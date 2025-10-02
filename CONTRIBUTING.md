@@ -4,8 +4,8 @@
 
 ### Prerequisites
 
-- Node.js
-- pnpm
+- Node.js 22+
+- pnpm 8+
 
 ### Development Setup
 

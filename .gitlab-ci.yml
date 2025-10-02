@@ -5,7 +5,7 @@ stages:
   - quality
 
 variables:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
   PNPM_VERSION: '8.15.0'
 
 # Install dependencies and run quality checks
