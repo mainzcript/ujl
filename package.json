@@ -1,0 +1,40 @@
+{
+  "name": "ujl-monorepo",
+  "version": "0.0.1",
+  "description": "Unified JSON Layout Framework - The Open-Source Web-Builder of the Future",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r run clean && rm -rf node_modules",
+    "ui:dev": "pnpm --filter @ujl/ui dev",
+    "ui:build": "pnpm --filter @ujl/ui build",
+    "ui:storybook": "pnpm --filter @ujl/ui storybook",
+    "ui:build-storybook": "pnpm --filter @ujl/ui build-storybook"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

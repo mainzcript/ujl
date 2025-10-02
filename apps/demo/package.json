@@ -1,0 +1,13 @@
+{
+  "name": "@ujl/demo",
+  "version": "0.0.1",
+  "description": "UJL Demo Application - Showcase UJL Framework",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Demo app build placeholder'",
+    "dev": "echo 'Demo app dev placeholder'",
+    "lint": "echo 'Demo app lint placeholder'",
+    "type-check": "echo 'Demo app type-check placeholder'",
+    "clean": "echo 'Demo app clean placeholder'"
+  }
+}

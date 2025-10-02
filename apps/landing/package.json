@@ -1,0 +1,13 @@
+{
+  "name": "@ujl/landing",
+  "version": "0.0.1",
+  "description": "UJL Landing Page - Marketing Website",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Landing page build placeholder'",
+    "dev": "echo 'Landing page dev placeholder'",
+    "lint": "echo 'Landing page lint placeholder'",
+    "type-check": "echo 'Landing page type-check placeholder'",
+    "clean": "echo 'Landing page clean placeholder'"
+  }
+}

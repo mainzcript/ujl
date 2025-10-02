@@ -21,13 +21,13 @@ ujl/
 ├── packages/
 │   ├── core/           # Schemas, Validator, Renderer
 │   ├── ui/             # Shadcn-svelte UI Components
-│   └── crafter/        # Visual UJL Editor
+│   ├── crafter/        # Visual UJL Editor
+│   └── examples/       # Example Material and Test Data
 ├── services/           # Backend Services
-├── apps/
-│   ├── landing/        # Marketing Landing Page
-│   ├── demo/           # Demo Application
-│   └── docs/           # Documentation Website
-└── examples/           # Example Material
+└── apps/
+    ├── landing/        # Marketing Landing Page
+    ├── demo/           # Demo Application
+    └── docs/           # Documentation Website
 ```
 
 ## Installation
@@ -43,7 +43,30 @@ pnpm install
 
 ## Development
 
-TODO: Development environment needs to be set up.
+```bash
+# Install all dependencies
+pnpm install
+
+# Until now there is only one package that can be developed: the UI package.
+# We will add more packages soon.
+
+# Start development for UI package (SvelteKit + Storybook)
+pnpm ui:dev          # Start UI package development
+pnpm ui:storybook    # Start Storybook for UI components
+
+# Build UI package
+pnpm ui:build        # Build UI package
+pnpm ui:build-storybook  # Build Storybook
+
+# Run linting (all packages)
+pnpm lint
+
+# Run type checking (all packages)
+pnpm type-check
+
+# Clean all build outputs
+pnpm clean
+```
 
 ## License
 

@@ -1,6 +1,8 @@
 {
 	"name": "@ujl/ui",
 	"version": "0.0.1",
+	"description": "UJL UI - shadcn-svelte Component Library",
+	"private": true,
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -75,11 +77,10 @@
 		"vite-plugin-devtools-json": "^1.0.0"
 	},
 	"keywords": [
-		"svelte"
-	],
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	}
+		"svelte",
+		"ujl",
+		"components",
+		"ui",
+		"shadcn-svelte"
+	]
 }
