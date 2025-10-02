@@ -4,10 +4,10 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@ujl-framework/core", "@ujl-framework/crafter", "@ujl-framework/ui", "@ujl-framework/examples"]
+    ["@ujl-framework/core", "@ujl-framework/crafter", "@ujl-framework/ui", "@ujl-framework/examples", "@ujl-framework/demo", "@ujl-framework/docs"]
   ],
   "access": "restricted",
-  "baseBranch": "main",
+  "baseBranch": "develop",
   "updateInternalDependencies": "patch",
-  "ignore": ["@ujl-framework/landing", "@ujl-framework/demo", "@ujl-framework/docs"]
+  "ignore": ["@ujl-framework/landing"]
 }
