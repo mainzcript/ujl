@@ -13,13 +13,13 @@ Brief description of the changes made.
 
 ## Packages Affected
 
-- [ ] `@ujl/core`
-- [ ] `@ujl/ui`
-- [ ] `@ujl/crafter`
-- [ ] `@ujl/examples`
-- [ ] `@ujl/landing`
-- [ ] `@ujl/demo`
-- [ ] `@ujl/docs`
+- [ ] `@ujl-framework/core`
+- [ ] `@ujl-framework/ui`
+- [ ] `@ujl-framework/crafter`
+- [ ] `@ujl-framework/examples`
+- [ ] `@ujl-framework/landing`
+- [ ] `@ujl-framework/demo`
+- [ ] `@ujl-framework/docs`
 
 ## Testing
 

@@ -1,3 +1,3 @@
-# @ujl/core - The Heart of the UJL Framework
+# @ujl-framework/core - The Heart of the UJL Framework
 
 This package contains the core functionality of UJL: JSON schemas for `.ujl` and `.ujlt` files, a validator with AJV for schema validation, a renderer for **ContentFrame** generation (HTML/CSS/JS), TypeScript definitions for all UJL types and utility functions for content management. It provides a **modular architecture** with a registry system that allows **AtomicModules** and **LayoutModules** to be registered and extended. The core comes with built-in standard modules (Text, Image, Video, Gallery, Maps, etc. for AtomicModules; Section, Grid, Hero, Carousel, etc. for LayoutModules) but can be extended with custom modules through the registry system.

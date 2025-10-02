@@ -1,5 +1,5 @@
 {
-  "name": "@ujl/crafter",
+  "name": "@ujl-framework/crafter",
   "version": "0.0.1",
   "description": "UJL Crafter - Visual Editor for UJL Content",
   "main": "dist/index.js",
@@ -12,9 +12,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@ujl/core": "workspace:*",
-    "@ujl/ui": "workspace:*",
-    "@ujl/examples": "workspace:*"
+    "@ujl-framework/core": "workspace:*",
+    "@ujl-framework/ui": "workspace:*",
+    "@ujl-framework/examples": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

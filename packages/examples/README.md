@@ -1,4 +1,4 @@
-# @ujl/examples - Example Material and Test Data
+# @ujl-framework/examples - Example Material and Test Data
 
 This package contains example UJL content files (`.ujl`), theme files (`.ujlt`), and test data that can be used across the UJL Framework for development, testing, and documentation purposes.
 

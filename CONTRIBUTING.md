@@ -85,7 +85,7 @@ pnpm release
 
 The following packages are linked and versioned together:
 
-- `@ujl/core`
-- `@ujl/crafter`
-- `@ujl/ui`
-- `@ujl/examples`
+- `@ujl-framework/core`
+- `@ujl-framework/crafter`
+- `@ujl-framework/ui`
+- `@ujl-framework/examples`
