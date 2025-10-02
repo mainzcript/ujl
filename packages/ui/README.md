@@ -44,3 +44,5 @@ To publish the UI library to [npm](https://www.npmjs.com):
 ```sh
 pnpm publish
 ```
+
+TODO: Publishig should be done with changesets.

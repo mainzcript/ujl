@@ -18,15 +18,19 @@
     "ui:dev": "pnpm --filter @ujl/ui dev",
     "ui:build": "pnpm --filter @ujl/ui build",
     "ui:storybook": "pnpm --filter @ujl/ui storybook",
-    "ui:build-storybook": "pnpm --filter @ujl/ui build-storybook"
+    "ui:build-storybook": "pnpm --filter @ujl/ui build-storybook",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@types/node": "^20.10.0",
-    "typescript": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.54.0",
     "prettier": "^3.1.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "typescript": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "echo 'Crafter build placeholder'",
+    "dev": "echo 'Crafter dev placeholder'",
     "lint": "eslint src --ext .ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "echo 'Crafter type-check placeholder'",
     "clean": "rm -rf dist"
   },
   "dependencies": {

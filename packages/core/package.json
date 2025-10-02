@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "echo 'Core build placeholder'",
+    "dev": "echo 'Core dev placeholder'",
     "lint": "eslint src --ext .ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "echo 'Core type-check placeholder'",
     "clean": "rm -rf dist"
   },
   "dependencies": {

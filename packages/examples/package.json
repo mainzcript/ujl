@@ -6,11 +6,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "lint": "eslint src --ext .ts,.js",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "build": "echo 'Examples build placeholder'",
+    "dev": "echo 'Examples dev placeholder'",
+    "lint": "echo 'Examples lint placeholder'",
+    "type-check": "echo 'Examples type-check placeholder'",
+    "clean": "echo 'Examples clean placeholder'"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

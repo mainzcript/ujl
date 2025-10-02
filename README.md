@@ -30,44 +30,6 @@ ujl/
     └── docs/           # Documentation Website
 ```
 
-## Installation
-
-```bash
-# Clone repository
-git clone git@gitlab.rlp.net:ujl-framework/ujl.git
-cd ujl
-
-# Install dependencies
-pnpm install
-```
-
-## Development
-
-```bash
-# Install all dependencies
-pnpm install
-
-# Until now there is only one package that can be developed: the UI package.
-# We will add more packages soon.
-
-# Start development for UI package (SvelteKit + Storybook)
-pnpm ui:dev          # Start UI package development
-pnpm ui:storybook    # Start Storybook for UI components
-
-# Build UI package
-pnpm ui:build        # Build UI package
-pnpm ui:build-storybook  # Build Storybook
-
-# Run linting (all packages)
-pnpm lint
-
-# Run type checking (all packages)
-pnpm type-check
-
-# Clean all build outputs
-pnpm clean
-```
-
 ## License
 
 TODO: Looks like it will be an MIT license.
