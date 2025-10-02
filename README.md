@@ -5,7 +5,7 @@
 ## About UJL
 
 UJL is a building block system for digital content. At its heart is an editor – the UJL **Crafter** – with which content can be managed and combined.
-A central concept of UJL is the strict separation of content and design. Unlike HTML and CSS, where content and styling are technically separated, UJL works at a higher abstraction level. Content is structured and described through modules (**AtomicComponents** & **LayoutComponents**) as reusable building blocks in a JSON format (`.ujl`), while design specifications are centrally stored in a `.ujlt` file. The UJL Renderer combines both elements and generates a **ContentFrame** (HTML/CSS/JS) that consistently adheres to the corporate design.
+A central concept of UJL is the strict separation of content and design. Unlike HTML and CSS, where content and styling are technically separated, UJL works at a higher abstraction level. Content is structured and described through modules (**AtomicModules** & **LayoutModules**) as reusable building blocks in a JSON format (`.ujl`), while design specifications are centrally stored in a `.ujlt` file. The UJL Renderer combines both elements and generates a **ContentFrame** (HTML/CSS/JS) that consistently adheres to the corporate design.
 
 ### Core Concepts
 
@@ -21,7 +21,7 @@ ujl/
 ├── packages/
 │   ├── core/           # Schemas, Validator, Renderer
 │   ├── ui/             # Shadcn-svelte UI Components
-│   └── crafter/        # UJL Editor
+│   └── crafter/        # Visual UJL Editor
 ├── services/           # Backend Services
 ├── apps/
 │   ├── landing/        # Marketing Landing Page
