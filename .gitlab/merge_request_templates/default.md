@@ -23,7 +23,7 @@ Brief description of the changes made.
 - [ ] I have tested this change locally
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] All existing tests pass
-- [ ] I have run `pnpm lint` and `pnpm type-check`
+- [ ] I have run `pnpm lint` and `pnpm check`
 
 ### Performance & Usability
 

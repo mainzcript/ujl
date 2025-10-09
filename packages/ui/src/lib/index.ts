@@ -1,1 +1,2 @@
-// Reexport your entry components here
+// UJL UI - shadcn-svelte Component Library
+export * from './components/index.js';

@@ -1,13 +1,20 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": "@changesets/cli/changelog",
-  "commit": false,
-  "fixed": [],
-  "linked": [
-    ["@ujl-framework/core", "@ujl-framework/crafter", "@ujl-framework/ui", "@ujl-framework/examples", "@ujl-framework/demo", "@ujl-framework/docs"]
-  ],
-  "access": "restricted",
-  "baseBranch": "develop",
-  "updateInternalDependencies": "patch",
-  "ignore": ["@ujl-framework/landing"]
+	"$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+	"changelog": "@changesets/cli/changelog",
+	"commit": false,
+	"fixed": [],
+	"linked": [
+		[
+			"@ujl-framework/core",
+			"@ujl-framework/crafter",
+			"@ujl-framework/ui",
+			"@ujl-framework/examples",
+			"@ujl-framework/demo",
+			"@ujl-framework/docs"
+		]
+	],
+	"access": "restricted",
+	"baseBranch": "develop",
+	"updateInternalDependencies": "patch",
+	"ignore": ["@ujl-framework/landing"]
 }

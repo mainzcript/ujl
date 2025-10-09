@@ -1,26 +1,24 @@
 <script lang="ts" module>
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { WithElementRef } from 'bits-ui';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
+	import type { Flavor } from '$lib/tokens/flavor.js';
 
 	export const buttonVariants = tv({
-		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+		base: 'focus-visible:ring-ring focus-visible:scale-[.98] duration-200 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none opacity-100 disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[.95] touch-manipulation',
 		variants: {
 			variant: {
-				default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
-				destructive:
-					'bg-destructive shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
+				default: 'elevation after:bg-flavor-foreground text-flavor',
+				flavored: 'elevation after:bg-flavor text-flavor-foreground hover:after:bg-flavor/90',
 				outline:
-					'bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border',
-				secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-				ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-				link: 'text-primary underline-offset-4 hover:underline'
+					'border border-flavor-foreground text-flavor-foreground hover:bg-flavor-foreground hover:text-flavor',
+				ghost: 'hover:bg-flavor-foreground/10 text-flavor-foreground'
 			},
 			size: {
-				default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-				sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
-				lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
-				icon: 'size-9'
+				default: 'h-9 px-4 py-2',
+				sm: 'h-8 rounded-md px-3 text-xs',
+				lg: 'h-10 rounded-md px-8',
+				icon: 'h-9 w-9'
 			}
 		},
 		defaultVariants: {
@@ -36,14 +34,18 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			flavor?: Flavor;
 		};
 </script>
 
 <script lang="ts">
+	import { cn } from '$lib/utils.js';
+
 	let {
 		class: className,
-		variant = 'default',
+		variant = undefined,
 		size = 'default',
+		flavor = undefined,
 		ref = $bindable(null),
 		href = undefined,
 		type = 'button',
@@ -51,17 +53,32 @@
 		children,
 		...restProps
 	}: ButtonProps = $props();
+
+	if (flavor && !variant) {
+		variant = 'flavored';
+	}
+
+	// Touch event handlers for better mobile interaction
+	function handleTouchStart(event: TouchEvent) {
+		if (disabled) return;
+		const target = event.currentTarget as HTMLElement;
+		target.style.transform = 'scale(0.95)';
+	}
+
+	function handleTouchEnd(event: TouchEvent) {
+		if (disabled) return;
+		const target = event.currentTarget as HTMLElement;
+		target.style.transform = '';
+	}
 </script>
 
 {#if href}
 	<a
 		bind:this={ref}
-		data-slot="button"
-		class={cn(buttonVariants({ variant, size }), className)}
+		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
 		{href}
-		aria-disabled={disabled}
-		role={disabled ? 'link' : undefined}
-		tabindex={disabled ? -1 : undefined}
+		ontouchstart={handleTouchStart}
+		ontouchend={handleTouchEnd}
 		{...restProps}
 	>
 		{@render children?.()}
@@ -69,10 +86,11 @@
 {:else}
 	<button
 		bind:this={ref}
-		data-slot="button"
-		class={cn(buttonVariants({ variant, size }), className)}
+		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
 		{type}
 		{disabled}
+		ontouchstart={handleTouchStart}
+		ontouchend={handleTouchEnd}
 		{...restProps}
 	>
 		{@render children?.()}

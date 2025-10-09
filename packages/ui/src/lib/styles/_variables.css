@@ -1,0 +1,95 @@
+:root {
+	/* Primary color */
+	--primary-l: 0.546;
+	--primary-c: 0.245;
+	--primary-h: 262.881;
+
+	/* Dark-Mode: Primary color */
+	--dark_primary-l: 0.7;
+	--dark_primary-c: 0.245;
+	--dark_primary-h: 262.881;
+
+	/* Contrast to primary color */
+	--primary-foreground-l: 1;
+	--primary-foreground-c: 0;
+	--primary-foreground-h: 0;
+
+	/* Dark-Mode: Contrast to primary color */
+	--dark_primary-foreground-l: 1;
+	--dark_primary-foreground-c: 0;
+	--dark_primary-foreground-h: 0;
+
+	/* Secondary color */
+	--secondary-l: 0.2;
+	--secondary-c: 0;
+	--secondary-h: 0;
+
+	/* Dark-Mode: Secondary color */
+	--dark_secondary-l: 0.2;
+	--dark_secondary-c: 0;
+	--dark_secondary-h: 0;
+
+	/* Contrast to secondary color */
+	--secondary-foreground-l: 1;
+	--secondary-foreground-c: 0;
+	--secondary-foreground-h: 0;
+
+	/* Dark-Mode: Contrast to secondary color */
+	--dark_secondary-foreground-l: 1;
+	--dark_secondary-foreground-c: 0;
+	--dark_secondary-foreground-h: 0;
+
+	/* Accent color */
+	--accent-l: 0.586;
+	--accent-c: 0.253;
+	--accent-h: 17.585;
+
+	/* Dark-Mode: Accent color */
+	--dark_accent-l: 0.712;
+	--dark_accent-c: 0.194;
+	--dark_accent-h: 13.428;
+
+	/* Contrast to accent color */
+	--accent-foreground-l: 1;
+	--accent-foreground-c: 0;
+	--accent-foreground-h: 0;
+
+	/* Dark-Mode: Contrast to accent color */
+	--dark_accent-foreground-l: 1;
+	--dark_accent-foreground-c: 0;
+	--dark_accent-foreground-h: 0;
+
+	/* Success color */
+	/* oklch(72.3% 0.219 149.579) */
+	--success-l: 0.723; /* <-- irrelevant */
+	--success-c: 0.219;
+	--success-h: 149.579;
+
+	/* Warning color */
+	--warning-l: 0.7501; /* <-- irrelevant */
+	--warning-c: 0.1583;
+	--warning-h: 63.9;
+
+	/* Error color */
+	--destructive-l: 0.5717; /* <-- irrelevant */
+	--destructive-c: 0.2151;
+	--destructive-h: 24.12;
+
+	/* Info color */
+	--info-l: 0.526; /* <-- irrelevant */
+	--info-c: 0.136653;
+	--info-h: 246.4667;
+
+	/* Light elements */
+	--light-l: 0.98;
+	--light-c: 0;
+	--light-h: 0;
+
+	/* Dark elements oklch(21% 0.034 264.665); */
+	--dark-l: 0.21;
+	--dark-c: 0.034;
+	--dark-h: 264.665;
+
+	/* Radius for rounded corners */
+	--radius: 0.75rem;
+}
