@@ -5,8 +5,8 @@ stages:
   - quality
 
 variables:
-  NODE_VERSION: '22'
-  PNPM_VERSION: '8.15.0'
+  NODE_VERSION: '22-slim'
+  PNPM_VERSION: '10.18.1'
 
 # Install dependencies and run quality checks
 quality_check:
@@ -17,10 +17,18 @@ quality_check:
     - corepack prepare pnpm@${PNPM_VERSION} --activate
   script:
     - pnpm install --frozen-lockfile
-    - pnpm lint
-    - pnpm type-check
+    - pnpm run build
+    - pnpm run lint
+    - pnpm run check
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
       - .pnpm-store/
+      - '**/node_modules/'
+      - '**/.svelte-kit/'
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure

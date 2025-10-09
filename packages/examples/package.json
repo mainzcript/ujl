@@ -1,18 +1,18 @@
 {
-  "name": "@ujl-framework/examples",
-  "version": "0.0.1",
-  "description": "UJL Examples - Example Material and Test Data",
-  "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "echo 'Examples build placeholder'",
-    "dev": "echo 'Examples dev placeholder'",
-    "lint": "echo 'Examples lint placeholder'",
-    "type-check": "echo 'Examples type-check placeholder'",
-    "clean": "echo 'Examples clean placeholder'"
-  },
-  "devDependencies": {
-    "typescript": "^5.3.0"
-  }
+	"name": "@ujl-framework/examples",
+	"version": "0.0.1",
+	"description": "UJL Examples - Example Material and Test Data",
+	"private": true,
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "echo 'Examples build placeholder'",
+		"dev": "echo 'Examples dev placeholder'",
+		"lint": "echo 'Examples lint placeholder'",
+		"check": "echo 'Examples check placeholder'",
+		"clean": "echo 'Examples clean placeholder'"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	}
 }

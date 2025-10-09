@@ -49,7 +49,7 @@ Further **rules** for branch names:
 4. Run linting and type checking:
    ```bash
    pnpm lint
-   pnpm type-check
+   pnpm check
    ```
 
 ### 2. Adding Changesets
