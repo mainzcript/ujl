@@ -5,7 +5,7 @@
 	--primary-h: 262.881;
 
 	/* Dark-Mode: Primary color */
-	--dark_primary-l: 0.7;
+	--dark_primary-l: 0.65;
 	--dark_primary-c: 0.245;
 	--dark_primary-h: 262.881;
 
@@ -20,14 +20,14 @@
 	--dark_primary-foreground-h: 0;
 
 	/* Secondary color */
-	--secondary-l: 0.2;
-	--secondary-c: 0;
-	--secondary-h: 0;
+	--secondary-l: 0.373;
+	--secondary-c: 0.034;
+	--secondary-h: 264.665;
 
 	/* Dark-Mode: Secondary color */
-	--dark_secondary-l: 0.2;
-	--dark_secondary-c: 0;
-	--dark_secondary-h: 0;
+	--dark_secondary-l: 0.373;
+	--dark_secondary-c: 0.034;
+	--dark_secondary-h: 264.665;
 
 	/* Contrast to secondary color */
 	--secondary-foreground-l: 1;
@@ -65,10 +65,10 @@
 	--success-c: 0.219;
 	--success-h: 149.579;
 
-	/* Warning color */
-	--warning-l: 0.7501; /* <-- irrelevant */
-	--warning-c: 0.1583;
-	--warning-h: 63.9;
+	/* Warning color oklch(87.9% 0.169 91.605) */
+	--warning-l: 0.879; /* <-- irrelevant */
+	--warning-c: 0.169;
+	--warning-h: 91.605;
 
 	/* Error color */
 	--destructive-l: 0.5717; /* <-- irrelevant */
@@ -85,7 +85,7 @@
 	--light-c: 0;
 	--light-h: 0;
 
-	/* Dark elements oklch(21% 0.034 264.665); */
+	/* Dark elements */
 	--dark-l: 0.21;
 	--dark-c: 0.034;
 	--dark-h: 264.665;

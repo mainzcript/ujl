@@ -23,7 +23,8 @@ ujl/
 │   ├── ui/             # Shadcn-svelte UI Components
 │   ├── crafter/        # Visual UJL Editor
 │   └── examples/       # Example Material and Test Data
-├── services/           # Backend Services
+├── services/           # Backend Services (Docker-based)
+│   └── media/          # Payload CMS-based Media Management
 └── apps/
     ├── landing/        # Marketing Landing Page
     ├── demo/           # Demo Application
@@ -32,4 +33,4 @@ ujl/
 
 ## License
 
-TODO: Looks like it will be an MIT license.
+TODO: Looks like it will be an MIT license. 

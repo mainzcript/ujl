@@ -8,6 +8,9 @@ import Content from './dialog-content.svelte';
 import Description from './dialog-description.svelte';
 import Trigger from './dialog-trigger.svelte';
 import Close from './dialog-close.svelte';
+import Body from './dialog-body.svelte';
+import TriggerButton from './dialog-trigger-button.svelte';
+import CloseButton from './dialog-close-button.svelte';
 
 const Root = DialogPrimitive.Root;
 const Portal = DialogPrimitive.Portal;
@@ -18,9 +21,12 @@ export {
 	Portal as DialogPortal,
 	Footer as DialogFooter,
 	Header as DialogHeader,
+	Body as DialogBody,
 	Trigger as DialogTrigger,
 	Overlay as DialogOverlay,
 	Content as DialogContent,
 	Description as DialogDescription,
-	Close as DialogClose
+	Close as DialogClose,
+	TriggerButton as DialogTriggerButton,
+	CloseButton as DialogCloseButton
 };

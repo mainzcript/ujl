@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Text, type TextSize, type TextWeight } from '$lib/components/ui/text/index.js';
+	import { Text, type TextSize, type TextWeight } from '$lib/index.js';
 
 	let {
 		ref = $bindable(null),

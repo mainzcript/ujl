@@ -23,7 +23,7 @@
 
 <script lang="ts">
 	import { cn } from '$lib/utils.js';
-	import { Text, type TextWeight } from '$lib/components/ui/text/index.js';
+	import { Text, type TextWeight } from '$lib/index.js';
 
 	let {
 		class: className = '',
