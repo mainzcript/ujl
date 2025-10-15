@@ -10,7 +10,8 @@
 			"@ujl-framework/ui",
 			"@ujl-framework/examples",
 			"@ujl-framework/demo",
-			"@ujl-framework/docs"
+			"@ujl-framework/docs",
+			"@ujl-framework/media"
 		]
 	],
 	"access": "restricted",

@@ -4,6 +4,8 @@
 
 @import './_variables.css';
 
+@source '../components/**/*.{svelte,js,ts}';
+
 @custom-variant dark (&:is(.dark *));
 
 /* TODO: Add fonts */
@@ -13,7 +15,7 @@
 } */
 
 :root {
-	/* Helligkeitsabstufungen */
+	/* Lightness levels */
 	--l-50: 0.985;
 	--l-100: 0.967;
 	--l-200: 0.928;
@@ -26,7 +28,7 @@
 	--l-900: 0.21;
 	--l-950: 0.13;
 
-	/* Primärfarbe */
+	/* Primary color */
 	--primary: var(--primary-l) var(--primary-c) var(--primary-h);
 	--primary-grad-s: var(--primary);
 	--primary-grad-e: var(--primary);
@@ -44,7 +46,7 @@
 	--primary-foreground: var(--primary-foreground-l) var(--primary-foreground-c)
 		var(--primary-foreground-h);
 
-	/* Sekundärfarbe */
+	/* Secondary color */
 	--secondary: var(--secondary-l) var(--secondary-c) var(--secondary-h);
 	--secondary-grad-s: var(--secondary);
 	--secondary-grad-e: var(--secondary);
@@ -62,7 +64,7 @@
 	--secondary-foreground: var(--secondary-foreground-l) var(--secondary-foreground-c)
 		var(--secondary-foreground-h);
 
-	/* Akzentfarbe */
+	/* Accent color */
 	--accent: var(--accent-l) var(--accent-c) var(--accent-h);
 	--accent-grad-s: var(--accent);
 	--accent-grad-e: var(--accent);
@@ -80,9 +82,9 @@
 	--accent-foreground: var(--accent-foreground-l) var(--accent-foreground-c)
 		var(--accent-foreground-h);
 
-	/* Ambiente Farbe */
-	--ambient: var(--light-l) var(--light-c) var(--light-h);
-	--ambient-l: var(--light-l);
+	/* Ambient color */
+	--ambient: var(--ambient-l) var(--light-c) var(--light-h);
+	--ambient-l: var(--l-50);
 	--ambient-grad-s: var(--ambient);
 	--ambient-grad-e: var(--ambient);
 	--ambient-50: var(--l-50) var(--light-c) var(--light-h);
@@ -96,9 +98,9 @@
 	--ambient-800: var(--l-800) var(--dark-c) var(--dark-h);
 	--ambient-900: var(--l-900) var(--dark-c) var(--dark-h);
 	--ambient-950: var(--l-950) var(--dark-c) var(--dark-h);
-	--ambient-foreground: var(--dark-l) var(--dark-c) var(--dark-h);
+	--ambient-foreground: var(--l-950) var(--dark-c) var(--dark-h);
 
-	/* Erfolgsfarbe */
+	/* Success color */
 	--success-50: var(--l-50) var(--success-c) var(--success-h);
 	--success-100: var(--l-100) var(--success-c) var(--success-h);
 	--success-200: var(--l-200) var(--success-c) var(--success-h);
@@ -113,7 +115,7 @@
 	--success: var(--success-400);
 	--success-foreground: var(--success-900);
 
-	/* Warnfarbe */
+	/* Warning color */
 	--warning-50: var(--l-50) var(--warning-c) var(--warning-h);
 	--warning-100: var(--l-100) var(--warning-c) var(--warning-h);
 	--warning-200: var(--l-200) var(--warning-c) var(--warning-h);
@@ -128,7 +130,7 @@
 	--warning: var(--warning-300);
 	--warning-foreground: var(--warning-800);
 
-	/* Fehlerfarbe */
+	/* Destructive color */
 	--destructive-50: var(--l-50) var(--destructive-c) var(--destructive-h);
 	--destructive-100: var(--l-100) var(--destructive-c) var(--destructive-h);
 	--destructive-200: var(--l-200) var(--destructive-c) var(--destructive-h);
@@ -143,7 +145,7 @@
 	--destructive: var(--destructive-600);
 	--destructive-foreground: var(--destructive-50);
 
-	/* Infofarbe */
+	/* Info color */
 	--info-50: var(--l-50) var(--info-c) var(--info-h);
 	--info-100: var(--l-100) var(--info-c) var(--info-h);
 	--info-200: var(--l-200) var(--info-c) var(--info-h);
@@ -159,8 +161,6 @@
 	--info-foreground: var(--info-950);
 
 	/* Fallback colors for default Shadcn */
-	--popover: var(--ambient);
-	--popover-foreground: var(--ambient-foreground);
 	--muted: 0.967 0.001 286.375;
 	--muted-foreground: 0.552 0.016 285.938;
 	--border: 0.92 0.004 286.32;
@@ -203,9 +203,9 @@
 	--accent-foreground-c: var(--dark_accent-foreground-c);
 	--accent-foreground-h: var(--dark_accent-foreground-h);
 
-	--ambient: var(--dark-l) var(--dark-c) var(--dark-h);
-	--ambient-l: var(--dark-l);
-	--ambient-foreground: var(--light-l) var(--light-c) var(--light-h);
+	--ambient: var(--ambient-l) var(--dark-c) var(--dark-h);
+	--ambient-l: var(--l-950);
+	--ambient-foreground: var(--l-50) var(--light-c) var(--light-h);
 
 	/* Fallback colors for default Shadcn */
 	--muted: 0.274 0.006 286.033;
@@ -524,8 +524,6 @@
 	--color-info-foreground: oklch(var(--info-foreground));
 
 	/* Other shadcn colors */
-	--color-popover: oklch(var(--popover));
-	--color-popover-foreground: oklch(var(--popover-foreground));
 	--color-muted: oklch(var(--muted));
 	--color-muted-foreground: oklch(var(--muted-foreground));
 	--color-border: oklch(var(--border));
@@ -558,10 +556,12 @@
 
 	.elevation {
 		@apply relative isolate;
-		@apply outline-foreground/5 shadow-lg outline;
-		@apply backdrop-brightness-125 backdrop-saturate-150;
-		@apply before:from-flavor-100/25 before:via-flavor-900/5 before:to-flavor-100/25 before:absolute before:inset-0 before:-z-20 before:bg-gradient-to-br;
-		@apply after:bg-flavor/80 after:absolute after:inset-[1px] after:-z-10;
+		@apply bg-flavor/80;
+		@apply border-flavor-foreground/10 border-[1px];
+		@apply inset-shadow-xs inset-shadow-flavor-100/15 shadow-flavor-900/10 shadow-lg;
+		@apply backdrop-saturate-125 backdrop-brightness-125;
+		@apply after:absolute after:inset-0 after:-z-10;
+		@apply after:bg-ambient-500/5;
 	}
 
 	.elevation::before,

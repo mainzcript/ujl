@@ -2,17 +2,17 @@
 
 This package provides the base UI components (Text, Button, Input, Card, Dialog, etc.) for the UJL project based on [shadcn-svelte](https://shadcn-svelte.com). These elements are used both for the **Crafter** UI and for the implementation of **LayoutModules** and **AtomicModules**.
 
-**Features:**
-
-- **shadcn-svelte** based components
-- **Namespace exports** for clean imports
-- **CSS Styles distribution** for custom styling
-- **Tailwind CSS configuration export** for custom component development
-- **Design tokens** and **utility tools**
-
 ---
 
 ## Installation and Usage
+
+### Prerequisites
+
+This library requires the following peer dependencies to be installed in your project:
+
+```bash
+pnpm add svelte @sveltejs/kit tailwindcss
+```
 
 ### Installation
 
@@ -20,41 +20,55 @@ This package provides the base UI components (Text, Button, Input, Card, Dialog,
 pnpm add @ujl-framework/ui
 ```
 
-The library provides pre-built CSS styles that you can import in your project.
+### Svelte Component Usage
 
-### Basic Usage (Pre-built Styles)
+```svelte
+<script>
+	import {
+		Button,
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+		Text,
+		Heading,
+		Dialog,
+		DialogContent,
+		DialogTriggerButton
+	} from '@ujl-framework/ui';
+	import { flavors } from '@ujl-framework/ui/tokens';
+</script>
 
-```css
-@import '@ujl-framework/ui/styles';
+<!-- Styles are automatically imported when you import components -->
 
-/* your own styles */
+<Card>
+	<CardHeader>
+		<CardTitle>My Card</CardTitle>
+	</CardHeader>
+	<CardContent>
+		<Text>This is a card with a button.</Text>
+		<Button>Click me</Button>
+	</CardContent>
+</Card>
 ```
 
-### Advanced Usage (Custom Tailwind Setup)
-
-If you want to build custom components with Tailwind CSS, you can import the Tailwind configuration:
-
-```css
-@import '@ujl-framework/ui/styles-raw';
-
-/* your custom components with UJL design tokens */
-```
-
-> **Note:** When using the raw styles, you need to configure Tailwind to scan the component files from this package to ensure all CSS classes are included in your build.
-
-### JavaScript/TypeScript Usage
+### Design Tokens
 
 ```javascript
-import { Components, Tokens, Tools } from '@ujl-framework/ui';
+import { flavors } from '@ujl-framework/ui/tokens';
 
-// Use components
-const { Button, Card, Text } = Components;
+// Access available flavor tokens
+console.log(flavors); // ['primary', 'secondary', 'accent', ...]
+```
 
-// Use design tokens
-const { flavors } = Tokens;
+### Tools
 
-// Use tools
-const { PositionSpy } = Tools;
+```javascript
+import { PositionSpy, scrollToHash } from '@ujl-framework/ui/tools';
+
+// Use utility functions
+PositionSpy.subscribe(/* ... */);
+scrollToHash(/* ... */);
 ```
 
 ## Developing
@@ -80,7 +94,36 @@ pnpm run build
 
 This will:
 
+- Build the SvelteKit application
 - Copy all content from `src/lib` to `dist`
-- Copy the compiled CSS assets to `dist/index.css` for distribution
+- Copy the compiled CSS assets to `dist/styles/index.css` for distribution
 - Package the library components using `svelte-package`
 - Validate the package structure with `publint`
+
+## Available Components
+
+The library includes the following component categories:
+
+- **Layout**: Container, Grid, GridItem
+- **Typography**: Text, Heading, Highlight
+- **Interactive**: Button, Link
+- **Overlay**: Dialog, Drawer, Popover, Sheet, Tooltip, HoverCard
+- **Navigation**: Breadcrumb, Tabs, Accordion
+- **Data Display**: Table, Card, Alert, Badge, Counter
+- **Forms**: (Coming soon)
+- **Feedback**: (Coming soon)
+
+## Available Tools
+
+- **PositionSpy**: Track element positions
+- **scrollToHash**: Smooth scrolling to hash targets
+
+## Design System
+
+The library includes a comprehensive design system with:
+
+- **Flavors**: Primary, Secondary, Accent, Success, Warning, Destructive, Info
+- **Color System**: OKLCH-based color space for better color consistency
+- **Typography**: Responsive text sizing and weight system
+- **Spacing**: Consistent spacing scale
+- **Animations**: Built-in animation utilities
