@@ -6,7 +6,7 @@ stages:
 
 variables:
   NODE_VERSION: '22-slim'
-  PNPM_VERSION: '10.18.1'
+  PNPM_VERSION: '10.19.0'
 
 # Install dependencies and run quality checks
 quality_check:

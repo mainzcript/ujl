@@ -4,10 +4,10 @@
 	"description": "UJL Landing Page - Marketing Website",
 	"private": true,
 	"scripts": {
-		"build": "echo 'Landing page build placeholder'",
-		"dev": "echo 'Landing page dev placeholder'",
-		"lint": "echo 'Landing page lint placeholder'",
-		"check": "echo 'Landing page check placeholder'",
-		"clean": "echo 'Landing page clean placeholder'"
+		"format": "echo 'No format script needed'",
+		"lint": "echo 'No lint script needed'",
+		"check": "echo 'No check script needed'",
+		"test": "echo 'No test script needed'",
+		"clean": "echo 'No clean script needed'"
 	}
 }
