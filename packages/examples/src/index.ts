@@ -1,4 +1,4 @@
-// UJL Examples - Example Material and Test Data
-// This package will contain example UJL content and theme files
+// Export all example documents
+import showcaseDocument from "../documents/showcase.ujl.json" with { type: "json" };
 
-export const version = '0.0.1';
+export { showcaseDocument };

@@ -2,11 +2,6 @@
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 22+
-- pnpm 8+
-
 ### Development Setup
 
 ```bash
@@ -116,6 +111,7 @@ The following packages are linked and versioned together:
 - `@ujl-framework/core`
 - `@ujl-framework/crafter`
 - `@ujl-framework/ui`
+- `@ujl-framework/adapter-svelte`
 - `@ujl-framework/examples`
 - `@ujl-framework/demo`
 - `@ujl-framework/docs`

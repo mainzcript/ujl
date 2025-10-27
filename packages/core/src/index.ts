@@ -1,4 +1,13 @@
-// UJL Core - The Heart of the UJL Framework
-// This package will contain schemas, validator, and renderer functionality
+// Re-export all field-related types and classes
+export * from "./fields/index.js";
+export * from "./modules/index.js";
 
-export const version = '0.0.1';
+/**
+ * Re-export all types
+ */
+export * from "./types/index.js";
+
+/**
+ * Re-export composer for easy access
+ */
+export { Composer } from "./composer.js";

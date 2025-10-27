@@ -4,19 +4,27 @@
 	"description": "UJL Core - The Heart of the UJL Framework",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": "./dist/index.js"
+	},
 	"scripts": {
-		"build": "echo 'Core build placeholder'",
-		"dev": "echo 'Core dev placeholder'",
-		"lint": "eslint src --ext .ts",
-		"check": "echo 'Core check placeholder'",
+		"build": "pnpm run clean && tsc",
+		"check": "tsc --noEmit",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
 		"clean": "rm -rf dist"
 	},
-	"dependencies": {
-		"@ujl-framework/examples": "workspace:*"
-	},
 	"devDependencies": {
-		"@types/node": "^20.19.21",
-		"eslint": "^8.57.1",
-		"typescript": "^5.9.3"
+		"@eslint/compat": "^1.4.0",
+		"@eslint/js": "^9.38.0",
+		"@types/node": "^24.9.1",
+		"eslint": "^9.38.0",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^16.4.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-organize-imports": "^3.2.4",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.46.2"
 	}
 }

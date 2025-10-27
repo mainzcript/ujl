@@ -12,7 +12,7 @@
 		as?: keyof HTMLElementTagNameMap;
 	} & HTMLAttributes<HTMLElement> = $props();
 
-	const baseStyle = 'container mx-auto px-10';
+	const baseStyle = 'container mx-auto';
 </script>
 
 <div class={cn(baseStyle, className)} {...restProps}>

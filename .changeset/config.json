@@ -8,6 +8,7 @@
 			"@ujl-framework/core",
 			"@ujl-framework/crafter",
 			"@ujl-framework/ui",
+			"@ujl-framework/adapter-svelte",
 			"@ujl-framework/examples",
 			"@ujl-framework/demo",
 			"@ujl-framework/docs",

@@ -2,17 +2,36 @@
 	"name": "@ujl-framework/examples",
 	"version": "0.0.1",
 	"description": "UJL Examples - Example Material and Test Data",
+	"type": "module",
 	"private": true,
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"files": [
+		"src/",
+		"documents/"
+	],
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./showcase": "./documents/showcase.ujl.json"
+	},
 	"scripts": {
-		"build": "echo 'Examples build placeholder'",
-		"dev": "echo 'Examples dev placeholder'",
-		"lint": "echo 'Examples lint placeholder'",
-		"check": "echo 'Examples check placeholder'",
-		"clean": "echo 'Examples clean placeholder'"
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"check": "echo 'No check script needed'",
+		"test": "echo 'No test script needed'",
+		"clean": "echo 'No clean script needed'"
 	},
 	"devDependencies": {
-		"typescript": "^5.9.3"
+		"@eslint/compat": "^1.4.0",
+		"@eslint/js": "^9.37.0",
+		"@types/node": "^20.19.21",
+		"eslint": "^9.37.0",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^16.4.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-organize-imports": "^3.2.2",
+		"typescript": "^5.9.3",
+		"tsx": "^4.7.0",
+		"typescript-eslint": "^8.46.0"
 	}
 }

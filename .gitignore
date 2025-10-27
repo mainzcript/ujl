@@ -80,10 +80,5 @@ jspm_packages/
 # Storybook
 storybook-static/
 
-# UJL specific
-*.ujl
-*.ujlt
-content-frames/
-
 # Personal Support Files
 _support/

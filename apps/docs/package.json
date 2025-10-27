@@ -4,10 +4,10 @@
 	"description": "UJL Documentation - User and Architecture Documentation",
 	"private": true,
 	"scripts": {
-		"build": "echo 'Docs build placeholder'",
-		"dev": "echo 'Docs dev placeholder'",
-		"lint": "echo 'Docs lint placeholder'",
-		"check": "echo 'Docs check placeholder'",
-		"clean": "echo 'Docs clean placeholder'"
+		"format": "echo 'No format script needed'",
+		"lint": "echo 'No lint script needed'",
+		"check": "echo 'No check script needed'",
+		"test": "echo 'No test script needed'",
+		"clean": "echo 'No clean script needed'"
 	}
 }
