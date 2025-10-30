@@ -1,0 +1,12 @@
+/* UJL-Framework Brand Colors for VitePress */
+:root {
+	/* Primary brand color (from UI variables) */
+	--vp-c-brand-1: oklch(54.6% 0.245 262.881);
+	--vp-c-brand-2: oklch(65% 0.245 262.881);
+	--vp-c-brand-3: var(--vp-c-brand-1);
+}
+
+:root.dark {
+	--vp-c-brand-1: oklch(65% 0.245 262.881);
+	--vp-c-brand-2: oklch(54.6% 0.245 262.881);
+}

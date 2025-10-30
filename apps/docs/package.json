@@ -3,11 +3,20 @@
 	"version": "0.0.1",
 	"description": "UJL Documentation - User and Architecture Documentation",
 	"private": true,
+	"type": "module",
 	"scripts": {
-		"format": "echo 'No format script needed'",
-		"lint": "echo 'No lint script needed'",
-		"check": "echo 'No check script needed'",
+		"dev": "vitepress dev",
+		"build": "vitepress build && cp -r src/assets/* dist/assets/",
+		"preview": "vitepress preview",
+		"format": "prettier --write .",
+		"lint": "prettier --check .",
 		"test": "echo 'No test script needed'",
-		"clean": "echo 'No clean script needed'"
+		"clean": "rm -rf dist .vitepress/cache"
+	},
+	"devDependencies": {
+		"markdown-it-textual-uml": "^0.17.1",
+		"prettier": "^3.6.2",
+		"vitepress": "2.0.0-alpha.12",
+		"vue": "^3.5.0"
 	}
 }
