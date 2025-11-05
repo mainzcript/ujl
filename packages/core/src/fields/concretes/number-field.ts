@@ -1,5 +1,5 @@
-import type { UJLFieldObject } from "../../types/index.js";
-import { BaseFieldConfig, FieldBase } from "../base";
+import type { UJLCFieldObject } from "../../types/index.js";
+import { BaseFieldConfig, FieldBase } from "../base.js";
 
 /**
  * Value type for number fields
@@ -37,7 +37,7 @@ export class NumberField extends FieldBase<NumberFieldValue, NumberFieldConfig> 
 	 * @param raw - Raw field value from UJL document
 	 * @returns Parsed number value (clamped to min/max range)
 	 */
-	public parse(raw: UJLFieldObject): NumberFieldValue {
+	public parse(raw: UJLCFieldObject): NumberFieldValue {
 		if (!this.validate(raw)) {
 			return this.config.default;
 		}
@@ -72,7 +72,7 @@ export class NumberField extends FieldBase<NumberFieldValue, NumberFieldConfig> 
 	 * @param raw - Raw UJL field value to validate
 	 * @returns Type predicate indicating if raw value is a number
 	 */
-	public validate(raw: UJLFieldObject): raw is number {
+	public validate(raw: UJLCFieldObject): raw is number {
 		return typeof raw === "number";
 	}
 }

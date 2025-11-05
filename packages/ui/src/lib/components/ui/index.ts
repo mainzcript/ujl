@@ -30,3 +30,4 @@ export * from './table/index.js';
 export * from './tabs/index.js';
 export * from './text/index.js';
 export * from './tooltip/index.js';
+export * from './ujl-theme/index.js';

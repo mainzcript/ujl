@@ -32,20 +32,25 @@ This package provides pre-built UJL documents that you can use in your applicati
 
 ### Basic Usage
 
+Use the adapter directly in JavaScript/TypeScript code outside of Svelte components:
+
 ```typescript
 import { svelteAdapter } from '@ujl-framework/adapter-svelte';
 import { Composer } from '@ujl-framework/core';
-import { showcaseDocument } from '@ujl-framework/examples';
+import type { UJLTDocument } from '@ujl-framework/core';
+import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
+import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
-// Use example document from examples package
-const ujlDocument = showcaseDocument;
+// Extract token set from theme document
+const themeDocument = defaultTheme as unknown as UJLTDocument;
+const tokenSet = themeDocument.ujlt.tokens;
 
 // Compose and render
 const composer = new Composer();
-const ast = composer.compose(ujlDocument);
+const ast = composer.compose(showcaseDocument);
 
-// Mount to DOM
-const mountedComponent = svelteAdapter(ast, {
+// Mount to DOM (tokenSet is required)
+const mountedComponent = svelteAdapter(ast, tokenSet, {
 	target: '#my-container'
 });
 
@@ -53,47 +58,24 @@ const mountedComponent = svelteAdapter(ast, {
 mountedComponent.unmount();
 ```
 
-### Svelte Component Usage
-
-```svelte
-<script>
-	import { onMount } from 'svelte';
-	import { svelteAdapter } from '@ujl-framework/adapter-svelte';
-	import { Composer } from '@ujl-framework/core';
-	import type { MountedComponent } from '@ujl-framework/adapter-svelte';
-
-	let mountedComponent: MountedComponent | null = null;
-
-	onMount(() => {
-		const composer = new Composer();
-		const ast = composer.compose(ujlDocument);
-
-		mountedComponent = svelteAdapter(ast, {
-			target: '#ujl-content'
-		});
-
-		return () => {
-			if (mountedComponent) {
-				mountedComponent.unmount();
-			}
-		};
-	});
-</script>
-
-<div id="ujl-content"></div>
-```
+> **Note**: When using the adapter within a Svelte component, wrap the adapter call in `onMount()` and return a cleanup function that calls `unmount()` to ensure proper lifecycle management.
 
 ## API Reference
 
 ### svelteAdapter
 
 ```typescript
-function svelteAdapter(node: UJLAbstractNode, options: SvelteAdapterOptions): MountedComponent;
+function svelteAdapter(
+	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
+	options: SvelteAdapterOptions
+): MountedComponent;
 ```
 
 **Parameters:**
 
 - `node`: The UJL AST node to render
+- `tokenSet`: Design token set (`UJLTTokenSet`) to apply to the rendered AST (required)
 - `options.target`: DOM element or selector where the component should be mounted
 
 **Returns:**
@@ -139,6 +121,7 @@ The adapter provides the following Svelte components:
 - **Cleanup Support**: Proper component unmounting and memory management
 - **UI Package Integration**: Uses components from `@ujl-framework/ui` for consistent design
 - **Design System**: Leverages established design tokens and responsive layouts
+- **Theme Support**: Required token set for consistent design system integration
 
 ## Architecture
 

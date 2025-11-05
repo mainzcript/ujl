@@ -15,7 +15,7 @@
 	bind:ref
 	data-slot="progress"
 	class={cn(
-		'bg-foreground/20 backdrop-saturate-125 relative h-2 w-full overflow-hidden rounded-full backdrop-blur',
+		'bg-foreground/20 h-2 backdrop-blur relative w-full overflow-hidden rounded-full backdrop-saturate-125',
 		className
 	)}
 	{value}

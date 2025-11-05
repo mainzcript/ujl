@@ -4,6 +4,7 @@
 	"description": "UJL Crafter - Visual Editor for UJL Content",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"type": "module",
 	"scripts": {
 		"format": "echo 'No format script needed'",
 		"lint": "eslint src --ext .ts",

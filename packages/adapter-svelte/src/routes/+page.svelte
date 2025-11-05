@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { UJLTDocument } from '@ujl-framework/core';
 	import { Composer } from '@ujl-framework/core';
 	import { svelteAdapter } from '$lib/index.js';
 	import type { MountedComponent } from '$lib/index.js';
-	import { showcaseDocument } from '@ujl-framework/examples';
+	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
+	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
 	// Use the showcase document from examples package
 	const ujlDocument = showcaseDocument;
+
+	// Extract token set from theme document
+	const themeDocument = defaultTheme as unknown as UJLTDocument;
+	const tokenSet = themeDocument.ujlt.tokens;
 
 	let mountedComponent: MountedComponent | null = null;
 	let error: string | null = null;
@@ -17,8 +23,8 @@
 			const composer = new Composer();
 			const ast = composer.compose(ujlDocument);
 
-			// Use the Svelte adapter to render the AST
-			mountedComponent = svelteAdapter(ast, {
+			// Use the Svelte adapter to render the AST with tokenSet
+			mountedComponent = svelteAdapter(ast, tokenSet, {
 				target: '#ujl-content'
 			});
 

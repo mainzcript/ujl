@@ -1,6 +1,6 @@
 import type { Composer } from "../composer.js";
 import { Field } from "../fields/index.js";
-import type { UJLAbstractNode, UJLModuleObject } from "../types/index.js";
+import type { UJLAbstractNode, UJLCModuleObject } from "../types/index.js";
 import { Slot } from "./slot.js";
 
 /**
@@ -67,5 +67,5 @@ export abstract class ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public abstract compose(moduleData: UJLModuleObject, composer: Composer): UJLAbstractNode;
+	public abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
 }

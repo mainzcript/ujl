@@ -11,7 +11,7 @@ hero:
       text: Einführung & Ziele
       link: /01-introduction-and-goals
     - theme: alt
-      text: Bausteinsicht
+      text: Architektur
       link: /05-building-block-view
 
 features:

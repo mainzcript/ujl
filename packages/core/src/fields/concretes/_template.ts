@@ -1,4 +1,4 @@
-import type { UJLFieldObject } from "../../types/index.js";
+import type { UJLCFieldObject } from "../../types/index.js";
 import { BaseFieldConfig, FieldBase } from "../base.js";
 
 /**
@@ -38,7 +38,7 @@ export class TEMPLATE_Field extends FieldBase<TEMPLATE_FieldValue, TEMPLATE_Fiel
 	 * @param raw - Raw UJL field value to validate
 	 * @returns Type predicate indicating if raw value is a valid template type
 	 */
-	public validate(raw: UJLFieldObject): raw is TEMPLATE_FieldValue {
+	public validate(raw: UJLCFieldObject): raw is TEMPLATE_FieldValue {
 		// TODO: Implement type validation
 		// Example for string:
 		// return typeof raw === "string";

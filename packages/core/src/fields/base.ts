@@ -1,4 +1,4 @@
-import type { UJLFieldObject } from "../types/index.js";
+import type { UJLCFieldObject } from "../types/index.js";
 
 /**
  * Base configuration interface for all field types
@@ -30,7 +30,7 @@ export abstract class FieldBase<ValueT, ConfigT extends BaseFieldConfig<ValueT>>
 	 * @param raw - Raw field value from UJL document
 	 * @returns Parsed value of type ValueT (default if invalid, fitted if valid)
 	 */
-	public parse(raw: UJLFieldObject): ValueT {
+	public parse(raw: UJLCFieldObject): ValueT {
 		if (!this.validate(raw)) {
 			return this.config.default;
 		}
@@ -42,7 +42,7 @@ export abstract class FieldBase<ValueT, ConfigT extends BaseFieldConfig<ValueT>>
 	 * @param raw - Raw UJL field value to validate
 	 * @returns True if the raw value passes validation, false otherwise
 	 */
-	public abstract validate(raw: UJLFieldObject): raw is ValueT;
+	public abstract validate(raw: UJLCFieldObject): raw is ValueT;
 
 	/**
 	 * Fit a validated value to field constraints (clamping, rounding, truncation, etc.)
@@ -56,10 +56,10 @@ export abstract class FieldBase<ValueT, ConfigT extends BaseFieldConfig<ValueT>>
 	 * @param value - Typed value to serialize
 	 * @returns Serialized UJL field object
 	 */
-	public serialize(value: ValueT): UJLFieldObject {
+	public serialize(value: ValueT): UJLCFieldObject {
 		// Default implementation: direct conversion
 		// Override in subclasses for complex serialization needs
-		return value as UJLFieldObject;
+		return value as UJLCFieldObject;
 	}
 
 	/**

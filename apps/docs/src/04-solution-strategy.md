@@ -30,7 +30,7 @@ UJL verfolgt eine mehrschichtige Lösungsstrategie, die folgende zentrale Prinzi
 
 UJL basiert auf einer **JSON-basierten Architektur**, die drei zentrale Prinzipien verfolgt:
 
-- **Trennung von Inhalt und Design**: Inhalte werden in `.ujl.json`-Dateien, Design in `.ujlt.json`-Dateien gespeichert
+- **Trennung von Inhalt und Design**: Inhalte werden in `.ujlc.json`-Dateien, Design in `.ujlt.json`-Dateien gespeichert
 - **Modulare Struktur**: Wiederverwendbare Module mit Fields (Daten) und Slots (Inhaltsbereiche)
 - **Plattformunabhängigkeit**: Offenes JSON-Format für maximale Flexibilität
 

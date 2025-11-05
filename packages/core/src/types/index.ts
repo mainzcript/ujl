@@ -1,2 +1,3 @@
 export * from "./ast.js";
-export * from "./ujl-objects.js";
+export * from "./ujl-content.js";
+export * from "./ujl-theme.js";

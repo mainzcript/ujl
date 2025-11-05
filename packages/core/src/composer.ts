@@ -1,6 +1,6 @@
 import { createDefaultRegistry } from "./modules/default-registry.js";
 import { ModuleRegistry, type AnyModule } from "./modules/index.js";
-import type { UJLAbstractNode, UJLDocument, UJLModuleObject } from "./types";
+import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "./types";
 
 /**
  * Composer class for converting UJL documents to Abstract Syntax Trees
@@ -33,7 +33,7 @@ export class Composer {
 	 * @param moduleData - The module data to compose
 	 * @returns Composed abstract syntax tree node
 	 */
-	public composeModule(moduleData: UJLModuleObject): UJLAbstractNode {
+	public composeModule(moduleData: UJLCModuleObject): UJLAbstractNode {
 		const module = this._module_registry.getModule(moduleData.type);
 		if (module) {
 			return module.compose(moduleData, this);
@@ -53,10 +53,10 @@ export class Composer {
 	 * @param doc - The UJL document to compose
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(doc: UJLDocument): UJLAbstractNode {
+	public compose(doc: UJLCDocument): UJLAbstractNode {
 		const children: UJLAbstractNode[] = [];
 
-		for (const rawModule of doc.ujl.root) {
+		for (const rawModule of doc.ujlc.root) {
 			children.push(this.composeModule(rawModule));
 		}
 

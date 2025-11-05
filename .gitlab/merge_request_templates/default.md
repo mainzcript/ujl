@@ -1,6 +1,8 @@
+> **Note**: This is a fallback template. Please use a specific template if your change matches one of the types below (e.g., `bugfix.md`, `feature.md`, `documentation.md`, etc.). If you are not sure which template to use, please use this template or create a new one in the `.gitlab/merge_request_templates` directory. Delete this note before submitting your merge request.
+
 ## Description
 
-Brief description of the changes made.
+<!-- Brief description of the changes made. -->
 
 ## Type of Change
 
@@ -27,17 +29,17 @@ Brief description of the changes made.
 
 ### Performance & Usability
 
-- [ ] Performance requirements met (<200ms for 200 entries)
-- [ ] Clear status/error messages implemented
-- [ ] Required fields are clearly marked
-- [ ] User experience is responsive
+- [ ] Performance requirements met (<200ms for 200 entries) (if applicable)
+- [ ] Clear status/error messages implemented (if applicable)
+- [ ] Required fields are clearly marked (if applicable)
+- [ ] User experience is responsive (if applicable)
 
 ### Accessibility
 
-- [ ] Focus states are clearly visible
-- [ ] Fully navigable with keyboard only
+- [ ] Focus states are clearly visible (if applicable)
+- [ ] Fully navigable with keyboard only (if applicable)
 - [ ] Screen reader compatible (if applicable)
-- [ ] Color contrast meets WCAG standards
+- [ ] Color contrast meets WCAG standards (if applicable)
 
 ### Checklist
 

@@ -1,7 +1,7 @@
 import type { Composer } from "../../composer.js";
-import { TextField } from "../../fields/concretes/text-field";
-import type { UJLAbstractNode, UJLModuleObject } from "../../types/index.js";
-import { ModuleBase } from "../base";
+import { TextField } from "../../fields/concretes/text-field.js";
+import type { UJLAbstractNode, UJLCModuleObject } from "../../types/index.js";
+import { ModuleBase } from "../base.js";
 
 /**
  * Call-to-action module for UJL
@@ -80,7 +80,7 @@ export class CallToActionModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLModuleObject, _composer: Composer): UJLAbstractNode {
+	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
 		const headlineField = this.fields.find(field => field.key === "headline");
 		const headline = headlineField?.field.parse(moduleData.fields.headline);
 		const descriptionField = this.fields.find(field => field.key === "description");

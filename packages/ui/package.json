@@ -33,16 +33,14 @@
 			"svelte": "./dist/index.js"
 		},
 		"./styles": "./dist/styles/index.css",
-		"./tokens": {
-			"types": "./dist/tokens/index.d.ts",
-			"default": "./dist/tokens/index.js"
-		},
 		"./tools": {
 			"types": "./dist/tools/index.d.ts",
 			"default": "./dist/tools/index.js"
 		}
 	},
 	"dependencies": {
+		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/examples": "workspace:*",
 		"@lucide/svelte": "^0.544.0",
 		"bits-ui": "^2.11.4",
 		"clsx": "^2.1.1",

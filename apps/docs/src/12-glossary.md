@@ -11,15 +11,15 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts – mit klarer Trennung von Inhalt und Design.
 
 - **UJL Crafter**  
-  Der visuelle Editor von UJL zur Bearbeitung von `.ujl.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler, Designer und Redakteure. Integriert standardmäßig den Renderer, kann aber auch mit alternativen Renderern kombiniert werden.
+  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler, Designer und Redakteure. Integriert standardmäßig den Renderer, kann aber auch mit alternativen Renderern kombiniert werden.
 
 - **UJL Renderer**  
-  Die Render-Engine des UJL-Systems. Verarbeitet `.ujl.json`- und `.ujlt.json`-Dateien und erzeugt daraus ein vollständiges Frontend (HTML, CSS, JS).
+  Die Render-Engine des UJL-Systems. Verarbeitet `.ujlc.json`- und `.ujlt.json`-Dateien und erzeugt daraus ein vollständiges Frontend (HTML, CSS, JS).
 
 - **ContentFrame**  
   Das gerenderte Endprodukt eines UJL-Layouts – bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
 
-- **UJL-Datei (`.ujl.json`)**  
+- **UJL-Datei (`.ujlc.json`)**  
   JSON-Datei zur Definition von Inhalten und deren Anordnung in einem Layout. Grundlage für das modulare Rendering mit UJL.
 
 - **Design-Konfigurationsdatei (`.ujlt.json`)**  
@@ -43,7 +43,7 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Verwaltet verfügbare Module und ermöglicht die Registrierung neuer Module zur Erweiterung des Systems.
 
 - **Validator**  
-  Teil des Renderprozesses – überprüft die technische Korrektheit und Kompatibilität von `.ujl.json`-Layouts:
+  Teil des Renderprozesses – überprüft die technische Korrektheit und Kompatibilität von `.ujlc.json`-Layouts:
   - **Syntaxprüfung**: Formale Validierung der JSON-Struktur.
   - **Kompatibilitätsprüfung**: Sicherstellung, dass die Layout-Datei mit der eingesetzten UJL-Version harmoniert.
 
@@ -67,7 +67,7 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   UJL wird so strukturiert, dass Sprachmodelle (z. B. GPT, Mistral) Inhalte und Layouts verstehen, erzeugen oder verändern können.
 
 - **Mehrsprachigkeit**  
-  Unterstützung sprachspezifischer Inhalte direkt im `.ujl.json`. Anbindung an Übersetzungs-APIs ist vorgesehen.
+  Unterstützung sprachspezifischer Inhalte direkt im `.ujlc.json`. Anbindung an Übersetzungs-APIs ist vorgesehen.
 
 ## Technische Begriffe
 

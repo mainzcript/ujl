@@ -1,5 +1,5 @@
-import type { UJLFieldObject } from "../../types/index.js";
-import { BaseFieldConfig, FieldBase } from "../base";
+import type { UJLCFieldObject } from "../../types/index.js";
+import { BaseFieldConfig, FieldBase } from "../base.js";
 
 /**
  * Value type for text fields (after parsing)
@@ -34,7 +34,7 @@ export class TextField extends FieldBase<TextFieldValue, TextFieldConfig> {
 	 * @param raw - Raw UJL field value to validate
 	 * @returns Type predicate indicating if raw value is a string
 	 */
-	public validate(raw: UJLFieldObject): raw is string {
+	public validate(raw: UJLCFieldObject): raw is string {
 		return typeof raw === "string";
 	}
 
