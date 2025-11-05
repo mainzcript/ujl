@@ -97,7 +97,7 @@ Im Folgenden werden ausgewählte Tools hinsichtlich ihrer Funktionalität, Unter
 #### GrapesJS
 
 - **Funktionalität:** GrapesJS ist ein Open-Source-Framework für die visuelle Erstellung von HTML-Templates mittels Drag-and-Drop. Es speichert Projektzustände intern als JSON, generiert jedoch primär HTML und CSS für die Darstellung.
-- **Unterschiede zu UJL:** Während GrapesJS Inhalte, Layout und Stile eng miteinander verknüpft, verfolgt UJL eine strikte Trennung von Inhalt (.ujl.json) und Design (.ujlt.json), was eine höhere Flexibilität und Wiederverwendbarkeit ermöglicht.
+- **Unterschiede zu UJL:** Während GrapesJS Inhalte, Layout und Stile eng miteinander verknüpft, verfolgt UJL eine strikte Trennung von Inhalt (.ujlc.json) und Design (.ujlt.json), was eine höhere Flexibilität und Wiederverwendbarkeit ermöglicht.
 - **Integration mit UJL:** GrapesJS eignet sich für die visuelle Erstellung von Templates, jedoch nicht für die strukturierte Inhalts- und Layoutbearbeitung, wie sie UJL bietet.
 
 #### Editor.js

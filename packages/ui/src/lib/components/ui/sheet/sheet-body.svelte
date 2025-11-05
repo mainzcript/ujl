@@ -13,7 +13,7 @@
 <div
 	bind:this={ref}
 	data-slot="sheet-body"
-	class={cn('flex flex-col gap-1.5 overflow-y-auto p-4', className)}
+	class={cn('gap-1.5 p-4 flex flex-col overflow-y-auto', className)}
 	{...restProps}
 >
 	{@render children?.()}

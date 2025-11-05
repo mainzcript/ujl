@@ -2,7 +2,7 @@
 
 **The Heart of the UJL Framework** - A modular, type-safe system for building dynamic web layouts using an Abstract Syntax Tree (AST) architecture.
 
-UJL Core provides the foundational building blocks for creating reusable, composable web layouts. Instead of writing HTML directly, you define layouts using `.ujl.json` documents that get composed into AST nodes and rendered through adapters. This separation enables powerful features like:
+UJL Core provides the foundational building blocks for creating reusable, composable web layouts. Instead of writing HTML directly, you define layouts using `.ujlc.json` documents that get composed into AST nodes and rendered through adapters. This separation enables powerful features like:
 
 - **Modular Architecture**: Create reusable modules with fields and slots
 - **Type Safety**: Full TypeScript support with compile-time validation
@@ -21,9 +21,9 @@ pnpm add @ujl-framework/core
 ```typescript
 import { Composer } from "@ujl-framework/core";
 
-// Create a UJL document
-const ujlDocument = {
-	ujl: {
+// Create a UJLC document
+const ujlcDocument = {
+	ujlc: {
 		meta: {
 			title: "My First UJL Document",
 			description: "A simple example",
@@ -60,7 +60,7 @@ const ujlDocument = {
 
 // Compose to AST
 const composer = new Composer();
-const ast = composer.compose(ujlDocument);
+const ast = composer.compose(ujlcDocument);
 // Use an adapter to render (e.g., HTML, Svelte, etc.)
 ```
 
@@ -69,7 +69,7 @@ const ast = composer.compose(ujlDocument);
 ### Data Flow
 
 ```
-UJL Document (.ujl.json)
+UJL Document (.ujlc.json)
     ↓
 Composer (with Module Registry)
     ↓
@@ -104,7 +104,7 @@ class EmailField extends FieldBase<string, EmailFieldConfig> {
 		default: "",
 	};
 
-	validate(raw: UJLFieldObject): raw is string {
+	validate(raw: UJLCFieldObject): raw is string {
 		return typeof raw === "string" && raw.includes("@");
 	}
 
@@ -132,7 +132,7 @@ class CustomModule extends ModuleBase {
 
 	readonly slots = [{ key: "content", slot: new Slot({ label: "Content Area", max: 5 }) }];
 
-	compose(moduleData: UJLModuleObject, composer: Composer): UJLAbstractNode {
+	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
 		const children = moduleData.slots.content.map(child => composer.composeModule(child));
 
 		return {
@@ -191,8 +191,8 @@ class Composer {
 	constructor(registry?: ModuleRegistry);
 	registerModule(module: AnyModule): void;
 	unregisterModule(module: AnyModule | string): void;
-	compose(doc: UJLDocument): UJLAbstractNode;
-	composeModule(moduleData: UJLModuleObject): UJLAbstractNode;
+	compose(doc: UJLCDocument): UJLAbstractNode;
+	composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
 }
 
 class ModuleRegistry {
@@ -202,21 +202,22 @@ class ModuleRegistry {
 }
 
 abstract class FieldBase<ValueT, ConfigT> {
-	parse(raw: UJLFieldObject): ValueT;
-	abstract validate(raw: UJLFieldObject): raw is ValueT;
+	parse(raw: UJLCFieldObject): ValueT;
+	abstract validate(raw: UJLCFieldObject): raw is ValueT;
 	abstract fit(value: ValueT): ValueT;
-	serialize(value: ValueT): UJLFieldObject;
+	serialize(value: ValueT): UJLCFieldObject;
 }
 
 abstract class ModuleBase {
 	abstract readonly name: string;
 	abstract readonly fields: FieldSet;
 	abstract readonly slots: SlotSet;
-	abstract compose(moduleData: UJLModuleObject, composer: Composer): UJLAbstractNode;
+	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
 }
 
 type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
 	options: OptionsType
 ) => OutputType;
 ```
@@ -253,7 +254,8 @@ src/
 │   └── registry.ts  # ModuleRegistry class
 ├── types/           # Type definitions
 │   ├── ast.ts       # AST node types
-│   └── ujl-objects.ts # UJL document types
+│   ├── ujl-content.ts # UJL content types
+│   └── ujl-theme.ts # UJL theme types
 ├── composer.ts      # Composer class
 └── index.ts         # Main exports
 ```

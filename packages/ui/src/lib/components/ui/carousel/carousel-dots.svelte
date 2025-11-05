@@ -33,7 +33,7 @@
 	});
 </script>
 
-<Card bind:ref class={cn('relative inline-block rounded-full px-2 py-1', className)} {...restProps}>
+<Card bind:ref class={cn('px-2 py-1 relative inline-block rounded-full', className)} {...restProps}>
 	<div class="flex" role="tablist" aria-label="Carousel navigation">
 		{#each Array(itemCount), i (i)}
 			{@const isActive = carouselState

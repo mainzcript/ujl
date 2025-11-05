@@ -17,6 +17,5 @@
 	],
 	"access": "restricted",
 	"baseBranch": "develop",
-	"updateInternalDependencies": "patch",
-	"ignore": ["@ujl-framework/landing"]
+	"updateInternalDependencies": "patch"
 }

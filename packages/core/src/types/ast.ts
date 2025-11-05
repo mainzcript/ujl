@@ -1,3 +1,5 @@
+import type { UJLTTokenSet } from "./ujl-theme.js";
+
 type UJLAbstractWrapperNode = {
 	type: "wrapper";
 	props: {
@@ -116,5 +118,6 @@ export type {
  */
 export type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
 	options: OptionsType
 ) => OutputType;

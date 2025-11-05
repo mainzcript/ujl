@@ -1,4 +1,4 @@
-import type { UJLSlotObject } from "../types/index.js";
+import type { UJLCSlotObject } from "../types/index.js";
 
 /**
  * Configuration options for a slot
@@ -48,7 +48,7 @@ export class Slot {
 	 * @param raw - Raw slot value from UJL document
 	 * @returns Parsed slot data (validated and fitted)
 	 */
-	public parse(raw: UJLSlotObject): UJLSlotObject {
+	public parse(raw: UJLCSlotObject): UJLCSlotObject {
 		return this.fit(raw);
 	}
 
@@ -57,7 +57,7 @@ export class Slot {
 	 * @param slotData - Validated slot data to fit to constraints
 	 * @returns Fitted slot data
 	 */
-	public fit(slotData: UJLSlotObject): UJLSlotObject {
+	public fit(slotData: UJLCSlotObject): UJLCSlotObject {
 		// Apply max constraint if set
 		if (this.config.max > 0 && slotData.length > this.config.max) {
 			return slotData.slice(0, this.config.max);

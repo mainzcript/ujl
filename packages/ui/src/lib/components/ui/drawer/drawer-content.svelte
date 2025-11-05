@@ -2,6 +2,7 @@
 	import { Drawer as DrawerPrimitive } from 'vaul-svelte';
 	import DrawerOverlay from './drawer-overlay.svelte';
 	import { cn } from '$lib/utils.js';
+	import { getUjlThemeContext } from '../ujl-theme/context.js';
 
 	let {
 		ref = $bindable(null),
@@ -12,6 +13,9 @@
 	}: DrawerPrimitive.ContentProps & {
 		portalProps?: DrawerPrimitive.PortalProps;
 	} = $props();
+
+	const themeContext = getUjlThemeContext();
+	const themeId = $derived(themeContext?.themeId ?? null);
 </script>
 
 <DrawerPrimitive.Portal {...portalProps}>
@@ -19,19 +23,20 @@
 	<DrawerPrimitive.Content
 		bind:ref
 		data-slot="drawer-content"
+		data-ujl-theme={themeId}
 		class={cn(
-			'bg-ambient/95 text-ambient-foreground outline-foreground/10 outline backdrop-blur-sm',
+			'bg-ambient/95 text-ambient-foreground outline-foreground/10 backdrop-blur-sm outline',
 			'group/drawer-content fixed z-50 flex h-auto flex-col',
-			'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg',
-			'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg',
-			'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:sm:max-w-sm',
-			'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:sm:max-w-sm',
+			'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:max-h-[80vh]',
+			'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:rounded-t-lg data-[vaul-drawer-direction=bottom]:max-h-[80vh]',
+			'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:sm:max-w-sm data-[vaul-drawer-direction=right]:w-3/4',
+			'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=left]:w-3/4',
 			className
 		)}
 		{...restProps}
 	>
 		<div
-			class="bg-foreground/10 mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block"
+			class="bg-foreground/10 mt-4 h-2 mx-auto hidden w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block"
 		></div>
 		{@render children?.()}
 	</DrawerPrimitive.Content>

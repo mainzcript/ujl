@@ -145,7 +145,7 @@ stop
 UJL ist nicht einfach nur ein weiterer Baukasten, sondern ein Framework, das Inhalt und Design technisch trennt – strukturiert, modulbasiert und promptfähig. Es integriert sich in bestehende Systeme, bleibt Open Source, erweiterbar und verständlich für Mensch und KI.
 
 1. **UJL trennt Inhalt und Design konsequent – für Flexibilität und Markenkonformität**: UJL bringt eine konsequente Strukturierung mit:
-   - Inhalte in `.ujl.json`-Dateien
+   - Inhalte in `.ujlc.json`-Dateien
    - Designsysteme in `.ujlt.json`-Theme-Dateien
    - Layout-Bausteine werden definiert durch vorgegebene und erweiterbare UJL-Module mit Fields (Daten) und Slots (Inhaltsbereiche)
 

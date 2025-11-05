@@ -1,6 +1,6 @@
 import type { Composer } from "../../composer.js";
 import { TextField } from "../../fields/concretes/text-field.js";
-import type { UJLAbstractNode, UJLModuleObject } from "../../types/index.js";
+import type { UJLAbstractNode, UJLCModuleObject } from "../../types/index.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -35,7 +35,7 @@ export class TextModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLModuleObject, _composer: Composer): UJLAbstractNode {
+	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
 		const contentField = this.fields.find(field => field.key === "content");
 		const content = contentField?.field.parse(moduleData.fields.content) || "Default content";
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn } from '$lib/utils.js';
 	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+	import { getUjlThemeContext } from '../ujl-theme/context.js';
 
 	let {
 		ref = $bindable(null),
@@ -11,16 +12,20 @@
 	}: DropdownMenuPrimitive.ContentProps & {
 		portalProps?: DropdownMenuPrimitive.PortalProps;
 	} = $props();
+
+	const themeContext = getUjlThemeContext();
+	const themeId = $derived(themeContext?.themeId ?? null);
 </script>
 
 <DropdownMenuPrimitive.Portal {...portalProps}>
 	<DropdownMenuPrimitive.Content
 		bind:ref
 		data-slot="dropdown-menu-content"
+		data-ujl-theme={themeId}
 		{sideOffset}
 		class={cn(
 			'bg-ambient text-ambient-foreground outline-foreground/10 shadow-lg outline',
-			'z-50 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md p-1',
+			'rounded-md p-1 z-50 min-w-[8rem] overflow-x-hidden overflow-y-auto',
 			'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 max-h-(--bits-dropdown-menu-content-available-height) origin-(--bits-dropdown-menu-content-transform-origin)',
 			className
 		)}

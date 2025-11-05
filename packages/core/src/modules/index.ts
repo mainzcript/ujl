@@ -1,10 +1,10 @@
-import { ModuleBase } from "./base";
-import { Button } from "./concretes/button";
-import { CallToActionModule } from "./concretes/call-to-action";
-import { CardModule } from "./concretes/card";
-import { ContainerModule } from "./concretes/container";
-import { GridModule } from "./concretes/grid";
-import { TextModule } from "./concretes/text";
+import { ModuleBase } from "./base.js";
+import { Button } from "./concretes/button.js";
+import { CallToActionModule } from "./concretes/call-to-action.js";
+import { CardModule } from "./concretes/card.js";
+import { ContainerModule } from "./concretes/container.js";
+import { GridModule } from "./concretes/grid.js";
+import { TextModule } from "./concretes/text.js";
 
 /**
  * Any module is an instance of the ModuleBase class

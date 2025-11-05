@@ -14,7 +14,7 @@
 	<table
 		bind:this={ref}
 		data-slot="table"
-		class={cn('text-foreground/90 w-full caption-bottom text-sm', className)}
+		class={cn('text-foreground/90 text-sm w-full caption-bottom', className)}
 		{...restProps}
 	>
 		{@render children?.()}

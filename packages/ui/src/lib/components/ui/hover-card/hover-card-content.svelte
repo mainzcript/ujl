@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { LinkPreview as HoverCardPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
+	import { getUjlThemeContext } from '../ujl-theme/context.js';
 
 	let {
 		ref = $bindable(null),
@@ -12,16 +13,20 @@
 	}: HoverCardPrimitive.ContentProps & {
 		portalProps?: HoverCardPrimitive.PortalProps;
 	} = $props();
+
+	const themeContext = getUjlThemeContext();
+	const themeId = $derived(themeContext?.themeId ?? null);
 </script>
 
 <HoverCardPrimitive.Portal {...portalProps}>
 	<HoverCardPrimitive.Content
 		bind:ref
 		data-slot="hover-card-content"
+		data-ujl-theme={themeId}
 		{align}
 		{sideOffset}
 		class={cn(
-			'elevation z-50 mt-3 w-64 rounded-md p-4 backdrop-blur',
+			'elevation mt-3 w-64 rounded-md p-4 backdrop-blur z-50',
 			'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
 			className
 		)}

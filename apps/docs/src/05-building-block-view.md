@@ -37,7 +37,7 @@ rectangle "UJL System" {
     }
 
     database " " as "Speicher" {
-            file ".ujl.json" as UJLFile
+            file ".ujlc.json" as UJLFile
             file ".ujlt.json" as DesignConfig
         }
 
@@ -76,8 +76,8 @@ rectangle "UJL System" {
    - Sollte ein Entwickler eine alternative Rendering-Einheit verwenden, muss diese ebenfalls in der Lage sein, einen ContentFrame zu erzeugen, der die in den UJL-Dateien definierte Struktur und das Design widerspiegelt.
 
 3. **Speicher**:
-   - Die Daten für die UJL-Layouts und die Design-Konfiguration werden in **.ujl.json**- und **.ujlt.json**-Dateien im **Speicher** verwaltet.
-     - **UJL-Datei (.ujl.json)**: Enthält die Struktur und die Inhalte eines Layouts.
+   - Die Daten für die UJL-Layouts und die Design-Konfiguration werden in **.ujlc.json**- und **.ujlt.json**-Dateien im **Speicher** verwaltet.
+     - **UJL-Datei (.ujlc.json)**: Enthält die Struktur und die Inhalte eines Layouts.
      - **Design-Konfigurationsdatei (.ujlt.json)**: Speichert Designvorgaben, wie z.B. Farben, Schriften und Abstände.
    - Der **UJL Crafter** und der **Renderer** greifen auf diese Dateien zu, um Daten zu laden, zu speichern und zu validieren.
 
@@ -96,13 +96,13 @@ rectangle "UJL System" {
 
 In diesem Abschnitt werden einige grundlegende Beispielcodes vorgestellt, um die Funktionalitäten des UJL-Systems zu veranschaulichen. Die Beispiele decken verschiedene Bereiche ab, wie das Definieren von Layouts und Inhalten, die Nutzung der Design-Konfigurationsdatei sowie die Integration des Editors und Renderers in eine Webanwendung. Auch die API für erweiterbare Module wird kurz dargestellt.
 
-#### .ujl.json-Datei: Struktur und Inhalt
+#### .ujlc.json-Datei: Struktur und Inhalt
 
-Die .ujl.json-Datei ist die zentrale Datei im UJL-System und beschreibt das Layout und den Inhalt der Seite in einem strukturierten JSON-Format. Die Datei referenziert Module mit ihren Fields (Daten) und Slots (Inhaltsbereiche) und definiert die Inhalte innerhalb der vordefinierten Struktur.
+Die .ujlc.json-Datei ist die zentrale Datei im UJL-System und beschreibt das Layout und den Inhalt der Seite in einem strukturierten JSON-Format. Die Datei referenziert Module mit ihren Fields (Daten) und Slots (Inhaltsbereiche) und definiert die Inhalte innerhalb der vordefinierten Struktur.
 
 ```json
 {
-	"ujl": {
+	"ujlc": {
 		"meta": {
 			"title": "Produktkatalog",
 			"description": "Unser Staubsauger-Sortiment",
@@ -178,32 +178,82 @@ Die .ujl.json-Datei ist die zentrale Datei im UJL-System und beschreibt das Layo
 
 In diesem Beispiel wird ein einfacher Produktkatalog definiert, der aus einem Haupt-Container-Modul mit einem Text-Modul und einem Grid-Modul mit zwei Card-Modulen besteht. Jedes Modul hat Fields für Daten und Slots für verschachtelte Inhalte.
 
-#### .ujlt.json: Design-Konfigurationsdatei
+#### .ujlt.json: Design-Theme (Tokens)
 
-Die .ujlt.json-Datei enthält Designvorgaben, die das Corporate Design einheitlich und konsistent in allen Layouts umsetzen. Die Datei beschreibt Vorgaben für Farben, Schriftarten, Abstände und weitere visuelle Details, die die Designer festlegen.
+Die .ujlt.json-Datei definiert das Theme über Design‑Tokens. Ein vollständiges Theme benötigt alle Flavors: `ambient`, `primary`, `secondary`, `accent`, `success`, `warning`, `destructive` und `info`. Jeder Flavor benötigt die Properties `light`, `lightForeground`, `dark`, `darkForeground` und eine vollständige `shades` mit Shades von 50 bis 950. Die Version wird unter `meta._version` geführt.
 
 ```json
 {
-	"design": {
-		"colors": {
-			"primary": "#0044cc",
-			"secondary": "#00cc88",
-			"background": "#ffffff",
-			"text": "#333333"
+	"ujlt": {
+		"meta": {
+			"_version": "0.0.1"
 		},
-		"fonts": {
-			"main": "Arial, sans-serif",
-			"header": "Georgia, serif"
-		},
-		"spacing": {
-			"padding": "10px",
-			"margin": "15px"
+		"tokens": {
+			"color": {
+				"ambient": {
+					"light": { "l": 0.985, "c": 0, "h": 0 },
+					"lightForeground": { "l": 0.274, "c": 0.006, "h": 286.033 },
+					"dark": { "l": 0.141, "c": 0.005, "h": 285.823 },
+					"darkForeground": { "l": 0.967, "c": 0.001, "h": 286.375 },
+					"shades": {
+						"50": { "l": 0.985, "c": 0, "h": 0 },
+						"100": { "l": 0.967, "c": 0.001, "h": 286.375 },
+						"200": { "l": 0.92, "c": 0.004, "h": 286.32 },
+						"300": { "l": 0.871, "c": 0.006, "h": 286.286 },
+						"400": { "l": 0.705, "c": 0.015, "h": 286.067 },
+						"500": { "l": 0.552, "c": 0.016, "h": 285.938 },
+						"600": { "l": 0.442, "c": 0.017, "h": 285.786 },
+						"700": { "l": 0.37, "c": 0.013, "h": 285.805 },
+						"800": { "l": 0.274, "c": 0.006, "h": 286.033 },
+						"900": { "l": 0.21, "c": 0.006, "h": 285.885 },
+						"950": { "l": 0.141, "c": 0.005, "h": 285.823 }
+					}
+				},
+				"primary": {
+					"light": { "l": 0.546, "c": 0.245, "h": 262.881 },
+					"lightForeground": { "l": 0.985, "c": 0, "h": 0 },
+					"dark": { "l": 0.623, "c": 0.214, "h": 259.815 },
+					"darkForeground": { "l": 0.985, "c": 0, "h": 0 },
+					"shades": {
+						"50": { "l": 0.97, "c": 0.014, "h": 254.604 },
+						"100": { "l": 0.932, "c": 0.032, "h": 255.585 },
+						"200": { "l": 0.882, "c": 0.059, "h": 254.128 },
+						"300": { "l": 0.809, "c": 0.105, "h": 251.813 },
+						"400": { "l": 0.707, "c": 0.165, "h": 254.624 },
+						"500": { "l": 0.623, "c": 0.214, "h": 259.815 },
+						"600": { "l": 0.546, "c": 0.245, "h": 262.881 },
+						"700": { "l": 0.488, "c": 0.243, "h": 264.376 },
+						"800": { "l": 0.424, "c": 0.199, "h": 265.638 },
+						"900": { "l": 0.379, "c": 0.146, "h": 265.522 },
+						"950": { "l": 0.282, "c": 0.091, "h": 267.935 }
+					}
+				},
+				"secondary": {
+					/* ... gleiche Struktur wie primary ... */
+				},
+				"accent": {
+					/* ... gleiche Struktur wie primary ... */
+				},
+				"success": {
+					/* ... gleiche Struktur wie primary ... */
+				},
+				"warning": {
+					/* ... gleiche Struktur wie primary ... */
+				},
+				"destructive": {
+					/* ... gleiche Struktur wie primary ... */
+				},
+				"info": {
+					/* ... gleiche Struktur wie primary ... */
+				}
+			},
+			"radius": "0.75rem"
 		}
 	}
 }
 ```
 
-In diesem Beispiel definiert die .ujlt.json Datei Primär- und Sekundärfarben, die Schriftarten für Haupt- und Headertexte sowie die Standardwerte für Padding und Margin, die in allen Modulen verwendet werden.
+**Hinweis:** Dieses Beispiel zeigt die Struktur für `ambient` und `primary` vollständig. Die weiteren Flavors (`secondary`, `accent`, `success`, `warning`, `destructive`, `info`) folgen exakt der gleichen Struktur mit `light`, `lightForeground`, `dark`, `darkForeground` und einer vollständigen `shades` mit allen Shades von 50 bis 950. Alle Flavors sind erforderlich für ein vollständiges Theme.
 
 #### Integration des Editors (UJL Crafter) in eine Web-Anwendung
 
@@ -219,7 +269,7 @@ import UJLCrafter from "ujlcrafter";
 const crafter = new UJLCrafter({
 	target: document.getElementById("editor-container"),
 	data: {
-		layoutFile: "path/to/layout.ujl.json",
+		layoutFile: "path/to/layout.ujlc.json",
 		config: "path/to/design.ujlt.json",
 	},
 });
@@ -234,11 +284,11 @@ crafter.on("save", updatedData => {
 });
 ```
 
-Dieser Code integriert den UJL Crafter in eine Web-Anwendung. Der Editor wird im editor-container-Element der HTML-Seite angezeigt und bietet eine Speichermethode, um die aktualisierten .ujl.json-Daten über eine API zu speichern.
+Dieser Code integriert den UJL Crafter in eine Web-Anwendung. Der Editor wird im editor-container-Element der HTML-Seite angezeigt und bietet eine Speichermethode, um die aktualisierten .ujlc.json-Daten über eine API zu speichern.
 
 #### Verwendung des Renderers zur Ausgabe als HTML/CSS/JS
 
-Der Renderer wird benötigt, um die .ujl.json- und .ujlt.json-Dateien in HTML/CSS/JS zu konvertieren und die Webansicht anzuzeigen. Hier ist ein Beispiel für die Verwendung des Renderers:
+Der Renderer wird benötigt, um die .ujlc.json- und .ujlt.json-Dateien in HTML/CSS/JS zu konvertieren und die Webansicht anzuzeigen. Hier ist ein Beispiel für die Verwendung des Renderers:
 
 ```javascript
 // Installation via npm:
@@ -247,7 +297,7 @@ Der Renderer wird benötigt, um die .ujl.json- und .ujlt.json-Dateien in HTML/CS
 import UJLRenderer from "ujlcrafter-renderer";
 
 const renderer = new UJLRenderer({
-	layoutFile: "path/to/layout.ujl.json",
+	layoutFile: "path/to/layout.ujlc.json",
 	config: "path/to/design.ujlt.json",
 	target: document.getElementById("view-container"),
 });
@@ -281,4 +331,4 @@ crafter.registerComponent("carousel", {
 });
 ```
 
-Mit diesem Code wird ein neues carousel-Modul registriert, das Bilder in einem Karussell anzeigt. Entwickler können die Struktur und das Verhalten des Moduls selbst definieren und das Modul in der .ujl.json-Datei referenzieren.
+Mit diesem Code wird ein neues carousel-Modul registriert, das Bilder in einem Karussell anzeigt. Entwickler können die Struktur und das Verhalten des Moduls selbst definieren und das Modul in der .ujlc.json-Datei referenzieren.

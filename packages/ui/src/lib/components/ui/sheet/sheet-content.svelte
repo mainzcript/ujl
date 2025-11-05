@@ -26,6 +26,7 @@
 	import type { Snippet } from 'svelte';
 	import SheetOverlay from './sheet-overlay.svelte';
 	import { cn, type WithoutChildrenOrChild } from '$lib/utils.js';
+	import { getUjlThemeContext } from '../ujl-theme/context.js';
 
 	let {
 		ref = $bindable(null),
@@ -39,6 +40,9 @@
 		side?: Side;
 		children: Snippet;
 	} = $props();
+
+	const themeContext = getUjlThemeContext();
+	const themeId = $derived(themeContext?.themeId ?? null);
 </script>
 
 <SheetPrimitive.Portal {...portalProps}>
@@ -46,12 +50,13 @@
 	<SheetPrimitive.Content
 		bind:ref
 		data-slot="sheet-content"
+		data-ujl-theme={themeId}
 		class={cn(sheetVariants({ side }), className)}
 		{...restProps}
 	>
 		{@render children?.()}
 		<SheetPrimitive.Close
-			class="rounded-xs ring-offset-background focus-visible:ring-ring focus-visible:outline-hidden absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none"
+			class="rounded-xs ring-offset-background focus-visible:ring-ring right-4 top-4 absolute opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none"
 		>
 			<XIcon class="size-4" />
 			<span class="sr-only">Close</span>

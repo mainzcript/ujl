@@ -1,8 +1,8 @@
 import { mount } from 'svelte';
 import type { Component } from 'svelte';
-import type { UJLAdapter, UJLAbstractNode } from '@ujl-framework/core';
+import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
 import type { SvelteAdapterOptions, MountedComponent } from './types.js';
-import ASTNode from './components/ASTNode.svelte';
+import ThemeWrapper from './components/ThemeWrapper.svelte';
 
 /**
  * Svelte adapter for UJL Framework
@@ -12,6 +12,7 @@ import ASTNode from './components/ASTNode.svelte';
  */
 export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> = (
 	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
 	options: SvelteAdapterOptions
 ): MountedComponent => {
 	// Resolve target element
@@ -30,10 +31,13 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 	// Clear target element
 	targetElement.innerHTML = '';
 
-	// Mount the ASTNode component
-	const instance = mount(ASTNode, {
+	// Mount the ThemeWrapper component (which wraps ASTNode with tokenSet)
+	const instance = mount(ThemeWrapper, {
 		target: targetElement,
-		props: { node }
+		props: {
+			node,
+			theme: tokenSet
+		}
 	});
 
 	// Return mounted component with cleanup function

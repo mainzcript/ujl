@@ -1,6 +1,6 @@
 import type { Composer } from "../../composer.js";
-import { TextField } from "../../fields";
-import type { UJLAbstractNode, UJLModuleObject } from "../../types";
+import { TextField } from "../../fields/index.js";
+import type { UJLAbstractNode, UJLCModuleObject } from "../../types";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
 
@@ -53,7 +53,7 @@ export class CardModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLModuleObject, composer: Composer): UJLAbstractNode {
+	public compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
 		const title = (moduleData.fields.title as string) || "Default Feature";
 		const description = (moduleData.fields.description as string) || "Default description";
 

@@ -14,7 +14,7 @@
 	bind:this={ref}
 	data-slot="alert-description"
 	class={cn(
-		'col-start-2 grid justify-items-start gap-1 text-sm opacity-90 [&_p]:leading-relaxed',
+		'gap-1 text-sm [&_p]:leading-relaxed col-start-2 grid justify-items-start opacity-90',
 		className
 	)}
 	{...restProps}
