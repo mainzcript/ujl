@@ -27,10 +27,10 @@
 
 <div
 	data-slot="carousel-item-wrapper"
-	class="min-w-0 px-2 relative shrink-0 grow-0"
+	class="relative min-w-0 shrink-0 grow-0 px-2"
 	bind:this={wrapper}
 >
-	<div class="inset-0 -left-20 top-0 absolute snap-start"></div>
+	<div class="absolute inset-0 -left-20 top-0 snap-start"></div>
 	<div
 		bind:this={ref}
 		data-slot="carousel-item"

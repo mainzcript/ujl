@@ -2,6 +2,8 @@
 
 This package contains example UJL content files (`.ujlc.json`), theme files (`.ujlt.json`), and test data that can be used across the UJL Framework for development, testing, and documentation purposes.
 
+---
+
 ## Installation
 
 ```bash

@@ -13,7 +13,7 @@
 <span
 	bind:this={ref}
 	data-slot="context-menu-shortcut"
-	class={cn('text-xs tracking-widest ml-auto opacity-80', className)}
+	class={cn('ml-auto text-xs tracking-widest opacity-80', className)}
 	{...restProps}
 >
 	{@render children?.()}

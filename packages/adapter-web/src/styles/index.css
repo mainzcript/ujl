@@ -1,0 +1,79 @@
+@import '@ujl-framework/adapter-svelte/bundle.css';
+
+/**
+ * Shadow DOM compatibility hack for Tailwind CSS variables.
+ *
+ * Tailwind's @supports query in @layer properties evaluates differently in Shadow DOM
+ * contexts, causing CSS variables (--tw-*) to not be defined. This explicitly sets
+ * all required Tailwind CSS variables to ensure utilities (e.g., drop shadows) work
+ * correctly in Custom Elements with Shadow DOM.
+ */
+@layer properties {
+	:host,
+	*,
+	:before,
+	:after,
+	::backdrop {
+		--tw-translate-x: 0;
+		--tw-translate-y: 0;
+		--tw-translate-z: 0;
+		--tw-rotate-x: initial;
+		--tw-rotate-y: initial;
+		--tw-rotate-z: initial;
+		--tw-skew-x: initial;
+		--tw-skew-y: initial;
+		--tw-scroll-snap-strictness: proximity;
+		--tw-space-y-reverse: 0;
+		--tw-border-style: solid;
+		--tw-leading: initial;
+		--tw-font-weight: initial;
+		--tw-tracking: initial;
+		--tw-shadow: 0 0 #0000;
+		--tw-shadow-color: initial;
+		--tw-shadow-alpha: 100%;
+		--tw-inset-shadow: 0 0 #0000;
+		--tw-inset-shadow-color: initial;
+		--tw-inset-shadow-alpha: 100%;
+		--tw-ring-color: initial;
+		--tw-ring-shadow: 0 0 #0000;
+		--tw-inset-ring-color: initial;
+		--tw-inset-ring-shadow: 0 0 #0000;
+		--tw-ring-inset: initial;
+		--tw-ring-offset-width: 0px;
+		--tw-ring-offset-color: #fff;
+		--tw-ring-offset-shadow: 0 0 #0000;
+		--tw-outline-style: solid;
+		--tw-backdrop-blur: initial;
+		--tw-backdrop-brightness: initial;
+		--tw-backdrop-contrast: initial;
+		--tw-backdrop-grayscale: initial;
+		--tw-backdrop-hue-rotate: initial;
+		--tw-backdrop-invert: initial;
+		--tw-backdrop-opacity: initial;
+		--tw-backdrop-saturate: initial;
+		--tw-backdrop-sepia: initial;
+		--tw-duration: initial;
+		--tw-ease: initial;
+		--tw-content: '';
+		--tw-scale-x: 1;
+		--tw-scale-y: 1;
+		--tw-scale-z: 1;
+		--tw-animation-delay: 0s;
+		--tw-animation-direction: normal;
+		--tw-animation-duration: initial;
+		--tw-animation-fill-mode: none;
+		--tw-animation-iteration-count: 1;
+		--tw-enter-blur: 0;
+		--tw-enter-opacity: 1;
+		--tw-enter-rotate: 0;
+		--tw-enter-scale: 1;
+		--tw-enter-translate-x: 0;
+		--tw-enter-translate-y: 0;
+		--tw-exit-blur: 0;
+		--tw-exit-opacity: 1;
+		--tw-exit-rotate: 0;
+		--tw-exit-scale: 1;
+		--tw-exit-translate-x: 0;
+		--tw-exit-translate-y: 0;
+	}
+}

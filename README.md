@@ -13,6 +13,7 @@ A central concept of UJL is the strict separation of content and design. Unlike 
 - **Modular & Open Source**: Fully open source and extensible
 - **LLM-ready by Design**: Optimized for language models and AI assistants
 - **Easy Integration**: Adapts to existing systems
+- **Framework-Agnostic**: Works with any framework via adapters (Svelte, Web Components, and more)
 
 ## Project Structure
 
@@ -22,6 +23,8 @@ ujl/
 │   ├── core/           # Schemas, Validator, Renderer
 │   ├── ui/             # Shadcn-svelte UI Components
 │   ├── crafter/        # Visual UJL Editor
+│   ├── adapter-svelte/ # Svelte Adapter (Svelte 5)
+│   ├── adapter-web/    # Web Adapter (Custom Elements)
 │   └── examples/       # Example Material and Test Data
 ├── services/           # Backend Services (Docker-based)
 │   └── media/          # Payload CMS-based Media Management

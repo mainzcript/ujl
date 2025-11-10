@@ -25,6 +25,6 @@ export type SvelteAdapterOptions = {
 export type MountedComponent = {
 	/** The mounted Svelte component instance */
 	instance: Component;
-	/** Function to unmount and cleanup the component */
-	unmount: () => void;
+	/** Function to unmount and cleanup the component (async in Svelte 5) */
+	unmount: () => Promise<void>;
 };

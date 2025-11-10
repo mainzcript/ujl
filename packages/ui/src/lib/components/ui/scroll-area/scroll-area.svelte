@@ -26,7 +26,7 @@
 >
 	<ScrollAreaPrimitive.Viewport
 		data-slot="scroll-area-viewport"
-		class="ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-1"
+		class="ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-4"
 	>
 		{@render children?.()}
 	</ScrollAreaPrimitive.Viewport>

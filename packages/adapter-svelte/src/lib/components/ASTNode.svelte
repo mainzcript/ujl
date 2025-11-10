@@ -1,3 +1,9 @@
+<!--
+ * ASTNode component
+ *
+ * Central router component that delegates to specific node components
+ * based on the AST node type.
+ -->
 <script lang="ts">
 	import type { UJLAbstractNode } from '@ujl-framework/core';
 	import {

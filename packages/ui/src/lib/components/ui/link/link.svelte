@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/state';
+	import { getContext } from 'svelte';
 	import PositionSpy from '$lib/tools/positionSpy.js';
 	import { cn } from '$lib/utils.js';
 
@@ -12,16 +11,25 @@
 		href = '#', // Link target
 		external = false, // Open in new tab if true
 		underline = false, // Underline style if true
+		currentUrl, // Optional: URL object for current page
+		active, // Optional: explicit active state
 		...restProps // All other props
 	} = $props();
+
+	// Optional: Context support for ujl:url
+	const contextUrl = getContext<{ url: URL }>('ujl:url');
+	const effectiveUrl = currentUrl ?? contextUrl?.url;
+
+	// Browser detection (SSR-safe)
+	const browser = typeof window !== 'undefined';
 
 	// Base styles for all links (hover and transition)
 	const baseStyle = 'hover:opacity-80 duration-200';
 	// Underline style if enabled
 	const underlineStyle = underline ? 'underline underline-offset-4' : '';
 
-	// Create a URL object from href, relative to the current page (browser only)
-	let url = $derived(browser ? new URL(href, page.url) : null);
+	// URL resolution: currentUrl from Props/Context, otherwise window.location as fallback
+	let url = $derived(browser ? new URL(href, effectiveUrl ?? window.location.href) : null);
 
 	// State: is the hash target (fragment) currently visible?
 	let hashActive: boolean = $state(false);
@@ -44,17 +52,19 @@
 		}
 	});
 
-	// Active logic: link is active if host and path match, and (if present) the fragment is visible
-	let active = $derived(
-		browser && url
-			? url.host === page.url.host &&
-					url.pathname === page.url.pathname &&
+	// Active state: explicitly passed or automatically calculated
+	let computedActive = $derived(
+		active !== undefined
+			? active
+			: browser && url && effectiveUrl
+				? url.host === effectiveUrl.host &&
+					url.pathname === effectiveUrl.pathname &&
 					(!url.hash || hashActive)
-			: false
+				: false
 	);
 
 	// Choose the class based on whether the link is active
-	const dynamicClass = $derived(active ? activeClass : inactiveClass);
+	const dynamicClass = $derived(computedActive ? activeClass : inactiveClass);
 </script>
 
 <a

@@ -5,4 +5,4 @@ export { svelteAdapter } from './adapter.js';
 export type { SvelteNodeDescriptor, SvelteAdapterOptions, MountedComponent } from './types.js';
 
 // Component exports
-export { ASTNode, Container, Wrapper, Raw, Error } from './components/index.js';
+export { AdapterRoot } from './components/index.js';

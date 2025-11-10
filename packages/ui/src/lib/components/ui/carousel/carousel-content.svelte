@@ -27,16 +27,16 @@
 	<div
 		bind:this={wrapper}
 		data-slot="carousel-wrapper"
-		class="no-scrollbar -mx-22 -my-2 py-2 snap-x snap-mandatory overflow-x-scroll"
+		class="no-scrollbar -mx-22 -my-2 snap-x snap-mandatory overflow-x-scroll py-2"
 		style="mask: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%); -webkit-mask: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);"
 	>
 		<div data-slot="carousel-track" class={cn('isolate flex', className)} {...restProps}>
 			<div
-				class="w-20 min-w-0 relative shrink-0 grow-0"
+				class="relative w-20 min-w-0 shrink-0 grow-0"
 				data-slot="carousel-placeholder-start"
 			></div>
 			{@render children?.()}
-			<div class="w-20 min-w-0 relative shrink-0 grow-0" data-slot="carousel-placeholder-end"></div>
+			<div class="relative w-20 min-w-0 shrink-0 grow-0" data-slot="carousel-placeholder-end"></div>
 		</div>
 	</div>
 </div>

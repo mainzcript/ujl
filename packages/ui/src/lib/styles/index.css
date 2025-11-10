@@ -15,6 +15,7 @@
 } */
 
 :root,
+:host,
 [data-ujl-theme] {
 	/* Light mode colors */
 	--primary: var(--primary-light);
@@ -409,8 +410,8 @@
 		@apply bg-flavor/80;
 		@apply border-flavor-foreground/10 border-[1px];
 		@apply inset-shadow-xs inset-shadow-flavor-100/15 shadow-flavor-900/10 shadow-lg;
-		@apply backdrop-brightness-125 backdrop-saturate-125;
-		@apply after:inset-0 after:absolute after:-z-10;
+		@apply backdrop-saturate-125 backdrop-brightness-125;
+		@apply after:absolute after:inset-0 after:-z-10;
 		@apply after:bg-ambient-500/5;
 	}
 
