@@ -36,10 +36,10 @@ pnpm add @ujl-framework/ui
 		DialogContent,
 		DialogTriggerButton
 	} from '@ujl-framework/ui';
-	import { flavors } from '@ujl-framework/ui/tokens';
-</script>
 
-<!-- Styles are automatically imported when you import components -->
+	// Import styles
+	import '@ujl-framework/ui/styles';
+</script>
 
 <Card>
 	<CardHeader>
@@ -52,14 +52,7 @@ pnpm add @ujl-framework/ui
 </Card>
 ```
 
-### Design Tokens
-
-```javascript
-import { flavors } from '@ujl-framework/ui/tokens';
-
-// Access available flavor tokens
-console.log(flavors); // ['primary', 'secondary', 'accent', ...]
-```
+> **Note**: Styles are **not** automatically imported. You must explicitly import `@ujl-framework/ui/styles` in your application. In SvelteKit, this is typically done in your root `+layout.svelte` file.
 
 ### Tools
 

@@ -1,8 +1,8 @@
-import { mount } from 'svelte';
+import { mount, unmount } from 'svelte';
 import type { Component } from 'svelte';
 import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
 import type { SvelteAdapterOptions, MountedComponent } from './types.js';
-import ThemeWrapper from './components/ThemeWrapper.svelte';
+import AdapterRoot from './components/AdapterRoot.svelte';
 
 /**
  * Svelte adapter for UJL Framework
@@ -31,27 +31,20 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 	// Clear target element
 	targetElement.innerHTML = '';
 
-	// Mount the ThemeWrapper component (which wraps ASTNode with tokenSet)
-	const instance = mount(ThemeWrapper, {
+	// Mount the AdapterRoot component (which handles theme and AST rendering)
+	const instance = mount(AdapterRoot, {
 		target: targetElement,
 		props: {
 			node,
-			theme: tokenSet
+			tokenSet
 		}
 	});
 
 	// Return mounted component with cleanup function
 	return {
 		instance: instance as Component, // Type assertion for Svelte 5 mount result
-		unmount: () => {
-			// Svelte 5 mount() returns a component with $destroy method
-			if (
-				instance &&
-				typeof (instance as Component & { $destroy?: () => void }).$destroy === 'function'
-			) {
-				(instance as Component & { $destroy: () => void }).$destroy();
-			}
-			targetElement.innerHTML = '';
+		unmount: async () => {
+			await unmount(instance);
 		}
 	};
 };

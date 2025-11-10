@@ -14,6 +14,6 @@
 	bind:ref
 	bind:value
 	data-slot="tabs"
-	class={cn('gap-2 flex flex-col', className)}
+	class={cn('flex flex-col gap-2', className)}
 	{...restProps}
 />

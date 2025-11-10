@@ -10,6 +10,8 @@ UJL Core provides the foundational building blocks for creating reusable, compos
 - **Multiple Outputs**: Render to HTML, Svelte components, or any format via adapters
 - **LLM-Ready**: JSON-based structure optimized for AI assistance
 
+---
+
 ## Installation
 
 ```bash

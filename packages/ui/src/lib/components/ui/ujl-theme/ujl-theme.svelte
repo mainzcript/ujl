@@ -75,31 +75,18 @@
 			: ''
 	);
 
-	// Create and manage style element lifecycle
-	$effect(() => {
-		if (!tokens) return;
-
-		const styleElement = document.createElement('style');
-		styleElement.setAttribute('data-ujl-theme', themeId);
-		document.head.appendChild(styleElement);
-
-		// Cleanup: Remove style element when component is destroyed
-		return () => {
-			styleElement.remove();
+	// Action to update style element content reactively
+	function updateStyle(element: HTMLStyleElement, css: string) {
+		element.textContent = css;
+		return {
+			update(css: string) {
+				element.textContent = css;
+			}
 		};
-	});
-
-	// Update CSS content when themeCSS changes reactively
-	$effect(() => {
-		if (!tokens) return;
-
-		const styleElement = document.querySelector(`style[data-ujl-theme="${themeId}"]`);
-		if (styleElement) {
-			styleElement.textContent = themeCSS;
-		}
-	});
+	}
 </script>
 
 <div data-ujl-theme={themeId} class={className} {...restProps}>
+	<style use:updateStyle={themeCSS} data-ujl-role="styles-theme"></style>
 	{@render children?.()}
 </div>

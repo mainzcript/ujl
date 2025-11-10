@@ -135,7 +135,7 @@
 
 <UJLTheme tokens={themeTokens}>
 	{#each flavors as flavor (flavor)}
-		<section class="flavor-{flavor} bg-flavor py-20 relative">
+		<section class="flavor-{flavor} bg-flavor relative py-20">
 			<Container>
 				<Card>
 					<CardContent>
@@ -177,8 +177,8 @@
 										<CardDescription>This are all shades of the {flavor}-flavor.</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div class="elevation border-flavor-500/25 rounded-xl overflow-hidden border">
-											<Grid class="gap-0 grid-cols-11">
+										<div class="elevation border-flavor-500/25 overflow-hidden rounded-xl border">
+											<Grid class="grid-cols-11 gap-0">
 												<AspectRatio class="bg-flavor-50" />
 												<AspectRatio class="bg-flavor-100" />
 												<AspectRatio class="bg-flavor-200" />
@@ -201,7 +201,7 @@
 										<CardTitle>Buttons</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div class="gap-2 flex">
+										<div class="flex gap-2">
 											<Button>Default</Button>
 											<Button variant="muted">Muted</Button>
 											<Button variant="outline">Outline</Button>
@@ -219,7 +219,7 @@
 										<CardTitle>Overlay Components</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div class="gap-2 flex items-center">
+										<div class="flex items-center gap-2">
 											<Dialog>
 												<DialogTriggerButton>Dialog</DialogTriggerButton>
 												<DialogContent class="sm:max-w-[425px]">
@@ -238,7 +238,7 @@
 											<Drawer>
 												<DrawerTriggerButton>Drawer</DrawerTriggerButton>
 												<DrawerContent>
-													<div class="max-w-sm mx-auto w-full">
+													<div class="mx-auto w-full max-w-sm">
 														<DrawerHeader>
 															<DrawerTitle>Drawer Title</DrawerTitle>
 															<DrawerDescription>This is the Drawer Description.</DrawerDescription>
@@ -362,7 +362,7 @@
 											</HoverCard>
 											<ContextMenu>
 												<ContextMenuTrigger
-													class="border-foreground rounded-md p-2 border border-dashed"
+													class="border-foreground rounded-md border border-dashed p-2"
 												>
 													<Text size="sm">Right click here</Text>
 												</ContextMenuTrigger>
@@ -416,7 +416,7 @@
 										<CardTitle>Scroll Area</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<ScrollArea class="elevation h-32 rounded-md w-full">
+										<ScrollArea class="elevation h-32 w-full rounded-md">
 											<div class="p-4">
 												{#each Array(20), i (i)}
 													<Text class="mb-1"
@@ -437,7 +437,7 @@
 										<div class="h-48 w-full">
 											<ResizablePaneGroup
 												direction="horizontal"
-												class="elevation rounded-md h-full w-full"
+												class="elevation h-full w-full rounded-md"
 											>
 												<ResizablePane defaultSize={50} minSize={20}>
 													<div class="p-6">
@@ -649,7 +649,7 @@
 										<Accordion type="single" class="w-full" value="item-1">
 											<AccordionItem value="item-1">
 												<AccordionTrigger>Product Information</AccordionTrigger>
-												<AccordionContent class="gap-4 flex flex-col text-balance">
+												<AccordionContent class="flex flex-col gap-4 text-balance">
 													<Text size="sm">
 														Our flagship product combines cutting-edge technology with sleek design.
 														Built with premium materials, it offers unparalleled performance and
@@ -663,7 +663,7 @@
 											</AccordionItem>
 											<AccordionItem value="item-2">
 												<AccordionTrigger>Shipping Details</AccordionTrigger>
-												<AccordionContent class="gap-4 flex flex-col text-balance">
+												<AccordionContent class="flex flex-col gap-4 text-balance">
 													<Text size="sm">
 														We offer worldwide shipping through trusted courier partners. Standard
 														delivery takes 3-5 business days, while express shipping ensures
@@ -677,7 +677,7 @@
 											</AccordionItem>
 											<AccordionItem value="item-3">
 												<AccordionTrigger>Return Policy</AccordionTrigger>
-												<AccordionContent class="gap-4 flex flex-col text-balance">
+												<AccordionContent class="flex flex-col gap-4 text-balance">
 													<Text size="sm">
 														We stand behind our products with a comprehensive 30-day return policy.
 														If you're not completely satisfied, simply return the item in its
@@ -723,15 +723,15 @@
 										<!-- Badge Examples -->
 										<div class="space-y-3">
 											<Text size="sm" class="font-medium">Badges:</Text>
-											<div class="gap-2 flex flex-wrap">
+											<div class="flex flex-wrap gap-2">
 												<Badge>Default</Badge>
 												{#each flavors as badge_flavor (badge_flavor)}
 													<Badge flavor={badge_flavor}>{badge_flavor}</Badge>
 												{/each}
 												<Badge variant="outline">Outline</Badge>
-												<Badge class="h-5 min-w-5 px-1 font-mono rounded-full tabular-nums">8</Badge
+												<Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">8</Badge
 												>
-												<Badge class="h-5 min-w-5 px-1 font-mono rounded-full tabular-nums"
+												<Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
 													>99</Badge
 												>
 											</div>
@@ -750,7 +750,7 @@
 										<!-- Skeleton Examples -->
 										<div class="space-y-3">
 											<Text size="sm" class="font-medium">Skeleton:</Text>
-											<div class="space-x-4 flex items-center">
+											<div class="flex items-center space-x-4">
 												<Skeleton class="size-12 rounded-full" />
 												<div class="space-y-2">
 													<Skeleton class="h-4 w-[250px]" />
@@ -762,7 +762,7 @@
 										<!-- Sonner/Toaster Examples -->
 										<div class="space-y-3">
 											<Text size="sm" class="font-medium">Sonner (Toaster):</Text>
-											<div class="gap-2 flex flex-wrap">
+											<div class="flex flex-wrap gap-2">
 												<Button
 													size="sm"
 													onclick={() => toast.success('Success! Your changes have been saved.')}
@@ -811,7 +811,7 @@
 														<!-- Avatar Examples -->
 														<div class="space-y-3">
 															<Text size="sm" class="font-medium">Avatars:</Text>
-															<div class="gap-4 flex flex-wrap">
+															<div class="flex flex-wrap gap-4">
 																<!-- Avatar with Fallback -->
 																<Avatar>
 																	<AvatarImage src="https://broken-link.png" alt="User" />
@@ -840,7 +840,7 @@
 														<!-- Avatar Group -->
 														<div class="space-y-3">
 															<Text size="sm" class="font-medium">Avatar Group:</Text>
-															<div class="-space-x-2 flex">
+															<div class="flex -space-x-2">
 																<Avatar class="border-background border-2">
 																	<AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
 																	<AvatarFallback>U1</AvatarFallback>
@@ -865,7 +865,7 @@
 															<Image
 																src="https://picsum.photos/400/300?random=1"
 																alt="Random image"
-																class="max-w-lg aspect-4/3"
+																class="aspect-4/3 max-w-lg"
 															/>
 														</div>
 
@@ -878,7 +878,7 @@
 																		<CarouselItem>
 																			<Card>
 																				<CardContent
-																					class="p-6 flex aspect-square items-center justify-center"
+																					class="flex aspect-square items-center justify-center p-6"
 																				>
 																					<div class="text-center">
 																						<Text size="3xl" class="font-semibold">{i + 1}</Text>
@@ -889,7 +889,7 @@
 																		</CarouselItem>
 																	{/each}
 																</CarouselContent>
-																<div class="gap-2 flex w-full items-center justify-center">
+																<div class="flex w-full items-center justify-center gap-2">
 																	<CarouselPrevious />
 																	<CarouselDots />
 																	<CarouselNext />

@@ -10,7 +10,7 @@
 	let { node }: Props = $props();
 </script>
 
-<Card>
+<Card class="h-full">
 	<CardHeader>
 		<CardTitle>{node.props.title}</CardTitle>
 		<CardDescription>{node.props.description}</CardDescription>

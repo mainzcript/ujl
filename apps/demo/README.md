@@ -1,3 +1,12 @@
 # UJL Demo App
 
-This application demonstrates UJL functionality in a live demo. It shows interactive examples for various modules, theme switching between different designs, responsive display on different devices, and performance metrics for UJL rendering. The demo serves as a showcase for UJL features and as a test environment for new functionality.
+This application demonstrates the `@ujl-framework/adapter-web` package in a minimal vanilla TypeScript setup. It showcases how to use the framework-agnostic web adapter to render UJL documents as Custom Elements without requiring Svelte build tools.
+
+## Usage
+
+```bash
+pnpm install
+pnpm run dev
+```
+
+The demo loads a showcase UJL document and renders it using the `webAdapter` function.

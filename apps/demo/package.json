@@ -4,15 +4,17 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "echo 'Demo app is minimal - no dev server needed'",
-		"build": "echo 'Demo app is minimal - no build needed'",
-		"preview": "echo 'Demo app is minimal - no preview needed'",
-		"prepare": "echo 'Demo app is minimal'",
-		"check": "echo 'Demo app is minimal - no check needed'",
-		"check:watch": "echo 'Demo app is minimal - no check needed'",
-		"format": "echo 'No format script needed'",
-		"lint": "echo 'No lint script needed'"
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
 	},
-	"devDependencies": {},
-	"dependencies": {}
+	"dependencies": {
+		"@ujl-framework/adapter-web": "workspace:*",
+		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/examples": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vite": "^7.1.10"
+	}
 }

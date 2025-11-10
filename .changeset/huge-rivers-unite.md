@@ -4,4 +4,4 @@
 '@ujl-framework/core': minor
 ---
 
-Implement foundational rendering pipeline with Core composition system and Svelte adapter
+Implement foundational rendering pipeline with Core composition system and Svelte adapter.

@@ -10,7 +10,7 @@
 		"lint": "eslint src --ext .ts",
 		"check": "echo 'No check script needed'",
 		"test": "echo 'No test script needed'",
-		"clean": "rm -rf dist"
+		"clean": "rimraf dist"
 	},
 	"dependencies": {
 		"@ujl-framework/core": "workspace:*",
@@ -22,6 +22,7 @@
 		"@types/node": "^24.9.1",
 		"eslint": "^9.38.0",
 		"globals": "^16.4.0",
+		"rimraf": "^6.0.1",
 		"typescript": "^5.9.3"
 	}
 }

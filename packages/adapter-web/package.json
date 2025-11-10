@@ -1,0 +1,52 @@
+{
+	"name": "@ujl-framework/adapter-web",
+	"version": "0.0.1",
+	"scripts": {
+		"build": "vite build",
+		"prepack": "vite build && publint",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint ."
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"sideEffects": [
+		"**/*.css",
+		"**/*.svelte"
+	],
+	"types": "./dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.4.0",
+		"@eslint/js": "^9.38.0",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@types/node": "^22",
+		"@ujl-framework/adapter-svelte": "workspace:*",
+		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/ui": "workspace:*",
+		"eslint": "^9.38.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.12.4",
+		"globals": "^16.4.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-svelte": "^3.4.0",
+		"publint": "^0.3.14",
+		"svelte": "^5.41.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.46.1",
+		"vite": "^7.1.10",
+		"vite-plugin-dts": "^4.3.0"
+	},
+	"keywords": [
+		"svelte"
+	]
+}
