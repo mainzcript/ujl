@@ -8,7 +8,7 @@
 		"apps/*",
 		"services/*"
 	],
-	"packageManager": "pnpm@10.21.0",
+	"packageManager": "pnpm@10.22.0",
 	"scripts": {
 		"build": "pnpm run demo:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
 		"format": "pnpm -r run format",
