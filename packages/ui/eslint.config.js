@@ -13,7 +13,7 @@ import svelteConfig from './svelte.config.js';
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 /**
- * ESLint rule: Enforces .js extensions on relative imports in TypeScript/JavaScript files
+ * ESLint rule: Enforces .js or .ts extensions on relative imports in TypeScript/JavaScript files
  * for ES Modules compatibility (Approach A: Simple & safe)
  *
  * Only checks relative imports (./ or ../), excludes:
@@ -31,7 +31,7 @@ const requireJsExtensionInRelativeImports = {
 		const sc = context.getSourceCode();
 
 		const isRelative = (s) => typeof s === 'string' && (s.startsWith('./') || s.startsWith('../'));
-		const hasJsExt = (s) => /\.(mjs|cjs|js)$/i.test(s);
+		const hasJsExt = (s) => /\.(mjs|cjs|js|ts)$/i.test(s);
 		const isTypeOnly = (node) => node.importKind === 'type' || node.exportKind === 'type';
 		const isResourceLike = (s) =>
 			/[?#]/.test(s) ||
@@ -41,7 +41,7 @@ const requireJsExtensionInRelativeImports = {
 		const isTypesHelper = (s) => s === './$types' || s.endsWith('/$types');
 
 		/**
-		 * Determines if a node should be checked for missing .js extension
+		 * Determines if a node should be checked for missing extension
 		 */
 		function shouldCheck(node, source) {
 			if (!isRelative(source)) return false;
@@ -58,7 +58,7 @@ const requireJsExtensionInRelativeImports = {
 		function fixedLiteral(literalNode, source) {
 			const raw = sc.getText(literalNode); // Preserves ' or "
 			const quote = raw[0];
-			return `${quote}${source}.js${quote}`;
+			return `${quote}${source}.ts${quote}`;
 		}
 
 		/**
@@ -67,7 +67,7 @@ const requireJsExtensionInRelativeImports = {
 		function report(literalNode, source) {
 			context.report({
 				node: literalNode,
-				message: "ESM requires file extensions on relative imports. Add '.js' extension.",
+				message: "ESM requires file extensions on relative imports. Add '.ts' extension.",
 				fix(fixer) {
 					return fixer.replaceText(literalNode, fixedLiteral(literalNode, source));
 				}
