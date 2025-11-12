@@ -301,6 +301,18 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.18.10
+      '@ujl-framework/adapter-svelte':
+        specifier: workspace:*
+        version: link:../adapter-svelte
+      '@ujl-framework/core':
+        specifier: workspace:*
+        version: link:../core
+      '@ujl-framework/examples':
+        specifier: workspace:*
+        version: link:../examples
+      '@ujl-framework/ui':
+        specifier: workspace:*
+        version: link:../ui
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)

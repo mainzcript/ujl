@@ -37,6 +37,10 @@
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
+		"@ujl-framework/adapter-svelte": "workspace:*",
+		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/ui": "workspace:*",
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.38.0",
 		"@playwright/test": "^1.56.1",
