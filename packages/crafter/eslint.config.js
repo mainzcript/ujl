@@ -100,6 +100,12 @@ const requireJsExtensionInRelativeImports = {
 	}
 };
 
+const requireJsExtensionPlugin = {
+	rules: {
+		'require-js-extension': requireJsExtensionInRelativeImports
+	}
+};
+
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
@@ -123,11 +129,7 @@ export default defineConfig(
 	{
 		files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
 		plugins: {
-			'require-js-extension': {
-				rules: {
-					'require-js-extension': requireJsExtensionInRelativeImports
-				}
-			}
+			'require-js-extension': requireJsExtensionPlugin
 		},
 		rules: {
 			'require-js-extension/require-js-extension': 'error'
@@ -136,11 +138,7 @@ export default defineConfig(
 	{
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		plugins: {
-			'require-js-extension': {
-				rules: {
-					'require-js-extension': requireJsExtensionInRelativeImports
-				}
-			}
+			'require-js-extension': requireJsExtensionPlugin
 		},
 		rules: {
 			'require-js-extension/require-js-extension': 'error'
