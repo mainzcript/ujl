@@ -123,14 +123,55 @@
 		CarouselNext,
 		CarouselDots,
 		Image,
-		UJLTheme
+		UJLTheme,
+		Select,
+		SelectTrigger,
+		SelectContent,
+		SelectItem,
+		SelectLabel,
+		SelectGroup,
+		SelectSeparator,
+		Slider,
+		Input,
+		Textarea,
+		ColorPicker,
+		InputGroup,
+		InputGroupAddon,
+		InputGroupButton,
+		InputGroupInput,
+		InputGroupText,
+		InputGroupTextarea
 	} from '$lib/index.js';
 	import { flavors } from '@ujl-framework/core';
 	import { toast } from 'svelte-sonner';
+	import SearchIcon from '@lucide/svelte/icons/search';
+	import MailIcon from '@lucide/svelte/icons/mail';
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
+	import PlusIcon from '@lucide/svelte/icons/plus';
+	import InfoIcon from '@lucide/svelte/icons/info';
 
 	// Theme for testing UJLTheme
 	const themeDocument = defaultTheme as unknown as UJLTDocument;
 	const themeTokens = themeDocument.ujlt.tokens;
+
+	// Form component state
+	const selectOptions = [
+		{ value: 'option1', label: 'Option 1' },
+		{ value: 'option2', label: 'Option 2' },
+		{ value: 'option3', label: 'Option 3' },
+		{ value: 'option4', label: 'Option 4' },
+		{ value: 'option5', label: 'Option 5' }
+	];
+	let selectValue = $state<string>('');
+	const selectTriggerContent = $derived(
+		selectOptions.find((opt) => opt.value === selectValue)?.label ?? 'Select an option'
+	);
+	let sliderSingleValue = $state(50);
+	let sliderRangeValue = $state<number[]>([25, 75]);
+	let inputValue = $state<string>('');
+	let textareaValue = $state<string>('');
+	let colorValue = $state('#ff0000');
 </script>
 
 <UJLTheme tokens={themeTokens}>
@@ -209,6 +250,200 @@
 											{#each flavors as btn_flavor (btn_flavor)}
 												<Button flavor={btn_flavor}>{btn_flavor}</Button>
 											{/each}
+										</div>
+									</CardContent>
+								</Card>
+							</GridItem>
+							<GridItem>
+								<Card>
+									<CardHeader>
+										<CardTitle>Form Components</CardTitle>
+										<CardDescription>Input, Select and Slider components</CardDescription>
+									</CardHeader>
+									<CardContent class="space-y-6">
+										<!-- Input Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Input:</Text>
+											<div class="space-y-2">
+												<Input bind:value={inputValue} placeholder="Enter something..." />
+												{#if inputValue}
+													<Text size="sm" intensity="muted">Entered value: {inputValue}</Text>
+												{/if}
+												<Input type="email" placeholder="Email address" />
+												<Input type="password" placeholder="Password" />
+												<Input type="number" placeholder="Number" />
+											</div>
+										</div>
+
+										<!-- Select Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Select:</Text>
+											<div class="space-y-2">
+												<Select type="single" bind:value={selectValue}>
+													<SelectTrigger class="w-[180px]">
+														{selectTriggerContent}
+													</SelectTrigger>
+													<SelectContent>
+														<SelectGroup>
+															<SelectLabel>Options</SelectLabel>
+															{#each selectOptions.slice(0, 3) as option (option.value)}
+																<SelectItem value={option.value} label={option.label}>
+																	{option.label}
+																</SelectItem>
+															{/each}
+														</SelectGroup>
+														<SelectSeparator />
+														<SelectGroup>
+															<SelectLabel>More options</SelectLabel>
+															{#each selectOptions.slice(3) as option (option.value)}
+																<SelectItem value={option.value} label={option.label}>
+																	{option.label}
+																</SelectItem>
+															{/each}
+														</SelectGroup>
+													</SelectContent>
+												</Select>
+												{#if selectValue}
+													<Text size="sm" intensity="muted">Selected value: {selectValue}</Text>
+												{/if}
+											</div>
+										</div>
+
+										<!-- Slider Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Slider:</Text>
+											<div class="space-y-4">
+												<div class="space-y-2">
+													<Slider
+														type="single"
+														bind:value={sliderSingleValue}
+														max={100}
+														step={1}
+														class="w-full"
+													/>
+													<Text size="sm" intensity="muted">Value: {sliderSingleValue}</Text>
+												</div>
+												<div class="space-y-2">
+													<Slider
+														type="multiple"
+														bind:value={sliderRangeValue}
+														max={100}
+														step={1}
+														class="w-full"
+													/>
+													<Text size="sm" intensity="muted"
+														>Range: {sliderRangeValue[0]} - {sliderRangeValue[1]}</Text
+													>
+												</div>
+											</div>
+										</div>
+
+										<!-- Textarea Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Textarea:</Text>
+											<div class="space-y-2">
+												<Textarea bind:value={textareaValue} placeholder="Enter your message..." />
+												{#if textareaValue}
+													<Text size="sm" intensity="muted">Entered value: {textareaValue}</Text>
+												{/if}
+											</div>
+										</div>
+
+										<!-- Color Picker Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Color Picker:</Text>
+											<div class="space-y-2">
+												<ColorPicker bind:value={colorValue} />
+												<Text size="sm" intensity="muted">Selected color: {colorValue}</Text>
+											</div>
+										</div>
+
+										<!-- Input Group Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Input Group:</Text>
+											<div class="space-y-4">
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">With icon</Text>
+													<InputGroup>
+														<InputGroupInput placeholder="Search..." />
+														<InputGroupAddon align="inline-end">
+															<SearchIcon />
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">With icons</Text>
+													<InputGroup>
+														<InputGroupInput type="email" placeholder="Enter your email" />
+														<InputGroupAddon>
+															<MailIcon />
+														</InputGroupAddon>
+														<InputGroupAddon align="inline-end">
+															<CheckIcon />
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">With text prefix and suffix</Text>
+													<InputGroup>
+														<InputGroupAddon>
+															<InputGroupText>$</InputGroupText>
+														</InputGroupAddon>
+														<InputGroupInput placeholder="0.00" />
+														<InputGroupAddon align="inline-end">
+															<InputGroupText>USD</InputGroupText>
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">URL input</Text>
+													<InputGroup>
+														<InputGroupAddon>
+															<InputGroupText>https://</InputGroupText>
+														</InputGroupAddon>
+														<InputGroupInput placeholder="example.com" class="!pl-0.5" />
+														<InputGroupAddon align="inline-end">
+															<InputGroupText>.com</InputGroupText>
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">With button</Text>
+													<InputGroup>
+														<InputGroupInput placeholder="Search..." />
+														<InputGroupAddon align="inline-end">
+															<InputGroupButton>Search</InputGroupButton>
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">With icon button</Text>
+													<InputGroup>
+														<InputGroupInput placeholder="Enter URL..." />
+														<InputGroupAddon align="inline-end">
+															<InputGroupButton size="icon-xs" variant="ghost">
+																<InfoIcon />
+															</InputGroupButton>
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+												<div class="space-y-2">
+													<Text size="xs" intensity="muted">Textarea with buttons</Text>
+													<InputGroup>
+														<InputGroupTextarea placeholder="Ask, Search or Chat..." />
+														<InputGroupAddon align="block-end">
+															<InputGroupButton variant="outline" size="icon-xs">
+																<PlusIcon />
+															</InputGroupButton>
+															<InputGroupText class="ml-auto">52% used</InputGroupText>
+															<InputGroupButton variant="default" size="icon-xs">
+																<ArrowUpIcon class="text-background" />
+																<span class="sr-only">Send</span>
+															</InputGroupButton>
+														</InputGroupAddon>
+													</InputGroup>
+												</div>
+											</div>
 										</div>
 									</CardContent>
 								</Card>
