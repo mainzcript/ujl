@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { UJLTTokenSet, UJLTFlavor } from '@ujl-framework/core';
-	import { flavors } from '@ujl-framework/core';
+	import type { UJLTTokenSet, UJLTFlavor } from '@ujl-framework/types';
+	import { flavors } from '@ujl-framework/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { formatOklch, uuid } from '$lib/tools/index.js';
 	import { setUjlThemeContext } from './context.js';

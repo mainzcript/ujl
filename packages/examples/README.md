@@ -38,4 +38,4 @@ When adding new example files:
 1. Place `.ujlc.json` files in `src/documents/`
 2. Place `.ujlt.json` files in `src/themes/`
 3. Import and export them in `src/index.ts`
-4. Ensure they conform to the type definitions in `@ujl-framework/core`
+4. Ensure they conform to the type definitions in `@ujl-framework/types`

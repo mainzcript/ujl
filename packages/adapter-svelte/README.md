@@ -7,7 +7,7 @@ This package provides a Svelte adapter for the UJL Framework, converting UJL AST
 ## Installation
 
 ```bash
-pnpm add @ujl-framework/adapter-svelte svelte @ujl-framework/core @ujl-framework/ui
+pnpm add @ujl-framework/adapter-svelte svelte @ujl-framework/core @ujl-framework/ui @ujl-framework/types
 ```
 
 > **Note**: Styles are **not** automatically imported. You must explicitly import `@ujl-framework/adapter-svelte/styles` in your application. In SvelteKit, this is typically done in your root `+layout.svelte` file.

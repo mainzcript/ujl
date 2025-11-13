@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractCallToActionModuleNode } from '@ujl-framework/core';
+	import type { UJLAbstractCallToActionModuleNode } from '@ujl-framework/types';
 	import { Heading, Text, Card, CardContent, Button } from '@ujl-framework/ui';
 
 	interface Props {

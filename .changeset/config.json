@@ -13,7 +13,8 @@
 			"@ujl-framework/examples",
 			"@ujl-framework/demo",
 			"@ujl-framework/docs",
-			"@ujl-framework/media"
+			"@ujl-framework/media",
+			"@ujl-framework/types"
 		]
 	],
 	"access": "restricted",

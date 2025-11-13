@@ -254,10 +254,6 @@ src/
 │   ├── base.ts      # ModuleBase abstract class
 │   ├── concretes/   # Built-in module implementations
 │   └── registry.ts  # ModuleRegistry class
-├── types/           # Type definitions
-│   ├── ast.ts       # AST node types
-│   ├── ujl-content.ts # UJL content types
-│   └── ujl-theme.ts # UJL theme types
 ├── composer.ts      # Composer class
 └── index.ts         # Main exports
 ```

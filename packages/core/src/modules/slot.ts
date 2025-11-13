@@ -1,4 +1,4 @@
-import type { UJLCSlotObject } from "../types/index.js";
+import type { UJLCSlotObject } from "@ujl-framework/types";
 
 /**
  * Configuration options for a slot

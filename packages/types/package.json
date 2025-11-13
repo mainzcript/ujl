@@ -1,26 +1,32 @@
 {
-	"name": "@ujl-framework/core",
+	"name": "@ujl-framework/types",
 	"version": "0.0.1",
-	"description": "UJL Core - The Heart of the UJL Framework",
+	"description": "UJL Types",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"bin": {
+		"ujl-validate": "./dist/validate.js"
+	},
+	"files": [
+		"dist",
+		"src"
+	],
 	"scripts": {
 		"build": "pnpm run clean && tsc",
+		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\"",
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"test": "echo 'No test script needed'",
-		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\""
+		"validate": "node ./dist/validate.js",
+		"prepare": "pnpm run build"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.38.0",
-		"@ujl-framework/examples": "workspace:*",
-		"@ujl-framework/types": "workspace:*",
 		"@types/node": "^24.9.1",
 		"eslint": "^9.38.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -28,7 +34,9 @@
 		"prettier": "^3.6.2",
 		"prettier-plugin-organize-imports": "^3.2.4",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.46.2",
-		"vitest": "3.2.3"
+		"typescript-eslint": "^8.46.2"
+	},
+	"dependencies": {
+		"zod": "^4.1.12"
 	}
 }

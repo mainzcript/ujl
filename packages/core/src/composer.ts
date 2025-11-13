@@ -1,6 +1,6 @@
+import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-framework/types";
 import { createDefaultRegistry } from "./modules/default-registry.js";
 import { ModuleRegistry, type AnyModule } from "./modules/index.js";
-import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "./types";
 
 /**
  * Composer class for converting UJL documents to Abstract Syntax Trees
