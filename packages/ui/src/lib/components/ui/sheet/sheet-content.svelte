@@ -43,6 +43,7 @@
 
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
+	const isDark = $derived(themeContext ? themeContext.isDark : false);
 </script>
 
 <SheetPrimitive.Portal {...portalProps}>
@@ -51,7 +52,7 @@
 		bind:ref
 		data-slot="sheet-content"
 		data-ujl-theme={themeId}
-		class={cn(sheetVariants({ side }), className)}
+		class={cn(isDark && 'dark', sheetVariants({ side }), className)}
 		{...restProps}
 	>
 		{@render children?.()}

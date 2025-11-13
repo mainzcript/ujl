@@ -32,6 +32,9 @@ export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 	const customElement = document.createElement('ujl-content') as UJLContentElement;
 	customElement.node = node;
 	customElement.tokenSet = tokenSet;
+	if (options.mode !== undefined) {
+		customElement.mode = options.mode;
+	}
 
 	// Mount Custom Element to target
 	targetElement.appendChild(customElement);

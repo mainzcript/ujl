@@ -115,7 +115,6 @@
 		Badge,
 		Progress,
 		Skeleton,
-		Toaster,
 		Avatar,
 		AvatarImage,
 		AvatarFallback,
@@ -1207,6 +1206,3 @@
 		</section>
 	{/each}
 </UJLTheme>
-
-<!-- Toaster for toast notifications -->
-<Toaster />

@@ -488,6 +488,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      mode-watcher:
+        specifier: ^1.1.0
+        version: 1.1.0(svelte@5.39.13)
       paneforge:
         specifier: ^1.0.2
         version: 1.0.2(svelte@5.39.13)
@@ -576,9 +579,6 @@ importers:
       globals:
         specifier: ^16.4.0
         version: 16.4.0
-      mode-watcher:
-        specifier: ^1.1.0
-        version: 1.1.0(svelte@5.39.13)
       prettier:
         specifier: ^3.6.2
         version: 3.6.2

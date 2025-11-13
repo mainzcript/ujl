@@ -7,10 +7,12 @@
 
 	let {
 		node,
-		tokenSet
+		tokenSet,
+		mode
 	}: {
 		node: UJLAbstractNode;
 		tokenSet?: UJLTTokenSet;
+		mode?: 'light' | 'dark' | 'system';
 	} = $props();
 
 	function updateStyle(element: HTMLStyleElement, css: string) {
@@ -25,5 +27,5 @@
 
 <div>
 	<style use:updateStyle={bundledStyles} data-ujl-role="styles-bundle"></style>
-	<AdapterRoot {node} {tokenSet} />
+	<AdapterRoot {node} {tokenSet} {mode} />
 </div>
