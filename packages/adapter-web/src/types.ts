@@ -1,4 +1,4 @@
-import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
+import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 
 /**
  * Options for the webAdapter function.

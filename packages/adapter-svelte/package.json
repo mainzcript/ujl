@@ -34,6 +34,7 @@
 	},
 	"dependencies": {
 		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/types": "workspace:*",
 		"@ujl-framework/ui": "workspace:*",
 		"svelte-sonner": "^1.0.5"
 	},
@@ -53,6 +54,7 @@
 		"@tailwindcss/vite": "^4.1.13",
 		"@types/node": "^22",
 		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*",
 		"eslint": "^9.36.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",

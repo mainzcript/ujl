@@ -3,11 +3,6 @@ export * from "./fields/index.js";
 export * from "./modules/index.js";
 
 /**
- * Re-export all types
- */
-export * from "./types/index.js";
-
-/**
  * Re-export composer for easy access
  */
 export { Composer } from "./composer.js";

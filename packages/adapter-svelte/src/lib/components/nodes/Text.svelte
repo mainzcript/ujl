@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractTextNode } from '@ujl-framework/core';
+	import type { UJLAbstractTextNode } from '@ujl-framework/types';
 	import { Text } from '@ujl-framework/ui';
 
 	interface Props {

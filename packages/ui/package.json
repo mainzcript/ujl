@@ -41,6 +41,7 @@
 	"dependencies": {
 		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*",
 		"@lucide/svelte": "^0.544.0",
 		"bits-ui": "^2.11.4",
 		"clsx": "^2.1.1",

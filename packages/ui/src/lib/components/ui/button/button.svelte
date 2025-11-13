@@ -2,7 +2,7 @@
 	import type { WithElementRef } from 'bits-ui';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
-	import type { UJLTFlavor } from '@ujl-framework/core';
+	import type { UJLTFlavor } from '@ujl-framework/types';
 
 	export const buttonVariants = tv({
 		base: 'focus-visible:ring-ring focus-visible:scale-[.98] duration-200 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none opacity-100 disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[.95] touch-manipulation transition-all',

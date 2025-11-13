@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/core';
+	import type { UJLAbstractNode } from '@ujl-framework/types';
 	import { Container } from '@ujl-framework/ui';
 	import ASTNode from '../ASTNode.svelte';
 

@@ -32,6 +32,7 @@
 		"@ujl-framework/adapter-svelte": "workspace:*",
 		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*",
 		"@ujl-framework/ui": "workspace:*",
 		"eslint": "^9.38.0",
 		"eslint-config-prettier": "^10.1.8",

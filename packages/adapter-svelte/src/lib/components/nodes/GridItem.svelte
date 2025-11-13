@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractGridItemNode } from '@ujl-framework/core';
+	import type { UJLAbstractGridItemNode } from '@ujl-framework/types';
 	import { GridItem } from '@ujl-framework/ui';
 	import ASTNode from '../ASTNode.svelte';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { UJLTDocument } from '@ujl-framework/core';
+	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 	import { Composer } from '@ujl-framework/core';
 	import { svelteAdapter } from '$lib/index.js';
 	import type { MountedComponent } from '$lib/index.js';
@@ -8,7 +8,7 @@
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
 	// Use the showcase document from examples package
-	const ujlDocument = showcaseDocument;
+	const ujlDocument = showcaseDocument as unknown as UJLCDocument;
 
 	// Extract token set from theme document
 	const themeDocument = defaultTheme as unknown as UJLTDocument;

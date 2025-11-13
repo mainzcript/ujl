@@ -6,12 +6,14 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"validate": "ujl-validate"
 	},
 	"dependencies": {
 		"@ujl-framework/adapter-web": "workspace:*",
 		"@ujl-framework/core": "workspace:*",
-		"@ujl-framework/examples": "workspace:*"
+		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3",

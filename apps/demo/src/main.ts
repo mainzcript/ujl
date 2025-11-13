@@ -1,6 +1,6 @@
 import { webAdapter } from '@ujl-framework/adapter-web';
 import { Composer } from '@ujl-framework/core';
-import type { UJLTDocument, UJLCDocument } from '@ujl-framework/core';
+import type { UJLTDocument, UJLCDocument } from '@ujl-framework/types';
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
