@@ -30,12 +30,7 @@
 		Group: DropdownMenuGroup,
 		Item: DropdownMenuItem
 	};
-	import {
-		SidebarMenu,
-		SidebarMenuItem,
-		SidebarMenuButton,
-		useSidebar
-	} from '@ujl-framework/ui';
+	import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@ujl-framework/ui';
 	import BadgeCheckIcon from '@lucide/svelte/icons/badge-check';
 	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';

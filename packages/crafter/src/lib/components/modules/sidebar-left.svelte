@@ -14,12 +14,7 @@
 	import NavSecondary from './nav-secondary.svelte';
 	import NavWorkspaces from './nav-workspaces.svelte';
 	import ModeSwitcher from './mode-switcher.svelte';
-	import {
-		Sidebar,
-		SidebarHeader,
-		SidebarContent,
-		SidebarRail
-	} from '@ujl-framework/ui';
+	import { Sidebar, SidebarHeader, SidebarContent, SidebarRail } from '@ujl-framework/ui';
 	import type { ComponentProps } from 'svelte';
 
 	// This is sample data.

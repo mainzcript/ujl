@@ -21,11 +21,7 @@
 		Separator: DropdownMenuSeparator,
 		Shortcut: DropdownMenuShortcut
 	};
-	import {
-		SidebarMenu,
-		SidebarMenuItem,
-		SidebarMenuButton
-	} from '@ujl-framework/ui';
+	import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@ujl-framework/ui';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import PencilRulerIcon from '@lucide/svelte/icons/pencil-ruler';
 	import PaletteIcon from '@lucide/svelte/icons/palette';

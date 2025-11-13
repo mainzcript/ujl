@@ -123,7 +123,15 @@ export default defineConfig(
 		}
 	},
 	{
-		files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+		files: [
+			'**/*.ts',
+			'**/*.tsx',
+			'**/*.js',
+			'**/*.jsx',
+			'**/*.svelte',
+			'**/*.svelte.ts',
+			'**/*.svelte.js'
+		],
 		plugins: {
 			'require-js-extension': {
 				rules: {
@@ -137,16 +145,6 @@ export default defineConfig(
 	},
 	{
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
-		plugins: {
-			'require-js-extension': {
-				rules: {
-					'require-js-extension': requireJsExtensionInRelativeImports
-				}
-			}
-		},
-		rules: {
-			'require-js-extension/require-js-extension': 'error'
-		},
 		languageOptions: {
 			parserOptions: {
 				projectService: true,

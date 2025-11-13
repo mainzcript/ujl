@@ -18,11 +18,7 @@
 		Item: BreadcrumbItem,
 		Page: BreadcrumbPage
 	};
-	import {
-		SidebarProvider,
-		SidebarInset,
-		SidebarTrigger
-	} from '@ujl-framework/ui';
+	import { SidebarProvider, SidebarInset, SidebarTrigger } from '@ujl-framework/ui';
 </script>
 
 <SidebarProvider>
