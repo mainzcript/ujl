@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import type { UJLTDocument } from '@ujl-framework/core';
+	import type { UJLTDocument } from '@ujl-framework/types';
 	import { UJLTheme } from '@ujl-framework/ui';
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 

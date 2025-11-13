@@ -1,5 +1,5 @@
 # GitLab CI/CD Pipeline for UJL Framework
-# Quality checks + Validation + GitLab Pages deployment
+# Quality checks + GitLab Pages deployment
 
 stages:
   - install

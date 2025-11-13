@@ -14,7 +14,7 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:e2e": "playwright test",
-		"test": "pnpm run test:e2e"
+		"test": "echo 'The tests are temporarily disabled in this package. Change this to `pnpm run test:e2e` when first tests are implemented.'"
 	},
 	"files": [
 		"dist",
@@ -53,6 +53,7 @@
 		"@ujl-framework/adapter-svelte": "workspace:*",
 		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*",
 		"@ujl-framework/ui": "workspace:*",
 		"bits-ui": "^2.11.5",
 		"clsx": "^2.1.1",

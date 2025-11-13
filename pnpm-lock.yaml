@@ -81,9 +81,6 @@ importers:
 
   packages/adapter-svelte:
     dependencies:
-      '@ujl-framework/core':
-        specifier: workspace:*
-        version: link:../core
       '@ujl-framework/types':
         specifier: workspace:*
         version: link:../types
@@ -127,6 +124,9 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.18.10
+      '@ujl-framework/core':
+        specifier: workspace:*
+        version: link:../core
       '@ujl-framework/examples':
         specifier: workspace:*
         version: link:../examples
@@ -193,18 +193,9 @@ importers:
       '@ujl-framework/adapter-svelte':
         specifier: workspace:*
         version: link:../adapter-svelte
-      '@ujl-framework/core':
-        specifier: workspace:*
-        version: link:../core
-      '@ujl-framework/examples':
-        specifier: workspace:*
-        version: link:../examples
       '@ujl-framework/types':
         specifier: workspace:*
         version: link:../types
-      '@ujl-framework/ui':
-        specifier: workspace:*
-        version: link:../ui
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)
@@ -334,6 +325,9 @@ importers:
       '@ujl-framework/examples':
         specifier: workspace:*
         version: link:../examples
+      '@ujl-framework/types':
+        specifier: workspace:*
+        version: link:../types
       '@ujl-framework/ui':
         specifier: workspace:*
         version: link:../ui
@@ -485,12 +479,6 @@ importers:
       '@sveltejs/kit':
         specifier: ^2.0.0
         version: 2.46.5(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.39.13)(vite@7.1.10(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.20.3)))(svelte@5.39.13)(vite@7.1.10(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.20.3))
-      '@ujl-framework/core':
-        specifier: workspace:*
-        version: link:../core
-      '@ujl-framework/examples':
-        specifier: workspace:*
-        version: link:../examples
       '@ujl-framework/types':
         specifier: workspace:*
         version: link:../types
@@ -570,6 +558,9 @@ importers:
       '@types/node':
         specifier: ^24.7.0
         version: 24.7.2
+      '@ujl-framework/examples':
+        specifier: workspace:*
+        version: link:../examples
       eslint:
         specifier: ^9.37.0
         version: 9.37.0(jiti@2.6.1)
@@ -13211,7 +13202,7 @@ snapshots:
       eslint: 9.37.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.37.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.37.0(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.37.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.37.0(jiti@2.6.1))
@@ -13249,7 +13240,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.37.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -13264,7 +13255,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.37.0(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.2(eslint@9.37.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1)))(eslint@9.37.0(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
