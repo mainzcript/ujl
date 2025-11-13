@@ -7,16 +7,19 @@
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLSpanElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLUListElement>> = $props();
 </script>
 
-<span
+<ul
 	bind:this={ref}
+	data-slot="sidebar-menu-sub"
+	data-sidebar="menu-sub"
 	class={cn(
-		"text-muted-foreground flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
+		'border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-0.5',
+		'group-data-[collapsible=icon]:hidden',
 		className
 	)}
 	{...restProps}
 >
 	{@render children?.()}
-</span>
+</ul>

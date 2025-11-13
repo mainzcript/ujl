@@ -7,16 +7,15 @@
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLSpanElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 </script>
 
-<span
+<div
 	bind:this={ref}
-	class={cn(
-		"text-muted-foreground flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
-		className
-	)}
+	data-slot="sidebar-group-content"
+	data-sidebar="group-content"
+	class={cn('w-full text-sm', className)}
 	{...restProps}
 >
 	{@render children?.()}
-</span>
+</div>

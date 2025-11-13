@@ -40,7 +40,7 @@
 	role="group"
 	data-slot="input-group-addon"
 	data-align={align}
-	class={cn(inputGroupAddonVariants({ align }), 'bg-input/15', className)}
+	class={cn(inputGroupAddonVariants({ align }), className)}
 	onclick={(e) => {
 		if ((e.target as HTMLElement).closest('button')) {
 			return;

@@ -4,19 +4,18 @@
 
 	let {
 		ref = $bindable(null),
-		class: className,
 		children,
+		class: className,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLSpanElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLLIElement>> = $props();
 </script>
 
-<span
+<li
 	bind:this={ref}
-	class={cn(
-		"text-muted-foreground flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
-		className
-	)}
+	data-slot="sidebar-menu-sub-item"
+	data-sidebar="menu-sub-item"
+	class={cn('group/menu-sub-item relative', className)}
 	{...restProps}
 >
 	{@render children?.()}
-</span>
+</li>
