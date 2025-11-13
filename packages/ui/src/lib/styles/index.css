@@ -376,14 +376,18 @@
 	--color-chart-3: oklch(var(--chart-3));
 	--color-chart-4: oklch(var(--chart-4));
 	--color-chart-5: oklch(var(--chart-5));
-	--color-sidebar: red;
-	--color-sidebar-foreground: red;
-	--color-sidebar-primary: red;
-	--color-sidebar-primary-foreground: red;
-	--color-sidebar-accent: red;
-	--color-sidebar-accent-foreground: red;
-	--color-sidebar-border: red;
-	--color-sidebar-ring: red;
+	--color-sidebar: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);
+	--color-sidebar-foreground: oklch(var(--flavor-foreground));
+	--color-sidebar-primary: oklch(var(--primary));
+	--color-sidebar-primary-foreground: oklch(var(--primary-foreground));
+	--color-sidebar-accent: color-mix(
+		in srgb,
+		oklch(var(--flavor)) 90%,
+		oklch(var(--flavor-foreground)) 10%
+	);
+	--color-sidebar-accent-foreground: oklch(var(--flavor-foreground));
+	--color-sidebar-border: var(--color-border);
+	--color-sidebar-ring: var(--color-ring);
 }
 
 @layer base {

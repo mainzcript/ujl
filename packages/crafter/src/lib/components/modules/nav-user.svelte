@@ -1,11 +1,4 @@
 <script lang="ts">
-	import BadgeCheckIcon from '@lucide/svelte/icons/badge-check';
-	import BellIcon from '@lucide/svelte/icons/bell';
-	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
-	import LogOutIcon from '@lucide/svelte/icons/log-out';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-
 	import {
 		Avatar,
 		AvatarImage,
@@ -18,8 +11,6 @@
 		DropdownMenuGroup,
 		DropdownMenuItem
 	} from '@ujl-framework/ui';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 
 	// Namespace objects to maintain compatibility with existing component usage patterns.
 	// Components from @ujl-framework/ui are exported with full names (e.g., Avatar, AvatarImage)
@@ -39,21 +30,33 @@
 		Group: DropdownMenuGroup,
 		Item: DropdownMenuItem
 	};
+	import {
+		SidebarMenu,
+		SidebarMenuItem,
+		SidebarMenuButton,
+		useSidebar
+	} from '@ujl-framework/ui';
+	import BadgeCheckIcon from '@lucide/svelte/icons/badge-check';
+	import BellIcon from '@lucide/svelte/icons/bell';
+	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
+	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 
 	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 
 	const sidebar = useSidebar();
 </script>
 
-<Sidebar.Menu>
-	<Sidebar.MenuItem>
+<SidebarMenu>
+	<SidebarMenuItem>
 		<DropdownMenuNamespace.Root>
 			<DropdownMenuNamespace.Trigger>
 				{#snippet child({ props })}
-					<Sidebar.MenuButton
+					<SidebarMenuButton
 						{...props}
 						size="lg"
-						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0"
+						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 					>
 						<AvatarNamespace.Root class="size-8 rounded-lg">
 							<AvatarNamespace.Image src={user.avatar} alt={user.name} />
@@ -64,13 +67,13 @@
 							<span class="truncate text-xs">{user.email}</span>
 						</div>
 						<ChevronsUpDownIcon class="ml-auto size-4" />
-					</Sidebar.MenuButton>
+					</SidebarMenuButton>
 				{/snippet}
 			</DropdownMenuNamespace.Trigger>
 			<DropdownMenuNamespace.Content
 				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
 				side={sidebar.isMobile ? 'bottom' : 'right'}
-				align="end"
+				align="start"
 				sideOffset={4}
 			>
 				<DropdownMenuNamespace.Label class="p-0 font-normal">
@@ -114,5 +117,5 @@
 				</DropdownMenuNamespace.Item>
 			</DropdownMenuNamespace.Content>
 		</DropdownMenuNamespace.Root>
-	</Sidebar.MenuItem>
-</Sidebar.Menu>
+	</SidebarMenuItem>
+</SidebarMenu>
