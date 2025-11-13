@@ -1,4 +1,4 @@
-import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
+import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 import type { WebAdapterOptions, MountedElement, UJLContentElement } from './types.js';
 
 /**

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLTDocument } from '@ujl-framework/core';
+	import type { UJLTDocument } from '@ujl-framework/types';
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 	import {
 		Card,
@@ -147,7 +147,7 @@
 		Switch,
 		Label
 	} from '$lib/index.js';
-	import { flavors } from '@ujl-framework/core';
+	import { flavors } from '@ujl-framework/types';
 	import { toast } from 'svelte-sonner';
 	import SearchIcon from '@lucide/svelte/icons/search';
 	import MailIcon from '@lucide/svelte/icons/mail';

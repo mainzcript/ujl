@@ -1,4 +1,4 @@
-import type { UJLCFieldObject } from "../../types/index.js";
+import type { UJLCFieldObject } from "@ujl-framework/types";
 import { BaseFieldConfig, FieldBase } from "../base.js";
 
 /**

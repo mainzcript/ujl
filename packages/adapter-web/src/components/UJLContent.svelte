@@ -1,7 +1,7 @@
 <svelte:options customElement={{ tag: 'ujl-content' }} />
 
 <script lang="ts">
-	import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
+	import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
 	import bundledStyles from '../styles/index.css?inline';
 

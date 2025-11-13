@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractCardNode } from '@ujl-framework/core';
+	import type { UJLAbstractCardNode } from '@ujl-framework/types';
 	import { Card, CardTitle, CardDescription, CardContent, CardHeader } from '@ujl-framework/ui';
 	import ASTNode from '../ASTNode.svelte';
 

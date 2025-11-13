@@ -14,17 +14,20 @@
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
 		"check": "pnpm -r run check",
+		"test": "pnpm -r run test",
+		"examples:test": "pnpm --filter @ujl-framework/examples validate",
 		"clean": "pnpm -r run clean && rimraf node_modules",
-		"core:build": "pnpm --filter @ujl-framework/core build",
+		"core:build": "pnpm types:build && pnpm --filter @ujl-framework/core build",
 		"ui:build": "pnpm run core:build && pnpm --filter @ujl-framework/ui build",
 		"adapter-svelte:build": "pnpm run ui:build && pnpm --filter @ujl-framework/adapter-svelte build",
 		"adapter-web:build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/adapter-web build",
 		"demo:build": "pnpm run adapter-web:build && pnpm --filter @ujl-framework/demo build",
 		"docs:build": "pnpm --filter @ujl-framework/docs build",
+		"types:build": "pnpm --filter @ujl-framework/types build",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish",
-		"rtc": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check"
+		"rtc": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check && pnpm run test"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.7",

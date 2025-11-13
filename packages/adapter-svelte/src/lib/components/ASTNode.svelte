@@ -5,7 +5,7 @@
  * based on the AST node type.
  -->
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/core';
+	import type { UJLAbstractNode } from '@ujl-framework/types';
 	import {
 		Container,
 		Wrapper,

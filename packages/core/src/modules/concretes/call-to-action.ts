@@ -1,6 +1,6 @@
+import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { TextField } from "../../fields/concretes/text-field.js";
-import type { UJLAbstractNode, UJLCModuleObject } from "../../types/index.js";
 import { ModuleBase } from "../base.js";
 
 /**

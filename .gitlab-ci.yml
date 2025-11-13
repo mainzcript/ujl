@@ -1,9 +1,10 @@
 # GitLab CI/CD Pipeline for UJL Framework
-# Quality checks + GitLab Pages deployment
+# Quality checks + Validation + GitLab Pages deployment
 
 stages:
   - install
   - build
+  - test
   - quality
   - deploy
 
@@ -59,6 +60,33 @@ build_all:
       - '**/node_modules/'
     policy: pull
 
+# Run all tests
+test_all:
+  stage: test
+  image: node:${NODE_VERSION}
+  dependencies:
+    - install_deps
+    - build_all
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm install --offline
+  script:
+    - pnpm test
+  cache:
+    key: dependencies-${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - .pnpm-store/
+      - '**/node_modules/'
+    policy: pull
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - api_failure
+
 # Run quality checks
 quality_check:
   stage: quality
@@ -85,6 +113,7 @@ quality_check:
     when:
       - runner_system_failure
       - stuck_or_timeout_failure
+      - api_failure
 
 # Deploy to GitLab Pages
 pages:

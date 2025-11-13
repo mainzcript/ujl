@@ -9,7 +9,7 @@
  * Styles must be imported separately by the consumer.
  -->
 <script lang="ts">
-	import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/core';
+	import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 	import { UJLTheme } from '@ujl-framework/ui';
 	import ASTNode from './ASTNode.svelte';
 

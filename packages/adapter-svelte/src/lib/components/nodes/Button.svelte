@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UJLAbstractButtonNode } from '@ujl-framework/core';
+	import type { UJLAbstractButtonNode } from '@ujl-framework/types';
 	import { Button } from '@ujl-framework/ui';
 
 	interface Props {
