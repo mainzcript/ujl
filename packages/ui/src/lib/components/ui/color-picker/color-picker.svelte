@@ -6,6 +6,7 @@
 		value?: string;
 		onChange?: (value: string) => void;
 		disabled?: boolean;
+		id?: string;
 	}
 
 	let {
@@ -13,6 +14,7 @@
 		value = $bindable('#000000'),
 		onChange,
 		disabled = false,
+		id,
 		class: className,
 		...restProps
 	}: ColorPickerProps = $props();
@@ -41,6 +43,7 @@
 		bind:value
 		oninput={handleColorChange}
 		class="sr-only pointer-events-none absolute inset-0 opacity-0"
+		{id}
 		{disabled}
 	/>
 	<button
