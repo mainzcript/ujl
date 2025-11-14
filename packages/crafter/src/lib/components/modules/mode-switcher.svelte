@@ -49,12 +49,7 @@
 					</SidebarMenuButton>
 				{/snippet}
 			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				class="w-64 rounded-lg"
-				align="start"
-				side="bottom"
-				sideOffset={4}
-			>
+			<DropdownMenuContent class="w-64 rounded-lg" align="start" side="bottom" sideOffset={4}>
 				<DropdownMenuLabel>Mode</DropdownMenuLabel>
 				{#each modes as mode, index (mode.name)}
 					<DropdownMenuItem onSelect={() => (activeMode = mode)} class="gap-2 p-2">
