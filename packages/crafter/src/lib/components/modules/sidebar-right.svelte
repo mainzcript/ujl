@@ -7,18 +7,19 @@
 		SidebarGroup,
 		SidebarGroupLabel,
 		SidebarGroupContent,
-		SidebarMenu,
-		SidebarMenuItem,
-		SidebarMenuButton,
-		SidebarSeparator,
-		SidebarFooter,
-		Collapsible,
-		CollapsibleTrigger,
-		CollapsibleContent
+		Input,
+		Textarea,
+		Select,
+		SelectTrigger,
+		SelectContent,
+		SelectItem,
+		SelectLabel,
+		SelectGroup,
+		Switch,
+		Label,
+		Slider,
+		Text
 	} from '@ujl-framework/ui';
-	import PlusIcon from '@lucide/svelte/icons/plus';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { ComponentProps } from 'svelte';
 
 	// This is sample data.
@@ -27,22 +28,23 @@
 			name: 'shadcn',
 			email: 'm@example.com',
 			avatar: '/avatars/shadcn.jpg'
-		},
-		groups: [
-			{
-				name: 'My Groups',
-				items: ['Personal', 'Work', 'Family']
-			},
-			{
-				name: 'Favorites',
-				items: ['Important', 'Starred']
-			},
-			{
-				name: 'Other',
-				items: ['Archive', 'Trash', 'Spam']
-			}
-		]
+		}
 	};
+
+	// Form state
+	let titleValue = $state('UJL Framework Example');
+	let descriptionValue = $state('A comprehensive example showcasing UJL framework capabilities');
+	let selectValue = $state<string | undefined>(undefined);
+	let switchValue = $state(false);
+	let sliderValue = $state(50);
+
+	const selectOptions = [
+		{ value: 'container', label: 'Container' },
+		{ value: 'text', label: 'Text' },
+		{ value: 'grid', label: 'Grid' },
+		{ value: 'card', label: 'Card' },
+		{ value: 'button', label: 'Button' }
+	];
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
 </script>
@@ -56,56 +58,87 @@
 	<SidebarHeader class="h-16 border-b border-sidebar-border">
 		<NavUser user={data.user} />
 	</SidebarHeader>
-	<SidebarContent>
-		{#each data.groups as group, index (group.name)}
-			<SidebarGroup class="py-0">
-				<Collapsible open={index === 0} class="group/collapsible">
-					<SidebarGroupLabel
-						class="group/label w-full text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-					>
-						{#snippet child({ props })}
-							<CollapsibleTrigger {...props}>
-								{group.name}
-								<ChevronRightIcon
-									class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
-								/>
-							</CollapsibleTrigger>
-						{/snippet}
-					</SidebarGroupLabel>
-					<CollapsibleContent>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{#each group.items as item, itemIndex (item)}
-									<SidebarMenuItem>
-										<SidebarMenuButton>
-											<div
-												data-active={itemIndex < 2}
-												class="group/group-item flex aspect-square size-4 shrink-0 items-center justify-center rounded-xs border border-sidebar-border text-sidebar-primary-foreground data-[active=true]:border-sidebar-primary data-[active=true]:bg-sidebar-primary"
-											>
-												<CheckIcon
-													class="hidden size-3 group-data-[active=true]/group-item:block"
-												/>
-											</div>
-											{item}
-										</SidebarMenuButton>
-									</SidebarMenuItem>
+	<SidebarContent class="overflow-y-auto">
+		<SidebarGroup>
+			<SidebarGroupLabel>Properties</SidebarGroupLabel>
+			<SidebarGroupContent class="space-y-4 p-4">
+				<!-- Title Input -->
+				<div class="space-y-2">
+					<Label for="title" class="text-xs">Title</Label>
+					<Input id="title" bind:value={titleValue} placeholder="Enter title..." />
+				</div>
+
+				<!-- Description Textarea -->
+				<div class="space-y-2">
+					<Label for="description" class="text-xs">Description</Label>
+					<Textarea
+						id="description"
+						bind:value={descriptionValue}
+						placeholder="Enter description..."
+						rows={3}
+					/>
+				</div>
+
+				<!-- Type Select -->
+				<div class="space-y-2">
+					<Label for="type" class="text-xs">Type</Label>
+					<Select type="single" bind:value={selectValue}>
+						<SelectTrigger id="type" class="w-full">
+							{selectValue || 'Select type...'}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Module Types</SelectLabel>
+								{#each selectOptions as option (option.value)}
+									<SelectItem value={option.value} label={option.label}>
+										{option.label}
+									</SelectItem>
 								{/each}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</CollapsibleContent>
-				</Collapsible>
-			</SidebarGroup>
-			<SidebarSeparator class="mx-0" />
-		{/each}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
+
+				<!-- Switch -->
+				<div class="space-y-2">
+					<div class="flex items-center justify-between">
+						<Label for="enabled" class="text-xs">Enabled</Label>
+						<Switch id="enabled" bind:checked={switchValue} />
+					</div>
+				</div>
+
+				<!-- Slider -->
+				<div class="space-y-2">
+					<div class="flex items-center justify-between">
+						<Label for="opacity" class="text-xs">Opacity</Label>
+						<Text size="xs" intensity="muted">{sliderValue}%</Text>
+					</div>
+					<Slider
+						id="opacity"
+						type="single"
+						bind:value={sliderValue}
+						max={100}
+						step={1}
+						class="w-full"
+					/>
+				</div>
+
+				<!-- Additional Input Fields -->
+				<div class="space-y-2">
+					<Label for="url" class="text-xs">URL</Label>
+					<Input id="url" type="url" placeholder="https://example.com" />
+				</div>
+
+				<div class="space-y-2">
+					<Label for="email" class="text-xs">Email</Label>
+					<Input id="email" type="email" placeholder="email@example.com" />
+				</div>
+
+				<div class="space-y-2">
+					<Label for="number" class="text-xs">Number</Label>
+					<Input id="number" type="number" placeholder="0" />
+				</div>
+			</SidebarGroupContent>
+		</SidebarGroup>
 	</SidebarContent>
-	<SidebarFooter>
-		<SidebarMenu>
-			<SidebarMenuItem>
-				<SidebarMenuButton>
-					<PlusIcon />
-					<span>New Item</span>
-				</SidebarMenuButton>
-			</SidebarMenuItem>
-		</SidebarMenu>
-	</SidebarFooter>
 </Sidebar>
