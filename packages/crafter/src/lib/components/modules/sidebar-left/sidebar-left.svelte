@@ -12,6 +12,12 @@
 	import { Sidebar, SidebarContent, SidebarRail } from '@ujl-framework/ui';
 	import type { Component, ComponentProps } from 'svelte';
 
+	// Import des UJLC Dokuments (oder als Prop übergeben)
+	import showcaseDocumentJson from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
+	import type { UJLCDocument } from '@ujl-framework/types';
+
+	const showcaseDocument = showcaseDocumentJson as unknown as UJLCDocument;
+
 	type Mode = {
 		name: string;
 		icon: Component;
@@ -31,7 +37,6 @@
 		}
 	];
 
-	// This is sample data.
 	const data = {
 		navMain: [
 			{
@@ -51,49 +56,6 @@
 				url: '#',
 				icon: MessageCircleQuestionIcon
 			}
-		],
-		nodes: [
-			{
-				name: 'UJL Framework Example',
-				pages: [
-					{
-						name: 'Main Container',
-						pages: [
-							{
-								name: 'Hero Text'
-							},
-							{
-								name: 'Features Grid',
-								pages: [
-									{
-										name: 'Type-Safe Fields'
-									},
-									{
-										name: 'Modular Architecture'
-									},
-									{
-										name: 'Flexible Rendering'
-									}
-								]
-							},
-							{
-								name: 'Description Text'
-							},
-							{
-								name: 'Try UJL Framework Button'
-							},
-							{
-								name: 'Nested Container',
-								pages: [
-									{
-										name: 'Call-to-Action'
-									}
-								]
-							}
-						]
-					}
-				]
-			}
 		]
 	};
 
@@ -110,7 +72,7 @@
 	<Header {activeMode} onModeChange={handleModeChange} navMainItems={data.navMain} />
 	<SidebarContent>
 		{#if activeMode.fileType === 'ujlc'}
-			<Editor nodes={data.nodes} />
+			<Editor ujlcData={showcaseDocument.ujlc.root} />
 		{:else}
 			<Designer />
 		{/if}

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import NavTreeMock from './nav-tree-mock.svelte';
+	import type { UJLCModuleObject } from '@ujl-framework/types';
+	import NavTree from './nav-tree.svelte';
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let { nodes }: { nodes: any[] } = $props();
+	let { ujlcData }: { ujlcData: UJLCModuleObject[] } = $props();
 </script>
 
 <div
@@ -10,5 +10,5 @@
 	data-sidebar="group"
 	class="relative flex w-full min-w-0 flex-col p-2"
 >
-	<NavTreeMock {nodes} />
+	<NavTree nodes={ujlcData} />
 </div>

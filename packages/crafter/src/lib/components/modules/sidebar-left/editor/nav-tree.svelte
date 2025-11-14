@@ -16,20 +16,59 @@
 		SidebarMenuSubButton
 	} from '@ujl-framework/ui';
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let { nodes }: { nodes: any[] } = $props();
+	import type { UJLCModuleObject } from '@ujl-framework/types';
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function hasChildren(node: any): boolean {
-		return node.pages !== undefined && node.pages.length > 0;
+	let { nodes }: { nodes: UJLCModuleObject[] } = $props();
+
+	/**
+	 * Erzeugt einen lesbaren Anzeigenamen aus einem UJLC-Node
+	 */
+	function getDisplayName(node: UJLCModuleObject): string {
+		// Priorität 1: Explizite Titel/Labels
+		if (node.fields.title) return node.fields.title as string;
+		if (node.fields.label) return node.fields.label as string;
+		if (node.fields.headline) return node.fields.headline as string;
+
+		// Priorität 2: Content-Felder (gekürzt)
+		if (node.fields.content && typeof node.fields.content === 'string') {
+			const content = node.fields.content.trim();
+			return content.length > 40 ? content.substring(0, 40) + '...' : content;
+		}
+
+		// Priorität 3: Type als Fallback (mit schöner Formatierung)
+		return formatTypeName(node.type);
+	}
+
+	/**
+	 * Formatiert den Type-Namen für bessere Lesbarkeit
+	 */
+	function formatTypeName(type: string): string {
+		return type
+			.split('-')
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
+	}
+
+	/**
+	 * Gibt alle Kinder eines Nodes zurück (aus allen Slots)
+	 */
+	function getChildren(node: UJLCModuleObject): UJLCModuleObject[] {
+		if (!node.slots) return [];
+
+		// Alle Slots durchgehen und Kinder sammeln
+		return Object.values(node.slots).flat();
+	}
+
+	/**
+	 * Prüft ob ein Node Kinder hat
+	 */
+	function hasChildren(node: UJLCModuleObject): boolean {
+		if (!node.slots) return false;
+		return Object.values(node.slots).some((slot) => slot.length > 0);
 	}
 </script>
 
-{#snippet renderNode(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	node: any,
-	level: number = 0
-)}
+{#snippet renderNode(node: UJLCModuleObject, level: number = 0)}
 	{#if level === 0}
 		{#if hasChildren(node)}
 			<Collapsible>
@@ -42,7 +81,7 @@
 										<ChevronRightIcon
 											class="size-4 transition-transform group-data-[state=open]:rotate-90"
 										/>
-										<span>{node.name}</span>
+										<span>{getDisplayName(node)}</span>
 									</button>
 								{/snippet}
 							</SidebarMenuButton>
@@ -50,9 +89,9 @@
 					</CollapsibleTrigger>
 					<CollapsibleContent>
 						<SidebarMenuSub>
-							{#each node.pages as page (page.name)}
+							{#each getChildren(node) as childNode (childNode.meta.id)}
 								<SidebarMenuSubItem>
-									{@render renderNode(page, level + 1)}
+									{@render renderNode(childNode, level + 1)}
 								</SidebarMenuSubItem>
 							{/each}
 						</SidebarMenuSub>
@@ -64,7 +103,7 @@
 				<SidebarMenuButton>
 					{#snippet child({ props })}
 						<button type="button" {...props}>
-							<span>{node.name}</span>
+							<span>{getDisplayName(node)}</span>
 						</button>
 					{/snippet}
 				</SidebarMenuButton>
@@ -78,15 +117,15 @@
 						<ChevronRightIcon
 							class="size-4 transition-transform group-data-[state=open]:rotate-90"
 						/>
-						<span>{node.name}</span>
+						<span>{getDisplayName(node)}</span>
 					</SidebarMenuSubButton>
 				{/snippet}
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<SidebarMenuSub>
-					{#each node.pages as page (page.name)}
+					{#each getChildren(node) as childNode (childNode.meta.id)}
 						<SidebarMenuSubItem>
-							{@render renderNode(page, level + 1)}
+							{@render renderNode(childNode, level + 1)}
 						</SidebarMenuSubItem>
 					{/each}
 				</SidebarMenuSub>
@@ -94,7 +133,7 @@
 		</Collapsible>
 	{:else}
 		<SidebarMenuSubButton>
-			<span>{node.name}</span>
+			<span>{getDisplayName(node)}</span>
 		</SidebarMenuSubButton>
 	{/if}
 {/snippet}
@@ -103,7 +142,7 @@
 	<SidebarGroupLabel>Document</SidebarGroupLabel>
 	<SidebarGroupContent>
 		<SidebarMenu>
-			{#each nodes as node (node.name)}
+			{#each nodes as node (node.meta.id)}
 				{@render renderNode(node)}
 			{/each}
 		</SidebarMenu>
