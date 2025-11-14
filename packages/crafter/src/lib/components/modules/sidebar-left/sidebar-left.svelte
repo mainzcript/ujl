@@ -2,19 +2,40 @@
 	import MessageCircleQuestionIcon from '@lucide/svelte/icons/message-circle-question';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import PencilRulerIcon from '@lucide/svelte/icons/pencil-ruler';
+	import PaletteIcon from '@lucide/svelte/icons/palette';
 
-	import NavMain from './nav-main.svelte';
+	import Header from './header.svelte';
+	import Editor from './editor/editor.svelte';
+	import Designer from './designer/designer.svelte';
 	import NavSecondary from './nav-secondary.svelte';
-	import NavTree from './nav-tree.svelte';
-	import ModeSwitcher from './mode-switcher.svelte';
-	import { Sidebar, SidebarHeader, SidebarContent, SidebarRail } from '@ujl-framework/ui';
-	import type { ComponentProps } from 'svelte';
+	import { Sidebar, SidebarContent, SidebarRail } from '@ujl-framework/ui';
+	import type { Component, ComponentProps } from 'svelte';
+
+	type Mode = {
+		name: string;
+		icon: Component;
+		fileType: string;
+	};
+
+	const modes: Mode[] = [
+		{
+			name: 'Editor',
+			icon: PencilRulerIcon,
+			fileType: 'ujlc'
+		},
+		{
+			name: 'Designer',
+			icon: PaletteIcon,
+			fileType: 'ujlt'
+		}
+	];
 
 	// This is sample data.
 	const data = {
 		navMain: [
 			{
-				title: 'Ask AI',
+				title: 'Example Action',
 				url: '#',
 				icon: SparklesIcon
 			}
@@ -76,16 +97,23 @@
 		]
 	};
 
+	let activeMode = $state(modes[0]);
+
+	function handleModeChange(mode: Mode) {
+		activeMode = mode;
+	}
+
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
 </script>
 
-<Sidebar class="border-r-0" {...restProps}>
-	<SidebarHeader>
-		<ModeSwitcher />
-		<NavMain items={data.navMain} />
-	</SidebarHeader>
+<Sidebar class="border-r-0" bind:ref {...restProps}>
+	<Header {activeMode} onModeChange={handleModeChange} navMainItems={data.navMain} />
 	<SidebarContent>
-		<NavTree nodes={data.nodes} />
+		{#if activeMode.fileType === 'ujlc'}
+			<Editor nodes={data.nodes} />
+		{:else}
+			<Designer />
+		{/if}
 		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</SidebarContent>
 	<SidebarRail />

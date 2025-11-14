@@ -100,7 +100,7 @@
 {/snippet}
 
 <SidebarGroup>
-	<SidebarGroupLabel>Nodes</SidebarGroupLabel>
+	<SidebarGroupLabel>Document</SidebarGroupLabel>
 	<SidebarGroupContent>
 		<SidebarMenu>
 			{#each nodes as node (node.name)}

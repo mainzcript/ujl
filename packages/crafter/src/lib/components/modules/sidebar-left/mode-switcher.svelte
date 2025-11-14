@@ -32,7 +32,13 @@
 		}
 	];
 
-	let activeMode = $state(modes[0]);
+	let {
+		activeMode = $bindable(modes[0]),
+		onModeChange
+	}: {
+		activeMode: Mode;
+		onModeChange?: (mode: Mode) => void;
+	} = $props();
 </script>
 
 <SidebarMenu>
@@ -52,7 +58,13 @@
 			<DropdownMenuContent class="w-64 rounded-lg" align="start" side="bottom" sideOffset={4}>
 				<DropdownMenuLabel>Mode</DropdownMenuLabel>
 				{#each modes as mode, index (mode.name)}
-					<DropdownMenuItem onSelect={() => (activeMode = mode)} class="gap-2 p-2">
+					<DropdownMenuItem
+						onSelect={() => {
+							activeMode = mode;
+							onModeChange?.(mode);
+						}}
+						class="gap-2 p-2"
+					>
 						<div class="flex size-6 items-center justify-center rounded-xs">
 							<mode.icon class="size-4 shrink-0 text-[currentColor]" />
 						</div>
