@@ -153,5 +153,13 @@ export default defineConfig(
 				svelteConfig
 			}
 		}
+	},
+	{
+		// Disable SvelteKit-specific navigation rules for UI library components
+		// These components are generic and should work outside of SvelteKit
+		files: ['src/lib/components/ui/button/button.svelte', 'src/lib/components/ui/link/link.svelte'],
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );
