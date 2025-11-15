@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
-		"@eslint/js": "^9.38.0",
+		"@eslint/js": "^9.39.1",
 		"@ujl-framework/examples": "workspace:*",
 		"@ujl-framework/types": "workspace:*",
 		"@types/node": "^24.9.1",
@@ -28,7 +28,7 @@
 		"prettier": "^3.6.2",
 		"prettier-plugin-organize-imports": "^3.2.4",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.46.2",
+		"typescript-eslint": "^8.46.4",
 		"vitest": "3.2.3"
 	}
 }
