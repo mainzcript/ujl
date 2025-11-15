@@ -39,7 +39,7 @@
 		}
 	},
 	"dependencies": {
-		"@lucide/svelte": "^0.544.0",
+		"@lucide/svelte": "^0.553.0",
 		"@ujl-framework/types": "workspace:*",
 		"bits-ui": "^2.14.3",
 		"clsx": "^2.1.1",
