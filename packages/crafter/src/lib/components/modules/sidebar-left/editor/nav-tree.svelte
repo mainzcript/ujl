@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { UJLCModuleObject } from '@ujl-framework/types';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	import {
@@ -15,10 +16,12 @@
 		SidebarMenuSubItem,
 		SidebarMenuSubButton
 	} from '@ujl-framework/ui';
-
-	import type { UJLCModuleObject } from '@ujl-framework/types';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let { nodes }: { nodes: UJLCModuleObject[] } = $props();
+
+	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	/**
 	 * Erzeugt einen lesbaren Anzeigenamen aus einem UJLC-Node
@@ -66,23 +69,49 @@
 		if (!node.slots) return false;
 		return Object.values(node.slots).some((slot) => slot.length > 0);
 	}
+
+	function handleNodeClick(nodeId: string) {
+		const url = new URL($page.url);
+		url.searchParams.set('selected', nodeId);
+		goto(url, { replaceState: true, noScroll: true });
+		console.log('Node clicked:', selectedNodeId);
+	}
 </script>
 
 {#snippet renderNode(node: UJLCModuleObject, level: number = 0)}
 	{#if level === 0}
 		{#if hasChildren(node)}
-			<Collapsible>
-				<SidebarMenuItem>
+			<SidebarMenuItem>
+				<Collapsible>
 					<CollapsibleTrigger class="group">
 						{#snippet child({ props })}
 							<SidebarMenuButton {...props}>
 								{#snippet child({ props: buttonProps })}
-									<button type="button" {...buttonProps}>
-										<ChevronRightIcon
-											class="size-4 transition-transform group-data-[state=open]:rotate-90"
-										/>
-										<span>{getDisplayName(node)}</span>
-									</button>
+									<div
+										class="flex w-full items-center justify-between gap-1 rounded-md {selectedNodeId ===
+										node.meta.id
+											? 'node-selected'
+											: ''}"
+									>
+										<button
+											type="button"
+											{...buttonProps}
+											class=" {buttonProps.class || ''}  w-auto!"
+										>
+											<ChevronRightIcon
+												class="size-4 transition-transform group-data-[state=open]:rotate-90"
+											/>
+										</button>
+										<button
+											onclick={() => handleNodeClick(node.meta.id)}
+											class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
+										>
+											<span>
+												{node.meta.id}
+												{getDisplayName(node)}
+											</span>
+										</button>
+									</div>
 								{/snippet}
 							</SidebarMenuButton>
 						{/snippet}
@@ -96,14 +125,18 @@
 							{/each}
 						</SidebarMenuSub>
 					</CollapsibleContent>
-				</SidebarMenuItem>
-			</Collapsible>
+				</Collapsible>
+			</SidebarMenuItem>
 		{:else}
-			<SidebarMenuItem>
+			<SidebarMenuItem onclick={() => handleNodeClick(node.meta.id)}>
 				<SidebarMenuButton>
 					{#snippet child({ props })}
-						<button type="button" {...props}>
-							<span>{getDisplayName(node)}</span>
+						<button
+							type="button"
+							{...props}
+							class="{props.class || ''} {selectedNodeId === node.meta.id ? 'selected' : ''}"
+						>
+							<span>UNUSED?{getDisplayName(node)}</span>
 						</button>
 					{/snippet}
 				</SidebarMenuButton>
@@ -111,14 +144,32 @@
 		{/if}
 	{:else if hasChildren(node)}
 		<Collapsible>
-			<CollapsibleTrigger class="group">
+			<CollapsibleTrigger class="group" onclick={() => handleNodeClick(node.meta.id)}>
 				{#snippet child({ props })}
-					<SidebarMenuSubButton {...props}>
-						<ChevronRightIcon
-							class="size-4 transition-transform group-data-[state=open]:rotate-90"
-						/>
-						<span>{getDisplayName(node)}</span>
-					</SidebarMenuSubButton>
+					<SidebarMenuButton {...props}>
+						{#snippet child({ props: buttonProps })}
+							<div
+								class="flex w-full items-center justify-between rounded-md {selectedNodeId ===
+								node.meta.id
+									? 'node-selected'
+									: ''}"
+							>
+								<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
+									<ChevronRightIcon
+										class="size-4 transition-transform group-data-[state=open]:rotate-90"
+									/>
+								</button>
+								<button
+									onclick={() => handleNodeClick(node.meta.id)}
+									class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
+								>
+									<span>
+										GUDE {getDisplayName(node)}
+									</span>
+								</button>
+							</div>
+						{/snippet}
+					</SidebarMenuButton>
 				{/snippet}
 			</CollapsibleTrigger>
 			<CollapsibleContent>
@@ -132,8 +183,22 @@
 			</CollapsibleContent>
 		</Collapsible>
 	{:else}
-		<SidebarMenuSubButton>
-			<span>{getDisplayName(node)}</span>
+		<SidebarMenuSubButton class="px-0">
+			<div
+				class="flex w-full items-center justify-between rounded-md p-2 {selectedNodeId ===
+				node.meta.id
+					? 'node-selected'
+					: ''}"
+			>
+				<button
+					onclick={() => handleNodeClick(node.meta.id)}
+					class="h-full w-full overflow-hidden text-left text-nowrap text-ellipsis"
+				>
+					<span>
+						tach {getDisplayName(node)}
+					</span>
+				</button>
+			</div>
 		</SidebarMenuSubButton>
 	{/if}
 {/snippet}
@@ -148,3 +213,14 @@
 		</SidebarMenu>
 	</SidebarGroupContent>
 </SidebarGroup>
+
+<style>
+	.node-selected {
+		background-color: color-mix(
+			in srgb,
+			oklch(var(--flavor)) 90%,
+			oklch(var(--flavor-foreground)) 10%
+		);
+		border-left: 2px solid hsl(var(--primary));
+	}
+</style>
