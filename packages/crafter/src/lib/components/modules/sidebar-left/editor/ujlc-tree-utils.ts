@@ -133,6 +133,61 @@ export function insertNodeIntoSlot(
 }
 
 /**
+ * inserts a node at a specific position in a parent's slot (immutable)
+ */
+export function insertNodeAtPosition(
+	nodes: UJLCModuleObject[],
+	parentId: string,
+	slotName: string,
+	nodeToInsert: UJLCModuleObject,
+	position: number
+): UJLCModuleObject[] {
+	return nodes.map((node) => {
+		// if this is the parent node, insert into the specified slot at position
+		if (node.meta.id === parentId) {
+			const newSlots = { ...node.slots };
+
+			if (newSlots[slotName]) {
+				const slotArray = [...newSlots[slotName]];
+				// Insert at specific position
+				slotArray.splice(position, 0, nodeToInsert);
+				newSlots[slotName] = slotArray;
+			} else {
+				// slot does not exist yet, create it
+				newSlots[slotName] = [nodeToInsert];
+			}
+
+			return {
+				...node,
+				slots: newSlots
+			};
+		}
+
+		// search recursively in all slots
+		if (node.slots && Object.keys(node.slots).length > 0) {
+			const newSlots: Record<string, UJLCModuleObject[]> = {};
+
+			for (const [currentSlotName, slotContent] of Object.entries(node.slots)) {
+				newSlots[currentSlotName] = insertNodeAtPosition(
+					slotContent,
+					parentId,
+					slotName,
+					nodeToInsert,
+					position
+				);
+			}
+
+			return {
+				...node,
+				slots: newSlots
+			};
+		}
+
+		return node;
+	});
+}
+
+/**
  * returns the name of the first slot of a node, or null if there are no slots
  */
 export function getFirstSlotName(node: UJLCModuleObject): string | null {

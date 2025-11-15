@@ -9,6 +9,7 @@
 		findParentOfNode,
 		removeNodeFromTree,
 		insertNodeIntoSlot,
+		insertNodeAtPosition,
 		getFirstSlotName,
 		hasSlots
 	} from './ujlc-tree-utils.js';
@@ -112,13 +113,13 @@
 	 */
 	function handleKeyDown(event: KeyboardEvent) {
 		// Check for Ctrl+C or Cmd+C (Mac)
-		// if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
-		// 	// Prevent default browser copy behavior
-		// 	if (canCut) {
-		// 		event.preventDefault();
-		// 		handleCopy();
-		// 	}
-		// }
+		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+			// Prevent default browser copy behavior
+			if (canCut) {
+				event.preventDefault();
+				handleCut();
+			}
+		}
 
 		// Check for Ctrl+V or Cmd+V (Mac)
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
@@ -155,6 +156,137 @@
 			window.removeEventListener('keydown', handleKeyDown);
 		};
 	});
+
+	/**
+	 * Move Handler for Drag & Drop
+	 * Returns true if move was successful, false if rejected
+	 */
+	function handleNodeMove(nodeId: string, targetId: string): boolean {
+		// Find the node and target
+		const node = findNodeById(ujlcData, nodeId);
+		const targetNode = findNodeById(ujlcData, targetId);
+
+		if (!node || !targetNode) {
+			console.warn('Node or target not found');
+			return false;
+		}
+
+		// Check if node is root
+		const parentInfo = findParentOfNode(ujlcData, nodeId);
+		if (!parentInfo || !parentInfo.parent) {
+			console.warn('Cannot move root node');
+			return false;
+		}
+
+		// Check if target can accept children (has slots)
+		if (!hasSlots(targetNode)) {
+			console.warn('Target node has no slots - cannot accept children');
+			return false;
+		}
+
+		// Check if trying to move node into itself or its own descendants
+		if (isDescendant(node, targetId)) {
+			console.warn('Cannot move node into itself or its descendants');
+			return false;
+		}
+
+		// Get first slot of target
+		const slotName = getFirstSlotName(targetNode);
+		if (!slotName) {
+			console.warn('Target node has no valid slot');
+			return false;
+		}
+
+		// Perform the move: remove from old position, insert at new position
+		const removedTree = removeNodeFromTree(ujlcData, nodeId);
+		ujlcData = insertNodeIntoSlot(removedTree, targetId, slotName, node);
+
+		console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', slotName);
+		return true;
+	}
+
+	/**
+	 * Checks if a node is a descendant of the target
+	 */
+	function isDescendant(node: UJLCModuleObject, targetId: string): boolean {
+		if (node.meta.id === targetId) return true;
+
+		if (!node.slots) return false;
+
+		for (const slotContent of Object.values(node.slots)) {
+			for (const child of slotContent) {
+				if (isDescendant(child, targetId)) return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Reorder Handler for Drag & Drop within same parent
+	 * Returns true if reorder was successful, false if rejected
+	 */
+	function handleNodeReorder(
+		nodeId: string,
+		targetId: string,
+		position: 'before' | 'after'
+	): boolean {
+		// Find both nodes
+		const node = findNodeById(ujlcData, nodeId);
+		const targetNode = findNodeById(ujlcData, targetId);
+
+		if (!node || !targetNode) {
+			console.warn('Node or target not found');
+			return false;
+		}
+
+		// Get parent info for both nodes
+		const nodeParentInfo = findParentOfNode(ujlcData, nodeId);
+		const targetParentInfo = findParentOfNode(ujlcData, targetId);
+
+		if (!nodeParentInfo || !nodeParentInfo.parent) {
+			console.warn('Cannot reorder root node');
+			return false;
+		}
+
+		if (!targetParentInfo || !targetParentInfo.parent) {
+			console.warn('Cannot reorder relative to root node');
+			return false;
+		}
+
+		// Check if nodes are siblings (same parent and slot)
+		if (
+			nodeParentInfo.parent.meta.id !== targetParentInfo.parent.meta.id ||
+			nodeParentInfo.slotName !== targetParentInfo.slotName
+		) {
+			console.warn('Nodes must be siblings to reorder');
+			return false;
+		}
+
+		// Calculate new position
+		let newPosition = targetParentInfo.index;
+		if (position === 'after') {
+			newPosition += 1;
+		}
+
+		// Adjust position if moving within same parent and moving down
+		if (nodeParentInfo.index < newPosition) {
+			newPosition -= 1;
+		}
+
+		// Perform the reorder: remove from old position, insert at new position
+		const removedTree = removeNodeFromTree(ujlcData, nodeId);
+		ujlcData = insertNodeAtPosition(
+			removedTree,
+			nodeParentInfo.parent.meta.id,
+			nodeParentInfo.slotName,
+			node,
+			newPosition
+		);
+
+		console.log('Reordered node:', nodeId, position, targetId, 'at position:', newPosition);
+		return true;
+	}
 </script>
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
@@ -166,6 +298,6 @@
 		{canPaste}
 	/>
 	<div class="p-2">
-		<NavTree nodes={ujlcData} />
+		<NavTree nodes={ujlcData} onNodeMove={handleNodeMove} onNodeReorder={handleNodeReorder} />
 	</div>
 </div>
