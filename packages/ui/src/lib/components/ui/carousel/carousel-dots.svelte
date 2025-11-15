@@ -48,7 +48,7 @@
 			>
 				<div
 					data-is-active={isActive}
-					class="bg-foreground/30 data-[is-active=true]:bg-foreground/80 m-0.5 h-2 w-2 rounded-full duration-500"
+					class="m-0.5 h-2 w-2 rounded-full bg-foreground/30 duration-500 data-[is-active=true]:bg-foreground/80"
 				></div>
 				<span class="sr-only">
 					{isActive

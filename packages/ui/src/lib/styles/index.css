@@ -398,9 +398,9 @@
 	.elevation {
 		@apply relative isolate;
 		@apply bg-flavor/80;
-		@apply border-flavor-foreground/10 border-[1px];
-		@apply inset-shadow-xs inset-shadow-flavor-100/15 shadow-flavor-900/10 shadow-lg;
-		@apply backdrop-saturate-125 backdrop-brightness-125;
+		@apply border-[1px] border-flavor-foreground/10;
+		@apply shadow-lg inset-shadow-xs shadow-flavor-900/10 inset-shadow-flavor-100/15;
+		@apply backdrop-brightness-125 backdrop-saturate-125;
 		@apply after:absolute after:inset-0 after:-z-10;
 		@apply after:bg-ambient-500/5;
 	}

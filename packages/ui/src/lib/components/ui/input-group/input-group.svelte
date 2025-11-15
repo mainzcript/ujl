@@ -16,7 +16,7 @@
 	role="group"
 	class={cn(
 		'bg-input/15',
-		'group/input-group border-input shadow-xs relative flex w-full items-center rounded-md border outline-none transition-[color,box-shadow]',
+		'group/input-group relative flex w-full items-center rounded-md border border-input shadow-xs transition-[color,box-shadow] outline-none',
 		'h-9 has-[>textarea]:h-auto',
 
 		// Variants based on alignment.
@@ -26,10 +26,10 @@
 		'has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3',
 
 		// Focus state.
-		'has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]',
+		'has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50',
 
 		// Error state.
-		'has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive',
+		'has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-destructive/20',
 
 		className
 	)}
