@@ -17,9 +17,13 @@ export type OKLab = {
 	b: number;
 };
 
-export type TailwindColor = {
-	name: string; // "sky"
-	shade: number; // 50 .. 950
+/**
+ * A reference color from the Tailwind palette with precomputed color space values
+ * Used as a basis for generating custom color palettes
+ */
+export type ReferenceColor = {
+	name: string; // Color family name, e.g. "sky"
+	shade: number; // Shade value: 50, 100, 200, ..., 950
 	hex: string;
 	oklab: OKLab;
 	oklch: OKLCH;
@@ -32,17 +36,32 @@ export type GeneratedPalette = {
 };
 
 // ============================================
-// PRECOMPUTED TAILWIND COLORS
+// REFERENCE COLOR PALETTE
 // ============================================
 
 const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
+// Shade constants for ambient palette interpolation
+const LIGHT_SHADE = 50;
+const MID_SHADE = 500;
+const DARK_SHADE = 950;
+const SHADE_RANGE_TO_MID = MID_SHADE - LIGHT_SHADE; // 450
+const SHADE_RANGE_FROM_MID = DARK_SHADE - MID_SHADE; // 450
+const LIGHT_DARK_MIX_FACTOR = 0.5; // For 50/50 mix of light and dark
+
+// Blending constants
+const DEFAULT_BLEND_RADIUS = 4; // Default steps for palette blending fade-out
+const DEFAULT_LC_SMOOTH_RADIUS = 3; // Default steps for L/C transition smoothing
+const BASE_BLEND_RADIUS = 3; // Base radius for dynamic blending
+const MAX_EXTRA_BLEND_RADIUS = 4; // Maximum additional steps for dynamic blending
+const DELTA_TO_RADIUS_MULTIPLIER = 10; // Multiplier to convert color delta to radius steps
+
 /**
- * Precomputes all Tailwind colors with OKLab and OKLCH values
+ * Precomputes all reference colors from the Tailwind palette with OKLab and OKLCH values
  * This is done once at module load for performance
  */
-function precomputeTailwindColors(): TailwindColor[] {
-	const colors: TailwindColor[] = [];
+function precomputeReferenceColors(): ReferenceColor[] {
+	const colors: ReferenceColor[] = [];
 
 	for (const [colorName, shades] of Object.entries(tailwindColorPlate)) {
 		for (const [shadeStr, oklch] of Object.entries(shades)) {
@@ -65,7 +84,7 @@ function precomputeTailwindColors(): TailwindColor[] {
 	return colors;
 }
 
-const TAILWIND_COLORS: TailwindColor[] = precomputeTailwindColors();
+const REFERENCE_COLORS: ReferenceColor[] = precomputeReferenceColors();
 
 // ============================================
 // COLOR CONVERSION
@@ -78,27 +97,6 @@ export function hexToOklch(hex: string): OKLCH {
 	const color = new Color(hex);
 	const [l, c, h] = color.to('oklch').coords;
 	return { l, c, h: h ?? 0 };
-}
-
-/**
- * Converts OKLCH to OKLab
- * @internal - May be used in future enhancements
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function oklchToOklab(oklch: OKLCH): OKLab {
-	const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]);
-	const [L, a, b] = color.to('oklab').coords;
-	return { L, a, b };
-}
-
-/**
- * Converts OKLCH to HEX
- * @internal - May be used in future enhancements
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function oklchToHex(oklch: OKLCH): string {
-	const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]);
-	return color.toGamut().to('srgb').toString({ format: 'hex' });
 }
 
 // ============================================
@@ -129,10 +127,10 @@ function hueDistance(a: number, b: number): number {
 // ============================================
 
 /**
- * Finds the closest color in Tailwind palette using OKLab distance
+ * Finds the closest reference color to the input using OKLab distance
  */
-function findClosestColorOKLab(inputHex: string): {
-	color: TailwindColor;
+function findClosestReferenceColor(inputHex: string): {
+	color: ReferenceColor;
 	distance: number;
 } {
 	const inputColor = new Color(inputHex);
@@ -140,11 +138,11 @@ function findClosestColorOKLab(inputHex: string): {
 	const inputOklab: OKLab = { L: inputL, a: inputA, b: inputB };
 
 	// Optional: Pre-filter by similar lightness for performance
-	const candidates = TAILWIND_COLORS.filter((c) => Math.abs(c.oklab.L - inputOklab.L) < 0.25);
+	const candidates = REFERENCE_COLORS.filter((c) => Math.abs(c.oklab.L - inputOklab.L) < 0.25);
 
-	const searchSpace = candidates.length > 0 ? candidates : TAILWIND_COLORS;
+	const searchSpace = candidates.length > 0 ? candidates : REFERENCE_COLORS;
 
-	let closest: TailwindColor | null = null;
+	let closest: ReferenceColor | null = null;
 	let minDistance = Infinity;
 
 	for (const color of searchSpace) {
@@ -156,21 +154,22 @@ function findClosestColorOKLab(inputHex: string): {
 	}
 
 	if (!closest) {
-		throw new Error('No closest color found');
+		throw new Error('No closest reference color found');
 	}
 
 	return { color: closest, distance: minDistance };
 }
 
 /**
- * Finds the second color for interpolation at the same shade level
+ * Finds a second reference color at the same shade level for interpolation
+ * Returns the color that forms a hue pair with the first color around the input hue
  */
-function findSecondColorAtSameStep(
+function findSecondColorAtSameShade(
 	inputOklch: OKLCH,
-	firstColor: TailwindColor
-): TailwindColor | null {
-	// Get all colors at the same shade
-	const candidates = TAILWIND_COLORS.filter((c) => c.shade === firstColor.shade);
+	firstColor: ReferenceColor
+): ReferenceColor | null {
+	// Get all reference colors at the same shade
+	const candidates = REFERENCE_COLORS.filter((c) => c.shade === firstColor.shade);
 
 	if (candidates.length < 2) {
 		return null;
@@ -180,7 +179,7 @@ function findSecondColorAtSameStep(
 	const sorted = candidates.slice().sort((a, b) => a.oklch.h - b.oklch.h);
 
 	// Find the neighbor pair where inputHue falls between them
-	let bestPair: { a: TailwindColor; b: TailwindColor } | null = null;
+	let bestPair: { a: ReferenceColor; b: ReferenceColor } | null = null;
 	let minSumDistance = Infinity;
 
 	for (let i = 0; i < sorted.length; i++) {
@@ -221,26 +220,31 @@ function findSecondColorAtSameStep(
 // ============================================
 
 /**
- * Interpolates two color palettes in OKLab space
+ * Interpolates two reference color palettes in OKLab space
+ * Creates a smooth transition between two color families
  */
-function interpolatePalettes(
-	color1Name: string,
-	color2Name: string,
+function interpolateReferencePalettes(
+	primaryColorName: string,
+	secondaryColorName: string,
 	factor: number
 ): Record<number, { hex: string; oklch: OKLCH }> {
 	const result: Record<number, { hex: string; oklch: OKLCH }> = {};
 
 	for (const shade of SHADES) {
-		const c1 = TAILWIND_COLORS.find((c) => c.name === color1Name && c.shade === shade);
-		const c2 = TAILWIND_COLORS.find((c) => c.name === color2Name && c.shade === shade);
+		const primaryColor = REFERENCE_COLORS.find(
+			(c) => c.name === primaryColorName && c.shade === shade
+		);
+		const secondaryColor = REFERENCE_COLORS.find(
+			(c) => c.name === secondaryColorName && c.shade === shade
+		);
 
-		if (!c1 || !c2) {
+		if (!primaryColor || !secondaryColor) {
 			continue;
 		}
 
 		// Use Color.mix() static method (OO-API) instead of mix from colorjs.io/fn
 		// Color.mix() returns a Color object directly
-		const mixed = Color.mix(c1.hex, c2.hex, factor, { space: 'oklab' });
+		const mixed = Color.mix(primaryColor.hex, secondaryColor.hex, factor, { space: 'oklab' });
 
 		// Map to sRGB gamut and convert to sRGB
 		const srgb = mixed.to('srgb').toGamut();
@@ -294,7 +298,7 @@ function calculateInterpolationFactor(inputHue: number, hue1: number, hue2: numb
  * Finds the closest shade index where the input color should be anchored
  */
 function findClosestShadeIndex(palette: Record<number, { oklch: OKLCH }>, input: OKLCH): number {
-	let bestShade = 500;
+	let bestShade = MID_SHADE;
 	let bestDist = Infinity;
 	const inputLab = new Color('oklch', [input.l, input.c, input.h]).to('oklab').coords;
 	const [iL, iA, iB] = inputLab;
@@ -318,20 +322,20 @@ function findClosestShadeIndex(palette: Record<number, { oklch: OKLCH }>, input:
 }
 
 /**
- * Builds a pure hue palette Q with constant hue = input.h
- * Smoothly transitions L & C values towards input around shade k
+ * Builds a pure hue palette with constant hue = input.h
+ * Smoothly transitions L & C values towards input around anchor shade
  * This prevents hard edges when blending with the base palette
  */
 function buildPureHuePalette(
 	basePalette: Record<number, { oklch: OKLCH }>,
 	input: OKLCH,
-	k: number,
-	radiusLC = 3 // how many steps left/right to smooth L/C transition
+	anchorShade: number,
+	radiusLC = DEFAULT_LC_SMOOTH_RADIUS // how many steps left/right to smooth L/C transition
 ): Record<number, { oklch: OKLCH; hex: string }> {
-	const Q: Record<number, { oklch: OKLCH; hex: string }> = {};
-	const kIndex = SHADES.indexOf(k as (typeof SHADES)[number]);
+	const pureHuePalette: Record<number, { oklch: OKLCH; hex: string }> = {};
+	const anchorIndex = SHADES.indexOf(anchorShade as (typeof SHADES)[number]);
 
-	if (kIndex === -1) {
+	if (anchorIndex === -1) {
 		// Fallback: if shade not found, use original behavior
 		for (const shade of SHADES) {
 			const base = basePalette[shade];
@@ -346,9 +350,9 @@ function buildPureHuePalette(
 			const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]).toGamut();
 			const hex = color.to('srgb').toString({ format: 'hex' });
 
-			Q[shade] = { oklch, hex };
+			pureHuePalette[shade] = { oklch, hex };
 		}
-		return Q;
+		return pureHuePalette;
 	}
 
 	for (let i = 0; i < SHADES.length; i++) {
@@ -356,10 +360,10 @@ function buildPureHuePalette(
 		const base = basePalette[shade];
 		if (!base) continue;
 
-		const dist = Math.abs(i - kIndex);
+		const dist = Math.abs(i - anchorIndex);
 
 		// Weight for transitioning L/C values towards input
-		// 1 at k, 0 at distance >= radiusLC
+		// 1 at anchor, 0 at distance >= radiusLC
 		const w = Math.max(0, 1 - dist / radiusLC);
 
 		// Smoothly blend L & C from base towards input
@@ -372,10 +376,10 @@ function buildPureHuePalette(
 		const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]).toGamut();
 		const hex = color.to('srgb').toString({ format: 'hex' });
 
-		Q[shade] = { oklch, hex };
+		pureHuePalette[shade] = { oklch, hex };
 	}
 
-	return Q;
+	return pureHuePalette;
 }
 
 /**
@@ -390,45 +394,48 @@ function ease(dist: number, radius: number): number {
 }
 
 /**
- * Blends two palettes P and Q smoothly in OKLab space
- * At shade k, the result is 100% Q, fading to 100% P at distance radius
- * Uses cosine ease function for smoother transitions
+ * Blends two palettes smoothly in OKLab space
+ * @param basePalette - The base palette to blend from
+ * @param pureHuePalette - The pure hue palette to blend towards
+ * @param anchorShade - The shade index where blending is strongest (100% pureHuePalette)
+ * @param radius - How many steps left/right the fade-out reaches
+ * @returns A blended palette with smooth transitions
  */
 function blendPalettes(
-	P: Record<number, { oklch: OKLCH; hex: string }>,
-	Q: Record<number, { oklch: OKLCH; hex: string }>,
-	k: number,
-	radius = 4 // how many steps left/right fade-out reaches
+	basePalette: Record<number, { oklch: OKLCH; hex: string }>,
+	pureHuePalette: Record<number, { oklch: OKLCH; hex: string }>,
+	anchorShade: number,
+	radius = DEFAULT_BLEND_RADIUS // how many steps left/right fade-out reaches
 ): Record<number, { oklch: OKLCH; hex: string }> {
 	const blended: Record<number, { oklch: OKLCH; hex: string }> = {};
-	const idx = SHADES.indexOf(k as (typeof SHADES)[number]);
+	const anchorIndex = SHADES.indexOf(anchorShade as (typeof SHADES)[number]);
 
-	if (idx === -1) {
-		// Fallback: if shade not found, return P
-		return P;
+	if (anchorIndex === -1) {
+		// Fallback: if shade not found, return base palette
+		return basePalette;
 	}
 
 	for (let i = 0; i < SHADES.length; i++) {
 		const shade = SHADES[i];
-		const pEntry = P[shade];
-		const qEntry = Q[shade];
+		const baseEntry = basePalette[shade];
+		const pureHueEntry = pureHuePalette[shade];
 
 		// Skip if either palette doesn't have this shade
-		if (!pEntry || !qEntry) {
+		if (!baseEntry || !pureHueEntry) {
 			continue;
 		}
 
-		const pColor = new Color(pEntry.hex);
-		const qColor = new Color(qEntry.hex);
+		const baseColor = new Color(baseEntry.hex);
+		const pureHueColor = new Color(pureHueEntry.hex);
 
 		// Distance from anchor
-		const dist = Math.abs(i - idx);
+		const dist = Math.abs(i - anchorIndex);
 
 		// Use cosine ease for smooth transition instead of linear
-		// 1 → full Q at center, 0 → full P far away
-		const t = ease(dist, radius);
+		// 1 → full pureHuePalette at center, 0 → full basePalette far away
+		const blendFactor = ease(dist, radius);
 
-		const mixed = Color.mix(pColor, qColor, t, { space: 'oklab' }).toGamut();
+		const mixed = Color.mix(baseColor, pureHueColor, blendFactor, { space: 'oklab' }).toGamut();
 		const [l, c, h] = mixed.to('oklch').coords;
 
 		blended[shade] = {
@@ -446,41 +453,161 @@ function blendPalettes(
  * smooth transitions and Tailwind-like harmony
  */
 export function refinePaletteWithInputColor(
-	P: Record<number, { hex: string; oklch: OKLCH }>,
+	basePalette: Record<number, { hex: string; oklch: OKLCH }>,
 	input: OKLCH
 ): Record<number, { hex: string; oklch: OKLCH }> {
-	// Step 1: Find anchor shade k
-	const k = findClosestShadeIndex(P, input);
+	// Step 1: Find anchor shade where input color should be placed
+	const anchorShade = findClosestShadeIndex(basePalette, input);
 
-	// Step 2: Calculate delta between input and P[k] in OKLab for dynamic radius
-	const pKColor = new Color(P[k].hex).to('oklab').coords;
+	// Step 2: Calculate delta between input and basePalette[anchorShade] in OKLab for dynamic radius
+	const baseColorAtAnchor = new Color(basePalette[anchorShade].hex).to('oklab').coords;
 	const inputLab = new Color('oklch', [input.l, input.c, input.h]).to('oklab').coords;
 	const delta = Math.sqrt(
-		Math.pow(pKColor[0] - inputLab[0], 2) +
-			Math.pow(pKColor[1] - inputLab[1], 2) +
-			Math.pow(pKColor[2] - inputLab[2], 2)
+		Math.pow(baseColorAtAnchor[0] - inputLab[0], 2) +
+			Math.pow(baseColorAtAnchor[1] - inputLab[1], 2) +
+			Math.pow(baseColorAtAnchor[2] - inputLab[2], 2)
 	);
 
-	// Dynamic radius: larger when input is far from P[k]
-	const baseRadius = 3;
-	const extra = Math.min(4, Math.floor(delta * 10)); // 0..4 additional steps
-	const radius = baseRadius + extra;
+	// Dynamic radius: larger when input is far from basePalette[anchorShade]
+	const extra = Math.min(MAX_EXTRA_BLEND_RADIUS, Math.floor(delta * DELTA_TO_RADIUS_MULTIPLIER)); // 0..MAX_EXTRA_BLEND_RADIUS additional steps
+	const blendRadius = BASE_BLEND_RADIUS + extra;
 
-	// Step 3: Build hue-constant palette with smooth L/C transition around k
-	const Q = buildPureHuePalette(P, input, k, 3);
+	// Step 3: Build hue-constant palette with smooth L/C transition around anchor
+	const pureHuePalette = buildPureHuePalette(
+		basePalette,
+		input,
+		anchorShade,
+		DEFAULT_LC_SMOOTH_RADIUS
+	);
 
-	// Step 4: Blend P & Q smoothly with dynamic radius
-	const final = blendPalettes(P, Q, k, radius);
+	// Step 4: Blend base and pure hue palettes smoothly with dynamic radius
+	const refinedPalette = blendPalettes(basePalette, pureHuePalette, anchorShade, blendRadius);
 
-	// Step 5: Explicitly set final[k] to exact input color
-	// Since Q and blendPalettes are already smoothed, the difference to neighbors is minimal
+	// Step 5: Explicitly set refinedPalette[anchorShade] to exact input color
+	// Since pureHuePalette and blendPalettes are already smoothed, the difference to neighbors is minimal
 	const exactColor = new Color('oklch', [input.l, input.c, input.h]).toGamut();
-	final[k] = {
+	refinedPalette[anchorShade] = {
 		oklch: input,
 		hex: exactColor.to('srgb').toString({ format: 'hex' })
 	};
 
-	return final;
+	return refinedPalette;
+}
+
+// ============================================
+// PALETTE INTERPOLATION
+// ============================================
+
+/**
+ * Creates a 25% light + 50% mid + 25% dark color mix
+ * This is achieved by first mixing light and dark 50/50, then mixing the result with mid 50/50
+ */
+function mixLightMidDark(lightColor: string, midColor: string, darkColor: string): Color {
+	const lightDarkMix = Color.mix(lightColor, darkColor, LIGHT_DARK_MIX_FACTOR, { space: 'oklab' });
+	return Color.mix(lightDarkMix, midColor, LIGHT_DARK_MIX_FACTOR, { space: 'oklab' });
+}
+
+/**
+ * Gets a reference palette (e.g., zinc) as a GeneratedPalette
+ * @param colorName - Name of the reference color family (e.g., "zinc")
+ * @returns A GeneratedPalette from the reference colors
+ */
+export function getReferencePalette(colorName: string): GeneratedPalette {
+	const referenceColors = REFERENCE_COLORS.filter((c) => c.name === colorName);
+	const shades: Record<number, { hex: string; oklch: OKLCH }> = {};
+
+	for (const color of referenceColors) {
+		shades[color.shade] = {
+			hex: color.hex,
+			oklch: color.oklch
+		};
+	}
+
+	// Use mid shade (500) as base color
+	const baseColor = referenceColors.find((c) => c.shade === MID_SHADE);
+	if (!baseColor) {
+		throw new Error(`Reference palette "${colorName}" does not have shade ${MID_SHADE}`);
+	}
+
+	return {
+		baseHex: baseColor.hex,
+		baseOklch: baseColor.oklch,
+		shades
+	};
+}
+
+/**
+ * Interpolates three palettes (light, mid, dark) into a single ambient palette
+ * Shade 50 uses 100% light palette
+ * Shade 500 uses 25% light + 50% mid + 25% dark
+ * Shade 950 uses 100% dark palette
+ * Intermediate shades are linearly interpolated between the appropriate pairs
+ * @param lightPalette - The light palette (used at shade 50)
+ * @param midPalette - The mid palette (contributes 50% at shade 500)
+ * @param darkPalette - The dark palette (used at shade 950)
+ * @returns A new interpolated ambient palette
+ */
+export function interpolateAmbientPalette(
+	lightPalette: GeneratedPalette,
+	midPalette: GeneratedPalette,
+	darkPalette: GeneratedPalette
+): GeneratedPalette {
+	const result: Record<number, { hex: string; oklch: OKLCH }> = {};
+
+	for (const shade of SHADES) {
+		const lightColor = lightPalette.shades[shade];
+		const midColor = midPalette.shades[shade];
+		const darkColor = darkPalette.shades[shade];
+
+		if (!lightColor || !midColor || !darkColor) {
+			continue;
+		}
+
+		let mixed: Color;
+
+		if (shade === MID_SHADE) {
+			// At shade 500: 25% light + 50% mid + 25% dark
+			mixed = mixLightMidDark(lightColor.hex, midColor.hex, darkColor.hex);
+		} else if (shade < MID_SHADE) {
+			// Interpolate between light (at 50) and the 25/50/25 mix (at 500)
+			// Shade 50 -> factor = 0 (100% light)
+			// Shade 500 -> factor = 1 (25% light + 50% mid + 25% dark)
+			const factor = (shade - LIGHT_SHADE) / SHADE_RANGE_TO_MID;
+
+			// Calculate the target mix at factor=1 (25/50/25)
+			const targetMix = mixLightMidDark(lightColor.hex, midColor.hex, darkColor.hex);
+
+			// Interpolate from light to target mix
+			mixed = Color.mix(lightColor.hex, targetMix, factor, { space: 'oklab' });
+		} else {
+			// Interpolate between the 25/50/25 mix (at 500) and dark (at 950)
+			// Shade 500 -> factor = 0 (25% light + 50% mid + 25% dark)
+			// Shade 950 -> factor = 1 (100% dark)
+			const factor = (shade - MID_SHADE) / SHADE_RANGE_FROM_MID;
+
+			// Calculate the source mix at factor=0 (25/50/25)
+			const sourceMix = mixLightMidDark(lightColor.hex, midColor.hex, darkColor.hex);
+
+			// Interpolate from source mix to dark
+			mixed = Color.mix(sourceMix, darkColor.hex, factor, { space: 'oklab' });
+		}
+
+		const srgb = mixed.to('srgb').toGamut();
+		const [l, c, h] = srgb.to('oklch').coords;
+		const hex = srgb.toString({ format: 'hex' });
+
+		result[shade] = {
+			hex,
+			oklch: { l, c, h: h ?? 0 }
+		};
+	}
+
+	// Use the light palette as base for metadata
+	return {
+		baseHex: lightPalette.baseHex,
+		baseOklch: lightPalette.baseOklch,
+		shades: result
+	};
 }
 
 // ============================================
@@ -493,55 +620,36 @@ export function refinePaletteWithInputColor(
 export function generateColorPalette(hexColor: string): GeneratedPalette {
 	const inputOklch = hexToOklch(hexColor);
 
-	// Edge case: Very low chroma (almost gray) -> use neutral palette
-	if (inputOklch.c < 0.02) {
-		// Use slate as neutral palette
-		const slatePalette = TAILWIND_COLORS.filter((c) => c.name === 'slate');
-		const baseShades: Record<number, { hex: string; oklch: OKLCH }> = {};
+	// Step 1: Find closest reference color
+	const { color: closestColor } = findClosestReferenceColor(hexColor);
 
-		for (const color of slatePalette) {
-			baseShades[color.shade] = {
-				hex: color.hex,
-				oklch: color.oklch
-			};
-		}
-
-		// Refine palette with input color (anchor exact color and blend)
-		const shades = refinePaletteWithInputColor(baseShades, inputOklch);
-
-		return {
-			baseHex: hexColor,
-			baseOklch: inputOklch,
-			shades
-		};
-	}
-
-	// Step 1: Find closest color
-	const { color: firstColor } = findClosestColorOKLab(hexColor);
-
-	// Step 2: Find second color at same shade
-	const secondColor = findSecondColorAtSameStep(inputOklch, firstColor);
+	// Step 2: Find second reference color at same shade for interpolation
+	const interpolationColor = findSecondColorAtSameShade(inputOklch, closestColor);
 
 	// Step 3: Calculate interpolation factor
-	let factor = 0;
-	let color1Name = firstColor.name;
-	let color2Name = firstColor.name;
+	let interpolationFactor = 0;
+	let primaryColorName = closestColor.name;
+	let secondaryColorName = closestColor.name;
 
-	if (secondColor) {
-		factor = calculateInterpolationFactor(inputOklch.h, firstColor.oklch.h, secondColor.oklch.h);
-		color1Name = firstColor.name;
-		color2Name = secondColor.name;
+	if (interpolationColor) {
+		interpolationFactor = calculateInterpolationFactor(
+			inputOklch.h,
+			closestColor.oklch.h,
+			interpolationColor.oklch.h
+		);
+		primaryColorName = closestColor.name;
+		secondaryColorName = interpolationColor.name;
 	}
 
-	// Step 4: Interpolate palettes
-	const baseShades =
-		secondColor && factor > 0 && factor < 1
-			? interpolatePalettes(color1Name, color2Name, factor)
-			: // Fallback: use first color palette directly
+	// Step 4: Interpolate reference palettes
+	const basePalette =
+		interpolationColor && interpolationFactor > 0 && interpolationFactor < 1
+			? interpolateReferencePalettes(primaryColorName, secondaryColorName, interpolationFactor)
+			: // Fallback: use closest color palette directly
 				(() => {
 					const result: Record<number, { hex: string; oklch: OKLCH }> = {};
-					const firstPalette = TAILWIND_COLORS.filter((c) => c.name === firstColor.name);
-					for (const color of firstPalette) {
+					const closestPalette = REFERENCE_COLORS.filter((c) => c.name === closestColor.name);
+					for (const color of closestPalette) {
 						result[color.shade] = {
 							hex: color.hex,
 							oklch: color.oklch
@@ -551,7 +659,7 @@ export function generateColorPalette(hexColor: string): GeneratedPalette {
 				})();
 
 	// Step 5: Refine palette with input color (anchor exact color and blend)
-	const shades = refinePaletteWithInputColor(baseShades, inputOklch);
+	const shades = refinePaletteWithInputColor(basePalette, inputOklch);
 
 	return {
 		baseHex: hexColor,
