@@ -12,6 +12,7 @@
 		CollapsibleContent
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import { generateColorPalette } from '$lib/tools/colorPlate.js';
 
 	// Color state for design tokens
 	let ambientLightColor = $state('#ffffff');
@@ -26,6 +27,18 @@
 
 	// Radius state for design tokens (0-2 rem range)
 	let radius = $state(0.75);
+
+	// Generated palette for primary color
+	let primaryPalette = $derived.by(() => {
+		try {
+			return generateColorPalette(primaryColor);
+		} catch (error) {
+			console.error('Error generating palette:', error);
+			return null;
+		}
+	});
+
+	const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 </script>
 
 <Collapsible open class="group/collapsible">
@@ -76,6 +89,23 @@
 				<div class="space-y-2">
 					<Label for="primary-color" class="text-xs">Primary Color</Label>
 					<ColorPicker id="primary-color" bind:value={primaryColor} />
+					{#if primaryPalette}
+						<!-- Palette Preview -->
+						<div class="space-y-2 pt-2">
+							<Text size="xs" intensity="muted" class="block">Generated Palette</Text>
+							<div class="flex flex-wrap gap-1">
+								{#each SHADES as shade (shade)}
+									{#if primaryPalette.shades[shade]}
+										<div
+											class="h-6 w-6 rounded border border-border"
+											style="background-color: {primaryPalette.shades[shade].hex};"
+											title="Shade {shade}: {primaryPalette.shades[shade].hex}"
+										></div>
+									{/if}
+								{/each}
+							</div>
+						</div>
+					{/if}
 				</div>
 
 				<!-- Secondary Color -->
