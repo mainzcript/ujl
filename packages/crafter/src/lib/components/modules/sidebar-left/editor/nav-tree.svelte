@@ -24,26 +24,30 @@
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	/**
-	 * Erzeugt einen lesbaren Anzeigenamen aus einem UJLC-Node
+	 * returns a display name for a node
 	 */
-	function getDisplayName(node: UJLCModuleObject): string {
-		// Priorität 1: Explizite Titel/Labels
-		if (node.fields.title) return node.fields.title as string;
-		if (node.fields.label) return node.fields.label as string;
-		if (node.fields.headline) return node.fields.headline as string;
 
-		// Priorität 2: Content-Felder (gekürzt)
+	function getDisplayName(node: UJLCModuleObject): string {
+		const typeName = formatTypeName(node.type);
+
+		// Title/Labels
+		if (node.fields.title) return `${typeName}: ${node.fields.title}`;
+		if (node.fields.label) return `${typeName}: ${node.fields.label}`;
+		if (node.fields.headline) return `${typeName}: ${node.fields.headline}`;
+
+		// Content-Fields (shortened)
 		if (node.fields.content && typeof node.fields.content === 'string') {
 			const content = node.fields.content.trim();
-			return content.length > 40 ? content.substring(0, 40) + '...' : content;
+			const shortContent = content.length > 40 ? content.substring(0, 40) + '...' : content;
+			return `${typeName}: ${shortContent}`;
 		}
 
-		// Priorität 3: Type als Fallback (mit schöner Formatierung)
-		return formatTypeName(node.type);
+		// Type only
+		return typeName;
 	}
 
 	/**
-	 * Formatiert den Type-Namen für bessere Lesbarkeit
+	 * formats a type string into a more readable format
 	 */
 	function formatTypeName(type: string): string {
 		return type
@@ -53,17 +57,17 @@
 	}
 
 	/**
-	 * Gibt alle Kinder eines Nodes zurück (aus allen Slots)
+	 * returns the children of a node
 	 */
 	function getChildren(node: UJLCModuleObject): UJLCModuleObject[] {
 		if (!node.slots) return [];
 
-		// Alle Slots durchgehen und Kinder sammeln
+		// traverse all slots and collect children
 		return Object.values(node.slots).flat();
 	}
 
 	/**
-	 * Prüft ob ein Node Kinder hat
+	 * checks if a node has children
 	 */
 	function hasChildren(node: UJLCModuleObject): boolean {
 		if (!node.slots) return false;
@@ -107,7 +111,6 @@
 											class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 										>
 											<span>
-												{node.meta.id}
 												{getDisplayName(node)}
 											</span>
 										</button>
@@ -136,7 +139,7 @@
 							{...props}
 							class="{props.class || ''} {selectedNodeId === node.meta.id ? 'selected' : ''}"
 						>
-							<span>UNUSED?{getDisplayName(node)}</span>
+							<span>{getDisplayName(node)}</span>
 						</button>
 					{/snippet}
 				</SidebarMenuButton>
@@ -164,7 +167,7 @@
 									class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 								>
 									<span>
-										GUDE {getDisplayName(node)}
+										{getDisplayName(node)}
 									</span>
 								</button>
 							</div>
@@ -195,7 +198,7 @@
 					class="h-full w-full overflow-hidden text-left text-nowrap text-ellipsis"
 				>
 					<span>
-						tach {getDisplayName(node)}
+						{getDisplayName(node)}
 					</span>
 				</button>
 			</div>

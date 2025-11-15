@@ -62,6 +62,19 @@
 								slots: {
 									items: [
 										{
+											type: 'button',
+											meta: {
+												id: 'button-005',
+												updated_at: '2024-01-15T10:30:00Z',
+												_embedding: [3.6, 3.7, 3.8, 3.9, 4.0]
+											},
+											fields: {
+												label: 'Try UJL Framework',
+												href: 'https://ujl-framework.org'
+											},
+											slots: {}
+										},
+										{
 											type: 'card',
 											meta: {
 												id: 'feature-001',
@@ -74,21 +87,7 @@
 													'Built with TypeScript for maximum type safety and developer experience'
 											},
 											slots: {
-												content: [
-													{
-														type: 'button',
-														meta: {
-															id: 'button-005',
-															updated_at: '2024-01-15T10:30:00Z',
-															_embedding: [3.6, 3.7, 3.8, 3.9, 4.0]
-														},
-														fields: {
-															label: 'Try UJL Framework',
-															href: 'https://ujl-framework.org'
-														},
-														slots: {}
-													}
-												]
+												content: []
 											}
 										},
 										{
