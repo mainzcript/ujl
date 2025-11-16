@@ -17,17 +17,19 @@
 		interpolateAmbientPalette,
 		getReferencePalette
 	} from '$lib/tools/colorPlate.js';
+	import SunIcon from '@lucide/svelte/icons/sun';
+	import MoonIcon from '@lucide/svelte/icons/moon';
 
 	// Color state for design tokens
-	let ambientLightColor = $state('#ffffff');
-	let ambientDarkColor = $state('#000000');
-	let primaryColor = $state('#3b82f6');
-	let secondaryColor = $state('#8b5cf6');
-	let accentColor = $state('#10b981');
-	let successColor = $state('#10b981');
-	let warningColor = $state('#10b981');
-	let destructiveColor = $state('#10b981');
-	let infoColor = $state('#10b981');
+	let ambientLightColor = $state('#fafafa');
+	let ambientDarkColor = $state('#09090b');
+	let primaryColor = $state('#2563eb');
+	let secondaryColor = $state('#475569');
+	let accentColor = $state('#e11d48');
+	let successColor = $state('#22c55e');
+	let warningColor = $state('#fbbf24');
+	let destructiveColor = $state('#dc2626');
+	let infoColor = $state('#06b6d4');
 
 	// Radius state for design tokens (0-2 rem range)
 	let radius = $state(0.75);
@@ -143,17 +145,38 @@
 {#snippet palettePreview(palette: ReturnType<typeof generateColorPalette> | null)}
 	{#if palette}
 		<div class="space-y-2 pt-2">
-			<Text size="xs" intensity="muted" class="block">Generated Palette</Text>
-			<div class="flex flex-wrap gap-1">
+			<div class="grid grid-cols-11 overflow-hidden rounded border border-border">
 				{#each SHADES as shade (shade)}
 					{#if palette.shades[shade]}
 						<div
-							class="h-6 w-6 rounded border border-border"
+							class="h-6"
 							style="background-color: {palette.shades[shade].hex};"
 							title="Shade {shade}: {palette.shades[shade].hex}"
 						></div>
 					{/if}
 				{/each}
+			</div>
+			<div class="grid grid-cols-4 gap-2">
+				<div class="rounded border border-border" style="background-color: {palette.light.hex};">
+					<div style="color: {palette.lightFg.hex};" class="flex h-6 items-center justify-center">
+						<SunIcon size="14" />
+					</div>
+				</div>
+				<div class="rounded border border-border bg-ambient-100/90">
+					<div style="color: {palette.lightText.hex};" class="flex h-6 items-center justify-center">
+						<SunIcon class="h-4 w-4" />
+					</div>
+				</div>
+				<div class="rounded border border-border" style="background-color: {palette.dark.hex};">
+					<div style="color: {palette.darkFg.hex};" class="flex h-6 items-center justify-center">
+						<MoonIcon class="h-4 w-4" />
+					</div>
+				</div>
+				<div class="rounded border border-border bg-ambient-900/90">
+					<div style="color: {palette.darkText.hex};" class="flex h-6 items-center justify-center">
+						<MoonIcon class="h-4 w-4" />
+					</div>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -188,17 +211,34 @@
 				<!-- Final interpolated ambient palette -->
 				{#if ambientPalette}
 					<div class="space-y-2 pt-2">
-						<Text size="xs" intensity="muted" class="block">Ambient Palette</Text>
-						<div class="flex flex-wrap gap-1">
+						<div class="grid grid-cols-11 overflow-hidden rounded border border-border">
 							{#each SHADES as shade (shade)}
 								{#if ambientPalette.shades[shade]}
 									<div
-										class="h-6 w-6 rounded border border-border"
+										class="h-6"
 										style="background-color: {ambientPalette.shades[shade].hex};"
 										title="Shade {shade}: {ambientPalette.shades[shade].hex}"
 									></div>
 								{/if}
 							{/each}
+						</div>
+						<div class="grid grid-cols-2 gap-2">
+							<div class="rounded border border-border bg-ambient-100/90">
+								<div
+									style="color: {ambientPalette.lightText.hex};"
+									class="flex h-6 items-center justify-center"
+								>
+									<SunIcon class="h-4 w-4" />
+								</div>
+							</div>
+							<div class="rounded border border-border bg-ambient-900/90">
+								<div
+									style="color: {ambientPalette.darkText.hex};"
+									class="flex h-6 items-center justify-center"
+								>
+									<MoonIcon class="h-4 w-4" />
+								</div>
+							</div>
 						</div>
 					</div>
 				{/if}
@@ -220,7 +260,7 @@
 			{/snippet}
 		</SidebarGroupLabel>
 		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-4 p-4">
+			<SidebarGroupContent class="space-y-8 p-4">
 				<!-- Primary color input -->
 				<div class="space-y-2">
 					<Label for="primary-color" class="text-xs">Primary Color</Label>
@@ -259,7 +299,7 @@
 			{/snippet}
 		</SidebarGroupLabel>
 		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-4 p-4">
+			<SidebarGroupContent class="space-y-8 p-4">
 				<!-- Success color input -->
 				<div class="space-y-2">
 					<Label for="success-color" class="text-xs">Success Color</Label>
@@ -305,7 +345,7 @@
 			{/snippet}
 		</SidebarGroupLabel>
 		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-4 p-4">
+			<SidebarGroupContent class="space-y-8 p-4">
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
 						<Label for="radius" class="text-xs">Radius</Label>
