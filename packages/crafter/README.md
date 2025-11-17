@@ -106,6 +106,8 @@ The color utilities are organized into focused modules:
 
 All functions are re-exported from `colorPlate.ts` for backward compatibility.
 
+Palette previews are rendered via a reusable `ColorPalettePreview` component located in the designer module, which displays shade stripes and light/dark mode examples for any generated palette.
+
 ### Example Usage
 
 **Note:** This is an internal example from `packages/crafter/src/lib/components/modules/designer/designer.svelte`.

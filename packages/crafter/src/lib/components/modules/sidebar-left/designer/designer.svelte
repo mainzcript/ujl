@@ -1,43 +1,36 @@
 <!--
 	Designer sidebar component for editing theme tokens (colors, radius, etc.).
 
-	This component provides UI controls for:
-	- Ambient colors (light/dark mode base colors)
-	- Theme colors (primary, secondary, accent)
-	- Notification colors (success, warning, destructive, info)
-	- Appearance settings (border radius)
+	This component orchestrates the theme editing UI by:
+	- Reading tokens from props
+	- Computing color palettes from token values (including special ambient palette interpolation)
+	- Providing callback functions to child group components
+	- Updating tokens through the Crafter context API (updateTokenSet)
 
-	All changes are applied through the Crafter context API (updateTokenSet).
-	The component reads tokens from props and uses local input states to track user edits
-	before committing them to the document.
+	The actual UI layout is delegated to presentational group components:
+	- ambient-group.svelte: Ambient color controls
+	- theme-colors-group.svelte: Primary, secondary, accent colors
+	- notification-colors-group.svelte: Success, warning, destructive, info colors
+	- appearance-group.svelte: Border radius control
+
+	All palette calculations and token mutations remain in this component.
+	The group components are pure presentational components that only handle UI rendering.
 -->
 <script lang="ts">
-	import {
-		SidebarGroup,
-		SidebarGroupLabel,
-		SidebarGroupContent,
-		ColorPicker,
-		Label,
-		Slider,
-		Text,
-		Collapsible,
-		CollapsibleTrigger,
-		CollapsibleContent
-	} from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import { getContext } from 'svelte';
 	import type { UJLTTokenSet, UJLTFlavor } from '@ujl-framework/types';
 	import {
 		generateColorPalette,
 		interpolateAmbientPalette,
 		getReferencePalette,
-		oklchToHex,
-		type GeneratedPalette
+		oklchToHex
 	} from '$lib/tools/colorPlate.js';
 	import { mapGeneratedPaletteToColorSet } from '$lib/tools/paletteToColorSet.js';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import SunIcon from '@lucide/svelte/icons/sun';
-	import MoonIcon from '@lucide/svelte/icons/moon';
+	import AmbientGroup from './_ambient-group.svelte';
+	import ThemeColorsGroup from './_theme-colors-group.svelte';
+	import NotificationColorsGroup from './_notification-colors-group.svelte';
+	import AppearanceGroup from './_appearance-group.svelte';
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 
@@ -328,14 +321,29 @@
 	let radiusValue = $state(getRadiusValue());
 
 	/**
-	 * Keep the tokens.radius value in sync with the slider.
-	 * radiusValue is the UI state, radiusInput is used to override the token-derived value.
-	 * When the user moves the slider, radiusValue changes, which triggers this effect.
+	 * Handle radius changes from the slider.
+	 * When radiusValue changes (via binding from AppearanceGroup), update tokens.
+	 * We track the previous value to avoid infinite loops.
+	 */
+	let previousRadiusValue = $state(getRadiusValue());
+	$effect(() => {
+		// Only update if radiusValue actually changed from user input
+		if (radiusValue !== previousRadiusValue) {
+			previousRadiusValue = radiusValue;
+			handleRadiusChange(radiusValue);
+		}
+	});
+
+	/**
+	 * Sync radiusValue with tokens when tokens change externally (e.g., from external updates).
+	 * This ensures the slider reflects the current token value.
 	 */
 	$effect(() => {
 		const tokenValue = getRadiusValue();
-		if (radiusValue !== tokenValue) {
-			handleRadiusChange(radiusValue);
+		// Only update if the token value changed externally (not from our own updates via radiusInput)
+		if (radiusInput === null && radiusValue !== tokenValue) {
+			radiusValue = tokenValue;
+			previousRadiusValue = tokenValue;
 		}
 	});
 
@@ -357,287 +365,66 @@
 			}));
 		}
 	});
-
-	const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 </script>
 
-{#snippet palettePreview(palette: GeneratedPalette | null)}
-	{#if palette}
-		<div class="space-y-2 pt-2">
-			<div class="grid grid-cols-11 overflow-hidden rounded border border-border">
-				{#each SHADES as shade (shade)}
-					{#if palette.shades[shade]}
-						<div
-							class="h-6"
-							style="background-color: {palette.shades[shade].hex};"
-							title="Shade {shade}: {palette.shades[shade].hex}"
-						></div>
-					{/if}
-				{/each}
-			</div>
-			<div class="grid grid-cols-4 gap-2">
-				<div class="rounded border border-border" style="background-color: {palette.light.hex};">
-					<div style="color: {palette.lightFg.hex};" class="flex h-6 items-center justify-center">
-						<SunIcon size="14" />
-					</div>
-				</div>
-				<div class="rounded border border-border bg-white">
-					<div style="color: {palette.lightText.hex};" class="flex h-6 items-center justify-center">
-						<SunIcon class="h-4 w-4" />
-					</div>
-				</div>
-				<div class="rounded border border-border" style="background-color: {palette.dark.hex};">
-					<div style="color: {palette.darkFg.hex};" class="flex h-6 items-center justify-center">
-						<MoonIcon class="h-4 w-4" />
-					</div>
-				</div>
-				<div class="rounded border border-border bg-black">
-					<div style="color: {palette.darkText.hex};" class="flex h-6 items-center justify-center">
-						<MoonIcon class="h-4 w-4" />
-					</div>
-				</div>
-			</div>
-		</div>
-	{/if}
-{/snippet}
+<!--
+	Delegate UI rendering to presentational group components.
+	Each group receives the necessary data and callbacks as props.
+-->
+<AmbientGroup
+	{ambientLightValue}
+	{ambientDarkValue}
+	{ambientPalette}
+	onLightChange={handleAmbientLightChange}
+	onDarkChange={handleAmbientDarkChange}
+/>
 
-<Collapsible open class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Ambient Colors
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
-		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-4 p-4">
-				<!-- Light color input -->
-				<div class="space-y-2">
-					<Label for="ambient-light" class="text-xs">Light</Label>
-					<ColorPicker
-						id="ambient-light"
-						bind:value={ambientLightValue}
-						onChange={(value) => handleAmbientLightChange(value)}
-					/>
-				</div>
+<ThemeColorsGroup
+	bind:primaryValue
+	{primaryPalette}
+	primaryOnChange={(hex) => {
+		primaryInput = hex;
+		handleColorChange('primary', hex);
+	}}
+	bind:secondaryValue
+	{secondaryPalette}
+	secondaryOnChange={(hex) => {
+		secondaryInput = hex;
+		handleColorChange('secondary', hex);
+	}}
+	bind:accentValue
+	{accentPalette}
+	accentOnChange={(hex) => {
+		accentInput = hex;
+		handleColorChange('accent', hex);
+	}}
+/>
 
-				<!-- Dark color input -->
-				<div class="space-y-2">
-					<Label for="ambient-dark" class="text-xs">Dark</Label>
-					<ColorPicker
-						id="ambient-dark"
-						bind:value={ambientDarkValue}
-						onChange={(value) => handleAmbientDarkChange(value)}
-					/>
-				</div>
+<NotificationColorsGroup
+	bind:successValue
+	{successPalette}
+	successOnChange={(hex) => {
+		successInput = hex;
+		handleColorChange('success', hex);
+	}}
+	bind:warningValue
+	{warningPalette}
+	warningOnChange={(hex) => {
+		warningInput = hex;
+		handleColorChange('warning', hex);
+	}}
+	bind:destructiveValue
+	{destructivePalette}
+	destructiveOnChange={(hex) => {
+		destructiveInput = hex;
+		handleColorChange('destructive', hex);
+	}}
+	bind:infoValue
+	{infoPalette}
+	infoOnChange={(hex) => {
+		infoInput = hex;
+		handleColorChange('info', hex);
+	}}
+/>
 
-				<!-- Final interpolated ambient palette -->
-				{#if ambientPalette}
-					<div class="space-y-2 pt-2">
-						<div class="grid grid-cols-11 overflow-hidden rounded border border-border">
-							{#each SHADES as shade (shade)}
-								{#if ambientPalette.shades[shade]}
-									<div
-										class="h-6"
-										style="background-color: {ambientPalette.shades[shade].hex};"
-										title="Shade {shade}: {ambientPalette.shades[shade].hex}"
-									></div>
-								{/if}
-							{/each}
-						</div>
-						<div class="grid grid-cols-2 gap-2">
-							<div class="rounded border border-border bg-white">
-								<div
-									style="color: {ambientPalette.lightText.hex};"
-									class="flex h-6 items-center justify-center"
-								>
-									<SunIcon class="h-4 w-4" />
-								</div>
-							</div>
-							<div class="rounded border border-border bg-black">
-								<div
-									style="color: {ambientPalette.darkText.hex};"
-									class="flex h-6 items-center justify-center"
-								>
-									<MoonIcon class="h-4 w-4" />
-								</div>
-							</div>
-						</div>
-					</div>
-				{/if}
-			</SidebarGroupContent>
-		</CollapsibleContent>
-	</SidebarGroup>
-</Collapsible>
-
-<Collapsible open class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Theme Colors
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
-		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-8 p-4">
-				<!-- Primary color input -->
-				<div class="space-y-2">
-					<Label for="primary-color" class="text-xs">Primary Color</Label>
-					<ColorPicker
-						id="primary-color"
-						bind:value={primaryValue}
-						onChange={(value) => {
-							primaryInput = value;
-							handleColorChange('primary', value);
-						}}
-					/>
-					{@render palettePreview(primaryPalette)}
-				</div>
-
-				<!-- Secondary color input -->
-				<div class="space-y-2">
-					<Label for="secondary-color" class="text-xs">Secondary Color</Label>
-					<ColorPicker
-						id="secondary-color"
-						bind:value={secondaryValue}
-						onChange={(value) => {
-							secondaryInput = value;
-							handleColorChange('secondary', value);
-						}}
-					/>
-					{@render palettePreview(secondaryPalette)}
-				</div>
-
-				<!-- Accent color input -->
-				<div class="space-y-2">
-					<Label for="accent-color" class="text-xs">Accent Color</Label>
-					<ColorPicker
-						id="accent-color"
-						bind:value={accentValue}
-						onChange={(value) => {
-							accentInput = value;
-							handleColorChange('accent', value);
-						}}
-					/>
-					{@render palettePreview(accentPalette)}
-				</div>
-			</SidebarGroupContent>
-		</CollapsibleContent>
-	</SidebarGroup>
-</Collapsible>
-
-<Collapsible open class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Notification Colors
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
-		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-8 p-4">
-				<!-- Success color input -->
-				<div class="space-y-2">
-					<Label for="success-color" class="text-xs">Success Color</Label>
-					<ColorPicker
-						id="success-color"
-						bind:value={successValue}
-						onChange={(value) => {
-							successInput = value;
-							handleColorChange('success', value);
-						}}
-					/>
-					{@render palettePreview(successPalette)}
-				</div>
-
-				<!-- Warning color input -->
-				<div class="space-y-2">
-					<Label for="warning-color" class="text-xs">Warning Color</Label>
-					<ColorPicker
-						id="warning-color"
-						bind:value={warningValue}
-						onChange={(value) => {
-							warningInput = value;
-							handleColorChange('warning', value);
-						}}
-					/>
-					{@render palettePreview(warningPalette)}
-				</div>
-
-				<!-- Destructive color input -->
-				<div class="space-y-2">
-					<Label for="destructive-color" class="text-xs">Destructive Color</Label>
-					<ColorPicker
-						id="destructive-color"
-						bind:value={destructiveValue}
-						onChange={(value) => {
-							destructiveInput = value;
-							handleColorChange('destructive', value);
-						}}
-					/>
-					{@render palettePreview(destructivePalette)}
-				</div>
-
-				<!-- Info color input -->
-				<div class="space-y-2">
-					<Label for="info-color" class="text-xs">Info Color</Label>
-					<ColorPicker
-						id="info-color"
-						bind:value={infoValue}
-						onChange={(value) => {
-							infoInput = value;
-							handleColorChange('info', value);
-						}}
-					/>
-					{@render palettePreview(infoPalette)}
-				</div>
-			</SidebarGroupContent>
-		</CollapsibleContent>
-	</SidebarGroup>
-</Collapsible>
-
-<Collapsible open class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Appearance
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
-		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-8 p-4">
-				<div class="space-y-2">
-					<div class="flex items-center justify-between">
-						<Label for="radius" class="text-xs">Radius</Label>
-						<Text size="xs" intensity="muted">{getRadiusValue()} rem</Text>
-					</div>
-					<Slider
-						id="radius"
-						type="single"
-						bind:value={radiusValue}
-						min={0}
-						max={2}
-						step={0.05}
-						class="w-full"
-					/>
-				</div>
-			</SidebarGroupContent>
-		</CollapsibleContent>
-	</SidebarGroup>
-</Collapsible>
+<AppearanceGroup bind:radiusValue radiusDisplayValue={getRadiusValue()} />
