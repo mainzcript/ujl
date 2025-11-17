@@ -1,3 +1,15 @@
+<!--
+	Preview component for rendering UJL documents with live theme updates.
+
+	This component orchestrates the rendering pipeline:
+	1. Composes the UJL content document into an AST using Composer
+	2. Extracts theme tokens from the UJLT document
+	3. Renders the AST with the theme tokens using the Svelte adapter
+
+	The component reacts to changes in both documents and re-renders automatically.
+	We rely on reference changes (new object instances) from the parent to detect updates,
+	not deep equality checks.
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
@@ -12,6 +24,15 @@
 	let mountedComponent = $state<MountedComponent | null>(null);
 	let error = $state<string | null>(null);
 
+	/**
+	 * Renders the UJL document by composing it into an AST and mounting it with the Svelte adapter.
+	 * Cleans up any previously mounted component before rendering.
+	 *
+	 * The rendering pipeline:
+	 * 1. Create a Composer instance and compose the content document into an AST
+	 * 2. Extract the token set from the theme document (ujlt.tokens)
+	 * 3. Use svelteAdapter to render the AST with the theme tokens into the target element
+	 */
 	function renderDocument() {
 		// Cleanup previous mount
 		if (mountedComponent) {
@@ -33,6 +54,7 @@
 			});
 
 			error = null;
+			// Debug log - can be removed or gated behind a debug flag in production
 			console.log('UJL document successfully rendered with Svelte adapter!');
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -40,7 +62,11 @@
 		}
 	}
 
-	// Track previous document references to avoid unnecessary re-renders
+	/**
+	 * Track previous document references to avoid unnecessary re-renders.
+	 * We rely on reference equality checks since the parent creates new object instances
+	 * when documents are updated (immutable updates).
+	 */
 	let previousUjlcDocument = $state<UJLCDocument | null>(null);
 	let previousUjltDocument = $state<UJLTDocument | null>(null);
 
@@ -57,7 +83,11 @@
 		};
 	});
 
-	// Re-render when documents change (only if they actually changed)
+	/**
+	 * Re-render when documents change (only if they actually changed).
+	 * This effect watches for reference changes in the document objects.
+	 * Since the parent uses immutable updates, new object instances indicate changes.
+	 */
 	$effect(() => {
 		if (
 			ujlcDocument &&

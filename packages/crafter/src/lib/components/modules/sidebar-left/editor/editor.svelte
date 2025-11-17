@@ -1,6 +1,17 @@
+<!--
+	Temporary navigation tree editor component for visualizing the document structure.
+
+	This is a temporary solution that converts UJLCSlotObject (array of root modules) into
+	a simple tree structure for display. It will be replaced with a proper UJLCSlotObject renderer
+	that supports drag & drop, module selection, and direct editing.
+
+	UJLCSlotObject is expected to be an array of root-level modules in the document.
+	Each module can have nested slots, which are mapped to child nodes in the tree.
+-->
 <script lang="ts">
 	import type { UJLCSlotObject } from '@ujl-framework/types';
 	import NavTreeMock from './nav-tree-mock.svelte';
+	import type { NavNode } from './types.js';
 
 	let { slot }: { slot: UJLCSlotObject } = $props();
 
@@ -9,9 +20,16 @@
 	// import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	// const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	// For now, convert slot to a simple tree structure for NavTreeMock
-	// TODO: Replace NavTreeMock with a proper UJLCSlotObject renderer
-	const nodes = $derived.by(() => {
+	/**
+	 * Converts UJLCSlotObject (array of modules) into a NavNode tree structure.
+	 * This is a temporary solution until we have a proper slot renderer.
+	 *
+	 * The conversion:
+	 * - Maps each root module to a top-level NavNode
+	 * - Extracts nested modules from module.slots and creates child nodes
+	 * - Uses module.meta.id for unique keys when available, falls back to indices
+	 */
+	const nodes = $derived.by<NavNode[]>(() => {
 		if (!slot || slot.length === 0) {
 			return [];
 		}

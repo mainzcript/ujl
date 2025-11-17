@@ -1,3 +1,16 @@
+<!--
+	Designer sidebar component for editing theme tokens (colors, radius, etc.).
+
+	This component provides UI controls for:
+	- Ambient colors (light/dark mode base colors)
+	- Theme colors (primary, secondary, accent)
+	- Notification colors (success, warning, destructive, info)
+	- Appearance settings (border radius)
+
+	All changes are applied through the Crafter context API (updateTokenSet).
+	The component reads tokens from props and uses local input states to track user edits
+	before committing them to the document.
+-->
 <script lang="ts">
 	import {
 		SidebarGroup,
@@ -31,7 +44,12 @@
 	// Get context API for mutations
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	// Local input states for color pickers (null means use value from tokens)
+	/**
+	 * Local input states for color pickers.
+	 * These track user edits before committing to tokens.
+	 * null means use the value from tokens (no local override).
+	 * When a user picks a color, we store it here first, then update tokens.
+	 */
 	let ambientLightInput = $state<string | null>(null);
 	let ambientDarkInput = $state<string | null>(null);
 	let primaryInput = $state<string | null>(null);
@@ -42,8 +60,11 @@
 	let destructiveInput = $state<string | null>(null);
 	let infoInput = $state<string | null>(null);
 
-	// Computed values for ColorPicker bindings (derived from inputs and tokens)
-	// Initialize with values from tokens
+	/**
+	 * Computed values for ColorPicker bindings (derived from inputs and tokens).
+	 * These are the actual hex values displayed in the color pickers.
+	 * Priority: if *Input is set, use that; otherwise derive from tokens.
+	 */
 	let ambientLightValue = $state(getAmbientColor(true, null));
 	let ambientDarkValue = $state(getAmbientColor(false, null));
 	let primaryValue = $state(getColorValue('primary', null));
@@ -67,10 +88,19 @@
 		infoValue = getColorValue('info', infoInput);
 	});
 
-	// Radius state
+	/**
+	 * Radius input state for tracking user edits before committing to tokens.
+	 * null means use the value from tokens.
+	 */
 	let radiusInput = $state<number | null>(null);
 
-	// Helper function to get color value for ColorPicker
+	/**
+	 * Gets the color value for a ColorPicker, prioritizing local input over tokens.
+	 *
+	 * @param flavor - The color flavor (primary, secondary, accent, etc.)
+	 * @param input - Local input override (null means use tokens)
+	 * @returns Hex color string for the ColorPicker
+	 */
 	function getColorValue(flavor: UJLTFlavor, input: string | null): string {
 		if (input !== null) {
 			return input;
@@ -83,7 +113,13 @@
 		return '#000000'; // Fallback
 	}
 
-	// Helper function to get ambient light/dark color
+	/**
+	 * Gets the ambient color (light or dark) for a ColorPicker.
+	 *
+	 * @param isLight - true for light mode, false for dark mode
+	 * @param input - Local input override (null means use tokens)
+	 * @returns Hex color string for the ColorPicker
+	 */
 	function getAmbientColor(isLight: boolean, input: string | null): string {
 		if (input !== null) {
 			return input;
@@ -98,7 +134,11 @@
 		return isLight ? '#fafafa' : '#09090b'; // Fallback
 	}
 
-	// Helper function to get radius value
+	/**
+	 * Gets the radius value, prioritizing local input over tokens.
+	 *
+	 * @returns Radius value in rem units (as a number)
+	 */
 	function getRadiusValue(): number {
 		if (radiusInput !== null) {
 			return radiusInput;
@@ -223,7 +263,13 @@
 		}
 	});
 
-	// Handler functions for color changes
+	/**
+	 * Handler for theme/notification color changes (primary, secondary, accent, success, warning, destructive, info).
+	 * Generates a new palette from the hex color and immediately updates tokens.
+	 *
+	 * @param flavor - The color flavor to update
+	 * @param hex - The new hex color value
+	 */
 	function handleColorChange(flavor: UJLTFlavor, hex: string) {
 		if (!hex) return;
 
@@ -243,42 +289,34 @@
 		}
 	}
 
+	/**
+	 * Handler for ambient light color changes.
+	 * Stores the input and lets the reactive effect handle the token update.
+	 *
+	 * @param hex - The new hex color value for light mode
+	 */
 	function handleAmbientLightChange(hex: string) {
 		if (!hex) return;
 		ambientLightInput = hex;
-		// Update tokens after a short delay to ensure ambientPalette is computed
-		setTimeout(() => {
-			if (ambientPalette) {
-				const colorSet = mapGeneratedPaletteToColorSet(ambientPalette);
-				crafter.updateTokenSet((oldTokens) => ({
-					...oldTokens,
-					color: {
-						...oldTokens.color,
-						ambient: colorSet
-					}
-				}));
-			}
-		}, 0);
 	}
 
+	/**
+	 * Handler for ambient dark color changes.
+	 * Stores the input and lets the reactive effect handle the token update.
+	 *
+	 * @param hex - The new hex color value for dark mode
+	 */
 	function handleAmbientDarkChange(hex: string) {
 		if (!hex) return;
 		ambientDarkInput = hex;
-		// Update tokens after a short delay to ensure ambientPalette is computed
-		setTimeout(() => {
-			if (ambientPalette) {
-				const colorSet = mapGeneratedPaletteToColorSet(ambientPalette);
-				crafter.updateTokenSet((oldTokens) => ({
-					...oldTokens,
-					color: {
-						...oldTokens.color,
-						ambient: colorSet
-					}
-				}));
-			}
-		}, 0);
 	}
 
+	/**
+	 * Handler for radius changes.
+	 * Updates the local input state and immediately commits to tokens.
+	 *
+	 * @param value - The new radius value in rem units
+	 */
 	function handleRadiusChange(value: number) {
 		radiusInput = value;
 		crafter.updateTokenSet((oldTokens) => ({
@@ -289,11 +327,34 @@
 
 	let radiusValue = $state(getRadiusValue());
 
-	// Watch for radius changes
+	/**
+	 * Keep the tokens.radius value in sync with the slider.
+	 * radiusValue is the UI state, radiusInput is used to override the token-derived value.
+	 * When the user moves the slider, radiusValue changes, which triggers this effect.
+	 */
 	$effect(() => {
 		const tokenValue = getRadiusValue();
 		if (radiusValue !== tokenValue) {
 			handleRadiusChange(radiusValue);
+		}
+	});
+
+	/**
+	 * Reactive effect that updates ambient tokens when the interpolated palette changes.
+	 * This replaces the setTimeout pattern by reacting to ambientPalette changes.
+	 * When ambientLightInput or ambientDarkInput change, ambientPalette is recomputed,
+	 * and this effect commits the new palette to tokens.
+	 */
+	$effect(() => {
+		if (ambientPalette && (ambientLightInput !== null || ambientDarkInput !== null)) {
+			const colorSet = mapGeneratedPaletteToColorSet(ambientPalette);
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: {
+					...oldTokens.color,
+					ambient: colorSet
+				}
+			}));
 		}
 	});
 

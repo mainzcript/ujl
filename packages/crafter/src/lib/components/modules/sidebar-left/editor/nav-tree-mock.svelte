@@ -1,3 +1,10 @@
+<!--
+	Temporary navigation tree mock component for visualizing document structure.
+
+	This component renders a collapsible tree structure from NavNode data.
+	It expects a flat NavNode tree with `name`, `key`, and `pages` properties.
+	This is a temporary solution until a proper UJLCSlotObject renderer is implemented.
+-->
 <script lang="ts">
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
@@ -15,21 +22,19 @@
 		SidebarMenuSubItem,
 		SidebarMenuSubButton
 	} from '@ujl-framework/ui';
+	import type { NavNode } from './types.js';
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let { nodes }: { nodes: any[] } = $props();
+	let { nodes }: { nodes: NavNode[] } = $props();
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function hasChildren(node: any): boolean {
+	/**
+	 * Checks if a node has children (non-empty pages array).
+	 */
+	function hasChildren(node: NavNode): boolean {
 		return node.pages !== undefined && node.pages.length > 0;
 	}
 </script>
 
-{#snippet renderNode(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	node: any,
-	level: number = 0
-)}
+{#snippet renderNode(node: NavNode, level: number = 0)}
 	{#if level === 0}
 		{#if hasChildren(node)}
 			<Collapsible>
