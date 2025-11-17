@@ -16,6 +16,7 @@
 	import SidebarRight from './sidebar-right/sidebar-right.svelte';
 	import Header from './header/header.svelte';
 	import Body from './body/preview.svelte';
+	import { type CrafterMode } from './types.js';
 
 	/**
 	 * Single Source of Truth: Load and validate documents
@@ -29,6 +30,23 @@
 	let ujltDocument = $state<UJLTDocument>(
 		validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
 	);
+
+	/**
+	 * Global mode state for the Crafter.
+	 * Controls whether the sidebar displays the Editor (UJLC) or Designer (UJLT) view.
+	 * This state is owned by app.svelte and passed down to SidebarLeft as a controlled prop.
+	 */
+	let mode = $state<CrafterMode>('editor');
+
+	/**
+	 * Handler for mode changes from the sidebar.
+	 * Updates the global mode state when the user switches between Editor and Designer.
+	 *
+	 * @param newMode - The new mode to switch to
+	 */
+	function handleModeChange(newMode: CrafterMode) {
+		mode = newMode;
+	}
 
 	/**
 	 * Updates the theme document (ujlt) by applying a functional updater to the token set.
@@ -81,7 +99,12 @@
 </script>
 
 <SidebarProvider>
-	<SidebarLeft tokenSet={ujltDocument.ujlt.tokens} contentSlot={ujlcDocument.ujlc.root} />
+	<SidebarLeft
+		{mode}
+		onModeChange={handleModeChange}
+		tokenSet={ujltDocument.ujlt.tokens}
+		contentSlot={ujlcDocument.ujlc.root}
+	/>
 	<SidebarInset>
 		<Header />
 		<Body {ujlcDocument} {ujltDocument} />

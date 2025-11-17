@@ -25,8 +25,10 @@ The Crafter manages two distinct document types:
 - **`app.svelte`** holds the central state:
   - `ujlcDocument: UJLCDocument` - The UJL content document (validated on initialization)
   - `ujltDocument: UJLTDocument` - The UJL theme document (validated on initialization)
-  - Both are validated on initialization using `validateUJLCDocument` and `validateUJLTDocument`
+  - `mode: CrafterMode` - The current sidebar mode ('editor' or 'designer'), controls which view is displayed
+  - Both documents are validated on initialization using `validateUJLCDocument` and `validateUJLTDocument`
   - These functions throw `ZodError` if validation fails, ensuring only valid documents are used
+  - The mode state is owned by `app.svelte` and passed down to `SidebarLeft` as a controlled prop
 
 ### Context API
 
@@ -58,8 +60,9 @@ This ensures:
   - Extracts `ujlcDocument.ujlc.root` → `contentSlot` prop
   - Provides `CrafterContext` via Svelte context API
 
-- **`sidebar-left.svelte`**: Receives `tokenSet` and `contentSlot` as props, routes to Editor/Designer
-  - Switches between Editor mode (UJLC) and Designer mode (UJLT) based on user selection
+- **`sidebar-left.svelte`**: Receives `tokenSet`, `contentSlot`, and `mode` as props, routes to Editor/Designer
+  - This is a controlled component - the mode state is owned by `app.svelte` and passed down
+  - Switches between Editor mode (UJLC) and Designer mode (UJLT) based on the `mode` prop
   - Forwards props to the appropriate child component
 
 - **`designer.svelte`**: Reads `tokens` (theme tokens) from props, uses context API for mutations
@@ -67,8 +70,8 @@ This ensures:
   - All changes go through `crafter.updateTokenSet()`
 
 - **`editor.svelte`**: Reads `slot` (content structure) from props, uses context API for mutations
-  - Currently shows a navigation tree of the document structure
-  - Prepared for future features like drag & drop, module selection
+  - Currently a placeholder implementation
+  - Will be extended with a navigation tree of the document structure
 
 - **`preview.svelte`**: Receives `ujlcDocument` and `ujltDocument` as props, renders via `@ujl-framework/adapter-svelte`
   - Composes the content document into an AST using `Composer`
