@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import NavTree from './nav-tree.svelte';
 	import EditorToolbar from './editor-toolbar.svelte';
+	import { getDocumentContext } from '$lib/components/modules/context/document-context.svelte.ts';
 	import {
 		findNodeById,
 		findParentOfNode,
@@ -14,16 +15,16 @@
 		hasSlots
 	} from './ujlc-tree-utils.js';
 
-	let { ujlcData = $bindable() }: { ujlcData: UJLCModuleObject[] } = $props();
-
-	// Clipboard State
-	let clipboardNode = $state<UJLCModuleObject | null>(null);
+	// Get document context from parent
+	const documentContext = getDocumentContext();
 
 	// selected node id from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
-	// selected node object
-	const selectedNode = $derived(selectedNodeId ? findNodeById(ujlcData, selectedNodeId) : null);
+	// selected node object from context
+	const selectedNode = $derived(
+		selectedNodeId ? findNodeById(documentContext.root, selectedNodeId) : null
+	);
 
 	// Cut Button is enabled if a node is selected and it's not the root node
 	const canCut = $derived(selectedNodeId !== null);
@@ -33,7 +34,7 @@
 	// - node is selected
 	// - selected Node has Slots
 	const canPaste = $derived(
-		clipboardNode !== null && selectedNode !== null && hasSlots(selectedNode)
+		documentContext.hasClipboard && selectedNode !== null && hasSlots(selectedNode)
 	);
 
 	/**
@@ -42,21 +43,21 @@
 	function handleCut() {
 		if (!selectedNodeId) return;
 
-		const node = findNodeById(ujlcData, selectedNodeId);
+		const node = findNodeById(documentContext.root, selectedNodeId);
 		if (!node) return;
 
 		// check if node is root
-		const parentInfo = findParentOfNode(ujlcData, selectedNodeId);
+		const parentInfo = findParentOfNode(documentContext.root, selectedNodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot cut root node');
 			return;
 		}
 
-		// save node to Clipboard
-		clipboardNode = node;
+		// save node to context clipboard
+		documentContext.cutNode(node);
 
 		// remove node from tree
-		ujlcData = removeNodeFromTree(ujlcData, selectedNodeId);
+		documentContext.root = removeNodeFromTree(documentContext.root, selectedNodeId);
 
 		console.log('Cut node:', node.meta.id);
 	}
@@ -65,9 +66,10 @@
 	 * Paste Handler - paste node from Clipboard into selected Node
 	 */
 	function handlePaste() {
+		const clipboardNode = documentContext.getClipboard();
 		if (!clipboardNode || !selectedNodeId) return;
 
-		const targetNode = findNodeById(ujlcData, selectedNodeId);
+		const targetNode = findNodeById(documentContext.root, selectedNodeId);
 		if (!targetNode) return;
 
 		// find first slot name of target node
@@ -78,12 +80,17 @@
 		}
 
 		// add node to target slot
-		ujlcData = insertNodeIntoSlot(ujlcData, selectedNodeId, slotName, clipboardNode);
+		documentContext.root = insertNodeIntoSlot(
+			documentContext.root,
+			selectedNodeId,
+			slotName,
+			clipboardNode
+		);
 
 		console.log('Pasted node into:', selectedNodeId, 'slot:', slotName);
 
 		// clear Clipboard
-		clipboardNode = null;
+		documentContext.clearClipboard();
 	}
 
 	/**
@@ -92,18 +99,18 @@
 	function handleDelete() {
 		if (!selectedNodeId) return;
 
-		const node = findNodeById(ujlcData, selectedNodeId);
+		const node = findNodeById(documentContext.root, selectedNodeId);
 		if (!node) return;
 
 		// check if node is root
-		const parentInfo = findParentOfNode(ujlcData, selectedNodeId);
+		const parentInfo = findParentOfNode(documentContext.root, selectedNodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot delete root node');
 			return;
 		}
 
 		// remove node from tree
-		ujlcData = removeNodeFromTree(ujlcData, selectedNodeId);
+		documentContext.root = removeNodeFromTree(documentContext.root, selectedNodeId);
 
 		console.log('Deleted node:', node.meta.id);
 	}
@@ -163,8 +170,8 @@
 	 */
 	function handleNodeMove(nodeId: string, targetId: string): boolean {
 		// Find the node and target
-		const node = findNodeById(ujlcData, nodeId);
-		const targetNode = findNodeById(ujlcData, targetId);
+		const node = findNodeById(documentContext.root, nodeId);
+		const targetNode = findNodeById(documentContext.root, targetId);
 
 		if (!node || !targetNode) {
 			console.warn('Node or target not found');
@@ -172,7 +179,7 @@
 		}
 
 		// Check if node is root
-		const parentInfo = findParentOfNode(ujlcData, nodeId);
+		const parentInfo = findParentOfNode(documentContext.root, nodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot move root node');
 			return false;
@@ -198,8 +205,8 @@
 		}
 
 		// Perform the move: remove from old position, insert at new position
-		const removedTree = removeNodeFromTree(ujlcData, nodeId);
-		ujlcData = insertNodeIntoSlot(removedTree, targetId, slotName, node);
+		const removedTree = removeNodeFromTree(documentContext.root, nodeId);
+		documentContext.root = insertNodeIntoSlot(removedTree, targetId, slotName, node);
 
 		console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', slotName);
 		return true;
@@ -232,8 +239,8 @@
 		position: 'before' | 'after'
 	): boolean {
 		// Find both nodes
-		const node = findNodeById(ujlcData, nodeId);
-		const targetNode = findNodeById(ujlcData, targetId);
+		const node = findNodeById(documentContext.root, nodeId);
+		const targetNode = findNodeById(documentContext.root, targetId);
 
 		if (!node || !targetNode) {
 			console.warn('Node or target not found');
@@ -241,8 +248,8 @@
 		}
 
 		// Get parent info for both nodes
-		const nodeParentInfo = findParentOfNode(ujlcData, nodeId);
-		const targetParentInfo = findParentOfNode(ujlcData, targetId);
+		const nodeParentInfo = findParentOfNode(documentContext.root, nodeId);
+		const targetParentInfo = findParentOfNode(documentContext.root, targetId);
 
 		if (!nodeParentInfo || !nodeParentInfo.parent) {
 			console.warn('Cannot reorder root node');
@@ -275,8 +282,8 @@
 		}
 
 		// Perform the reorder: remove from old position, insert at new position
-		const removedTree = removeNodeFromTree(ujlcData, nodeId);
-		ujlcData = insertNodeAtPosition(
+		const removedTree = removeNodeFromTree(documentContext.root, nodeId);
+		documentContext.root = insertNodeAtPosition(
 			removedTree,
 			nodeParentInfo.parent.meta.id,
 			nodeParentInfo.slotName,
@@ -298,6 +305,10 @@
 		{canPaste}
 	/>
 	<div class="p-2">
-		<NavTree nodes={ujlcData} onNodeMove={handleNodeMove} onNodeReorder={handleNodeReorder} />
+		<NavTree
+			nodes={documentContext.root}
+			onNodeMove={handleNodeMove}
+			onNodeReorder={handleNodeReorder}
+		/>
 	</div>
 </div>
