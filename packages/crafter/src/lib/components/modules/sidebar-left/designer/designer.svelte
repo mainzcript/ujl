@@ -24,9 +24,9 @@
 		mapGeneratedPaletteToColorSet
 	} from '$lib/tools/colors/index.js';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import ThemeColorsGroup from './_theme-colors-group.svelte';
-	import NotificationColorsGroup from './_notification-colors-group.svelte';
-	import AppearanceGroup from './_appearance-group.svelte';
+	import ThemeColorsGroup from './components/theme-colors-group.svelte';
+	import NotificationColorsGroup from './components/notification-colors-group.svelte';
+	import AppearanceGroup from './components/appearance-group.svelte';
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 

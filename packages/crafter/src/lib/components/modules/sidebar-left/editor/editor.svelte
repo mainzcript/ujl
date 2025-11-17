@@ -10,7 +10,7 @@
 -->
 <script lang="ts">
 	import type { UJLCSlotObject } from '@ujl-framework/types';
-	import NavTreeMock from './_nav-tree-mock.svelte';
+	import NavTreeMock from './components/nav-tree-mock.svelte';
 	import type { NavNode } from './types.js';
 
 	let { slot }: { slot: UJLCSlotObject } = $props();

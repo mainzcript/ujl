@@ -15,10 +15,10 @@
 	import PaletteIcon from '@lucide/svelte/icons/palette';
 	import type { UJLTTokenSet, UJLCSlotObject } from '@ujl-framework/types';
 
-	import Header from './_header.svelte';
+	import Header from './components/header.svelte';
 	import Editor from './editor/editor.svelte';
 	import Designer from './designer/designer.svelte';
-	import NavSecondary from './_nav-secondary.svelte';
+	import NavSecondary from './components/nav-secondary.svelte';
 	import { Sidebar, SidebarContent, SidebarRail } from '@ujl-framework/ui';
 	import type { Component, ComponentProps } from 'svelte';
 

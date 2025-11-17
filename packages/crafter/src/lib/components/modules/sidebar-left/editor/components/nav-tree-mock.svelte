@@ -22,7 +22,7 @@
 		SidebarMenuSubItem,
 		SidebarMenuSubButton
 	} from '@ujl-framework/ui';
-	import type { NavNode } from './types.js';
+	import type { NavNode } from '../types.js';
 
 	let { nodes }: { nodes: NavNode[] } = $props();
 

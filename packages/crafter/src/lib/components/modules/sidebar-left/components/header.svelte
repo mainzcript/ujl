@@ -5,8 +5,8 @@
 	while also accepting a callback for mode changes.
 -->
 <script lang="ts">
-	import ModeSwitcher from './_mode-switcher.svelte';
-	import NavMain from './_nav-main.svelte';
+	import ModeSwitcher from './mode-switcher.svelte';
+	import NavMain from './nav-main.svelte';
 	import { SidebarHeader } from '@ujl-framework/ui';
 	import type { Component } from 'svelte';
 
