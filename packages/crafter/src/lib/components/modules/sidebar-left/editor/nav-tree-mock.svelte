@@ -50,7 +50,7 @@
 					</CollapsibleTrigger>
 					<CollapsibleContent>
 						<SidebarMenuSub>
-							{#each node.pages as page (page.name)}
+							{#each node.pages as page (page.key || page.name)}
 								<SidebarMenuSubItem>
 									{@render renderNode(page, level + 1)}
 								</SidebarMenuSubItem>
@@ -84,7 +84,7 @@
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<SidebarMenuSub>
-					{#each node.pages as page (page.name)}
+					{#each node.pages as page (page.key || page.name)}
 						<SidebarMenuSubItem>
 							{@render renderNode(page, level + 1)}
 						</SidebarMenuSubItem>
@@ -103,7 +103,7 @@
 	<SidebarGroupLabel>Document</SidebarGroupLabel>
 	<SidebarGroupContent>
 		<SidebarMenu>
-			{#each nodes as node (node.name)}
+			{#each nodes as node (node.key || node.name)}
 				{@render renderNode(node)}
 			{/each}
 		</SidebarMenu>

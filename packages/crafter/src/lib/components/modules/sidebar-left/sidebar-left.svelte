@@ -4,6 +4,7 @@
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import PencilRulerIcon from '@lucide/svelte/icons/pencil-ruler';
 	import PaletteIcon from '@lucide/svelte/icons/palette';
+	import type { UJLTTokenSet, UJLCSlotObject } from '@ujl-framework/types';
 
 	import Header from './header.svelte';
 	import Editor from './editor/editor.svelte';
@@ -51,49 +52,6 @@
 				url: '#',
 				icon: MessageCircleQuestionIcon
 			}
-		],
-		nodes: [
-			{
-				name: 'UJL Framework Example',
-				pages: [
-					{
-						name: 'Main Container',
-						pages: [
-							{
-								name: 'Hero Text'
-							},
-							{
-								name: 'Features Grid',
-								pages: [
-									{
-										name: 'Type-Safe Fields'
-									},
-									{
-										name: 'Modular Architecture'
-									},
-									{
-										name: 'Flexible Rendering'
-									}
-								]
-							},
-							{
-								name: 'Description Text'
-							},
-							{
-								name: 'Try UJL Framework Button'
-							},
-							{
-								name: 'Nested Container',
-								pages: [
-									{
-										name: 'Call-to-Action'
-									}
-								]
-							}
-						]
-					}
-				]
-			}
 		]
 	};
 
@@ -103,16 +61,24 @@
 		activeMode = mode;
 	}
 
-	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
+	let {
+		tokenSet,
+		contentSlot,
+		ref = $bindable(null),
+		...restProps
+	}: ComponentProps<typeof Sidebar> & {
+		tokenSet: UJLTTokenSet;
+		contentSlot: UJLCSlotObject;
+	} = $props();
 </script>
 
 <Sidebar class="border-r-0" bind:ref {...restProps}>
-	<Header {activeMode} onModeChange={handleModeChange} navMainItems={data.navMain} />
+	<Header bind:activeMode onModeChange={handleModeChange} navMainItems={data.navMain} />
 	<SidebarContent>
 		{#if activeMode.fileType === 'ujlc'}
-			<Editor nodes={data.nodes} />
+			<Editor slot={contentSlot} />
 		{:else}
-			<Designer />
+			<Designer tokens={tokenSet} />
 		{/if}
 		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</SidebarContent>

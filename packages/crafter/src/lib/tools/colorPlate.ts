@@ -98,7 +98,16 @@ const REFERENCE_COLORS: ReferenceColor[] = precomputeReferenceColors();
 export function hexToOklch(hex: string): UJLTOklch {
 	const color = new Color(hex);
 	const [l, c, h] = color.to('oklch').coords;
-	return { l, c, h: h ?? 0 };
+	// Handle NaN for achromatic colors (black, white, gray) - they have no hue
+	return { l, c, h: Number.isNaN(h) ? 0 : (h ?? 0) };
+}
+
+/**
+ * Converts OKLCH color to HEX string
+ */
+export function oklchToHex(oklch: UJLTOklch): string {
+	const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]).toGamut();
+	return color.to('srgb').toString({ format: 'hex' });
 }
 
 // ============================================

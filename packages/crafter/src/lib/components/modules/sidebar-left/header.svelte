@@ -11,7 +11,7 @@
 	};
 
 	let {
-		activeMode,
+		activeMode = $bindable(),
 		onModeChange,
 		navMainItems
 	}: {
