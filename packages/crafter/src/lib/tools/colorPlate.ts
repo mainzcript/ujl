@@ -2,16 +2,11 @@ import Color from 'colorjs.io';
 // @ts-expect-error - apca-w3 doesn't have TypeScript definitions
 import { APCAcontrast, sRGBtoY } from 'apca-w3';
 import { tailwindColorPlate } from './tailwindColorPlate.js';
+import type { UJLTOklch } from '@ujl-framework/types';
 
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
-
-export type OKLCH = {
-	l: number;
-	c: number;
-	h: number;
-};
 
 export type OKLab = {
 	L: number;
@@ -28,19 +23,19 @@ export type ReferenceColor = {
 	shade: number; // Shade value: 50, 100, 200, ..., 950
 	hex: string;
 	oklab: OKLab;
-	oklch: OKLCH;
+	oklch: UJLTOklch;
 };
 
 export type GeneratedPalette = {
 	baseHex: string;
-	baseOklch: OKLCH;
-	shades: Record<number, { hex: string; oklch: OKLCH }>;
-	light: { hex: string; oklch: OKLCH; shade: number };
-	dark: { hex: string; oklch: OKLCH; shade: number };
-	lightFg: { hex: string; oklch: OKLCH };
-	darkFg: { hex: string; oklch: OKLCH };
-	lightText: { hex: string; oklch: OKLCH; shade: number };
-	darkText: { hex: string; oklch: OKLCH; shade: number };
+	baseOklch: UJLTOklch;
+	shades: Record<number, { hex: string; oklch: UJLTOklch }>;
+	light: { hex: string; oklch: UJLTOklch; shade: number };
+	dark: { hex: string; oklch: UJLTOklch; shade: number };
+	lightFg: { hex: string; oklch: UJLTOklch };
+	darkFg: { hex: string; oklch: UJLTOklch };
+	lightText: { hex: string; oklch: UJLTOklch };
+	darkText: { hex: string; oklch: UJLTOklch };
 };
 
 // ============================================
@@ -59,6 +54,9 @@ const LIGHT_DARK_MIX_FACTOR = 0.5; // For 50/50 mix of light and dark
 
 // Blending constant
 const BLEND_RADIUS = 5; // Number of shade steps left/right for palette blending and smoothing
+
+// APCA contrast threshold for text colors
+const TEXT_CONTRAST_THRESHOLD = 60; // Minimum APCA contrast for text colors on light/dark backgrounds
 
 /**
  * Precomputes all reference colors from the Tailwind palette with OKLab and OKLCH values
@@ -97,7 +95,7 @@ const REFERENCE_COLORS: ReferenceColor[] = precomputeReferenceColors();
 /**
  * Converts HEX color to OKLCH
  */
-export function hexToOklch(hex: string): OKLCH {
+export function hexToOklch(hex: string): UJLTOklch {
 	const color = new Color(hex);
 	const [l, c, h] = color.to('oklch').coords;
 	return { l, c, h: h ?? 0 };
@@ -161,11 +159,11 @@ function determineBestForegroundColor(backgroundHex: string, candidateColors: st
  * @returns The shade number that meets requirements, or null if none found
  */
 function findBestContrastShade(
-	shades: Record<number, { hex: string; oklch: OKLCH }>,
+	shades: Record<number, { hex: string; oklch: UJLTOklch }>,
 	favoriteShade: number,
 	contrastColor: string,
 	mode: 'bg' | 'fg',
-	threshold: number = 60 // WCAG Level AA equivalent
+	threshold: number = TEXT_CONTRAST_THRESHOLD
 ): number | null {
 	if (Object.keys(shades).length === 0) {
 		return null;
@@ -290,7 +288,7 @@ function findClosestReferenceColor(inputHex: string): {
  * Returns the color that forms a hue pair with the first color around the input hue
  */
 function findSecondColorAtSameShade(
-	inputOklch: OKLCH,
+	inputOklch: UJLTOklch,
 	firstColor: ReferenceColor
 ): ReferenceColor | null {
 	// Get all reference colors at the same shade
@@ -352,8 +350,8 @@ function interpolateReferencePalettes(
 	primaryColorName: string,
 	secondaryColorName: string,
 	factor: number
-): Record<number, { hex: string; oklch: OKLCH }> {
-	const result: Record<number, { hex: string; oklch: OKLCH }> = {};
+): Record<number, { hex: string; oklch: UJLTOklch }> {
+	const result: Record<number, { hex: string; oklch: UJLTOklch }> = {};
 
 	for (const shade of SHADES) {
 		const primaryColor = REFERENCE_COLORS.find(
@@ -420,7 +418,7 @@ function calculateInterpolationFactor(inputHue: number, hue1: number, hue2: numb
 /**
  * Finds the closest shade where the input color should be anchored
  */
-function findClosestShade(palette: Record<number, { oklch: OKLCH }>, input: OKLCH): number {
+function findClosestShade(palette: Record<number, { oklch: UJLTOklch }>, input: UJLTOklch): number {
 	let bestShade = MID_SHADE;
 	let bestDist = Infinity;
 	const inputLab = new Color('oklch', [input.l, input.c, input.h]).to('oklab').coords;
@@ -449,12 +447,12 @@ function findClosestShade(palette: Record<number, { oklch: OKLCH }>, input: OKLC
  * This prevents hard edges when blending with the base palette
  */
 function buildPureHuePalette(
-	basePalette: Record<number, { oklch: OKLCH }>,
-	input: OKLCH,
+	basePalette: Record<number, { oklch: UJLTOklch }>,
+	input: UJLTOklch,
 	anchorShade: number,
 	radius = BLEND_RADIUS
-): Record<number, { oklch: OKLCH; hex: string }> {
-	const pureHuePalette: Record<number, { oklch: OKLCH; hex: string }> = {};
+): Record<number, { oklch: UJLTOklch; hex: string }> {
+	const pureHuePalette: Record<number, { oklch: UJLTOklch; hex: string }> = {};
 	const anchorIndex = SHADES.indexOf(anchorShade as (typeof SHADES)[number]);
 
 	for (let i = 0; i < SHADES.length; i++) {
@@ -469,7 +467,7 @@ function buildPureHuePalette(
 		const c = base.oklch.c * (1 - w) + input.c * w;
 		const h = input.h;
 
-		const oklch: OKLCH = { l, c, h };
+		const oklch: UJLTOklch = { l, c, h };
 
 		const color = new Color('oklch', [oklch.l, oklch.c, oklch.h]).toGamut();
 		const hex = color.to('srgb').toString({ format: 'hex' });
@@ -500,12 +498,12 @@ function ease(dist: number, radius: number): number {
  * @returns A blended palette with smooth transitions
  */
 function blendPalettes(
-	basePalette: Record<number, { oklch: OKLCH; hex: string }>,
-	pureHuePalette: Record<number, { oklch: OKLCH; hex: string }>,
+	basePalette: Record<number, { oklch: UJLTOklch; hex: string }>,
+	pureHuePalette: Record<number, { oklch: UJLTOklch; hex: string }>,
 	anchorShade: number,
 	radius = BLEND_RADIUS
-): Record<number, { oklch: OKLCH; hex: string }> {
-	const blended: Record<number, { oklch: OKLCH; hex: string }> = {};
+): Record<number, { oklch: UJLTOklch; hex: string }> {
+	const blended: Record<number, { oklch: UJLTOklch; hex: string }> = {};
 	const anchorIndex = SHADES.indexOf(anchorShade as (typeof SHADES)[number]);
 
 	for (let i = 0; i < SHADES.length; i++) {
@@ -541,9 +539,9 @@ function blendPalettes(
  * smooth transitions and Tailwind-like harmony
  */
 export function refinePaletteWithInputColor(
-	basePalette: Record<number, { hex: string; oklch: OKLCH }>,
-	input: OKLCH
-): Record<number, { hex: string; oklch: OKLCH }> {
+	basePalette: Record<number, { hex: string; oklch: UJLTOklch }>,
+	input: UJLTOklch
+): Record<number, { hex: string; oklch: UJLTOklch }> {
 	const anchorShade = findClosestShade(basePalette, input);
 	const pureHuePalette = buildPureHuePalette(basePalette, input, anchorShade);
 	const refinedPalette = blendPalettes(basePalette, pureHuePalette, anchorShade);
@@ -567,9 +565,9 @@ export function refinePaletteWithInputColor(
  */
 function getTextColorWithFallback(
 	shade: number | null,
-	shades: Record<number, { hex: string; oklch: OKLCH }>,
+	shades: Record<number, { hex: string; oklch: UJLTOklch }>,
 	fallbackShade: number
-): { hex: string; oklch: OKLCH } {
+): { hex: string; oklch: UJLTOklch } {
 	if (shade !== null && shades[shade]) {
 		return shades[shade];
 	}
@@ -586,15 +584,15 @@ function getTextColorWithFallback(
  * @returns Object with light, dark, lightFg, darkFg, lightText, and darkText color information
  */
 function addLightDarkColorsWithAPCA(
-	shades: Record<number, { hex: string; oklch: OKLCH }>,
+	shades: Record<number, { hex: string; oklch: UJLTOklch }>,
 	favoriteShade: number
 ): {
-	light: { hex: string; oklch: OKLCH; shade: number };
-	dark: { hex: string; oklch: OKLCH; shade: number };
-	lightFg: { hex: string; oklch: OKLCH };
-	darkFg: { hex: string; oklch: OKLCH };
-	lightText: { hex: string; oklch: OKLCH; shade: number };
-	darkText: { hex: string; oklch: OKLCH; shade: number };
+	light: { hex: string; oklch: UJLTOklch; shade: number };
+	dark: { hex: string; oklch: UJLTOklch; shade: number };
+	lightFg: { hex: string; oklch: UJLTOklch };
+	darkFg: { hex: string; oklch: UJLTOklch };
+	lightText: { hex: string; oklch: UJLTOklch };
+	darkText: { hex: string; oklch: UJLTOklch };
 } {
 	const lightShade = findBestContrastShade(shades, favoriteShade, '#ffffff', 'fg', 5);
 	const darkShade = findBestContrastShade(shades, favoriteShade, '#000000', 'fg', 5);
@@ -614,9 +612,21 @@ function addLightDarkColorsWithAPCA(
 	const lightFgHex = determineBestForegroundColor(lightColor.hex, foregroundCandidates);
 	const darkFgHex = determineBestForegroundColor(darkColor.hex, foregroundCandidates);
 
-	// Find text colors with at least 65 APCA contrast
-	const lightTextShade = findBestContrastShade(shades, favoriteShade, '#ffffff', 'fg', 65);
-	const darkTextShade = findBestContrastShade(shades, favoriteShade, '#000000', 'fg', 65);
+	// Find text colors with minimum APCA contrast threshold
+	const lightTextShade = findBestContrastShade(
+		shades,
+		favoriteShade,
+		'#ffffff',
+		'fg',
+		TEXT_CONTRAST_THRESHOLD
+	);
+	const darkTextShade = findBestContrastShade(
+		shades,
+		favoriteShade,
+		'#000000',
+		'fg',
+		TEXT_CONTRAST_THRESHOLD
+	);
 
 	const lightTextColor = getTextColorWithFallback(lightTextShade, shades, DARK_SHADE);
 	const darkTextColor = getTextColorWithFallback(darkTextShade, shades, LIGHT_SHADE);
@@ -642,13 +652,11 @@ function addLightDarkColorsWithAPCA(
 		},
 		lightText: {
 			hex: lightTextColor.hex,
-			oklch: lightTextColor.oklch,
-			shade: lightTextShade ?? DARK_SHADE
+			oklch: lightTextColor.oklch
 		},
 		darkText: {
 			hex: darkTextColor.hex,
-			oklch: darkTextColor.oklch,
-			shade: darkTextShade ?? LIGHT_SHADE
+			oklch: darkTextColor.oklch
 		}
 	};
 }
@@ -659,13 +667,15 @@ function addLightDarkColorsWithAPCA(
  * @param shades - The shades record
  * @returns Object with light, dark, lightFg, darkFg, lightText, and darkText color information
  */
-function addLightDarkColorsFromExtremes(shades: Record<number, { hex: string; oklch: OKLCH }>): {
-	light: { hex: string; oklch: OKLCH; shade: number };
-	dark: { hex: string; oklch: OKLCH; shade: number };
-	lightFg: { hex: string; oklch: OKLCH };
-	darkFg: { hex: string; oklch: OKLCH };
-	lightText: { hex: string; oklch: OKLCH; shade: number };
-	darkText: { hex: string; oklch: OKLCH; shade: number };
+function addLightDarkColorsFromExtremes(
+	shades: Record<number, { hex: string; oklch: UJLTOklch }>
+): {
+	light: { hex: string; oklch: UJLTOklch; shade: number };
+	dark: { hex: string; oklch: UJLTOklch; shade: number };
+	lightFg: { hex: string; oklch: UJLTOklch };
+	darkFg: { hex: string; oklch: UJLTOklch };
+	lightText: { hex: string; oklch: UJLTOklch };
+	darkText: { hex: string; oklch: UJLTOklch };
 } {
 	const lightColor = shades[LIGHT_SHADE] ?? Object.values(shades)[0];
 	const darkColor = shades[DARK_SHADE] ?? Object.values(shades)[Object.values(shades).length - 1];
@@ -675,10 +685,22 @@ function addLightDarkColorsFromExtremes(shades: Record<number, { hex: string; ok
 	const lightFgHex = determineBestForegroundColor(lightColor.hex, foregroundCandidates);
 	const darkFgHex = determineBestForegroundColor(darkColor.hex, foregroundCandidates);
 
-	// Find text colors with at least 65 APCA contrast
+	// Find text colors with minimum APCA contrast threshold
 	const favoriteShade = MID_SHADE;
-	const lightTextShade = findBestContrastShade(shades, favoriteShade, '#ffffff', 'fg', 65);
-	const darkTextShade = findBestContrastShade(shades, favoriteShade, '#000000', 'fg', 65);
+	const lightTextShade = findBestContrastShade(
+		shades,
+		favoriteShade,
+		'#ffffff',
+		'fg',
+		TEXT_CONTRAST_THRESHOLD
+	);
+	const darkTextShade = findBestContrastShade(
+		shades,
+		favoriteShade,
+		'#000000',
+		'fg',
+		TEXT_CONTRAST_THRESHOLD
+	);
 
 	const lightTextColor = getTextColorWithFallback(lightTextShade, shades, DARK_SHADE);
 	const darkTextColor = getTextColorWithFallback(darkTextShade, shades, LIGHT_SHADE);
@@ -704,13 +726,11 @@ function addLightDarkColorsFromExtremes(shades: Record<number, { hex: string; ok
 		},
 		lightText: {
 			hex: lightTextColor.hex,
-			oklch: lightTextColor.oklch,
-			shade: lightTextShade ?? DARK_SHADE
+			oklch: lightTextColor.oklch
 		},
 		darkText: {
 			hex: darkTextColor.hex,
-			oklch: darkTextColor.oklch,
-			shade: darkTextShade ?? LIGHT_SHADE
+			oklch: darkTextColor.oklch
 		}
 	};
 }
@@ -735,7 +755,7 @@ function mixLightMidDark(lightColor: string, midColor: string, darkColor: string
  */
 export function getReferencePalette(colorName: string): GeneratedPalette {
 	const referenceColors = REFERENCE_COLORS.filter((c) => c.name === colorName);
-	const shades: Record<number, { hex: string; oklch: OKLCH }> = {};
+	const shades: Record<number, { hex: string; oklch: UJLTOklch }> = {};
 
 	for (const color of referenceColors) {
 		shades[color.shade] = {
@@ -783,7 +803,7 @@ export function interpolateAmbientPalette(
 	midPalette: GeneratedPalette,
 	darkPalette: GeneratedPalette
 ): GeneratedPalette {
-	const result: Record<number, { hex: string; oklch: OKLCH }> = {};
+	const result: Record<number, { hex: string; oklch: UJLTOklch }> = {};
 
 	for (const shade of SHADES) {
 		const lightColor = lightPalette.shades[shade];

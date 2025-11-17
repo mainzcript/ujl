@@ -245,6 +245,34 @@
 							<GridItem>
 								<Card>
 									<CardHeader>
+										<CardTitle>Text Colors</CardTitle>
+										<CardDescription
+											>Text colors optimized for light and dark backgrounds.</CardDescription
+										>
+									</CardHeader>
+									<CardContent>
+										<div class="space-y-4">
+											<div class="space-y-2">
+												<div class="rounded-lg border border-border bg-white p-4">
+													<Text style="color: oklch(var(--{flavor}-light-text));"
+														>This text uses the {flavor} color optimized for light backgrounds.</Text
+													>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="rounded-lg border border-border bg-black p-4">
+													<Text style="color: oklch(var(--{flavor}-dark-text));"
+														>This text uses the {flavor} color optimized for dark backgrounds.</Text
+													>
+												</div>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							</GridItem>
+							<GridItem>
+								<Card>
+									<CardHeader>
 										<CardTitle>Buttons</CardTitle>
 									</CardHeader>
 									<CardContent>

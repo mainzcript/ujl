@@ -15,7 +15,8 @@
 	import {
 		generateColorPalette,
 		interpolateAmbientPalette,
-		getReferencePalette
+		getReferencePalette,
+		type GeneratedPalette
 	} from '$lib/tools/colorPlate.js';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MoonIcon from '@lucide/svelte/icons/moon';
@@ -142,7 +143,7 @@
 	const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 </script>
 
-{#snippet palettePreview(palette: ReturnType<typeof generateColorPalette> | null)}
+{#snippet palettePreview(palette: GeneratedPalette | null)}
 	{#if palette}
 		<div class="space-y-2 pt-2">
 			<div class="grid grid-cols-11 overflow-hidden rounded border border-border">
@@ -162,7 +163,7 @@
 						<SunIcon size="14" />
 					</div>
 				</div>
-				<div class="rounded border border-border bg-ambient-100/90">
+				<div class="rounded border border-border bg-white">
 					<div style="color: {palette.lightText.hex};" class="flex h-6 items-center justify-center">
 						<SunIcon class="h-4 w-4" />
 					</div>
@@ -172,7 +173,7 @@
 						<MoonIcon class="h-4 w-4" />
 					</div>
 				</div>
-				<div class="rounded border border-border bg-ambient-900/90">
+				<div class="rounded border border-border bg-black">
 					<div style="color: {palette.darkText.hex};" class="flex h-6 items-center justify-center">
 						<MoonIcon class="h-4 w-4" />
 					</div>
@@ -223,7 +224,7 @@
 							{/each}
 						</div>
 						<div class="grid grid-cols-2 gap-2">
-							<div class="rounded border border-border bg-ambient-100/90">
+							<div class="rounded border border-border bg-white">
 								<div
 									style="color: {ambientPalette.lightText.hex};"
 									class="flex h-6 items-center justify-center"
@@ -231,7 +232,7 @@
 									<SunIcon class="h-4 w-4" />
 								</div>
 							</div>
-							<div class="rounded border border-border bg-ambient-900/90">
+							<div class="rounded border border-border bg-black">
 								<div
 									style="color: {ambientPalette.darkText.hex};"
 									class="flex h-6 items-center justify-center"

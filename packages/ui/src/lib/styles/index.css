@@ -253,6 +253,8 @@
 	--color-primary-900: oklch(var(--primary-900));
 	--color-primary-950: oklch(var(--primary-950));
 	--color-primary-foreground: oklch(var(--primary-foreground));
+	--color-primary-light-text: oklch(var(--primary-light-text));
+	--color-primary-dark-text: oklch(var(--primary-dark-text));
 
 	/* Secondary color */
 	--color-secondary: oklch(var(--secondary));
@@ -268,6 +270,8 @@
 	--color-secondary-900: oklch(var(--secondary-900));
 	--color-secondary-950: oklch(var(--secondary-950));
 	--color-secondary-foreground: oklch(var(--secondary-foreground));
+	--color-secondary-light-text: oklch(var(--secondary-light-text));
+	--color-secondary-dark-text: oklch(var(--secondary-dark-text));
 
 	/* Accent color */
 	--color-accent: oklch(var(--accent));
@@ -283,6 +287,8 @@
 	--color-accent-900: oklch(var(--accent-900));
 	--color-accent-950: oklch(var(--accent-950));
 	--color-accent-foreground: oklch(var(--accent-foreground));
+	--color-accent-light-text: oklch(var(--accent-light-text));
+	--color-accent-dark-text: oklch(var(--accent-dark-text));
 
 	/* Ambient color */
 	--color-ambient: oklch(var(--ambient));
@@ -298,6 +304,8 @@
 	--color-ambient-900: oklch(var(--ambient-900));
 	--color-ambient-950: oklch(var(--ambient-950));
 	--color-ambient-foreground: oklch(var(--ambient-foreground));
+	--color-ambient-light-text: oklch(var(--ambient-light-text));
+	--color-ambient-dark-text: oklch(var(--ambient-dark-text));
 
 	/* Success color */
 	--color-success: oklch(var(--success));
@@ -313,6 +321,8 @@
 	--color-success-900: oklch(var(--success-900));
 	--color-success-950: oklch(var(--success-950));
 	--color-success-foreground: oklch(var(--success-foreground));
+	--color-success-light-text: oklch(var(--success-light-text));
+	--color-success-dark-text: oklch(var(--success-dark-text));
 
 	/* Warning color */
 	--color-warning: oklch(var(--warning));
@@ -328,6 +338,8 @@
 	--color-warning-900: oklch(var(--warning-900));
 	--color-warning-950: oklch(var(--warning-950));
 	--color-warning-foreground: oklch(var(--warning-foreground));
+	--color-warning-light-text: oklch(var(--warning-light-text));
+	--color-warning-dark-text: oklch(var(--warning-dark-text));
 
 	/* Destructive color */
 	--color-destructive: oklch(var(--destructive));
@@ -343,6 +355,8 @@
 	--color-destructive-900: oklch(var(--destructive-900));
 	--color-destructive-950: oklch(var(--destructive-950));
 	--color-destructive-foreground: oklch(var(--destructive-foreground));
+	--color-destructive-light-text: oklch(var(--destructive-light-text));
+	--color-destructive-dark-text: oklch(var(--destructive-dark-text));
 
 	/* Info color */
 	--color-info: oklch(var(--info));
@@ -358,6 +372,8 @@
 	--color-info-900: oklch(var(--info-900));
 	--color-info-950: oklch(var(--info-950));
 	--color-info-foreground: oklch(var(--info-foreground));
+	--color-info-light-text: oklch(var(--info-light-text));
+	--color-info-dark-text: oklch(var(--info-dark-text));
 
 	/* Other shadcn colors */
 	--color-popover: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);
