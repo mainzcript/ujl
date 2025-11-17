@@ -1,5 +1,5 @@
 import type { UJLTColorSet } from '@ujl-framework/types';
-import type { GeneratedPalette } from './colorPlate.js';
+import type { GeneratedPalette } from './palettes.js';
 
 /**
  * Converts a GeneratedPalette to a UJLTColorSet.

@@ -18,11 +18,7 @@ import { tailwindColorPlate } from './tailwindColorPlate.js';
 import type { UJLTOklch } from '@ujl-framework/types';
 import { hexToOklch, distanceOKLab, hueDistance } from './colorSpaces.js';
 import type { OKLab } from './colorSpaces.js';
-import {
-	addLightDarkColorsWithAPCA,
-	findBestContrastShade,
-	getTextColorWithFallback
-} from './contrast.js';
+import { addLightDarkColorsWithAPCA } from './contrast.js';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -62,13 +58,8 @@ export type GeneratedPalette = {
 
 const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
-// Shade constants for ambient palette interpolation
-const LIGHT_SHADE = 50;
+// Shade constants
 const MID_SHADE = 500;
-const DARK_SHADE = 950;
-const SHADE_RANGE_TO_MID = MID_SHADE - LIGHT_SHADE; // 450
-const SHADE_RANGE_FROM_MID = DARK_SHADE - MID_SHADE; // 450
-const LIGHT_DARK_MIX_FACTOR = 0.5; // For 50/50 mix of light and dark
 
 // Blending constant
 const BLEND_RADIUS = 5; // Number of shade steps left/right for palette blending and smoothing
@@ -435,7 +426,7 @@ function blendPalettes(
  * @param input - The exact input color that should appear in the palette
  * @returns A refined palette with the input color anchored at the correct shade
  */
-export function refinePaletteWithInputColor(
+function refinePaletteWithInputColor(
 	basePalette: Record<number, { hex: string; oklch: UJLTOklch }>,
 	input: UJLTOklch
 ): Record<number, { hex: string; oklch: UJLTOklch }> {
@@ -451,230 +442,6 @@ export function refinePaletteWithInputColor(
 	};
 
 	return refinedPalette;
-}
-
-// ============================================
-// PALETTE ENRICHMENT (Light/Dark Colors)
-// ============================================
-
-/**
- * Adds light and dark colors to a palette using the extreme shades.
- * Used for reference palettes where APCA validation is not needed.
- *
- * @param shades - The shades record
- * @returns Object with light, dark, lightFg, darkFg, lightText, and darkText color information
- */
-function addLightDarkColorsFromExtremes(
-	shades: Record<number, { hex: string; oklch: UJLTOklch }>
-): {
-	light: { hex: string; oklch: UJLTOklch; shade: number };
-	dark: { hex: string; oklch: UJLTOklch; shade: number };
-	lightFg: { hex: string; oklch: UJLTOklch };
-	darkFg: { hex: string; oklch: UJLTOklch };
-	lightText: { hex: string; oklch: UJLTOklch };
-	darkText: { hex: string; oklch: UJLTOklch };
-} {
-	const lightColor = shades[LIGHT_SHADE] ?? Object.values(shades)[0];
-	const darkColor = shades[DARK_SHADE] ?? Object.values(shades)[Object.values(shades).length - 1];
-
-	// Note: determineBestForegroundColor is not exported from contrast.ts, so we'll inline a simple version
-	// For reference palettes, we can use a simpler approach
-	const lightFgHex = '#000000'; // Typically black on light
-	const darkFgHex = '#ffffff'; // Typically white on dark
-
-	// Find text colors with minimum APCA contrast threshold
-	const favoriteShade = MID_SHADE;
-	const lightTextShade = findBestContrastShade(
-		shades,
-		favoriteShade,
-		'#ffffff',
-		'fg',
-		60 // TEXT_CONTRAST_THRESHOLD
-	);
-	const darkTextShade = findBestContrastShade(
-		shades,
-		favoriteShade,
-		'#000000',
-		'fg',
-		60 // TEXT_CONTRAST_THRESHOLD
-	);
-
-	const lightTextColor = getTextColorWithFallback(lightTextShade, shades, DARK_SHADE);
-	const darkTextColor = getTextColorWithFallback(darkTextShade, shades, LIGHT_SHADE);
-
-	return {
-		light: {
-			hex: lightColor.hex,
-			oklch: lightColor.oklch,
-			shade: LIGHT_SHADE
-		},
-		dark: {
-			hex: darkColor.hex,
-			oklch: darkColor.oklch,
-			shade: DARK_SHADE
-		},
-		lightFg: {
-			hex: lightFgHex,
-			oklch: hexToOklch(lightFgHex)
-		},
-		darkFg: {
-			hex: darkFgHex,
-			oklch: hexToOklch(darkFgHex)
-		},
-		lightText: {
-			hex: lightTextColor.hex,
-			oklch: lightTextColor.oklch
-		},
-		darkText: {
-			hex: darkTextColor.hex,
-			oklch: darkTextColor.oklch
-		}
-	};
-}
-
-// ============================================
-// PALETTE INTERPOLATION
-// ============================================
-
-/**
- * Creates a 25% light + 50% mid + 25% dark color mix.
- * This is achieved by first mixing light and dark 50/50, then mixing the result with mid 50/50.
- *
- * @param lightColor - Light color in hex
- * @param midColor - Mid color in hex
- * @param darkColor - Dark color in hex
- * @returns Mixed color in Color.js format
- */
-function mixLightMidDark(lightColor: string, midColor: string, darkColor: string): Color {
-	const lightDarkMix = Color.mix(lightColor, darkColor, LIGHT_DARK_MIX_FACTOR, { space: 'oklab' });
-	return Color.mix(lightDarkMix, midColor, LIGHT_DARK_MIX_FACTOR, { space: 'oklab' });
-}
-
-/**
- * Gets a reference palette (e.g., zinc) as a GeneratedPalette.
- * Reference palettes are pre-computed Tailwind color families that can be used
- * as a basis for interpolation or as-is.
- *
- * @param colorName - Name of the reference color family (e.g., "zinc", "blue", "red")
- * @returns A GeneratedPalette from the reference colors
- * @throws {Error} If the color name doesn't exist or doesn't have shade 500
- *
- * @example
- * ```ts
- * const zincPalette = getReferencePalette("zinc");
- * ```
- */
-export function getReferencePalette(colorName: string): GeneratedPalette {
-	const referenceColors = REFERENCE_COLORS.filter((c) => c.name === colorName);
-	const shades: Record<number, { hex: string; oklch: UJLTOklch }> = {};
-
-	for (const color of referenceColors) {
-		shades[color.shade] = {
-			hex: color.hex,
-			oklch: color.oklch
-		};
-	}
-
-	// Use mid shade (500) as base color
-	const baseColor = referenceColors.find((c) => c.shade === MID_SHADE);
-	if (!baseColor) {
-		throw new Error(`Reference palette "${colorName}" does not have shade ${MID_SHADE}`);
-	}
-
-	// For reference palettes, use extreme shades (no APCA needed)
-	const { light, dark, lightFg, darkFg, lightText, darkText } =
-		addLightDarkColorsFromExtremes(shades);
-
-	return {
-		baseHex: baseColor.hex,
-		baseOklch: baseColor.oklch,
-		shades,
-		light,
-		dark,
-		lightFg,
-		darkFg,
-		lightText,
-		darkText
-	};
-}
-
-/**
- * Interpolates three palettes (light, mid, dark) into a single ambient palette.
- *
- * The interpolation strategy:
- * - Shade 50 uses 100% light palette
- * - Shade 500 uses 25% light + 50% mid + 25% dark
- * - Shade 950 uses 100% dark palette
- * - Intermediate shades are linearly interpolated between the appropriate pairs
- *
- * @param lightPalette - The light palette (used at shade 50)
- * @param midPalette - The mid palette (contributes 50% at shade 500)
- * @param darkPalette - The dark palette (used at shade 950)
- * @returns A new interpolated ambient palette with APCA-validated text colors
- *
- * @example
- * ```ts
- * const ambient = interpolateAmbientPalette(lightPal, zincPal, darkPal);
- * ```
- */
-export function interpolateAmbientPalette(
-	lightPalette: GeneratedPalette,
-	midPalette: GeneratedPalette,
-	darkPalette: GeneratedPalette
-): GeneratedPalette {
-	const result: Record<number, { hex: string; oklch: UJLTOklch }> = {};
-
-	for (const shade of SHADES) {
-		const lightColor = lightPalette.shades[shade];
-		const midColor = midPalette.shades[shade];
-		const darkColor = darkPalette.shades[shade];
-
-		if (!lightColor || !midColor || !darkColor) {
-			continue;
-		}
-
-		const midMix = mixLightMidDark(lightColor.hex, midColor.hex, darkColor.hex);
-		let mixed: Color;
-
-		if (shade === MID_SHADE) {
-			mixed = midMix;
-		} else if (shade < MID_SHADE) {
-			const factor = (shade - LIGHT_SHADE) / SHADE_RANGE_TO_MID;
-			mixed = Color.mix(lightColor.hex, midMix, factor, { space: 'oklab' });
-		} else {
-			const factor = (shade - MID_SHADE) / SHADE_RANGE_FROM_MID;
-			mixed = Color.mix(midMix, darkColor.hex, factor, { space: 'oklab' });
-		}
-
-		const srgb = mixed.to('srgb').toGamut();
-		const [l, c, h] = srgb.to('oklch').coords;
-		const hex = srgb.toString({ format: 'hex' });
-
-		result[shade] = {
-			hex,
-			oklch: { l, c, h: h ?? 0 }
-		};
-	}
-
-	// Calculate light and dark colors with APCA contrast validation
-	const favoriteShade = MID_SHADE;
-	const { light, dark, lightFg, darkFg, lightText, darkText } = addLightDarkColorsWithAPCA(
-		result,
-		favoriteShade
-	);
-
-	// Use the light palette as base for metadata
-	return {
-		baseHex: lightPalette.baseHex,
-		baseOklch: lightPalette.baseOklch,
-		shades: result,
-		light,
-		dark,
-		lightFg,
-		darkFg,
-		lightText,
-		darkText
-	};
 }
 
 // ============================================

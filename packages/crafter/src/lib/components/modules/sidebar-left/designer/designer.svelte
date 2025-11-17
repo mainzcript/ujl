@@ -3,12 +3,11 @@
 
 	This component orchestrates the theme editing UI by:
 	- Reading tokens from props
-	- Computing color palettes from token values (including special ambient palette interpolation)
+	- Computing color palettes from token values
 	- Providing callback functions to child group components
 	- Updating tokens through the Crafter context API (updateTokenSet)
 
 	The actual UI layout is delegated to presentational group components:
-	- ambient-group.svelte: Ambient color controls
 	- theme-colors-group.svelte: Primary, secondary, accent colors
 	- notification-colors-group.svelte: Success, warning, destructive, info colors
 	- appearance-group.svelte: Border radius control
@@ -21,13 +20,10 @@
 	import type { UJLTTokenSet, UJLTFlavor } from '@ujl-framework/types';
 	import {
 		generateColorPalette,
-		interpolateAmbientPalette,
-		getReferencePalette,
-		oklchToHex
-	} from '$lib/tools/colorPlate.js';
-	import { mapGeneratedPaletteToColorSet } from '$lib/tools/paletteToColorSet.js';
+		oklchToHex,
+		mapGeneratedPaletteToColorSet
+	} from '$lib/tools/colors/index.js';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import AmbientGroup from './_ambient-group.svelte';
 	import ThemeColorsGroup from './_theme-colors-group.svelte';
 	import NotificationColorsGroup from './_notification-colors-group.svelte';
 	import AppearanceGroup from './_appearance-group.svelte';
@@ -43,8 +39,6 @@
 	 * null means use the value from tokens (no local override).
 	 * When a user picks a color, we store it here first, then update tokens.
 	 */
-	let ambientLightInput = $state<string | null>(null);
-	let ambientDarkInput = $state<string | null>(null);
 	let primaryInput = $state<string | null>(null);
 	let secondaryInput = $state<string | null>(null);
 	let accentInput = $state<string | null>(null);
@@ -58,8 +52,6 @@
 	 * These are the actual hex values displayed in the color pickers.
 	 * Priority: if *Input is set, use that; otherwise derive from tokens.
 	 */
-	let ambientLightValue = $state(getAmbientColor(true, null));
-	let ambientDarkValue = $state(getAmbientColor(false, null));
 	let primaryValue = $state(getColorValue('primary', null));
 	let secondaryValue = $state(getColorValue('secondary', null));
 	let accentValue = $state(getColorValue('accent', null));
@@ -70,8 +62,6 @@
 
 	// Update computed values when tokens or inputs change
 	$effect(() => {
-		ambientLightValue = getAmbientColor(true, ambientLightInput);
-		ambientDarkValue = getAmbientColor(false, ambientDarkInput);
 		primaryValue = getColorValue('primary', primaryInput);
 		secondaryValue = getColorValue('secondary', secondaryInput);
 		accentValue = getColorValue('accent', accentInput);
@@ -107,27 +97,6 @@
 	}
 
 	/**
-	 * Gets the ambient color (light or dark) for a ColorPicker.
-	 *
-	 * @param isLight - true for light mode, false for dark mode
-	 * @param input - Local input override (null means use tokens)
-	 * @returns Hex color string for the ColorPicker
-	 */
-	function getAmbientColor(isLight: boolean, input: string | null): string {
-		if (input !== null) {
-			return input;
-		}
-		const colorSet = tokens.color.ambient;
-		if (isLight && colorSet.light) {
-			return oklchToHex(colorSet.light);
-		}
-		if (!isLight && colorSet.dark) {
-			return oklchToHex(colorSet.dark);
-		}
-		return isLight ? '#fafafa' : '#09090b'; // Fallback
-	}
-
-	/**
 	 * Gets the radius value, prioritizing local input over tokens.
 	 *
 	 * @returns Radius value in rem units (as a number)
@@ -143,49 +112,6 @@
 	}
 
 	// Generated palettes for all colors
-	let ambientLightPalette = $derived.by(() => {
-		try {
-			const color = getAmbientColor(true, ambientLightInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating ambient light palette:', error);
-			return null;
-		}
-	});
-
-	let ambientDarkPalette = $derived.by(() => {
-		try {
-			const color = getAmbientColor(false, ambientDarkInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating ambient dark palette:', error);
-			return null;
-		}
-	});
-
-	// Mid palette (zinc reference palette)
-	let ambientMidPalette = $derived.by(() => {
-		try {
-			return getReferencePalette('zinc');
-		} catch (error) {
-			console.error('Error getting zinc reference palette:', error);
-			return null;
-		}
-	});
-
-	// Final ambient palette interpolated from light, mid (zinc), and dark
-	let ambientPalette = $derived.by(() => {
-		if (!ambientLightPalette || !ambientMidPalette || !ambientDarkPalette) {
-			return null;
-		}
-		try {
-			return interpolateAmbientPalette(ambientLightPalette, ambientMidPalette, ambientDarkPalette);
-		} catch (error) {
-			console.error('Error interpolating ambient palette:', error);
-			return null;
-		}
-	});
-
 	let primaryPalette = $derived.by(() => {
 		try {
 			const color = getColorValue('primary', primaryInput);
@@ -283,28 +209,6 @@
 	}
 
 	/**
-	 * Handler for ambient light color changes.
-	 * Stores the input and lets the reactive effect handle the token update.
-	 *
-	 * @param hex - The new hex color value for light mode
-	 */
-	function handleAmbientLightChange(hex: string) {
-		if (!hex) return;
-		ambientLightInput = hex;
-	}
-
-	/**
-	 * Handler for ambient dark color changes.
-	 * Stores the input and lets the reactive effect handle the token update.
-	 *
-	 * @param hex - The new hex color value for dark mode
-	 */
-	function handleAmbientDarkChange(hex: string) {
-		if (!hex) return;
-		ambientDarkInput = hex;
-	}
-
-	/**
 	 * Handler for radius changes.
 	 * Updates the local input state and immediately commits to tokens.
 	 *
@@ -346,39 +250,12 @@
 			previousRadiusValue = tokenValue;
 		}
 	});
-
-	/**
-	 * Reactive effect that updates ambient tokens when the interpolated palette changes.
-	 * This replaces the setTimeout pattern by reacting to ambientPalette changes.
-	 * When ambientLightInput or ambientDarkInput change, ambientPalette is recomputed,
-	 * and this effect commits the new palette to tokens.
-	 */
-	$effect(() => {
-		if (ambientPalette && (ambientLightInput !== null || ambientDarkInput !== null)) {
-			const colorSet = mapGeneratedPaletteToColorSet(ambientPalette);
-			crafter.updateTokenSet((oldTokens) => ({
-				...oldTokens,
-				color: {
-					...oldTokens.color,
-					ambient: colorSet
-				}
-			}));
-		}
-	});
 </script>
 
 <!--
 	Delegate UI rendering to presentational group components.
 	Each group receives the necessary data and callbacks as props.
 -->
-<AmbientGroup
-	{ambientLightValue}
-	{ambientDarkValue}
-	{ambientPalette}
-	onLightChange={handleAmbientLightChange}
-	onDarkChange={handleAmbientDarkChange}
-/>
-
 <ThemeColorsGroup
 	bind:primaryValue
 	{primaryPalette}

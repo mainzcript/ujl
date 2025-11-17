@@ -19,7 +19,7 @@
 		CollapsibleContent
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { GeneratedPalette } from '$lib/tools/colorPlate.js';
+	import type { GeneratedPalette } from '$lib/tools/colors/index.js';
 	import { ColorPalettePreview } from '$lib/components/ui/color-palette-preview/index.js';
 
 	let {

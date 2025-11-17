@@ -98,26 +98,27 @@ The Crafter includes a sophisticated color palette generation system that create
 - Refines the palette to anchor the exact input color at the correct shade
 - Derives light/dark + text colors using APCA contrast validation
 
-The color utilities are organized into focused modules:
+The color utilities are organized into focused modules in `$lib/tools/colors/`:
 
 - `colorSpaces.ts`: Color space conversions (HEX ↔ OKLCH) and distance calculations
 - `contrast.ts`: APCA contrast calculations and text color selection
 - `palettes.ts`: Palette generation, interpolation, and refinement
+- `paletteToColorSet.ts`: Conversion from GeneratedPalette to UJLTColorSet
+- `tailwindColorPlate.ts`: Tailwind reference color data
 
-All functions are re-exported from `colorPlate.ts` for backward compatibility.
+All functions and types are exported from `$lib/tools/colors/index.js`.
 
-Palette previews are rendered via a reusable `ColorPalettePreview` component located in the designer module, which displays shade stripes and light/dark mode examples for any generated palette.
+Palette previews are rendered via a reusable `ColorPalettePreview` component located in `$lib/components/ui/color-palette-preview/`, which displays shade stripes and light/dark mode examples for any generated palette.
 
 ### Example Usage
 
-**Note:** This is an internal example from `packages/crafter/src/lib/components/modules/designer/designer.svelte`.
+**Note:** This is an internal example from `packages/crafter/src/lib/components/modules/sidebar-left/designer/designer.svelte`.
 
 ```svelte
 <script>
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from './context.js';
-	import { generateColorPalette } from '$lib/tools/colorPlate.js';
-	import { mapGeneratedPaletteToColorSet } from '$lib/tools/paletteToColorSet.js';
+	import { generateColorPalette, mapGeneratedPaletteToColorSet } from '$lib/tools/colors/index.js';
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);

@@ -15,7 +15,7 @@
 <script lang="ts">
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MoonIcon from '@lucide/svelte/icons/moon';
-	import type { GeneratedPalette } from '$lib/tools/colorPlate.js';
+	import type { GeneratedPalette } from '$lib/tools/colors/index.js';
 
 	/**
 	 * Preview mode determines the layout:
