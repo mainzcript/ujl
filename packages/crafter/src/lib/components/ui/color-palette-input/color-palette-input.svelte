@@ -94,7 +94,7 @@
 				{/each}
 			</div>
 
-			<!-- Light/Dark examples: 4 examples (light bg, light text, dark bg, dark text) -->
+			<!-- Light/Dark examples (light bg, light text, dark bg, dark text) -->
 			<div class="grid grid-cols-4 gap-2">
 				<div class="rounded border border-border" style="background-color: {palette.light.hex};">
 					<div style="color: {palette.lightFg.hex};" class="flex h-6 items-center justify-center">
