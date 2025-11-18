@@ -22,8 +22,10 @@ export function generateThemeCSSVariables(tokens: UJLTTokenSet): Record<string, 
 		const colorSet = colorSetRaw as {
 			light: { l: number; c: number; h: number };
 			lightForeground: { l: number; c: number; h: number };
+			lightText: { l: number; c: number; h: number };
 			dark: { l: number; c: number; h: number };
 			darkForeground: { l: number; c: number; h: number };
+			darkText: { l: number; c: number; h: number };
 			shades: Record<
 				50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 950,
 				{ l: number; c: number; h: number }
@@ -39,8 +41,10 @@ export function generateThemeCSSVariables(tokens: UJLTTokenSet): Record<string, 
 		// Light and dark mode variables for consistent theme switching
 		vars[`--${flavor}-light`] = formatOklch(colorSet.light);
 		vars[`--${flavor}-light-foreground`] = formatOklch(colorSet.lightForeground);
+		vars[`--${flavor}-light-text`] = formatOklch(colorSet.lightText);
 		vars[`--${flavor}-dark`] = formatOklch(colorSet.dark);
 		vars[`--${flavor}-dark-foreground`] = formatOklch(colorSet.darkForeground);
+		vars[`--${flavor}-dark-text`] = formatOklch(colorSet.darkText);
 	});
 
 	return vars;
