@@ -1,3 +1,9 @@
+<!--
+	Header component for the Crafter interface.
+	
+	Displays the main navigation breadcrumb and sidebar trigger.
+	This is a presentational component with no internal state.
+-->
 <script lang="ts">
 	import {
 		Breadcrumb,
@@ -16,7 +22,7 @@
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbPage class="line-clamp-1">This is Header</BreadcrumbPage>
+					<BreadcrumbPage class="line-clamp-1">UJL Crafter</BreadcrumbPage>
 				</BreadcrumbItem>
 			</BreadcrumbList>
 		</Breadcrumb>

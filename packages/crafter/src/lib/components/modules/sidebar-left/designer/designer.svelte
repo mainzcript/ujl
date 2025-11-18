@@ -1,28 +1,12 @@
 <!--
 	Designer sidebar component for editing theme tokens (colors, radius, etc.).
-
-	This component orchestrates the theme editing UI by:
-	- Reading tokens from props
-	- Computing color palettes from token values
-	- Providing callback functions to child group components
-	- Updating tokens through the Crafter context API (updateTokenSet)
-
-	The actual UI layout is delegated to presentational group components:
-	- theme-colors-group.svelte: Primary, secondary, accent colors
-	- notification-colors-group.svelte: Success, warning, destructive, info colors
-	- appearance-group.svelte: Border radius control
-
-	All palette calculations and token mutations remain in this component.
-	The group components are pure presentational components that only handle UI rendering.
+	Orchestrates the theme editing UI by managing UJLTColorSet states per flavor and syncing them with tokens.
+	UI layout is delegated to presentational group components (theme-colors-group, notification-colors-group, appearance-group).
+	All palette generation is handled by ColorPaletteInput; this component only bridges UJLTColorSet states and tokens.
 -->
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { UJLTTokenSet, UJLTFlavor } from '@ujl-framework/types';
-	import {
-		generateColorPalette,
-		oklchToHex,
-		mapGeneratedPaletteToColorSet
-	} from '$lib/tools/colors/index.js';
+	import type { UJLTTokenSet, UJLTColorSet } from '@ujl-framework/types';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import ThemeColorsGroup from './components/theme-colors-group.svelte';
 	import NotificationColorsGroup from './components/notification-colors-group.svelte';
@@ -34,42 +18,18 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	/**
-	 * Local input states for color pickers.
-	 * These track user edits before committing to tokens.
-	 * null means use the value from tokens (no local override).
-	 * When a user picks a color, we store it here first, then update tokens.
+	 * UJLTColorSet states for each color flavor.
+	 * These are initialized from tokens and kept in sync via reactive effects.
+	 * When a ColorPaletteInput changes a colorSet, it updates the corresponding state,
+	 * which triggers a token update.
 	 */
-	let primaryInput = $state<string | null>(null);
-	let secondaryInput = $state<string | null>(null);
-	let accentInput = $state<string | null>(null);
-	let successInput = $state<string | null>(null);
-	let warningInput = $state<string | null>(null);
-	let destructiveInput = $state<string | null>(null);
-	let infoInput = $state<string | null>(null);
-
-	/**
-	 * Computed values for ColorPicker bindings (derived from inputs and tokens).
-	 * These are the actual hex values displayed in the color pickers.
-	 * Priority: if *Input is set, use that; otherwise derive from tokens.
-	 */
-	let primaryValue = $state(getColorValue('primary', null));
-	let secondaryValue = $state(getColorValue('secondary', null));
-	let accentValue = $state(getColorValue('accent', null));
-	let successValue = $state(getColorValue('success', null));
-	let warningValue = $state(getColorValue('warning', null));
-	let destructiveValue = $state(getColorValue('destructive', null));
-	let infoValue = $state(getColorValue('info', null));
-
-	// Update computed values when tokens or inputs change
-	$effect(() => {
-		primaryValue = getColorValue('primary', primaryInput);
-		secondaryValue = getColorValue('secondary', secondaryInput);
-		accentValue = getColorValue('accent', accentInput);
-		successValue = getColorValue('success', successInput);
-		warningValue = getColorValue('warning', warningInput);
-		destructiveValue = getColorValue('destructive', destructiveInput);
-		infoValue = getColorValue('info', infoInput);
-	});
+	let primaryColorSet = $state<UJLTColorSet | null>(tokens.color.primary);
+	let secondaryColorSet = $state<UJLTColorSet | null>(tokens.color.secondary);
+	let accentColorSet = $state<UJLTColorSet | null>(tokens.color.accent);
+	let successColorSet = $state<UJLTColorSet | null>(tokens.color.success);
+	let warningColorSet = $state<UJLTColorSet | null>(tokens.color.warning);
+	let destructiveColorSet = $state<UJLTColorSet | null>(tokens.color.destructive);
+	let infoColorSet = $state<UJLTColorSet | null>(tokens.color.info);
 
 	/**
 	 * Radius input state for tracking user edits before committing to tokens.
@@ -78,23 +38,67 @@
 	let radiusInput = $state<number | null>(null);
 
 	/**
-	 * Gets the color value for a ColorPicker, prioritizing local input over tokens.
-	 *
-	 * @param flavor - The color flavor (primary, secondary, accent, etc.)
-	 * @param input - Local input override (null means use tokens)
-	 * @returns Hex color string for the ColorPicker
+	 * Sync color sets from tokens when tokens change externally.
+	 * This ensures the UI reflects external token updates.
 	 */
-	function getColorValue(flavor: UJLTFlavor, input: string | null): string {
-		if (input !== null) {
-			return input;
+	$effect(() => {
+		primaryColorSet = tokens.color.primary;
+		secondaryColorSet = tokens.color.secondary;
+		accentColorSet = tokens.color.accent;
+		successColorSet = tokens.color.success;
+		warningColorSet = tokens.color.warning;
+		destructiveColorSet = tokens.color.destructive;
+		infoColorSet = tokens.color.info;
+	});
+
+	/**
+	 * Update tokens when color sets change via ColorPaletteInput bindings.
+	 * We use a single effect that watches all color sets and updates the corresponding token.
+	 */
+	$effect(() => {
+		if (primaryColorSet && primaryColorSet !== tokens.color.primary) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, primary: primaryColorSet! }
+			}));
 		}
-		// Extract from tokens - use shade 500 as base color
-		const colorSet = tokens.color[flavor];
-		if (colorSet && colorSet.shades[500]) {
-			return oklchToHex(colorSet.shades[500]);
+		if (secondaryColorSet && secondaryColorSet !== tokens.color.secondary) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, secondary: secondaryColorSet! }
+			}));
 		}
-		return '#000000'; // Fallback
-	}
+		if (accentColorSet && accentColorSet !== tokens.color.accent) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, accent: accentColorSet! }
+			}));
+		}
+		if (successColorSet && successColorSet !== tokens.color.success) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, success: successColorSet! }
+			}));
+		}
+		if (warningColorSet && warningColorSet !== tokens.color.warning) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, warning: warningColorSet! }
+			}));
+		}
+		if (destructiveColorSet && destructiveColorSet !== tokens.color.destructive) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, destructive: destructiveColorSet! }
+			}));
+		}
+		if (infoColorSet && infoColorSet !== tokens.color.info) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, info: infoColorSet! }
+			}));
+		}
+	});
 
 	/**
 	 * Gets the radius value, prioritizing local input over tokens.
@@ -109,103 +113,6 @@
 		const radiusStr = tokens.radius;
 		const match = radiusStr.match(/^([\d.]+)/);
 		return match ? Number.parseFloat(match[1]) : 0.75;
-	}
-
-	// Generated palettes for all colors
-	let primaryPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('primary', primaryInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating primary palette:', error);
-			return null;
-		}
-	});
-
-	let secondaryPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('secondary', secondaryInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating secondary palette:', error);
-			return null;
-		}
-	});
-
-	let accentPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('accent', accentInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating accent palette:', error);
-			return null;
-		}
-	});
-
-	let successPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('success', successInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating success palette:', error);
-			return null;
-		}
-	});
-
-	let warningPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('warning', warningInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating warning palette:', error);
-			return null;
-		}
-	});
-
-	let destructivePalette = $derived.by(() => {
-		try {
-			const color = getColorValue('destructive', destructiveInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating destructive palette:', error);
-			return null;
-		}
-	});
-
-	let infoPalette = $derived.by(() => {
-		try {
-			const color = getColorValue('info', infoInput);
-			return generateColorPalette(color);
-		} catch (error) {
-			console.error('Error generating info palette:', error);
-			return null;
-		}
-	});
-
-	/**
-	 * Handler for theme/notification color changes (primary, secondary, accent, success, warning, destructive, info).
-	 * Generates a new palette from the hex color and immediately updates tokens.
-	 *
-	 * @param flavor - The color flavor to update
-	 * @param hex - The new hex color value
-	 */
-	function handleColorChange(flavor: UJLTFlavor, hex: string) {
-		if (!hex) return;
-
-		try {
-			const newPalette = generateColorPalette(hex);
-			const colorSet = mapGeneratedPaletteToColorSet(newPalette);
-
-			crafter.updateTokenSet((oldTokens) => ({
-				...oldTokens,
-				color: {
-					...oldTokens.color,
-					[flavor]: colorSet
-				}
-			}));
-		} catch (error) {
-			console.error(`Error updating ${flavor} color:`, error);
-		}
 	}
 
 	/**
@@ -254,54 +161,15 @@
 
 <!--
 	Delegate UI rendering to presentational group components.
-	Each group receives the necessary data and callbacks as props.
+	Each group receives UJLTColorSet bindings that sync with tokens.
 -->
-<ThemeColorsGroup
-	bind:primaryValue
-	{primaryPalette}
-	primaryOnChange={(hex) => {
-		primaryInput = hex;
-		handleColorChange('primary', hex);
-	}}
-	bind:secondaryValue
-	{secondaryPalette}
-	secondaryOnChange={(hex) => {
-		secondaryInput = hex;
-		handleColorChange('secondary', hex);
-	}}
-	bind:accentValue
-	{accentPalette}
-	accentOnChange={(hex) => {
-		accentInput = hex;
-		handleColorChange('accent', hex);
-	}}
-/>
+<ThemeColorsGroup bind:primaryColorSet bind:secondaryColorSet bind:accentColorSet />
 
 <NotificationColorsGroup
-	bind:successValue
-	{successPalette}
-	successOnChange={(hex) => {
-		successInput = hex;
-		handleColorChange('success', hex);
-	}}
-	bind:warningValue
-	{warningPalette}
-	warningOnChange={(hex) => {
-		warningInput = hex;
-		handleColorChange('warning', hex);
-	}}
-	bind:destructiveValue
-	{destructivePalette}
-	destructiveOnChange={(hex) => {
-		destructiveInput = hex;
-		handleColorChange('destructive', hex);
-	}}
-	bind:infoValue
-	{infoPalette}
-	infoOnChange={(hex) => {
-		infoInput = hex;
-		handleColorChange('info', hex);
-	}}
+	bind:successColorSet
+	bind:warningColorSet
+	bind:destructiveColorSet
+	bind:infoColorSet
 />
 
 <AppearanceGroup bind:radiusValue radiusDisplayValue={getRadiusValue()} />

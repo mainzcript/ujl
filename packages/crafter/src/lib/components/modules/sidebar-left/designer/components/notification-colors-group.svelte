@@ -2,52 +2,34 @@
 	Notification Colors group component.
 	
 	This is a presentational component that displays UI controls for editing notification colors
-	(success, warning, destructive, info). It receives color values, palettes, and callback functions
-	as props and does not perform any palette calculations or token updates itself.
+	(success, warning, destructive, info). It receives UJLTColorSet bindings and delegates
+	all color editing to the ColorPaletteInput component.
 	
-	All palette generation and token updates are handled by the parent designer.svelte component.
+	All palette generation and token updates are handled by ColorPaletteInput and the parent designer.svelte component.
 -->
 <script lang="ts">
 	import {
 		SidebarGroup,
 		SidebarGroupLabel,
 		SidebarGroupContent,
-		ColorPicker,
-		Label,
 		Collapsible,
 		CollapsibleTrigger,
 		CollapsibleContent
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { GeneratedPalette } from '$lib/tools/colors/index.js';
-	import { ColorPalettePreview } from '$lib/components/ui/color-palette-preview/index.js';
+	import type { UJLTColorSet } from '@ujl-framework/types';
+	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
 
 	let {
-		successValue = $bindable(),
-		successPalette,
-		successOnChange,
-		warningValue = $bindable(),
-		warningPalette,
-		warningOnChange,
-		destructiveValue = $bindable(),
-		destructivePalette,
-		destructiveOnChange,
-		infoValue = $bindable(),
-		infoPalette,
-		infoOnChange
+		successColorSet = $bindable(),
+		warningColorSet = $bindable(),
+		destructiveColorSet = $bindable(),
+		infoColorSet = $bindable()
 	}: {
-		successValue?: string;
-		successPalette: GeneratedPalette | null;
-		successOnChange: (hex: string) => void;
-		warningValue?: string;
-		warningPalette: GeneratedPalette | null;
-		warningOnChange: (hex: string) => void;
-		destructiveValue?: string;
-		destructivePalette: GeneratedPalette | null;
-		destructiveOnChange: (hex: string) => void;
-		infoValue?: string;
-		infoPalette: GeneratedPalette | null;
-		infoOnChange: (hex: string) => void;
+		successColorSet?: UJLTColorSet | null;
+		warningColorSet?: UJLTColorSet | null;
+		destructiveColorSet?: UJLTColorSet | null;
+		infoColorSet?: UJLTColorSet | null;
 	} = $props();
 </script>
 
@@ -65,49 +47,22 @@
 		</SidebarGroupLabel>
 		<CollapsibleContent>
 			<SidebarGroupContent class="space-y-8 p-4">
-				<!-- Success color input -->
-				<div class="space-y-2">
-					<Label for="success-color" class="text-xs">Success Color</Label>
-					<ColorPicker
-						id="success-color"
-						bind:value={successValue}
-						onChange={(value) => successOnChange(value)}
-					/>
-					<ColorPalettePreview palette={successPalette} />
-				</div>
-
-				<!-- Warning color input -->
-				<div class="space-y-2">
-					<Label for="warning-color" class="text-xs">Warning Color</Label>
-					<ColorPicker
-						id="warning-color"
-						bind:value={warningValue}
-						onChange={(value) => warningOnChange(value)}
-					/>
-					<ColorPalettePreview palette={warningPalette} />
-				</div>
-
-				<!-- Destructive color input -->
-				<div class="space-y-2">
-					<Label for="destructive-color" class="text-xs">Destructive Color</Label>
-					<ColorPicker
-						id="destructive-color"
-						bind:value={destructiveValue}
-						onChange={(value) => destructiveOnChange(value)}
-					/>
-					<ColorPalettePreview palette={destructivePalette} />
-				</div>
-
-				<!-- Info color input -->
-				<div class="space-y-2">
-					<Label for="info-color" class="text-xs">Info Color</Label>
-					<ColorPicker
-						id="info-color"
-						bind:value={infoValue}
-						onChange={(value) => infoOnChange(value)}
-					/>
-					<ColorPalettePreview palette={infoPalette} />
-				</div>
+				<ColorPaletteInput
+					label="Success Color"
+					id="success-color"
+					bind:colorSet={successColorSet}
+				/>
+				<ColorPaletteInput
+					label="Warning Color"
+					id="warning-color"
+					bind:colorSet={warningColorSet}
+				/>
+				<ColorPaletteInput
+					label="Destructive Color"
+					id="destructive-color"
+					bind:colorSet={destructiveColorSet}
+				/>
+				<ColorPaletteInput label="Info Color" id="info-color" bind:colorSet={infoColorSet} />
 			</SidebarGroupContent>
 		</CollapsibleContent>
 	</SidebarGroup>

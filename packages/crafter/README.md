@@ -111,32 +111,37 @@ The color utilities are organized into focused modules in `$lib/tools/colors/`:
 
 All functions and types are exported from `$lib/tools/colors/index.js`.
 
-Palette previews are rendered via a reusable `ColorPalettePreview` component located in `$lib/components/ui/color-palette-preview/`, which displays shade stripes and light/dark mode examples for any generated palette.
+Color editing is handled via the `ColorPaletteInput` component located in `$lib/components/ui/color-palette-input/`, which combines a color picker with a palette preview and directly binds to `UJLTColorSet` for seamless integration with theme tokens.
 
 ### Example Usage
 
-**Note:** This is an internal example from `packages/crafter/src/lib/components/modules/sidebar-left/designer/designer.svelte`.
+**Note:** This is an internal example showing how color editing works with the new `ColorPaletteInput` component.
 
 ```svelte
 <script>
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from './context.js';
-	import { generateColorPalette, mapGeneratedPaletteToColorSet } from '$lib/tools/colors/index.js';
+	import type { UJLTTokenSet, UJLTColorSet } from '@ujl-framework/types';
+	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	function updatePrimaryColor(hex: string) {
-		const newPalette = generateColorPalette(hex);
-		const colorSet = mapGeneratedPaletteToColorSet(newPalette);
+	// Local state for color sets (synced with tokens)
+	let primaryColorSet = $state<UJLTColorSet | null>(tokens.color.primary);
 
-		crafter.updateTokenSet((oldTokens) => ({
-			...oldTokens,
-			color: {
-				...oldTokens.color,
-				primary: colorSet
-			}
-		}));
-	}
+	// Update tokens when color set changes
+	$effect(() => {
+		if (primaryColorSet && primaryColorSet !== tokens.color.primary) {
+			crafter.updateTokenSet((oldTokens) => ({
+				...oldTokens,
+				color: { ...oldTokens.color, primary: primaryColorSet! }
+			}));
+		}
+	});
 </script>
+
+<ColorPaletteInput label="Primary Color" bind:colorSet={primaryColorSet} />
 ```
+
+The `ColorPaletteInput` component handles all palette generation internally and works directly with `UJLTColorSet`, eliminating the need for manual hex-to-palette conversions in component code.

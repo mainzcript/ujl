@@ -23,4 +23,8 @@ export { hexToOklch, oklchToHex } from './colorSpaces.js';
 export { generateColorPalette } from './palettes.js';
 
 // Re-export palette conversion functions
-export { mapGeneratedPaletteToColorSet } from './paletteToColorSet.js';
+export {
+	mapGeneratedPaletteToColorSet,
+	generateColorSetFromHex,
+	getBaseHexFromColorSet
+} from './paletteToColorSet.js';

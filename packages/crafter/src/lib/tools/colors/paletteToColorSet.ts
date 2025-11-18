@@ -1,5 +1,7 @@
 import type { UJLTColorSet } from '@ujl-framework/types';
 import type { GeneratedPalette } from './palettes.js';
+import { generateColorPalette } from './palettes.js';
+import { oklchToHex } from './colorSpaces.js';
 
 /**
  * Converts a GeneratedPalette to a UJLTColorSet.
@@ -48,4 +50,40 @@ export function mapGeneratedPaletteToColorSet(palette: GeneratedPalette): UJLTCo
 			950: palette.shades[950]?.oklch ?? palette.dark.oklch
 		}
 	};
+}
+
+/**
+ * Generates a UJLTColorSet from a hex color string.
+ * This is a convenience function that combines palette generation and conversion.
+ *
+ * @param hex - Hex color string (e.g., "#3b82f6")
+ * @returns A complete UJLTColorSet ready for use in UJL theme tokens
+ * @throws {Error} If the hex color is invalid
+ *
+ * @example
+ * ```ts
+ * const colorSet = generateColorSetFromHex("#3b82f6");
+ * // Result: { light, lightForeground, lightText, dark, darkForeground, darkText, shades: {...} }
+ * ```
+ */
+export function generateColorSetFromHex(hex: string): UJLTColorSet {
+	const palette = generateColorPalette(hex);
+	return mapGeneratedPaletteToColorSet(palette);
+}
+
+/**
+ * Extracts the base hex color from a UJLTColorSet.
+ * Uses shade 500 as the base color, which typically represents the input color.
+ *
+ * @param colorSet - The color set to extract from
+ * @returns Hex color string (e.g., "#3b82f6")
+ *
+ * @example
+ * ```ts
+ * const hex = getBaseHexFromColorSet(colorSet);
+ * // Result: "#3b82f6"
+ * ```
+ */
+export function getBaseHexFromColorSet(colorSet: UJLTColorSet): string {
+	return oklchToHex(colorSet.shades[500]);
 }
