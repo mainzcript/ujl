@@ -1,3 +1,4 @@
+<!-- Top header with sidebar trigger and breadcrumb for the Crafter interface. -->
 <script lang="ts">
 	import {
 		Breadcrumb,
@@ -16,7 +17,7 @@
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbPage class="line-clamp-1">Project Management & Task Tracking</BreadcrumbPage>
+					<BreadcrumbPage class="line-clamp-1">UJL Crafter</BreadcrumbPage>
 				</BreadcrumbItem>
 			</BreadcrumbList>
 		</Breadcrumb>

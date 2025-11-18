@@ -15,7 +15,7 @@
 	data-slot="breadcrumb-ellipsis"
 	role="presentation"
 	aria-hidden="true"
-	class={cn('text-foreground/80 flex size-9 items-center justify-center', className)}
+	class={cn('flex size-9 items-center justify-center text-foreground/80', className)}
 	{...restProps}
 >
 	<EllipsisIcon class="size-4" />

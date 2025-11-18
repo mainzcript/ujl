@@ -31,6 +31,53 @@ We recommend using the `./styles` export in your Svelte application.
 
 ## Usage
 
+The adapter provides two ways to render UJL content:
+
+### Recommended: Using `AdapterRoot` Component (Svelte Components)
+
+For Svelte components, use `AdapterRoot` directly. This approach is more idiomatic and leverages Svelte's reactive system:
+
+```svelte
+<script lang="ts">
+	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
+	import { Composer } from '@ujl-framework/core';
+	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
+	import '@ujl-framework/adapter-svelte/styles';
+
+	let {
+		ujlcDocument,
+		ujltDocument,
+		mode = 'system'
+	}: {
+		ujlcDocument: UJLCDocument;
+		ujltDocument: UJLTDocument;
+		mode?: 'light' | 'dark' | 'system';
+	} = $props();
+
+	// Compose document to AST (reactive)
+	const ast = $derived.by(() => {
+		const composer = new Composer();
+		return composer.compose(ujlcDocument);
+	});
+
+	// Extract token set (reactive)
+	const tokenSet = $derived(ujltDocument.ujlt.tokens);
+</script>
+
+<AdapterRoot node={ast} {tokenSet} {mode} />
+```
+
+**Benefits:**
+
+- Automatic reactivity - updates when props change
+- No manual lifecycle management
+- More Svelte-idiomatic code
+- Simpler and cleaner
+
+### Alternative: Using `svelteAdapter` Function (Imperative Mounting)
+
+For imperative mounting scenarios (e.g., outside Svelte components, dynamic DOM manipulation), use `svelteAdapter`:
+
 ```svelte
 <script lang="ts">
 	import { onMount } from 'svelte';
@@ -47,7 +94,8 @@ We recommend using the `./styles` export in your Svelte application.
 		const ast = composer.compose(ujlDocument);
 
 		mountedComponent = svelteAdapter(ast, tokenSet, {
-			target: '#my-container'
+			target: '#my-container',
+			mode: 'system'
 		});
 
 		return () => {
@@ -59,7 +107,7 @@ We recommend using the `./styles` export in your Svelte application.
 <div id="my-container"></div>
 ```
 
-> **Note**: When using the adapter within a Svelte component, wrap the adapter call in `onMount()` and return a cleanup function that calls `unmount()` to ensure proper lifecycle management.
+> **Note**: When using `svelteAdapter`, wrap the adapter call in `onMount()` and return a cleanup function that calls `unmount()` to ensure proper lifecycle management.
 
 ## API Reference
 
@@ -78,16 +126,35 @@ function svelteAdapter(
 - `node`: The UJL AST node to render
 - `tokenSet`: Design token set (`UJLTTokenSet`) to apply to the rendered AST
 - `options.target`: DOM element or selector where the component should be mounted
+- `options.mode`: Theme mode - 'light', 'dark', or 'system' (optional, default: 'system')
 
 **Returns:**
 
 - `MountedComponent` with `instance` and `unmount()` method
+
+### AdapterRoot
+
+```typescript
+// Component props
+interface AdapterRootProps {
+	node: UJLAbstractNode;
+	tokenSet?: UJLTTokenSet;
+	mode?: 'light' | 'dark' | 'system';
+}
+```
+
+**Props:**
+
+- `node`: The UJL AST node to render
+- `tokenSet`: Design token set (`UJLTTokenSet`) to apply to the rendered AST (optional)
+- `mode`: Theme mode - 'light', 'dark', or 'system' (default: 'system')
 
 ### Types
 
 ```typescript
 type SvelteAdapterOptions = {
 	target: string | HTMLElement;
+	mode?: 'light' | 'dark' | 'system';
 };
 
 type MountedComponent = {
@@ -95,11 +162,3 @@ type MountedComponent = {
 	unmount: () => Promise<void>;
 };
 ```
-
-## Exported Components
-
-The adapter exports the following component (for advanced use cases):
-
-- `AdapterRoot` - Root component that combines theme support and AST node rendering
-
-Most users should simply use `svelteAdapter()` directly rather than importing components.

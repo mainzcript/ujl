@@ -35,8 +35,10 @@ const UJLTColorShadesSchema = z.object({
 const UJLTColorSetSchema = z.object({
 	light: UJLTOklchSchema,
 	lightForeground: UJLTOklchSchema,
+	lightText: UJLTOklchSchema,
 	dark: UJLTOklchSchema,
 	darkForeground: UJLTOklchSchema,
+	darkText: UJLTOklchSchema,
 	shades: UJLTColorShadesSchema,
 });
 
