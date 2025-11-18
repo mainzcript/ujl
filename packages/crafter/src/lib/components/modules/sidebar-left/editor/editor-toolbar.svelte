@@ -28,16 +28,16 @@
 		title="Cut selected component"
 	>
 		<ScissorsIcon class="size-4" />
-		<span>Cut</span>
+		<!-- <span>Cut</span> -->
 	</Button>
 
 	<Button variant="ghost" size="sm" disabled={!canPaste} onclick={onPaste} title="Paste component">
 		<ClipboardPasteIcon class="size-4" />
-		<span>Paste</span>
+		<!-- <span>Paste</span> -->
 	</Button>
 
 	<Button variant="ghost" size="sm" disabled={!canCut} onclick={onDelete} title="Delete component">
 		<DeleteIcon class="size-4" />
-		<span>Delete</span>
+		<!-- <span>Delete</span> -->
 	</Button>
 </div>

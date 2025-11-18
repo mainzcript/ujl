@@ -297,7 +297,7 @@
 						{/snippet}
 					</CollapsibleTrigger>
 					<CollapsibleContent>
-						<SidebarMenuSub class="mr-0 pe-0">
+						<SidebarMenuSub class="mr-1 pe-0">
 							{#if hasMultiple}
 								<!-- Multiple slots: show slot names as groups -->
 								{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
@@ -509,13 +509,13 @@
 			{#if showDropBefore}
 				<div class="drop-indicator drop-indicator-before"></div>
 			{/if}
-			<SidebarMenuSubButton class="px-0">
+			<SidebarMenuSubButton class="p-0">
 				<div
 					role="button"
 					tabindex="0"
-					class="flex w-full items-center justify-between rounded-md p-2 pe-0 {isSelected
-						? 'node-selected'
-						: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
+					class="flex h-full w-full items-center justify-between rounded-md px-2 {showDropInto
+						? 'drop-target'
+						: ''} {isSelected ? 'node-selected' : ''} {isDragging ? 'opacity-50' : ''}"
 					draggable="true"
 					ondragstart={(e) => handleDragStart(e, node.meta.id)}
 					ondragover={(e) => handleDragOver(e, node.meta.id)}
@@ -528,7 +528,7 @@
 						class="h-full w-full overflow-hidden text-left text-nowrap text-ellipsis"
 					>
 						<span>
-							{getDisplayName(node)}
+							hallo{getDisplayName(node)}
 						</span>
 					</button>
 				</div>
@@ -563,13 +563,13 @@
 
 	.drop-target {
 		background-color: color-mix(in srgb, hsl(var(--primary)) 20%, transparent 80%);
-		outline: 2px dashed hsl(var(--primary));
+		outline: 1px dashed oklch(var(--flavor-foreground));
 		outline-offset: -2px;
 	}
 
 	.drop-target-slot {
 		background-color: color-mix(in srgb, hsl(var(--primary)) 15%, transparent 85%);
-		outline: 2px dashed hsl(var(--primary));
+		outline: 1px dashed oklch(var(--flavor-foreground));
 		outline-offset: -2px;
 	}
 
