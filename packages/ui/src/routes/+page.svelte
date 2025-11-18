@@ -182,7 +182,7 @@
 
 <UJLTheme tokens={themeTokens}>
 	{#each flavors as flavor (flavor)}
-		<section class="flavor-{flavor} bg-flavor relative py-20">
+		<section class="flavor-{flavor} relative bg-flavor py-20">
 			<Container>
 				<Card>
 					<CardContent>
@@ -224,7 +224,7 @@
 										<CardDescription>This are all shades of the {flavor}-flavor.</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div class="elevation border-flavor-500/25 overflow-hidden rounded-xl border">
+										<div class="elevation overflow-hidden rounded-xl border border-flavor-500/25">
 											<Grid class="grid-cols-11 gap-0">
 												<AspectRatio class="bg-flavor-50" />
 												<AspectRatio class="bg-flavor-100" />
@@ -238,6 +238,34 @@
 												<AspectRatio class="bg-flavor-900" />
 												<AspectRatio class="bg-flavor-950" />
 											</Grid>
+										</div>
+									</CardContent>
+								</Card>
+							</GridItem>
+							<GridItem>
+								<Card>
+									<CardHeader>
+										<CardTitle>Text Colors</CardTitle>
+										<CardDescription
+											>Text colors optimized for light and dark backgrounds.</CardDescription
+										>
+									</CardHeader>
+									<CardContent>
+										<div class="space-y-4">
+											<div class="space-y-2">
+												<div class="rounded-lg border border-border bg-white p-4">
+													<Text style="color: oklch(var(--{flavor}-light-text));"
+														>This text uses the {flavor} color optimized for light backgrounds.</Text
+													>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="rounded-lg border border-border bg-black p-4">
+													<Text style="color: oklch(var(--{flavor}-dark-text));"
+														>This text uses the {flavor} color optimized for dark backgrounds.</Text
+													>
+												</div>
+											</div>
 										</div>
 									</CardContent>
 								</Card>
@@ -627,7 +655,7 @@
 											</HoverCard>
 											<ContextMenu>
 												<ContextMenuTrigger
-													class="border-foreground rounded-md border border-dashed p-2"
+													class="rounded-md border border-dashed border-foreground p-2"
 												>
 													<Text size="sm">Right click here</Text>
 												</ContextMenuTrigger>
@@ -1135,19 +1163,19 @@
 														<div class="space-y-3">
 															<Text size="sm" class="font-medium">Avatar Group:</Text>
 															<div class="flex -space-x-2">
-																<Avatar class="border-background border-2">
+																<Avatar class="border-2 border-background">
 																	<AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
 																	<AvatarFallback>U1</AvatarFallback>
 																</Avatar>
-																<Avatar class="border-background border-2">
+																<Avatar class="border-2 border-background">
 																	<AvatarImage src="https://github.com/shadcn.png" alt="User 2" />
 																	<AvatarFallback>U2</AvatarFallback>
 																</Avatar>
-																<Avatar class="border-background border-2">
+																<Avatar class="border-2 border-background">
 																	<AvatarImage src="https://github.com/shadcn.png" alt="User 3" />
 																	<AvatarFallback>U3</AvatarFallback>
 																</Avatar>
-																<Avatar class="border-background border-2">
+																<Avatar class="border-2 border-background">
 																	<AvatarFallback>+5</AvatarFallback>
 																</Avatar>
 															</div>

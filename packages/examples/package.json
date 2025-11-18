@@ -23,18 +23,18 @@
 		"validate": "pnpm exec ujl-validate ./src/themes/default.ujlt.json && pnpm exec ujl-validate ./src/documents/showcase.ujlc.json"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^1.4.0",
-		"@eslint/js": "^9.37.0",
+		"@eslint/compat": "^1.4.1",
+		"@eslint/js": "^9.39.1",
+		"@types/node": "^24.10.1",
 		"@ujl-framework/types": "workspace:*",
-		"@types/node": "^20.19.21",
-		"eslint": "^9.37.0",
+		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
-		"globals": "^16.4.0",
+		"globals": "^16.5.0",
 		"prettier": "^3.6.2",
-		"prettier-plugin-organize-imports": "^3.2.2",
+		"prettier-plugin-organize-imports": "^3.2.4",
+		"tsx": "^4.20.6",
 		"typescript": "^5.9.3",
-		"tsx": "^4.7.0",
-		"typescript-eslint": "^8.46.0",
+		"typescript-eslint": "^8.46.4",
 		"vitest": "3.2.3"
 	}
 }

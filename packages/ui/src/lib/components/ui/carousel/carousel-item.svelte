@@ -30,7 +30,7 @@
 	class="relative min-w-0 shrink-0 grow-0 px-2"
 	bind:this={wrapper}
 >
-	<div class="absolute inset-0 -left-20 top-0 snap-start"></div>
+	<div class="absolute inset-0 top-0 -left-20 snap-start"></div>
 	<div
 		bind:this={ref}
 		data-slot="carousel-item"

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { UJLCModuleObject } from '@ujl-framework/types';
+	import type { UJLCModuleObject, UJLCSlotObject } from '@ujl-framework/types';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree.svelte';
 	import EditorToolbar from './editor-toolbar.svelte';
-	import { getDocumentContext } from '$lib/components/modules/context/document-context.svelte.ts';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import {
 		findNodeById,
 		findParentOfNode,
@@ -15,16 +15,23 @@
 		hasSlots
 	} from './ujlc-tree-utils.js';
 
-	// Get document context from parent
-	const documentContext = getDocumentContext();
+	let {
+		slot
+	}: {
+		slot: UJLCSlotObject;
+	} = $props();
+
+	// Get CrafterContext for mutations
+	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+
+	// Local clipboard state (replaces documentContext clipboard)
+	let clipboard = $state<UJLCModuleObject | null>(null);
 
 	// selected node id from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
-	// selected node object from context
-	const selectedNode = $derived(
-		selectedNodeId ? findNodeById(documentContext.root, selectedNodeId) : null
-	);
+	// selected node object from current slot
+	const selectedNode = $derived(selectedNodeId ? findNodeById(slot, selectedNodeId) : null);
 
 	// Cut Button is enabled if a node is selected and it's not the root node
 	const canCut = $derived(selectedNodeId !== null);
@@ -33,9 +40,7 @@
 	// - Clipboard is not empty
 	// - node is selected
 	// - selected Node has Slots
-	const canPaste = $derived(
-		documentContext.hasClipboard && selectedNode !== null && hasSlots(selectedNode)
-	);
+	const canPaste = $derived(clipboard !== null && selectedNode !== null && hasSlots(selectedNode));
 
 	/**
 	 * Cut Handler - cut selected Node to Clipboard
@@ -43,21 +48,23 @@
 	function handleCut() {
 		if (!selectedNodeId) return;
 
-		const node = findNodeById(documentContext.root, selectedNodeId);
+		const node = findNodeById(slot, selectedNodeId);
 		if (!node) return;
 
 		// check if node is root
-		const parentInfo = findParentOfNode(documentContext.root, selectedNodeId);
+		const parentInfo = findParentOfNode(slot, selectedNodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot cut root node');
 			return;
 		}
 
-		// save node to context clipboard
-		documentContext.cutNode(node);
+		// save node to local clipboard
+		clipboard = node;
 
-		// remove node from tree
-		documentContext.root = removeNodeFromTree(documentContext.root, selectedNodeId);
+		// remove node from tree via updateRootSlot
+		crafter.updateRootSlot((currentSlot) => {
+			return removeNodeFromTree(currentSlot, selectedNodeId);
+		});
 
 		console.log('Cut node:', node.meta.id);
 	}
@@ -66,14 +73,13 @@
 	 * Paste Handler - paste node from Clipboard into selected Node
 	 */
 	function handlePaste() {
-		const clipboardNode = documentContext.getClipboard();
-		if (!clipboardNode || !selectedNodeId) return;
+		if (!clipboard || !selectedNodeId) return;
 
-		const targetNode = findNodeById(documentContext.root, selectedNodeId);
+		const targetNode = findNodeById(slot, selectedNodeId);
 		if (!targetNode) return;
 
 		// Check if clipboard node already exists in tree (prevents duplicates)
-		const existingNode = findNodeById(documentContext.root, clipboardNode.meta.id);
+		const existingNode = findNodeById(slot, clipboard.meta.id);
 		if (existingNode) {
 			console.warn('Cannot paste: Node already exists in tree. Cut operation may have failed.');
 			return;
@@ -86,18 +92,15 @@
 			return;
 		}
 
-		// add node to target slot
-		documentContext.root = insertNodeIntoSlot(
-			documentContext.root,
-			selectedNodeId,
-			slotName,
-			clipboardNode
-		);
+		// add node to target slot via updateRootSlot
+		crafter.updateRootSlot((currentSlot) => {
+			return insertNodeIntoSlot(currentSlot, selectedNodeId, slotName, clipboard!);
+		});
 
 		console.log('Pasted node into:', selectedNodeId, 'slot:', slotName);
 
 		// clear Clipboard
-		documentContext.clearClipboard();
+		clipboard = null;
 	}
 
 	/**
@@ -106,18 +109,20 @@
 	function handleDelete() {
 		if (!selectedNodeId) return;
 
-		const node = findNodeById(documentContext.root, selectedNodeId);
+		const node = findNodeById(slot, selectedNodeId);
 		if (!node) return;
 
 		// check if node is root
-		const parentInfo = findParentOfNode(documentContext.root, selectedNodeId);
+		const parentInfo = findParentOfNode(slot, selectedNodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot delete root node');
 			return;
 		}
 
-		// remove node from tree
-		documentContext.root = removeNodeFromTree(documentContext.root, selectedNodeId);
+		// remove node from tree via updateRootSlot
+		crafter.updateRootSlot((currentSlot) => {
+			return removeNodeFromTree(currentSlot, selectedNodeId);
+		});
 
 		console.log('Deleted node:', node.meta.id);
 	}
@@ -177,8 +182,8 @@
 	 */
 	function handleNodeMove(nodeId: string, targetId: string, slotName?: string): boolean {
 		// Find the node and target
-		const node = findNodeById(documentContext.root, nodeId);
-		const targetNode = findNodeById(documentContext.root, targetId);
+		const node = findNodeById(slot, nodeId);
+		const targetNode = findNodeById(slot, targetId);
 
 		if (!node || !targetNode) {
 			console.warn('Node or target not found');
@@ -186,7 +191,7 @@
 		}
 
 		// Check if node is root
-		const parentInfo = findParentOfNode(documentContext.root, nodeId);
+		const parentInfo = findParentOfNode(slot, nodeId);
 		if (!parentInfo || !parentInfo.parent) {
 			console.warn('Cannot move root node');
 			return false;
@@ -222,9 +227,11 @@
 			return false;
 		}
 
-		// Perform the move: remove from old position, insert at new position
-		const removedTree = removeNodeFromTree(documentContext.root, nodeId);
-		documentContext.root = insertNodeIntoSlot(removedTree, targetId, targetSlotName, node);
+		// Perform the move: remove from old position, insert at new position via updateRootSlot
+		crafter.updateRootSlot((currentSlot) => {
+			const removedTree = removeNodeFromTree(currentSlot, nodeId);
+			return insertNodeIntoSlot(removedTree, targetId, targetSlotName!, node);
+		});
 
 		console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', targetSlotName);
 		return true;
@@ -257,8 +264,8 @@
 		position: 'before' | 'after'
 	): boolean {
 		// Find both nodes
-		const node = findNodeById(documentContext.root, nodeId);
-		const targetNode = findNodeById(documentContext.root, targetId);
+		const node = findNodeById(slot, nodeId);
+		const targetNode = findNodeById(slot, targetId);
 
 		if (!node || !targetNode) {
 			console.warn('Node or target not found');
@@ -266,8 +273,8 @@
 		}
 
 		// Get parent info for both nodes
-		const nodeParentInfo = findParentOfNode(documentContext.root, nodeId);
-		const targetParentInfo = findParentOfNode(documentContext.root, targetId);
+		const nodeParentInfo = findParentOfNode(slot, nodeId);
+		const targetParentInfo = findParentOfNode(slot, targetId);
 
 		if (!nodeParentInfo || !nodeParentInfo.parent) {
 			console.warn('Cannot reorder root node');
@@ -299,15 +306,17 @@
 			newPosition -= 1;
 		}
 
-		// Perform the reorder: remove from old position, insert at new position
-		const removedTree = removeNodeFromTree(documentContext.root, nodeId);
-		documentContext.root = insertNodeAtPosition(
-			removedTree,
-			nodeParentInfo.parent.meta.id,
-			nodeParentInfo.slotName,
-			node,
-			newPosition
-		);
+		// Perform the reorder: remove from old position, insert at new position via updateRootSlot
+		crafter.updateRootSlot((currentSlot) => {
+			const removedTree = removeNodeFromTree(currentSlot, nodeId);
+			return insertNodeAtPosition(
+				removedTree,
+				nodeParentInfo.parent!.meta.id,
+				nodeParentInfo.slotName,
+				node,
+				newPosition
+			);
+		});
 
 		console.log('Reordered node:', nodeId, position, targetId, 'at position:', newPosition);
 		return true;
@@ -323,10 +332,6 @@
 		{canPaste}
 	/>
 	<div class="p-2">
-		<NavTree
-			nodes={documentContext.root}
-			onNodeMove={handleNodeMove}
-			onNodeReorder={handleNodeReorder}
-		/>
+		<NavTree nodes={slot} onNodeMove={handleNodeMove} onNodeReorder={handleNodeReorder} />
 	</div>
 </div>

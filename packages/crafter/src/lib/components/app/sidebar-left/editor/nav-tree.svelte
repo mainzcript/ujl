@@ -110,10 +110,11 @@
 		return targetNode.slots && Object.keys(targetNode.slots).length > 0;
 	}
 
-	function handleNodeClick(nodeId: string) {
+	async function handleNodeClick(nodeId: string) {
 		const url = new URL($page.url);
 		url.searchParams.set('selected', nodeId);
-		goto(url, { replaceState: true, noScroll: true });
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto(url, { replaceState: true, noScroll: true });
 		console.log('Node clicked:', selectedNodeId);
 	}
 
