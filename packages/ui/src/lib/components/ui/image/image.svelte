@@ -13,7 +13,7 @@
 <img
 	bind:this={ref}
 	class={cn(
-		'elevation border-flavor-foreground/20 block h-auto max-w-full rounded border',
+		'elevation block h-auto max-w-full rounded border border-flavor-foreground/20',
 		className
 	)}
 	{...restProps}
