@@ -1,13 +1,4 @@
-<!--
- * AdapterRoot component
- *
- * Root component for the Svelte adapter that combines:
- * - Theme support via UJLTheme
- * - AST node rendering
- *
- * This is the main component used by svelteAdapter.
- * Styles must be imported separately by the consumer.
- -->
+<!-- Root component that combines theme support (UJLTheme) and AST node rendering. -->
 <script lang="ts">
 	import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 	import { UJLTheme } from '@ujl-framework/ui';

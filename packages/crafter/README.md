@@ -75,7 +75,7 @@ This ensures:
 
 - **`preview.svelte`**: Receives `ujlcDocument` and `ujltDocument` as props, renders via `@ujl-framework/adapter-svelte`
   - Composes the content document into an AST using `Composer`
-  - Renders the AST with the theme tokens using `svelteAdapter`
+  - Renders the AST with the theme tokens using `AdapterRoot` component (reactive, Svelte-idiomatic)
 
 ### Data Flow
 
