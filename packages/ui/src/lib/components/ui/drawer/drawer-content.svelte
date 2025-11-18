@@ -16,6 +16,7 @@
 
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
+	const isDark = $derived(themeContext ? themeContext.isDark : false);
 </script>
 
 <DrawerPrimitive.Portal {...portalProps}>
@@ -25,6 +26,7 @@
 		data-slot="drawer-content"
 		data-ujl-theme={themeId}
 		class={cn(
+			isDark && 'dark',
 			'bg-ambient/95 text-ambient-foreground outline-foreground/10 outline backdrop-blur-sm',
 			'group/drawer-content fixed z-50 flex h-auto flex-col',
 			'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg',

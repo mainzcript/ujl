@@ -2,4 +2,4 @@
 '@ujl-framework/types': minor
 ---
 
-types and validator for ujl-documents
+Implement types and validator for ujl-documents

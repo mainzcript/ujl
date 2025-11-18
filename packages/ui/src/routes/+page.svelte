@@ -106,13 +106,15 @@
 		AccordionItem,
 		AccordionTrigger,
 		AccordionContent,
+		Collapsible,
+		CollapsibleTriggerButton,
+		CollapsibleContent,
 		Alert,
 		AlertTitle,
 		AlertDescription,
 		Badge,
 		Progress,
 		Skeleton,
-		Toaster,
 		Avatar,
 		AvatarImage,
 		AvatarFallback,
@@ -140,7 +142,9 @@
 		InputGroupButton,
 		InputGroupInput,
 		InputGroupText,
-		InputGroupTextarea
+		InputGroupTextarea,
+		Switch,
+		Label
 	} from '$lib/index.js';
 	import { flavors } from '@ujl-framework/types';
 	import { toast } from 'svelte-sonner';
@@ -150,6 +154,7 @@
 	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import InfoIcon from '@lucide/svelte/icons/info';
+	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 
 	// Theme for testing UJLTheme
 	const themeDocument = defaultTheme as unknown as UJLTDocument;
@@ -172,6 +177,7 @@
 	let inputValue = $state<string>('');
 	let textareaValue = $state<string>('');
 	let colorValue = $state('#ff0000');
+	let switchValue = $state(false);
 </script>
 
 <UJLTheme tokens={themeTokens}>
@@ -358,6 +364,30 @@
 											</div>
 										</div>
 
+										<!-- Switch Examples -->
+										<div class="space-y-3">
+											<Text size="sm" class="font-medium">Switch:</Text>
+											<div class="space-y-4">
+												<div class="flex items-center space-x-2">
+													<Switch id="airplane-mode" bind:checked={switchValue} />
+													<Label for="airplane-mode">Airplane Mode</Label>
+												</div>
+												<div class="flex items-center space-x-2">
+													<Switch id="notifications" />
+													<Label for="notifications">Enable Notifications</Label>
+												</div>
+												<div class="flex items-center space-x-2">
+													<Switch id="disabled-switch" disabled />
+													<Label for="disabled-switch">Disabled Switch</Label>
+												</div>
+												{#if switchValue !== undefined}
+													<Text size="sm" intensity="muted"
+														>Airplane Mode: {switchValue ? 'On' : 'Off'}</Text
+													>
+												{/if}
+											</div>
+										</div>
+
 										<!-- Input Group Examples -->
 										<div class="space-y-3">
 											<Text size="sm" class="font-medium">Input Group:</Text>
@@ -431,7 +461,7 @@
 													<Text size="xs" intensity="muted">Textarea with buttons</Text>
 													<InputGroup>
 														<InputGroupTextarea placeholder="Ask, Search or Chat..." />
-														<InputGroupAddon align="block-end">
+														<InputGroupAddon align="block-end" class="bg-input/15">
 															<InputGroupButton variant="outline" size="icon-xs">
 																<PlusIcon />
 															</InputGroupButton>
@@ -931,6 +961,35 @@
 							<GridItem>
 								<Card>
 									<CardHeader>
+										<CardTitle>Collapsible</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<Collapsible class="w-[350px] space-y-2">
+											<div class="flex items-center justify-between space-x-4 px-4">
+												<h4 class="text-sm font-semibold">@huntabyte starred 3 repositories</h4>
+												<CollapsibleTriggerButton variant="ghost" size="sm" class="w-9 p-0">
+													<ChevronsUpDownIcon />
+													<span class="sr-only">Toggle</span>
+												</CollapsibleTriggerButton>
+											</div>
+											<div class="rounded-md border px-4 py-3 font-mono text-sm">
+												@huntabyte/bits-ui
+											</div>
+											<CollapsibleContent class="space-y-2">
+												<div class="rounded-md border px-4 py-3 font-mono text-sm">
+													@melt-ui/melt-ui
+												</div>
+												<div class="rounded-md border px-4 py-3 font-mono text-sm">
+													@sveltejs/svelte
+												</div>
+											</CollapsibleContent>
+										</Collapsible>
+									</CardContent>
+								</Card>
+							</GridItem>
+							<GridItem>
+								<Card>
+									<CardHeader>
 										<CardTitle>Feedback</CardTitle>
 									</CardHeader>
 									<CardContent class="space-y-6">
@@ -1145,6 +1204,3 @@
 		</section>
 	{/each}
 </UJLTheme>
-
-<!-- Toaster for toast notifications -->
-<Toaster />
