@@ -111,11 +111,11 @@ The color utilities are organized into focused modules in `$lib/tools/colors/`:
 
 All functions and types are exported from `$lib/tools/colors/index.js`.
 
-Color editing is handled via the `ColorPaletteInput` component located in `$lib/components/ui/color-palette-input/`, which combines a color picker with a palette preview and directly binds to `UJLTColorSet` for seamless integration with theme tokens.
+Color editing is handled via the `ColorPaletteInput` component located in `$lib/components/ui/color-palette-input/`, which combines a color picker with a palette preview and works with `UJLTColorSet` through unidirectional data flow (props down, events up) for seamless integration with theme tokens.
 
 ### Example Usage
 
-**Note:** This is an internal example showing how color editing works with the new `ColorPaletteInput` component.
+**Note:** This is an internal example showing how color editing works with the new `ColorPaletteInput` component using unidirectional data flow.
 
 ```svelte
 <script>
@@ -127,21 +127,30 @@ Color editing is handled via the `ColorPaletteInput` component located in `$lib/
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	// Local state for color sets (synced with tokens)
-	let primaryColorSet = $state<UJLTColorSet | null>(tokens.color.primary);
-
-	// Update tokens when color set changes
-	$effect(() => {
-		if (primaryColorSet && primaryColorSet !== tokens.color.primary) {
-			crafter.updateTokenSet((oldTokens) => ({
-				...oldTokens,
-				color: { ...oldTokens.color, primary: primaryColorSet! }
-			}));
-		}
-	});
+	/**
+	 * Helper function to update a single color token.
+	 * This is the only mutation path for color tokens, ensuring unidirectional data flow.
+	 */
+	function updateColorToken(key: keyof UJLTTokenSet['color'], set: UJLTColorSet) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			color: { ...oldTokens.color, [key]: set }
+		}));
+	}
 </script>
 
-<ColorPaletteInput label="Primary Color" bind:colorSet={primaryColorSet} />
+<ColorPaletteInput
+	label="Primary Color"
+	colorSet={tokens.color.primary}
+	onChange={(set) => updateColorToken('primary', set)}
+/>
 ```
 
-The `ColorPaletteInput` component handles all palette generation internally and works directly with `UJLTColorSet`, eliminating the need for manual hex-to-palette conversions in component code.
+The `ColorPaletteInput` component:
+
+- Receives `colorSet` as a read-only prop (no `$bindable`)
+- Communicates changes via the `onChange` callback
+- Handles all palette generation internally
+- Works directly with `UJLTColorSet`, eliminating the need for manual hex-to-palette conversions
+
+This follows Svelte 5 best practices: **Props down, events up** - no local state duplication or two-way bindings needed.

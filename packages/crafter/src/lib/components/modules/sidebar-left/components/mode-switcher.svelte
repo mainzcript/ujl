@@ -1,9 +1,4 @@
-<!--
-	Mode switcher component that displays a dropdown menu for switching between Editor and Designer modes.
-
-	This is a pure presentational component that defines its own mode configuration (icons, names).
-	It receives the current mode as a bindable prop and calls onModeChange when the user selects a new mode.
--->
+<!-- Mode switcher dropdown between Editor and Designer; calls onModeChange on selection. -->
 <script lang="ts">
 	import {
 		DropdownMenu,
@@ -20,10 +15,10 @@
 	import type { CrafterMode } from '../../types.js';
 
 	let {
-		mode = $bindable<CrafterMode>('editor'),
+		mode,
 		onModeChange
 	}: {
-		mode?: CrafterMode;
+		mode: CrafterMode;
 		onModeChange?: (mode: CrafterMode) => void;
 	} = $props();
 
@@ -64,7 +59,6 @@
 				{#each modes as modeConfig, index (modeConfig.id)}
 					<DropdownMenuItem
 						onSelect={() => {
-							mode = modeConfig.id;
 							onModeChange?.(modeConfig.id);
 						}}
 						class="gap-2 p-2"

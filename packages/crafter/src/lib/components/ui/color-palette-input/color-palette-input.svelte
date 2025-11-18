@@ -1,6 +1,7 @@
 <!--
 	Color palette input component that combines a color picker with a palette preview.
-	Binds directly to UJLTColorSet and handles all internal conversions (hex ↔ palette ↔ colorSet).
+	Receives colorSet as a read-only prop and communicates changes via onChange callback.
+	Handles all internal conversions (hex ↔ palette ↔ colorSet).
 -->
 <script lang="ts">
 	import { ColorPicker, Label } from '@ujl-framework/ui';
@@ -15,13 +16,13 @@
 	} from '$lib/tools/colors/index.js';
 
 	let {
-		colorSet = $bindable<UJLTColorSet | null>(null),
+		colorSet,
 		label,
 		id,
 		onChange,
 		shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 	}: {
-		colorSet?: UJLTColorSet | null;
+		colorSet: UJLTColorSet | null;
 		label: string;
 		id?: string;
 		onChange?: (colorSet: UJLTColorSet) => void;
@@ -51,12 +52,11 @@
 
 	// Handle color picker changes
 	function handleColorChange(hex: string) {
-		if (!hex) return;
+		if (!hex || !onChange) return;
 
 		try {
 			const newColorSet = generateColorSetFromHex(hex);
-			colorSet = newColorSet;
-			onChange?.(newColorSet);
+			onChange(newColorSet);
 		} catch (error) {
 			console.error('Error updating color set:', error);
 		}

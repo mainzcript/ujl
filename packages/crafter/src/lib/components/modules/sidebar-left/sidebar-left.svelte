@@ -1,12 +1,6 @@
 <!--
-	Main sidebar component that orchestrates mode switching between content editor (UJLC) and theme designer (UJLT).
-
-	This is a controlled component - the mode state is owned by app.svelte and passed down as a prop.
-	This component:
-	- Receives tokenSet (theme tokens), contentSlot (root slot), and mode as props from app.svelte
-	- Provides a mode switcher to toggle between Editor and Designer views
-	- Routes to the appropriate child component based on the mode prop
-	- Forwards all Sidebar component props while adding Crafter-specific props
+	Controlled sidebar that switches between the content editor (UJLC) and theme designer (UJLT).
+	Receives mode, tokenSet and contentSlot from app.svelte and forwards them to child components.
 -->
 <script lang="ts">
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
@@ -38,17 +32,17 @@
 	 * Forward all Sidebar props while adding Crafter-specific props for tokenSet and contentSlot.
 	 * tokenSet comes from ujltDocument.ujlt.tokens (theme tokens)
 	 * contentSlot comes from ujlcDocument.ujlc.root (root slot array)
-	 * Mode state is now controlled by parent (app.svelte)
+	 * Mode state is controlled by parent (app.svelte) - this is a controlled component.
 	 */
 	let {
-		mode = $bindable<CrafterMode>('editor'),
+		mode,
 		onModeChange,
 		tokenSet,
 		contentSlot,
 		ref = $bindable(null),
 		...restProps
 	}: ComponentProps<typeof Sidebar> & {
-		mode?: CrafterMode;
+		mode: CrafterMode;
 		onModeChange?: (mode: CrafterMode) => void;
 		tokenSet: UJLTTokenSet;
 		contentSlot: UJLCSlotObject;
@@ -56,7 +50,7 @@
 </script>
 
 <Sidebar class="border-r-0" bind:ref {...restProps}>
-	<Header bind:mode {onModeChange} navMainItems={data.navMain} />
+	<Header {mode} {onModeChange} navMainItems={data.navMain} />
 	<SidebarContent>
 		{#if mode === 'editor'}
 			<Editor slot={contentSlot} />

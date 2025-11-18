@@ -1,9 +1,4 @@
-<!--
-	Header component for the Crafter interface.
-	
-	Displays the main navigation breadcrumb and sidebar trigger.
-	This is a presentational component with no internal state.
--->
+<!-- Top header with sidebar trigger and breadcrumb for the Crafter interface. -->
 <script lang="ts">
 	import {
 		Breadcrumb,

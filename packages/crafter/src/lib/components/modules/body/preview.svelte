@@ -1,15 +1,4 @@
-<!--
-	Preview component for rendering UJL documents with live theme updates.
-
-	This component orchestrates the rendering pipeline:
-	1. Composes the UJL content document into an AST using Composer
-	2. Extracts theme tokens from the UJLT document
-	3. Renders the AST with the theme tokens using the Svelte adapter
-
-	The component reacts to changes in both documents and re-renders automatically.
-	We rely on reference changes (new object instances) from the parent to detect updates,
-	not deep equality checks.
--->
+<!-- Preview that composes the UJLC document and renders it with UJLT tokens via the Svelte adapter. -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';

@@ -6,6 +6,12 @@ import type { UJLTTokenSet, UJLCSlotObject } from '@ujl-framework/types';
  *
  * This context is provided by `app.svelte` and consumed by child components
  * that need to update the document state (e.g., Designer, Editor).
+ *
+ * Architecture: Unidirectional data flow
+ * - Tokens and documents are owned by app.svelte (Single Source of Truth)
+ * - Child components receive tokens as read-only props
+ * - Changes flow up via callbacks (onChange handlers) to updateTokenSet/updateRootSlot
+ * - No local token copies or two-way bindings - data flows down, events flow up
  */
 export type CrafterContext = {
 	/**

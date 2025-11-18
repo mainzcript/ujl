@@ -1,11 +1,6 @@
 <!--
-	Appearance group component.
-	
-	This is a presentational component that displays UI controls for editing appearance settings
-	(border radius). It receives the radius value as a bindable prop and does not
-	perform any token updates itself.
-	
-	All token updates are handled by the parent designer.svelte component via reactive effects.
+	Appearance group for editing border radius.
+	Uses local slider state and reports changes via onRadiusChange; designer.svelte performs token updates.
 -->
 <script lang="ts">
 	import {
@@ -22,12 +17,37 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	let {
-		radiusValue = $bindable(),
-		radiusDisplayValue
+		radiusValue,
+		radiusDisplayValue,
+		onRadiusChange
 	}: {
-		radiusValue?: number;
+		radiusValue: number;
 		radiusDisplayValue: number;
+		onRadiusChange?: (value: number) => void;
 	} = $props();
+
+	// Local state for the slider, initialized from prop
+	// Note: We use $state here because the Slider component requires a bindable value.
+	let sliderValue = $state(radiusValue);
+
+	// Track previous value to detect user-initiated changes
+	let previousValue = $state(radiusValue);
+
+	// Sync sliderValue with prop when it changes externally
+	$effect(() => {
+		if (radiusValue !== previousValue) {
+			sliderValue = radiusValue;
+			previousValue = radiusValue;
+		}
+	});
+
+	// Call onChange when sliderValue changes from user interaction
+	$effect(() => {
+		if (sliderValue !== previousValue && sliderValue !== radiusValue && onRadiusChange) {
+			previousValue = sliderValue;
+			onRadiusChange(sliderValue);
+		}
+	});
 </script>
 
 <Collapsible open class="group/collapsible">
@@ -52,7 +72,7 @@
 					<Slider
 						id="radius"
 						type="single"
-						bind:value={radiusValue}
+						bind:value={sliderValue}
 						min={0}
 						max={2}
 						step={0.05}

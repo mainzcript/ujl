@@ -1,9 +1,4 @@
-<!--
-	Content editor component for visualizing and editing the document structure.
-
-	This is a placeholder implementation. A proper UJLCSlotObject renderer
-	with drag & drop, module selection, and direct editing will be implemented here.
--->
+<!-- Placeholder content editor for visualizing the UJLCSlotObject; full drag & drop editor TBD. -->
 <script lang="ts">
 	import type { UJLCSlotObject } from '@ujl-framework/types';
 

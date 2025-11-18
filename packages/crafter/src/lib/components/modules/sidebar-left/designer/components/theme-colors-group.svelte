@@ -1,11 +1,6 @@
 <!--
-	Theme Colors group component.
-	
-	This is a presentational component that displays UI controls for editing theme colors
-	(primary, secondary, accent). It receives UJLTColorSet bindings and delegates
-	all color editing to the ColorPaletteInput component.
-	
-	All palette generation and token updates are handled by ColorPaletteInput and the parent designer.svelte component.
+	Theme colors group for primary, secondary and accent tokens.
+	Receives UJLTColorSet props and forwards changes via on*Change callbacks to designer.svelte.
 -->
 <script lang="ts">
 	import {
@@ -21,13 +16,19 @@
 	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
 
 	let {
-		primaryColorSet = $bindable(),
-		secondaryColorSet = $bindable(),
-		accentColorSet = $bindable()
+		primaryColorSet,
+		secondaryColorSet,
+		accentColorSet,
+		onPrimaryChange,
+		onSecondaryChange,
+		onAccentChange
 	}: {
-		primaryColorSet?: UJLTColorSet | null;
-		secondaryColorSet?: UJLTColorSet | null;
-		accentColorSet?: UJLTColorSet | null;
+		primaryColorSet: UJLTColorSet | null;
+		secondaryColorSet: UJLTColorSet | null;
+		accentColorSet: UJLTColorSet | null;
+		onPrimaryChange?: (set: UJLTColorSet) => void;
+		onSecondaryChange?: (set: UJLTColorSet) => void;
+		onAccentChange?: (set: UJLTColorSet) => void;
 	} = $props();
 </script>
 
@@ -48,14 +49,21 @@
 				<ColorPaletteInput
 					label="Primary Color"
 					id="primary-color"
-					bind:colorSet={primaryColorSet}
+					colorSet={primaryColorSet}
+					onChange={onPrimaryChange}
 				/>
 				<ColorPaletteInput
 					label="Secondary Color"
 					id="secondary-color"
-					bind:colorSet={secondaryColorSet}
+					colorSet={secondaryColorSet}
+					onChange={onSecondaryChange}
 				/>
-				<ColorPaletteInput label="Accent Color" id="accent-color" bind:colorSet={accentColorSet} />
+				<ColorPaletteInput
+					label="Accent Color"
+					id="accent-color"
+					colorSet={accentColorSet}
+					onChange={onAccentChange}
+				/>
 			</SidebarGroupContent>
 		</CollapsibleContent>
 	</SidebarGroup>

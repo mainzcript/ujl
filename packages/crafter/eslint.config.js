@@ -151,5 +151,13 @@ export default defineConfig(
 				svelteConfig
 			}
 		}
+	},
+	{
+		// Disable prefer-writable-derived for appearance-group.svelte
+		// The Slider component requires a bindable $state value, not a derived value
+		files: ['**/appearance-group.svelte'],
+		rules: {
+			'svelte/prefer-writable-derived': 'off'
+		}
 	}
 );
