@@ -168,7 +168,7 @@
 	 * Move Handler for Drag & Drop
 	 * Returns true if move was successful, false if rejected
 	 */
-	function handleNodeMove(nodeId: string, targetId: string): boolean {
+	function handleNodeMove(nodeId: string, targetId: string, slotName?: string): boolean {
 		// Find the node and target
 		const node = findNodeById(documentContext.root, nodeId);
 		const targetNode = findNodeById(documentContext.root, targetId);
@@ -197,18 +197,29 @@
 			return false;
 		}
 
-		// Get first slot of target
-		const slotName = getFirstSlotName(targetNode);
-		if (!slotName) {
+		// Determine which slot to use
+		let targetSlotName: string | undefined | null = slotName;
+		if (!targetSlotName) {
+			// If no slot specified, use first available slot
+			targetSlotName = getFirstSlotName(targetNode);
+		}
+
+		if (!targetSlotName) {
 			console.warn('Target node has no valid slot');
+			return false;
+		}
+
+		// Verify the slot exists on target node
+		if (!targetNode.slots || !targetNode.slots[targetSlotName]) {
+			console.warn('Specified slot does not exist on target node:', targetSlotName);
 			return false;
 		}
 
 		// Perform the move: remove from old position, insert at new position
 		const removedTree = removeNodeFromTree(documentContext.root, nodeId);
-		documentContext.root = insertNodeIntoSlot(removedTree, targetId, slotName, node);
+		documentContext.root = insertNodeIntoSlot(removedTree, targetId, targetSlotName, node);
 
-		console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', slotName);
+		console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', targetSlotName);
 		return true;
 	}
 

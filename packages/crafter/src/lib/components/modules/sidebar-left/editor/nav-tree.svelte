@@ -25,7 +25,7 @@
 		onNodeReorder
 	}: {
 		nodes: UJLCModuleObject[];
-		onNodeMove?: (nodeId: string, targetId: string) => boolean;
+		onNodeMove?: (nodeId: string, targetId: string, slotName?: string) => boolean;
 		onNodeReorder?: (nodeId: string, targetId: string, position: 'before' | 'after') => boolean;
 	} = $props();
 
@@ -34,6 +34,7 @@
 	// Drag & Drop State
 	let draggedNodeId = $state<string | null>(null);
 	let dropTargetId = $state<string | null>(null);
+	let dropTargetSlot = $state<string | null>(null);
 	let dropPosition = $state<'before' | 'after' | 'into' | null>(null);
 
 	/**
@@ -84,6 +85,22 @@
 	function hasChildren(node: UJLCModuleObject): boolean {
 		if (!node.slots) return false;
 		return Object.values(node.slots).some((slot) => slot.length > 0);
+	}
+
+	/**
+	 * checks if a node has multiple slots
+	 */
+	function hasMultipleSlots(node: UJLCModuleObject): boolean {
+		if (!node.slots) return false;
+		return Object.keys(node.slots).length > 1;
+	}
+
+	/**
+	 * returns all slot entries [slotName, children[]]
+	 */
+	function getSlotEntries(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
+		if (!node.slots) return [];
+		return Object.entries(node.slots);
 	}
 
 	/**
@@ -138,10 +155,11 @@
 
 	function handleDragLeave() {
 		dropTargetId = null;
+		dropTargetSlot = null;
 		dropPosition = null;
 	}
 
-	function handleDrop(event: DragEvent, targetNodeId: string) {
+	function handleDrop(event: DragEvent, targetNodeId: string, slotName?: string) {
 		event.preventDefault();
 
 		if (!draggedNodeId || draggedNodeId === targetNodeId) {
@@ -149,7 +167,7 @@
 			return;
 		}
 
-		console.log('Drop:', draggedNodeId, dropPosition, targetNodeId);
+		console.log('Drop:', draggedNodeId, dropPosition, targetNodeId, 'slot:', slotName);
 
 		let success = false;
 
@@ -162,9 +180,9 @@
 				}
 			}
 		} else {
-			// Drop into node
+			// Drop into node (or into specific slot)
 			if (onNodeMove) {
-				success = onNodeMove(draggedNodeId, targetNodeId);
+				success = onNodeMove(draggedNodeId, targetNodeId, slotName);
 				if (!success) {
 					console.log('Drop rejected - node returned to original position');
 				}
@@ -181,17 +199,56 @@
 	function resetDragState() {
 		draggedNodeId = null;
 		dropTargetId = null;
+		dropTargetSlot = null;
 		dropPosition = null;
+	}
+
+	// Handler for slot group drops
+	function handleSlotDragOver(event: DragEvent, parentNodeId: string, slotName: string) {
+		if (!draggedNodeId) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+
+		dropTargetId = parentNodeId;
+		dropTargetSlot = slotName;
+		dropPosition = 'into';
+	}
+
+	function handleSlotDrop(event: DragEvent, parentNodeId: string, slotName: string) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		if (!draggedNodeId || draggedNodeId === parentNodeId) {
+			resetDragState();
+			return;
+		}
+
+		console.log('Drop into slot:', draggedNodeId, 'into', parentNodeId, 'slot:', slotName);
+
+		if (onNodeMove) {
+			const success = onNodeMove(draggedNodeId, parentNodeId, slotName);
+			if (!success) {
+				console.log('Drop into slot rejected');
+			}
+		}
+
+		resetDragState();
 	}
 </script>
 
 {#snippet renderNode(node: UJLCModuleObject, level: number = 0)}
 	{@const isDragging = draggedNodeId === node.meta.id}
-	{@const isDropTarget = dropTargetId === node.meta.id}
+	{@const isDropTarget = dropTargetId === node.meta.id && !dropTargetSlot}
 	{@const isSelected = selectedNodeId === node.meta.id}
 	{@const showDropBefore = isDropTarget && dropPosition === 'before'}
 	{@const showDropAfter = isDropTarget && dropPosition === 'after'}
 	{@const showDropInto = isDropTarget && dropPosition === 'into' && canAcceptDrop(node)}
+	{@const hasMultiple = hasMultipleSlots(node)}
 
 	{#if level === 0}
 		{#if hasChildren(node)}
@@ -241,11 +298,65 @@
 					</CollapsibleTrigger>
 					<CollapsibleContent>
 						<SidebarMenuSub class="mr-0 pe-0">
-							{#each getChildren(node) as childNode (childNode.meta.id)}
-								<SidebarMenuSubItem>
-									{@render renderNode(childNode, level + 1)}
-								</SidebarMenuSubItem>
-							{/each}
+							{#if hasMultiple}
+								<!-- Multiple slots: show slot names as groups -->
+								{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
+									{#if slotChildren.length > 0}
+										<SidebarMenuSubItem>
+											<Collapsible>
+												<CollapsibleTrigger class="group">
+													{#snippet child({ props })}
+														<SidebarMenuSubButton {...props}>
+															{#snippet child({ props: buttonProps })}
+																<div
+																	role="button"
+																	tabindex="0"
+																	class="flex w-full items-center gap-1 rounded-md {dropTargetId ===
+																		node.meta.id && dropTargetSlot === slotName
+																		? 'drop-target-slot'
+																		: ''}"
+																	ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
+																	ondragleave={handleDragLeave}
+																	ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+																>
+																	<button
+																		type="button"
+																		{...buttonProps}
+																		class="{buttonProps.class || ''} w-auto!"
+																	>
+																		<ChevronRightIcon
+																			class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																		/>
+																	</button>
+																	<span class="text-xs font-medium text-muted-foreground uppercase">
+																		{slotName}
+																	</span>
+																</div>
+															{/snippet}
+														</SidebarMenuSubButton>
+													{/snippet}
+												</CollapsibleTrigger>
+												<CollapsibleContent>
+													<SidebarMenuSub class="mr-0 pe-0">
+														{#each slotChildren as childNode (childNode.meta.id)}
+															<SidebarMenuSubItem>
+																{@render renderNode(childNode, level + 1)}
+															</SidebarMenuSubItem>
+														{/each}
+													</SidebarMenuSub>
+												</CollapsibleContent>
+											</Collapsible>
+										</SidebarMenuSubItem>
+									{/if}
+								{/each}
+							{:else}
+								<!-- Single slot: show children directly -->
+								{#each getChildren(node) as childNode (childNode.meta.id)}
+									<SidebarMenuSubItem>
+										{@render renderNode(childNode, level + 1)}
+									</SidebarMenuSubItem>
+								{/each}
+							{/if}
 						</SidebarMenuSub>
 					</CollapsibleContent>
 				</Collapsible>
@@ -327,11 +438,65 @@
 				</CollapsibleTrigger>
 				<CollapsibleContent>
 					<SidebarMenuSub class="mr-0 pe-0">
-						{#each getChildren(node) as childNode (childNode.meta.id)}
-							<SidebarMenuSubItem>
-								{@render renderNode(childNode, level + 1)}
-							</SidebarMenuSubItem>
-						{/each}
+						{#if hasMultiple}
+							<!-- Multiple slots: show slot names as groups -->
+							{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
+								{#if slotChildren.length > 0}
+									<SidebarMenuSubItem>
+										<Collapsible>
+											<CollapsibleTrigger class="group">
+												{#snippet child({ props })}
+													<SidebarMenuSubButton {...props}>
+														{#snippet child({ props: buttonProps })}
+															<div
+																role="button"
+																tabindex="0"
+																class="flex w-full items-center gap-1 rounded-md {dropTargetId ===
+																	node.meta.id && dropTargetSlot === slotName
+																	? 'drop-target-slot'
+																	: ''}"
+																ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
+																ondragleave={handleDragLeave}
+																ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+															>
+																<button
+																	type="button"
+																	{...buttonProps}
+																	class="{buttonProps.class || ''} w-auto!"
+																>
+																	<ChevronRightIcon
+																		class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																	/>
+																</button>
+																<span class="text-xs font-medium text-muted-foreground uppercase">
+																	{slotName}
+																</span>
+															</div>
+														{/snippet}
+													</SidebarMenuSubButton>
+												{/snippet}
+											</CollapsibleTrigger>
+											<CollapsibleContent>
+												<SidebarMenuSub class="mr-0 pe-0">
+													{#each slotChildren as childNode (childNode.meta.id)}
+														<SidebarMenuSubItem>
+															{@render renderNode(childNode, level + 1)}
+														</SidebarMenuSubItem>
+													{/each}
+												</SidebarMenuSub>
+											</CollapsibleContent>
+										</Collapsible>
+									</SidebarMenuSubItem>
+								{/if}
+							{/each}
+						{:else}
+							<!-- Single slot: show children directly -->
+							{#each getChildren(node) as childNode (childNode.meta.id)}
+								<SidebarMenuSubItem>
+									{@render renderNode(childNode, level + 1)}
+								</SidebarMenuSubItem>
+							{/each}
+						{/if}
 					</SidebarMenuSub>
 				</CollapsibleContent>
 			</Collapsible>
@@ -398,6 +563,12 @@
 
 	.drop-target {
 		background-color: color-mix(in srgb, hsl(var(--primary)) 20%, transparent 80%);
+		outline: 2px dashed hsl(var(--primary));
+		outline-offset: -2px;
+	}
+
+	.drop-target-slot {
+		background-color: color-mix(in srgb, hsl(var(--primary)) 15%, transparent 85%);
 		outline: 2px dashed hsl(var(--primary));
 		outline-offset: -2px;
 	}
