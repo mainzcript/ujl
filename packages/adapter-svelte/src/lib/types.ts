@@ -16,6 +16,8 @@ export type SvelteNodeDescriptor<Props extends Record<string, unknown> = Record<
 export type SvelteAdapterOptions = {
 	/** Target element or selector where the component should be mounted */
 	target: string | HTMLElement;
+	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
+	mode?: 'light' | 'dark' | 'system';
 };
 
 /**

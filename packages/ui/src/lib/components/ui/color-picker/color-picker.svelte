@@ -48,17 +48,17 @@
 		onclick={handleButtonClick}
 		{disabled}
 		class={cn(
-			'elevation border-foreground/25 text-foreground bg-flavor border shadow-sm',
-			'selection:bg-primary selection:text-primary-foreground ring-offset-background shadow-xs',
-			'inline-flex h-9 w-full min-w-0 items-center gap-2 rounded-md px-3 py-1 text-base outline-none',
+			'text-foreground border-input bg-input/15 selection:bg-primary selection:text-primary-foreground ring-offset-background shadow-xs',
+			'inline-flex h-9 w-full min-w-0 items-center gap-2 rounded-md border px-3 py-1 text-base outline-none',
 			'transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-			'focus-visible:border-foreground/50 focus-visible:ring-foreground/50 focus-visible:ring-[3px]',
+			'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+			'aria-invalid:ring-destructive/20 aria-invalid:border-destructive',
 			'cursor-pointer',
 			className
 		)}
 	>
 		<div
-			class="border-border/50 h-4 w-4 shrink-0 rounded border"
+			class="border-border h-4 w-4 shrink-0 rounded border"
 			style="background-color: {value}"
 		></div>
 		<span class="truncate">{value.toUpperCase()}</span>

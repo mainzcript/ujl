@@ -257,11 +257,11 @@ Die .ujlt.json-Datei definiert das Theme über Design‑Tokens. Ein vollständig
 
 #### Integration des Editors (UJL Crafter) in eine Web-Anwendung
 
-Der UJL Crafter (Editor) kann über npm in eine Web-Anwendung integriert werden, sodass Redakteure Inhalte direkt auf der Seite bearbeiten können. Hier ist ein Beispielcode zur Integration:
+Der UJL Crafter (Editor) kann über pnpm in eine Web-Anwendung integriert werden, sodass Redakteure Inhalte direkt auf der Seite bearbeiten können. Hier ist ein Beispielcode zur Integration:
 
 ```javascript
-// Installation via npm:
-// npm install ujlcrafter
+// Installation via pnpm:
+// pnpm install ujlcrafter
 
 import UJLCrafter from "ujlcrafter";
 
@@ -291,8 +291,8 @@ Dieser Code integriert den UJL Crafter in eine Web-Anwendung. Der Editor wird im
 Der Renderer wird benötigt, um die .ujlc.json- und .ujlt.json-Dateien in HTML/CSS/JS zu konvertieren und die Webansicht anzuzeigen. Hier ist ein Beispiel für die Verwendung des Renderers:
 
 ```javascript
-// Installation via npm:
-// npm install ujlcrafter-renderer
+// Installation via pnpm:
+// pnpm install ujlcrafter-renderer
 
 import UJLRenderer from "ujlcrafter-renderer";
 

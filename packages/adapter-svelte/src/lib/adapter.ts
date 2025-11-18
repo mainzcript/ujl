@@ -36,7 +36,8 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 		target: targetElement,
 		props: {
 			node,
-			tokenSet
+			tokenSet,
+			mode: options.mode
 		}
 	});
 

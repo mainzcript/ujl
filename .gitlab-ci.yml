@@ -1,5 +1,5 @@
 # GitLab CI/CD Pipeline for UJL Framework
-# Quality checks + Validation + GitLab Pages deployment
+# Quality checks + GitLab Pages deployment
 
 stages:
   - install
@@ -10,7 +10,7 @@ stages:
 
 variables:
   NODE_VERSION: '22-slim'
-  PNPM_VERSION: '10.21.0'
+  PNPM_VERSION: '10.22.0'
 
 # Install dependencies once
 install_deps:

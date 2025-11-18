@@ -4,10 +4,12 @@ const UJL_THEME_CONTEXT = Symbol('UJL_THEME_CONTEXT');
 
 /**
  * Context type for UJL theme system.
- * Contains the unique theme ID used for scoping CSS variables.
+ * Contains the unique theme ID used for scoping CSS variables and a computed isDark boolean.
+ * Uses a getter function for reactivity (Svelte 5 best practice).
  */
 export type UjlThemeContext = {
 	themeId: string;
+	get isDark(): boolean;
 };
 
 /**
