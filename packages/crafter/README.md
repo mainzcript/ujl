@@ -70,8 +70,9 @@ This ensures:
   - All changes go through `crafter.updateTokenSet()`
 
 - **`editor.svelte`**: Reads `slot` (content structure) from props, uses context API for mutations
-  - Currently a placeholder implementation
-  - Will be extended with a navigation tree of the document structure
+  - Implements an interactive navigation tree of the document structure (`nav-tree.svelte`)
+  - Supports selection via URL (`?selected=<id>`), Cut/Paste/Delete und Drag & Drop (Move/Reorder)
+  - Alle Strukturänderungen laufen immutable über `crafter.updateRootSlot(fn)` und die Tree-Utilities (`ujlc-tree-utils.ts`)
 
 - **`preview.svelte`**: Receives `ujlcDocument` and `ujltDocument` as props, renders via `@ujl-framework/adapter-svelte`
   - Composes the content document into an AST using `Composer`
