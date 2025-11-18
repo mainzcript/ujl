@@ -1,23 +1,36 @@
-<!--
-	Controlled sidebar that switches between the content editor (UJLC) and theme designer (UJLT).
-	Receives mode, tokenSet and contentSlot from app.svelte and forwards them to child components.
--->
 <script lang="ts">
+	import MessageCircleQuestionIcon from '@lucide/svelte/icons/message-circle-question';
+	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-	import type { UJLTTokenSet, UJLCSlotObject } from '@ujl-framework/types';
+	import PencilRulerIcon from '@lucide/svelte/icons/pencil-ruler';
+	import PaletteIcon from '@lucide/svelte/icons/palette';
 
-	import Header from './components/header.svelte';
+	import Header from './header.svelte';
 	import Editor from './editor/editor.svelte';
 	import Designer from './designer/designer.svelte';
-	import NavSecondary from './components/nav-secondary.svelte';
+	import NavSecondary from './nav-secondary.svelte';
 	import { Sidebar, SidebarContent, SidebarRail } from '@ujl-framework/ui';
-	import type { ComponentProps } from 'svelte';
-	import type { CrafterMode } from '../types.js';
+	import type { Component, ComponentProps } from 'svelte';
 
-	/**
-	 * Sample navigation data.
-	 * In a real application, these would typically come from props or a store.
-	 */
+	type Mode = {
+		name: string;
+		icon: Component;
+		fileType: string;
+	};
+
+	const modes: Mode[] = [
+		{
+			name: 'Editor',
+			icon: PencilRulerIcon,
+			fileType: 'ujlc'
+		},
+		{
+			name: 'Designer',
+			icon: PaletteIcon,
+			fileType: 'ujlt'
+		}
+	];
+
 	const data = {
 		navMain: [
 			{
@@ -25,39 +38,39 @@
 				url: '#',
 				icon: SparklesIcon
 			}
+		],
+		navSecondary: [
+			{
+				title: 'Settings',
+				url: '#',
+				icon: Settings2Icon
+			},
+			{
+				title: 'Help',
+				url: '#',
+				icon: MessageCircleQuestionIcon
+			}
 		]
 	};
 
-	/**
-	 * Forward all Sidebar props while adding Crafter-specific props for tokenSet and contentSlot.
-	 * tokenSet comes from ujltDocument.ujlt.tokens (theme tokens)
-	 * contentSlot comes from ujlcDocument.ujlc.root (root slot array)
-	 * Mode state is controlled by parent (app.svelte) - this is a controlled component.
-	 */
-	let {
-		mode,
-		onModeChange,
-		tokenSet,
-		contentSlot,
-		ref = $bindable(null),
-		...restProps
-	}: ComponentProps<typeof Sidebar> & {
-		mode: CrafterMode;
-		onModeChange?: (mode: CrafterMode) => void;
-		tokenSet: UJLTTokenSet;
-		contentSlot: UJLCSlotObject;
-	} = $props();
+	let activeMode = $state(modes[0]);
+
+	function handleModeChange(mode: Mode) {
+		activeMode = mode;
+	}
+
+	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
 </script>
 
 <Sidebar class="border-r-0" bind:ref {...restProps}>
-	<Header {mode} {onModeChange} navMainItems={data.navMain} />
+	<Header {activeMode} onModeChange={handleModeChange} navMainItems={data.navMain} />
 	<SidebarContent>
-		{#if mode === 'editor'}
-			<Editor slot={contentSlot} />
+		{#if activeMode.fileType === 'ujlc'}
+			<Editor />
 		{:else}
-			<Designer tokens={tokenSet} />
+			<Designer />
 		{/if}
-		<NavSecondary class="mt-auto" />
+		<NavSecondary items={data.navSecondary} class="mt-auto" />
 	</SidebarContent>
 	<SidebarRail />
 </Sidebar>

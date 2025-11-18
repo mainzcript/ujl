@@ -1,85 +1,57 @@
-<!--
-	Designer sidebar for editing theme tokens (colors, radius, etc.).
-	Reads tokens from props, updates them via CrafterContext.updateTokenSet and delegates UI to group components.
--->
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { UJLTTokenSet, UJLTColorSet } from '@ujl-framework/types';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import ThemeColorsGroup from './components/theme-colors-group.svelte';
-	import NotificationColorsGroup from './components/notification-colors-group.svelte';
-	import AppearanceGroup from './components/appearance-group.svelte';
+	import {
+		SidebarGroup,
+		SidebarGroupLabel,
+		SidebarGroupContent,
+		ColorPicker,
+		Label
+	} from '@ujl-framework/ui';
 
-	let { tokens }: { tokens: UJLTTokenSet } = $props();
-
-	// Get context API for mutations
-	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-
-	/**
-	 * Helper function to update a single color token.
-	 * This is the only mutation path for color tokens, ensuring unidirectional data flow.
-	 *
-	 * @param key - The color key to update (e.g., 'primary', 'secondary', etc.)
-	 * @param set - The new UJLTColorSet value
-	 */
-	function updateColorToken(key: keyof UJLTTokenSet['color'], set: UJLTColorSet) {
-		crafter.updateTokenSet((oldTokens) => ({
-			...oldTokens,
-			color: { ...oldTokens.color, [key]: set }
-		}));
-	}
-
-	/**
-	 * Parses the radius value from tokens.
-	 *
-	 * @param tokens - The token set to parse
-	 * @returns Radius value in rem units (as a number)
-	 */
-	function parseRadius(tokens: UJLTTokenSet): number {
-		const match = tokens.radius.match(/^([\d.]+)/);
-		return match ? Number.parseFloat(match[1]) : 0.75;
-	}
-
-	/**
-	 * Helper function to update the radius token.
-	 * This is the only mutation path for radius, ensuring unidirectional data flow.
-	 *
-	 * @param value - The new radius value in rem units (as a number)
-	 */
-	function updateRadiusToken(value: number) {
-		crafter.updateTokenSet((oldTokens) => ({
-			...oldTokens,
-			radius: `${value}rem`
-		}));
-	}
+	// Color state for design tokens
+	let primaryColor = $state('#3b82f6');
+	let secondaryColor = $state('#8b5cf6');
+	let backgroundColor = $state('#ffffff');
+	let textColor = $state('#000000');
+	let accentColor = $state('#10b981');
 </script>
 
-<!--
-	Delegate UI rendering to presentational group components.
-	Each group receives tokens directly as props and onChange callbacks for updates.
--->
-<ThemeColorsGroup
-	primaryColorSet={tokens.color.primary}
-	secondaryColorSet={tokens.color.secondary}
-	accentColorSet={tokens.color.accent}
-	onPrimaryChange={(set) => updateColorToken('primary', set)}
-	onSecondaryChange={(set) => updateColorToken('secondary', set)}
-	onAccentChange={(set) => updateColorToken('accent', set)}
-/>
+<div
+	data-slot="sidebar-group"
+	data-sidebar="group"
+	class="relative flex w-full min-w-0 flex-col p-2"
+>
+	<SidebarGroup>
+		<SidebarGroupLabel>Designer</SidebarGroupLabel>
+		<SidebarGroupContent class="space-y-4 p-4">
+			<!-- Primary Color -->
+			<div class="space-y-2">
+				<Label for="primary-color" class="text-xs">Primary Color</Label>
+				<ColorPicker id="primary-color" bind:value={primaryColor} />
+			</div>
 
-<NotificationColorsGroup
-	successColorSet={tokens.color.success}
-	warningColorSet={tokens.color.warning}
-	destructiveColorSet={tokens.color.destructive}
-	infoColorSet={tokens.color.info}
-	onSuccessChange={(set) => updateColorToken('success', set)}
-	onWarningChange={(set) => updateColorToken('warning', set)}
-	onDestructiveChange={(set) => updateColorToken('destructive', set)}
-	onInfoChange={(set) => updateColorToken('info', set)}
-/>
+			<!-- Secondary Color -->
+			<div class="space-y-2">
+				<Label for="secondary-color" class="text-xs">Secondary Color</Label>
+				<ColorPicker id="secondary-color" bind:value={secondaryColor} />
+			</div>
 
-<AppearanceGroup
-	radiusValue={parseRadius(tokens)}
-	radiusDisplayValue={parseRadius(tokens)}
-	onRadiusChange={updateRadiusToken}
-/>
+			<!-- Background Color -->
+			<div class="space-y-2">
+				<Label for="background-color" class="text-xs">Background Color</Label>
+				<ColorPicker id="background-color" bind:value={backgroundColor} />
+			</div>
+
+			<!-- Text Color -->
+			<div class="space-y-2">
+				<Label for="text-color" class="text-xs">Text Color</Label>
+				<ColorPicker id="text-color" bind:value={textColor} />
+			</div>
+
+			<!-- Accent Color -->
+			<div class="space-y-2">
+				<Label for="accent-color" class="text-xs">Accent Color</Label>
+				<ColorPicker id="accent-color" bind:value={accentColor} />
+			</div>
+		</SidebarGroupContent>
+	</SidebarGroup>
+</div>

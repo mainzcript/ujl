@@ -1,5 +1,5 @@
 <script lang="ts">
-	import NavUser from './components/nav-user.svelte';
+	import NavUser from './nav-user.svelte';
 	import {
 		Sidebar,
 		SidebarHeader,

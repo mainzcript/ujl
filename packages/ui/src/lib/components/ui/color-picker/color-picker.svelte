@@ -6,7 +6,6 @@
 		value?: string;
 		onChange?: (value: string) => void;
 		disabled?: boolean;
-		id?: string;
 	}
 
 	let {
@@ -14,7 +13,6 @@
 		value = $bindable('#000000'),
 		onChange,
 		disabled = false,
-		id,
 		class: className,
 		...restProps
 	}: ColorPickerProps = $props();
@@ -42,8 +40,7 @@
 		type="color"
 		bind:value
 		oninput={handleColorChange}
-		class="pointer-events-none sr-only absolute inset-0 opacity-0"
-		{id}
+		class="sr-only pointer-events-none absolute inset-0 opacity-0"
 		{disabled}
 	/>
 	<button
@@ -51,17 +48,17 @@
 		onclick={handleButtonClick}
 		{disabled}
 		class={cn(
-			'border-input bg-input/15 text-foreground shadow-xs ring-offset-background selection:bg-primary selection:text-primary-foreground',
+			'text-foreground border-input bg-input/15 selection:bg-primary selection:text-primary-foreground ring-offset-background shadow-xs',
 			'inline-flex h-9 w-full min-w-0 items-center gap-2 rounded-md border px-3 py-1 text-base outline-none',
 			'transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-			'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-			'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
+			'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+			'aria-invalid:ring-destructive/20 aria-invalid:border-destructive',
 			'cursor-pointer',
 			className
 		)}
 	>
 		<div
-			class="h-4 w-4 shrink-0 rounded border border-border"
+			class="border-border h-4 w-4 shrink-0 rounded border"
 			style="background-color: {value}"
 		></div>
 		<span class="truncate">{value.toUpperCase()}</span>

@@ -13,7 +13,7 @@
 <CollapsiblePrimitive.Content
 	bind:ref
 	data-slot="collapsible-content"
-	class="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down"
+	class="data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden"
 	{...restProps}
 >
 	{#if children}
