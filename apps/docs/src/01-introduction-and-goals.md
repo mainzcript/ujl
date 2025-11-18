@@ -80,7 +80,7 @@ Damit du die Projektidee und die Einsatzmöglichkeiten von UJL leichter erfassen
 1. **Contributors**: Entwickler, die aktiv an der Weiterentwicklung von UJL mitwirken und neue Module, Plugins oder Erweiterungen erstellen möchten. Durch ihre Arbeit bereichern sie das Projekt, steigern ihre eigene Reputation und tragen dazu bei, UJL als flexibles und innovatives Framework zu etablieren.
 
 2. **Anwender**: Unternehmen und Teams, die UJL in ihre Projekte einbinden und so individuelle Anforderungen abdecken können. Dies umfasst:
-   - **Entwickler**, die UJL über npm in ihre Web-Anwendungen integrieren, Plugins implementieren und spezifische Anpassungen vornehmen können.
+   - **Entwickler**, die UJL über pnpm in ihre Web-Anwendungen integrieren, Plugins implementieren und spezifische Anpassungen vornehmen können.
    - **Designer**, die über die Design-Konfigurationsdatei das Corporate Design pflegen, ohne direkt in Layout oder Inhalte eingreifen zu müssen.
    - **Redakteure**, die Inhalte strukturiert und unkompliziert im UJL-Editor verwalten und einpflegen, ohne sich um Designanpassungen sorgen zu müssen.
    - **Konsumenten**, die das Endprodukt nutzen und durch UJLs modulare Struktur ein flexibles, auf allen Endgeräten optimales Design erleben.

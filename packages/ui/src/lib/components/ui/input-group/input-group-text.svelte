@@ -13,7 +13,7 @@
 <span
 	bind:this={ref}
 	class={cn(
-		"text-foreground/80 [&_svg:not([class*='text-'])]:text-foreground/80 flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
+		"text-muted-foreground flex items-center gap-2 text-sm [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none",
 		className
 	)}
 	{...restProps}

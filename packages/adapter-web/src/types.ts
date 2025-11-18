@@ -6,6 +6,8 @@ import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
 export interface WebAdapterOptions {
 	/** DOM element or CSS selector where the Custom Element should be mounted */
 	target: string | HTMLElement;
+	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
+	mode?: 'light' | 'dark' | 'system';
 }
 
 /**
@@ -27,6 +29,8 @@ export interface UJLContentElement extends HTMLElement {
 	node: UJLAbstractNode;
 	/** Optional design token set to apply to the rendered AST */
 	tokenSet?: UJLTTokenSet;
+	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
+	mode?: 'light' | 'dark' | 'system';
 }
 
 declare global {

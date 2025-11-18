@@ -16,11 +16,12 @@
 	interface Props {
 		node: UJLAbstractNode;
 		tokenSet?: UJLTTokenSet;
+		mode?: 'light' | 'dark' | 'system';
 	}
 
-	let { node, tokenSet }: Props = $props();
+	let { node, tokenSet, mode }: Props = $props();
 </script>
 
-<UJLTheme tokens={tokenSet}>
+<UJLTheme tokens={tokenSet} {mode}>
 	<ASTNode {node} />
 </UJLTheme>
