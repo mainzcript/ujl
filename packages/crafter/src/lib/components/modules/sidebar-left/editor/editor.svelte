@@ -72,6 +72,13 @@
 		const targetNode = findNodeById(documentContext.root, selectedNodeId);
 		if (!targetNode) return;
 
+		// Check if clipboard node already exists in tree (prevents duplicates)
+		const existingNode = findNodeById(documentContext.root, clipboardNode.meta.id);
+		if (existingNode) {
+			console.warn('Cannot paste: Node already exists in tree. Cut operation may have failed.');
+			return;
+		}
+
 		// find first slot name of target node
 		const slotName = getFirstSlotName(targetNode);
 		if (!slotName) {
@@ -120,13 +127,13 @@
 	 */
 	function handleKeyDown(event: KeyboardEvent) {
 		// Check for Ctrl+C or Cmd+C (Mac)
-		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
-			// Prevent default browser copy behavior
-			if (canCut) {
-				event.preventDefault();
-				handleCut();
-			}
-		}
+		// if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+		// 	// Prevent default browser copy behavior
+		// 	if (canCut) {
+		// 		event.preventDefault();
+		// 		handleCut();
+		// 	}
+		// }
 
 		// Check for Ctrl+V or Cmd+V (Mac)
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {

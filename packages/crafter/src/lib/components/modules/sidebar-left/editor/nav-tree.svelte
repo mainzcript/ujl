@@ -528,7 +528,7 @@
 						class="h-full w-full overflow-hidden text-left text-nowrap text-ellipsis"
 					>
 						<span>
-							hallo{getDisplayName(node)}
+							{getDisplayName(node)}
 						</span>
 					</button>
 				</div>
