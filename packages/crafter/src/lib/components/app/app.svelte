@@ -10,7 +10,7 @@
 	import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
-	import { CRAFTER_CONTEXT, type CrafterContext } from './context.js';
+	import { CRAFTER_CONTEXT, createOperations, type CrafterContext } from './context.js';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
 	import SidebarRight from './sidebar-right/sidebar-right.svelte';
@@ -89,10 +89,14 @@
 		};
 	}
 
+	// Create operations using the factory function
+	const operations = createOperations(() => ujlcDocument.ujlc.root, updateRootSlot);
+
 	// Provide context API to child components
 	const crafterContext: CrafterContext = {
 		updateTokenSet,
-		updateRootSlot
+		updateRootSlot,
+		operations
 	};
 
 	setContext(CRAFTER_CONTEXT, crafterContext);
