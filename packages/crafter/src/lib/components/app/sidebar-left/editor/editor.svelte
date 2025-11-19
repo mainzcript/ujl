@@ -28,8 +28,23 @@
 	// Cut button enabled if a node is selected
 	const canCut = $derived(selectedNodeId !== null);
 
+	// Copy button enabled if a node is selected (same as cut)
+	const canCopy = $derived(selectedNodeId !== null);
+
 	// Paste button enabled if clipboard has content, node is selected, and node has slots
 	const canPaste = $derived(clipboard !== null && selectedNode !== null && hasSlots(selectedNode));
+
+	/**
+	 * Copy Handler - copy selected node to clipboard (without removing)
+	 */
+	function handleCopy() {
+		if (!selectedNodeId) return;
+
+		const copiedNode = crafter.operations.copyNode(selectedNodeId);
+		if (copiedNode) {
+			clipboard = copiedNode;
+		}
+	}
 
 	/**
 	 * Cut Handler - cut selected node to clipboard
@@ -67,6 +82,14 @@
 	 * Keyboard Event Handler
 	 */
 	function handleKeyDown(event: KeyboardEvent) {
+		// Ctrl/Cmd + C for copy
+		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+			if (canCopy) {
+				event.preventDefault();
+				handleCopy();
+			}
+		}
+
 		// Ctrl/Cmd + V for paste
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
 			if (canPaste) {
@@ -123,9 +146,11 @@
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
 	<EditorToolbar
+		onCopy={handleCopy}
 		onCut={handleCut}
 		onPaste={handlePaste}
 		onDelete={handleDelete}
+		{canCopy}
 		{canCut}
 		{canPaste}
 	/>

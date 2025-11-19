@@ -1,4 +1,5 @@
 import type { UJLTTokenSet, UJLCSlotObject, UJLCModuleObject } from '@ujl-framework/types';
+import { nanoid } from 'nanoid';
 import {
 	findNodeById,
 	findParentOfNode,
@@ -59,6 +60,12 @@ export type CrafterContext = {
 	 */
 	operations: {
 		/**
+		 * Copies a node (returns it without removing from tree)
+		 * @returns the node or null if operation failed
+		 */
+		copyNode: (nodeId: string) => UJLCModuleObject | null;
+
+		/**
 		 * Moves a node to a target parent's slot
 		 * @returns true if successful, false if operation was rejected
 		 */
@@ -101,6 +108,13 @@ export type CrafterContext = {
 export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
 
 /**
+ * Generates a unique random ID for a node
+ */
+export function generateNodeId(): string {
+	return nanoid(10);
+}
+
+/**
  * Helper function to check if a node is a descendant of target
  */
 function isDescendant(node: UJLCModuleObject, targetId: string): boolean {
@@ -125,6 +139,48 @@ export function createOperations(
 	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void
 ): CrafterContext['operations'] {
 	return {
+		copyNode(nodeId: string): UJLCModuleObject | null {
+			const slot = getSlot();
+			const node = findNodeById(slot, nodeId);
+
+			if (!node) {
+				console.warn('Node not found');
+				return null;
+			}
+
+			// Check if node is root
+			const parentInfo = findParentOfNode(slot, nodeId);
+			if (!parentInfo || !parentInfo.parent) {
+				console.warn('Cannot copy root node');
+				return null;
+			}
+
+			// Generate new unique ID for the copy
+			let newId = generateNodeId();
+			let attempts = 0;
+			while (findNodeById(slot, newId) !== null && attempts < 10) {
+				newId = generateNodeId();
+				attempts++;
+			}
+
+			if (attempts >= 10) {
+				console.error('Failed to generate unique ID after 10 attempts');
+				return null;
+			}
+
+			// Create duplicate with new ID
+			const duplicatedNode: UJLCModuleObject = {
+				...node,
+				meta: {
+					...node.meta,
+					id: newId
+				}
+			};
+
+			console.log('Copied node:', nodeId, 'as:', newId);
+			return duplicatedNode;
+		},
+
 		moveNode(nodeId: string, targetId: string, slotName?: string): boolean {
 			const slot = getSlot();
 			const node = findNodeById(slot, nodeId);
