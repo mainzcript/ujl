@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree.svelte';
-	import EditorToolbar from './editor-toolbar.svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import { findNodeById, hasSlots } from './ujlc-tree-utils.js';
 
@@ -37,10 +36,8 @@
 	/**
 	 * Copy Handler - copy selected node to clipboard (without removing)
 	 */
-	function handleCopy() {
-		if (!selectedNodeId) return;
-
-		const copiedNode = crafter.operations.copyNode(selectedNodeId);
+	function handleCopy(nodeId: string) {
+		const copiedNode = crafter.operations.copyNode(nodeId);
 		if (copiedNode) {
 			clipboard = copiedNode;
 		}
@@ -49,10 +46,8 @@
 	/**
 	 * Cut Handler - cut selected node to clipboard
 	 */
-	function handleCut() {
-		if (!selectedNodeId) return;
-
-		const cutNode = crafter.operations.cutNode(selectedNodeId);
+	function handleCut(nodeId: string) {
+		const cutNode = crafter.operations.cutNode(nodeId);
 		if (cutNode) {
 			clipboard = cutNode;
 		}
@@ -61,32 +56,33 @@
 	/**
 	 * Paste Handler - paste node from clipboard into selected node
 	 */
-	function handlePaste() {
-		if (!clipboard || !selectedNodeId) return;
+	function handlePaste(nodeId: string) {
+		if (!clipboard) return;
 
-		const success = crafter.operations.pasteNode(clipboard, selectedNodeId);
+		const success = crafter.operations.pasteNode(clipboard, nodeId);
 		if (success) {
-			clipboard = null;
+			clipboard = null; // Clear clipboard after successful paste
 		}
 	}
 
 	/**
 	 * Delete Handler - delete selected node without saving to clipboard
 	 */
-	function handleDelete() {
-		if (!selectedNodeId) return;
-		crafter.operations.deleteNode(selectedNodeId);
+	function handleDelete(nodeId: string) {
+		crafter.operations.deleteNode(nodeId);
 	}
 
 	/**
 	 * Keyboard Event Handler
 	 */
 	function handleKeyDown(event: KeyboardEvent) {
+		if (!selectedNodeId) return;
+
 		// Ctrl/Cmd + C for copy
 		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
 			if (canCopy) {
 				event.preventDefault();
-				handleCopy();
+				handleCopy(selectedNodeId);
 			}
 		}
 
@@ -94,7 +90,7 @@
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
 			if (canPaste) {
 				event.preventDefault();
-				handlePaste();
+				handlePaste(selectedNodeId);
 			}
 		}
 
@@ -102,7 +98,7 @@
 		if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
 			if (canCut) {
 				event.preventDefault();
-				handleCut();
+				handleCut(selectedNodeId);
 			}
 		}
 
@@ -110,7 +106,7 @@
 		if (event.key === 'Delete') {
 			if (canCut) {
 				event.preventDefault();
-				handleDelete();
+				handleDelete(selectedNodeId);
 			}
 		}
 	}
@@ -145,16 +141,16 @@
 </script>
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
-	<EditorToolbar
-		onCopy={handleCopy}
-		onCut={handleCut}
-		onPaste={handlePaste}
-		onDelete={handleDelete}
-		{canCopy}
-		{canCut}
-		{canPaste}
-	/>
 	<div class="p-2">
-		<NavTree nodes={slot} onNodeMove={handleNodeMove} onNodeReorder={handleNodeReorder} />
+		<NavTree
+			nodes={slot}
+			{clipboard}
+			onCopy={handleCopy}
+			onCut={handleCut}
+			onPaste={handlePaste}
+			onDelete={handleDelete}
+			onNodeMove={handleNodeMove}
+			onNodeReorder={handleNodeReorder}
+		/>
 	</div>
 </div>

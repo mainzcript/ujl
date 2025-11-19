@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { UJLCModuleObject } from '@ujl-framework/types';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import MoreVerticalIcon from '@lucide/svelte/icons/more-vertical';
 
 	import {
 		Collapsible,
@@ -14,22 +15,43 @@
 		SidebarMenuButton,
 		SidebarMenuSub,
 		SidebarMenuSubItem,
-		SidebarMenuSubButton
+		SidebarMenuSubButton,
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuTrigger,
+		Button
 	} from '@ujl-framework/ui';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import EditorToolbar from './editor-toolbar.svelte';
+	import { hasSlots } from './ujlc-tree-utils.js';
 
 	let {
 		nodes,
+		clipboard,
+		onCopy,
+		onCut,
+		onPaste,
+		onDelete,
 		onNodeMove,
 		onNodeReorder
 	}: {
 		nodes: UJLCModuleObject[];
+		clipboard: UJLCModuleObject | null;
+		onCopy: (nodeId: string) => void;
+		onCut: (nodeId: string) => void;
+		onPaste: (nodeId: string) => void;
+		onDelete: (nodeId: string) => void;
 		onNodeMove?: (nodeId: string, targetId: string, slotName?: string) => boolean;
 		onNodeReorder?: (nodeId: string, targetId: string, position: 'before' | 'after') => boolean;
 	} = $props();
 
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+
+	// Helper to check if a node can accept paste
+	function canNodeAcceptPaste(node: UJLCModuleObject): boolean {
+		return clipboard !== null && hasSlots(node);
+	}
 
 	// Drag & Drop State
 	let draggedNodeId = $state<string | null>(null);
@@ -250,6 +272,7 @@
 	{@const showDropAfter = isDropTarget && dropPosition === 'after'}
 	{@const showDropInto = isDropTarget && dropPosition === 'into' && canAcceptDrop(node)}
 	{@const hasMultiple = hasMultipleSlots(node)}
+	{@const canPaste = canNodeAcceptPaste(node)}
 
 	{#if level === 0}
 		{#if hasChildren(node)}
@@ -265,7 +288,7 @@
 									<div
 										role="button"
 										tabindex="0"
-										class="flex w-full items-center justify-between gap-1 rounded-md {isSelected
+										class="group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md {isSelected
 											? 'node-selected'
 											: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
 										draggable="true"
@@ -292,13 +315,39 @@
 												{getDisplayName(node)}
 											</span>
 										</button>
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												{#snippet child({ props })}
+													<Button
+														{...props}
+														variant="ghost"
+														size="icon"
+														class="mr-2 h-6 w-6 opacity-0 group-hover/node-root:opacity-100"
+													>
+														<MoreVerticalIcon class="size-4" />
+													</Button>
+												{/snippet}
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end">
+												<EditorToolbar
+													nodeId={node.meta.id}
+													{onCopy}
+													{onCut}
+													{onPaste}
+													{onDelete}
+													canCopy={true}
+													canCut={true}
+													{canPaste}
+												/>
+											</DropdownMenuContent>
+										</DropdownMenu>
 									</div>
 								{/snippet}
 							</SidebarMenuButton>
 						{/snippet}
 					</CollapsibleTrigger>
 					<CollapsibleContent>
-						<SidebarMenuSub class="mr-1 pe-0">
+						<SidebarMenuSub class="mr-0 pe-0">
 							{#if hasMultiple}
 								<!-- Multiple slots: show slot names as groups -->
 								{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
@@ -376,9 +425,11 @@
 							type="button"
 							{...props}
 							tabindex="0"
-							class="{props.class || ''} {isSelected ? 'selected' : ''} {isDragging
+							class="group/root {props.class || ''} {isSelected ? 'selected' : ''} {isDragging
 								? 'opacity-50'
-								: ''} {showDropInto ? 'drop-target' : ''}"
+								: ''} {showDropInto
+								? 'drop-target'
+								: ''} flex h-full w-full items-center justify-between rounded-md"
 							onclick={() => handleNodeClick(node.meta.id)}
 							draggable="true"
 							ondragstart={(e) => handleDragStart(e, node.meta.id)}
@@ -387,7 +438,34 @@
 							ondrop={(e) => handleDrop(e, node.meta.id)}
 							ondragend={handleDragEnd}
 						>
-							<span>{getDisplayName(node)}</span>
+							<span class="flex-1 overflow-hidden text-ellipsis">{getDisplayName(node)}</span>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									{#snippet child({ props: triggerProps })}
+										<Button
+											{...triggerProps}
+											variant="ghost"
+											size="icon"
+											class="mr-2 h-6 w-6 opacity-0 group-hover/root:opacity-100"
+											onclick={(e) => e.stopPropagation()}
+										>
+											<MoreVerticalIcon class="size-4" />
+										</Button>
+									{/snippet}
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<EditorToolbar
+										nodeId={node.meta.id}
+										{onCopy}
+										{onCut}
+										{onPaste}
+										{onDelete}
+										canCopy={true}
+										canCut={true}
+										{canPaste}
+									/>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</button>
 					{/snippet}
 				</SidebarMenuButton>
@@ -401,7 +479,7 @@
 			{#if showDropBefore}
 				<div class="drop-indicator drop-indicator-before"></div>
 			{/if}
-			<Collapsible>
+			<Collapsible class="">
 				<CollapsibleTrigger class="group">
 					{#snippet child({ props })}
 						<SidebarMenuButton {...props}>
@@ -409,7 +487,7 @@
 								<div
 									role="button"
 									tabindex="0"
-									class="flex w-full items-center justify-between rounded-md {isSelected
+									class="group/dropdown flex h-full w-full items-center justify-between rounded-md {isSelected
 										? 'node-selected'
 										: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
 									draggable="true"
@@ -432,6 +510,32 @@
 											{getDisplayName(node)}
 										</span>
 									</button>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											{#snippet child({ props })}
+												<Button
+													{...props}
+													variant="ghost"
+													size="icon"
+													class="mr-2 h-6 w-6 opacity-0 group-hover/dropdown:opacity-100"
+												>
+													<MoreVerticalIcon class="size-4" />
+												</Button>
+											{/snippet}
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<EditorToolbar
+												nodeId={node.meta.id}
+												{onCopy}
+												{onCut}
+												{onPaste}
+												{onDelete}
+												canCopy={true}
+												canCut={true}
+												{canPaste}
+											/>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</div>
 							{/snippet}
 						</SidebarMenuButton>
@@ -514,7 +618,7 @@
 				<div
 					role="button"
 					tabindex="0"
-					class="flex h-full w-full items-center justify-between rounded-md px-2 {showDropInto
+					class="group/node flex h-full w-full items-center justify-between rounded-md ps-2 {showDropInto
 						? 'drop-target'
 						: ''} {isSelected ? 'node-selected' : ''} {isDragging ? 'opacity-50' : ''}"
 					draggable="true"
@@ -526,12 +630,39 @@
 				>
 					<button
 						onclick={() => handleNodeClick(node.meta.id)}
-						class="h-full w-full overflow-hidden text-left text-nowrap text-ellipsis"
+						class="h-full flex-1 overflow-hidden text-left text-nowrap text-ellipsis"
 					>
 						<span>
 							{getDisplayName(node)}
 						</span>
 					</button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							{#snippet child({ props })}
+								<Button
+									{...props}
+									variant="ghost"
+									size="icon"
+									class="mr-1 h-6 w-6 opacity-0 group-hover/node:opacity-100"
+									onclick={(e) => e.stopPropagation()}
+								>
+									<MoreVerticalIcon class="size-4" />
+								</Button>
+							{/snippet}
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<EditorToolbar
+								nodeId={node.meta.id}
+								{onCopy}
+								{onCut}
+								{onPaste}
+								{onDelete}
+								canCopy={true}
+								canCut={true}
+								{canPaste}
+							/>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</SidebarMenuSubButton>
 			{#if showDropAfter}
