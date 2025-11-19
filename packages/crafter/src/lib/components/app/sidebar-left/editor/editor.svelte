@@ -121,10 +121,16 @@
 
 	/**
 	 * Move Handler for Drag & Drop
+	 * NEU: Unterstützt jetzt auch before/after position beim Verschieben
 	 * Returns true if move was successful, false if rejected
 	 */
-	function handleNodeMove(nodeId: string, targetId: string, slotName?: string): boolean {
-		return crafter.operations.moveNode(nodeId, targetId, slotName);
+	function handleNodeMove(
+		nodeId: string,
+		targetId: string,
+		slotName?: string,
+		position?: 'before' | 'after' | 'into'
+	): boolean {
+		return crafter.operations.moveNode(nodeId, targetId, slotName, position);
 	}
 
 	/**

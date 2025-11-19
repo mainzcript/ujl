@@ -33,8 +33,7 @@
 		onCut,
 		onPaste,
 		onDelete,
-		onNodeMove,
-		onNodeReorder
+		onNodeMove
 	}: {
 		nodes: UJLCModuleObject[];
 		clipboard: UJLCModuleObject | null;
@@ -42,8 +41,12 @@
 		onCut: (nodeId: string) => void;
 		onPaste: (nodeId: string) => void;
 		onDelete: (nodeId: string) => void;
-		onNodeMove?: (nodeId: string, targetId: string, slotName?: string) => boolean;
-		onNodeReorder?: (nodeId: string, targetId: string, position: 'before' | 'after') => boolean;
+		onNodeMove?: (
+			nodeId: string,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		) => boolean;
 	} = $props();
 
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
@@ -194,21 +197,11 @@
 
 		let success = false;
 
-		// Handle reordering (before/after) vs moving into
-		if (dropPosition === 'before' || dropPosition === 'after') {
-			if (onNodeReorder) {
-				success = onNodeReorder(draggedNodeId, targetNodeId, dropPosition);
-				if (!success) {
-					console.log('Reorder rejected - node returned to original position');
-				}
-			}
-		} else {
-			// Drop into node (or into specific slot)
-			if (onNodeMove) {
-				success = onNodeMove(draggedNodeId, targetNodeId, slotName);
-				if (!success) {
-					console.log('Drop rejected - node returned to original position');
-				}
+		// NEU: Einheitlicher moveNode Call mit position
+		if (onNodeMove) {
+			success = onNodeMove(draggedNodeId, targetNodeId, slotName, dropPosition || 'into');
+			if (!success) {
+				console.log('Move rejected - node returned to original position');
 			}
 		}
 
@@ -254,7 +247,7 @@
 		console.log('Drop into slot:', draggedNodeId, 'into', parentNodeId, 'slot:', slotName);
 
 		if (onNodeMove) {
-			const success = onNodeMove(draggedNodeId, parentNodeId, slotName);
+			const success = onNodeMove(draggedNodeId, parentNodeId, slotName, 'into');
 			if (!success) {
 				console.log('Drop into slot rejected');
 			}

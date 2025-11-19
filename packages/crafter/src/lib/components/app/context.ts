@@ -66,10 +66,16 @@ export type CrafterContext = {
 		copyNode: (nodeId: string) => UJLCModuleObject | null;
 
 		/**
-		 * Moves a node to a target parent's slot
+		 * Moves a node to a target parent's slot or position
+		 * @param position - 'before' | 'after' inserts relative to target, 'into' inserts into target's slot
 		 * @returns true if successful, false if operation was rejected
 		 */
-		moveNode: (nodeId: string, targetId: string, slotName?: string) => boolean;
+		moveNode: (
+			nodeId: string,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		) => boolean;
 
 		/**
 		 * Reorders a node relative to a sibling
@@ -181,7 +187,12 @@ export function createOperations(
 			return duplicatedNode;
 		},
 
-		moveNode(nodeId: string, targetId: string, slotName?: string): boolean {
+		moveNode(
+			nodeId: string,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		): boolean {
 			const slot = getSlot();
 			const node = findNodeById(slot, nodeId);
 			const targetNode = findNodeById(slot, targetId);
@@ -198,6 +209,54 @@ export function createOperations(
 				return false;
 			}
 
+			// NEU: Wenn position 'before' oder 'after' ist, verwende reorderNode Logik
+			if (position === 'before' || position === 'after') {
+				// Hole Parent-Info vom Target
+				const targetParentInfo = findParentOfNode(slot, targetId);
+
+				if (!targetParentInfo || !targetParentInfo.parent) {
+					console.warn('Cannot move relative to root node');
+					return false;
+				}
+
+				// Check if trying to move node into itself or its descendants
+				if (isDescendant(node, targetId)) {
+					console.warn('Cannot move node into itself or its descendants');
+					return false;
+				}
+
+				// Berechne neue Position
+				let newPosition = targetParentInfo.index;
+				if (position === 'after') {
+					newPosition += 1;
+				}
+
+				// Wenn wir aus dem gleichen Parent kommen und nach unten verschieben
+				if (
+					parentInfo.parent.meta.id === targetParentInfo.parent.meta.id &&
+					parentInfo.slotName === targetParentInfo.slotName &&
+					parentInfo.index < newPosition
+				) {
+					newPosition -= 1;
+				}
+
+				// Perform move with position
+				updateRootSlot((currentSlot) => {
+					const removedTree = removeNodeFromTree(currentSlot, nodeId);
+					return insertNodeAtPosition(
+						removedTree,
+						targetParentInfo.parent!.meta.id,
+						targetParentInfo.slotName,
+						node,
+						newPosition
+					);
+				});
+
+				console.log('Moved node:', nodeId, position, targetId, 'at position:', newPosition);
+				return true;
+			}
+
+			// ORIGINAL: 'into' Logik (default)
 			// Check if target can accept children
 			if (!hasSlots(targetNode)) {
 				console.warn('Target node has no slots - cannot accept children');
