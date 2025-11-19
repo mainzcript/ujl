@@ -309,7 +309,7 @@
 											</span>
 										</button>
 										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
+											<DropdownMenuTrigger>
 												{#snippet child({ props })}
 													<Button
 														{...props}
@@ -433,7 +433,7 @@
 						>
 							<span class="flex-1 overflow-hidden text-ellipsis">{getDisplayName(node)}</span>
 							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
+								<DropdownMenuTrigger>
 									{#snippet child({ props: triggerProps })}
 										<Button
 											{...triggerProps}
@@ -504,7 +504,7 @@
 										</span>
 									</button>
 									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
+										<DropdownMenuTrigger>
 											{#snippet child({ props })}
 												<Button
 													{...props}
@@ -630,7 +630,7 @@
 						</span>
 					</button>
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
+						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<Button
 									{...props}

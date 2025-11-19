@@ -121,7 +121,6 @@
 
 	/**
 	 * Move Handler for Drag & Drop
-	 * NEU: Unterstützt jetzt auch before/after position beim Verschieben
 	 * Returns true if move was successful, false if rejected
 	 */
 	function handleNodeMove(
@@ -131,18 +130,6 @@
 		position?: 'before' | 'after' | 'into'
 	): boolean {
 		return crafter.operations.moveNode(nodeId, targetId, slotName, position);
-	}
-
-	/**
-	 * Reorder Handler for Drag & Drop within same parent
-	 * Returns true if reorder was successful, false if rejected
-	 */
-	function handleNodeReorder(
-		nodeId: string,
-		targetId: string,
-		position: 'before' | 'after'
-	): boolean {
-		return crafter.operations.reorderNode(nodeId, targetId, position);
 	}
 </script>
 
@@ -156,7 +143,6 @@
 			onPaste={handlePaste}
 			onDelete={handleDelete}
 			onNodeMove={handleNodeMove}
-			onNodeReorder={handleNodeReorder}
 		/>
 	</div>
 </div>
