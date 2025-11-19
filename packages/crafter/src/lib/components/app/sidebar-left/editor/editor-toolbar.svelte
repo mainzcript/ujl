@@ -4,6 +4,7 @@
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import ClipboardPasteIcon from '@lucide/svelte/icons/clipboard-paste';
 	import DeleteIcon from '@lucide/svelte/icons/trash-2';
+	import PlusIcon from '@lucide/svelte/icons/plus';
 
 	let {
 		nodeId,
@@ -11,22 +12,40 @@
 		onCut,
 		onPaste,
 		onDelete,
+		onInsert,
 		canCopy = false,
 		canCut = false,
-		canPaste = false
+		canPaste = false,
+		canInsert = false
 	}: {
 		nodeId: string;
 		onCopy: (nodeId: string) => void;
 		onCut: (nodeId: string) => void;
 		onPaste: (nodeId: string) => void;
 		onDelete: (nodeId: string) => void;
+		onInsert: (nodeId: string) => void;
 		canCopy?: boolean;
 		canCut?: boolean;
 		canPaste?: boolean;
+		canInsert?: boolean;
 	} = $props();
 </script>
 
 <div class="flex flex-col">
+	<Button
+		variant="ghost"
+		size="sm"
+		disabled={!canInsert}
+		onclick={() => onInsert(nodeId)}
+		class="justify-start gap-2"
+	>
+		<PlusIcon class="size-4" />
+		<span>Insert</span>
+		<span class="ml-auto text-xs text-muted-foreground">Ctrl+I</span>
+	</Button>
+
+	<div class="my-1 h-px bg-border"></div>
+
 	<Button
 		variant="ghost"
 		size="sm"

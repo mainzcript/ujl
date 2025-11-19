@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree.svelte';
+	import ComponentPicker from './component-picker.svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import { findNodeById, hasSlots } from './ujlc-tree-utils.js';
 
@@ -18,19 +19,19 @@
 	// Local clipboard state
 	let clipboard = $state<UJLCModuleObject | null>(null);
 
+	// Component Picker state
+	let showComponentPicker = $state(false);
+	let insertTargetNodeId = $state<string | null>(null);
+
 	// Selected node id from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	// Selected node object from current slot
 	const selectedNode = $derived(selectedNodeId ? findNodeById(slot, selectedNodeId) : null);
 
-	// Cut button enabled if a node is selected
+	// Button states
 	const canCut = $derived(selectedNodeId !== null);
-
-	// Copy button enabled if a node is selected (same as cut)
 	const canCopy = $derived(selectedNodeId !== null);
-
-	// Paste button enabled if clipboard has content, node is selected, and node has slots
 	const canPaste = $derived(clipboard !== null && selectedNode !== null && hasSlots(selectedNode));
 
 	/**
@@ -73,9 +74,48 @@
 	}
 
 	/**
+	 * Insert Handler - open component picker for target node
+	 */
+	function handleInsert(nodeId: string) {
+		insertTargetNodeId = nodeId;
+		showComponentPicker = true;
+	}
+
+	/**
+	 * Component Select Handler - insert selected component
+	 */
+	function handleComponentSelect(componentType: string) {
+		if (!insertTargetNodeId) return;
+
+		// Default behavior: insert into target node (not before/after)
+		const success = crafter.operations.insertNode(
+			componentType,
+			insertTargetNodeId,
+			undefined, // slotName - will use first slot
+			'into' // position - insert into target
+		);
+
+		if (success) {
+			console.log('Component inserted successfully:', componentType);
+		}
+
+		// Reset state
+		insertTargetNodeId = null;
+	}
+
+	/**
 	 * Keyboard Event Handler
 	 */
 	function handleKeyDown(event: KeyboardEvent) {
+		// Ctrl/Cmd + I for insert
+		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+			if (selectedNodeId) {
+				event.preventDefault();
+				handleInsert(selectedNodeId);
+			}
+			return;
+		}
+
 		if (!selectedNodeId) return;
 
 		// Ctrl/Cmd + C for copy
@@ -142,7 +182,10 @@
 			onCut={handleCut}
 			onPaste={handlePaste}
 			onDelete={handleDelete}
+			onInsert={handleInsert}
 			onNodeMove={handleNodeMove}
 		/>
 	</div>
 </div>
+
+<ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />

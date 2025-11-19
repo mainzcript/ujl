@@ -33,6 +33,7 @@
 		onCut,
 		onPaste,
 		onDelete,
+		onInsert,
 		onNodeMove
 	}: {
 		nodes: UJLCModuleObject[];
@@ -41,6 +42,7 @@
 		onCut: (nodeId: string) => void;
 		onPaste: (nodeId: string) => void;
 		onDelete: (nodeId: string) => void;
+		onInsert: (nodeId: string) => void;
 		onNodeMove?: (
 			nodeId: string,
 			targetId: string,
@@ -197,7 +199,6 @@
 
 		let success = false;
 
-		// NEU: Einheitlicher moveNode Call mit position
 		if (onNodeMove) {
 			success = onNodeMove(draggedNodeId, targetNodeId, slotName, dropPosition || 'into');
 			if (!success) {
@@ -266,6 +267,7 @@
 	{@const showDropInto = isDropTarget && dropPosition === 'into' && canAcceptDrop(node)}
 	{@const hasMultiple = hasMultipleSlots(node)}
 	{@const canPaste = canNodeAcceptPaste(node)}
+	{@const canInsert = true}
 
 	{#if level === 0}
 		{#if hasChildren(node)}
@@ -328,9 +330,11 @@
 													{onCut}
 													{onPaste}
 													{onDelete}
+													{onInsert}
 													canCopy={true}
 													canCut={true}
 													{canPaste}
+													{canInsert}
 												/>
 											</DropdownMenuContent>
 										</DropdownMenu>
@@ -453,9 +457,11 @@
 										{onCut}
 										{onPaste}
 										{onDelete}
+										{onInsert}
 										canCopy={true}
 										canCut={true}
 										{canPaste}
+										{canInsert}
 									/>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -523,9 +529,11 @@
 												{onCut}
 												{onPaste}
 												{onDelete}
+												{onInsert}
 												canCopy={true}
 												canCut={true}
 												{canPaste}
+												{canInsert}
 											/>
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -650,9 +658,11 @@
 								{onCut}
 								{onPaste}
 								{onDelete}
+								{onInsert}
 								canCopy={true}
 								canCut={true}
 								{canPaste}
+								{canInsert}
 							/>
 						</DropdownMenuContent>
 					</DropdownMenu>

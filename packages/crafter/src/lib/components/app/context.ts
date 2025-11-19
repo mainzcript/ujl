@@ -9,6 +9,10 @@ import {
 	getFirstSlotName,
 	hasSlots
 } from './sidebar-left/editor/ujlc-tree-utils.js';
+import {
+	getComponentDefinition,
+	createNodeFromDefinition
+} from '@ujl-framework/examples/components';
 
 /**
  * Editor context API for managing UJL document state.
@@ -100,6 +104,21 @@ export type CrafterContext = {
 		 * @returns true if successful, false if operation was rejected
 		 */
 		pasteNode: (node: UJLCModuleObject, targetId: string, slotName?: string) => boolean;
+
+		/**
+		 * Inserts a new node from component library
+		 * @param componentType - The component type from the library
+		 * @param targetId - The target node ID
+		 * @param slotName - Optional slot name (uses first slot if not specified)
+		 * @param position - 'before' | 'after' inserts relative to target, 'into' inserts into target's slot
+		 * @returns true if successful, false if operation was rejected
+		 */
+		insertNode: (
+			componentType: string,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		) => boolean;
 	};
 
 	// Future extensions (planned but not yet implemented):
@@ -209,9 +228,8 @@ export function createOperations(
 				return false;
 			}
 
-			// NEU: Wenn position 'before' oder 'after' ist, verwende reorderNode Logik
 			if (position === 'before' || position === 'after') {
-				// Hole Parent-Info vom Target
+				// get parent info of target
 				const targetParentInfo = findParentOfNode(slot, targetId);
 
 				if (!targetParentInfo || !targetParentInfo.parent) {
@@ -225,13 +243,13 @@ export function createOperations(
 					return false;
 				}
 
-				// Berechne neue Position
+				// calculate new position
 				let newPosition = targetParentInfo.index;
 				if (position === 'after') {
 					newPosition += 1;
 				}
 
-				// Wenn wir aus dem gleichen Parent kommen und nach unten verschieben
+				// if moving down in the same slot, adjust position
 				if (
 					parentInfo.parent.meta.id === targetParentInfo.parent.meta.id &&
 					parentInfo.slotName === targetParentInfo.slotName &&
@@ -256,7 +274,6 @@ export function createOperations(
 				return true;
 			}
 
-			// ORIGINAL: 'into' Logik (default)
 			// Check if target can accept children
 			if (!hasSlots(targetNode)) {
 				console.warn('Target node has no slots - cannot accept children');
@@ -439,6 +456,109 @@ export function createOperations(
 			});
 
 			console.log('Pasted node into:', targetId, 'slot:', targetSlotName);
+			return true;
+		},
+		insertNode(
+			componentType: string,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		): boolean {
+			const slot = getSlot();
+			const targetNode = findNodeById(slot, targetId);
+
+			if (!targetNode) {
+				console.warn('Target node not found');
+				return false;
+			}
+
+			// Get component definition from library
+			const componentDefinition = getComponentDefinition(componentType);
+			if (!componentDefinition) {
+				console.warn('Component type not found in library:', componentType);
+				return false;
+			}
+
+			// Generate unique ID
+			let newId = generateNodeId();
+			let attempts = 0;
+			while (findNodeById(slot, newId) !== null && attempts < 10) {
+				newId = generateNodeId();
+				attempts++;
+			}
+
+			if (attempts >= 10) {
+				console.error('Failed to generate unique ID after 10 attempts');
+				return false;
+			}
+
+			// Create new node from definition
+			const newNode = createNodeFromDefinition(componentDefinition, newId);
+
+			// Handle insert position
+			if (position === 'before' || position === 'after') {
+				// Get parent info of target
+				const targetParentInfo = findParentOfNode(slot, targetId);
+
+				if (!targetParentInfo || !targetParentInfo.parent) {
+					console.warn('Cannot insert relative to root node');
+					return false;
+				}
+
+				// Calculate new position
+				let insertPosition = targetParentInfo.index;
+				if (position === 'after') {
+					insertPosition += 1;
+				}
+
+				// Perform insert with position
+				updateRootSlot((currentSlot) => {
+					return insertNodeAtPosition(
+						currentSlot,
+						targetParentInfo.parent!.meta.id,
+						targetParentInfo.slotName,
+						newNode,
+						insertPosition
+					);
+				});
+
+				console.log(
+					'Inserted node:',
+					componentType,
+					position,
+					targetId,
+					'at position:',
+					insertPosition
+				);
+				return true;
+			}
+
+			// Position is 'into' or undefined - insert into target's slot
+			if (!hasSlots(targetNode)) {
+				console.warn('Target node has no slots - cannot accept children');
+				return false;
+			}
+
+			// Determine target slot
+			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
+
+			if (!targetSlotName) {
+				console.warn('Target node has no valid slot');
+				return false;
+			}
+
+			// Verify slot exists
+			if (!targetNode.slots || !targetNode.slots[targetSlotName]) {
+				console.warn('Specified slot does not exist on target node:', targetSlotName);
+				return false;
+			}
+
+			// Perform insert into slot
+			updateRootSlot((currentSlot) => {
+				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, newNode);
+			});
+
+			console.log('Inserted node:', componentType, 'into:', targetId, 'slot:', targetSlotName);
 			return true;
 		}
 	};
