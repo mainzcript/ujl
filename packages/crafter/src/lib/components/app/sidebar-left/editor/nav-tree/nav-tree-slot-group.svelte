@@ -49,7 +49,10 @@
 		parentNode: UJLCModuleObject;
 		slotName: string;
 		slotChildren: UJLCModuleObject[];
-		clipboard: UJLCModuleObject | { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null;
+		clipboard:
+			| UJLCModuleObject
+			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+			| null;
 		onSlotCopy?: (parentId: string, slotName: string) => void;
 		onSlotCut?: (parentId: string, slotName: string) => void;
 		onSlotPaste?: (parentId: string, slotName: string) => void;
@@ -93,11 +96,7 @@
 							ondragleave={onSlotDragLeave}
 							ondrop={(e) => onSlotDrop(e, parentNode.meta.id, slotName)}
 						>
-							<button
-								type="button"
-								{...buttonProps}
-								class="{buttonProps.class || ''} w-auto!"
-							>
+							<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
 								<ChevronRightIcon
 									class="size-4 transition-transform group-data-[state=open]:rotate-90"
 								/>

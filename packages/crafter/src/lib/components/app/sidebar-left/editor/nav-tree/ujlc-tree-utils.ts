@@ -284,7 +284,10 @@ export function canAcceptDrop(targetNode: UJLCModuleObject): boolean {
  */
 export function canNodeAcceptPaste(
 	node: UJLCModuleObject,
-	clipboard: UJLCModuleObject | { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null
+	clipboard:
+		| UJLCModuleObject
+		| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+		| null
 ): boolean {
 	if (clipboard === null || !hasSlots(node)) return false;
 
@@ -305,7 +308,10 @@ export function canNodeAcceptPaste(
  * Helper to check if a slot can accept paste
  */
 export function canSlotAcceptPaste(
-	clipboard: UJLCModuleObject | { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null,
+	clipboard:
+		| UJLCModuleObject
+		| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+		| null,
 	slotName: string
 ): boolean {
 	if (!clipboard) return false;

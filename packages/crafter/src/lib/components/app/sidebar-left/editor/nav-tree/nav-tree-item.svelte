@@ -58,7 +58,10 @@
 		node: UJLCModuleObject;
 		level?: number;
 		selectedNodeId: string | null;
-		clipboard: UJLCModuleObject | { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null;
+		clipboard:
+			| UJLCModuleObject
+			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+			| null;
 		draggedNodeId: string | null;
 		dropTargetId: string | null;
 		dropTargetSlot: string | null;
@@ -117,11 +120,7 @@
 									ondrop={(e) => onDrop(e, node.meta.id)}
 									ondragend={onDragEnd}
 								>
-									<button
-										type="button"
-										{...buttonProps}
-										class="{buttonProps.class || ''} w-auto!"
-									>
+									<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
 										<ChevronRightIcon
 											class="size-4 transition-transform group-data-[state=open]:rotate-90"
 										/>
@@ -194,7 +193,7 @@
 									{onDelete}
 									{onDragStart}
 									{onDragOver}
-                                    {onDragLeave}
+									{onDragLeave}
 									{onDrop}
 									{onDragEnd}
 								/>
@@ -399,7 +398,7 @@
 								{onDelete}
 								{onDragStart}
 								{onDragOver}
-                                {onDragLeave}
+								{onDragLeave}
 								{onDrop}
 								{onDragEnd}
 							/>

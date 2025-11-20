@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu } from '@ujl-framework/ui';
+	import {
+		SidebarGroup,
+		SidebarGroupLabel,
+		SidebarGroupContent,
+		SidebarMenu
+	} from '@ujl-framework/ui';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import NavTreeItem from './nav-tree-item.svelte';
@@ -20,11 +25,14 @@
 		onSlotPaste
 	}: {
 		nodes: UJLCModuleObject[];
-		clipboard: UJLCModuleObject | {
-				type: 'slot';
-				slotName: string;
-				content: UJLCModuleObject[];
-		  } | null;
+		clipboard:
+			| UJLCModuleObject
+			| {
+					type: 'slot';
+					slotName: string;
+					content: UJLCModuleObject[];
+			  }
+			| null;
 		onCopy: (nodeId: string) => void;
 		onCut: (nodeId: string) => void;
 		onPaste: (nodeId: string) => void;
