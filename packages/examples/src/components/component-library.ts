@@ -14,6 +14,7 @@ export const componentLibrary: ComponentLibrary = [
 		defaultFields: {},
 		defaultSlots: {
 			body: [],
+			header: []
 		},
 		tags: ["wrapper", "section", "group"],
 	},

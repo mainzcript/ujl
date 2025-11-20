@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentDefinition } from '@ujl-framework/types';
+	import type { ComponentDefinition, UJLCModuleObject } from '@ujl-framework/types';
 	import {
 		Dialog,
 		DialogContent,
@@ -7,20 +7,35 @@
 		DialogTitle,
 		Input,
 		Button,
-		ScrollArea
+		ScrollArea,
+		Label
 	} from '@ujl-framework/ui';
 	import { componentLibrary } from '@ujl-framework/examples/components';
 
 	let {
 		open = $bindable(false),
+		targetNode = null,
 		onSelect
 	}: {
 		open?: boolean;
-		onSelect: (componentType: string) => void;
+		targetNode?: UJLCModuleObject | null;
+		onSelect: (componentType: string, slotName?: string) => void;
 	} = $props();
 
 	// Search query
 	let searchQuery = $state('');
+
+	// Selected slot
+	let selectedSlot = $state<string | null>(null);
+
+	// Available slots from target node
+	const availableSlots = $derived(() => {
+		if (!targetNode?.slots) return [];
+		return Object.keys(targetNode.slots);
+	});
+
+	// Check if target has multiple slots
+	const hasMultipleSlots = $derived(availableSlots().length > 1);
 
 	// Filtered and grouped components
 	const filteredComponents = $derived(() => {
@@ -71,17 +86,50 @@
 		navigation: 'Navigation'
 	};
 
-	// Handle component selection
-	function handleSelect(componentType: string) {
-		onSelect(componentType);
-		open = false;
-		searchQuery = ''; // Reset search
+	// Format slot name for display
+	function formatSlotName(slotName: string): string {
+		return slotName
+			.split(/[-_]/)
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
 	}
 
-	// Reset search when dialog closes
+	// Get slot item count
+	function getSlotItemCount(slotName: string): number {
+		if (!targetNode?.slots?.[slotName]) return 0;
+		return targetNode.slots[slotName].length;
+	}
+
+	// Handle component selection
+	function handleSelect(componentType: string) {
+		// If target has multiple slots, pass the selected slot
+		const slotToUse = hasMultipleSlots ? selectedSlot : undefined;
+		onSelect(componentType, slotToUse || undefined);
+		open = false;
+		resetState();
+	}
+
+	// Reset state
+	function resetState() {
+		searchQuery = '';
+		selectedSlot = null;
+	}
+
+	// Initialize selected slot when dialog opens
+	$effect(() => {
+		if (open && hasMultipleSlots && !selectedSlot) {
+			// Set default to first slot
+			selectedSlot = availableSlots()[0];
+		} else if (open && !hasMultipleSlots) {
+			// Clear selection if only one slot
+			selectedSlot = null;
+		}
+	});
+
+	// Reset state when dialog closes
 	$effect(() => {
 		if (!open) {
-			searchQuery = '';
+			resetState();
 		}
 	});
 </script>
@@ -95,6 +143,28 @@
 		<div class="flex flex-col gap-4">
 			<!-- Search Input -->
 			<Input bind:value={searchQuery} placeholder="Search components..." class="w-full" autofocus />
+
+			<!-- Slot Selection (only if multiple slots) -->
+			{#if hasMultipleSlots}
+				<div class="space-y-3 rounded-md border bg-muted/50 p-4">
+					<Label class="text-sm font-medium">Insert into slot:</Label>
+					<div class="flex flex-wrap gap-2">
+						{#each availableSlots() as slotName (slotName)}
+							<Button
+								variant={selectedSlot === slotName ? 'default' : 'outline'}
+								size="sm"
+								class="min-w-[120px] flex-1"
+								onclick={() => (selectedSlot = slotName)}
+							>
+								<span class="font-medium">{formatSlotName(slotName)}</span>
+								<span class="ml-2 text-xs opacity-70">
+									({getSlotItemCount(slotName)})
+								</span>
+							</Button>
+						{/each}
+					</div>
+				</div>
+			{/if}
 
 			<!-- Component List -->
 			<ScrollArea class="h-[400px] pr-4">

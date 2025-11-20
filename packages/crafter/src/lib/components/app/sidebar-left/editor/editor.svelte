@@ -17,7 +17,15 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	// Local clipboard state
-	let clipboard = $state<UJLCModuleObject | null>(null);
+	let clipboard = $state<
+		| UJLCModuleObject
+		| {
+				type: 'slot';
+				slotName: string;
+				content: UJLCModuleObject[];
+		  }
+		| null
+	>(null);
 
 	// Component Picker state
 	let showComponentPicker = $state(false);
@@ -29,10 +37,29 @@
 	// Selected node object from current slot
 	const selectedNode = $derived(selectedNodeId ? findNodeById(slot, selectedNodeId) : null);
 
+	// Target node for component insertion
+	const insertTargetNode = $derived(
+		insertTargetNodeId ? findNodeById(slot, insertTargetNodeId) : null
+	);
+
 	// Button states
 	const canCut = $derived(selectedNodeId !== null);
 	const canCopy = $derived(selectedNodeId !== null);
-	const canPaste = $derived(clipboard !== null && selectedNode !== null && hasSlots(selectedNode));
+	const canPaste = $derived(() => {
+		if (!clipboard || !selectedNode) return false;
+
+		// If clipboard is a regular node, check if target has slots
+		if ('meta' in clipboard) {
+			return hasSlots(selectedNode);
+		}
+
+		// If clipboard is a slot, check if target has that slot type
+		if (clipboard.type === 'slot' && selectedNode.slots) {
+			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
+		}
+
+		return false;
+	});
 
 	/**
 	 * Copy Handler - copy selected node to clipboard (without removing)
@@ -55,14 +82,51 @@
 	}
 
 	/**
-	 * Paste Handler - paste node from clipboard into selected node
+	 * Paste Handler - paste node or slot from clipboard into selected node
 	 */
 	function handlePaste(nodeId: string) {
 		if (!clipboard) return;
 
-		const success = crafter.operations.pasteNode(clipboard, nodeId);
-		if (success) {
-			clipboard = null; // Clear clipboard after successful paste
+		// If clipboard contains a regular node
+		if ('meta' in clipboard) {
+			const success = crafter.operations.pasteNode(clipboard, nodeId);
+			if (success) {
+				clipboard = null;
+			}
+			return;
+		}
+
+		// If clipboard contains a slot
+		if (clipboard.type === 'slot') {
+			const targetNode = findNodeById(slot, nodeId);
+			if (!targetNode?.slots) {
+				console.warn('Target node has no slots');
+				return;
+			}
+
+			// Check if target has the slot type
+			if (!Object.keys(targetNode.slots).includes(clipboard.slotName)) {
+				console.warn('Target does not have slot:', clipboard.slotName);
+				return;
+			}
+
+			// Capture clipboard data before passing to callback
+			const slotName = clipboard.slotName;
+			const slotContent = clipboard.content;
+
+			// Paste slot content into target's matching slot
+			crafter.updateRootSlot((currentSlot) => {
+				return updateNodeInTree(currentSlot, nodeId, (node) => ({
+					...node,
+					slots: {
+						...node.slots,
+						[slotName]: [...slotContent]
+					}
+				}));
+			});
+
+			console.log('Pasted slot', slotName, 'into node:', nodeId);
+			clipboard = null;
 		}
 	}
 
@@ -84,19 +148,19 @@
 	/**
 	 * Component Select Handler - insert selected component
 	 */
-	function handleComponentSelect(componentType: string) {
+	function handleComponentSelect(componentType: string, slotName?: string) {
 		if (!insertTargetNodeId) return;
 
-		// Default behavior: insert into target node (not before/after)
+		// Insert component with optional slot name
 		const success = crafter.operations.insertNode(
 			componentType,
 			insertTargetNodeId,
-			undefined, // slotName - will use first slot
+			slotName, // Pass the selected slot name
 			'into' // position - insert into target
 		);
 
 		if (success) {
-			console.log('Component inserted successfully:', componentType);
+			console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
 		}
 
 		// Reset state
@@ -128,7 +192,7 @@
 
 		// Ctrl/Cmd + V for paste
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-			if (canPaste) {
+			if (canPaste()) {
 				event.preventDefault();
 				handlePaste(selectedNodeId);
 			}
@@ -171,6 +235,89 @@
 	): boolean {
 		return crafter.operations.moveNode(nodeId, targetId, slotName, position);
 	}
+
+	/**
+	 * Helper function to update a node in the tree
+	 */
+	function updateNodeInTree(
+		nodes: UJLCModuleObject[],
+		targetId: string,
+		updateFn: (node: UJLCModuleObject) => UJLCModuleObject
+	): UJLCModuleObject[] {
+		return nodes.map((node) => {
+			if (node.meta.id === targetId) {
+				return updateFn(node);
+			}
+
+			if (node.slots) {
+				const updatedSlots: Record<string, UJLCModuleObject[]> = {};
+				for (const [slotName, children] of Object.entries(node.slots)) {
+					updatedSlots[slotName] = updateNodeInTree(children, targetId, updateFn);
+				}
+				return { ...node, slots: updatedSlots };
+			}
+
+			return node;
+		});
+	}
+
+	/**
+	 * Slot Copy Handler - copies a complete slot with all its content
+	 */
+	function handleSlotCopy(parentId: string, slotName: string) {
+		const parentNode = findNodeById(slot, parentId);
+		if (!parentNode?.slots?.[slotName]) {
+			console.warn('Slot not found:', slotName);
+			return;
+		}
+
+		clipboard = {
+			type: 'slot',
+			slotName,
+			content: [...parentNode.slots[slotName]]
+		};
+		console.log('Copied slot:', slotName, 'with', clipboard.content.length, 'items');
+	}
+
+	/**
+	 * Slot Cut Handler - cuts a complete slot (empties it and saves to clipboard)
+	 */
+	function handleSlotCut(parentId: string, slotName: string) {
+		const parentNode = findNodeById(slot, parentId);
+		if (!parentNode?.slots?.[slotName]) {
+			console.warn('Slot not found:', slotName);
+			return;
+		}
+
+		const slotContent = [...parentNode.slots[slotName]];
+
+		// Save to clipboard
+		clipboard = {
+			type: 'slot',
+			slotName,
+			content: slotContent
+		};
+
+		// Empty the slot
+		crafter.updateRootSlot((currentSlot) => {
+			return updateNodeInTree(currentSlot, parentId, (node) => ({
+				...node,
+				slots: {
+					...node.slots,
+					[slotName]: []
+				}
+			}));
+		});
+
+		console.log('Cut slot:', slotName, 'with', slotContent.length, 'items');
+	}
+
+	/**
+	 * Slot Paste Handler - uses the regular paste handler
+	 */
+	function handleSlotPaste(targetParentId: string) {
+		handlePaste(targetParentId);
+	}
 </script>
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
@@ -184,8 +331,15 @@
 			onDelete={handleDelete}
 			onInsert={handleInsert}
 			onNodeMove={handleNodeMove}
+			onSlotCopy={handleSlotCopy}
+			onSlotCut={handleSlotCut}
+			onSlotPaste={handleSlotPaste}
 		/>
 	</div>
 </div>
 
-<ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />
+<ComponentPicker
+	bind:open={showComponentPicker}
+	targetNode={insertTargetNode}
+	onSelect={handleComponentSelect}
+/>

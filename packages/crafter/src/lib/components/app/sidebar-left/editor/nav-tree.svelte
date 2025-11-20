@@ -34,10 +34,20 @@
 		onPaste,
 		onDelete,
 		onInsert,
-		onNodeMove
+		onNodeMove,
+		onSlotCopy,
+		onSlotCut,
+		onSlotPaste
 	}: {
 		nodes: UJLCModuleObject[];
-		clipboard: UJLCModuleObject | null;
+		clipboard:
+			| UJLCModuleObject
+			| {
+					type: 'slot';
+					slotName: string;
+					content: UJLCModuleObject[];
+			  }
+			| null;
 		onCopy: (nodeId: string) => void;
 		onCut: (nodeId: string) => void;
 		onPaste: (nodeId: string) => void;
@@ -49,13 +59,28 @@
 			slotName?: string,
 			position?: 'before' | 'after' | 'into'
 		) => boolean;
+		onSlotCopy?: (parentId: string, slotName: string) => void;
+		onSlotCut?: (parentId: string, slotName: string) => void;
+		onSlotPaste?: (parentId: string, slotName: string) => void;
 	} = $props();
 
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	// Helper to check if a node can accept paste
 	function canNodeAcceptPaste(node: UJLCModuleObject): boolean {
-		return clipboard !== null && hasSlots(node);
+		if (clipboard === null || !hasSlots(node)) return false;
+
+		// If clipboard is a regular node, check if target has slots
+		if ('meta' in clipboard) {
+			return true;
+		}
+
+		// If clipboard is a slot, check if target has that slot type
+		if (clipboard.type === 'slot' && node.slots) {
+			return Object.keys(node.slots).includes(clipboard.slotName);
+		}
+
+		return false;
 	}
 
 	// Drag & Drop State
@@ -115,19 +140,20 @@
 	}
 
 	/**
-	 * checks if a node has multiple slots
+	 * checks if a node has multiple slots WITH children
 	 */
-	function hasMultipleSlots(node: UJLCModuleObject): boolean {
+	function hasMultipleSlotsWithChildren(node: UJLCModuleObject): boolean {
 		if (!node.slots) return false;
-		return Object.keys(node.slots).length > 1;
+		const slotsWithChildren = Object.values(node.slots).filter((slot) => slot.length > 0);
+		return slotsWithChildren.length > 1;
 	}
 
 	/**
-	 * returns all slot entries [slotName, children[]]
+	 * returns all slot entries [slotName, children[]] that have children
 	 */
-	function getSlotEntries(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
+	function getSlotEntriesWithChildren(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
 		if (!node.slots) return [];
-		return Object.entries(node.slots);
+		return Object.entries(node.slots).filter(([, children]) => children.length > 0);
 	}
 
 	/**
@@ -265,7 +291,7 @@
 	{@const showDropBefore = isDropTarget && dropPosition === 'before'}
 	{@const showDropAfter = isDropTarget && dropPosition === 'after'}
 	{@const showDropInto = isDropTarget && dropPosition === 'into' && canAcceptDrop(node)}
-	{@const hasMultiple = hasMultipleSlots(node)}
+	{@const hasMultiple = hasMultipleSlotsWithChildren(node)}
 	{@const canPaste = canNodeAcceptPaste(node)}
 	{@const canInsert = true}
 
@@ -346,58 +372,87 @@
 					<CollapsibleContent>
 						<SidebarMenuSub class="mr-0 pe-0">
 							{#if hasMultiple}
-								<!-- Multiple slots: show slot names as groups -->
-								{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
-									{#if slotChildren.length > 0}
-										<SidebarMenuSubItem>
-											<Collapsible>
-												<CollapsibleTrigger class="group">
-													{#snippet child({ props })}
-														<SidebarMenuSubButton {...props}>
-															{#snippet child({ props: buttonProps })}
-																<div
-																	role="button"
-																	tabindex="0"
-																	class="flex w-full items-center gap-1 rounded-md {dropTargetId ===
-																		node.meta.id && dropTargetSlot === slotName
-																		? 'drop-target-slot'
-																		: ''}"
-																	ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
-																	ondragleave={handleDragLeave}
-																	ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+								<!-- Multiple slots with children: show slot names as groups -->
+								{#each getSlotEntriesWithChildren(node) as [slotName, slotChildren] (slotName)}
+									<SidebarMenuSubItem>
+										<Collapsible>
+											<CollapsibleTrigger class="group">
+												{#snippet child({ props })}
+													<SidebarMenuSubButton {...props}>
+														{#snippet child({ props: buttonProps })}
+															<div
+																role="button"
+																tabindex="0"
+																class="group/slot flex w-full items-center justify-between gap-1 rounded-md {dropTargetId ===
+																	node.meta.id && dropTargetSlot === slotName
+																	? 'drop-target-slot'
+																	: ''}"
+																ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
+																ondragleave={handleDragLeave}
+																ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+															>
+																<button
+																	type="button"
+																	{...buttonProps}
+																	class="{buttonProps.class || ''} w-auto!"
 																>
-																	<button
-																		type="button"
-																		{...buttonProps}
-																		class="{buttonProps.class || ''} w-auto!"
-																	>
-																		<ChevronRightIcon
-																			class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																	<ChevronRightIcon
+																		class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																	/>
+																</button>
+																<span
+																	class="flex-1 text-xs font-medium text-muted-foreground uppercase"
+																>
+																	{slotName}
+																</span>
+																<DropdownMenu>
+																	<DropdownMenuTrigger>
+																		{#snippet child({ props })}
+																			<Button
+																				{...props}
+																				variant="ghost"
+																				size="icon"
+																				class="mr-2 h-6 w-6 opacity-0 group-hover/slot:opacity-100"
+																				onclick={(e) => e.stopPropagation()}
+																			>
+																				<MoreVerticalIcon class="size-4" />
+																			</Button>
+																		{/snippet}
+																	</DropdownMenuTrigger>
+																	<DropdownMenuContent align="end">
+																		<EditorToolbar
+																			nodeId={node.meta.id}
+																			onCopy={() => onSlotCopy?.(node.meta.id, slotName)}
+																			onCut={() => onSlotCut?.(node.meta.id, slotName)}
+																			onPaste={() => onSlotPaste?.(node.meta.id, slotName)}
+																			onDelete={() => {}}
+																			onInsert={() => onInsert(node.meta.id)}
+																			canCopy={slotChildren.length > 0}
+																			canCut={slotChildren.length > 0}
+																			canPaste={clipboard !== null}
+																			canInsert={true}
 																		/>
-																	</button>
-																	<span class="text-xs font-medium text-muted-foreground uppercase">
-																		{slotName}
-																	</span>
-																</div>
-															{/snippet}
-														</SidebarMenuSubButton>
-													{/snippet}
-												</CollapsibleTrigger>
-												<CollapsibleContent>
-													<SidebarMenuSub class="mr-0 pe-0">
-														{#each slotChildren as childNode (childNode.meta.id)}
-															<SidebarMenuSubItem>
-																{@render renderNode(childNode, level + 1)}
-															</SidebarMenuSubItem>
-														{/each}
-													</SidebarMenuSub>
-												</CollapsibleContent>
-											</Collapsible>
-										</SidebarMenuSubItem>
-									{/if}
+																	</DropdownMenuContent>
+																</DropdownMenu>
+															</div>
+														{/snippet}
+													</SidebarMenuSubButton>
+												{/snippet}
+											</CollapsibleTrigger>
+											<CollapsibleContent>
+												<SidebarMenuSub class="mr-0 pe-0">
+													{#each slotChildren as childNode (childNode.meta.id)}
+														<SidebarMenuSubItem>
+															{@render renderNode(childNode, level + 1)}
+														</SidebarMenuSubItem>
+													{/each}
+												</SidebarMenuSub>
+											</CollapsibleContent>
+										</Collapsible>
+									</SidebarMenuSubItem>
 								{/each}
 							{:else}
-								<!-- Single slot: show children directly -->
+								<!-- Single slot or only one slot with children: show children directly -->
 								{#each getChildren(node) as childNode (childNode.meta.id)}
 									<SidebarMenuSubItem>
 										{@render renderNode(childNode, level + 1)}
@@ -545,58 +600,87 @@
 				<CollapsibleContent>
 					<SidebarMenuSub class="mr-0 pe-0">
 						{#if hasMultiple}
-							<!-- Multiple slots: show slot names as groups -->
-							{#each getSlotEntries(node) as [slotName, slotChildren] (slotName)}
-								{#if slotChildren.length > 0}
-									<SidebarMenuSubItem>
-										<Collapsible>
-											<CollapsibleTrigger class="group">
-												{#snippet child({ props })}
-													<SidebarMenuSubButton {...props}>
-														{#snippet child({ props: buttonProps })}
-															<div
-																role="button"
-																tabindex="0"
-																class="flex w-full items-center gap-1 rounded-md {dropTargetId ===
-																	node.meta.id && dropTargetSlot === slotName
-																	? 'drop-target-slot'
-																	: ''}"
-																ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
-																ondragleave={handleDragLeave}
-																ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+							<!-- Multiple slots with children: show slot names as groups -->
+							{#each getSlotEntriesWithChildren(node) as [slotName, slotChildren] (slotName)}
+								<SidebarMenuSubItem>
+									<Collapsible>
+										<CollapsibleTrigger class="group">
+											{#snippet child({ props })}
+												<SidebarMenuSubButton {...props}>
+													{#snippet child({ props: buttonProps })}
+														<div
+															role="button"
+															tabindex="0"
+															class="group/slot flex w-full items-center justify-between gap-1 rounded-md {dropTargetId ===
+																node.meta.id && dropTargetSlot === slotName
+																? 'drop-target-slot'
+																: ''}"
+															ondragover={(e) => handleSlotDragOver(e, node.meta.id, slotName)}
+															ondragleave={handleDragLeave}
+															ondrop={(e) => handleSlotDrop(e, node.meta.id, slotName)}
+														>
+															<button
+																type="button"
+																{...buttonProps}
+																class="{buttonProps.class || ''} w-auto!"
 															>
-																<button
-																	type="button"
-																	{...buttonProps}
-																	class="{buttonProps.class || ''} w-auto!"
-																>
-																	<ChevronRightIcon
-																		class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																<ChevronRightIcon
+																	class="size-4 transition-transform group-data-[state=open]:rotate-90"
+																/>
+															</button>
+															<span
+																class="flex-1 text-xs font-medium text-muted-foreground uppercase"
+															>
+																{slotName}
+															</span>
+															<DropdownMenu>
+																<DropdownMenuTrigger>
+																	{#snippet child({ props })}
+																		<Button
+																			{...props}
+																			variant="ghost"
+																			size="icon"
+																			class="mr-2 h-6 w-6 opacity-0 group-hover/slot:opacity-100"
+																			onclick={(e) => e.stopPropagation()}
+																		>
+																			<MoreVerticalIcon class="size-4" />
+																		</Button>
+																	{/snippet}
+																</DropdownMenuTrigger>
+																<DropdownMenuContent align="end">
+																	<EditorToolbar
+																		nodeId={node.meta.id}
+																		onCopy={() => onSlotCopy?.(node.meta.id, slotName)}
+																		onCut={() => onSlotCut?.(node.meta.id, slotName)}
+																		onPaste={() => onSlotPaste?.(node.meta.id, slotName)}
+																		onDelete={() => {}}
+																		onInsert={() => onInsert(node.meta.id)}
+																		canCopy={slotChildren.length > 0}
+																		canCut={slotChildren.length > 0}
+																		canPaste={clipboard !== null}
+																		canInsert={true}
 																	/>
-																</button>
-																<span class="text-xs font-medium text-muted-foreground uppercase">
-																	{slotName}
-																</span>
-															</div>
-														{/snippet}
-													</SidebarMenuSubButton>
-												{/snippet}
-											</CollapsibleTrigger>
-											<CollapsibleContent>
-												<SidebarMenuSub class="mr-0 pe-0">
-													{#each slotChildren as childNode (childNode.meta.id)}
-														<SidebarMenuSubItem>
-															{@render renderNode(childNode, level + 1)}
-														</SidebarMenuSubItem>
-													{/each}
-												</SidebarMenuSub>
-											</CollapsibleContent>
-										</Collapsible>
-									</SidebarMenuSubItem>
-								{/if}
+																</DropdownMenuContent>
+															</DropdownMenu>
+														</div>
+													{/snippet}
+												</SidebarMenuSubButton>
+											{/snippet}
+										</CollapsibleTrigger>
+										<CollapsibleContent>
+											<SidebarMenuSub class="mr-0 pe-0">
+												{#each slotChildren as childNode (childNode.meta.id)}
+													<SidebarMenuSubItem>
+														{@render renderNode(childNode, level + 1)}
+													</SidebarMenuSubItem>
+												{/each}
+											</SidebarMenuSub>
+										</CollapsibleContent>
+									</Collapsible>
+								</SidebarMenuSubItem>
 							{/each}
 						{:else}
-							<!-- Single slot: show children directly -->
+							<!-- Single slot or only one slot with children: show children directly -->
 							{#each getChildren(node) as childNode (childNode.meta.id)}
 								<SidebarMenuSubItem>
 									{@render renderNode(childNode, level + 1)}
