@@ -85,6 +85,8 @@
 		onDragEnd: () => void;
 	} = $props();
 
+	let dropdownOpen = $state(false);
+
 	const isDropTarget = $derived(dropTargetId === parentNode.meta.id && dropTargetSlot === slotName);
 	const isDragging = $derived(
 		dragType === 'slot' &&
@@ -128,7 +130,7 @@
 							<span class="flex-1 text-xs font-medium text-muted-foreground uppercase">
 								{formatSlotName(slotName)}
 							</span>
-							<DropdownMenu>
+							<DropdownMenu bind:open={dropdownOpen}>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
 										<Button
@@ -150,6 +152,7 @@
 										onPaste={() => onSlotPaste?.(parentNode.meta.id, slotName)}
 										onDelete={() => {}}
 										onInsert={() => onInsert(parentNode.meta.id)}
+										onClose={() => (dropdownOpen = false)}
 										canCopy={slotChildren.length > 0}
 										canCut={slotChildren.length > 0}
 										canPaste={clipboard !== null}

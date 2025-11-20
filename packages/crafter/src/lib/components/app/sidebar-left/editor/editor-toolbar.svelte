@@ -13,6 +13,7 @@
 		onPaste,
 		onDelete,
 		onInsert,
+		onClose,
 		canCopy = false,
 		canCut = false,
 		canPaste = false,
@@ -24,6 +25,7 @@
 		onPaste: (nodeId: string) => void;
 		onDelete: (nodeId: string) => void;
 		onInsert: (nodeId: string) => void;
+		onClose?: () => void;
 		canCopy?: boolean;
 		canCut?: boolean;
 		canPaste?: boolean;
@@ -36,7 +38,10 @@
 		variant="ghost"
 		size="sm"
 		disabled={!canInsert}
-		onclick={() => onInsert(nodeId)}
+		onclick={() => {
+			onInsert(nodeId);
+			onClose?.();
+		}}
 		class="justify-start gap-2"
 	>
 		<PlusIcon class="size-4" />

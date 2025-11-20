@@ -92,6 +92,8 @@
 		onSlotDrop: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 	} = $props();
 
+	let dropdownOpen = $state(false);
+
 	const isDragging = $derived(dragType === 'node' && draggedNodeId === node.meta.id);
 	const isDropTarget = $derived(dropTargetId === node.meta.id && !dropTargetSlot);
 	const isSelected = $derived(selectedNodeId === node.meta.id);
@@ -139,7 +141,7 @@
 									>
 										<span>{getDisplayName(node)}</span>
 									</button>
-									<DropdownMenu>
+									<DropdownMenu bind:open={dropdownOpen}>
 										<DropdownMenuTrigger>
 											{#snippet child({ props })}
 												<Button
@@ -160,6 +162,7 @@
 												{onPaste}
 												{onDelete}
 												{onInsert}
+												onClose={() => (dropdownOpen = false)}
 												canCopy={true}
 												canCut={true}
 												{canPaste}
@@ -280,7 +283,7 @@
 						ondragend={onDragEnd}
 					>
 						<span class="flex-1 overflow-hidden text-ellipsis">{getDisplayName(node)}</span>
-						<DropdownMenu>
+						<DropdownMenu bind:open={dropdownOpen}>
 							<DropdownMenuTrigger>
 								{#snippet child({ props: triggerProps })}
 									<Button
@@ -302,6 +305,7 @@
 									{onPaste}
 									{onDelete}
 									{onInsert}
+									onClose={() => (dropdownOpen = false)}
 									canCopy={true}
 									canCut={true}
 									{canPaste}
@@ -352,7 +356,7 @@
 								>
 									<span>{getDisplayName(node)}</span>
 								</button>
-								<DropdownMenu>
+								<DropdownMenu bind:open={dropdownOpen}>
 									<DropdownMenuTrigger>
 										{#snippet child({ props })}
 											<Button
@@ -373,6 +377,7 @@
 											{onPaste}
 											{onDelete}
 											{onInsert}
+											onClose={() => (dropdownOpen = false)}
 											canCopy={true}
 											canCut={true}
 											{canPaste}
@@ -493,7 +498,7 @@
 				>
 					<span>{getDisplayName(node)}</span>
 				</button>
-				<DropdownMenu>
+				<DropdownMenu bind:open={dropdownOpen}>
 					<DropdownMenuTrigger>
 						{#snippet child({ props })}
 							<Button
@@ -515,6 +520,7 @@
 							{onPaste}
 							{onDelete}
 							{onInsert}
+							onClose={() => (dropdownOpen = false)}
 							canCopy={true}
 							canCut={true}
 							{canPaste}

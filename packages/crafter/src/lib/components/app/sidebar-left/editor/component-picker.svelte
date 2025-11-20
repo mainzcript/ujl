@@ -135,29 +135,31 @@
 </script>
 
 <Dialog bind:open>
-	<DialogContent class="max-h-[80vh] max-w-2xl">
+	<DialogContent
+		class="h-full max-h-[90vh] w-[95vw] max-w-2xl overflow-hidden sm:max-h-[80vh] sm:w-full sm:rounded-lg"
+	>
 		<DialogHeader>
 			<DialogTitle>Insert Component</DialogTitle>
 		</DialogHeader>
 
-		<div class="flex flex-col gap-4">
+		<div class="flex h-full flex-col gap-3 overflow-hidden sm:gap-4">
 			<!-- Search Input -->
 			<Input bind:value={searchQuery} placeholder="Search components..." class="w-full" autofocus />
 
 			<!-- Slot Selection (only if multiple slots) -->
 			{#if hasMultipleSlots}
-				<div class="space-y-3 rounded-md border bg-muted/50 p-4">
+				<div class="space-y-2 rounded-md border bg-muted/50 p-3 sm:space-y-3 sm:p-4">
 					<Label class="text-sm font-medium">Insert into slot:</Label>
 					<div class="flex flex-wrap gap-2">
 						{#each availableSlots() as slotName (slotName)}
 							<Button
 								variant={selectedSlot === slotName ? 'default' : 'outline'}
 								size="sm"
-								class="min-w-[120px] flex-1"
+								class="min-w-[100px] flex-1 text-xs sm:min-w-[120px] sm:text-sm"
 								onclick={() => (selectedSlot = slotName)}
 							>
 								<span class="font-medium">{formatSlotName(slotName)}</span>
-								<span class="ml-2 text-xs opacity-70">
+								<span class="ml-1 text-xs opacity-70 sm:ml-2">
 									({getSlotItemCount(slotName)})
 								</span>
 							</Button>
@@ -167,31 +169,39 @@
 			{/if}
 
 			<!-- Component List -->
-			<ScrollArea class="h-[400px] pr-4">
+			<ScrollArea class="h-[50vh] h-full overflow-hidden pr-2 sm:h-[400px] sm:pr-4">
 				{#if Object.keys(filteredComponents()).length === 0}
-					<div class="flex items-center justify-center py-8 text-muted-foreground">
+					<div
+						class="flex items-center justify-center py-8 text-sm text-muted-foreground sm:text-base"
+					>
 						No components found.
 					</div>
 				{:else}
-					<div class="space-y-4">
+					<div class="space-y-3 sm:space-y-4">
 						{#each Object.entries(filteredComponents()) as [category, components] (category)}
 							{@const typedComponents = components as ComponentDefinition[]}
 							{#if typedComponents.length > 0}
 								<div>
-									<h3 class="mb-2 text-sm font-semibold text-muted-foreground uppercase">
+									<h3
+										class="mb-1.5 text-xs font-semibold text-muted-foreground uppercase sm:mb-2 sm:text-sm"
+									>
 										{categoryLabels[category] || category}
 									</h3>
 									<div class="space-y-1">
 										{#each typedComponents as component (component.type)}
 											<Button
 												variant="ghost"
-												class="h-auto w-full justify-start gap-3 px-4 py-3"
+												class="h-auto w-full justify-start gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3"
 												onclick={() => handleSelect(component.type)}
 											>
 												<div class="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-													<span class="text-left font-medium">{component.label}</span>
+													<span class="text-left text-sm font-medium sm:text-base"
+														>{component.label}</span
+													>
 													{#if component.description}
-														<span class="text-left text-xs text-muted-foreground">
+														<span
+															class="line-clamp-2 text-left text-xs text-muted-foreground sm:line-clamp-1"
+														>
 															{component.description}
 														</span>
 													{/if}
