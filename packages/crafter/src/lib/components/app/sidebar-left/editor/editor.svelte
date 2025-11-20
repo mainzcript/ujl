@@ -2,10 +2,10 @@
 	import type { UJLCModuleObject, UJLCSlotObject } from '@ujl-framework/types';
 	import { page } from '$app/stores';
 	import { onMount, getContext } from 'svelte';
-	import NavTree from './nav-tree.svelte';
+	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import { findNodeById, hasSlots } from './ujlc-tree-utils.js';
+	import { findNodeById, hasSlots } from './nav-tree/ujlc-tree-utils.ts';
 
 	let {
 		slot

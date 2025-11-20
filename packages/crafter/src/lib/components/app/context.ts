@@ -8,7 +8,7 @@ import {
 	insertNodeAtPosition,
 	getFirstSlotName,
 	hasSlots
-} from './sidebar-left/editor/ujlc-tree-utils.js';
+} from './sidebar-left/editor/nav-tree/ujlc-tree-utils.js';
 import {
 	getComponentDefinition,
 	createNodeFromDefinition
