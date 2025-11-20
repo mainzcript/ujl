@@ -20,6 +20,7 @@
 		onDelete,
 		onInsert,
 		onNodeMove,
+		onSlotMove,
 		onSlotCopy,
 		onSlotCut,
 		onSlotPaste
@@ -44,6 +45,12 @@
 			slotName?: string,
 			position?: 'before' | 'after' | 'into'
 		) => boolean;
+		onSlotMove?: (
+			sourceParentId: string,
+			sourceSlotName: string,
+			targetParentId: string,
+			targetSlotName: string
+		) => boolean;
 		onSlotCopy?: (parentId: string, slotName: string) => void;
 		onSlotCut?: (parentId: string, slotName: string) => void;
 		onSlotPaste?: (parentId: string, slotName: string) => void;
@@ -52,8 +59,8 @@
 	// Selected node from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
-	// Create drag handler
-	const dragHandler = createDragHandler(onNodeMove);
+	// Create drag handler with slot move support
+	const dragHandler = createDragHandler(onNodeMove, onSlotMove);
 
 	/**
 	 * Handle node click - update URL with selected node ID
@@ -78,6 +85,9 @@
 					{selectedNodeId}
 					{clipboard}
 					draggedNodeId={dragHandler.draggedNodeId}
+					draggedSlotName={dragHandler.draggedSlotName}
+					draggedSlotParentId={dragHandler.draggedSlotParentId}
+					dragType={dragHandler.dragType}
 					dropTargetId={dragHandler.dropTargetId}
 					dropTargetSlot={dragHandler.dropTargetSlot}
 					dropPosition={dragHandler.dropPosition}
@@ -88,6 +98,7 @@
 					{onDelete}
 					{onInsert}
 					onDragStart={dragHandler.handleDragStart}
+					onSlotDragStart={dragHandler.handleSlotDragStart}
 					onDragOver={dragHandler.handleDragOver}
 					onDragLeave={dragHandler.handleDragLeave}
 					onDrop={dragHandler.handleDrop}

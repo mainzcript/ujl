@@ -35,6 +35,9 @@
 		selectedNodeId,
 		clipboard,
 		draggedNodeId,
+		draggedSlotName,
+		draggedSlotParentId,
+		dragType,
 		dropTargetId,
 		dropTargetSlot,
 		dropPosition,
@@ -45,6 +48,7 @@
 		onDelete,
 		onInsert,
 		onDragStart,
+		onSlotDragStart,
 		onDragOver,
 		onDragLeave,
 		onDrop,
@@ -63,6 +67,9 @@
 			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
 			| null;
 		draggedNodeId: string | null;
+		draggedSlotName: string | null;
+		draggedSlotParentId: string | null;
+		dragType: 'node' | 'slot' | null;
 		dropTargetId: string | null;
 		dropTargetSlot: string | null;
 		dropPosition: 'before' | 'after' | 'into' | null;
@@ -73,6 +80,7 @@
 		onDelete: (nodeId: string) => void;
 		onInsert: (nodeId: string) => void;
 		onDragStart: (event: DragEvent, nodeId: string) => void;
+		onSlotDragStart: (event: DragEvent, parentId: string, slotName: string) => void;
 		onDragOver: (event: DragEvent, nodeId: string) => void;
 		onDragLeave: () => void;
 		onDrop: (event: DragEvent, nodeId: string, slotName?: string) => void;
@@ -84,7 +92,7 @@
 		onSlotDrop: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 	} = $props();
 
-	const isDragging = $derived(draggedNodeId === node.meta.id);
+	const isDragging = $derived(dragType === 'node' && draggedNodeId === node.meta.id);
 	const isDropTarget = $derived(dropTargetId === node.meta.id && !dropTargetSlot);
 	const isSelected = $derived(selectedNodeId === node.meta.id);
 	const showDropBefore = $derived(isDropTarget && dropPosition === 'before');
@@ -174,10 +182,14 @@
 									{slotName}
 									{slotChildren}
 									{clipboard}
+									{dragType}
+									{draggedSlotParentId}
+									{draggedSlotName}
 									{onSlotCopy}
 									{onSlotCut}
 									{onSlotPaste}
 									{onInsert}
+									{onSlotDragStart}
 									{dropTargetId}
 									{dropTargetSlot}
 									{onSlotDragOver}
@@ -208,6 +220,9 @@
 										{selectedNodeId}
 										{clipboard}
 										{draggedNodeId}
+										{draggedSlotName}
+										{draggedSlotParentId}
+										{dragType}
 										{dropTargetId}
 										{dropTargetSlot}
 										{dropPosition}
@@ -218,6 +233,7 @@
 										{onDelete}
 										{onInsert}
 										{onDragStart}
+										{onSlotDragStart}
 										{onDragOver}
 										{onDragLeave}
 										{onDrop}
@@ -379,10 +395,14 @@
 								{slotName}
 								{slotChildren}
 								{clipboard}
+								{dragType}
+								{draggedSlotParentId}
+								{draggedSlotName}
 								{onSlotCopy}
 								{onSlotCut}
 								{onSlotPaste}
 								{onInsert}
+								{onSlotDragStart}
 								{dropTargetId}
 								{dropTargetSlot}
 								{onSlotDragOver}
@@ -413,6 +433,9 @@
 									{selectedNodeId}
 									{clipboard}
 									{draggedNodeId}
+									{draggedSlotName}
+									{draggedSlotParentId}
+									{dragType}
 									{dropTargetId}
 									{dropTargetSlot}
 									{dropPosition}
@@ -423,6 +446,7 @@
 									{onDelete}
 									{onInsert}
 									{onDragStart}
+									{onSlotDragStart}
 									{onDragOver}
 									{onDragLeave}
 									{onDrop}

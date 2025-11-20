@@ -23,10 +23,14 @@
 		slotName,
 		slotChildren,
 		clipboard,
+		dragType,
+		draggedSlotParentId,
+		draggedSlotName,
 		onSlotCopy,
 		onSlotCut,
 		onSlotPaste,
 		onInsert,
+		onSlotDragStart,
 		dropTargetId,
 		dropTargetSlot,
 		onSlotDragOver,
@@ -53,10 +57,14 @@
 			| UJLCModuleObject
 			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
 			| null;
+		dragType: 'node' | 'slot' | null;
+		draggedSlotParentId: string | null;
+		draggedSlotName: string | null;
 		onSlotCopy?: (parentId: string, slotName: string) => void;
 		onSlotCut?: (parentId: string, slotName: string) => void;
 		onSlotPaste?: (parentId: string, slotName: string) => void;
 		onInsert: (nodeId: string) => void;
+		onSlotDragStart: (event: DragEvent, parentId: string, slotName: string) => void;
 		dropTargetId: string | null;
 		dropTargetSlot: string | null;
 		onSlotDragOver: (event: DragEvent, parentNodeId: string, slotName: string) => void;
@@ -78,6 +86,11 @@
 	} = $props();
 
 	const isDropTarget = $derived(dropTargetId === parentNode.meta.id && dropTargetSlot === slotName);
+	const isDragging = $derived(
+		dragType === 'slot' &&
+			draggedSlotParentId === parentNode.meta.id &&
+			draggedSlotName === slotName
+	);
 </script>
 
 <SidebarMenuSubItem>
@@ -91,10 +104,21 @@
 							tabindex="0"
 							class="group/slot flex w-full items-center justify-between gap-1 rounded-md {isDropTarget
 								? 'drop-target-slot'
-								: ''}"
-							ondragover={(e) => onSlotDragOver(e, parentNode.meta.id, slotName)}
-							ondragleave={onSlotDragLeave}
-							ondrop={(e) => onSlotDrop(e, parentNode.meta.id, slotName)}
+								: ''} {isDragging ? 'opacity-50' : ''}"
+							draggable="true"
+							ondragstart={(e) => {
+								onSlotDragStart(e, parentNode.meta.id, slotName);
+							}}
+							ondragover={(e) => {
+								onSlotDragOver(e, parentNode.meta.id, slotName);
+							}}
+							ondragleave={() => {
+								onSlotDragLeave();
+							}}
+							ondrop={(e) => {
+								onSlotDrop(e, parentNode.meta.id, slotName);
+							}}
+							ondragend={onDragEnd}
 						>
 							<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
 								<ChevronRightIcon
@@ -148,6 +172,9 @@
 							{selectedNodeId}
 							{clipboard}
 							{draggedNodeId}
+							{draggedSlotName}
+							{draggedSlotParentId}
+							{dragType}
 							{dropTargetId}
 							{dropTargetSlot}
 							{dropPosition}
@@ -158,6 +185,7 @@
 							{onDelete}
 							{onInsert}
 							{onDragStart}
+							{onSlotDragStart}
 							{onDragOver}
 							{onDragLeave}
 							{onDrop}
@@ -180,5 +208,10 @@
 		background-color: color-mix(in srgb, hsl(var(--primary)) 15%, transparent 85%);
 		outline: 1px dashed oklch(var(--flavor-foreground));
 		outline-offset: -2px;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
 	}
 </style>

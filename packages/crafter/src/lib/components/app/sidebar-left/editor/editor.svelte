@@ -318,6 +318,83 @@
 	function handleSlotPaste(targetParentId: string) {
 		handlePaste(targetParentId);
 	}
+
+	/**
+	 * Slot Move Handler for Drag & Drop
+	 * Moves an entire slot (with all its content) from one parent to another
+	 * Returns true if move was successful, false if rejected
+	 */
+	function handleSlotMove(
+		sourceParentId: string,
+		sourceSlotName: string,
+		targetParentId: string,
+		targetSlotName: string
+	): boolean {
+		console.log('Slot move:', sourceParentId, sourceSlotName, '→', targetParentId, targetSlotName);
+
+		// Can't move slot to itself
+		if (sourceParentId === targetParentId && sourceSlotName === targetSlotName) {
+			console.warn('Cannot move slot to itself');
+			return false;
+		}
+
+		const sourceParent = findNodeById(slot, sourceParentId);
+		const targetParent = findNodeById(slot, targetParentId);
+
+		if (!sourceParent?.slots?.[sourceSlotName]) {
+			console.warn('Source slot not found:', sourceSlotName);
+			return false;
+		}
+
+		if (!targetParent?.slots) {
+			console.warn('Target node has no slots');
+			return false;
+		}
+
+		// Check if target has the target slot
+		if (!targetParent.slots[targetSlotName]) {
+			console.warn(
+				`Target node doesn't have slot "${targetSlotName}". Available slots:`,
+				Object.keys(targetParent.slots)
+			);
+			return false;
+		}
+
+		// Get the content from source slot
+		const slotContent = [...sourceParent.slots[sourceSlotName]];
+
+		console.log(`Moving ${slotContent.length} items from ${sourceSlotName} to ${targetSlotName}`);
+
+		// Perform the move
+		crafter.updateRootSlot((currentSlot) => {
+			// First, remove content from source slot
+			let updatedSlot = updateNodeInTree(currentSlot, sourceParentId, (node) => ({
+				...node,
+				slots: {
+					...node.slots,
+					[sourceSlotName]: []
+				}
+			}));
+
+			// Then, add content to target slot (replace existing content)
+			updatedSlot = updateNodeInTree(updatedSlot, targetParentId, (node) => {
+				const newSlots = { ...node.slots };
+
+				// Replace target slot content with source content
+				newSlots[targetSlotName] = [...slotContent];
+
+				return {
+					...node,
+					slots: newSlots
+				};
+			});
+
+			return updatedSlot;
+		});
+
+		console.log('Slot moved successfully');
+		return true;
+	}
 </script>
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
@@ -334,6 +411,7 @@
 			onSlotCopy={handleSlotCopy}
 			onSlotCut={handleSlotCut}
 			onSlotPaste={handleSlotPaste}
+			onSlotMove={handleSlotMove}
 		/>
 	</div>
 </div>
