@@ -273,6 +273,22 @@ export function getSlotEntriesWithChildren(node: UJLCModuleObject): [string, UJL
 }
 
 /**
+ * checks if a node has multiple slots (regardless of content)
+ */
+export function hasMultipleSlots(node: UJLCModuleObject): boolean {
+	if (!node.slots) return false;
+	return Object.keys(node.slots).length > 1;
+}
+
+/**
+ * returns ALL slot entries [slotName, children[]] (including empty slots)
+ */
+export function getAllSlotEntries(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
+	if (!node.slots) return [];
+	return Object.entries(node.slots);
+}
+
+/**
  * checks if target has slots (can accept children)
  */
 export function canAcceptDrop(targetNode: UJLCModuleObject): boolean {

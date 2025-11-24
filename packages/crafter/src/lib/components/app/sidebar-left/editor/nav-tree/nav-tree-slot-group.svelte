@@ -93,6 +93,7 @@
 			draggedSlotParentId === parentNode.meta.id &&
 			draggedSlotName === slotName
 	);
+	const isEmpty = $derived(slotChildren.length === 0);
 </script>
 
 <SidebarMenuSubItem>
@@ -167,40 +168,50 @@
 		</CollapsibleTrigger>
 		<CollapsibleContent>
 			<SidebarMenuSub class="mr-0 pe-0">
-				{#each slotChildren as childNode (childNode.meta.id)}
+				{#if isEmpty}
+					<!-- Empty slot placeholder -->
 					<SidebarMenuSubItem>
-						<NavTreeItem
-							node={childNode}
-							level={1}
-							{selectedNodeId}
-							{clipboard}
-							{draggedNodeId}
-							{draggedSlotName}
-							{draggedSlotParentId}
-							{dragType}
-							{dropTargetId}
-							{dropTargetSlot}
-							{dropPosition}
-							{onNodeClick}
-							{onCopy}
-							{onCut}
-							{onPaste}
-							{onDelete}
-							{onInsert}
-							{onDragStart}
-							{onSlotDragStart}
-							{onDragOver}
-							{onDragLeave}
-							{onDrop}
-							{onDragEnd}
-							{onSlotCopy}
-							{onSlotCut}
-							{onSlotPaste}
-							{onSlotDragOver}
-							{onSlotDrop}
-						/>
+						<div class="px-4 py-2 text-xs text-muted-foreground italic">
+							Empty slot - drop or insert components here
+						</div>
 					</SidebarMenuSubItem>
-				{/each}
+				{:else}
+					<!-- Slot children -->
+					{#each slotChildren as childNode (childNode.meta.id)}
+						<SidebarMenuSubItem>
+							<NavTreeItem
+								node={childNode}
+								level={1}
+								{selectedNodeId}
+								{clipboard}
+								{draggedNodeId}
+								{draggedSlotName}
+								{draggedSlotParentId}
+								{dragType}
+								{dropTargetId}
+								{dropTargetSlot}
+								{dropPosition}
+								{onNodeClick}
+								{onCopy}
+								{onCut}
+								{onPaste}
+								{onDelete}
+								{onInsert}
+								{onDragStart}
+								{onSlotDragStart}
+								{onDragOver}
+								{onDragLeave}
+								{onDrop}
+								{onDragEnd}
+								{onSlotCopy}
+								{onSlotCut}
+								{onSlotPaste}
+								{onSlotDragOver}
+								{onSlotDrop}
+							/>
+						</SidebarMenuSubItem>
+					{/each}
+				{/if}
 			</SidebarMenuSub>
 		</CollapsibleContent>
 	</Collapsible>

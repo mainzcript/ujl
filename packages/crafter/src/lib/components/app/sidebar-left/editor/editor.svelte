@@ -37,11 +37,6 @@
 	// Selected node object from current slot
 	const selectedNode = $derived(selectedNodeId ? findNodeById(slot, selectedNodeId) : null);
 
-	// Target node for component insertion
-	const insertTargetNode = $derived(
-		insertTargetNodeId ? findNodeById(slot, insertTargetNodeId) : null
-	);
-
 	// Button states
 	const canCut = $derived(selectedNodeId !== null);
 	const canCopy = $derived(selectedNodeId !== null);
@@ -148,15 +143,38 @@
 	/**
 	 * Component Select Handler - insert selected component
 	 */
-	function handleComponentSelect(componentType: string, slotName?: string) {
+	function handleComponentSelect(componentType: string) {
 		if (!insertTargetNodeId) return;
 
-		// Insert component with optional slot name
+		const targetNode = findNodeById(slot, insertTargetNodeId);
+		if (!targetNode) {
+			console.warn('Target node not found');
+			return;
+		}
+
+		// Determine slot name
+		let slotName: string | undefined = undefined;
+
+		if (targetNode.slots) {
+			const slotNames = Object.keys(targetNode.slots);
+
+			// If exactly one slot, use it
+			if (slotNames.length === 1) {
+				slotName = slotNames[0];
+			}
+			// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
+			else if (slotNames.length > 1) {
+				console.warn('Target has multiple slots but no slot specified, using first slot');
+				slotName = slotNames[0];
+			}
+		}
+
+		// Insert component
 		const success = crafter.operations.insertNode(
 			componentType,
 			insertTargetNodeId,
-			slotName, // Pass the selected slot name
-			'into' // position - insert into target
+			slotName,
+			'into'
 		);
 
 		if (success) {
@@ -416,8 +434,4 @@
 	</div>
 </div>
 
-<ComponentPicker
-	bind:open={showComponentPicker}
-	targetNode={insertTargetNode}
-	onSelect={handleComponentSelect}
-/>
+<ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />

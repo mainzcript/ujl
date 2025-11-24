@@ -23,10 +23,11 @@
 		getDisplayName,
 		getChildren,
 		hasChildren,
-		hasMultipleSlotsWithChildren,
-		getSlotEntriesWithChildren,
+		hasMultipleSlots,
+		getAllSlotEntries,
 		canAcceptDrop,
-		canNodeAcceptPaste
+		canNodeAcceptPaste,
+		hasSlots
 	} from './ujlc-tree-utils.js';
 
 	let {
@@ -100,14 +101,17 @@
 	const showDropBefore = $derived(isDropTarget && dropPosition === 'before');
 	const showDropAfter = $derived(isDropTarget && dropPosition === 'after');
 	const showDropInto = $derived(isDropTarget && dropPosition === 'into' && canAcceptDrop(node));
-	const hasMultiple = $derived(hasMultipleSlotsWithChildren(node));
+	const hasMultiple = $derived(hasMultipleSlots(node));
 	const canPaste = $derived(canNodeAcceptPaste(node, clipboard));
-	const canInsert = true;
+	const canInsert = $derived(hasSlots(node) && !hasMultipleSlots(node));
+
+	// Show slots as groups if node has multiple slots OR if it has no children yet
+	const showSlotsAsGroups = $derived(hasMultiple || (hasSlots(node) && !hasChildren(node)));
 </script>
 
 {#if level === 0}
-	{#if hasChildren(node)}
-		<!-- Root level node with children -->
+	{#if hasChildren(node) || (hasSlots(node) && !hasChildren(node))}
+		<!-- Root level node with children or empty slots -->
 		<SidebarMenuItem class="relative">
 			{#if showDropBefore}
 				<div class="drop-indicator drop-indicator-before"></div>
@@ -177,9 +181,9 @@
 				</CollapsibleTrigger>
 				<CollapsibleContent>
 					<SidebarMenuSub class="mr-0 pe-0">
-						{#if hasMultiple}
-							<!-- Multiple slots with children: show slot names as groups -->
-							{#each getSlotEntriesWithChildren(node) as [slotName, slotChildren] (slotName)}
+						{#if showSlotsAsGroups}
+							<!-- Multiple slots or no children: show all slots as groups (including empty) -->
+							{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
 								<NavTreeSlotGroup
 									parentNode={node}
 									{slotName}
@@ -214,7 +218,7 @@
 								/>
 							{/each}
 						{:else}
-							<!-- Single slot or only one slot with children: show children directly -->
+							<!-- Single slot: show children directly -->
 							{#each getChildren(node) as childNode (childNode.meta.id)}
 								<SidebarMenuSubItem>
 									<NavTreeItem
@@ -321,8 +325,8 @@
 			{/if}
 		</SidebarMenuItem>
 	{/if}
-{:else if hasChildren(node)}
-	<!-- Nested level node with children -->
+{:else if hasChildren(node) || (hasSlots(node) && !hasChildren(node))}
+	<!-- Nested level node with children or empty slots -->
 	<div class="relative">
 		{#if showDropBefore}
 			<div class="drop-indicator drop-indicator-before"></div>
@@ -392,9 +396,9 @@
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<SidebarMenuSub class="mr-0 pe-0">
-					{#if hasMultiple}
-						<!-- Multiple slots with children: show slot names as groups -->
-						{#each getSlotEntriesWithChildren(node) as [slotName, slotChildren] (slotName)}
+					{#if showSlotsAsGroups}
+						<!-- Multiple slots or no children: show all slots as groups (including empty) -->
+						{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
 							<NavTreeSlotGroup
 								parentNode={node}
 								{slotName}
@@ -429,7 +433,7 @@
 							/>
 						{/each}
 					{:else}
-						<!-- Single slot or only one slot with children: show children directly -->
+						<!-- Single slot: show children directly -->
 						{#each getChildren(node) as childNode (childNode.meta.id)}
 							<SidebarMenuSubItem>
 								<NavTreeItem
