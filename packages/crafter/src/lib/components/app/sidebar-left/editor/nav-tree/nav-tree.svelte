@@ -23,7 +23,8 @@
 		onSlotMove,
 		onSlotCopy,
 		onSlotCut,
-		onSlotPaste
+		onSlotPaste,
+		onSlotClick
 	}: {
 		nodes: UJLCModuleObject[];
 		clipboard:
@@ -54,6 +55,7 @@
 		onSlotCopy?: (parentId: string, slotName: string) => void;
 		onSlotCut?: (parentId: string, slotName: string) => void;
 		onSlotPaste?: (parentId: string, slotName: string) => void;
+		onSlotClick?: (parentId: string, slotName: string) => void;
 	} = $props();
 
 	// Selected node from URL
@@ -108,6 +110,7 @@
 					{onSlotPaste}
 					onSlotDragOver={dragHandler.handleSlotDragOver}
 					onSlotDrop={dragHandler.handleSlotDrop}
+					{onSlotClick}
 				/>
 			{/each}
 		</SidebarMenu>

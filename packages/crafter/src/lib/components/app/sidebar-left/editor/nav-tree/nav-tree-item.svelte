@@ -52,6 +52,7 @@
 		onSlotDragStart,
 		onDragOver,
 		onDragLeave,
+		onSlotClick,
 		onDrop,
 		onDragEnd,
 		onSlotCopy,
@@ -82,6 +83,7 @@
 		onInsert: (nodeId: string) => void;
 		onDragStart: (event: DragEvent, nodeId: string) => void;
 		onSlotDragStart: (event: DragEvent, parentId: string, slotName: string) => void;
+		onSlotClick?: (parentId: string, slotName: string) => void;
 		onDragOver: (event: DragEvent, nodeId: string) => void;
 		onDragLeave: () => void;
 		onDrop: (event: DragEvent, nodeId: string, slotName?: string) => void;
@@ -125,7 +127,7 @@
 									role="button"
 									tabindex="0"
 									class="group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md {isSelected
-										? 'node-selected'
+										? 'node-selected text-primary'
 										: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
 									draggable="true"
 									ondragstart={(e) => onDragStart(e, node.meta.id)}
@@ -215,6 +217,7 @@
 									{onDragLeave}
 									{onDrop}
 									{onDragEnd}
+									{onSlotClick}
 								/>
 							{/each}
 						{:else}
@@ -250,6 +253,7 @@
 										{onSlotPaste}
 										{onSlotDragOver}
 										{onSlotDrop}
+										{onSlotClick}
 									/>
 								</SidebarMenuSubItem>
 							{/each}
@@ -273,9 +277,9 @@
 						type="button"
 						{...props}
 						tabindex="0"
-						class="group/root {props.class || ''} {isSelected ? 'selected' : ''} {isDragging
-							? 'opacity-50'
-							: ''} {showDropInto
+						class="group/root {props.class || ''} {isSelected
+							? 'selected text-primary'
+							: ''} {isDragging ? 'opacity-50' : ''} {showDropInto
 							? 'drop-target'
 							: ''} flex h-full w-full items-center justify-between rounded-md"
 						onclick={() => onNodeClick(node.meta.id)}
@@ -340,7 +344,7 @@
 								role="button"
 								tabindex="0"
 								class="group/dropdown flex h-full w-full items-center justify-between rounded-md {isSelected
-									? 'node-selected'
+									? 'node-selected text-primary'
 									: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
 								draggable="true"
 								ondragstart={(e) => onDragStart(e, node.meta.id)}
@@ -430,6 +434,7 @@
 								{onDragLeave}
 								{onDrop}
 								{onDragEnd}
+								{onSlotClick}
 							/>
 						{/each}
 					{:else}
@@ -465,6 +470,7 @@
 									{onSlotPaste}
 									{onSlotDragOver}
 									{onSlotDrop}
+									{onSlotClick}
 								/>
 							</SidebarMenuSubItem>
 						{/each}
@@ -488,7 +494,7 @@
 				tabindex="0"
 				class="group/node flex h-full w-full items-center justify-between rounded-md ps-2 {showDropInto
 					? 'drop-target'
-					: ''} {isSelected ? 'node-selected' : ''} {isDragging ? 'opacity-50' : ''}"
+					: ''} {isSelected ? 'node-selected text-primary' : ''} {isDragging ? 'opacity-50' : ''}"
 				draggable="true"
 				ondragstart={(e) => onDragStart(e, node.meta.id)}
 				ondragover={(e) => onDragOver(e, node.meta.id)}
@@ -547,7 +553,7 @@
 			oklch(var(--flavor)) 90%,
 			oklch(var(--flavor-foreground)) 10%
 		);
-		border-left: 2px solid hsl(var(--primary));
+		color: oklch(var(--primary));
 	}
 
 	.drop-target {

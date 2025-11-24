@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { UJLCModuleObject, UJLCSlotObject } from '@ujl-framework/types';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import { findNodeById, hasSlots } from './nav-tree/ujlc-tree-utils.ts';
+	import { findNodeById, hasMultipleSlots, hasSlots } from './nav-tree/ujlc-tree-utils.ts';
 
 	let {
 		slot
@@ -34,23 +35,51 @@
 	// Selected node id from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
+	// Parse selected ID to check if it's a slot (format: parentId:slotName)
+	const selectedSlotInfo = $derived(() => {
+		if (!selectedNodeId) return null;
+
+		const parts = selectedNodeId.split(':');
+		if (parts.length === 2) {
+			return {
+				parentId: parts[0],
+				slotName: parts[1]
+			};
+		}
+		return null;
+	});
+
 	// Selected node object from current slot
-	const selectedNode = $derived(selectedNodeId ? findNodeById(slot, selectedNodeId) : null);
+	const selectedNode = $derived(() => {
+		if (!selectedNodeId) return null;
+
+		// If it's a slot selection, get the parent node
+		const slotInfo = selectedSlotInfo();
+		if (slotInfo) {
+			return findNodeById(slot, slotInfo.parentId);
+		}
+
+		// Otherwise, get the node directly
+		return findNodeById(slot, selectedNodeId);
+	});
 
 	// Button states
-	const canCut = $derived(selectedNodeId !== null);
-	const canCopy = $derived(selectedNodeId !== null);
+	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo());
+	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo());
 	const canPaste = $derived(() => {
-		if (!clipboard || !selectedNode) return false;
+		if (!clipboard || !selectedNode()) return false;
+
+		const node = selectedNode();
+		if (!node) return false;
 
 		// If clipboard is a regular node, check if target has slots
 		if ('meta' in clipboard) {
-			return hasSlots(selectedNode);
+			return hasSlots(node);
 		}
 
 		// If clipboard is a slot, check if target has that slot type
-		if (clipboard.type === 'slot' && selectedNode.slots) {
-			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
+		if (clipboard.type === 'slot' && node.slots) {
+			return Object.keys(node.slots).includes(clipboard.slotName);
 		}
 
 		return false;
@@ -133,10 +162,10 @@
 	}
 
 	/**
-	 * Insert Handler - open component picker for target node
+	 * Insert Handler - open component picker for target node or slot
 	 */
-	function handleInsert(nodeId: string) {
-		insertTargetNodeId = nodeId;
+	function handleInsert(nodeIdOrSlot: string) {
+		insertTargetNodeId = nodeIdOrSlot;
 		showComponentPicker = true;
 	}
 
@@ -146,43 +175,76 @@
 	function handleComponentSelect(componentType: string) {
 		if (!insertTargetNodeId) return;
 
-		const targetNode = findNodeById(slot, insertTargetNodeId);
-		if (!targetNode) {
-			console.warn('Target node not found');
-			return;
-		}
+		// Check if insertTargetNodeId is a slot (contains ':')
+		const parts = insertTargetNodeId.split(':');
 
-		// Determine slot name
-		let slotName: string | undefined = undefined;
+		if (parts.length === 2) {
+			// It's a slot: parentId:slotName
+			const [parentId, slotName] = parts;
+			const targetNode = findNodeById(slot, parentId);
 
-		if (targetNode.slots) {
-			const slotNames = Object.keys(targetNode.slots);
-
-			// If exactly one slot, use it
-			if (slotNames.length === 1) {
-				slotName = slotNames[0];
+			if (!targetNode) {
+				console.warn('Parent node not found');
+				return;
 			}
-			// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
-			else if (slotNames.length > 1) {
-				console.warn('Target has multiple slots but no slot specified, using first slot');
-				slotName = slotNames[0];
+
+			// Insert component into specific slot
+			const success = crafter.operations.insertNode(componentType, parentId, slotName, 'into');
+
+			if (success) {
+				console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
 			}
-		}
+		} else {
+			// It's a regular node
+			const targetNode = findNodeById(slot, insertTargetNodeId);
+			if (!targetNode) {
+				console.warn('Target node not found');
+				return;
+			}
 
-		// Insert component
-		const success = crafter.operations.insertNode(
-			componentType,
-			insertTargetNodeId,
-			slotName,
-			'into'
-		);
+			// Determine slot name
+			let slotName: string | undefined = undefined;
 
-		if (success) {
-			console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
+			if (targetNode.slots) {
+				const slotNames = Object.keys(targetNode.slots);
+
+				// If exactly one slot, use it
+				if (slotNames.length === 1) {
+					slotName = slotNames[0];
+				}
+				// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
+				else if (slotNames.length > 1) {
+					console.warn('Target has multiple slots but no slot specified, using first slot');
+					slotName = slotNames[0];
+				}
+			}
+
+			// Insert component
+			const success = crafter.operations.insertNode(
+				componentType,
+				insertTargetNodeId,
+				slotName,
+				'into'
+			);
+
+			if (success) {
+				console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
+			}
 		}
 
 		// Reset state
 		insertTargetNodeId = null;
+	}
+
+	/**
+	 * Handle Slot Click - update URL with parent:slotname format
+	 */
+	async function handleSlotClick(parentId: string, slotName: string) {
+		const url = new URL($page.url);
+		url.searchParams.set('selected', `${parentId}:${slotName}`);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto(url, { replaceState: true, noScroll: true });
+		console.log('Slot clicked:', parentId, slotName);
 	}
 
 	/**
@@ -192,13 +254,29 @@
 		// Ctrl/Cmd + I for insert
 		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
 			if (selectedNodeId) {
-				event.preventDefault();
-				handleInsert(selectedNodeId);
+				const slotInfo = selectedSlotInfo();
+
+				if (slotInfo) {
+					// Slot is selected - can always insert
+					event.preventDefault();
+					handleInsert(selectedNodeId);
+				} else {
+					// Node is selected - check if can insert
+					const node = selectedNode();
+					const canInsert = node && hasSlots(node) && !hasMultipleSlots(node);
+
+					if (canInsert) {
+						event.preventDefault();
+						handleInsert(selectedNodeId);
+					}
+				}
 			}
-			return;
 		}
 
 		if (!selectedNodeId) return;
+
+		// Don't allow copy/cut/delete on slots
+		if (selectedSlotInfo()) return;
 
 		// Ctrl/Cmd + C for copy
 		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
@@ -430,6 +508,7 @@
 			onSlotCut={handleSlotCut}
 			onSlotPaste={handleSlotPaste}
 			onSlotMove={handleSlotMove}
+			onSlotClick={handleSlotClick}
 		/>
 	</div>
 </div>

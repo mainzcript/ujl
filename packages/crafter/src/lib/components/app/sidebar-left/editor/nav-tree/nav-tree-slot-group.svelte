@@ -48,7 +48,8 @@
 		onDragOver,
 		onDragLeave,
 		onDrop,
-		onDragEnd
+		onDragEnd,
+		onSlotClick
 	}: {
 		parentNode: UJLCModuleObject;
 		slotName: string;
@@ -83,6 +84,7 @@
 		onDragLeave: () => void;
 		onDrop: (event: DragEvent, nodeId: string, slotName?: string) => void;
 		onDragEnd: () => void;
+		onSlotClick?: (parentId: string, slotName: string) => void;
 	} = $props();
 
 	let dropdownOpen = $state(false);
@@ -94,6 +96,9 @@
 			draggedSlotName === slotName
 	);
 	const isEmpty = $derived(slotChildren.length === 0);
+
+	// Check if this slot is selected (format: parentId:slotName)
+	const isSelected = $derived(selectedNodeId === `${parentNode.meta.id}:${slotName}`);
 </script>
 
 <SidebarMenuSubItem>
@@ -105,9 +110,11 @@
 						<div
 							role="button"
 							tabindex="0"
-							class="group/slot flex w-full items-center justify-between gap-1 rounded-md {isDropTarget
+							class="group/slot flex w-full items-center justify-between rounded-md {isDropTarget
 								? 'drop-target-slot'
-								: ''} {isDragging ? 'opacity-50' : ''}"
+								: ''} {isDragging ? 'opacity-50' : ''} {isSelected
+								? 'slot-selected text-primary'
+								: ''}"
 							draggable="true"
 							ondragstart={(e) => {
 								onSlotDragStart(e, parentNode.meta.id, slotName);
@@ -128,9 +135,12 @@
 									class="size-4 transition-transform group-data-[state=open]:rotate-90"
 								/>
 							</button>
-							<span class="flex-1 text-xs font-medium text-muted-foreground uppercase">
+							<button
+								onclick={() => onSlotClick?.(parentNode.meta.id, slotName)}
+								class="flex-1 text-left text-xs font-medium uppercase transition-colors"
+							>
 								{formatSlotName(slotName)}
-							</span>
+							</button>
 							<DropdownMenu bind:open={dropdownOpen}>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
@@ -208,6 +218,7 @@
 								{onSlotPaste}
 								{onSlotDragOver}
 								{onSlotDrop}
+								{onSlotClick}
 							/>
 						</SidebarMenuSubItem>
 					{/each}
@@ -218,14 +229,18 @@
 </SidebarMenuSubItem>
 
 <style>
+	.slot-selected {
+		background-color: color-mix(
+			in srgb,
+			oklch(var(--flavor)) 90%,
+			oklch(var(--flavor-foreground)) 10%
+		);
+		color: oklch(var(--primary));
+	}
+
 	.drop-target-slot {
 		background-color: color-mix(in srgb, hsl(var(--primary)) 15%, transparent 85%);
 		outline: 1px dashed oklch(var(--flavor-foreground));
 		outline-offset: -2px;
-	}
-
-	.drag-handle {
-		display: flex;
-		align-items: center;
 	}
 </style>
