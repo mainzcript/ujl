@@ -24,14 +24,10 @@ export interface DragHandlers {
 	handleDrop: (event: DragEvent, targetNodeId: string, slotName?: string) => void;
 	handleDragEnd: () => void;
 	handleSlotDragOver: (event: DragEvent, parentNodeId: string, slotName: string) => void;
-	handleSlotDrop: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 	reset: () => void;
 }
 
 export type DragHandler = DragState & DragHandlers;
-
-// Updated nav-tree-slot-group.svelte component below
-// Make the slot header draggable by adding these attributes to the main div:
 
 /**
  * Creates a drag & drop handler with reactive state and event handlers
@@ -76,7 +72,6 @@ export function createDragHandler(
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'node', nodeId }));
 		}
-		console.log('Node drag started:', nodeId);
 	}
 
 	function handleSlotDragStart(event: DragEvent, parentId: string, slotName: string) {
@@ -90,7 +85,6 @@ export function createDragHandler(
 				JSON.stringify({ type: 'slot', parentId, slotName })
 			);
 		}
-		console.log('Slot drag started:', parentId, slotName);
 	}
 
 	function handleDragOver(event: DragEvent, targetNodeId: string) {
@@ -106,7 +100,6 @@ export function createDragHandler(
 		}
 
 		// For slot drags on nodes, we only show "into" position
-		// (we'll move the slot content into the matching slot type)
 		if (dragType === 'slot') {
 			dropPosition = 'into';
 		} else {
@@ -136,49 +129,6 @@ export function createDragHandler(
 		dropPosition = null;
 	}
 
-	function handleDrop(event: DragEvent, targetNodeId: string, slotName?: string) {
-		event.preventDefault();
-		event.stopPropagation();
-
-		// Prevent dropping on itself
-		if (dragType === 'node' && draggedNodeId === targetNodeId) {
-			reset();
-			return;
-		}
-		if (dragType === 'slot' && draggedSlotParentId === targetNodeId) {
-			reset();
-			return;
-		}
-
-		console.log('Drop:', dragType, dropPosition, 'target:', targetNodeId, 'slot:', slotName);
-
-		let success = false;
-
-		if (dragType === 'node' && draggedNodeId && onNodeMove) {
-			success = onNodeMove(draggedNodeId, targetNodeId, slotName, dropPosition || 'into');
-			if (!success) {
-				console.log('Node move rejected');
-			}
-		} else if (dragType === 'slot' && draggedSlotParentId && draggedSlotName && onSlotMove) {
-			// Slot dropped on a node - try to move slot to matching slot type on target node
-			console.log('Slot dropped on node - looking for matching slot type:', draggedSlotName);
-
-			// Use the dragged slot name as the target slot name
-			// This means: move header slot to header slot, body to body, etc.
-			success = onSlotMove(draggedSlotParentId, draggedSlotName, targetNodeId, draggedSlotName);
-
-			if (!success) {
-				console.log('Slot move to node rejected - target might not have matching slot type');
-			}
-		}
-
-		reset();
-	}
-
-	function handleDragEnd() {
-		reset();
-	}
-
 	function handleSlotDragOver(event: DragEvent, parentNodeId: string, slotName: string) {
 		// Prevent dropping slot on itself
 		if (
@@ -201,32 +151,44 @@ export function createDragHandler(
 		dropPosition = 'into';
 	}
 
-	function handleSlotDrop(event: DragEvent, parentNodeId: string, targetSlotName: string) {
+	/**
+	 * Unified drop handler for both nodes and slots
+	 * Works for drops on nodes and drops on slots
+	 */
+	function handleDrop(event: DragEvent, targetNodeId: string, targetSlotName?: string) {
 		event.preventDefault();
 		event.stopPropagation();
 
-		console.log('Slot drop:', dragType, 'target:', parentNodeId, targetSlotName);
-
-		let success = false;
-
-		if (dragType === 'slot' && draggedSlotParentId && draggedSlotName && onSlotMove) {
-			// Prevent dropping slot on itself
-			if (draggedSlotParentId === parentNodeId && draggedSlotName === targetSlotName) {
-				reset();
-				return;
-			}
-
-			success = onSlotMove(draggedSlotParentId, draggedSlotName, parentNodeId, targetSlotName);
-			if (!success) {
-				console.log('Slot move rejected');
-			}
-		} else if (dragType === 'node' && draggedNodeId && onNodeMove) {
-			success = onNodeMove(draggedNodeId, parentNodeId, targetSlotName, 'into');
-			if (!success) {
-				console.log('Node move into slot rejected');
-			}
+		// Prevent dropping on itself
+		if (dragType === 'node' && draggedNodeId === targetNodeId && !targetSlotName) {
+			reset();
+			return;
+		}
+		if (
+			dragType === 'slot' &&
+			draggedSlotParentId === targetNodeId &&
+			draggedSlotName === targetSlotName
+		) {
+			reset();
+			return;
 		}
 
+		// Handle node being dragged
+		if (dragType === 'node' && draggedNodeId && onNodeMove) {
+			onNodeMove(draggedNodeId, targetNodeId, targetSlotName, dropPosition || 'into');
+		}
+		// Handle slot being dragged
+		else if (dragType === 'slot' && draggedSlotParentId && draggedSlotName && onSlotMove) {
+			// If targetSlotName is provided, drop into that specific slot
+			// Otherwise use the dragged slot's name (matching slot type)
+			const finalTargetSlot = targetSlotName || draggedSlotName;
+			onSlotMove(draggedSlotParentId, draggedSlotName, targetNodeId, finalTargetSlot);
+		}
+
+		reset();
+	}
+
+	function handleDragEnd() {
 		reset();
 	}
 
@@ -262,7 +224,6 @@ export function createDragHandler(
 		handleDrop,
 		handleDragEnd,
 		handleSlotDragOver,
-		handleSlotDrop,
 		reset
 	};
 }

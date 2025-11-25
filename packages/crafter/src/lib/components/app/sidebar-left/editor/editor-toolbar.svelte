@@ -34,70 +34,80 @@
 </script>
 
 <div class="flex flex-col">
-	<Button
-		variant="ghost"
-		size="sm"
-		disabled={!canInsert}
-		onclick={() => {
-			onInsert(nodeId);
-			onClose?.();
-		}}
-		class="justify-start gap-2"
-	>
-		<PlusIcon class="size-4" />
-		<span>Insert</span>
-		<span class="ml-auto text-xs text-muted-foreground">Ctrl+I</span>
-	</Button>
+	{#if canInsert}
+		<Button
+			variant="ghost"
+			size="sm"
+			disabled={!canInsert}
+			onclick={() => {
+				onInsert(nodeId);
+				onClose?.();
+			}}
+			class="justify-start gap-2"
+		>
+			<PlusIcon class="size-4" />
+			<span>Insert</span>
+			<span class="ml-auto text-xs text-muted-foreground">Ctrl+I</span>
+		</Button>
+		{#if canCopy || canCut || canPaste}
+			<div class="my-1 h-px bg-border"></div>
+		{/if}
+	{/if}
 
-	<div class="my-1 h-px bg-border"></div>
+	{#if canCut}
+		<Button
+			variant="ghost"
+			size="sm"
+			disabled={!canCut}
+			onclick={() => onCut(nodeId)}
+			class="justify-start gap-2"
+		>
+			<ScissorsIcon class="size-4" />
+			<span>Cut</span>
+			<span class="ml-auto text-xs text-muted-foreground">Ctrl+X</span>
+		</Button>
+	{/if}
 
-	<Button
-		variant="ghost"
-		size="sm"
-		disabled={!canCut}
-		onclick={() => onCut(nodeId)}
-		class="justify-start gap-2"
-	>
-		<ScissorsIcon class="size-4" />
-		<span>Cut</span>
-		<span class="ml-auto text-xs text-muted-foreground">Ctrl+X</span>
-	</Button>
+	{#if canCopy}
+		<Button
+			variant="ghost"
+			size="sm"
+			disabled={!canCopy}
+			onclick={() => onCopy(nodeId)}
+			class="justify-start gap-2"
+		>
+			<CopyIcon class="size-4" />
+			<span>Copy</span>
+			<span class="ml-auto text-xs text-muted-foreground">Ctrl+C</span>
+		</Button>
+	{/if}
 
-	<Button
-		variant="ghost"
-		size="sm"
-		disabled={!canCopy}
-		onclick={() => onCopy(nodeId)}
-		class="justify-start gap-2"
-	>
-		<CopyIcon class="size-4" />
-		<span>Copy</span>
-		<span class="ml-auto text-xs text-muted-foreground">Ctrl+C</span>
-	</Button>
+	{#if canPaste}
+		<Button
+			variant="ghost"
+			size="sm"
+			disabled={!canPaste}
+			onclick={() => onPaste(nodeId)}
+			class="justify-start gap-2"
+		>
+			<ClipboardPasteIcon class="size-4" />
+			<span>Paste</span>
+			<span class="ml-auto text-xs text-muted-foreground">Ctrl+V</span>
+		</Button>
+	{/if}
 
-	<Button
-		variant="ghost"
-		size="sm"
-		disabled={!canPaste}
-		onclick={() => onPaste(nodeId)}
-		class="justify-start gap-2"
-	>
-		<ClipboardPasteIcon class="size-4" />
-		<span>Paste</span>
-		<span class="ml-auto text-xs text-muted-foreground">Ctrl+V</span>
-	</Button>
-
-	<div class="my-1 h-px bg-border"></div>
-
-	<Button
-		variant="ghost"
-		size="sm"
-		disabled={!canCut}
-		onclick={() => onDelete(nodeId)}
-		class="justify-start gap-2 text-destructive hover:text-destructive"
-	>
-		<DeleteIcon class="size-4" />
-		<span>Delete</span>
-		<span class="ml-auto text-xs text-muted-foreground">Del</span>
-	</Button>
+	{#if canCut}
+		<div class="my-1 h-px bg-border"></div>
+		<Button
+			variant="ghost"
+			size="sm"
+			disabled={!canCut}
+			onclick={() => onDelete(nodeId)}
+			class="justify-start gap-2 text-destructive hover:text-destructive"
+		>
+			<DeleteIcon class="size-4" />
+			<span>Delete</span>
+			<span class="ml-auto text-xs text-muted-foreground">Del</span>
+		</Button>
+	{/if}
 </div>

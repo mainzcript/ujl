@@ -7,7 +7,8 @@ import {
 	insertNodeIntoSlot,
 	insertNodeAtPosition,
 	getFirstSlotName,
-	hasSlots
+	hasSlots,
+	updateNodeInTree
 } from './sidebar-left/editor/nav-tree/ujlc-tree-utils.js';
 import {
 	getComponentDefinition,
@@ -118,6 +119,54 @@ export type CrafterContext = {
 			targetId: string,
 			slotName?: string,
 			position?: 'before' | 'after' | 'into'
+		) => boolean;
+
+		/**
+		 * Copies a complete slot with all its content
+		 * @param parentId - The parent node ID
+		 * @param slotName - The slot name to copy
+		 * @returns Object with slot name and content, or null if operation failed
+		 */
+		copySlot: (
+			parentId: string,
+			slotName: string
+		) => { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null;
+
+		/**
+		 * Cuts a complete slot (empties it and returns content)
+		 * @param parentId - The parent node ID
+		 * @param slotName - The slot name to cut
+		 * @returns Object with slot name and content, or null if operation failed
+		 */
+		cutSlot: (
+			parentId: string,
+			slotName: string
+		) => { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null;
+
+		/**
+		 * Pastes slot content into a target node's matching slot
+		 * @param slotData - The slot data from clipboard
+		 * @param targetParentId - The target parent node ID
+		 * @returns true if successful, false if operation was rejected
+		 */
+		pasteSlot: (
+			slotData: { type: 'slot'; slotName: string; content: UJLCModuleObject[] },
+			targetParentId: string
+		) => boolean;
+
+		/**
+		 * Moves an entire slot (with all its content) from one parent to another
+		 * @param sourceParentId - Source parent node ID
+		 * @param sourceSlotName - Source slot name
+		 * @param targetParentId - Target parent node ID
+		 * @param targetSlotName - Target slot name
+		 * @returns true if successful, false if operation was rejected
+		 */
+		moveSlot: (
+			sourceParentId: string,
+			sourceSlotName: string,
+			targetParentId: string,
+			targetSlotName: string
 		) => boolean;
 	};
 
@@ -270,7 +319,7 @@ export function createOperations(
 					);
 				});
 
-				console.log('Moved node:', nodeId, position, targetId, 'at position:', newPosition);
+				// console.log('Moved node:', nodeId, position, targetId, 'at position:', newPosition);
 				return true;
 			}
 
@@ -306,7 +355,7 @@ export function createOperations(
 				return insertNodeIntoSlot(removedTree, targetId, targetSlotName!, node);
 			});
 
-			console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', targetSlotName);
+			// console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', targetSlotName);
 			return true;
 		},
 
@@ -458,6 +507,7 @@ export function createOperations(
 			console.log('Pasted node into:', targetId, 'slot:', targetSlotName);
 			return true;
 		},
+
 		insertNode(
 			componentType: string,
 			targetId: string,
@@ -559,6 +609,169 @@ export function createOperations(
 			});
 
 			console.log('Inserted node:', componentType, 'into:', targetId, 'slot:', targetSlotName);
+			return true;
+		},
+
+		copySlot(
+			parentId: string,
+			slotName: string
+		): { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null {
+			const slot = getSlot();
+			const parentNode = findNodeById(slot, parentId);
+
+			if (!parentNode?.slots?.[slotName]) {
+				console.warn('Slot not found:', slotName);
+				return null;
+			}
+
+			const slotData = {
+				type: 'slot' as const,
+				slotName,
+				content: [...parentNode.slots[slotName]]
+			};
+
+			console.log('Copied slot:', slotName, 'with', slotData.content.length, 'items');
+			return slotData;
+		},
+
+		cutSlot(
+			parentId: string,
+			slotName: string
+		): { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null {
+			const slot = getSlot();
+			const parentNode = findNodeById(slot, parentId);
+
+			if (!parentNode?.slots?.[slotName]) {
+				console.warn('Slot not found:', slotName);
+				return null;
+			}
+
+			const slotContent = [...parentNode.slots[slotName]];
+
+			// Empty the slot
+			updateRootSlot((currentSlot) => {
+				return updateNodeInTree(currentSlot, parentId, (node: UJLCModuleObject) => ({
+					...node,
+					slots: {
+						...node.slots,
+						[slotName]: []
+					}
+				}));
+			});
+
+			console.log('Cut slot:', slotName, 'with', slotContent.length, 'items');
+
+			return {
+				type: 'slot',
+				slotName,
+				content: slotContent
+			};
+		},
+
+		pasteSlot(
+			slotData: { type: 'slot'; slotName: string; content: UJLCModuleObject[] },
+			targetParentId: string
+		): boolean {
+			const slot = getSlot();
+			const targetNode = findNodeById(slot, targetParentId);
+
+			if (!targetNode?.slots) {
+				console.warn('Target node has no slots');
+				return false;
+			}
+
+			// Check if target has the slot type
+			if (!Object.keys(targetNode.slots).includes(slotData.slotName)) {
+				console.warn('Target does not have slot:', slotData.slotName);
+				return false;
+			}
+
+			// Paste slot content into target's matching slot
+			updateRootSlot((currentSlot) => {
+				return updateNodeInTree(currentSlot, targetParentId, (node: UJLCModuleObject) => ({
+					...node,
+					slots: {
+						...node.slots,
+						[slotData.slotName]: [...slotData.content]
+					}
+				}));
+			});
+
+			console.log('Pasted slot', slotData.slotName, 'into node:', targetParentId);
+			return true;
+		},
+
+		moveSlot(
+			sourceParentId: string,
+			sourceSlotName: string,
+			targetParentId: string,
+			targetSlotName: string
+		): boolean {
+			const slot = getSlot();
+
+			// Can't move slot to itself
+			if (sourceParentId === targetParentId && sourceSlotName === targetSlotName) {
+				console.warn('Cannot move slot to itself');
+				return false;
+			}
+
+			const sourceParent = findNodeById(slot, sourceParentId);
+			const targetParent = findNodeById(slot, targetParentId);
+
+			if (!sourceParent?.slots?.[sourceSlotName]) {
+				console.warn('Source slot not found:', sourceSlotName);
+				return false;
+			}
+
+			if (!targetParent?.slots) {
+				console.warn('Target node has no slots');
+				return false;
+			}
+
+			// Check if target has the target slot
+			if (!targetParent.slots[targetSlotName]) {
+				console.warn(
+					`Target node doesn't have slot "${targetSlotName}". Available slots:`,
+					Object.keys(targetParent.slots)
+				);
+				return false;
+			}
+
+			// Get the content from source slot
+			const slotContent = [...sourceParent.slots[sourceSlotName]];
+
+			console.log(`Moving ${slotContent.length} items from ${sourceSlotName} to ${targetSlotName}`);
+
+			// Perform the move
+			updateRootSlot((currentSlot) => {
+				// First, remove content from source slot
+				let updatedSlot = updateNodeInTree(
+					currentSlot,
+					sourceParentId,
+					(node: UJLCModuleObject) => ({
+						...node,
+						slots: {
+							...node.slots,
+							[sourceSlotName]: []
+						}
+					})
+				);
+
+				// Then, add content to target slot (replace existing content)
+				updatedSlot = updateNodeInTree(updatedSlot, targetParentId, (node: UJLCModuleObject) => {
+					const newSlots = { ...node.slots };
+					newSlots[targetSlotName] = [...slotContent];
+
+					return {
+						...node,
+						slots: newSlots
+					};
+				});
+
+				return updatedSlot;
+			});
+
+			console.log('Slot moved successfully');
 			return true;
 		}
 	};

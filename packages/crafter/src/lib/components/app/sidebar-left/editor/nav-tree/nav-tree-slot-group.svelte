@@ -35,7 +35,6 @@
 		dropTargetSlot,
 		onSlotDragOver,
 		onSlotDragLeave,
-		onSlotDrop,
 		selectedNodeId,
 		draggedNodeId,
 		dropPosition,
@@ -70,7 +69,6 @@
 		dropTargetSlot: string | null;
 		onSlotDragOver: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 		onSlotDragLeave: () => void;
-		onSlotDrop: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 		selectedNodeId: string | null;
 		draggedNodeId: string | null;
 		dropPosition: 'before' | 'after' | 'into' | null;
@@ -126,7 +124,7 @@
 								onSlotDragLeave();
 							}}
 							ondrop={(e) => {
-								onSlotDrop(e, parentNode.meta.id, slotName);
+								onDrop(e, parentNode.meta.id, slotName);
 							}}
 							ondragend={onDragEnd}
 						>
@@ -217,7 +215,6 @@
 								{onSlotCut}
 								{onSlotPaste}
 								{onSlotDragOver}
-								{onSlotDrop}
 								{onSlotClick}
 							/>
 						</SidebarMenuSubItem>

@@ -188,6 +188,35 @@ export function insertNodeAtPosition(
 }
 
 /**
+ * Updates a node in the tree by applying a function to it (immutable)
+ * @param nodes - The tree of nodes
+ * @param targetId - The ID of the node to update
+ * @param updateFn - Function that receives the node and returns updated node
+ * @returns Updated tree with the modified node
+ */
+export function updateNodeInTree(
+	nodes: UJLCModuleObject[],
+	targetId: string,
+	updateFn: (node: UJLCModuleObject) => UJLCModuleObject
+): UJLCModuleObject[] {
+	return nodes.map((node) => {
+		if (node.meta.id === targetId) {
+			return updateFn(node);
+		}
+
+		if (node.slots) {
+			const updatedSlots: Record<string, UJLCModuleObject[]> = {};
+			for (const [slotName, children] of Object.entries(node.slots)) {
+				updatedSlots[slotName] = updateNodeInTree(children, targetId, updateFn);
+			}
+			return { ...node, slots: updatedSlots };
+		}
+
+		return node;
+	});
+}
+
+/**
  * returns the name of the first slot of a node, or null if there are no slots
  */
 export function getFirstSlotName(node: UJLCModuleObject): string | null {

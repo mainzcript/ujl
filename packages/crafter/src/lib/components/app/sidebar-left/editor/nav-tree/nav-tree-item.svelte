@@ -58,8 +58,7 @@
 		onSlotCopy,
 		onSlotCut,
 		onSlotPaste,
-		onSlotDragOver,
-		onSlotDrop
+		onSlotDragOver
 	}: {
 		node: UJLCModuleObject;
 		level?: number;
@@ -92,7 +91,6 @@
 		onSlotCut?: (parentId: string, slotName: string) => void;
 		onSlotPaste?: (parentId: string, slotName: string) => void;
 		onSlotDragOver: (event: DragEvent, parentNodeId: string, slotName: string) => void;
-		onSlotDrop: (event: DragEvent, parentNodeId: string, slotName: string) => void;
 	} = $props();
 
 	let dropdownOpen = $state(false);
@@ -203,7 +201,6 @@
 									{dropTargetSlot}
 									{onSlotDragOver}
 									onSlotDragLeave={onDragLeave}
-									{onSlotDrop}
 									{selectedNodeId}
 									{draggedNodeId}
 									{dropPosition}
@@ -252,7 +249,6 @@
 										{onSlotCut}
 										{onSlotPaste}
 										{onSlotDragOver}
-										{onSlotDrop}
 										{onSlotClick}
 									/>
 								</SidebarMenuSubItem>
@@ -420,7 +416,6 @@
 								{dropTargetSlot}
 								{onSlotDragOver}
 								onSlotDragLeave={onDragLeave}
-								{onSlotDrop}
 								{selectedNodeId}
 								{draggedNodeId}
 								{dropPosition}
@@ -469,7 +464,6 @@
 									{onSlotCut}
 									{onSlotPaste}
 									{onSlotDragOver}
-									{onSlotDrop}
 									{onSlotClick}
 								/>
 							</SidebarMenuSubItem>

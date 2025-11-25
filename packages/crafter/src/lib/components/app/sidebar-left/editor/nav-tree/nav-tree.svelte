@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import NavTreeItem from './nav-tree-item.svelte';
-	import { createDragHandler } from './nav-tree-drag-handler.svelte.js';
+	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 
 	let {
 		nodes,
@@ -109,7 +109,6 @@
 					{onSlotCut}
 					{onSlotPaste}
 					onSlotDragOver={dragHandler.handleSlotDragOver}
-					onSlotDrop={dragHandler.handleSlotDrop}
 					{onSlotClick}
 				/>
 			{/each}

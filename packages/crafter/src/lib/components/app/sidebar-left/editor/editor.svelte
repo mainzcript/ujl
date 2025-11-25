@@ -122,35 +122,10 @@
 
 		// If clipboard contains a slot
 		if (clipboard.type === 'slot') {
-			const targetNode = findNodeById(slot, nodeId);
-			if (!targetNode?.slots) {
-				console.warn('Target node has no slots');
-				return;
+			const success = crafter.operations.pasteSlot(clipboard, nodeId);
+			if (success) {
+				clipboard = null;
 			}
-
-			// Check if target has the slot type
-			if (!Object.keys(targetNode.slots).includes(clipboard.slotName)) {
-				console.warn('Target does not have slot:', clipboard.slotName);
-				return;
-			}
-
-			// Capture clipboard data before passing to callback
-			const slotName = clipboard.slotName;
-			const slotContent = clipboard.content;
-
-			// Paste slot content into target's matching slot
-			crafter.updateRootSlot((currentSlot) => {
-				return updateNodeInTree(currentSlot, nodeId, (node) => ({
-					...node,
-					slots: {
-						...node.slots,
-						[slotName]: [...slotContent]
-					}
-				}));
-			});
-
-			console.log('Pasted slot', slotName, 'into node:', nodeId);
-			clipboard = null;
 		}
 	}
 
@@ -214,22 +189,17 @@
 				}
 				// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
 				else if (slotNames.length > 1) {
-					console.warn('Target has multiple slots but no slot specified, using first slot');
+					// console.warn('Target has multiple slots but no slot specified, using first slot');
 					slotName = slotNames[0];
 				}
 			}
 
 			// Insert component
-			const success = crafter.operations.insertNode(
-				componentType,
-				insertTargetNodeId,
-				slotName,
-				'into'
-			);
+			crafter.operations.insertNode(componentType, insertTargetNodeId, slotName, 'into');
 
-			if (success) {
-				console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
-			}
+			// if (success) {
+			// console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
+			// }
 		}
 
 		// Reset state
@@ -333,79 +303,23 @@
 	}
 
 	/**
-	 * Helper function to update a node in the tree
-	 */
-	function updateNodeInTree(
-		nodes: UJLCModuleObject[],
-		targetId: string,
-		updateFn: (node: UJLCModuleObject) => UJLCModuleObject
-	): UJLCModuleObject[] {
-		return nodes.map((node) => {
-			if (node.meta.id === targetId) {
-				return updateFn(node);
-			}
-
-			if (node.slots) {
-				const updatedSlots: Record<string, UJLCModuleObject[]> = {};
-				for (const [slotName, children] of Object.entries(node.slots)) {
-					updatedSlots[slotName] = updateNodeInTree(children, targetId, updateFn);
-				}
-				return { ...node, slots: updatedSlots };
-			}
-
-			return node;
-		});
-	}
-
-	/**
 	 * Slot Copy Handler - copies a complete slot with all its content
 	 */
 	function handleSlotCopy(parentId: string, slotName: string) {
-		const parentNode = findNodeById(slot, parentId);
-		if (!parentNode?.slots?.[slotName]) {
-			console.warn('Slot not found:', slotName);
-			return;
+		const slotData = crafter.operations.copySlot(parentId, slotName);
+		if (slotData) {
+			clipboard = slotData;
 		}
-
-		clipboard = {
-			type: 'slot',
-			slotName,
-			content: [...parentNode.slots[slotName]]
-		};
-		console.log('Copied slot:', slotName, 'with', clipboard.content.length, 'items');
 	}
 
 	/**
 	 * Slot Cut Handler - cuts a complete slot (empties it and saves to clipboard)
 	 */
 	function handleSlotCut(parentId: string, slotName: string) {
-		const parentNode = findNodeById(slot, parentId);
-		if (!parentNode?.slots?.[slotName]) {
-			console.warn('Slot not found:', slotName);
-			return;
+		const slotData = crafter.operations.cutSlot(parentId, slotName);
+		if (slotData) {
+			clipboard = slotData;
 		}
-
-		const slotContent = [...parentNode.slots[slotName]];
-
-		// Save to clipboard
-		clipboard = {
-			type: 'slot',
-			slotName,
-			content: slotContent
-		};
-
-		// Empty the slot
-		crafter.updateRootSlot((currentSlot) => {
-			return updateNodeInTree(currentSlot, parentId, (node) => ({
-				...node,
-				slots: {
-					...node.slots,
-					[slotName]: []
-				}
-			}));
-		});
-
-		console.log('Cut slot:', slotName, 'with', slotContent.length, 'items');
 	}
 
 	/**
@@ -426,70 +340,12 @@
 		targetParentId: string,
 		targetSlotName: string
 	): boolean {
-		console.log('Slot move:', sourceParentId, sourceSlotName, '→', targetParentId, targetSlotName);
-
-		// Can't move slot to itself
-		if (sourceParentId === targetParentId && sourceSlotName === targetSlotName) {
-			console.warn('Cannot move slot to itself');
-			return false;
-		}
-
-		const sourceParent = findNodeById(slot, sourceParentId);
-		const targetParent = findNodeById(slot, targetParentId);
-
-		if (!sourceParent?.slots?.[sourceSlotName]) {
-			console.warn('Source slot not found:', sourceSlotName);
-			return false;
-		}
-
-		if (!targetParent?.slots) {
-			console.warn('Target node has no slots');
-			return false;
-		}
-
-		// Check if target has the target slot
-		if (!targetParent.slots[targetSlotName]) {
-			console.warn(
-				`Target node doesn't have slot "${targetSlotName}". Available slots:`,
-				Object.keys(targetParent.slots)
-			);
-			return false;
-		}
-
-		// Get the content from source slot
-		const slotContent = [...sourceParent.slots[sourceSlotName]];
-
-		console.log(`Moving ${slotContent.length} items from ${sourceSlotName} to ${targetSlotName}`);
-
-		// Perform the move
-		crafter.updateRootSlot((currentSlot) => {
-			// First, remove content from source slot
-			let updatedSlot = updateNodeInTree(currentSlot, sourceParentId, (node) => ({
-				...node,
-				slots: {
-					...node.slots,
-					[sourceSlotName]: []
-				}
-			}));
-
-			// Then, add content to target slot (replace existing content)
-			updatedSlot = updateNodeInTree(updatedSlot, targetParentId, (node) => {
-				const newSlots = { ...node.slots };
-
-				// Replace target slot content with source content
-				newSlots[targetSlotName] = [...slotContent];
-
-				return {
-					...node,
-					slots: newSlots
-				};
-			});
-
-			return updatedSlot;
-		});
-
-		console.log('Slot moved successfully');
-		return true;
+		return crafter.operations.moveSlot(
+			sourceParentId,
+			sourceSlotName,
+			targetParentId,
+			targetSlotName
+		);
 	}
 </script>
 

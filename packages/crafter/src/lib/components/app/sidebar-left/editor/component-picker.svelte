@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { ComponentDefinition } from '@ujl-framework/types';
+	import type { ComponentDefinition, ComponentCategory } from '@ujl-framework/types';
+	import { CATEGORY_LABELS } from '@ujl-framework/types';
 	import {
 		Dialog,
 		DialogContent,
@@ -61,16 +62,6 @@
 		);
 	});
 
-	// Category display names
-	const categoryLabels: Record<string, string> = {
-		layout: 'Layout',
-		content: 'Content',
-		media: 'Media',
-		interactive: 'Interactive',
-		data: 'Data',
-		navigation: 'Navigation'
-	};
-
 	// Handle component selection
 	function handleSelect(componentType: string) {
 		onSelect(componentType);
@@ -115,12 +106,13 @@
 					<div class="space-y-3 sm:space-y-4">
 						{#each Object.entries(filteredComponents()) as [category, components] (category)}
 							{@const typedComponents = components as ComponentDefinition[]}
+							{@const typedCategory = category as ComponentCategory}
 							{#if typedComponents.length > 0}
 								<div>
 									<h3
 										class="mb-1.5 text-xs font-semibold text-muted-foreground uppercase sm:mb-2 sm:text-sm"
 									>
-										{categoryLabels[category] || category}
+										{CATEGORY_LABELS[typedCategory]}
 									</h3>
 									<div class="space-y-1">
 										{#each typedComponents as component (component.type)}
