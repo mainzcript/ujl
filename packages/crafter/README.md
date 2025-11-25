@@ -53,7 +53,6 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
     - `moveNode(nodeId, targetId, slotName?, position?)` - Moves a node to target parent's slot or position
     - `reorderNode(nodeId, targetId, position)` - Reorders a node relative to a sibling
     - `insertNode(componentType, targetId, slotName?, position?)` - Inserts a new node from component library
-  
   - **Slot Operations:**
     - `copySlot(parentId, slotName)` - Copies a complete slot with all its content
     - `cutSlot(parentId, slotName)` - Cuts a complete slot (empties it and saves to clipboard)
@@ -225,7 +224,6 @@ Managed by `nav-tree-drag-handler.svelte.ts` with two drag types:
     - Middle 50%: `into` (insert into target's slot)
   - Prevents invalid drops (node onto itself, into descendants)
   - Visual feedback via drop indicators and target highlighting
-  
 - **Slot dragging** (`dragType: 'slot'`):
   - Always uses `into` position (slots can only be dropped into nodes)
   - Moves entire slot content from source to target parent
@@ -233,6 +231,7 @@ Managed by `nav-tree-drag-handler.svelte.ts` with two drag types:
   - Prevents dropping slot onto itself
 
 Drag state includes:
+
 - `draggedNodeId` / `draggedSlotName` + `draggedSlotParentId`
 - `dropTargetId` + `dropTargetSlot`
 - `dropPosition`: `'before' | 'after' | 'into' | null`
