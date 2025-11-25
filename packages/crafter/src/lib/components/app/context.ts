@@ -250,8 +250,6 @@ export function createOperations(
 					id: newId
 				}
 			};
-
-			console.log('Copied node:', nodeId, 'as:', newId);
 			return duplicatedNode;
 		},
 
@@ -318,8 +316,6 @@ export function createOperations(
 						newPosition
 					);
 				});
-
-				// console.log('Moved node:', nodeId, position, targetId, 'at position:', newPosition);
 				return true;
 			}
 
@@ -354,8 +350,6 @@ export function createOperations(
 				const removedTree = removeNodeFromTree(currentSlot, nodeId);
 				return insertNodeIntoSlot(removedTree, targetId, targetSlotName!, node);
 			});
-
-			// console.log('Moved node:', nodeId, 'into:', targetId, 'slot:', targetSlotName);
 			return true;
 		},
 
@@ -414,8 +408,6 @@ export function createOperations(
 					newPosition
 				);
 			});
-
-			console.log('Reordered node:', nodeId, position, targetId, 'at position:', newPosition);
 			return true;
 		},
 
@@ -439,8 +431,6 @@ export function createOperations(
 			updateRootSlot((currentSlot) => {
 				return removeNodeFromTree(currentSlot, nodeId);
 			});
-
-			console.log('Deleted node:', nodeId);
 			return true;
 		},
 
@@ -464,8 +454,6 @@ export function createOperations(
 			updateRootSlot((currentSlot) => {
 				return removeNodeFromTree(currentSlot, nodeId);
 			});
-
-			console.log('Cut node:', nodeId);
 			return node;
 		},
 
@@ -503,8 +491,6 @@ export function createOperations(
 			updateRootSlot((currentSlot) => {
 				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, node);
 			});
-
-			console.log('Pasted node into:', targetId, 'slot:', targetSlotName);
 			return true;
 		},
 
@@ -571,15 +557,6 @@ export function createOperations(
 						insertPosition
 					);
 				});
-
-				console.log(
-					'Inserted node:',
-					componentType,
-					position,
-					targetId,
-					'at position:',
-					insertPosition
-				);
 				return true;
 			}
 
@@ -607,8 +584,6 @@ export function createOperations(
 			updateRootSlot((currentSlot) => {
 				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, newNode);
 			});
-
-			console.log('Inserted node:', componentType, 'into:', targetId, 'slot:', targetSlotName);
 			return true;
 		},
 
@@ -629,8 +604,6 @@ export function createOperations(
 				slotName,
 				content: [...parentNode.slots[slotName]]
 			};
-
-			console.log('Copied slot:', slotName, 'with', slotData.content.length, 'items');
 			return slotData;
 		},
 
@@ -658,8 +631,6 @@ export function createOperations(
 					}
 				}));
 			});
-
-			console.log('Cut slot:', slotName, 'with', slotContent.length, 'items');
 
 			return {
 				type: 'slot',
@@ -696,8 +667,6 @@ export function createOperations(
 					}
 				}));
 			});
-
-			console.log('Pasted slot', slotData.slotName, 'into node:', targetParentId);
 			return true;
 		},
 
@@ -740,8 +709,6 @@ export function createOperations(
 			// Get the content from source slot
 			const slotContent = [...sourceParent.slots[sourceSlotName]];
 
-			console.log(`Moving ${slotContent.length} items from ${sourceSlotName} to ${targetSlotName}`);
-
 			// Perform the move
 			updateRootSlot((currentSlot) => {
 				// First, remove content from source slot
@@ -770,8 +737,6 @@ export function createOperations(
 
 				return updatedSlot;
 			});
-
-			console.log('Slot moved successfully');
 			return true;
 		}
 	};
