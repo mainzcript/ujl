@@ -65,7 +65,7 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
   - Component insertion uses `getComponentDefinition()` and `createNodeFromDefinition()` from component library
 
 - **Helper Utilities:**
-  - `generateNodeId()` - Generates unique IDs using `nanoid(10)`
+  - `generateNodeId()` - Generates unique IDs using `generateUid(10)` from `@ujl-framework/core` (nanoid with 10 chars)
   - `isDescendant(node, targetId)` - Checks if node is descendant of target (prevents circular moves)
 
 This ensures:

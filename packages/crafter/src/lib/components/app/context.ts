@@ -1,5 +1,5 @@
 import type { UJLTTokenSet, UJLCSlotObject, UJLCModuleObject } from '@ujl-framework/types';
-import { nanoid } from 'nanoid';
+import { generateUid } from '@ujl-framework/core';
 import {
 	findNodeById,
 	findParentOfNode,
@@ -183,9 +183,11 @@ export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
 
 /**
  * Generates a unique random ID for a node
+ * Uses the framework's centralized ID generator from @ujl-framework/core
+ * Uses a shorter ID length (10 characters) for better UX in URLs and UI
  */
 export function generateNodeId(): string {
-	return nanoid(10);
+	return generateUid(10);
 }
 
 /**
@@ -231,15 +233,8 @@ export function createOperations(
 
 			// Generate new unique ID for the copy
 			let newId = generateNodeId();
-			let attempts = 0;
-			while (findNodeById(slot, newId) !== null && attempts < 10) {
+			while (findNodeById(slot, newId) !== null) {
 				newId = generateNodeId();
-				attempts++;
-			}
-
-			if (attempts >= 10) {
-				console.error('Failed to generate unique ID after 10 attempts');
-				return null;
 			}
 
 			// Create duplicate with new ID

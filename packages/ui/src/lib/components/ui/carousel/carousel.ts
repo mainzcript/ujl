@@ -1,4 +1,4 @@
-import { generateUUID } from '$lib/utils.js';
+import { generateUid } from '@ujl-framework/core';
 
 export type CarouselOptions = {
 	targetItemWidth: number;
@@ -116,7 +116,7 @@ export class Carousel {
 	}
 
 	public registerItem(wrapper: HTMLElement, item: HTMLElement): string {
-		const id = generateUUID();
+		const id = generateUid();
 		this.records.push({ wrapper, item, id });
 		this.onResize();
 		return id;
@@ -128,7 +128,7 @@ export class Carousel {
 	}
 
 	public registerUpdateHandler(handler: (state: CarouselState) => void): string {
-		const id = generateUUID();
+		const id = generateUid();
 		this.updateHandlers.push({ id, handler });
 		return id;
 	}
