@@ -55,6 +55,9 @@ export function createDragHandler(
 	let dropTargetSlot = $state<string | null>(null);
 	let dropPosition = $state<DragPosition>(null);
 
+	// Track global dragend listener to clean it up if drag ends normally
+	let globalDragEndListener: (() => void) | null = null;
+
 	function reset() {
 		draggedNodeId = null;
 		draggedSlotName = null;
@@ -63,6 +66,12 @@ export function createDragHandler(
 		dropTargetId = null;
 		dropTargetSlot = null;
 		dropPosition = null;
+
+		// Clean up global listener if it exists
+		if (globalDragEndListener) {
+			document.removeEventListener('dragend', globalDragEndListener);
+			globalDragEndListener = null;
+		}
 	}
 
 	function handleDragStart(event: DragEvent, nodeId: string) {
@@ -72,6 +81,13 @@ export function createDragHandler(
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'node', nodeId }));
 		}
+
+		// Add global dragend listener as fallback for cancelled drags (ESC, outside window, etc.)
+		// This ensures state is always cleaned up even if ondragend on the element doesn't fire
+		globalDragEndListener = () => {
+			reset();
+		};
+		document.addEventListener('dragend', globalDragEndListener, { once: true });
 	}
 
 	function handleSlotDragStart(event: DragEvent, parentId: string, slotName: string) {
@@ -85,6 +101,13 @@ export function createDragHandler(
 				JSON.stringify({ type: 'slot', parentId, slotName })
 			);
 		}
+
+		// Add global dragend listener as fallback for cancelled drags (ESC, outside window, etc.)
+		// This ensures state is always cleaned up even if ondragend on the element doesn't fire
+		globalDragEndListener = () => {
+			reset();
+		};
+		document.addEventListener('dragend', globalDragEndListener, { once: true });
 	}
 
 	function handleDragOver(event: DragEvent, targetNodeId: string) {
