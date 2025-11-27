@@ -72,7 +72,6 @@
 		url.searchParams.set('selected', nodeId);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(url, { replaceState: true, noScroll: true });
-		console.log('Node clicked:', selectedNodeId);
 	}
 </script>
 

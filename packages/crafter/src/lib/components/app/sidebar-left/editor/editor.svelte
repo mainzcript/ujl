@@ -204,21 +204,15 @@
 			const targetNode = findNodeById(slot, parentId);
 
 			if (!targetNode) {
-				console.warn('Parent node not found');
 				return;
 			}
 
 			// Insert component into specific slot
-			const success = crafter.operations.insertNode(componentType, parentId, slotName, 'into');
-
-			if (success) {
-				console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
-			}
+			crafter.operations.insertNode(componentType, parentId, slotName, 'into');
 		} else {
 			// It's a regular node
 			const targetNode = findNodeById(slot, insertTargetNodeId);
 			if (!targetNode) {
-				console.warn('Target node not found');
 				return;
 			}
 
@@ -234,17 +228,12 @@
 				}
 				// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
 				else if (slotNames.length > 1) {
-					// console.warn('Target has multiple slots but no slot specified, using first slot');
 					slotName = slotNames[0];
 				}
 			}
 
 			// Insert component
 			crafter.operations.insertNode(componentType, insertTargetNodeId, slotName, 'into');
-
-			// if (success) {
-			// console.log('Component inserted successfully:', componentType, 'into slot:', slotName);
-			// }
 		}
 
 		// Reset state
@@ -259,7 +248,6 @@
 		url.searchParams.set('selected', `${parentId}:${slotName}`);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(url, { replaceState: true, noScroll: true });
-		console.log('Slot clicked:', parentId, slotName);
 	}
 
 	/**
