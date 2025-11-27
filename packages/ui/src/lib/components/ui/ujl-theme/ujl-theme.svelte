@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { UJLTTokenSet } from '@ujl-framework/types';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { generateThemeCSSVariables, uuid } from '$lib/tools/index.js';
+	import { generateThemeCSSVariables } from '$lib/tools/index.js';
+	import { generateUid } from '@ujl-framework/core';
 	import { setUjlThemeContext } from './context.js';
 	import { mode } from 'mode-watcher';
 	import { cn } from '$lib/utils.js';
@@ -24,7 +25,7 @@
 	const cssVars = $derived(tokens ? generateThemeCSSVariables(tokens) : {});
 
 	// Generate unique theme ID for scoping CSS variables
-	const themeId = uuid();
+	const themeId = generateUid();
 
 	// Use mode-watcher for dark mode detection
 	// If modeProp is provided, it overrides mode-watcher's system detection

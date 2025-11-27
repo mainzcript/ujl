@@ -73,6 +73,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.17",
 		"@types/node": "^24.10.1",
+		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
