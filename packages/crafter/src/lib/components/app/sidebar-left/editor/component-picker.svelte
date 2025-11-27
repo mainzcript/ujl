@@ -83,19 +83,17 @@
 </script>
 
 <Dialog bind:open>
-	<DialogContent
-		class="h-full max-h-[90vh] w-[95vw] max-w-2xl overflow-hidden sm:max-h-[80vh] sm:w-full sm:rounded-lg"
-	>
+	<DialogContent>
 		<DialogHeader>
 			<DialogTitle>Insert Component</DialogTitle>
 		</DialogHeader>
 
-		<div class="flex h-full flex-col gap-3 overflow-hidden sm:gap-4">
+		<div class="grid gap-4 py-4">
 			<!-- Search Input -->
 			<Input bind:value={searchQuery} placeholder="Search components..." class="w-full" autofocus />
 
 			<!-- Component List -->
-			<ScrollArea class="h-[50vh] h-full overflow-hidden pr-2 sm:h-[400px] sm:pr-4">
+			<ScrollArea class="max-h-[50vh] pr-2 sm:pr-4">
 				{#if Object.keys(filteredComponents()).length === 0}
 					<div
 						class="flex items-center justify-center py-8 text-sm text-muted-foreground sm:text-base"
