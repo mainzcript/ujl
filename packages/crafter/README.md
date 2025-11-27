@@ -156,6 +156,7 @@ This ensures:
   - Uses `componentLibrary` from `@ujl-framework/examples/components`
   - Calls `onSelect(componentType)` callback when component is chosen
   - Resets search state when dialog closes
+  - **⚠️ TODO:** Currently uses manually maintained Component Library - should be generated from Module Registry (see `@ujl-framework/core` and `@ujl-framework/examples` READMEs)
 
 - **`preview.svelte`**: Receives `ujlcDocument` and `ujltDocument` as props, renders via `@ujl-framework/adapter-svelte`
   - Composes the content document into an AST using `Composer`

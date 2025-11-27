@@ -1,8 +1,24 @@
 import type { ComponentDefinition, ComponentLibrary } from "@ujl-framework/types";
 
 /**
+ * TODO: This manual component library should be automatically generated from the Module Registry
+ *
+ * PROBLEM: This file is manually maintained and must be updated whenever modules change.
+ * This creates a maintenance burden and makes it difficult for developers to add new modules.
+ *
+ * SOLUTION: The Component Library should be automatically generated from ModuleBase instances
+ * in the ModuleRegistry. This requires:
+ * 1. Extending ModuleBase with optional metadata (label, description, category, tags)
+ * 2. Creating a function to convert ModuleBase instances to ComponentDefinition
+ * 3. Generating the library from the registry at runtime or build time
+ *
+ * See: packages/core/src/modules/base.ts for ModuleBase definition
+ * See: packages/core/src/modules/registry.ts for ModuleRegistry
+ *
  * Component Library based on showcase.ujlc.json
  * Contains all component types used in the example document
+ *
+ * @deprecated This manual approach should be replaced with automatic generation from Registry
  */
 export const componentLibrary: ComponentLibrary = [
 	// Layout Components

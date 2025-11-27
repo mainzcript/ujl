@@ -1,6 +1,25 @@
 import { z } from "zod";
 
 /**
+ * TODO: Component Library should be automatically generated from Module Registry
+ *
+ * The current approach requires manual maintenance of ComponentDefinition objects,
+ * which is error-prone and creates a barrier for module developers.
+ *
+ * The Component Library should be generated from ModuleBase instances in the Registry:
+ * - ModuleBase.name → ComponentDefinition.type
+ * - ModuleBase.fields → ComponentDefinition.defaultFields (extract defaults)
+ * - ModuleBase.slots → ComponentDefinition.defaultSlots (extract slot keys)
+ * - ModuleBase.label → ComponentDefinition.label (needs to be added to ModuleBase)
+ * - ModuleBase.description → ComponentDefinition.description (needs to be added to ModuleBase)
+ * - ModuleBase.category → ComponentDefinition.category (needs to be added to ModuleBase)
+ * - ModuleBase.tags → ComponentDefinition.tags (needs to be added to ModuleBase)
+ *
+ * See: packages/core/src/modules/base.ts for ModuleBase
+ * See: packages/examples/src/components/component-library.ts for current manual implementation
+ */
+
+/**
  * Component Categories
  */
 export const COMPONENT_CATEGORIES = [

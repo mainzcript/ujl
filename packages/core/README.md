@@ -164,6 +164,18 @@ registry.registerModule(new CustomModule());
 const composer = new Composer(registry);
 ```
 
+> **⚠️ TODO: Component Library Generation**
+>
+> Currently, the Component Library (used by the Crafter's component picker) is manually maintained in `@ujl-framework/examples`. This creates a maintenance burden and makes it difficult for developers to add new modules.
+>
+> **Future Improvement:** The Component Library should be automatically generated from the Module Registry. This requires:
+>
+> 1. Extending `ModuleBase` with optional metadata (label, description, category, tags)
+> 2. Creating a function to convert `ModuleBase` instances to `ComponentDefinition`
+> 3. Generating the library from the registry at runtime or build time
+>
+> See `packages/core/src/modules/base.ts` for TODO comments.
+
 ## Built-in Modules & Fields
 
 ### Modules
