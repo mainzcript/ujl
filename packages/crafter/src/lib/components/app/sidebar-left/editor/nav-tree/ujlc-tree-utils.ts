@@ -1,7 +1,7 @@
 import type { UJLCModuleObject } from '@ujl-framework/types';
 
 /**
- * finds a node by its ID
+ * Finds a node by its ID
  */
 export function findNodeById(nodes: UJLCModuleObject[], targetId: string): UJLCModuleObject | null {
 	for (const node of nodes) {
@@ -22,7 +22,7 @@ export function findNodeById(nodes: UJLCModuleObject[], targetId: string): UJLCM
 }
 
 /**
- * finds the parent of a node by its ID
+ * Finds the parent of a node by its ID
  */
 export function findParentOfNode(
 	nodes: UJLCModuleObject[],
@@ -54,7 +54,7 @@ export function findParentOfNode(
 }
 
 /**
- * removes a node from the tree by its ID (immutable)
+ * Removes a node from the tree by its ID (immutable)
  */
 export function removeNodeFromTree(
 	nodes: UJLCModuleObject[],
@@ -82,7 +82,7 @@ export function removeNodeFromTree(
 }
 
 /**
- * adds a node into a specified slot of a parent node (immutable)
+ * Adds a node into a specified slot of a parent node (immutable)
  */
 export function insertNodeIntoSlot(
 	nodes: UJLCModuleObject[],
@@ -133,7 +133,7 @@ export function insertNodeIntoSlot(
 }
 
 /**
- * inserts a node at a specific position in a parent's slot (immutable)
+ * Inserts a node at a specific position in a parent's slot (immutable)
  */
 export function insertNodeAtPosition(
 	nodes: UJLCModuleObject[],
@@ -217,7 +217,7 @@ export function updateNodeInTree(
 }
 
 /**
- * returns the name of the first slot of a node, or null if there are no slots
+ * Returns the name of the first slot of a node, or null if there are no slots
  */
 export function getFirstSlotName(node: UJLCModuleObject): string | null {
 	if (!node.slots || Object.keys(node.slots).length === 0) {
@@ -228,14 +228,14 @@ export function getFirstSlotName(node: UJLCModuleObject): string | null {
 }
 
 /**
- * checks if a node has slots
+ * Checks if a node has slots
  */
 export function hasSlots(node: UJLCModuleObject): boolean {
 	return node.slots && Object.keys(node.slots).length > 0;
 }
 
 /**
- * returns a display name for a node
+ * Returns a display name for a node
  */
 export function getDisplayName(node: UJLCModuleObject): string {
 	const typeName = formatTypeName(node.type);
@@ -257,7 +257,7 @@ export function getDisplayName(node: UJLCModuleObject): string {
 }
 
 /**
- * formats a type string into a more readable format
+ * Formats a type string into a more readable format
  */
 export function formatTypeName(type: string): string {
 	return type
@@ -267,7 +267,7 @@ export function formatTypeName(type: string): string {
 }
 
 /**
- * returns the children of a node
+ * Returns the children of a node
  */
 export function getChildren(node: UJLCModuleObject): UJLCModuleObject[] {
 	if (!node.slots) return [];
@@ -277,7 +277,7 @@ export function getChildren(node: UJLCModuleObject): UJLCModuleObject[] {
 }
 
 /**
- * checks if a node has children
+ * Checks if a node has children
  */
 export function hasChildren(node: UJLCModuleObject): boolean {
 	if (!node.slots) return false;
@@ -285,7 +285,7 @@ export function hasChildren(node: UJLCModuleObject): boolean {
 }
 
 /**
- * checks if a node has multiple slots WITH children
+ * Checks if a node has multiple slots WITH children
  */
 export function hasMultipleSlotsWithChildren(node: UJLCModuleObject): boolean {
 	if (!node.slots) return false;
@@ -294,7 +294,7 @@ export function hasMultipleSlotsWithChildren(node: UJLCModuleObject): boolean {
 }
 
 /**
- * returns all slot entries [slotName, children[]] that have children
+ * Returns all slot entries [slotName, children[]] that have children
  */
 export function getSlotEntriesWithChildren(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
 	if (!node.slots) return [];
@@ -302,7 +302,7 @@ export function getSlotEntriesWithChildren(node: UJLCModuleObject): [string, UJL
 }
 
 /**
- * checks if a node has multiple slots (regardless of content)
+ * Checks if a node has multiple slots (regardless of content)
  */
 export function hasMultipleSlots(node: UJLCModuleObject): boolean {
 	if (!node.slots) return false;
@@ -310,7 +310,7 @@ export function hasMultipleSlots(node: UJLCModuleObject): boolean {
 }
 
 /**
- * returns ALL slot entries [slotName, children[]] (including empty slots)
+ * Returns ALL slot entries [slotName, children[]] (including empty slots)
  */
 export function getAllSlotEntries(node: UJLCModuleObject): [string, UJLCModuleObject[]][] {
 	if (!node.slots) return [];
@@ -318,7 +318,7 @@ export function getAllSlotEntries(node: UJLCModuleObject): [string, UJLCModuleOb
 }
 
 /**
- * checks if target has slots (can accept children)
+ * Checks if target has slots (can accept children)
  */
 export function canAcceptDrop(targetNode: UJLCModuleObject): boolean {
 	return targetNode.slots && Object.keys(targetNode.slots).length > 0;

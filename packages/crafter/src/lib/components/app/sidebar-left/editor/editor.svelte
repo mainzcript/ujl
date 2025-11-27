@@ -277,7 +277,7 @@
 				event.preventDefault();
 				handleInsert(selectedNodeId);
 			} else {
-				// Node is selected - check if can insert
+				// node is selected - check if can insert
 				const node = selectedNode();
 				const canInsert = node && hasSlots(node) && !hasMultipleSlots(node);
 
