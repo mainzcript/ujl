@@ -6,6 +6,17 @@ import type { AnyModule } from "./index.js";
  *
  * Provides dynamic registration and lookup of modules by name.
  * Used by the Composer to find and instantiate modules.
+ *
+ * TODO: Add method to generate ComponentLibrary from registered modules
+ * This would allow automatic generation of ComponentLibrary for the Crafter's component picker,
+ * eliminating the need for manual maintenance in packages/examples/src/components/component-library.ts
+ *
+ * Example:
+ * ```typescript
+ * const registry = new ModuleRegistry();
+ * registry.registerModule(new ContainerModule());
+ * const componentLibrary = registry.generateComponentLibrary();
+ * ```
  */
 export class ModuleRegistry {
 	protected _modules: AnyModule[] = [];

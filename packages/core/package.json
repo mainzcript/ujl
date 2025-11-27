@@ -16,6 +16,9 @@
 		"test": "echo 'No test script needed'",
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\""
 	},
+	"dependencies": {
+		"nanoid": "^5.1.6"
+	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.1",
 		"@eslint/js": "^9.39.1",

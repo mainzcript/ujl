@@ -12,7 +12,8 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./documents/showcase": "./src/documents/showcase.ujlc.json",
-		"./themes/default": "./src/themes/default.ujlt.json"
+		"./themes/default": "./src/themes/default.ujlt.json",
+		"./components": "./src/components/component-library.ts"
 	},
 	"scripts": {
 		"format": "prettier --write .",

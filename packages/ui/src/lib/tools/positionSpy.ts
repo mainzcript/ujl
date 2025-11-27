@@ -1,4 +1,4 @@
-import { generateUUID } from '$lib/utils.js';
+import { generateUid } from '@ujl-framework/core';
 
 const THROTTLE_INTERVAL = 100;
 const SMOOTHING_FACTOR = 2 * THROTTLE_INTERVAL;
@@ -69,7 +69,7 @@ export default class PositionSpy {
 	 * @param element The HTML element to observe
 	 */
 	constructor(element: HTMLElement) {
-		this.id = generateUUID();
+		this.id = generateUid();
 		this.element = element;
 		// Register this instance
 		PositionSpy.instances.set(this.id, this);

@@ -50,6 +50,18 @@ type SlotSet = ReadonlyArray<SlotEntry>;
  *
  * Defines the common interface that all modules must implement,
  * including their name, field definitions, slot configurations, and rendering.
+ *
+ * TODO: Add optional metadata properties for Component Library generation:
+ * - label?: string - Human-readable display name (e.g., "Container" instead of "container")
+ * - description?: string - Description for component picker UI
+ * - category?: ComponentCategory - Category for grouping in component picker
+ * - tags?: string[] - Searchable tags for component discovery
+ *
+ * This would allow automatic generation of ComponentLibrary from ModuleRegistry,
+ * eliminating the need for manual maintenance in packages/examples/src/components/component-library.ts
+ *
+ * See: packages/examples/src/components/component-library.ts for current manual approach
+ * See: packages/types/src/component-library.ts for ComponentDefinition type
  */
 export abstract class ModuleBase {
 	/** Unique identifier for this module type */

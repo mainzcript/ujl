@@ -57,7 +57,7 @@
 		{:else}
 			<Designer tokens={tokenSet} />
 		{/if}
-		<NavSecondary class="mt-auto" />
 	</SidebarContent>
+	<NavSecondary class="mt-auto" />
 	<SidebarRail />
 </Sidebar>
