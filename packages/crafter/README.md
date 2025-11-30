@@ -66,7 +66,15 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
 
 - **Helper Utilities:**
   - `generateNodeId()` - Generates unique IDs using `generateUid(10)` from `@ujl-framework/core` (nanoid with 10 chars)
-  - `isDescendant(node, targetId)` - Checks if node is descendant of target (prevents circular moves)
+  - `isDescendant(node, targetId)` - Checks if node is de
+
+**Why Functional Updates?**
+
+We use a functional update pattern (`update((prev) => next)`) instead of passing new values directly. This ensures:
+
+1. **Atomic Updates**: The update function always receives the most current state at the moment of execution, preventing race conditions when multiple updates happen in quick succession.
+2. **Single Source of Truth**: Components don't need to maintain local copies or read state before updating. They just describe _how_ the state should change.
+3. **Predictability**: By enforcing immutable updates via pure functions, we keep the state history clean, enabling future features like reliable Undo/Redo.
 
 This ensures:
 
@@ -83,6 +91,7 @@ This ensures:
   - Holds `ujlcDocument` and `ujltDocument` as reactive state
   - Extracts `ujltDocument.ujlt.tokens` → `tokenSet` prop
   - Extracts `ujlcDocument.ujlc.root` → `contentSlot` prop
+  - Provides `CrafterContext` via Svelte context API
   - Creates operations factory via `createOperations()` and provides full `CrafterContext` via Svelte context API
   - Handles mode state (`'editor' | 'designer'`) and passes it down to `SidebarLeft`
 
@@ -260,63 +269,10 @@ All functions create new objects instead of mutating inputs, ensuring predictabl
 
 ### Color Theme Generation
 
-The Crafter includes a sophisticated color palette generation system that creates Tailwind-like color palettes from a single input color. The system:
+The Crafter generates Tailwind-like OKLCH color palettes from a single input color and derives light/dark variants plus complete foreground matrices for all flavor combinations using APCA contrast. Only the `shades` field of each color set stores actual OKLCH values; all other color tokens (e.g. `light`, `dark`, `lightForeground`, `darkForeground`) are shade references that point to entries in `shades`.
 
-- Finds the closest Tailwind reference color family in OKLab space
-- Optionally interpolates between two families based on hue position
-- Refines the palette to anchor the exact input color at the correct shade
-- Derives light/dark + text colors using APCA contrast validation
+**Ambient Flavor Special Handling:**
+The ambient flavor is unique as it serves as the base background color. Instead of a single input color, it accepts two distinct colors (`lightHex` and `darkHex`) to independently control the appearance of light and dark modes. The system interpolates a shade palette that transitions from the light color (shades 50-100) to the dark color (shades 900-950).
 
-The color utilities are organized into focused modules in `$lib/tools/colors/`:
-
-- `colorSpaces.ts`: Color space conversions (HEX ↔ OKLCH) and distance calculations
-- `contrast.ts`: APCA contrast calculations and text color selection
-- `palettes.ts`: Palette generation, interpolation, and refinement
-- `paletteToColorSet.ts`: Conversion from GeneratedPalette to UJLTColorSet
-- `tailwindColorPlate.ts`: Tailwind reference color data
-
-All functions and types are exported from `$lib/tools/colors/index.js`.
-
-Color editing is handled via the `ColorPaletteInput` component located in `$lib/components/ui/color-palette-input/`, which combines a color picker with a palette preview and works with `UJLTColorSet` through unidirectional data flow (props down, events up) for seamless integration with theme tokens.
-
-### Example Usage
-
-**Note:** This is an internal example showing how color editing works with the new `ColorPaletteInput` component using unidirectional data flow.
-
-```svelte
-<script>
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from './context.js';
-	import type { UJLTTokenSet, UJLTColorSet } from '@ujl-framework/types';
-	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
-
-	let { tokens }: { tokens: UJLTTokenSet } = $props();
-	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-
-	/**
-	 * Helper function to update a single color token.
-	 * This is the only mutation path for color tokens, ensuring unidirectional data flow.
-	 */
-	function updateColorToken(key: keyof UJLTTokenSet['color'], set: UJLTColorSet) {
-		crafter.updateTokenSet((oldTokens) => ({
-			...oldTokens,
-			color: { ...oldTokens.color, [key]: set }
-		}));
-	}
-</script>
-
-<ColorPaletteInput
-	label="Primary Color"
-	colorSet={tokens.color.primary}
-	onChange={(set) => updateColorToken('primary', set)}
-/>
-```
-
-The `ColorPaletteInput` component:
-
-- Receives `colorSet` as a read-only prop (no `$bindable`)
-- Communicates changes via the `onChange` callback
-- Handles all palette generation internally
-- Works directly with `UJLTColorSet`, eliminating the need for manual hex-to-palette conversions
-
-This follows Svelte 5 best practices: **Props down, events up** - no local state duplication or two-way bindings needed.
+All color utilities live in the `$lib/tools/colors/` toolkit and are re-exported from `$lib/tools/colors/index.js` for a single, cohesive API.
+Color editing in the UI is handled by the `ColorPaletteInput` component, which receives a `colorSet` and the shared `palette` as read-only props, plus the current `flavor`, and reports changes via an `onChange` or `onOriginalChange` callback, following a unidirectional data flow (props down, events up).

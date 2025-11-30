@@ -3,31 +3,34 @@
 layout: home
 
 hero:
-  name: "UJL-Framework"
-  text: "Der JSON basierte WYSIWYG Web-Builder der Zukunft"
-  tagline: "100% Open Source"
+  name: "UJL Crafter"
+  text: "Garantiert markenkonforme und barrierefreie Websites mit KI erstellen"
+  tagline: "Der erste Open-Source WYSIWYG Editor ohne Design-Chaos"
   actions:
     - theme: brand
-      text: Einführung & Ziele
-      link: /01-introduction-and-goals
+      text: Unsere Vision
+      link: /about/01-vision
+    - theme: alt
+      text: Dokumentation
+      link: /docs/01-getting-started
     - theme: alt
       text: Architektur
-      link: /05-building-block-view
+      link: /arc42/01-introduction-and-goals
 
 features:
-  - title: "Eine Quelle für alle Kanäle."
-    details: "UJL rendert aus einer strukturierten Basis Webseiten, PDFs, Newsletter und mehr – alles im selben Look & Feel."
-    icon: "🚀"
-
-  - title: "Garantiert Markenkonform."
-    details: "Änderungen am Corporate Design greifen sofort global. Redakteure gestalten Inhalte frei, ohne das Design brechen zu können."
+  - title: "Brand-Compliance by Design"
+    details: "Design-Änderungen greifen sofort global. Redakteur:innen gestalten Inhalte frei, ohne die Markenkonformität brechen zu können."
     icon: "🎨"
 
-  - title: "Gemacht für Mensch und KI."
-    details: "UJL ist so strukturiert, dass KI-Tools nur gültige Module kombinieren können. So wird KI zur echten Hilfe statt zum Risiko."
+  - title: "Garantiert barrierefrei"
+    details: "Barrierefreiheit ist kein Add-on, sondern architektonisch gesichert. WCAG-Kontraste und semantisches HTML erzwungen."
+    icon: "🚧"
+
+  - title: "AI-native"
+    details: "Von Grund auf für Künstliche Intelligenz konzipiert. Kleine Modelle erzielen große Wirkung bei minimalem Kosten- und Energieaufwand."
     icon: "✨"
 
-  - title: "Plug-in statt Neubeginn."
-    details: "UJL liefert Adapter und Exporte, die sich nahtlos in jede Web-App einfügen. Kein Rebuild – einfach integrieren und loslegen."
-    icon: "⚡"
+  - title: "Open Source & Integrierbar"
+    details: "Kostenlos, Open Source und Framework-agnostisch. Unser Core ist für Entwickler:innen konzipiert, alles unter MIT-Lizenz."
+    icon: "📦"
 ---

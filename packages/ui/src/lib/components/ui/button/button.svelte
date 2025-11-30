@@ -2,14 +2,22 @@
 	import type { WithElementRef } from 'bits-ui';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
-	import type { UJLTFlavor } from '@ujl-framework/types';
 
 	export const buttonVariants = tv({
 		base: 'focus-visible:ring-ring focus-visible:scale-[.98] duration-200 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none opacity-100 disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[.95] touch-manipulation transition-all',
 		variants: {
 			variant: {
 				default: 'elevation bg-flavor-foreground text-flavor shadow-sm',
-				flavored: 'elevation bg-flavor text-flavor-foreground hover:bg-flavor/90 shadow-sm',
+				ambient: 'elevation bg-ambient text-ambient-foreground hover:bg-ambient/90 shadow-sm',
+				primary: 'elevation bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm',
+				secondary:
+					'elevation bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-sm',
+				accent: 'elevation bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm',
+				success: 'elevation bg-success text-success-foreground hover:bg-success/90 shadow-sm',
+				warning: 'elevation bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm',
+				destructive:
+					'elevation bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
+				info: 'elevation bg-info text-info-foreground hover:bg-info/90 shadow-sm',
 				muted:
 					'elevation after:bg-flavor-foreground/15 text-flavor-foreground backdrop-blur shadow-sm',
 				outline:
@@ -36,7 +44,6 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
-			flavor?: UJLTFlavor;
 			as?: 'button' | 'a' | 'div' | 'span';
 		};
 </script>
@@ -48,7 +55,6 @@
 		class: className,
 		variant = undefined,
 		size = 'default',
-		flavor = undefined,
 		ref = $bindable(null),
 		href = undefined,
 		type = 'button',
@@ -57,10 +63,6 @@
 		children,
 		...restProps
 	}: ButtonProps = $props();
-
-	if (flavor && !variant) {
-		variant = 'flavored';
-	}
 
 	// Determine element type
 	const elementType = as || (href ? 'a' : 'button');
@@ -97,7 +99,7 @@
 {#if elementType === 'a'}
 	<a
 		bind:this={ref}
-		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
+		class={cn(buttonVariants({ variant, size }), className)}
 		{href}
 		{...touchHandlers}
 		{...restProps}
@@ -105,25 +107,17 @@
 		{@render children?.()}
 	</a>
 {:else if elementType === 'div'}
-	<div
-		bind:this={ref}
-		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
-		{...basicProps}
-	>
+	<div bind:this={ref} class={cn(buttonVariants({ variant, size }), className)} {...basicProps}>
 		{@render children?.()}
 	</div>
 {:else if elementType === 'span'}
-	<span
-		bind:this={ref}
-		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
-		{...basicProps}
-	>
+	<span bind:this={ref} class={cn(buttonVariants({ variant, size }), className)} {...basicProps}>
 		{@render children?.()}
 	</span>
 {:else}
 	<button
 		bind:this={ref}
-		class={cn(buttonVariants({ variant, size }), flavor && `flavor-${flavor}`, className)}
+		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
 		{disabled}
 		{...touchHandlers}

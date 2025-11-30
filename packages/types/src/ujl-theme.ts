@@ -13,34 +13,113 @@ const UJLTOklchSchema = z.object({
 });
 
 /**
+ * Shade keys array - single source of truth for all shade values
+ */
+export const colorShades = [
+	"50",
+	"100",
+	"200",
+	"300",
+	"400",
+	"500",
+	"600",
+	"700",
+	"800",
+	"900",
+	"950",
+] as const;
+
+/**
+ * Type for shade keys (50 | 100 | 200 | ... | 950)
+ */
+export type UJLTShadeKey = (typeof colorShades)[number];
+
+/**
+ * Shade reference schema - references a shade key (e.g., "600", "900")
+ */
+const UJLTShadeRefSchema = z.enum(colorShades);
+
+/**
+ * Type for shade references
+ */
+export type UJLTShadeRef = UJLTShadeKey;
+
+/**
  * Color shades from 50 to 950
  */
 const UJLTColorShadesSchema = z.object({
-	50: UJLTOklchSchema,
-	100: UJLTOklchSchema,
-	200: UJLTOklchSchema,
-	300: UJLTOklchSchema,
-	400: UJLTOklchSchema,
-	500: UJLTOklchSchema,
-	600: UJLTOklchSchema,
-	700: UJLTOklchSchema,
-	800: UJLTOklchSchema,
-	900: UJLTOklchSchema,
-	950: UJLTOklchSchema,
+	"50": UJLTOklchSchema,
+	"100": UJLTOklchSchema,
+	"200": UJLTOklchSchema,
+	"300": UJLTOklchSchema,
+	"400": UJLTOklchSchema,
+	"500": UJLTOklchSchema,
+	"600": UJLTOklchSchema,
+	"700": UJLTOklchSchema,
+	"800": UJLTOklchSchema,
+	"900": UJLTOklchSchema,
+	"950": UJLTOklchSchema,
 });
 
 /**
- * Color set with light/dark mode variants and shades
+ * Foreground color map for all flavors on a given background
+ * Each entry is a shade reference pointing to a shade in the foreground flavor's palette
  */
-const UJLTColorSetSchema = z.object({
-	light: UJLTOklchSchema,
-	lightForeground: UJLTOklchSchema,
-	lightText: UJLTOklchSchema,
-	dark: UJLTOklchSchema,
-	darkForeground: UJLTOklchSchema,
-	darkText: UJLTOklchSchema,
+const UJLTPaletteForegroundMapSchema = z.object({
+	ambient: UJLTShadeRefSchema,
+	primary: UJLTShadeRefSchema,
+	secondary: UJLTShadeRefSchema,
+	accent: UJLTShadeRefSchema,
+	success: UJLTShadeRefSchema,
+	warning: UJLTShadeRefSchema,
+	destructive: UJLTShadeRefSchema,
+	info: UJLTShadeRefSchema,
+});
+
+/**
+ * Base color set schema without _original field.
+ * Contains light/dark mode variants, full foreground palette and shades.
+ *
+ * Only `shades` contains actual OKLCH color values. All other fields (`light`, `dark`,
+ * `lightForeground`, `darkForeground`) are shade references that point to entries in `shades`.
+ *
+ * For a given background flavor B, `lightForeground[F]` / `darkForeground[F]`
+ * contain the shade reference for the recommended text color when using foreground
+ * flavor F on background B in light/dark mode.
+ */
+const UJLTColorSetBaseSchema = z.object({
+	light: UJLTShadeRefSchema,
+	lightForeground: UJLTPaletteForegroundMapSchema,
+	dark: UJLTShadeRefSchema,
+	darkForeground: UJLTPaletteForegroundMapSchema,
 	shades: UJLTColorShadesSchema,
 });
+
+/**
+ * Standard color set schema for non-ambient flavors (primary, secondary, accent, etc.).
+ * Uses a single hex color as the original input.
+ */
+const UJLTStandardColorSetSchema = UJLTColorSetBaseSchema.extend({
+	_original: z.object({ hex: z.string() }),
+});
+
+/**
+ * Ambient color set schema.
+ * Uses separate light and dark hex colors as the original input.
+ */
+const UJLTAmbientColorSetSchema = UJLTColorSetBaseSchema.extend({
+	_original: z.object({
+		lightHex: z.string(),
+		darkHex: z.string(),
+	}),
+});
+
+/**
+ * @deprecated Use UJLTStandardColorSet['_original'] or UJLTAmbientColorSet['_original'] instead.
+ * Original color input type - either a single hex color or separate light/dark hex colors.
+ * This represents the user's original color input before palette generation.
+ */
+export type UJLTOriginalColor = { hex: string } | { lightHex: string; darkHex: string };
 
 /**
  * Flavor constants
@@ -50,25 +129,99 @@ export const notificationFlavors = ["success", "warning", "destructive", "info"]
 export const flavors = ["ambient", ...themeFlavors, ...notificationFlavors] as const;
 
 /**
+ * Typography flavor constants - only base flavors, no notification flavors
+ */
+export const typographyFlavors = ["ambient", "primary", "secondary", "accent"] as const;
+
+/**
  * Complete color palette schema
+ * Ambient uses UJLTAmbientColorSetSchema (with lightHex/darkHex),
+ * all other flavors use UJLTStandardColorSetSchema (with hex).
  */
 const UJLTColorPaletteSchema = z.object({
-	ambient: UJLTColorSetSchema,
-	primary: UJLTColorSetSchema,
-	secondary: UJLTColorSetSchema,
-	accent: UJLTColorSetSchema,
-	success: UJLTColorSetSchema,
-	warning: UJLTColorSetSchema,
-	destructive: UJLTColorSetSchema,
-	info: UJLTColorSetSchema,
+	ambient: UJLTAmbientColorSetSchema,
+	primary: UJLTStandardColorSetSchema,
+	secondary: UJLTStandardColorSetSchema,
+	accent: UJLTStandardColorSetSchema,
+	success: UJLTStandardColorSetSchema,
+	warning: UJLTStandardColorSetSchema,
+	destructive: UJLTStandardColorSetSchema,
+	info: UJLTStandardColorSetSchema,
 });
 
 /**
- * Token set schema (colors + radius)
+ * Font weight schema - numeric values 100-900 as strings (consistent with shades)
  */
+const UJLTFontWeightSchema = z.string().refine(
+	val => {
+		const num = parseInt(val, 10);
+		return !isNaN(num) && num >= 100 && num <= 900;
+	},
+	{ message: "Font weight must be a string representing a number between 100 and 900" }
+);
+
+/** Typography style schema for base and heading tokens */
+const UJLTTypographyStyleSchema = z.object({
+	font: z.string(), // z.B. "Inter"
+	// Relativer Faktor zwischen 0 und 1 – konkrete CSS-Size wird in der UI-Library berechnet
+	size: z.number().min(0).max(1),
+	lineHeight: z.string(), // z.B. "1.5" oder "1.5rem"
+	letterSpacing: z.string(), // z.B. "-0.01em"
+	weight: UJLTFontWeightSchema,
+	italic: z.boolean(),
+	underline: z.boolean(),
+	textTransform: z.enum(["none", "capitalize", "uppercase", "lowercase"]),
+	// Typografie darf nur auf Basis-Flavors zugreifen
+	flavor: z.enum(typographyFlavors),
+});
+
+/** Base typography for body text */
+const UJLTTypographyBaseSchema = UJLTTypographyStyleSchema;
+
+/** Heading typography - UI components derive H1-H6 from this */
+const UJLTTypographyHeadingSchema = UJLTTypographyStyleSchema;
+
+/** Minimal emphasis token for inline text */
+const UJLTTypographyHighlightSchema = z.object({
+	flavor: z.enum(typographyFlavors),
+	weight: UJLTFontWeightSchema,
+	italic: z.boolean(),
+	underline: z.boolean(),
+});
+
+/** Minimal link configuration - states handled in UI library */
+const UJLTTypographyLinkSchema = z.object({
+	weight: UJLTFontWeightSchema,
+	underline: z.boolean(),
+});
+
+/** Monospace font family - scaling/spacing handled in UI library */
+const UJLTTypographyMonoSchema = z.object({
+	font: z.string(), // z.B. "JetBrains Mono"
+	size: z.number().min(0).max(1), // relativer Faktor, analog base/heading
+	lineHeight: z.string(),
+	letterSpacing: z.string(),
+	weight: UJLTFontWeightSchema,
+	italic: z.boolean(),
+	underline: z.boolean(),
+	textTransform: z.enum(["none", "capitalize", "uppercase", "lowercase"]),
+	flavor: z.enum(typographyFlavors),
+});
+
+/** Complete typography schema */
+const UJLTTypographySchema = z.object({
+	base: UJLTTypographyBaseSchema,
+	heading: UJLTTypographyHeadingSchema,
+	highlight: UJLTTypographyHighlightSchema,
+	link: UJLTTypographyLinkSchema,
+	mono: UJLTTypographyMonoSchema,
+});
+
+/** Token set schema */
 const UJLTTokenSetSchema = z.object({
 	color: UJLTColorPaletteSchema,
 	radius: z.string(), // CSS border-radius value
+	typography: UJLTTypographySchema,
 });
 
 /**
@@ -99,17 +252,153 @@ export const UJLTDocumentSchema = z.object({
 
 export type UJLTOklch = z.infer<typeof UJLTOklchSchema>;
 export type UJLTColorShades = z.infer<typeof UJLTColorShadesSchema>;
-export type UJLTColorSet = z.infer<typeof UJLTColorSetSchema>;
+export type UJLTStandardColorSet = z.infer<typeof UJLTStandardColorSetSchema>;
+export type UJLTAmbientColorSet = z.infer<typeof UJLTAmbientColorSetSchema>;
+/**
+ * Union type for all color sets (standard or ambient).
+ * Use UJLTStandardColorSet or UJLTAmbientColorSet for type-safe access.
+ */
+export type UJLTColorSet = UJLTStandardColorSet | UJLTAmbientColorSet;
 export type UJLTColorPalette = z.infer<typeof UJLTColorPaletteSchema>;
 export type UJLTTokenSet = z.infer<typeof UJLTTokenSetSchema>;
 export type UJLTMeta = z.infer<typeof UJLTMetaSchema>;
 export type UJLTObject = z.infer<typeof UJLTObjectSchema>;
 export type UJLTDocument = z.infer<typeof UJLTDocumentSchema>;
 
+// Typography types
+export type UJLTFontWeight = z.infer<typeof UJLTFontWeightSchema>;
+export type UJLTTypographyStyle = z.infer<typeof UJLTTypographyStyleSchema>;
+export type UJLTTypographyBase = z.infer<typeof UJLTTypographyBaseSchema>;
+export type UJLTTypographyHeading = z.infer<typeof UJLTTypographyHeadingSchema>;
+export type UJLTTypographyHighlight = z.infer<typeof UJLTTypographyHighlightSchema>;
+export type UJLTTypographyLink = z.infer<typeof UJLTTypographyLinkSchema>;
+export type UJLTTypographyMono = z.infer<typeof UJLTTypographyMonoSchema>;
+export type UJLTTypography = z.infer<typeof UJLTTypographySchema>;
+
 // Flavor types
 export type UJLTThemeFlavor = (typeof themeFlavors)[number];
 export type UJLTNotificationFlavor = (typeof notificationFlavors)[number];
 export type UJLTFlavor = (typeof flavors)[number];
+export type UJLTTypographyFlavor = (typeof typographyFlavors)[number];
+
+// ============================================
+// RESOLVER FUNCTIONS
+// ============================================
+
+/**
+ * Resolves a shade reference to its OKLCH color value.
+ *
+ * @param shades - The color shades object containing all shade values
+ * @param ref - The shade reference (e.g., "600", "900")
+ * @returns The OKLCH color value for the referenced shade
+ * @throws Error if the shade reference is invalid or the shade doesn't exist
+ */
+export function resolveColorFromShades(shades: UJLTColorShades, ref: UJLTShadeRef): UJLTOklch {
+	const shade = shades[ref];
+	if (!shade) {
+		throw new Error(`Shade reference "${ref}" not found in shades`);
+	}
+	return shade;
+}
+
+/**
+ * Resolved color set with actual OKLCH values instead of shade references.
+ * This is a helper type for runtime resolution of shade references.
+ * The _original field preserves the original input format (hex for standard, lightHex/darkHex for ambient).
+ */
+export type ResolvedUJLTColorSet = {
+	light: UJLTOklch;
+	lightForeground: Record<UJLTFlavor, UJLTOklch>;
+	dark: UJLTOklch;
+	darkForeground: Record<UJLTFlavor, UJLTOklch>;
+	shades: UJLTColorShades;
+	_original: UJLTStandardColorSet["_original"] | UJLTAmbientColorSet["_original"];
+};
+
+/**
+ * Resolves a color set by converting all shade references to actual OKLCH values.
+ *
+ * @param colorSet - The color set with shade references
+ * @returns A resolved color set with actual OKLCH values
+ */
+export function resolveColorSet(colorSet: UJLTColorSet): ResolvedUJLTColorSet {
+	// Note: This function is incomplete - it requires the full palette context
+	// to resolve foreground references. Use resolveColorPalette instead for complete resolution.
+	// This function is kept for backward compatibility but returns empty foreground maps.
+	const lightForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
+	const darkForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
+
+	return {
+		light: resolveColorFromShades(colorSet.shades, colorSet.light),
+		dark: resolveColorFromShades(colorSet.shades, colorSet.dark),
+		lightForeground,
+		darkForeground,
+		shades: colorSet.shades,
+		_original: colorSet._original,
+	};
+}
+
+/**
+ * Resolves a foreground reference to its OKLCH color value.
+ * Requires the full palette to resolve foreground flavor shades.
+ *
+ * @param palette - The complete color palette
+ * @param backgroundFlavor - The background flavor
+ * @param foregroundFlavor - The foreground flavor
+ * @param mode - 'light' or 'dark'
+ * @returns The OKLCH color value for the foreground on the background
+ */
+export function resolveForegroundColor(
+	palette: UJLTColorPalette,
+	backgroundFlavor: UJLTFlavor,
+	foregroundFlavor: UJLTFlavor,
+	mode: "light" | "dark"
+): UJLTOklch {
+	const backgroundSet = palette[backgroundFlavor];
+	const foregroundSet = palette[foregroundFlavor];
+	const shadeRef =
+		mode === "light"
+			? backgroundSet.lightForeground[foregroundFlavor]
+			: backgroundSet.darkForeground[foregroundFlavor];
+	return resolveColorFromShades(foregroundSet.shades, shadeRef);
+}
+
+/**
+ * Resolves a complete color palette by converting all shade references to actual OKLCH values.
+ *
+ * @param palette - The color palette with shade references
+ * @returns A resolved color palette with actual OKLCH values
+ */
+export function resolveColorPalette(
+	palette: UJLTColorPalette
+): Record<UJLTFlavor, ResolvedUJLTColorSet> {
+	const resolved: Record<UJLTFlavor, ResolvedUJLTColorSet> = {} as Record<
+		UJLTFlavor,
+		ResolvedUJLTColorSet
+	>;
+
+	flavors.forEach(flavor => {
+		const colorSet = palette[flavor];
+		const lightForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
+		const darkForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
+
+		flavors.forEach(fgFlavor => {
+			lightForeground[fgFlavor] = resolveForegroundColor(palette, flavor, fgFlavor, "light");
+			darkForeground[fgFlavor] = resolveForegroundColor(palette, flavor, fgFlavor, "dark");
+		});
+
+		resolved[flavor] = {
+			light: resolveColorFromShades(colorSet.shades, colorSet.light),
+			dark: resolveColorFromShades(colorSet.shades, colorSet.dark),
+			lightForeground,
+			darkForeground,
+			shades: colorSet.shades,
+			_original: colorSet._original,
+		};
+	});
+
+	return resolved;
+}
 
 // ============================================
 // VALIDATOR FUNCTIONS

@@ -1,4 +1,4 @@
-import type { ComponentDefinition, ComponentLibrary } from "@ujl-framework/types";
+import type { ComponentDefinition, ComponentLibrary, UJLCModuleObject } from "@ujl-framework/types";
 
 /**
  * TODO: This manual component library should be automatically generated from the Module Registry
@@ -133,7 +133,7 @@ export function getComponentsByCategory(
 export function createNodeFromDefinition(
 	definition: ComponentLibrary[number],
 	id: string
-): import("@ujl-framework/types").UJLCModuleObject {
+): UJLCModuleObject {
 	return {
 		type: definition.type,
 		fields: { ...definition.defaultFields },

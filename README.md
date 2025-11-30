@@ -35,4 +35,4 @@ ujl/
 
 ## License
 
-TODO: Looks like it will be an MIT license.
+Open source (license is still pending, but will most likely be MIT). The project will definitely be released under a permissive open source license.

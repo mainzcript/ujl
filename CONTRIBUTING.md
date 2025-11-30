@@ -6,7 +6,7 @@
 
 ```bash
 # Clone the repository
-git clone git@gitlab.rlp.net:ujl-framework/ujl.git
+git clone git@gitlab.mainzcript.eu:ujl-framework/ujl.git
 cd ujl
 
 # Install dependencies

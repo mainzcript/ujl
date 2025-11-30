@@ -24,7 +24,7 @@
 	const browser = typeof window !== 'undefined';
 
 	// Base styles for all links (hover and transition)
-	const baseStyle = 'hover:opacity-80 duration-200';
+	const baseStyle = 'hover:opacity-80 duration-200 text-flavor-foreground-accent';
 	// Underline style if enabled
 	const underlineStyle = underline ? 'underline underline-offset-4' : '';
 

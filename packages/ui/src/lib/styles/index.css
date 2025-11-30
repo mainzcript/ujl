@@ -19,21 +19,85 @@
 [data-ujl-theme] {
 	/* Light mode colors */
 	--primary: var(--primary-light);
-	--primary-foreground: var(--primary-light-foreground);
+	--primary-foreground: var(--primary-foreground-ambient);
+	--primary-foreground-ambient: var(--primary-light-foreground-ambient);
+	--primary-foreground-primary: var(--primary-light-foreground-primary);
+	--primary-foreground-secondary: var(--primary-light-foreground-secondary);
+	--primary-foreground-accent: var(--primary-light-foreground-accent);
+	--primary-foreground-success: var(--primary-light-foreground-success);
+	--primary-foreground-warning: var(--primary-light-foreground-warning);
+	--primary-foreground-destructive: var(--primary-light-foreground-destructive);
+	--primary-foreground-info: var(--primary-light-foreground-info);
 	--secondary: var(--secondary-light);
-	--secondary-foreground: var(--secondary-light-foreground);
+	--secondary-foreground: var(--secondary-foreground-ambient);
+	--secondary-foreground-ambient: var(--secondary-light-foreground-ambient);
+	--secondary-foreground-primary: var(--secondary-light-foreground-primary);
+	--secondary-foreground-secondary: var(--secondary-light-foreground-secondary);
+	--secondary-foreground-accent: var(--secondary-light-foreground-accent);
+	--secondary-foreground-success: var(--secondary-light-foreground-success);
+	--secondary-foreground-warning: var(--secondary-light-foreground-warning);
+	--secondary-foreground-destructive: var(--secondary-light-foreground-destructive);
+	--secondary-foreground-info: var(--secondary-light-foreground-info);
 	--accent: var(--accent-light);
-	--accent-foreground: var(--accent-light-foreground);
+	--accent-foreground: var(--accent-foreground-ambient);
+	--accent-foreground-ambient: var(--accent-light-foreground-ambient);
+	--accent-foreground-primary: var(--accent-light-foreground-primary);
+	--accent-foreground-secondary: var(--accent-light-foreground-secondary);
+	--accent-foreground-accent: var(--accent-light-foreground-accent);
+	--accent-foreground-success: var(--accent-light-foreground-success);
+	--accent-foreground-warning: var(--accent-light-foreground-warning);
+	--accent-foreground-destructive: var(--accent-light-foreground-destructive);
+	--accent-foreground-info: var(--accent-light-foreground-info);
 	--ambient: var(--ambient-light);
-	--ambient-foreground: var(--ambient-light-foreground);
+	--ambient-foreground: var(--ambient-foreground-ambient);
+	--ambient-foreground-ambient: var(--ambient-light-foreground-ambient);
+	--ambient-foreground-primary: var(--ambient-light-foreground-primary);
+	--ambient-foreground-secondary: var(--ambient-light-foreground-secondary);
+	--ambient-foreground-accent: var(--ambient-light-foreground-accent);
+	--ambient-foreground-success: var(--ambient-light-foreground-success);
+	--ambient-foreground-warning: var(--ambient-light-foreground-warning);
+	--ambient-foreground-destructive: var(--ambient-light-foreground-destructive);
+	--ambient-foreground-info: var(--ambient-light-foreground-info);
 	--success: var(--success-light);
-	--success-foreground: var(--success-light-foreground);
+	--success-foreground: var(--success-foreground-ambient);
+	--success-foreground-ambient: var(--success-light-foreground-ambient);
+	--success-foreground-primary: var(--success-light-foreground-primary);
+	--success-foreground-secondary: var(--success-light-foreground-secondary);
+	--success-foreground-accent: var(--success-light-foreground-accent);
+	--success-foreground-success: var(--success-light-foreground-success);
+	--success-foreground-warning: var(--success-light-foreground-warning);
+	--success-foreground-destructive: var(--success-light-foreground-destructive);
+	--success-foreground-info: var(--success-light-foreground-info);
 	--warning: var(--warning-light);
-	--warning-foreground: var(--warning-light-foreground);
+	--warning-foreground: var(--warning-foreground-ambient);
+	--warning-foreground-ambient: var(--warning-light-foreground-ambient);
+	--warning-foreground-primary: var(--warning-light-foreground-primary);
+	--warning-foreground-secondary: var(--warning-light-foreground-secondary);
+	--warning-foreground-accent: var(--warning-light-foreground-accent);
+	--warning-foreground-success: var(--warning-light-foreground-success);
+	--warning-foreground-warning: var(--warning-light-foreground-warning);
+	--warning-foreground-destructive: var(--warning-light-foreground-destructive);
+	--warning-foreground-info: var(--warning-light-foreground-info);
 	--destructive: var(--destructive-light);
-	--destructive-foreground: var(--destructive-light-foreground);
+	--destructive-foreground: var(--destructive-foreground-ambient);
+	--destructive-foreground-ambient: var(--destructive-light-foreground-ambient);
+	--destructive-foreground-primary: var(--destructive-light-foreground-primary);
+	--destructive-foreground-secondary: var(--destructive-light-foreground-secondary);
+	--destructive-foreground-accent: var(--destructive-light-foreground-accent);
+	--destructive-foreground-success: var(--destructive-light-foreground-success);
+	--destructive-foreground-warning: var(--destructive-light-foreground-warning);
+	--destructive-foreground-destructive: var(--destructive-light-foreground-destructive);
+	--destructive-foreground-info: var(--destructive-light-foreground-info);
 	--info: var(--info-light);
-	--info-foreground: var(--info-light-foreground);
+	--info-foreground: var(--info-foreground-ambient);
+	--info-foreground-ambient: var(--info-light-foreground-ambient);
+	--info-foreground-primary: var(--info-light-foreground-primary);
+	--info-foreground-secondary: var(--info-light-foreground-secondary);
+	--info-foreground-accent: var(--info-light-foreground-accent);
+	--info-foreground-success: var(--info-light-foreground-success);
+	--info-foreground-warning: var(--info-light-foreground-warning);
+	--info-foreground-destructive: var(--info-light-foreground-destructive);
+	--info-foreground-info: var(--info-light-foreground-info);
 
 	/* Fallback colors for default Shadcn in Light mode */
 	--chart-1: 0.646 0.222 41.116;
@@ -49,21 +113,85 @@
 .dark {
 	/* Dark mode colors */
 	--primary: var(--primary-dark);
-	--primary-foreground: var(--primary-dark-foreground);
+	--primary-foreground: var(--primary-foreground-ambient);
+	--primary-foreground-ambient: var(--primary-dark-foreground-ambient);
+	--primary-foreground-primary: var(--primary-dark-foreground-primary);
+	--primary-foreground-secondary: var(--primary-dark-foreground-secondary);
+	--primary-foreground-accent: var(--primary-dark-foreground-accent);
+	--primary-foreground-success: var(--primary-dark-foreground-success);
+	--primary-foreground-warning: var(--primary-dark-foreground-warning);
+	--primary-foreground-destructive: var(--primary-dark-foreground-destructive);
+	--primary-foreground-info: var(--primary-dark-foreground-info);
 	--secondary: var(--secondary-dark);
-	--secondary-foreground: var(--secondary-dark-foreground);
+	--secondary-foreground: var(--secondary-foreground-ambient);
+	--secondary-foreground-ambient: var(--secondary-dark-foreground-ambient);
+	--secondary-foreground-primary: var(--secondary-dark-foreground-primary);
+	--secondary-foreground-secondary: var(--secondary-dark-foreground-secondary);
+	--secondary-foreground-accent: var(--secondary-dark-foreground-accent);
+	--secondary-foreground-success: var(--secondary-dark-foreground-success);
+	--secondary-foreground-warning: var(--secondary-dark-foreground-warning);
+	--secondary-foreground-destructive: var(--secondary-dark-foreground-destructive);
+	--secondary-foreground-info: var(--secondary-dark-foreground-info);
 	--accent: var(--accent-dark);
-	--accent-foreground: var(--accent-dark-foreground);
+	--accent-foreground: var(--accent-foreground-ambient);
+	--accent-foreground-ambient: var(--accent-dark-foreground-ambient);
+	--accent-foreground-primary: var(--accent-dark-foreground-primary);
+	--accent-foreground-secondary: var(--accent-dark-foreground-secondary);
+	--accent-foreground-accent: var(--accent-dark-foreground-accent);
+	--accent-foreground-success: var(--accent-dark-foreground-success);
+	--accent-foreground-warning: var(--accent-dark-foreground-warning);
+	--accent-foreground-destructive: var(--accent-dark-foreground-destructive);
+	--accent-foreground-info: var(--accent-dark-foreground-info);
 	--ambient: var(--ambient-dark);
-	--ambient-foreground: var(--ambient-dark-foreground);
+	--ambient-foreground: var(--ambient-foreground-ambient);
+	--ambient-foreground-ambient: var(--ambient-dark-foreground-ambient);
+	--ambient-foreground-primary: var(--ambient-dark-foreground-primary);
+	--ambient-foreground-secondary: var(--ambient-dark-foreground-secondary);
+	--ambient-foreground-accent: var(--ambient-dark-foreground-accent);
+	--ambient-foreground-success: var(--ambient-dark-foreground-success);
+	--ambient-foreground-warning: var(--ambient-dark-foreground-warning);
+	--ambient-foreground-destructive: var(--ambient-dark-foreground-destructive);
+	--ambient-foreground-info: var(--ambient-dark-foreground-info);
 	--success: var(--success-dark);
-	--success-foreground: var(--success-dark-foreground);
+	--success-foreground: var(--success-foreground-ambient);
+	--success-foreground-ambient: var(--success-dark-foreground-ambient);
+	--success-foreground-primary: var(--success-dark-foreground-primary);
+	--success-foreground-secondary: var(--success-dark-foreground-secondary);
+	--success-foreground-accent: var(--success-dark-foreground-accent);
+	--success-foreground-success: var(--success-dark-foreground-success);
+	--success-foreground-warning: var(--success-dark-foreground-warning);
+	--success-foreground-destructive: var(--success-dark-foreground-destructive);
+	--success-foreground-info: var(--success-dark-foreground-info);
 	--warning: var(--warning-dark);
-	--warning-foreground: var(--warning-dark-foreground);
+	--warning-foreground: var(--warning-foreground-ambient);
+	--warning-foreground-ambient: var(--warning-dark-foreground-ambient);
+	--warning-foreground-primary: var(--warning-dark-foreground-primary);
+	--warning-foreground-secondary: var(--warning-dark-foreground-secondary);
+	--warning-foreground-accent: var(--warning-dark-foreground-accent);
+	--warning-foreground-success: var(--warning-dark-foreground-success);
+	--warning-foreground-warning: var(--warning-dark-foreground-warning);
+	--warning-foreground-destructive: var(--warning-dark-foreground-destructive);
+	--warning-foreground-info: var(--warning-dark-foreground-info);
 	--destructive: var(--destructive-dark);
-	--destructive-foreground: var(--destructive-dark-foreground);
+	--destructive-foreground: var(--destructive-foreground-ambient);
+	--destructive-foreground-ambient: var(--destructive-dark-foreground-ambient);
+	--destructive-foreground-primary: var(--destructive-dark-foreground-primary);
+	--destructive-foreground-secondary: var(--destructive-dark-foreground-secondary);
+	--destructive-foreground-accent: var(--destructive-dark-foreground-accent);
+	--destructive-foreground-success: var(--destructive-dark-foreground-success);
+	--destructive-foreground-warning: var(--destructive-dark-foreground-warning);
+	--destructive-foreground-destructive: var(--destructive-dark-foreground-destructive);
+	--destructive-foreground-info: var(--destructive-dark-foreground-info);
 	--info: var(--info-dark);
-	--info-foreground: var(--info-dark-foreground);
+	--info-foreground: var(--info-foreground-ambient);
+	--info-foreground-ambient: var(--info-dark-foreground-ambient);
+	--info-foreground-primary: var(--info-dark-foreground-primary);
+	--info-foreground-secondary: var(--info-dark-foreground-secondary);
+	--info-foreground-accent: var(--info-dark-foreground-accent);
+	--info-foreground-success: var(--info-dark-foreground-success);
+	--info-foreground-warning: var(--info-dark-foreground-warning);
+	--info-foreground-destructive: var(--info-dark-foreground-destructive);
+	--info-foreground-info: var(--info-dark-foreground-info);
 
 	/* Fallback colors for default Shadcn in Dark mode */
 	--chart-1: 0.488 0.243 264.376;
@@ -87,6 +215,14 @@
 	--flavor-900: var(--ambient-900);
 	--flavor-950: var(--ambient-950);
 	--flavor-foreground: var(--ambient-foreground);
+	--flavor-foreground-ambient: var(--ambient-foreground-ambient);
+	--flavor-foreground-primary: var(--ambient-foreground-primary);
+	--flavor-foreground-secondary: var(--ambient-foreground-secondary);
+	--flavor-foreground-accent: var(--ambient-foreground-accent);
+	--flavor-foreground-success: var(--ambient-foreground-success);
+	--flavor-foreground-warning: var(--ambient-foreground-warning);
+	--flavor-foreground-destructive: var(--ambient-foreground-destructive);
+	--flavor-foreground-info: var(--ambient-foreground-info);
 }
 
 .flavor-ambient,
@@ -108,6 +244,14 @@
 	--flavor-900: var(--primary-900);
 	--flavor-950: var(--primary-950);
 	--flavor-foreground: var(--primary-foreground);
+	--flavor-foreground-ambient: var(--primary-foreground-ambient);
+	--flavor-foreground-primary: var(--primary-foreground-primary);
+	--flavor-foreground-secondary: var(--primary-foreground-secondary);
+	--flavor-foreground-accent: var(--primary-foreground-accent);
+	--flavor-foreground-success: var(--primary-foreground-success);
+	--flavor-foreground-warning: var(--primary-foreground-warning);
+	--flavor-foreground-destructive: var(--primary-foreground-destructive);
+	--flavor-foreground-info: var(--primary-foreground-info);
 }
 
 .flavor-secondary {
@@ -124,6 +268,14 @@
 	--flavor-900: var(--secondary-900);
 	--flavor-950: var(--secondary-950);
 	--flavor-foreground: var(--secondary-foreground);
+	--flavor-foreground-ambient: var(--secondary-foreground-ambient);
+	--flavor-foreground-primary: var(--secondary-foreground-primary);
+	--flavor-foreground-secondary: var(--secondary-foreground-secondary);
+	--flavor-foreground-accent: var(--secondary-foreground-accent);
+	--flavor-foreground-success: var(--secondary-foreground-success);
+	--flavor-foreground-warning: var(--secondary-foreground-warning);
+	--flavor-foreground-destructive: var(--secondary-foreground-destructive);
+	--flavor-foreground-info: var(--secondary-foreground-info);
 }
 
 .flavor-accent {
@@ -140,6 +292,14 @@
 	--flavor-900: var(--accent-900);
 	--flavor-950: var(--accent-950);
 	--flavor-foreground: var(--accent-foreground);
+	--flavor-foreground-ambient: var(--accent-foreground-ambient);
+	--flavor-foreground-primary: var(--accent-foreground-primary);
+	--flavor-foreground-secondary: var(--accent-foreground-secondary);
+	--flavor-foreground-accent: var(--accent-foreground-accent);
+	--flavor-foreground-success: var(--accent-foreground-success);
+	--flavor-foreground-warning: var(--accent-foreground-warning);
+	--flavor-foreground-destructive: var(--accent-foreground-destructive);
+	--flavor-foreground-info: var(--accent-foreground-info);
 }
 
 .flavor-success {
@@ -156,6 +316,14 @@
 	--flavor-900: var(--success-900);
 	--flavor-950: var(--success-950);
 	--flavor-foreground: var(--success-foreground);
+	--flavor-foreground-ambient: var(--success-foreground-ambient);
+	--flavor-foreground-primary: var(--success-foreground-primary);
+	--flavor-foreground-secondary: var(--success-foreground-secondary);
+	--flavor-foreground-accent: var(--success-foreground-accent);
+	--flavor-foreground-success: var(--success-foreground-success);
+	--flavor-foreground-warning: var(--success-foreground-warning);
+	--flavor-foreground-destructive: var(--success-foreground-destructive);
+	--flavor-foreground-info: var(--success-foreground-info);
 }
 
 .flavor-warning {
@@ -172,6 +340,14 @@
 	--flavor-900: var(--warning-900);
 	--flavor-950: var(--warning-950);
 	--flavor-foreground: var(--warning-foreground);
+	--flavor-foreground-ambient: var(--warning-foreground-ambient);
+	--flavor-foreground-primary: var(--warning-foreground-primary);
+	--flavor-foreground-secondary: var(--warning-foreground-secondary);
+	--flavor-foreground-accent: var(--warning-foreground-accent);
+	--flavor-foreground-success: var(--warning-foreground-success);
+	--flavor-foreground-warning: var(--warning-foreground-warning);
+	--flavor-foreground-destructive: var(--warning-foreground-destructive);
+	--flavor-foreground-info: var(--warning-foreground-info);
 }
 
 .flavor-destructive {
@@ -188,6 +364,14 @@
 	--flavor-900: var(--destructive-900);
 	--flavor-950: var(--destructive-950);
 	--flavor-foreground: var(--destructive-foreground);
+	--flavor-foreground-ambient: var(--destructive-foreground-ambient);
+	--flavor-foreground-primary: var(--destructive-foreground-primary);
+	--flavor-foreground-secondary: var(--destructive-foreground-secondary);
+	--flavor-foreground-accent: var(--destructive-foreground-accent);
+	--flavor-foreground-success: var(--destructive-foreground-success);
+	--flavor-foreground-warning: var(--destructive-foreground-warning);
+	--flavor-foreground-destructive: var(--destructive-foreground-destructive);
+	--flavor-foreground-info: var(--destructive-foreground-info);
 }
 
 .flavor-info {
@@ -204,6 +388,14 @@
 	--flavor-900: var(--info-900);
 	--flavor-950: var(--info-950);
 	--flavor-foreground: var(--info-foreground);
+	--flavor-foreground-ambient: var(--info-foreground-ambient);
+	--flavor-foreground-primary: var(--info-foreground-primary);
+	--flavor-foreground-secondary: var(--info-foreground-secondary);
+	--flavor-foreground-accent: var(--info-foreground-accent);
+	--flavor-foreground-success: var(--info-foreground-success);
+	--flavor-foreground-warning: var(--info-foreground-warning);
+	--flavor-foreground-destructive: var(--info-foreground-destructive);
+	--flavor-foreground-info: var(--info-foreground-info);
 }
 
 @theme inline {
@@ -238,6 +430,14 @@
 	--color-flavor-900: oklch(var(--flavor-900));
 	--color-flavor-950: oklch(var(--flavor-950));
 	--color-flavor-foreground: oklch(var(--flavor-foreground));
+	--color-flavor-foreground-ambient: oklch(var(--flavor-foreground-ambient));
+	--color-flavor-foreground-primary: oklch(var(--flavor-foreground-primary));
+	--color-flavor-foreground-secondary: oklch(var(--flavor-foreground-secondary));
+	--color-flavor-foreground-accent: oklch(var(--flavor-foreground-accent));
+	--color-flavor-foreground-success: oklch(var(--flavor-foreground-success));
+	--color-flavor-foreground-warning: oklch(var(--flavor-foreground-warning));
+	--color-flavor-foreground-destructive: oklch(var(--flavor-foreground-destructive));
+	--color-flavor-foreground-info: oklch(var(--flavor-foreground-info));
 
 	/* Primary color */
 	--color-primary: oklch(var(--primary));
@@ -253,8 +453,6 @@
 	--color-primary-900: oklch(var(--primary-900));
 	--color-primary-950: oklch(var(--primary-950));
 	--color-primary-foreground: oklch(var(--primary-foreground));
-	--color-primary-light-text: oklch(var(--primary-light-text));
-	--color-primary-dark-text: oklch(var(--primary-dark-text));
 
 	/* Secondary color */
 	--color-secondary: oklch(var(--secondary));
@@ -270,8 +468,6 @@
 	--color-secondary-900: oklch(var(--secondary-900));
 	--color-secondary-950: oklch(var(--secondary-950));
 	--color-secondary-foreground: oklch(var(--secondary-foreground));
-	--color-secondary-light-text: oklch(var(--secondary-light-text));
-	--color-secondary-dark-text: oklch(var(--secondary-dark-text));
 
 	/* Accent color */
 	--color-accent: oklch(var(--accent));
@@ -287,8 +483,6 @@
 	--color-accent-900: oklch(var(--accent-900));
 	--color-accent-950: oklch(var(--accent-950));
 	--color-accent-foreground: oklch(var(--accent-foreground));
-	--color-accent-light-text: oklch(var(--accent-light-text));
-	--color-accent-dark-text: oklch(var(--accent-dark-text));
 
 	/* Ambient color */
 	--color-ambient: oklch(var(--ambient));
@@ -304,8 +498,6 @@
 	--color-ambient-900: oklch(var(--ambient-900));
 	--color-ambient-950: oklch(var(--ambient-950));
 	--color-ambient-foreground: oklch(var(--ambient-foreground));
-	--color-ambient-light-text: oklch(var(--ambient-light-text));
-	--color-ambient-dark-text: oklch(var(--ambient-dark-text));
 
 	/* Success color */
 	--color-success: oklch(var(--success));
@@ -321,8 +513,6 @@
 	--color-success-900: oklch(var(--success-900));
 	--color-success-950: oklch(var(--success-950));
 	--color-success-foreground: oklch(var(--success-foreground));
-	--color-success-light-text: oklch(var(--success-light-text));
-	--color-success-dark-text: oklch(var(--success-dark-text));
 
 	/* Warning color */
 	--color-warning: oklch(var(--warning));
@@ -338,8 +528,6 @@
 	--color-warning-900: oklch(var(--warning-900));
 	--color-warning-950: oklch(var(--warning-950));
 	--color-warning-foreground: oklch(var(--warning-foreground));
-	--color-warning-light-text: oklch(var(--warning-light-text));
-	--color-warning-dark-text: oklch(var(--warning-dark-text));
 
 	/* Destructive color */
 	--color-destructive: oklch(var(--destructive));
@@ -355,8 +543,6 @@
 	--color-destructive-900: oklch(var(--destructive-900));
 	--color-destructive-950: oklch(var(--destructive-950));
 	--color-destructive-foreground: oklch(var(--destructive-foreground));
-	--color-destructive-light-text: oklch(var(--destructive-light-text));
-	--color-destructive-dark-text: oklch(var(--destructive-dark-text));
 
 	/* Info color */
 	--color-info: oklch(var(--info));
@@ -372,8 +558,6 @@
 	--color-info-900: oklch(var(--info-900));
 	--color-info-950: oklch(var(--info-950));
 	--color-info-foreground: oklch(var(--info-foreground));
-	--color-info-light-text: oklch(var(--info-light-text));
-	--color-info-dark-text: oklch(var(--info-dark-text));
 
 	/* Other shadcn colors */
 	--color-popover: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);
@@ -414,7 +598,7 @@
 	.elevation {
 		@apply relative isolate;
 		@apply bg-flavor/80;
-		@apply border-[1px] border-flavor-foreground/10;
+		@apply border border-flavor-foreground/10;
 		@apply shadow-lg inset-shadow-xs shadow-flavor-900/10 inset-shadow-flavor-100/15;
 		@apply backdrop-brightness-125 backdrop-saturate-125;
 		@apply after:absolute after:inset-0 after:-z-10;

@@ -1,5 +1,7 @@
 import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 import {
+	colorShades,
+	resolveColorFromShades,
 	validateTokenSet,
 	validateUJLTDocumentSafe,
 	type UJLTDocument,
@@ -28,6 +30,12 @@ describe("UJLT Schema Validation", () => {
 			expect(theme.ujlt.tokens.radius).toBe("0.75rem");
 			expect(theme.ujlt.tokens.color.primary).toBeDefined();
 			expect(theme.ujlt.tokens.color.ambient).toBeDefined();
+			expect(theme.ujlt.tokens.typography).toBeDefined();
+			expect(theme.ujlt.tokens.typography.base.font).toBe("Inter");
+			expect(theme.ujlt.tokens.typography.heading.weight).toBe("700");
+			expect(theme.ujlt.tokens.typography.highlight.flavor).toBe("accent");
+			expect(theme.ujlt.tokens.typography.link.underline).toBe(false);
+			expect(theme.ujlt.tokens.typography.mono.font).toBe("JetBrains Mono");
 		});
 
 		it("should have valid OKLCH values", () => {
@@ -37,7 +45,9 @@ describe("UJLT Schema Validation", () => {
 				throw new Error("Validation failed");
 			}
 
-			const primary = result.data.ujlt.tokens.color.primary.light;
+			const primaryColorSet = result.data.ujlt.tokens.color.primary;
+			// Resolve the shade reference to get the actual OKLCH value
+			const primary = resolveColorFromShades(primaryColorSet.shades, primaryColorSet.light);
 
 			// Lightness between 0 and 1
 			expect(primary.l).toBeGreaterThanOrEqual(0);
@@ -83,27 +93,57 @@ describe("UJLT Schema Validation", () => {
 			}
 
 			const shades = result.data.ujlt.tokens.color.primary.shades;
-			const expectedShades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
-			expectedShades.forEach(shade => {
-				expect(shades[shade as keyof typeof shades]).toBeDefined();
+			colorShades.forEach(shade => {
+				expect(shades[shade]).toBeDefined();
 			});
 		});
 	});
 
 	describe("Invalid theme data", () => {
-		it("should reject invalid lightness value", () => {
+		it("should reject invalid shade key", () => {
 			const invalid = {
 				ujlt: {
 					meta: { _version: "0.0.1" },
 					tokens: {
 						color: {
 							ambient: {
-								light: { l: 2, c: 0, h: 0 }, // l > 1
-								lightForeground: { l: 0.5, c: 0, h: 0 },
-								dark: { l: 0.1, c: 0, h: 0 },
-								darkForeground: { l: 0.9, c: 0, h: 0 },
-								shades: {},
+								light: "999", // Invalid shade key
+								lightForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								dark: "900",
+								darkForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								shades: {
+									"50": { l: 0.985, c: 0.0017, h: 262.022 },
+									"100": { l: 0.967, c: 0.0027, h: 267.303 },
+									"200": { l: 0.927, c: 0.0057, h: 267.286 },
+									"300": { l: 0.8719, c: 0.0106, h: 267.889 },
+									"400": { l: 0.7067, c: 0.0156, h: 280.567 },
+									"500": { l: 0.5517, c: 0.0138, h: 285.938 },
+									"600": { l: 0.4455, c: 0.0174, h: 279.571 },
+									"700": { l: 0.3726, c: 0.027, h: 268.757 },
+									"800": { l: 0.2775, c: 0.0296, h: 260.538 },
+									"900": { l: 0.21, c: 0.0305, h: 267.348 },
+									"950": { l: 0.1314, c: 0.0251, h: 264.743 },
+								},
+								_original: { lightHex: "#fafafa", darkHex: "#1a1a1a" },
 							},
 							primary: {} as any,
 							secondary: {} as any,
@@ -122,18 +162,110 @@ describe("UJLT Schema Validation", () => {
 			expect(result.success).toBe(false);
 		});
 
-		it("should reject negative chroma", () => {
+		it("should reject invalid lightness value in shades", () => {
 			const invalid = {
 				ujlt: {
 					meta: { _version: "0.0.1" },
 					tokens: {
 						color: {
 							ambient: {
-								light: { l: 0.5, c: -0.1, h: 0 }, // c < 0
-								lightForeground: { l: 0.5, c: 0, h: 0 },
-								dark: { l: 0.1, c: 0, h: 0 },
-								darkForeground: { l: 0.9, c: 0, h: 0 },
-								shades: {} as any,
+								light: "50",
+								lightForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								dark: "900",
+								darkForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								shades: {
+									"50": { l: 2, c: 0, h: 0 }, // l > 1
+									"100": { l: 0.967, c: 0.0027, h: 267.303 },
+									"200": { l: 0.927, c: 0.0057, h: 267.286 },
+									"300": { l: 0.8719, c: 0.0106, h: 267.889 },
+									"400": { l: 0.7067, c: 0.0156, h: 280.567 },
+									"500": { l: 0.5517, c: 0.0138, h: 285.938 },
+									"600": { l: 0.4455, c: 0.0174, h: 279.571 },
+									"700": { l: 0.3726, c: 0.027, h: 268.757 },
+									"800": { l: 0.2775, c: 0.0296, h: 260.538 },
+									"900": { l: 0.21, c: 0.0305, h: 267.348 },
+									"950": { l: 0.1314, c: 0.0251, h: 264.743 },
+								},
+								_original: { lightHex: "#fafafa", darkHex: "#1a1a1a" },
+							},
+							primary: {} as any,
+							secondary: {} as any,
+							accent: {} as any,
+							success: {} as any,
+							warning: {} as any,
+							destructive: {} as any,
+							info: {} as any,
+						},
+						radius: "0.5rem",
+					},
+				},
+			};
+
+			const result = validateUJLTDocumentSafe(invalid);
+			expect(result.success).toBe(false);
+		});
+
+		it("should reject negative chroma in shades", () => {
+			const invalid = {
+				ujlt: {
+					meta: { _version: "0.0.1" },
+					tokens: {
+						color: {
+							ambient: {
+								light: "50",
+								lightForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								dark: "900",
+								darkForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								shades: {
+									"50": { l: 0.5, c: -0.1, h: 0 }, // c < 0
+									"100": { l: 0.967, c: 0.0027, h: 267.303 },
+									"200": { l: 0.927, c: 0.0057, h: 267.286 },
+									"300": { l: 0.8719, c: 0.0106, h: 267.889 },
+									"400": { l: 0.7067, c: 0.0156, h: 280.567 },
+									"500": { l: 0.5517, c: 0.0138, h: 285.938 },
+									"600": { l: 0.4455, c: 0.0174, h: 279.571 },
+									"700": { l: 0.3726, c: 0.027, h: 268.757 },
+									"800": { l: 0.2775, c: 0.0296, h: 260.538 },
+									"900": { l: 0.21, c: 0.0305, h: 267.348 },
+									"950": { l: 0.1314, c: 0.0251, h: 264.743 },
+								},
+								_original: { lightHex: "#fafafa", darkHex: "#1a1a1a" },
 							},
 							primary: {} as any,
 							secondary: {} as any,
@@ -167,18 +299,49 @@ describe("UJLT Schema Validation", () => {
 			expect(result.success).toBe(false);
 		});
 
-		it("should reject invalid hue", () => {
+		it("should reject invalid hue in shades", () => {
 			const invalid = {
 				ujlt: {
 					meta: { _version: "0.0.1" },
 					tokens: {
 						color: {
 							ambient: {
-								light: { l: 0.5, c: 0.1, h: 400 }, // h > 360
-								lightForeground: { l: 0.5, c: 0, h: 0 },
-								dark: { l: 0.1, c: 0, h: 0 },
-								darkForeground: { l: 0.9, c: 0, h: 0 },
-								shades: {} as any,
+								light: "50",
+								lightForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								dark: "900",
+								darkForeground: {
+									ambient: "50",
+									primary: "50",
+									secondary: "50",
+									accent: "50",
+									success: "50",
+									warning: "50",
+									destructive: "50",
+									info: "50",
+								},
+								shades: {
+									"50": { l: 0.5, c: 0.1, h: 400 }, // h > 360
+									"100": { l: 0.967, c: 0.0027, h: 267.303 },
+									"200": { l: 0.927, c: 0.0057, h: 267.286 },
+									"300": { l: 0.8719, c: 0.0106, h: 267.889 },
+									"400": { l: 0.7067, c: 0.0156, h: 280.567 },
+									"500": { l: 0.5517, c: 0.0138, h: 285.938 },
+									"600": { l: 0.4455, c: 0.0174, h: 279.571 },
+									"700": { l: 0.3726, c: 0.027, h: 268.757 },
+									"800": { l: 0.2775, c: 0.0296, h: 260.538 },
+									"900": { l: 0.21, c: 0.0305, h: 267.348 },
+									"950": { l: 0.1314, c: 0.0251, h: 264.743 },
+								},
+								_original: { lightHex: "#fafafa", darkHex: "#1a1a1a" },
 							},
 							primary: {} as any,
 							secondary: {} as any,

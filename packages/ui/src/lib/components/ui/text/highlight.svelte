@@ -3,7 +3,7 @@
 
 	let { class: className = '', children, as = 'strong', ...restProps } = $props();
 
-	const baseStyle = 'text-accent';
+	const baseStyle = 'text-flavor-foreground-primary';
 </script>
 
 <svelte:element this={as} class={cn(baseStyle, className)} {...restProps}>
