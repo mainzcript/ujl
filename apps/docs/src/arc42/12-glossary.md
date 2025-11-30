@@ -11,7 +11,7 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts – mit klarer Trennung von Inhalt und Design.
 
 - **UJL Crafter**  
-  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler, Designer und Redakteure. Integriert standardmäßig den Renderer, kann aber auch mit alternativen Renderern kombiniert werden.
+  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Integriert standardmäßig den Renderer, kann aber auch mit alternativen Renderern kombiniert werden.
 
 - **UJL Renderer**  
   Die Render-Engine des UJL-Systems. Verarbeitet `.ujlc.json`- und `.ujlt.json`-Dateien und erzeugt daraus ein vollständiges Frontend (HTML, CSS, JS).
@@ -49,17 +49,17 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 
 ## Rollen und Nutzung
 
-- **Entwickler**  
+- **Entwickler:innen**  
   Integrieren UJL in bestehende Systeme, erstellen eigene Module und konfigurieren die Ausgabe-Logik.
 
-- **Designer**  
+- **Designer:innen**  
   Pflegen zentrale Designregeln in der `.ujlt.json`-Datei und sorgen für ein konsistentes Erscheinungsbild.
 
-- **Redakteure**  
+- **Redakteur:innen**  
   Bearbeiten Inhalte visuell im Crafter. Nutzen vordefinierte Module und Layouts, ohne in Code eingreifen zu müssen.
 
-- **Konsument**  
-  Sieht das Endergebnis: eine klar strukturierte, responsive und designkonforme Darstellung – unabhängig vom Gerät.
+- **Konsument:innen**  
+  Sehen das Endergebnis: eine klar strukturierte, responsive und designkonforme Darstellung – unabhängig vom Gerät.
 
 ## Erweiterung & Zukunft
 

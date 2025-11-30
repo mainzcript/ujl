@@ -25,8 +25,6 @@
 	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 </script>
 
-<div class="flex flex-1 flex-col gap-4 p-4">
-	<div class="mx-auto w-full max-w-3xl">
-		<AdapterRoot node={ast} {tokenSet} {mode} />
-	</div>
+<div class="h-full w-full">
+	<AdapterRoot node={ast} {tokenSet} {mode} />
 </div>

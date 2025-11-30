@@ -13,6 +13,6 @@
 	let { node, tokenSet, mode }: Props = $props();
 </script>
 
-<UJLTheme tokens={tokenSet} {mode}>
+<UJLTheme tokens={tokenSet} {mode} class="bg-ambient isolate h-full p-10">
 	<ASTNode {node} />
 </UJLTheme>

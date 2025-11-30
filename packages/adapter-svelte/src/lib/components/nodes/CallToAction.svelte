@@ -20,7 +20,7 @@
 		</Text>
 
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-			<Button href={node.props.actionButtons.primary.props.href} flavor="primary">
+			<Button href={node.props.actionButtons.primary.props.href} variant="primary">
 				{node.props.actionButtons.primary.props.label}
 			</Button>
 

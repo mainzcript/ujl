@@ -12,10 +12,11 @@
 		CollapsibleContent
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTColorSet } from '@ujl-framework/types';
+	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
 	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
 
 	let {
+		palette,
 		successColorSet,
 		warningColorSet,
 		destructiveColorSet,
@@ -25,14 +26,15 @@
 		onDestructiveChange,
 		onInfoChange
 	}: {
+		palette: UJLTColorPalette;
 		successColorSet: UJLTColorSet | null;
 		warningColorSet: UJLTColorSet | null;
 		destructiveColorSet: UJLTColorSet | null;
 		infoColorSet: UJLTColorSet | null;
-		onSuccessChange?: (set: UJLTColorSet) => void;
-		onWarningChange?: (set: UJLTColorSet) => void;
-		onDestructiveChange?: (set: UJLTColorSet) => void;
-		onInfoChange?: (set: UJLTColorSet) => void;
+		onSuccessChange?: (hex: string) => void;
+		onWarningChange?: (hex: string) => void;
+		onDestructiveChange?: (hex: string) => void;
+		onInfoChange?: (hex: string) => void;
 	} = $props();
 </script>
 
@@ -54,24 +56,32 @@
 					label="Success Color"
 					id="success-color"
 					colorSet={successColorSet}
+					{palette}
+					flavor="success"
 					onChange={onSuccessChange}
 				/>
 				<ColorPaletteInput
 					label="Warning Color"
 					id="warning-color"
 					colorSet={warningColorSet}
+					{palette}
+					flavor="warning"
 					onChange={onWarningChange}
 				/>
 				<ColorPaletteInput
 					label="Destructive Color"
 					id="destructive-color"
 					colorSet={destructiveColorSet}
+					{palette}
+					flavor="destructive"
 					onChange={onDestructiveChange}
 				/>
 				<ColorPaletteInput
 					label="Info Color"
 					id="info-color"
 					colorSet={infoColorSet}
+					{palette}
+					flavor="info"
 					onChange={onInfoChange}
 				/>
 			</SidebarGroupContent>

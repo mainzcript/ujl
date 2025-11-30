@@ -251,21 +251,35 @@
 										>
 									</CardHeader>
 									<CardContent>
-										<div class="space-y-4">
-											<div class="space-y-2">
-												<div class="rounded-lg border border-border bg-white p-4">
-													<Text style="color: oklch(var(--{flavor}-light-text));"
-														>This text uses the {flavor} color optimized for light backgrounds.</Text
-													>
-												</div>
-											</div>
-											<div class="space-y-2">
-												<div class="rounded-lg border border-border bg-black p-4">
-													<Text style="color: oklch(var(--{flavor}-dark-text));"
-														>This text uses the {flavor} color optimized for dark backgrounds.</Text
-													>
-												</div>
-											</div>
+										<div class="grid grid-cols-2 gap-5">
+											<Text class="text-flavor-foreground-primary">
+												This paragraph uses <Badge variant="primary">primary</Badge> Text optimized to
+												be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-secondary">
+												This paragraph uses <Badge variant="secondary">secondary</Badge> Text optimized
+												to be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-accent">
+												This paragraph uses <Badge variant="accent">accent</Badge> Text optimized to
+												be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-success">
+												This paragraph uses <Badge variant="success">success</Badge> Text optimized to
+												be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-warning">
+												This paragraph uses <Badge variant="warning">warning</Badge> Text optimized to
+												be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-destructive">
+												This paragraph uses <Badge variant="destructive">destructive</Badge> Text optimized
+												to be displayed on {flavor} background.
+											</Text>
+											<Text class="text-flavor-foreground-info">
+												This paragraph uses <Badge variant="info">info</Badge> Text optimized to be displayed
+												on {flavor} background.
+											</Text>
 										</div>
 									</CardContent>
 								</Card>
@@ -276,13 +290,13 @@
 										<CardTitle>Buttons</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div class="flex gap-2">
+										<div class="flex flex-nowrap gap-2 overflow-x-auto">
 											<Button>Default</Button>
 											<Button variant="muted">Muted</Button>
 											<Button variant="outline">Outline</Button>
 											<Button variant="ghost">Ghost</Button>
 											{#each flavors as btn_flavor (btn_flavor)}
-												<Button flavor={btn_flavor}>{btn_flavor}</Button>
+												<Button variant={btn_flavor}>{btn_flavor}</Button>
 											{/each}
 										</div>
 									</CardContent>
@@ -459,10 +473,7 @@
 														<InputGroupAddon>
 															<InputGroupText>https://</InputGroupText>
 														</InputGroupAddon>
-														<InputGroupInput placeholder="example.com" class="!pl-0.5" />
-														<InputGroupAddon align="inline-end">
-															<InputGroupText>.com</InputGroupText>
-														</InputGroupAddon>
+														<InputGroupInput placeholder="example.com" class="pl-0.5!" />
 													</InputGroup>
 												</div>
 												<div class="space-y-2">
@@ -512,7 +523,7 @@
 										<CardTitle>Overlay Components</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div class="flex items-center gap-2">
+										<div class="flex flex-nowrap items-center gap-2 overflow-x-auto">
 											<Dialog>
 												<DialogTriggerButton>Dialog</DialogTriggerButton>
 												<DialogContent class="sm:max-w-[425px]">
@@ -1032,7 +1043,7 @@
 													</AlertDescription>
 												</Alert>
 												{#each flavors as alert_flavor (alert_flavor)}
-													<Alert flavor={alert_flavor}>
+													<Alert variant={alert_flavor}>
 														<AlertTitle>{alert_flavor} Alert</AlertTitle>
 														<AlertDescription>
 															This is an {alert_flavor} alert with title and description.
@@ -1048,7 +1059,7 @@
 											<div class="flex flex-wrap gap-2">
 												<Badge>Default</Badge>
 												{#each flavors as badge_flavor (badge_flavor)}
-													<Badge flavor={badge_flavor}>{badge_flavor}</Badge>
+													<Badge variant={badge_flavor}>{badge_flavor}</Badge>
 												{/each}
 												<Badge variant="outline">Outline</Badge>
 												<Badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">8</Badge
@@ -1093,21 +1104,21 @@
 												</Button>
 												<Button
 													size="sm"
-													flavor="destructive"
+													variant="destructive"
 													onclick={() => toast.error('Error! Something went wrong.')}
 												>
 													Error Toast
 												</Button>
 												<Button
 													size="sm"
-													flavor="info"
+													variant="info"
 													onclick={() => toast.info('Info: Here is some information.')}
 												>
 													Info Toast
 												</Button>
 												<Button
 													size="sm"
-													flavor="warning"
+													variant="warning"
 													onclick={() => toast.warning('Warning: Please check your input.')}
 												>
 													Warning Toast

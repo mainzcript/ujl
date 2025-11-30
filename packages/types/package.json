@@ -9,11 +9,12 @@
 		".": "./dist/index.js"
 	},
 	"bin": {
-		"ujl-validate": "./dist/validate.js"
+		"ujl-validate": "./bin/ujl-validate.js"
 	},
 	"files": [
 		"dist",
-		"src"
+		"src",
+		"bin"
 	],
 	"scripts": {
 		"build": "pnpm run clean && tsc",

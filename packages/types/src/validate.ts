@@ -7,7 +7,12 @@ import {
 	type UJLCDocument,
 	type UJLCModuleObject,
 } from "./ujl-content.js";
-import { validateUJLTDocumentSafe, type UJLTDocument } from "./ujl-theme.js";
+import {
+	resolveColorFromShades,
+	resolveForegroundColor,
+	validateUJLTDocumentSafe,
+	type UJLTDocument,
+} from "./ujl-theme.js";
 
 // Parse CLI arguments
 const filePath = process.argv[2];
@@ -114,8 +119,12 @@ function validateTheme(data: unknown) {
 		console.log("📊 Theme Details:");
 		console.log(`   Version: ${theme.ujlt.meta._version}`);
 		console.log(`   Radius: ${theme.ujlt.tokens.radius}`);
+		const primaryLight = resolveColorFromShades(
+			theme.ujlt.tokens.color.primary.shades,
+			theme.ujlt.tokens.color.primary.light
+		);
 		console.log(
-			`   Primary Light: l=${theme.ujlt.tokens.color.primary.light.l.toFixed(3)}, c=${theme.ujlt.tokens.color.primary.light.c.toFixed(3)}, h=${theme.ujlt.tokens.color.primary.light.h.toFixed(3)}`
+			`   Primary Light: l=${primaryLight.l.toFixed(3)}, c=${primaryLight.c.toFixed(3)}, h=${primaryLight.h.toFixed(3)}`
 		);
 
 		console.log("\n🎨 Available Colors:");
@@ -127,15 +136,18 @@ function validateTheme(data: unknown) {
 		console.log("\n🔍 Validation Checks:");
 		let warnings = 0;
 
-		Object.entries(theme.ujlt.tokens.color).forEach(([flavor, colorSet]) => {
-			// Check if light/dark contrast is sufficient
-			const lightness = colorSet.light.l;
-			const foregroundLightness = colorSet.lightForeground.l;
-			const contrast = Math.abs(lightness - foregroundLightness);
+		Object.entries(theme.ujlt.tokens.color).forEach(([flavorKey, colorSet]) => {
+			// Check if light/dark contrast is sufficient for the default
+			// foreground on the same background flavor (ambient on ambient,
+			// primary on primary, etc.) in light mode.
+			const flavor = flavorKey as keyof typeof theme.ujlt.tokens.color;
+			const bgLight = resolveColorFromShades(colorSet.shades, colorSet.light);
+			const fgLight = resolveForegroundColor(theme.ujlt.tokens.color, flavor, flavor, "light");
+			const contrast = Math.abs(bgLight.l - fgLight.l);
 
 			if (contrast < 0.3) {
 				console.log(
-					`   ⚠️  ${flavor}: Low contrast (${contrast.toFixed(2)}) between light and lightForeground`
+					`   ⚠️  ${flavorKey}: Low contrast (${contrast.toFixed(2)}) between light and lightForeground`
 				);
 				warnings++;
 			}

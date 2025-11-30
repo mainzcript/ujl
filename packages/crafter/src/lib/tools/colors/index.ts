@@ -4,27 +4,25 @@
  * This module provides a unified interface for all color-related functions.
  *
  * The color system is organized into focused modules:
- * - `colorSpaces.ts`: Color space conversions and distance calculations
- * - `contrast.ts`: APCA contrast calculations and text color selection
- * - `palettes.ts`: Palette generation, interpolation, and refinement
- * - `tailwindColorPlate.ts`: Tailwind reference color data
- * - `paletteToColorSet.ts`: Conversion from GeneratedPalette to UJLTColorSet
+ * - `conversion.ts`: Color space conversions (OKLCH ↔ Color ↔ Hex)
+ * - `shades.ts`: Color shade generation and manipulation
+ * - `contrast.ts`: APCA contrast calculations and foreground color selection
+ * - `palette.ts`: High-level palette update functions
+ * - `refColors.ts`: Tailwind reference color data
+ * - `types.ts`: Type definitions for color operations
+ * - `utils.ts`: Utility functions (easing, etc.)
  *
  * @module colors
  */
 
-// Re-export types
-export type { GeneratedPalette } from './palettes.js';
+// Re-export conversion utilities
+export { oklchToHex, formatOklch, getBaseHexFromColorSet } from './conversion.ts';
 
-// Re-export color space functions
-export { hexToOklch, oklchToHex } from './colorSpaces.js';
+// Re-export palette update functions
+export { updateFlavorByOriginal } from './palette.ts';
 
-// Re-export palette generation functions
-export { generateColorPalette } from './palettes.js';
+// Re-export shade generation
+export { generateColorShades, generateColorShadesLightDark } from './shades.ts';
 
-// Re-export palette conversion functions
-export {
-	mapGeneratedPaletteToColorSet,
-	generateColorSetFromHex,
-	getBaseHexFromColorSet
-} from './paletteToColorSet.js';
+// Re-export contrast utilities
+export { pickFgColor, pickSimilarFgColor } from './contrast.ts';

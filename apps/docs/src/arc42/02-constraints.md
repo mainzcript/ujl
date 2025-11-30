@@ -5,7 +5,11 @@ description: "TODO: Dieses Kapitel wird noch ausgearbeitet"
 
 # Randbedingungen
 
-> **TODO**: Dieses Kapitel wird in zukünftigen Versionen der Dokumentation ergänzt.
+::: info In Ausarbeitung
+
+Dieses Kapitel wird ausgearbeitet, sobald die Architektur weiter ausdifferenziert wird. Erste Konzepte findest du in der [Vision](/about/01-vision) und [Roadmap](/about/04-roadmap).
+
+:::
 
 Gemäß arc42-Template sollte dieses Kapitel folgende Inhalte enthalten:
 

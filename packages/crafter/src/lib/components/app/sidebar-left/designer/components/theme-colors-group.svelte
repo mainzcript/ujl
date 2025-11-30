@@ -12,10 +12,11 @@
 		CollapsibleContent
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTColorSet } from '@ujl-framework/types';
+	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
 	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
 
 	let {
+		palette,
 		primaryColorSet,
 		secondaryColorSet,
 		accentColorSet,
@@ -23,12 +24,13 @@
 		onSecondaryChange,
 		onAccentChange
 	}: {
+		palette: UJLTColorPalette;
 		primaryColorSet: UJLTColorSet | null;
 		secondaryColorSet: UJLTColorSet | null;
 		accentColorSet: UJLTColorSet | null;
-		onPrimaryChange?: (set: UJLTColorSet) => void;
-		onSecondaryChange?: (set: UJLTColorSet) => void;
-		onAccentChange?: (set: UJLTColorSet) => void;
+		onPrimaryChange?: (hex: string) => void;
+		onSecondaryChange?: (hex: string) => void;
+		onAccentChange?: (hex: string) => void;
 	} = $props();
 </script>
 
@@ -50,18 +52,24 @@
 					label="Primary Color"
 					id="primary-color"
 					colorSet={primaryColorSet}
+					{palette}
+					flavor="primary"
 					onChange={onPrimaryChange}
 				/>
 				<ColorPaletteInput
 					label="Secondary Color"
 					id="secondary-color"
 					colorSet={secondaryColorSet}
+					{palette}
+					flavor="secondary"
 					onChange={onSecondaryChange}
 				/>
 				<ColorPaletteInput
 					label="Accent Color"
 					id="accent-color"
 					colorSet={accentColorSet}
+					{palette}
+					flavor="accent"
 					onChange={onAccentChange}
 				/>
 			</SidebarGroupContent>

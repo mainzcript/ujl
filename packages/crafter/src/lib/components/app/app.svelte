@@ -11,6 +11,7 @@
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 	import { CRAFTER_CONTEXT, createOperations, type CrafterContext } from './context.js';
+	import { downloadJsonFile, readJsonFile } from '$lib/tools/files.ts';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
 	import SidebarRight from './sidebar-right/sidebar-right.svelte';
@@ -89,6 +90,66 @@
 		};
 	}
 
+	/**
+	 * Exports the current theme document (ujlt) as a .ujlt.json file.
+	 * Uses the current state of ujltDocument from the single source of truth.
+	 */
+	function handleExportTheme() {
+		downloadJsonFile(ujltDocument, 'theme.ujlt.json');
+	}
+
+	/**
+	 * Exports the current content document (ujlc) as a .ujlc.json file.
+	 * Uses the current state of ujlcDocument from the single source of truth.
+	 */
+	function handleExportContent() {
+		downloadJsonFile(ujlcDocument, 'content.ujlc.json');
+	}
+
+	/**
+	 * Imports a theme document (ujlt) from a .ujlt.json file.
+	 * Validates the imported document and updates the state if valid.
+	 *
+	 * @param file - The File object containing the .ujlt.json content
+	 */
+	async function handleImportTheme(file: File) {
+		const data = await readJsonFile(file);
+		if (!data) {
+			alert('Failed to read or parse the theme file.');
+			return;
+		}
+
+		try {
+			const validatedDocument = validateUJLTDocument(data as unknown as UJLTDocument);
+			ujltDocument = validatedDocument;
+		} catch (error) {
+			console.error('Theme validation failed:', error);
+			alert('The imported theme file is invalid. Please check the file format.');
+		}
+	}
+
+	/**
+	 * Imports a content document (ujlc) from a .ujlc.json file.
+	 * Validates the imported document and updates the state if valid.
+	 *
+	 * @param file - The File object containing the .ujlc.json content
+	 */
+	async function handleImportContent(file: File) {
+		const data = await readJsonFile(file);
+		if (!data) {
+			alert('Failed to read or parse the content file.');
+			return;
+		}
+
+		try {
+			const validatedDocument = validateUJLCDocument(data as unknown as UJLCDocument);
+			ujlcDocument = validatedDocument;
+		} catch (error) {
+			console.error('Content validation failed:', error);
+			alert('The imported content file is invalid. Please check the file format.');
+		}
+	}
+
 	// Create operations using the factory function
 	const operations = createOperations(() => ujlcDocument.ujlc.root, updateRootSlot);
 
@@ -113,5 +174,10 @@
 		<Header />
 		<Body {ujlcDocument} {ujltDocument} />
 	</SidebarInset>
-	<SidebarRight />
+	<SidebarRight
+		onExportTheme={handleExportTheme}
+		onExportContent={handleExportContent}
+		onImportTheme={handleImportTheme}
+		onImportContent={handleImportContent}
+	/>
 </SidebarProvider>

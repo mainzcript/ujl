@@ -9,7 +9,7 @@
 	let { node }: Props = $props();
 </script>
 
-<Alert variant="flavored" flavor="destructive">
+<Alert variant="destructive">
 	<AlertDescription>
 		<strong>Error:</strong>
 		{node.props.message}

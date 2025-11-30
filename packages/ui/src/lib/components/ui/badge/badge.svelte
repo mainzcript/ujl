@@ -1,13 +1,19 @@
 <script lang="ts" module>
 	import { type VariantProps, tv } from 'tailwind-variants';
-	import type { UJLTFlavor } from '@ujl-framework/types';
 
 	export const badgeVariants = tv({
 		base: 'focus-visible:border-ring/50 focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-medium transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3',
 		variants: {
 			variant: {
 				default: 'elevation bg-flavor-foreground/80 text-flavor border-flavor-foreground/20',
-				flavored: 'elevation text-flavor-foreground',
+				ambient: 'elevation bg-ambient text-ambient-foreground border-ambient',
+				primary: 'elevation bg-primary text-primary-foreground border-primary',
+				secondary: 'elevation bg-secondary text-secondary-foreground border-secondary',
+				accent: 'elevation bg-accent text-accent-foreground border-accent',
+				success: 'elevation bg-success text-success-foreground border-success',
+				warning: 'elevation bg-warning text-warning-foreground border-warning',
+				destructive: 'elevation bg-destructive text-destructive-foreground border-destructive',
+				info: 'elevation bg-info text-info-foreground border-info',
 				outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground'
 			}
 		},
@@ -28,17 +34,11 @@
 		href,
 		class: className,
 		variant = undefined,
-		flavor = undefined,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		variant?: BadgeVariant;
-		flavor?: UJLTFlavor;
 	} = $props();
-
-	if (flavor && !variant) {
-		variant = 'flavored';
-	}
 </script>
 
 <svelte:element
@@ -46,7 +46,7 @@
 	bind:this={ref}
 	data-slot="badge"
 	{href}
-	class={cn(badgeVariants({ variant }), flavor && `flavor-${flavor}`, className)}
+	class={cn(badgeVariants({ variant }), className)}
 	{...restProps}
 >
 	{@render children?.()}

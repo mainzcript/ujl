@@ -10,7 +10,7 @@
 	import { SidebarTrigger } from '@ujl-framework/ui';
 </script>
 
-<header class="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-sidebar">
+<header class="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 bg-sidebar shadow">
 	<div class="flex flex-1 items-center gap-2 px-3">
 		<SidebarTrigger />
 		<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />

@@ -4,8 +4,10 @@
 -->
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { UJLTTokenSet, UJLTColorSet } from '@ujl-framework/types';
+	import type { UJLTTokenSet, UJLTFlavor, UJLTAmbientColorSet } from '@ujl-framework/types';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
+	import { updateFlavorByOriginal } from '$lib/tools/colors/index.ts';
+	import AmbientColorGroup from './components/ambient-color-group.svelte';
 	import ThemeColorsGroup from './components/theme-colors-group.svelte';
 	import NotificationColorsGroup from './components/notification-colors-group.svelte';
 	import AppearanceGroup from './components/appearance-group.svelte';
@@ -16,17 +18,36 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	/**
-	 * Helper function to update a single color token.
-	 * This is the only mutation path for color tokens, ensuring unidirectional data flow.
+	 * Helper function to update a single non-ambient color flavor from a hex input.
+	 * Uses updateFlavorByOriginal to recalculate all derived colors
+	 * (light, dark and the complete foreground matrix) from a single hex color.
+	 * This is the only mutation path for non-ambient color tokens, ensuring unidirectional data flow.
 	 *
-	 * @param key - The color key to update (e.g., 'primary', 'secondary', etc.)
-	 * @param set - The new UJLTColorSet value
+	 * @param flavor - The color flavor to update (e.g., 'primary', 'secondary', etc.)
+	 * @param hex - The new hex color string (e.g., "#3b82f6")
 	 */
-	function updateColorToken(key: keyof UJLTTokenSet['color'], set: UJLTColorSet) {
-		crafter.updateTokenSet((oldTokens) => ({
-			...oldTokens,
-			color: { ...oldTokens.color, [key]: set }
-		}));
+	function updateColorToken(flavor: Exclude<UJLTFlavor, 'ambient'>, hex: string) {
+		crafter.updateTokenSet((oldTokens) => {
+			const updatedPalette = updateFlavorByOriginal(oldTokens.color, flavor, { hex });
+			return {
+				...oldTokens,
+				color: updatedPalette
+			};
+		});
+	}
+
+	/**
+	 * Helper function to update the ambient color flavor from a dual original input.
+	 * Accepts UJLTAmbientColorSet['_original'] so that ambient can be driven by separate light/dark hex values.
+	 */
+	function updateAmbientColorToken(original: UJLTAmbientColorSet['_original']) {
+		crafter.updateTokenSet((oldTokens) => {
+			const updatedPalette = updateFlavorByOriginal(oldTokens.color, 'ambient', original);
+			return {
+				...oldTokens,
+				color: updatedPalette
+			};
+		});
 	}
 
 	/**
@@ -58,24 +79,32 @@
 	Delegate UI rendering to presentational group components.
 	Each group receives tokens directly as props and onChange callbacks for updates.
 -->
+<AmbientColorGroup
+	palette={tokens.color}
+	ambientColorSet={tokens.color.ambient}
+	onAmbientChange={updateAmbientColorToken}
+/>
+
 <ThemeColorsGroup
+	palette={tokens.color}
 	primaryColorSet={tokens.color.primary}
 	secondaryColorSet={tokens.color.secondary}
 	accentColorSet={tokens.color.accent}
-	onPrimaryChange={(set) => updateColorToken('primary', set)}
-	onSecondaryChange={(set) => updateColorToken('secondary', set)}
-	onAccentChange={(set) => updateColorToken('accent', set)}
+	onPrimaryChange={(hex) => updateColorToken('primary', hex)}
+	onSecondaryChange={(hex) => updateColorToken('secondary', hex)}
+	onAccentChange={(hex) => updateColorToken('accent', hex)}
 />
 
 <NotificationColorsGroup
+	palette={tokens.color}
 	successColorSet={tokens.color.success}
 	warningColorSet={tokens.color.warning}
 	destructiveColorSet={tokens.color.destructive}
 	infoColorSet={tokens.color.info}
-	onSuccessChange={(set) => updateColorToken('success', set)}
-	onWarningChange={(set) => updateColorToken('warning', set)}
-	onDestructiveChange={(set) => updateColorToken('destructive', set)}
-	onInfoChange={(set) => updateColorToken('info', set)}
+	onSuccessChange={(hex) => updateColorToken('success', hex)}
+	onWarningChange={(hex) => updateColorToken('warning', hex)}
+	onDestructiveChange={(hex) => updateColorToken('destructive', hex)}
+	onInfoChange={(hex) => updateColorToken('info', hex)}
 />
 
 <AppearanceGroup

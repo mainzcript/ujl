@@ -185,6 +185,13 @@ export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
  * Generates a unique random ID for a node
  * Uses the framework's centralized ID generator from @ujl-framework/core
  * Uses a shorter ID length (10 characters) for better UX in URLs and UI
+ *
+ * @returns A unique random ID string
+ *
+ * @example
+ * ```ts
+ * const id = generateNodeId(); // "V1StGXR8_Z"
+ * ```
  */
 export function generateNodeId(): string {
 	return generateUid(10);
@@ -231,18 +238,12 @@ export function createOperations(
 				return null;
 			}
 
-			// Generate new unique ID for the copy
-			let newId = generateNodeId();
-			while (findNodeById(slot, newId) !== null) {
-				newId = generateNodeId();
-			}
-
 			// Create duplicate with new ID
 			const duplicatedNode: UJLCModuleObject = {
 				...node,
 				meta: {
 					...node.meta,
-					id: newId
+					id: generateNodeId()
 				}
 			};
 			return duplicatedNode;
@@ -510,21 +511,8 @@ export function createOperations(
 				return false;
 			}
 
-			// Generate unique ID
-			let newId = generateNodeId();
-			let attempts = 0;
-			while (findNodeById(slot, newId) !== null && attempts < 10) {
-				newId = generateNodeId();
-				attempts++;
-			}
-
-			if (attempts >= 10) {
-				console.error('Failed to generate unique ID after 10 attempts');
-				return false;
-			}
-
 			// Create new node from definition
-			const newNode = createNodeFromDefinition(componentDefinition, newId);
+			const newNode = createNodeFromDefinition(componentDefinition, generateNodeId());
 
 			// Handle insert position
 			if (position === 'before' || position === 'after') {

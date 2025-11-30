@@ -281,9 +281,6 @@ importers:
 
   packages/crafter:
     dependencies:
-      apca-w3:
-        specifier: ^0.1.9
-        version: 0.1.9
       colorjs.io:
         specifier: ^0.5.2
         version: 0.5.2
@@ -3492,9 +3489,6 @@ packages:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
 
-  apca-w3@0.1.9:
-    resolution: {integrity: sha512-Zrf6AeBeQjNe/fxK7U1jCo5zfdjDl6T4/kdw5Xlky3G7u+EJTZkyItjMYQGtwf9pkftsINxcYyOpuLkzKf1ITQ==}
-
   argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
 
@@ -3754,9 +3748,6 @@ packages:
 
   colorjs.io@0.5.2:
     resolution: {integrity: sha512-twmVoizEW7ylZSN32OgKdXRmo1qg+wT5/6C3xu5b9QsWzSFAhHLn2xd8ro0diCsKfCj1RdaTP/nrcW+vAoQPIw==}
-
-  colorparsley@0.1.8:
-    resolution: {integrity: sha512-rObESTTTE6G5qO5WFwFxWPggpw4KfpxnLC6Ssl8bITBnNVRhDsyCeTRAUxWQNVTx2pRknKlO2nddYTxjkdNFaw==}
 
   comma-separated-tokens@2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
@@ -10893,10 +10884,6 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.1
 
-  apca-w3@0.1.9:
-    dependencies:
-      colorparsley: 0.1.8
-
   argparse@1.0.10:
     dependencies:
       sprintf-js: 1.0.3
@@ -11172,8 +11159,6 @@ snapshots:
   colorette@2.0.20: {}
 
   colorjs.io@0.5.2: {}
-
-  colorparsley@0.1.8: {}
 
   comma-separated-tokens@2.0.3: {}
 
