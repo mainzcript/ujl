@@ -10,7 +10,12 @@
 	import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
-	import { CRAFTER_CONTEXT, createOperations, type CrafterContext } from './context.js';
+	import {
+		CRAFTER_CONTEXT,
+		createOperations,
+		findPathToNode,
+		type CrafterContext
+	} from './context.js';
 	import { downloadJsonFile, readJsonFile } from '$lib/tools/files.ts';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
@@ -18,6 +23,8 @@
 	import Header from './header/header.svelte';
 	import Body from './body/preview.svelte';
 	import { type CrafterMode } from './types.js';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	/**
 	 * Single Source of Truth: Load and validate documents
@@ -47,6 +54,42 @@
 	 */
 	function handleModeChange(newMode: CrafterMode) {
 		mode = newMode;
+	}
+
+	/**
+	 * Expanded node IDs in the navigation tree
+	 * This controls which nodes show their children in the tree view
+	 */
+	let expandedNodeIds = $state<Set<string>>(new Set());
+
+	/**
+	 * Toggle a node's expanded state
+	 */
+	function setNodeExpanded(nodeId: string, expanded: boolean) {
+		if (expanded) {
+			expandedNodeIds.add(nodeId);
+		} else {
+			expandedNodeIds.delete(nodeId);
+		}
+	}
+
+	/**
+	 * Expand all parent nodes to make a target node visible
+	 * This is called when clicking a component in the preview
+	 */
+	function expandToNode(nodeId: string) {
+		// Find the path from root to the target node
+		const path = findPathToNode(ujlcDocument.ujlc.root, nodeId);
+
+		if (!path) {
+			// console.warn('[Crafter] Could not find path to node:', nodeId);
+			return;
+		}
+
+		// Expand all nodes in the path
+		for (const parentId of path) {
+			expandedNodeIds.add(parentId);
+		}
 	}
 
 	/**
@@ -88,6 +131,26 @@
 				root: newSlot
 			}
 		};
+	}
+
+	/**
+	 * Set the currently selected node ID
+	 * Updates the URL with ?selected=nodeId query parameter
+	 */
+	function setSelectedNodeId(nodeId: string | null): void {
+		const url = new URL($page.url);
+
+		if (nodeId) {
+			url.searchParams.set('selected', nodeId);
+		} else {
+			url.searchParams.delete('selected');
+		}
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(url, {
+			replaceState: true, // Don't add to browser history
+			noScroll: true, // Don't scroll to top
+			keepFocus: true // Keep focus on current element
+		});
 	}
 
 	/**
@@ -157,6 +220,10 @@
 	const crafterContext: CrafterContext = {
 		updateTokenSet,
 		updateRootSlot,
+		setSelectedNodeId,
+		getExpandedNodeIds: () => expandedNodeIds,
+		setNodeExpanded,
+		expandToNode,
 		operations
 	};
 

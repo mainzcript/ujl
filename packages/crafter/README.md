@@ -26,13 +26,47 @@ The Crafter manages two distinct document types:
   - `ujlcDocument: UJLCDocument` - The UJL content document (validated on initialization)
   - `ujltDocument: UJLTDocument` - The UJL theme document (validated on initialization)
   - `mode: CrafterMode` - The current sidebar mode ('editor' or 'designer'), controls which view is displayed
+  - `expandedNodeIds: Set<string>` - Reactive set of expanded node IDs in the navigation tree
   - Both documents are validated on initialization using `validateUJLCDocument` and `validateUJLTDocument`
   - These functions throw `ZodError` if validation fails, ensuring only valid documents are used
   - The mode state is owned by `app.svelte` and passed down to `SidebarLeft` as a controlled prop
 
+### Bidirectional Tree ↔ Preview Synchronization
+
+The Crafter provides seamless bidirectional synchronization between the navigation tree and the visual preview:
+
+#### Tree → Preview Scrolling
+
+- Clicking a node in the tree automatically scrolls to that component in the preview
+- **Smart scroll behavior**: only scrolls if >80% of the component is outside the viewport
+- Smooth scrolling animation centers the component in the preview area
+- Uses manual scroll calculation with `scrollTo()` for precise container scrolling
+- Preview container uses `overflow-y-auto` for independent scrolling
+
+#### Preview → Tree Auto-Expand & Scroll
+
+- Clicking a component in the preview automatically:
+  1. **Expands** all parent nodes in the tree to reveal the clicked component
+  2. **Selects** the component (updates URL with `?selected=nodeId`)
+  3. **Scrolls** the tree to center the selected component
+- Uses path-finding algorithm (`findPathToNode()`) to determine which nodes need expansion
+- Centralized expand state managed via Svelte 5 `$state` runes for reactivity
+- Expansion state persists across tree interactions (manual collapse/expand still works)
+- 200ms delay before scrolling to allow for expansion animations to complete
+
+#### Implementation Details
+
+- **Expand State Management**: `app.svelte` maintains `expandedNodeIds` Set with reactive mutations (`.add()`, `.delete()`)
+- **Context API**: `expandToNode()`, `setNodeExpanded()`, `getExpandedNodeIds()` available via `CrafterContext`
+- **Controlled Collapsibles**: `nav-tree-item.svelte` uses `open={isExpanded}` bound to central state
+- **Path Finding**: `findPathToNode()` in `ujlc-tree-utils.ts` recursively finds all parent IDs to target node
+- **Preview Handler**: `handleModuleClick()` in `preview.svelte` orchestrates expand → select → scroll sequence
+
 ### Context API
 
 All mutations go through a central **Crafter Context API** (`context.ts`):
+
+#### Theme & Content Mutations
 
 - `updateTokenSet(fn)` - Updates theme tokens (colors, radius, etc.)
   - Receives a function that takes the current `UJLTTokenSet` and returns a new one
@@ -43,6 +77,27 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
   - Receives a function that takes the current `UJLCSlotObject` (root slot) and returns a new one
   - Updates `ujlcDocument.ujlc.root` immutably
   - This is the only mutation entrypoint for content structure changes
+
+- `setSelectedNodeId(nodeId)` - Updates selected node in URL
+  - Updates URL parameter `?selected=<nodeId>` without page reload
+  - Triggers tree and preview synchronization
+
+#### Tree Expansion State
+
+- `getExpandedNodeIds()` - Returns reactive Set of expanded node IDs
+  - Returns getter function to maintain Svelte 5 reactivity
+  - Usage: `const expandedNodeIds = $derived(crafter.getExpandedNodeIds())`
+
+- `setNodeExpanded(nodeId, expanded)` - Toggles individual node expansion
+  - Mutates the reactive Set directly (`.add()` or `.delete()`)
+  - Triggers reactive updates in all components using the expansion state
+
+- `expandToNode(nodeId)` - Expands all parents to reveal target node
+  - Uses `findPathToNode()` to find all parent IDs from root to target
+  - Adds all parent IDs to `expandedNodeIds` Set
+  - Called when clicking components in preview to auto-reveal in tree
+
+#### Content Operations
 
 - `operations` - High-level operations for document manipulation (created via `createOperations()` factory):
   - **Node Operations:**
@@ -64,9 +119,11 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
   - All tree mutations use immutable utilities from `ujlc-tree-utils.ts`
   - Component insertion uses `getComponentDefinition()` and `createNodeFromDefinition()` from component library
 
-- **Helper Utilities:**
-  - `generateNodeId()` - Generates unique IDs using `generateUid(10)` from `@ujl-framework/core` (nanoid with 10 chars)
-  - `isDescendant(node, targetId)` - Checks if node is de
+#### Helper Utilities
+
+- `generateNodeId()` - Generates unique IDs using `generateUid(10)` from `@ujl-framework/core` (nanoid with 10 chars)
+- `isDescendant(node, targetId)` - Checks if node is descendant of target
+- `findPathToNode(nodes, targetId)` - Finds all parent IDs from root to target (exported from `ujlc-tree-utils.ts`)
 
 **Why Functional Updates?**
 
@@ -89,11 +146,13 @@ This ensures:
 
 - **`app.svelte`**: Root component, manages state and provides context
   - Holds `ujlcDocument` and `ujltDocument` as reactive state
+  - Manages `expandedNodeIds` Set for tree expansion state
   - Extracts `ujltDocument.ujlt.tokens` → `tokenSet` prop
   - Extracts `ujlcDocument.ujlc.root` → `contentSlot` prop
   - Provides `CrafterContext` via Svelte context API
   - Creates operations factory via `createOperations()` and provides full `CrafterContext` via Svelte context API
   - Handles mode state (`'editor' | 'designer'`) and passes it down to `SidebarLeft`
+  - Implements `setNodeExpanded()` and `expandToNode()` for tree expansion control
 
 - **`sidebar-left.svelte`**: Receives `tokenSet`, `contentSlot`, and `mode` as props, routes to Editor/Designer
   - This is a controlled component - the mode state is owned by `app.svelte` and passed down
@@ -120,11 +179,16 @@ This ensures:
   - Supports both node dragging and slot dragging
 
 - **`nav-tree-item.svelte`**: Individual tree node component
-  - Renders nodes at any nesting level with collapsible structure
+  - Renders nodes at any nesting level with **controlled collapsible structure**
+  - **Controlled Expansion**: Uses central `expandedNodeIds` state from context
+  - `open={isExpanded}` binds Collapsible to `expandedNodeIds.has(node.meta.id)`
+  - `onOpenChange={handleOpenChange}` updates central state via `crafter.setNodeExpanded()`
   - Shows drop indicators (before/after/into) during drag operations
   - Provides context menu via dropdown for cut/copy/paste/delete/insert operations
-  - Handles both single-slot and multi-slot nodes differently
-  - For multi-slot nodes or empty slots, delegates to `NavTreeSlotGroup`
+  - Handles both single-slot and multi-slot nodes differently:
+    - **Single-slot nodes**: Children displayed directly under the node without showing the slot as a separate group
+    - **Multi-slot nodes**: Each slot shown as a named, collapsible group (e.g., "HEADER", "CONTENT", "FOOTER")
+  - Only nodes with children show the chevron icon for expanding/collapsing
   - Supports drag & drop for node reordering and moving
 
 - **`nav-tree-slot-group.svelte`**: Slot group component for multi-slot nodes
@@ -143,15 +207,29 @@ This ensures:
   - Returns drag state and handlers for use in tree components
 
 - **`ujlc-tree-utils.ts`**: Immutable tree manipulation utilities
-  - `findNodeById()` - Recursively finds nodes by ID
-  - `findParentOfNode()` - Finds parent, slot name, and index of a node
-  - `removeNodeFromTree()` - Removes node immutably
-  - `insertNodeIntoSlot()` - Inserts node at end of slot
-  - `insertNodeAtPosition()` - Inserts node at specific position
-  - `updateNodeInTree()` - Updates node using function
-  - Display helpers: `getDisplayName()`, `formatTypeName()`, `formatSlotName()`
-  - Navigation helpers: `getChildren()`, `hasChildren()`, `hasSlots()`, `canAcceptDrop()`
-  - Clipboard helpers: `canNodeAcceptPaste()`, `canSlotAcceptPaste()`
+  - **Search**:
+    - `findNodeById(nodes, targetId)` - Recursively finds nodes by ID
+    - `findParentOfNode(nodes, targetId)` - Finds parent, slot name, and index of a node
+    - `findPathToNode(nodes, targetId)` - **NEW**: Finds all parent IDs from root to target node (for auto-expansion)
+  - **Modification**:
+    - `removeNodeFromTree(nodes, targetId)` - Removes node immutably
+    - `insertNodeIntoSlot(nodes, parentId, slotName, nodeToInsert)` - Inserts node at end of slot
+    - `insertNodeAtPosition(nodes, targetId, position, nodeToInsert)` - Inserts node at specific position
+    - `updateNodeInTree(nodes, targetId, updateFn)` - Updates node using function
+  - **Display Helpers**:
+    - `getDisplayName(node)` - Returns formatted display name (type + title/label/content preview)
+    - `formatTypeName(type)` - Converts kebab-case to Title Case
+    - `formatSlotName(slotName)` - Formats slot names for display
+  - **Navigation Helpers**:
+    - `getChildren(node)` - Returns all children from all slots
+    - `hasChildren(node)` - Checks if node has any children
+    - `hasSlots(node)` - Checks if node has any slots
+    - `hasMultipleSlots(node)` - Checks if node has multiple slots
+  - **Validation Helpers**:
+    - `canAcceptDrop(node)` - Checks if node can accept dropped items
+    - `canNodeAcceptPaste(node, clipboard)` - Checks if node can accept pasted content
+    - `canSlotAcceptPaste(node, slotName, clipboard)` - Checks if slot can accept pasted content
+  - All functions create new objects instead of mutating inputs, ensuring predictable reactivity
 
 - **`editor-toolbar.svelte`**: Context menu toolbar for nodes
   - Renders operation buttons (Insert, Cut, Copy, Paste, Delete)
@@ -167,9 +245,20 @@ This ensures:
   - Resets search state when dialog closes
   - **⚠️ TODO:** Currently uses manually maintained Component Library - should be generated from Module Registry (see `@ujl-framework/core` and `@ujl-framework/examples` READMEs)
 
-- **`preview.svelte`**: Receives `ujlcDocument` and `ujltDocument` as props, renders via `@ujl-framework/adapter-svelte`
-  - Composes the content document into an AST using `Composer`
-  - Renders the AST with the theme tokens using `AdapterRoot` component (reactive, Svelte-idiomatic)
+- **`preview.svelte`**: Visual preview component
+  - Receives `ujlcDocument` and `ujltDocument` as props
+  - Composes UJLC document to AST using `Composer` from `@ujl-framework/core`
+  - Renders components via `AdapterRoot` from `@ujl-framework/adapter-svelte` with metadata and click handlers
+  - **Click Handler**: `handleModuleClick()` implements preview → tree sync:
+    1. Calls `crafter.expandToNode(moduleId)` to reveal clicked component in tree
+    2. Calls `crafter.setSelectedNodeId(moduleId)` to update selection and URL
+    3. Calls `scrollToNodeInTree(moduleId)` to scroll tree to component (200ms delay)
+  - **Selection Effect**: `$effect()` watches `selectedNodeId` and automatically:
+    - Highlights selected component with visual outline
+    - Scrolls preview to component if >80% is out of view
+    - Uses manual scroll calculation with `scrollTo()` for precise container scrolling
+  - Preview container uses `overflow-y-auto` for independent scrolling
+  - Smart scroll detection: only scrolls if >80% of component is outside viewport
 
 ### Data Flow
 
@@ -181,9 +270,12 @@ This ensures:
    - `crafter.updateTokenSet(fn)` → updates `ujltDocument.ujlt.tokens`
    - `crafter.updateRootSlot(fn)` → updates `ujlcDocument.ujlc.root`
    - `crafter.operations.*()` → high-level operations that internally use `updateRootSlot()`
+   - `crafter.setNodeExpanded(nodeId, expanded)` → updates `expandedNodeIds` Set
+   - `crafter.expandToNode(nodeId)` → expands all parents to reveal target
 
 3. **React**: State changes trigger reactive updates, props flow down, UI re-renders
    - When `ujltDocument` or `ujlcDocument` change, new props are computed
+   - When `expandedNodeIds` changes, tree collapsibles update
    - Child components reactively update their UI
    - Preview re-renders with new content/theme
 
@@ -193,8 +285,9 @@ This ensures:
 
 - Selected node/slot tracked via URL parameter `?selected=<id>` or `?selected=<parentId>:<slotName>`
 - Navigating to a node updates the URL without page reload (`goto()` with `replaceState: true`)
-- Visual feedback: Selected items highlighted with custom styling
+- Visual feedback: Selected items highlighted with custom styling in both tree and preview
 - Slot selection format: `parentId:slotName` (e.g., `"abc123:children"`)
+- Clicking in preview auto-expands tree to reveal selected component
 
 #### Clipboard Operations
 
@@ -259,7 +352,7 @@ Drag state includes:
 
 All tree manipulations in `ujlc-tree-utils.ts` are **immutable**:
 
-- **Search**: `findNodeById()`, `findParentOfNode()` - recursive traversal
+- **Search**: `findNodeById()`, `findParentOfNode()`, `findPathToNode()` - recursive traversal
 - **Modification**: `removeNodeFromTree()`, `insertNodeIntoSlot()`, `insertNodeAtPosition()`, `updateNodeInTree()`
 - **Display**: `getDisplayName()` shows type + title/label/content preview
 - **Navigation**: `getChildren()`, `hasChildren()`, `hasSlots()`, `hasMultipleSlots()`

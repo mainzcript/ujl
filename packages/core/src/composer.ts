@@ -36,7 +36,9 @@ export class Composer {
 	public composeModule(moduleData: UJLCModuleObject): UJLAbstractNode {
 		const module = this._module_registry.getModule(moduleData.type);
 		if (module) {
-			return module.compose(moduleData, this);
+			const node = module.compose(moduleData, this);
+			node.id = moduleData.meta.id;
+			return node;
 		} else {
 			// Fallback for unknown modules
 			return {
@@ -44,6 +46,7 @@ export class Composer {
 				props: {
 					message: `Unknown module type: ${moduleData.type}`,
 				},
+				id: moduleData.meta.id,
 			};
 		}
 	}

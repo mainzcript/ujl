@@ -8,13 +8,21 @@
 	let {
 		node,
 		tokenSet,
-		mode
+		mode,
+		showMetadata = false,
+		eventCallback
 	}: {
 		node: UJLAbstractNode;
 		tokenSet?: UJLTTokenSet;
 		mode?: 'light' | 'dark' | 'system';
+		showMetadata?: boolean;
+		eventCallback?: (moduleId: string) => void;
 	} = $props();
 
+	/**
+	 * Svelte action to inject CSS into Shadow DOM style element.
+	 * Returns an update function for reactive style changes.
+	 */
 	function updateStyle(element: HTMLStyleElement, css: string) {
 		element.textContent = css;
 		return {
@@ -27,5 +35,6 @@
 
 <div>
 	<style use:updateStyle={bundledStyles} data-ujl-role="styles-bundle"></style>
-	<AdapterRoot {node} {tokenSet} {mode} />
+	<!-- Pass props through to AdapterRoot component -->
+	<AdapterRoot {node} {tokenSet} {mode} {showMetadata} {eventCallback} />
 </div>

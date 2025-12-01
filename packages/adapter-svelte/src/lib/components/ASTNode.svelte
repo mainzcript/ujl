@@ -6,6 +6,7 @@
  -->
 <script lang="ts">
 	import type { UJLAbstractNode } from '@ujl-framework/types';
+	import { NODE_TYPES } from '../constants.js';
 	import {
 		Container,
 		Wrapper,
@@ -21,35 +22,37 @@
 
 	interface Props {
 		node: UJLAbstractNode;
+		showMetadata?: boolean;
+		eventCallback?: (moduleId: string) => void;
 	}
 
-	let { node }: Props = $props();
+	let { node, showMetadata = false, eventCallback }: Props = $props();
 </script>
 
-{#if node.type === 'container'}
-	<Container {node} />
-{:else if node.type === 'wrapper'}
-	<Wrapper {node} />
-{:else if node.type === 'raw-html'}
+{#if node.type === NODE_TYPES.CONTAINER}
+	<Container {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.WRAPPER}
+	<Wrapper {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.RAW_HTML}
 	<Raw {node} />
-{:else if node.type === 'error'}
+{:else if node.type === NODE_TYPES.ERROR}
 	<Error {node} />
-{:else if node.type === 'text'}
-	<Text {node} />
-{:else if node.type === 'button'}
-	<Button {node} />
-{:else if node.type === 'card'}
-	<Card {node} />
-{:else if node.type === 'grid'}
-	<Grid {node} />
-{:else if node.type === 'grid-item'}
-	<GridItem {node} />
-{:else if node.type === 'call-to-action'}
-	<CallToAction {node} />
+{:else if node.type === NODE_TYPES.TEXT}
+	<Text {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.BUTTON}
+	<Button {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.CARD}
+	<Card {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.GRID}
+	<Grid {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.GRID_ITEM}
+	<GridItem {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.CALL_TO_ACTION}
+	<CallToAction {node} {showMetadata} {eventCallback} />
 {:else}
 	<Error
 		node={{
-			type: 'error',
+			type: NODE_TYPES.ERROR,
 			props: { message: `Unknown node type: ${(node as { type: string }).type}` }
 		}}
 	/>

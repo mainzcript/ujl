@@ -30,7 +30,7 @@ export const componentLibrary: ComponentLibrary = [
 		defaultFields: {},
 		defaultSlots: {
 			body: [],
-			header: [],
+			// header: [],
 		},
 		tags: ["wrapper", "section", "group"],
 	},

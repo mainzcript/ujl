@@ -9,6 +9,23 @@ import AdapterRoot from './components/AdapterRoot.svelte';
  *
  * Converts UJL AST nodes into mounted Svelte components.
  * Uses Svelte 5's mount() API for direct component mounting.
+ *
+ * @param node - The UJL AST node to render
+ * @param tokenSet - Design token set to apply to the rendered AST
+ * @param options - Adapter configuration options
+ * @returns Mounted component instance with cleanup function
+ * @throws {Error} If target element is not found
+ *
+ * @example
+ * ```typescript
+ * const mounted = svelteAdapter(ast, tokenSet, {
+ *   target: '#container',
+ *   mode: 'system',
+ *   showMetadata: true,
+ *   eventCallback: (moduleId) => console.log('Clicked:', moduleId)
+ * });
+ * await mounted.unmount();
+ * ```
  */
 export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> = (
 	node: UJLAbstractNode,
@@ -37,13 +54,16 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 		props: {
 			node,
 			tokenSet,
-			mode: options.mode
+			mode: options.mode,
+			showMetadata: options.showMetadata ?? false,
+			eventCallback: options.eventCallback
 		}
 	});
 
 	// Return mounted component with cleanup function
 	return {
-		instance: instance as Component, // Type assertion for Svelte 5 mount result
+		// Svelte 5 mount() returns Component | undefined, but we've validated target exists
+		instance: instance as Component,
 		unmount: async () => {
 			await unmount(instance);
 		}
