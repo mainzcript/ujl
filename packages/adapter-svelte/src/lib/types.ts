@@ -18,6 +18,17 @@ export type SvelteAdapterOptions = {
 	target: string | HTMLElement;
 	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
 	mode?: 'light' | 'dark' | 'system';
+	/**
+	 * Show metadata attributes on module elements
+	 * When true, adds data-ujl-module-id attribute to module elements
+	 * (default: false)
+	 */
+	showMetadata?: boolean;
+	/**
+	 * Callback function triggered when a module is clicked
+	 * Receives the module ID from the clicked element
+	 */
+	eventCallback?: (moduleId: string) => void;
 };
 
 /**

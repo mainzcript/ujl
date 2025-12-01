@@ -8,11 +8,13 @@
 		node: UJLAbstractNode;
 		tokenSet?: UJLTTokenSet;
 		mode?: 'light' | 'dark' | 'system';
+		showMetadata?: boolean;
+		eventCallback?: (moduleId: string) => void;
 	}
 
-	let { node, tokenSet, mode }: Props = $props();
+	let { node, tokenSet, mode, showMetadata = false, eventCallback }: Props = $props();
 </script>
 
-<UJLTheme tokens={tokenSet} {mode} class="bg-ambient isolate h-full p-10">
-	<ASTNode {node} />
+<UJLTheme tokens={tokenSet} {mode} class="bg-ambient h-content isolate p-10">
+	<ASTNode {node} {showMetadata} {eventCallback} />
 </UJLTheme>

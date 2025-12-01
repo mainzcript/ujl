@@ -61,6 +61,31 @@ export type CrafterContext = {
 	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void;
 
 	/**
+	 * Set the currently selected node ID
+	 * This triggers navigation and updates the URL
+	 */
+	setSelectedNodeId: (nodeId: string | null) => void;
+
+	/**
+	 * Get the set of expanded node IDs in the navigation tree
+	 * Returns a reactive getter function
+	 */
+	getExpandedNodeIds: () => Set<string>;
+
+	/**
+	 * Toggle a node's expanded state
+	 * @param nodeId - The node ID to toggle
+	 * @param expanded - Whether the node should be expanded
+	 */
+	setNodeExpanded: (nodeId: string, expanded: boolean) => void;
+
+	/**
+	 * Expand all parent nodes to make a target node visible
+	 * @param nodeId - The target node ID
+	 */
+	expandToNode: (nodeId: string) => void;
+
+	/**
 	 * High-level operations for document manipulation
 	 */
 	operations: {
@@ -212,6 +237,47 @@ function isDescendant(node: UJLCModuleObject, targetId: string): boolean {
 	}
 
 	return false;
+}
+
+/**
+ * Helper: Find path from root to target node
+ * Returns array of all parent node IDs leading to the target
+ *
+ * @param nodes - Array of root nodes to search
+ * @param targetId - The node ID to find
+ * @param currentPath - Current path (used for recursion)
+ * @returns Array of parent node IDs, or null if not found
+ *
+ * @example
+ * ```ts
+ * const path = findPathToNode(rootNodes, 'child-node-id');
+ * // Returns: ['parent-id', 'grandparent-id']
+ * ```
+ */
+export function findPathToNode(
+	nodes: UJLCModuleObject[],
+	targetId: string,
+	currentPath: string[] = []
+): string[] | null {
+	for (const node of nodes) {
+		// Check if this is the target node
+		if (node.meta.id === targetId) {
+			return currentPath;
+		}
+
+		// Check children in all slots
+		if (node.slots) {
+			for (const slotContent of Object.values(node.slots)) {
+				const newPath = [...currentPath, node.meta.id];
+				const result = findPathToNode(slotContent, targetId, newPath);
+				if (result !== null) {
+					return result;
+				}
+			}
+		}
+	}
+
+	return null;
 }
 
 /**

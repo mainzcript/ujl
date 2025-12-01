@@ -29,6 +29,8 @@
 		canNodeAcceptPaste,
 		hasSlots
 	} from './ujlc-tree-utils.js';
+	import { getContext } from 'svelte';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.ts';
 
 	let {
 		node,
@@ -106,17 +108,29 @@
 	const canInsert = $derived(hasSlots(node) && !hasMultipleSlots(node));
 
 	// Show slots as groups if node has multiple slots OR if it has no children yet
-	const showSlotsAsGroups = $derived(hasMultiple || (hasSlots(node) && !hasChildren(node)));
+	const showSlotsAsGroups = $derived(hasMultiple);
+
+	// Get Crafter Context for expanded state
+	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+	const expandedNodeIds = $derived(crafter.getExpandedNodeIds());
+
+	// Controlled expanded state from context
+	const isExpanded = $derived(expandedNodeIds.has(node.meta.id));
+
+	// Handle expand/collapse toggle
+	function handleOpenChange(open: boolean) {
+		crafter.setNodeExpanded(node.meta.id, open);
+	}
 </script>
 
 {#if level === 0}
-	{#if hasChildren(node) || (hasSlots(node) && !hasChildren(node))}
+	{#if hasChildren(node)}
 		<!-- Root level node with children or empty slots -->
 		<SidebarMenuItem class="relative">
 			{#if showDropBefore}
 				<div class="drop-indicator drop-indicator-before"></div>
 			{/if}
-			<Collapsible>
+			<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
 				<CollapsibleTrigger class="group">
 					{#snippet child({ props })}
 						<SidebarMenuButton {...props}>
@@ -325,13 +339,13 @@
 			{/if}
 		</SidebarMenuItem>
 	{/if}
-{:else if hasChildren(node) || (hasSlots(node) && !hasChildren(node))}
+{:else if hasChildren(node)}
 	<!-- Nested level node with children or empty slots -->
 	<div class="relative">
 		{#if showDropBefore}
 			<div class="drop-indicator drop-indicator-before"></div>
 		{/if}
-		<Collapsible>
+		<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
 			<CollapsibleTrigger class="group">
 				{#snippet child({ props })}
 					<SidebarMenuButton {...props}>

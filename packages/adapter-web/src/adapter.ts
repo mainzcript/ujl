@@ -6,6 +6,23 @@ import type { WebAdapterOptions, MountedElement, UJLContentElement } from './typ
  *
  * Converts UJL AST nodes into Custom Elements (`<ujl-content>`).
  * Uses Svelte Custom Element compilation to create a framework-agnostic Web Component.
+ *
+ * @param node - The UJL AST node to render
+ * @param tokenSet - Design token set to apply to the rendered AST
+ * @param options - Adapter configuration options
+ * @returns Mounted element instance with cleanup function
+ * @throws {Error} If target element is not found
+ *
+ * @example
+ * ```typescript
+ * const mounted = webAdapter(ast, tokenSet, {
+ *   target: '#container',
+ *   mode: 'system',
+ *   showMetadata: true,
+ *   eventCallback: (moduleId) => console.log('Clicked:', moduleId)
+ * });
+ * mounted.unmount();
+ * ```
  */
 export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 	node: UJLAbstractNode,
@@ -34,6 +51,13 @@ export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 	customElement.tokenSet = tokenSet;
 	if (options.mode !== undefined) {
 		customElement.mode = options.mode;
+	}
+	// Pass through metadata and callback options to Custom Element
+	if (options.showMetadata !== undefined) {
+		customElement.showMetadata = options.showMetadata;
+	}
+	if (options.eventCallback !== undefined) {
+		customElement.eventCallback = options.eventCallback;
 	}
 
 	// Mount Custom Element to target

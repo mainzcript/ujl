@@ -75,7 +75,7 @@ UJL Document (.ujlc.json)
     ↓
 Composer (with Module Registry)
     ↓
-AST (UJLAbstractNode)
+AST (UJLAbstractNode with IDs)
     ↓
 Adapter (HTML, Svelte, etc.)
     ↓
@@ -90,7 +90,35 @@ Output
 - **Slots**: Nested content areas that can contain other modules
 - **Composer**: Orchestrates the composition process using the module registry
 - **AST**: Abstract intermediate representation that separates composition from rendering
+- **Module IDs**: Unique identifiers preserved from UJLC documents to AST nodes for tracking and selection
 - **Adapters**: Convert AST nodes to specific output formats (HTML, Svelte components, etc.)
+
+### Module ID Propagation
+
+The Composer automatically transfers module IDs from the UJLC document to the AST:
+
+```typescript
+// In UJLC document
+{
+	type: "text",
+	meta: { id: "text-001" },  // ← ID defined here
+	fields: { content: "Hello" }
+}
+
+// After composition
+{
+	type: "text",
+	id: "text-001",  // ← ID preserved in AST
+	props: { content: "Hello" }
+}
+```
+
+This enables:
+
+- ✅ Tracking modules through the composition pipeline
+- ✅ Click-to-select in visual editors
+- ✅ DOM element identification with `data-ujl-module-id`
+- ✅ Programmatic module manipulation
 
 ## Extensibility
 
@@ -174,7 +202,7 @@ const composer = new Composer(registry);
 > 2. Creating a function to convert `ModuleBase` instances to `ComponentDefinition`
 > 3. Generating the library from the registry at runtime or build time
 >
-> See `packages/core/src/modules/base.ts` for TODO comments.
+> See `packages/core/src/modules/base.ts` and `packages/core/src/modules/registry.ts` for TODO comments.
 
 ## Built-in Modules & Fields
 
@@ -235,6 +263,36 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	options: OptionsType
 ) => OutputType;
 ```
+
+### Module ID Handling in Composer
+
+The `composeModule` method automatically preserves IDs:
+
+```typescript
+public composeModule(moduleData: UJLCModuleObject): UJLAbstractNode {
+	const module = this._module_registry.getModule(moduleData.type);
+	if (module) {
+		const node = module.compose(moduleData, this);
+
+		// Automatic ID preservation
+		if (moduleData.meta?.id) {
+			node.id = moduleData.meta.id;
+		}
+
+		return node;
+	} else {
+		// Fallback for unknown modules
+		return {
+			type: "error",
+			props: {
+				message: `Unknown module type: ${moduleData.type}`,
+			},
+		};
+	}
+}
+```
+
+This ensures all AST nodes have their IDs properly set for downstream use by adapters.
 
 ## Development
 
