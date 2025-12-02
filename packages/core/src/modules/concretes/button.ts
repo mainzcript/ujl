@@ -57,6 +57,7 @@ export class Button extends ModuleBase {
 				label,
 				href,
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }

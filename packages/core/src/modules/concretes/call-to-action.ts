@@ -124,6 +124,7 @@ export class CallToActionModule extends ModuleBase {
 							label: primaryButtonLabel ?? "",
 							href: primaryButtonHref ?? "",
 						},
+						id: `${moduleData.meta.id}-primary-button`,
 					},
 					secondary: {
 						type: "button",
@@ -131,9 +132,11 @@ export class CallToActionModule extends ModuleBase {
 							label: secondaryButtonLabel ?? "",
 							href: secondaryButtonHref ?? "",
 						},
+						id: `${moduleData.meta.id}-secondary-button`,
 					},
 				},
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }

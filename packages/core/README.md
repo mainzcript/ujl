@@ -115,10 +115,10 @@ The Composer automatically transfers module IDs from the UJLC document to the AS
 
 This enables:
 
-- ✅ Tracking modules through the composition pipeline
-- ✅ Click-to-select in visual editors
-- ✅ DOM element identification with `data-ujl-module-id`
-- ✅ Programmatic module manipulation
+- Tracking modules through the composition pipeline
+- Click-to-select in visual editors
+- DOM element identification with `data-ujl-module-id`
+- Programmatic module manipulation
 
 ## Extensibility
 
@@ -272,27 +272,23 @@ The `composeModule` method automatically preserves IDs:
 public composeModule(moduleData: UJLCModuleObject): UJLAbstractNode {
 	const module = this._module_registry.getModule(moduleData.type);
 	if (module) {
-		const node = module.compose(moduleData, this);
-
-		// Automatic ID preservation
-		if (moduleData.meta?.id) {
-			node.id = moduleData.meta.id;
-		}
-
-		return node;
-	} else {
+		return module.compose(moduleData, this);
+		// ID is automatically preserved from moduleData.meta.id to node.id
+		// All AST nodes are guaranteed to have an id field (required)
+		} else {
 		// Fallback for unknown modules
 		return {
 			type: "error",
 			props: {
 				message: `Unknown module type: ${moduleData.type}`,
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }
 ```
 
-This ensures all AST nodes have their IDs properly set for downstream use by adapters.
+This ensures all AST nodes have their IDs properly set for downstream use by adapters. The `id` field is required on all AST node types, ensuring reliable module identification and selection in editors.
 
 ## Development
 

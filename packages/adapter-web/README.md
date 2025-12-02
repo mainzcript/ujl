@@ -158,12 +158,12 @@ The adapter compiles `adapter-svelte` components at build time using Vite's libr
 
 All features from `adapter-svelte` are available in `adapter-web`:
 
-- ✅ Full AST node support (all module types)
-- ✅ Theme token support with light/dark/system modes
-- ✅ Metadata attributes (`showMetadata`)
-- ✅ Click event callbacks (`eventCallback`)
-- ✅ Event prevention and propagation handling
-- ✅ All styling and layout capabilities
+- Full AST node support (all module types)
+- Theme token support with light/dark/system modes
+- Metadata attributes (`showMetadata`)
+- Click event callbacks (`eventCallback`)
+- Event prevention and propagation handling
+- All styling and layout capabilities
 
 ## Event Handling
 
@@ -182,10 +182,10 @@ function handleClick(event: MouseEvent) {
 
 This ensures:
 
-- ✅ Only the clicked module triggers the callback
-- ✅ Parent modules don't receive the event
-- ✅ Default behaviors are suppressed in editor mode
-- ✅ The correct module ID is passed to the callback
+- Only the clicked module triggers the callback
+- Parent modules don't receive the event
+- Default behaviors are suppressed in editor mode
+- The correct module ID is passed to the callback
 
 ## Development
 

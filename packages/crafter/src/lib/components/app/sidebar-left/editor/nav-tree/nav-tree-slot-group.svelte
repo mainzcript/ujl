@@ -16,7 +16,7 @@
 	} from '@ujl-framework/ui';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
-	import { formatSlotName } from './ujlc-tree-utils.js';
+	import { formatSlotName } from '$lib/tools/ujlc-tree.js';
 
 	let {
 		parentNode,
@@ -160,12 +160,13 @@
 										onCut={() => onSlotCut?.(parentNode.meta.id, slotName)}
 										onPaste={() => onSlotPaste?.(parentNode.meta.id, slotName)}
 										onDelete={() => {}}
-										onInsert={() => onInsert(parentNode.meta.id)}
+										onInsert={() => onInsert(`${parentNode.meta.id}:${slotName}`)}
 										onClose={() => (dropdownOpen = false)}
 										canCopy={slotChildren.length > 0}
 										canCut={slotChildren.length > 0}
 										canPaste={clipboard !== null}
 										canInsert={true}
+										canDelete={false}
 									/>
 								</DropdownMenuContent>
 							</DropdownMenu>

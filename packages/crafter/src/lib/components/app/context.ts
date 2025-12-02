@@ -8,8 +8,13 @@ import {
 	insertNodeAtPosition,
 	getFirstSlotName,
 	hasSlots,
-	updateNodeInTree
-} from './sidebar-left/editor/nav-tree/ujlc-tree-utils.js';
+	updateNodeInTree,
+	isDescendant,
+	isRootNode,
+	deepCloneModule,
+	deepCloneModuleWithNewIds,
+	DEFAULT_NODE_ID_LENGTH
+} from '$lib/tools/ujlc-tree.js';
 import {
 	getComponentDefinition,
 	createNodeFromDefinition
@@ -207,9 +212,24 @@ export type CrafterContext = {
 export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
 
 /**
- * Generates a unique random ID for a node
- * Uses the framework's centralized ID generator from @ujl-framework/core
- * Uses a shorter ID length (10 characters) for better UX in URLs and UI
+ * Logs a warning message for operation failures
+ * Centralized logging for consistent error handling
+ *
+ * @param message - The warning message
+ * @param details - Optional additional details
+ */
+function logWarning(message: string, details?: unknown): void {
+	if (details !== undefined) {
+		console.warn(`[Crafter] ${message}`, details);
+	} else {
+		console.warn(`[Crafter] ${message}`);
+	}
+}
+
+/**
+ * Generates a unique random ID for a node.
+ * Uses the framework's centralized ID generator from @ujl-framework/core.
+ * Uses a shorter ID length (10 characters) for better UX in URLs and UI.
  *
  * @returns A unique random ID string
  *
@@ -219,29 +239,12 @@ export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
  * ```
  */
 export function generateNodeId(): string {
-	return generateUid(10);
+	return generateUid(DEFAULT_NODE_ID_LENGTH);
 }
 
 /**
- * Helper function to check if a node is a descendant of target
- */
-function isDescendant(node: UJLCModuleObject, targetId: string): boolean {
-	if (node.meta.id === targetId) return true;
-
-	if (!node.slots) return false;
-
-	for (const slotContent of Object.values(node.slots)) {
-		for (const child of slotContent) {
-			if (isDescendant(child, targetId)) return true;
-		}
-	}
-
-	return false;
-}
-
-/**
- * Helper: Find path from root to target node
- * Returns array of all parent node IDs leading to the target
+ * Finds the path from root to target node.
+ * Returns an array of all parent node IDs leading to the target.
  *
  * @param nodes - Array of root nodes to search
  * @param targetId - The node ID to find
@@ -293,26 +296,17 @@ export function createOperations(
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				console.warn('Node not found');
+				logWarning('Node not found');
 				return null;
 			}
 
-			// Check if node is root
-			const parentInfo = findParentOfNode(slot, nodeId);
-			if (!parentInfo || !parentInfo.parent) {
-				console.warn('Cannot copy root node');
+			if (isRootNode(nodeId)) {
+				logWarning('Cannot copy root node');
 				return null;
 			}
 
-			// Create duplicate with new ID
-			const duplicatedNode: UJLCModuleObject = {
-				...node,
-				meta: {
-					...node.meta,
-					id: generateNodeId()
-				}
-			};
-			return duplicatedNode;
+			// Clone preserving IDs (new IDs assigned at paste time)
+			return deepCloneModule(node);
 		},
 
 		moveNode(
@@ -326,40 +320,46 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetId);
 
 			if (!node || !targetNode) {
-				console.warn('Node or target not found');
+				logWarning('Node or target not found');
 				return false;
 			}
 
-			// Check if node is root
+			if (isRootNode(nodeId)) {
+				logWarning('Cannot move root node');
+				return false;
+			}
+
 			const parentInfo = findParentOfNode(slot, nodeId);
-			if (!parentInfo || !parentInfo.parent) {
-				console.warn('Cannot move root node');
+			if (!parentInfo) {
+				logWarning('Cannot find parent of node');
 				return false;
 			}
 
 			if (position === 'before' || position === 'after') {
-				// get parent info of target
 				const targetParentInfo = findParentOfNode(slot, targetId);
 
-				if (!targetParentInfo || !targetParentInfo.parent) {
-					console.warn('Cannot move relative to root node');
+				if (!targetParentInfo) {
+					logWarning('Cannot find parent of target node');
 					return false;
 				}
 
-				// Check if trying to move node into itself or its descendants
+				if (isRootNode(targetId)) {
+					logWarning('Cannot move relative to root node');
+					return false;
+				}
+
 				if (isDescendant(node, targetId)) {
-					console.warn('Cannot move node into itself or its descendants');
+					logWarning('Cannot move node into itself or its descendants');
 					return false;
 				}
 
-				// calculate new position
 				let newPosition = targetParentInfo.index;
 				if (position === 'after') {
 					newPosition += 1;
 				}
-
-				// if moving down in the same slot, adjust position
 				if (
+					parentInfo.parent &&
+					targetParentInfo.parent &&
 					parentInfo.parent.meta.id === targetParentInfo.parent.meta.id &&
 					parentInfo.slotName === targetParentInfo.slotName &&
 					parentInfo.index < newPosition
@@ -367,47 +367,61 @@ export function createOperations(
 					newPosition -= 1;
 				}
 
-				// Perform move with position
+				if (targetParentInfo.parent && isRootNode(targetParentInfo.parent.meta.id)) {
+					updateRootSlot((currentSlot) => {
+						const removedTree = removeNodeFromTree(currentSlot, nodeId);
+						const newArray = [...removedTree];
+						newArray.splice(newPosition, 0, node);
+						return newArray;
+					});
+				} else {
+					if (!targetParentInfo.parent) {
+						logWarning('Cannot find parent of target node');
+						return false;
+					}
+					updateRootSlot((currentSlot) => {
+						const removedTree = removeNodeFromTree(currentSlot, nodeId);
+						return insertNodeAtPosition(
+							removedTree,
+							targetParentInfo.parent!.meta.id,
+							targetParentInfo.slotName,
+							node,
+							newPosition
+						);
+					});
+				}
+				return true;
+			}
+
+			if (isRootNode(targetId)) {
 				updateRootSlot((currentSlot) => {
 					const removedTree = removeNodeFromTree(currentSlot, nodeId);
-					return insertNodeAtPosition(
-						removedTree,
-						targetParentInfo.parent!.meta.id,
-						targetParentInfo.slotName,
-						node,
-						newPosition
-					);
+					return [...removedTree, node];
 				});
 				return true;
 			}
 
-			// Check if target can accept children
 			if (!hasSlots(targetNode)) {
-				console.warn('Target node has no slots - cannot accept children');
+				logWarning('Target node has no slots - cannot accept children');
 				return false;
 			}
 
-			// Check if trying to move node into itself or its descendants
 			if (isDescendant(node, targetId)) {
-				console.warn('Cannot move node into itself or its descendants');
+				logWarning('Cannot move node into itself or its descendants');
 				return false;
 			}
 
-			// Determine target slot
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				console.warn('Target node has no valid slot');
+				logWarning('Target node has no valid slot');
 				return false;
 			}
 
-			// Verify slot exists
-			if (!targetNode.slots || !targetNode.slots[targetSlotName]) {
-				console.warn('Specified slot does not exist on target node:', targetSlotName);
+			if (!targetNode.slots?.[targetSlotName]) {
+				logWarning('Specified slot does not exist on target node', targetSlotName);
 				return false;
 			}
-
-			// Perform move
 			updateRootSlot((currentSlot) => {
 				const removedTree = removeNodeFromTree(currentSlot, nodeId);
 				return insertNodeIntoSlot(removedTree, targetId, targetSlotName!, node);
@@ -421,55 +435,61 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetId);
 
 			if (!node || !targetNode) {
-				console.warn('Node or target not found');
+				logWarning('Node or target not found');
 				return false;
 			}
 
-			// Get parent info for both nodes
 			const nodeParentInfo = findParentOfNode(slot, nodeId);
 			const targetParentInfo = findParentOfNode(slot, targetId);
 
-			if (!nodeParentInfo || !nodeParentInfo.parent) {
-				console.warn('Cannot reorder root node');
+			if (!nodeParentInfo || !targetParentInfo) {
+				logWarning('Cannot find parent info');
 				return false;
 			}
 
-			if (!targetParentInfo || !targetParentInfo.parent) {
-				console.warn('Cannot reorder relative to root node');
+			if (!nodeParentInfo.parent || !targetParentInfo.parent) {
+				logWarning('Cannot find parent info');
 				return false;
 			}
-
-			// Check if nodes are siblings
 			if (
 				nodeParentInfo.parent.meta.id !== targetParentInfo.parent.meta.id ||
 				nodeParentInfo.slotName !== targetParentInfo.slotName
 			) {
-				console.warn('Nodes must be siblings to reorder');
+				logWarning('Nodes must be siblings to reorder');
 				return false;
 			}
 
-			// Calculate new position
 			let newPosition = targetParentInfo.index;
 			if (position === 'after') {
 				newPosition += 1;
 			}
 
-			// Adjust if moving down
 			if (nodeParentInfo.index < newPosition) {
 				newPosition -= 1;
 			}
-
-			// Perform reorder
-			updateRootSlot((currentSlot) => {
-				const removedTree = removeNodeFromTree(currentSlot, nodeId);
-				return insertNodeAtPosition(
-					removedTree,
-					nodeParentInfo.parent!.meta.id,
-					nodeParentInfo.slotName,
-					node,
-					newPosition
-				);
-			});
+			if (isRootNode(nodeParentInfo.parent.meta.id)) {
+				updateRootSlot((currentSlot) => {
+					const removedTree = removeNodeFromTree(currentSlot, nodeId);
+					const newArray = [...removedTree];
+					newArray.splice(newPosition, 0, node);
+					return newArray;
+				});
+			} else {
+				if (!nodeParentInfo.parent) {
+					logWarning('Cannot find parent of node');
+					return false;
+				}
+				updateRootSlot((currentSlot) => {
+					const removedTree = removeNodeFromTree(currentSlot, nodeId);
+					return insertNodeAtPosition(
+						removedTree,
+						nodeParentInfo.parent!.meta.id,
+						nodeParentInfo.slotName,
+						node,
+						newPosition
+					);
+				});
+			}
 			return true;
 		},
 
@@ -478,18 +498,14 @@ export function createOperations(
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				console.warn('Node not found');
+				logWarning('Node not found');
 				return false;
 			}
 
-			// Check if node is root
-			const parentInfo = findParentOfNode(slot, nodeId);
-			if (!parentInfo || !parentInfo.parent) {
-				console.warn('Cannot delete root node');
+			if (isRootNode(nodeId)) {
+				logWarning('Cannot delete root node');
 				return false;
 			}
-
-			// Remove node
 			updateRootSlot((currentSlot) => {
 				return removeNodeFromTree(currentSlot, nodeId);
 			});
@@ -497,61 +513,50 @@ export function createOperations(
 		},
 
 		cutNode(nodeId: string): UJLCModuleObject | null {
-			const slot = getSlot();
-			const node = findNodeById(slot, nodeId);
-
-			if (!node) {
-				console.warn('Node not found');
+			// Cut = Copy + Delete (IDs preserved until paste)
+			const copiedNode = this.copyNode(nodeId);
+			if (!copiedNode) {
 				return null;
 			}
-
-			// Check if node is root
-			const parentInfo = findParentOfNode(slot, nodeId);
-			if (!parentInfo || !parentInfo.parent) {
-				console.warn('Cannot cut root node');
+			const deleted = this.deleteNode(nodeId);
+			if (!deleted) {
 				return null;
 			}
-
-			// Remove node from tree
-			updateRootSlot((currentSlot) => {
-				return removeNodeFromTree(currentSlot, nodeId);
-			});
-			return node;
+			return copiedNode;
 		},
 
 		pasteNode(node: UJLCModuleObject, targetId: string, slotName?: string): boolean {
 			const slot = getSlot();
+
+			// Assign new IDs at paste time (ensures uniqueness, enables multiple pastes)
+			const clonedNode = deepCloneModuleWithNewIds(node);
+
+			if (isRootNode(targetId)) {
+				updateRootSlot((currentSlot) => {
+					return [...currentSlot, clonedNode];
+				});
+				return true;
+			}
+
 			const targetNode = findNodeById(slot, targetId);
-
 			if (!targetNode) {
-				console.warn('Target node not found');
+				logWarning('Target node not found');
 				return false;
 			}
 
-			// Check if node already exists (prevents duplicates)
-			const existingNode = findNodeById(slot, node.meta.id);
-			if (existingNode) {
-				console.warn('Cannot paste: Node already exists in tree');
-				return false;
-			}
-
-			// Check if target has slots
 			if (!hasSlots(targetNode)) {
-				console.warn('Target node has no slots');
+				logWarning('Target node has no slots');
 				return false;
 			}
 
-			// Determine target slot
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				console.warn('Target node has no valid slot');
+				logWarning('Target node has no valid slot');
 				return false;
 			}
-
-			// Insert node
 			updateRootSlot((currentSlot) => {
-				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, node);
+				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, clonedNode);
 			});
 			return true;
 		},
@@ -563,73 +568,88 @@ export function createOperations(
 			position?: 'before' | 'after' | 'into'
 		): boolean {
 			const slot = getSlot();
-			const targetNode = findNodeById(slot, targetId);
 
-			if (!targetNode) {
-				console.warn('Target node not found');
-				return false;
-			}
-
-			// Get component definition from library
 			const componentDefinition = getComponentDefinition(componentType);
 			if (!componentDefinition) {
-				console.warn('Component type not found in library:', componentType);
+				logWarning('Component type not found in library', componentType);
 				return false;
 			}
 
-			// Create new node from definition
 			const newNode = createNodeFromDefinition(componentDefinition, generateNodeId());
 
-			// Handle insert position
-			if (position === 'before' || position === 'after') {
-				// Get parent info of target
-				const targetParentInfo = findParentOfNode(slot, targetId);
-
-				if (!targetParentInfo || !targetParentInfo.parent) {
-					console.warn('Cannot insert relative to root node');
-					return false;
-				}
-
-				// Calculate new position
-				let insertPosition = targetParentInfo.index;
-				if (position === 'after') {
-					insertPosition += 1;
-				}
-
-				// Perform insert with position
+			if (isRootNode(targetId)) {
 				updateRootSlot((currentSlot) => {
-					return insertNodeAtPosition(
-						currentSlot,
-						targetParentInfo.parent!.meta.id,
-						targetParentInfo.slotName,
-						newNode,
-						insertPosition
-					);
+					return [...currentSlot, newNode];
 				});
 				return true;
 			}
 
-			// Position is 'into' or undefined - insert into target's slot
-			if (!hasSlots(targetNode)) {
-				console.warn('Target node has no slots - cannot accept children');
+			const targetNode = findNodeById(slot, targetId);
+
+			if (!targetNode) {
+				logWarning('Target node not found');
 				return false;
 			}
 
-			// Determine target slot
+			if (position === 'before' || position === 'after') {
+				const targetParentInfo = findParentOfNode(slot, targetId);
+
+				if (!targetParentInfo) {
+					logWarning('Cannot find parent of target node');
+					return false;
+				}
+
+				if (!targetParentInfo.parent) {
+					logWarning('Cannot find parent of target node');
+					return false;
+				}
+
+				if (isRootNode(targetParentInfo.parent.meta.id)) {
+					let insertPosition = targetParentInfo.index;
+					if (position === 'after') {
+						insertPosition += 1;
+					}
+
+					updateRootSlot((currentSlot) => {
+						const newArray = [...currentSlot];
+						newArray.splice(insertPosition, 0, newNode);
+						return newArray;
+					});
+				} else {
+					let insertPosition = targetParentInfo.index;
+					if (position === 'after') {
+						insertPosition += 1;
+					}
+
+					updateRootSlot((currentSlot) => {
+						return insertNodeAtPosition(
+							currentSlot,
+							targetParentInfo.parent!.meta.id,
+							targetParentInfo.slotName,
+							newNode,
+							insertPosition
+						);
+					});
+				}
+				return true;
+			}
+
+			if (!hasSlots(targetNode)) {
+				logWarning('Target node has no slots - cannot accept children');
+				return false;
+			}
+
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				console.warn('Target node has no valid slot');
+				logWarning('Target node has no valid slot');
 				return false;
 			}
 
-			// Verify slot exists
-			if (!targetNode.slots || !targetNode.slots[targetSlotName]) {
-				console.warn('Specified slot does not exist on target node:', targetSlotName);
+			if (!targetNode.slots?.[targetSlotName]) {
+				logWarning('Specified slot does not exist on target node', targetSlotName);
 				return false;
 			}
-
-			// Perform insert into slot
 			updateRootSlot((currentSlot) => {
 				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, newNode);
 			});
@@ -644,14 +664,15 @@ export function createOperations(
 			const parentNode = findNodeById(slot, parentId);
 
 			if (!parentNode?.slots?.[slotName]) {
-				console.warn('Slot not found:', slotName);
+				logWarning('Slot not found', slotName);
 				return null;
 			}
 
+			// Clone preserving IDs (new IDs assigned at paste time)
 			const slotData = {
 				type: 'slot' as const,
 				slotName,
-				content: [...parentNode.slots[slotName]]
+				content: parentNode.slots[slotName].map((module) => deepCloneModule(module))
 			};
 			return slotData;
 		},
@@ -660,17 +681,11 @@ export function createOperations(
 			parentId: string,
 			slotName: string
 		): { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null {
-			const slot = getSlot();
-			const parentNode = findNodeById(slot, parentId);
-
-			if (!parentNode?.slots?.[slotName]) {
-				console.warn('Slot not found:', slotName);
+			// Cut = Copy + Clear (IDs preserved until paste)
+			const copiedSlot = this.copySlot(parentId, slotName);
+			if (!copiedSlot) {
 				return null;
 			}
-
-			const slotContent = [...parentNode.slots[slotName]];
-
-			// Empty the slot
 			updateRootSlot((currentSlot) => {
 				return updateNodeInTree(currentSlot, parentId, (node: UJLCModuleObject) => ({
 					...node,
@@ -680,12 +695,7 @@ export function createOperations(
 					}
 				}));
 			});
-
-			return {
-				type: 'slot',
-				slotName,
-				content: slotContent
-			};
+			return copiedSlot;
 		},
 
 		pasteSlot(
@@ -695,24 +705,25 @@ export function createOperations(
 			const slot = getSlot();
 			const targetNode = findNodeById(slot, targetParentId);
 
-			if (!targetNode?.slots) {
-				console.warn('Target node has no slots');
+			if (!targetNode || !hasSlots(targetNode)) {
+				logWarning('Target node has no slots');
 				return false;
 			}
 
-			// Check if target has the slot type
 			if (!Object.keys(targetNode.slots).includes(slotData.slotName)) {
-				console.warn('Target does not have slot:', slotData.slotName);
+				logWarning('Target does not have slot', slotData.slotName);
 				return false;
 			}
 
-			// Paste slot content into target's matching slot
+			// Assign new IDs at paste time (ensures uniqueness, enables multiple pastes)
+			const clonedContent = slotData.content.map((module) => deepCloneModuleWithNewIds(module));
+
 			updateRootSlot((currentSlot) => {
 				return updateNodeInTree(currentSlot, targetParentId, (node: UJLCModuleObject) => ({
 					...node,
 					slots: {
 						...node.slots,
-						[slotData.slotName]: [...slotData.content]
+						[slotData.slotName]: [...clonedContent]
 					}
 				}));
 			});
@@ -727,9 +738,8 @@ export function createOperations(
 		): boolean {
 			const slot = getSlot();
 
-			// Can't move slot to itself
 			if (sourceParentId === targetParentId && sourceSlotName === targetSlotName) {
-				console.warn('Cannot move slot to itself');
+				logWarning('Cannot move slot to itself');
 				return false;
 			}
 
@@ -737,30 +747,26 @@ export function createOperations(
 			const targetParent = findNodeById(slot, targetParentId);
 
 			if (!sourceParent?.slots?.[sourceSlotName]) {
-				console.warn('Source slot not found:', sourceSlotName);
+				logWarning('Source slot not found', sourceSlotName);
 				return false;
 			}
 
-			if (!targetParent?.slots) {
-				console.warn('Target node has no slots');
+			if (!targetParent || !hasSlots(targetParent)) {
+				logWarning('Target node has no slots');
 				return false;
 			}
 
-			// Check if target has the target slot
-			if (!targetParent.slots[targetSlotName]) {
-				console.warn(
+			if (!targetParent.slots?.[targetSlotName]) {
+				logWarning(
 					`Target node doesn't have slot "${targetSlotName}". Available slots:`,
 					Object.keys(targetParent.slots)
 				);
 				return false;
 			}
 
-			// Get the content from source slot
 			const slotContent = [...sourceParent.slots[sourceSlotName]];
 
-			// Perform the move
 			updateRootSlot((currentSlot) => {
-				// First, remove content from source slot
 				let updatedSlot = updateNodeInTree(
 					currentSlot,
 					sourceParentId,
@@ -772,8 +778,6 @@ export function createOperations(
 						}
 					})
 				);
-
-				// Then, add content to target slot (replace existing content)
 				updatedSlot = updateNodeInTree(updatedSlot, targetParentId, (node: UJLCModuleObject) => {
 					const newSlots = { ...node.slots };
 					newSlots[targetSlotName] = [...slotContent];

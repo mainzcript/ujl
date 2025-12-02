@@ -9,6 +9,14 @@ description: "Für wen ist UJL gedacht und welche Probleme löst es für verschi
 
 Wir entwickeln einen Editor, der sich sowohl von Entwickler:innen in bestehende Anwendungen integrieren lässt als auch von uns direkt als Cloud-Service bereitgestellt wird. Er ermöglicht Redaktionsteams eine einfache, schnelle, markenkonforme und barrierefreie Pflege von Web-Inhalten. Besonders attraktiv ist das für SaaS-Unternehmen, die ihren Nutzer:innen einen eigenen Editor anbieten möchten. Weitere Zielgruppen sind Web- und Marketing-Agenturen, mittelständische Unternehmen sowie Bildungs- und Non-Profit-Organisationen. Sie alle profitieren davon, dass der UJL Crafter Designvorgaben zuverlässig einhält, die Arbeit mit KI sicherer macht und Redakteur:innen ein Werkzeug an die Hand gibt, das moderne Webgestaltung deutlich erleichtert.
 
+::: tip Vorschau ausprobieren
+
+Die folgenden Use Cases werden greifbarer, wenn du den UJL Crafter selbst ausprobierst. Wir haben eine frühe Vorschau veröffentlicht – viele Features sind noch in Entwicklung, aber die Vision wird bereits sichtbar.
+
+→ [Vorschau öffnen](https://demo.ujl-framework.org)
+
+:::
+
 ## Early Adopter Strategy
 
 Unsere Go-to-Market-Strategie startet bewusst bei Web- und Marketing-Agenturen, auch wenn UJL langfristig ebenso für SaaS-Unternehmen gedacht ist. Agenturen sind für uns ideale erste Partner, weil sie UJL unmittelbar produktiv einsetzen, kurze Entscheidungswege haben und das Tool in vielen Kundenprojekten nutzen können. Diese frühe Nutzung hilft uns, Stabilität, UX und Modulkatalog in der Praxis zu schärfen und UJL so auszurichten, dass es später auch in komplexen SaaS-Umgebungen gut passt.

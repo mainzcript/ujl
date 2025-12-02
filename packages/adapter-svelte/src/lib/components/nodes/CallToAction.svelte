@@ -16,7 +16,7 @@
 
 <Card
 	class="rounded-xl px-8 py-16 text-center {eventCallback ? 'cursor-pointer' : undefined}"
-	data-ujl-module-id={showMetadata && node.id ? node.id : undefined}
+	data-ujl-module-id={showMetadata ? node.id : undefined}
 	onclick={eventCallback ? handleClick : undefined}
 	role={eventCallback ? 'button' : undefined}
 	tabindex={eventCallback ? 0 : undefined}

@@ -71,6 +71,7 @@ export class CardModule extends ModuleBase {
 				description,
 				children,
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }

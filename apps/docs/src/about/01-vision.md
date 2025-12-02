@@ -69,6 +69,14 @@ UJL löst das Problem nicht durch größere Modelle oder KI-Training, sondern du
 
 UJL trennt strikt zwischen Inhalt (`.ujlc.json`), Design (`.ujlt.json`) und Modulstruktur. Redakteur:innen haben nur Zugriff auf Inhalt, das Design ist für sie nicht erreichbar.
 
+::: tip Frühe Vorschau
+
+Du möchtest sehen, wie UJL in der Praxis aussieht? Wir haben eine frühe Vorschau des UJL Crafter veröffentlicht. Bitte beachte, dass es sich um eine sehr frühe Version handelt – viele Features sind noch in Entwicklung.
+
+→ [Vorschau ausprobieren](https://demo.ujl-framework.org)
+
+:::
+
 ## Unsere Kernprinzipien
 
 ### 1. Garantierte Markenkonformität & Barrierefreiheit

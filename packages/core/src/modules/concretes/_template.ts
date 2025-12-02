@@ -94,10 +94,12 @@ export class TEMPLATE_Module extends ModuleBase {
 						props: {
 							content: `Module: ${moduleData.meta.id}`,
 						},
+						id: `${moduleData.meta.id}-raw`,
 					},
 					...children,
 				],
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }

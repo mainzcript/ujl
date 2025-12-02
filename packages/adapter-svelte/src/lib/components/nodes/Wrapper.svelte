@@ -11,7 +11,7 @@
 	let { node, showMetadata = false, eventCallback }: Props = $props();
 </script>
 
-<div class="ujl-wrapper">
+<div class="ujl-wrapper space-y-6">
 	{#if node.props.children}
 		{#each node.props.children as childNode, i (i)}
 			<ASTNode node={childNode} {showMetadata} {eventCallback} />

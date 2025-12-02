@@ -10,6 +10,7 @@
 	import { page } from '$app/stores';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
+	import { createVirtualRootNode } from '$lib/tools/ujlc-tree.js';
 
 	let {
 		nodes,
@@ -65,6 +66,17 @@
 	const dragHandler = createDragHandler(onNodeMove, onSlotMove);
 
 	/**
+	 * Create virtual root node that represents the document
+	 *
+	 * `nodes` is the root array (UJLCSlotObject = UJLCModuleObject[])
+	 * According to ujl-content.ts: root is UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema)
+	 *
+	 * We wrap it in a virtual node with a "root" slot to enable operations
+	 * on root-level nodes (which now have a parent: __root__)
+	 */
+	const virtualRootNode = $derived(createVirtualRootNode(nodes));
+
+	/**
 	 * Handle node click - update URL with selected node ID
 	 */
 	async function handleNodeClick(nodeId: string) {
@@ -79,38 +91,37 @@
 	<SidebarGroupLabel>Document</SidebarGroupLabel>
 	<SidebarGroupContent>
 		<SidebarMenu class="mr-0">
-			{#each nodes as node (node.meta.id)}
-				<NavTreeItem
-					{node}
-					level={0}
-					{selectedNodeId}
-					{clipboard}
-					draggedNodeId={dragHandler.draggedNodeId}
-					draggedSlotName={dragHandler.draggedSlotName}
-					draggedSlotParentId={dragHandler.draggedSlotParentId}
-					dragType={dragHandler.dragType}
-					dropTargetId={dragHandler.dropTargetId}
-					dropTargetSlot={dragHandler.dropTargetSlot}
-					dropPosition={dragHandler.dropPosition}
-					onNodeClick={handleNodeClick}
-					{onCopy}
-					{onCut}
-					{onPaste}
-					{onDelete}
-					{onInsert}
-					onDragStart={dragHandler.handleDragStart}
-					onSlotDragStart={dragHandler.handleSlotDragStart}
-					onDragOver={dragHandler.handleDragOver}
-					onDragLeave={dragHandler.handleDragLeave}
-					onDrop={dragHandler.handleDrop}
-					onDragEnd={dragHandler.handleDragEnd}
-					{onSlotCopy}
-					{onSlotCut}
-					{onSlotPaste}
-					onSlotDragOver={dragHandler.handleSlotDragOver}
-					{onSlotClick}
-				/>
-			{/each}
+			<NavTreeItem
+				node={virtualRootNode}
+				level={0}
+				isRootNode={true}
+				{selectedNodeId}
+				{clipboard}
+				draggedNodeId={dragHandler.draggedNodeId}
+				draggedSlotName={dragHandler.draggedSlotName}
+				draggedSlotParentId={dragHandler.draggedSlotParentId}
+				dragType={dragHandler.dragType}
+				dropTargetId={dragHandler.dropTargetId}
+				dropTargetSlot={dragHandler.dropTargetSlot}
+				dropPosition={dragHandler.dropPosition}
+				onNodeClick={handleNodeClick}
+				{onCopy}
+				{onCut}
+				{onPaste}
+				{onDelete}
+				{onInsert}
+				onDragStart={dragHandler.handleDragStart}
+				onSlotDragStart={dragHandler.handleSlotDragStart}
+				onDragOver={dragHandler.handleDragOver}
+				onDragLeave={dragHandler.handleDragLeave}
+				onDrop={dragHandler.handleDrop}
+				onDragEnd={dragHandler.handleDragEnd}
+				{onSlotCopy}
+				{onSlotCut}
+				{onSlotPaste}
+				onSlotDragOver={dragHandler.handleSlotDragOver}
+				{onSlotClick}
+			/>
 		</SidebarMenu>
 	</SidebarGroupContent>
 </SidebarGroup>

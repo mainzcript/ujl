@@ -32,6 +32,7 @@ export class ContainerModule extends ModuleBase {
 			props: {
 				children,
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }
