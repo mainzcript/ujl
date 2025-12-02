@@ -30,9 +30,9 @@ import {
 // Validate complete documents (safe - returns result object)
 const themeResult = validateUJLTDocumentSafe(theme);
 if (themeResult.success) {
-	console.log("✅ Valid:", themeResult.data);
+	console.log("Valid:", themeResult.data);
 } else {
-	console.error("❌ Invalid:", themeResult.error.issues);
+	console.error("Invalid:", themeResult.error.issues);
 }
 
 // Validate partial structures (throws on error)

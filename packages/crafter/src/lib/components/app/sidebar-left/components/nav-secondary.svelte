@@ -1,6 +1,7 @@
 <script lang="ts">
-	import MessageCircleQuestionIcon from '@lucide/svelte/icons/message-circle-question';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
+	import InfoIcon from '@lucide/svelte/icons/info';
+	import FileTextIcon from '@lucide/svelte/icons/file-text';
+	import ShieldCheckIcon from '@lucide/svelte/icons/shield-check';
 	import {
 		SidebarGroup,
 		SidebarGroupContent,
@@ -12,19 +13,24 @@
 	import type { Component, ComponentProps } from 'svelte';
 
 	/**
-	 * Sample navigation data for secondary navigation items.
-	 * In a real application, these would typically come from props or a store.
+	 * Navigation data for secondary navigation items.
+	 * Includes legal links (Imprint, Privacy) and utility links.
 	 */
 	const defaultItems = [
 		{
-			title: 'Settings',
-			url: '#',
-			icon: Settings2Icon
+			title: 'Info',
+			url: 'https://ujl-framework.org/',
+			icon: InfoIcon
 		},
 		{
-			title: 'Help',
-			url: '#',
-			icon: MessageCircleQuestionIcon
+			title: 'Imprint',
+			url: 'https://ujl-framework.org/legal/imprint.html',
+			icon: FileTextIcon
+		},
+		{
+			title: 'Privacy',
+			url: 'https://ujl-framework.org/legal/privacy.html',
+			icon: ShieldCheckIcon
 		}
 	];
 
@@ -45,7 +51,12 @@
 					<SidebarMenuButton>
 						{#snippet child({ props })}
 							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-							<a href={item.url} {...props}>
+							<a
+								href={item.url}
+								target={item.url.startsWith('http') ? '_blank' : undefined}
+								rel={item.url.startsWith('http') ? 'noreferrer' : undefined}
+								{...props}
+							>
 								<item.icon />
 								<span>{item.title}</span>
 							</a>

@@ -5,7 +5,7 @@ type UJLAbstractWrapperNode = {
 	props: {
 		children?: UJLAbstractNode[];
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractRawHtmlNode = {
@@ -13,7 +13,7 @@ type UJLAbstractRawHtmlNode = {
 	props: {
 		content: string;
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractErrorNode = {
@@ -21,7 +21,7 @@ type UJLAbstractErrorNode = {
 	props: {
 		message: string;
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractContainerNode = {
@@ -29,7 +29,7 @@ type UJLAbstractContainerNode = {
 	props: {
 		children?: UJLAbstractNode[];
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractCardNode = {
@@ -39,7 +39,7 @@ type UJLAbstractCardNode = {
 		description: string;
 		children?: UJLAbstractNode[];
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractTextNode = {
@@ -47,7 +47,7 @@ type UJLAbstractTextNode = {
 	props: {
 		content: string;
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractButtonNode = {
@@ -56,7 +56,7 @@ type UJLAbstractButtonNode = {
 		label: string;
 		href: string;
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractGridNode = {
@@ -64,7 +64,7 @@ type UJLAbstractGridNode = {
 	props: {
 		children?: UJLAbstractGridItemNode[];
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractGridItemNode = {
@@ -72,7 +72,7 @@ type UJLAbstractGridItemNode = {
 	props: {
 		children?: UJLAbstractNode[];
 	};
-	id?: string;
+	id: string;
 };
 
 type UJLAbstractCallToActionModuleNode = {
@@ -85,7 +85,7 @@ type UJLAbstractCallToActionModuleNode = {
 			secondary?: UJLAbstractButtonNode;
 		};
 	};
-	id?: string;
+	id: string;
 };
 
 /**

@@ -28,13 +28,14 @@
 		canAcceptDrop,
 		canNodeAcceptPaste,
 		hasSlots
-	} from './ujlc-tree-utils.js';
+	} from '$lib/tools/ujlc-tree.js';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.ts';
 
 	let {
 		node,
 		level = 0,
+		isRootNode = false,
 		selectedNodeId,
 		clipboard,
 		draggedNodeId,
@@ -64,6 +65,7 @@
 	}: {
 		node: UJLCModuleObject;
 		level?: number;
+		isRootNode?: boolean;
 		selectedNodeId: string | null;
 		clipboard:
 			| UJLCModuleObject
@@ -105,7 +107,8 @@
 	const showDropInto = $derived(isDropTarget && dropPosition === 'into' && canAcceptDrop(node));
 	const hasMultiple = $derived(hasMultipleSlots(node));
 	const canPaste = $derived(canNodeAcceptPaste(node, clipboard));
-	const canInsert = $derived(hasSlots(node) && !hasMultipleSlots(node));
+	// Allow insert if node has slots (single or multiple) - enables inserting into empty containers
+	const canInsert = $derived(hasSlots(node));
 
 	// Show slots as groups if node has multiple slots OR if it has no children yet
 	const showSlotsAsGroups = $derived(hasMultiple);
@@ -114,14 +117,122 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const expandedNodeIds = $derived(crafter.getExpandedNodeIds());
 
-	// Controlled expanded state from context
-	const isExpanded = $derived(expandedNodeIds.has(node.meta.id));
+	// Root node is always expanded and not collapsible
+	const isExpanded = $derived(isRootNode ? true : expandedNodeIds.has(node.meta.id));
 
-	// Handle expand/collapse toggle
+	// Handle expand/collapse toggle (disabled for root node)
 	function handleOpenChange(open: boolean) {
-		crafter.setNodeExpanded(node.meta.id, open);
+		if (!isRootNode) {
+			crafter.setNodeExpanded(node.meta.id, open);
+		}
 	}
+
+	// Root node display name
+	const displayName = $derived(isRootNode ? 'Document' : getDisplayName(node));
+
+	// Root node cannot be copied, cut, or deleted
+	const canCopyRoot = $derived(!isRootNode);
+	const canCutRoot = $derived(!isRootNode);
+	const canDeleteRoot = $derived(!isRootNode);
+
+	// Root node can insert into its root slot
+	const canInsertRoot = $derived(isRootNode ? true : canInsert);
 </script>
+
+{#snippet editorToolbar(canCopy: boolean, canCut: boolean, canInsert: boolean, canDelete: boolean)}
+	<EditorToolbar
+		nodeId={node.meta.id}
+		{onCopy}
+		{onCut}
+		{onPaste}
+		{onDelete}
+		{onInsert}
+		onClose={() => (dropdownOpen = false)}
+		{canCopy}
+		{canCut}
+		{canPaste}
+		{canInsert}
+		{canDelete}
+	/>
+{/snippet}
+
+{#snippet slotChildrenContent()}
+	<SidebarMenuSub class="mr-0 pe-0">
+		{#if showSlotsAsGroups}
+			<!-- Multiple slots or no children: show all slots as groups (including empty) -->
+			{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
+				<NavTreeSlotGroup
+					parentNode={node}
+					{slotName}
+					{slotChildren}
+					{clipboard}
+					{dragType}
+					{draggedSlotParentId}
+					{draggedSlotName}
+					{onSlotCopy}
+					{onSlotCut}
+					{onSlotPaste}
+					{onInsert}
+					{onSlotDragStart}
+					{dropTargetId}
+					{dropTargetSlot}
+					{onSlotDragOver}
+					onSlotDragLeave={onDragLeave}
+					{selectedNodeId}
+					{draggedNodeId}
+					{dropPosition}
+					{onNodeClick}
+					{onCopy}
+					{onCut}
+					{onPaste}
+					{onDelete}
+					{onDragStart}
+					{onDragOver}
+					{onDragLeave}
+					{onDrop}
+					{onDragEnd}
+					{onSlotClick}
+				/>
+			{/each}
+		{:else}
+			<!-- Single slot: show children directly -->
+			{#each getChildren(node) as childNode (childNode.meta.id)}
+				<SidebarMenuSubItem>
+					<NavTreeItem
+						node={childNode}
+						level={level + 1}
+						{selectedNodeId}
+						{clipboard}
+						{draggedNodeId}
+						{draggedSlotName}
+						{draggedSlotParentId}
+						{dragType}
+						{dropTargetId}
+						{dropTargetSlot}
+						{dropPosition}
+						{onNodeClick}
+						{onCopy}
+						{onCut}
+						{onPaste}
+						{onDelete}
+						{onInsert}
+						{onDragStart}
+						{onSlotDragStart}
+						{onDragOver}
+						{onDragLeave}
+						{onDrop}
+						{onDragEnd}
+						{onSlotCopy}
+						{onSlotCut}
+						{onSlotPaste}
+						{onSlotDragOver}
+						{onSlotClick}
+					/>
+				</SidebarMenuSubItem>
+			{/each}
+		{/if}
+	</SidebarMenuSub>
+{/snippet}
 
 {#if level === 0}
 	{#if hasChildren(node)}
@@ -130,7 +241,7 @@
 			{#if showDropBefore}
 				<div class="drop-indicator drop-indicator-before"></div>
 			{/if}
-			<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
+			<Collapsible open={isExpanded} onOpenChange={isRootNode ? undefined : handleOpenChange}>
 				<CollapsibleTrigger class="group">
 					{#snippet child({ props })}
 						<SidebarMenuButton {...props}>
@@ -141,8 +252,8 @@
 									class="group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md {isSelected
 										? 'node-selected text-primary'
 										: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
-									draggable="true"
-									ondragstart={(e) => onDragStart(e, node.meta.id)}
+									draggable={!isRootNode}
+									ondragstart={isRootNode ? undefined : (e) => onDragStart(e, node.meta.id)}
 									ondragover={(e) => onDragOver(e, node.meta.id)}
 									ondragleave={onDragLeave}
 									ondrop={(e) => onDrop(e, node.meta.id)}
@@ -157,7 +268,7 @@
 										onclick={() => onNodeClick(node.meta.id)}
 										class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 									>
-										<span>{getDisplayName(node)}</span>
+										<span>{displayName}</span>
 									</button>
 									<DropdownMenu bind:open={dropdownOpen}>
 										<DropdownMenuTrigger>
@@ -173,19 +284,7 @@
 											{/snippet}
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="end">
-											<EditorToolbar
-												nodeId={node.meta.id}
-												{onCopy}
-												{onCut}
-												{onPaste}
-												{onDelete}
-												{onInsert}
-												onClose={() => (dropdownOpen = false)}
-												canCopy={true}
-												canCut={true}
-												{canPaste}
-												{canInsert}
-											/>
+											{@render editorToolbar(canCopyRoot, canCutRoot, canInsertRoot, canDeleteRoot)}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</div>
@@ -194,81 +293,7 @@
 					{/snippet}
 				</CollapsibleTrigger>
 				<CollapsibleContent>
-					<SidebarMenuSub class="mr-0 pe-0">
-						{#if showSlotsAsGroups}
-							<!-- Multiple slots or no children: show all slots as groups (including empty) -->
-							{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
-								<NavTreeSlotGroup
-									parentNode={node}
-									{slotName}
-									{slotChildren}
-									{clipboard}
-									{dragType}
-									{draggedSlotParentId}
-									{draggedSlotName}
-									{onSlotCopy}
-									{onSlotCut}
-									{onSlotPaste}
-									{onInsert}
-									{onSlotDragStart}
-									{dropTargetId}
-									{dropTargetSlot}
-									{onSlotDragOver}
-									onSlotDragLeave={onDragLeave}
-									{selectedNodeId}
-									{draggedNodeId}
-									{dropPosition}
-									{onNodeClick}
-									{onCopy}
-									{onCut}
-									{onPaste}
-									{onDelete}
-									{onDragStart}
-									{onDragOver}
-									{onDragLeave}
-									{onDrop}
-									{onDragEnd}
-									{onSlotClick}
-								/>
-							{/each}
-						{:else}
-							<!-- Single slot: show children directly -->
-							{#each getChildren(node) as childNode (childNode.meta.id)}
-								<SidebarMenuSubItem>
-									<NavTreeItem
-										node={childNode}
-										level={level + 1}
-										{selectedNodeId}
-										{clipboard}
-										{draggedNodeId}
-										{draggedSlotName}
-										{draggedSlotParentId}
-										{dragType}
-										{dropTargetId}
-										{dropTargetSlot}
-										{dropPosition}
-										{onNodeClick}
-										{onCopy}
-										{onCut}
-										{onPaste}
-										{onDelete}
-										{onInsert}
-										{onDragStart}
-										{onSlotDragStart}
-										{onDragOver}
-										{onDragLeave}
-										{onDrop}
-										{onDragEnd}
-										{onSlotCopy}
-										{onSlotCut}
-										{onSlotPaste}
-										{onSlotDragOver}
-										{onSlotClick}
-									/>
-								</SidebarMenuSubItem>
-							{/each}
-						{/if}
-					</SidebarMenuSub>
+					{@render slotChildrenContent()}
 				</CollapsibleContent>
 			</Collapsible>
 			{#if showDropAfter}
@@ -293,14 +318,14 @@
 							? 'drop-target'
 							: ''} flex h-full w-full items-center justify-between rounded-md"
 						onclick={() => onNodeClick(node.meta.id)}
-						draggable="true"
-						ondragstart={(e) => onDragStart(e, node.meta.id)}
+						draggable={!isRootNode}
+						ondragstart={isRootNode ? undefined : (e) => onDragStart(e, node.meta.id)}
 						ondragover={(e) => onDragOver(e, node.meta.id)}
 						ondragleave={onDragLeave}
 						ondrop={(e) => onDrop(e, node.meta.id)}
 						ondragend={onDragEnd}
 					>
-						<span class="flex-1 overflow-hidden text-ellipsis">{getDisplayName(node)}</span>
+						<span class="flex-1 overflow-hidden text-ellipsis">{displayName}</span>
 						<DropdownMenu bind:open={dropdownOpen}>
 							<DropdownMenuTrigger>
 								{#snippet child({ props: triggerProps })}
@@ -316,19 +341,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<EditorToolbar
-									nodeId={node.meta.id}
-									{onCopy}
-									{onCut}
-									{onPaste}
-									{onDelete}
-									{onInsert}
-									onClose={() => (dropdownOpen = false)}
-									canCopy={true}
-									canCut={true}
-									{canPaste}
-									{canInsert}
-								/>
+								{@render editorToolbar(canCopyRoot, canCutRoot, canInsert, canDeleteRoot)}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</button>
@@ -372,7 +385,7 @@
 									onclick={() => onNodeClick(node.meta.id)}
 									class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 								>
-									<span>{getDisplayName(node)}</span>
+									<span>{displayName}</span>
 								</button>
 								<DropdownMenu bind:open={dropdownOpen}>
 									<DropdownMenuTrigger>
@@ -388,19 +401,7 @@
 										{/snippet}
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
-										<EditorToolbar
-											nodeId={node.meta.id}
-											{onCopy}
-											{onCut}
-											{onPaste}
-											{onDelete}
-											{onInsert}
-											onClose={() => (dropdownOpen = false)}
-											canCopy={true}
-											canCut={true}
-											{canPaste}
-											{canInsert}
-										/>
+										{@render editorToolbar(true, true, canInsert, true)}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>
@@ -409,81 +410,7 @@
 				{/snippet}
 			</CollapsibleTrigger>
 			<CollapsibleContent>
-				<SidebarMenuSub class="mr-0 pe-0">
-					{#if showSlotsAsGroups}
-						<!-- Multiple slots or no children: show all slots as groups (including empty) -->
-						{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
-							<NavTreeSlotGroup
-								parentNode={node}
-								{slotName}
-								{slotChildren}
-								{clipboard}
-								{dragType}
-								{draggedSlotParentId}
-								{draggedSlotName}
-								{onSlotCopy}
-								{onSlotCut}
-								{onSlotPaste}
-								{onInsert}
-								{onSlotDragStart}
-								{dropTargetId}
-								{dropTargetSlot}
-								{onSlotDragOver}
-								onSlotDragLeave={onDragLeave}
-								{selectedNodeId}
-								{draggedNodeId}
-								{dropPosition}
-								{onNodeClick}
-								{onCopy}
-								{onCut}
-								{onPaste}
-								{onDelete}
-								{onDragStart}
-								{onDragOver}
-								{onDragLeave}
-								{onDrop}
-								{onDragEnd}
-								{onSlotClick}
-							/>
-						{/each}
-					{:else}
-						<!-- Single slot: show children directly -->
-						{#each getChildren(node) as childNode (childNode.meta.id)}
-							<SidebarMenuSubItem>
-								<NavTreeItem
-									node={childNode}
-									level={level + 1}
-									{selectedNodeId}
-									{clipboard}
-									{draggedNodeId}
-									{draggedSlotName}
-									{draggedSlotParentId}
-									{dragType}
-									{dropTargetId}
-									{dropTargetSlot}
-									{dropPosition}
-									{onNodeClick}
-									{onCopy}
-									{onCut}
-									{onPaste}
-									{onDelete}
-									{onInsert}
-									{onDragStart}
-									{onSlotDragStart}
-									{onDragOver}
-									{onDragLeave}
-									{onDrop}
-									{onDragEnd}
-									{onSlotCopy}
-									{onSlotCut}
-									{onSlotPaste}
-									{onSlotDragOver}
-									{onSlotClick}
-								/>
-							</SidebarMenuSubItem>
-						{/each}
-					{/if}
-				</SidebarMenuSub>
+				{@render slotChildrenContent()}
 			</CollapsibleContent>
 		</Collapsible>
 		{#if showDropAfter}
@@ -531,19 +458,7 @@
 						{/snippet}
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<EditorToolbar
-							nodeId={node.meta.id}
-							{onCopy}
-							{onCut}
-							{onPaste}
-							{onDelete}
-							{onInsert}
-							onClose={() => (dropdownOpen = false)}
-							canCopy={true}
-							canCut={true}
-							{canPaste}
-							{canInsert}
-						/>
+						{@render editorToolbar(true, true, canInsert, true)}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

@@ -159,5 +159,13 @@ export default defineConfig(
 		rules: {
 			'svelte/prefer-writable-derived': 'off'
 		}
+	},
+	{
+		// Disable no-navigation-without-resolve for nav-secondary.svelte
+		// External links (https://) don't need SvelteKit's resolve()
+		files: ['**/nav-secondary.svelte'],
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );

@@ -26,7 +26,7 @@ describe("UJLC Schema Validation", () => {
 
 			const doc: UJLCDocument = result.data;
 
-			expect(doc.ujlc.meta.title).toBe("UJL Framework Example Document");
+			expect(doc.ujlc.meta.title).toBe("UJL Framework - Brand-Compliance by Design");
 			expect(doc.ujlc.meta.description).toBeDefined();
 			expect(doc.ujlc.meta.tags).toBeInstanceOf(Array);
 			expect(doc.ujlc.meta._version).toBe("0.0.1");
@@ -87,14 +87,22 @@ describe("UJLC Schema Validation", () => {
 				throw new Error("Validation failed");
 			}
 
-			const firstModule = result.data.ujlc.root[0];
-			const embedding = firstModule.meta._embedding;
+			// Check that all modules have valid embedding arrays (can be empty)
+			function checkEmbeddings(modules: UJLCModuleObject[]) {
+				modules.forEach(module => {
+					const embedding = module.meta._embedding;
+					expect(embedding).toBeInstanceOf(Array);
+					embedding.forEach(value => {
+						expect(typeof value).toBe("number");
+					});
+					// Recursively check nested modules
+					Object.values(module.slots).forEach(slot => {
+						checkEmbeddings(slot);
+					});
+				});
+			}
 
-			expect(embedding).toBeInstanceOf(Array);
-			expect(embedding.length).toBeGreaterThan(0);
-			embedding.forEach(value => {
-				expect(typeof value).toBe("number");
-			});
+			checkEmbeddings(result.data.ujlc.root);
 		});
 
 		it("should have nested slots and modules", () => {
@@ -137,37 +145,52 @@ describe("UJLC Schema Validation", () => {
 			});
 		});
 
-		it("should have button with valid fields", () => {
+		it("should have call-to-action module with valid fields", () => {
 			const result = validateUJLCDocumentSafe(docData);
 
 			if (!result.success) {
 				throw new Error("Validation failed");
 			}
 
-			const container = result.data.ujlc.root[0];
-			const buttonModule = container.slots.body.find(m => m.type === "button");
+			// Find the call-to-action module (it's in the third root container)
+			const ctaContainer = result.data.ujlc.root.find(
+				m =>
+					m.type === "container" &&
+					m.slots.body.some((child: UJLCModuleObject) => child.type === "call-to-action")
+			);
+			expect(ctaContainer).toBeDefined();
 
-			expect(buttonModule).toBeDefined();
-			expect(buttonModule?.fields.label).toBe("Try UJL Framework");
-			expect(buttonModule?.fields.href).toBe("https://ujl-framework.org");
+			const ctaModule = ctaContainer?.slots.body.find(
+				(m: UJLCModuleObject) => m.type === "call-to-action"
+			);
+
+			expect(ctaModule).toBeDefined();
+			expect(ctaModule?.fields.headline).toBeDefined();
+			expect(ctaModule?.fields.actionButtonPrimaryLabel).toBeDefined();
 		});
 
-		it("should have call-to-action in nested container", () => {
+		it("should have call-to-action in container", () => {
 			const result = validateUJLCDocumentSafe(docData);
 
 			if (!result.success) {
 				throw new Error("Validation failed");
 			}
 
-			const container = result.data.ujlc.root[0];
-			const nestedContainer = container.slots.body.find(m => m.type === "container");
+			// Find the container that has the call-to-action module
+			const ctaContainer = result.data.ujlc.root.find(
+				m =>
+					m.type === "container" &&
+					m.slots.body.some((child: UJLCModuleObject) => child.type === "call-to-action")
+			);
 
-			expect(nestedContainer).toBeDefined();
+			expect(ctaContainer).toBeDefined();
 
-			const ctaModule = nestedContainer?.slots.body[0];
+			const ctaModule = ctaContainer?.slots.body.find(
+				(m: UJLCModuleObject) => m.type === "call-to-action"
+			);
 			expect(ctaModule?.type).toBe("call-to-action");
-			expect(ctaModule?.fields.headline).toBe("Ready to get started?");
-			expect(ctaModule?.fields.actionButtonPrimaryLabel).toBe("Start Building");
+			expect(ctaModule?.fields.headline).toBe("Ready to ship faster without breaking your brand?");
+			expect(ctaModule?.fields.actionButtonPrimaryLabel).toBe("Become a Pilot Partner");
 		});
 
 		it("should have all module IDs unique", () => {
@@ -431,10 +454,11 @@ describe("UJLC Schema Validation", () => {
 
 	describe("Field flexibility", () => {
 		it("should accept any field value type", () => {
-			const docData = showcaseDocument;
+			// Create a deep clone to avoid mutating the original showcaseDocument
+			const testDoc = structuredClone(showcaseDocument);
 
 			// add different fiels types to first module
-			docData.ujlc.root[0].fields = {
+			testDoc.ujlc.root[0].fields = {
 				stringField: "text",
 				numberField: 42,
 				booleanField: true,
@@ -443,7 +467,7 @@ describe("UJLC Schema Validation", () => {
 				nullField: null,
 			};
 
-			const result = validateUJLCDocumentSafe(docData);
+			const result = validateUJLCDocumentSafe(testDoc);
 			expect(result.success).toBe(true);
 		});
 	});

@@ -5,7 +5,8 @@
  * based on the AST node type.
  -->
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/types';
+	import type { UJLAbstractNode, UJLAbstractErrorNode } from '@ujl-framework/types';
+	import { generateUid } from '@ujl-framework/core';
 	import { NODE_TYPES } from '../constants.js';
 	import {
 		Container,
@@ -50,10 +51,10 @@
 {:else if node.type === NODE_TYPES.CALL_TO_ACTION}
 	<CallToAction {node} {showMetadata} {eventCallback} />
 {:else}
-	<Error
-		node={{
-			type: NODE_TYPES.ERROR,
-			props: { message: `Unknown node type: ${(node as { type: string }).type}` }
-		}}
-	/>
+	{@const errorNode: UJLAbstractErrorNode = {
+		type: NODE_TYPES.ERROR,
+		props: { message: `Unknown node type: ${(node as { type: string }).type}` },
+		id: (node as { id?: string }).id ?? generateUid(10)
+	}}
+	<Error node={errorNode} />
 {/if}

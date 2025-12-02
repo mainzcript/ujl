@@ -171,8 +171,8 @@ When `eventCallback` is provided, all module components implement the following 
 ```typescript
 function handleClick(event: MouseEvent) {
 	if (eventCallback && node.id) {
-		event.preventDefault(); // Prevents default actions (links, buttons)
-		event.stopPropagation(); // Prevents event bubbling to parents
+		event.preventDefault();
+		event.stopPropagation();
 		eventCallback(node.id);
 	}
 }
@@ -180,10 +180,10 @@ function handleClick(event: MouseEvent) {
 
 This ensures:
 
-- ✅ Only the clicked module triggers the callback
-- ✅ Parent modules don't receive the event
-- ✅ Default behaviors (navigation, form submission) are suppressed in editor mode
-- ✅ The correct module ID is always passed to the callback
+- Only the clicked module triggers the callback
+- Parent modules don't receive the event
+- Default behaviors (navigation, form submission) are suppressed in editor mode
+- The correct module ID is always passed to the callback (all AST nodes have a required `id` field)
 
 ## Development
 

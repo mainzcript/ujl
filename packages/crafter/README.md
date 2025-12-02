@@ -101,10 +101,10 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
 
 - `operations` - High-level operations for document manipulation (created via `createOperations()` factory):
   - **Node Operations:**
-    - `copyNode(nodeId)` - Copies a node (returns it with new ID without removing from tree)
-    - `cutNode(nodeId)` - Cuts a node (removes and returns it for clipboard)
+    - `copyNode(nodeId)` - Copies a node (preserves IDs, new IDs assigned at paste time)
+    - `cutNode(nodeId)` - Cuts a node (removes and returns it for clipboard, IDs preserved until paste)
     - `deleteNode(nodeId)` - Deletes a node from the tree
-    - `pasteNode(node, targetId, slotName?)` - Pastes a node into a target node's slot
+    - `pasteNode(node, targetId, slotName?)` - Pastes a node into a target node's slot (generates new IDs for uniqueness)
     - `moveNode(nodeId, targetId, slotName?, position?)` - Moves a node to target parent's slot or position
     - `reorderNode(nodeId, targetId, position)` - Reorders a node relative to a sibling
     - `insertNode(componentType, targetId, slotName?, position?)` - Inserts a new node from component library
@@ -210,7 +210,7 @@ This ensures:
   - **Search**:
     - `findNodeById(nodes, targetId)` - Recursively finds nodes by ID
     - `findParentOfNode(nodes, targetId)` - Finds parent, slot name, and index of a node
-    - `findPathToNode(nodes, targetId)` - **NEW**: Finds all parent IDs from root to target node (for auto-expansion)
+    - `findPathToNode(nodes, targetId)` - Finds all parent IDs from root to target node (for auto-expansion)
   - **Modification**:
     - `removeNodeFromTree(nodes, targetId)` - Removes node immutably
     - `insertNodeIntoSlot(nodes, parentId, slotName, nodeToInsert)` - Inserts node at end of slot
@@ -291,18 +291,22 @@ This ensures:
 
 #### Clipboard Operations
 
+- **Cross-browser clipboard support** via browser Clipboard API with localStorage fallback:
+  - System clipboard integration enables copy/paste between different browsers and tabs
+  - localStorage fallback for Safari (user interaction requirement) and page reloads
+  - Clipboard data persists across page reloads and browser sessions
 - **Local clipboard state** in `editor.svelte` supports both:
   - Regular nodes: `UJLCModuleObject`
   - Complete slots: `{ type: 'slot', slotName: string, content: UJLCModuleObject[] }`
 - **Node operations:**
-  - Copy: Duplicates node with new unique ID (validates after generation)
-  - Cut: Removes node and saves to clipboard (prevents cutting root)
-  - Paste: Inserts clipboard node into target's slot (checks for slot compatibility)
+  - Copy: Duplicates node preserving IDs (new IDs assigned at paste time)
+  - Cut: Removes node and saves to clipboard (IDs preserved until paste, then regenerated)
+  - Paste: Inserts clipboard node into target's slot with new unique IDs (enables multiple pastes)
   - Delete: Removes node without clipboard (prevents deleting root)
 - **Slot operations:**
-  - Copy Slot: Copies entire slot content to clipboard
-  - Cut Slot: Empties slot and saves content to clipboard
-  - Paste Slot: Replaces target slot content with clipboard (must match slot type)
+  - Copy Slot: Copies entire slot content to clipboard (IDs preserved)
+  - Cut Slot: Empties slot and saves content to clipboard (IDs preserved)
+  - Paste Slot: Replaces target slot content with clipboard (new IDs generated, must match slot type)
 
 #### Keyboard Shortcuts
 
@@ -312,7 +316,7 @@ Implemented in `editor.svelte` via `handleKeyDown()`:
 - `Ctrl+X` / `Cmd+X` - Cut selected node (nodes only, not slots)
 - `Ctrl+V` / `Cmd+V` - Paste clipboard into selected node or slot
 - `Ctrl+I` / `Cmd+I` - Insert component into selected node or slot
-- `Delete` - Delete selected node (nodes only, not slots)
+- `Delete` / `Backspace` - Delete selected node (nodes only, not slots, root node cannot be deleted)
 
 All shortcuts respect current selection and validate operations before execution.
 

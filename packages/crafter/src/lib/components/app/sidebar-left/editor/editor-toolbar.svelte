@@ -17,7 +17,8 @@
 		canCopy = false,
 		canCut = false,
 		canPaste = false,
-		canInsert = false
+		canInsert = false,
+		canDelete = false
 	}: {
 		nodeId: string;
 		onCopy: (nodeId: string) => void;
@@ -30,6 +31,7 @@
 		canCut?: boolean;
 		canPaste?: boolean;
 		canInsert?: boolean;
+		canDelete?: boolean;
 	} = $props();
 </script>
 
@@ -96,12 +98,12 @@
 		</Button>
 	{/if}
 
-	{#if canCut}
+	{#if canDelete}
 		<div class="my-1 h-px bg-border"></div>
 		<Button
 			variant="ghost"
 			size="sm"
-			disabled={!canCut}
+			disabled={!canDelete}
 			onclick={() => onDelete(nodeId)}
 			class="justify-start gap-2 text-destructive hover:text-destructive"
 		>

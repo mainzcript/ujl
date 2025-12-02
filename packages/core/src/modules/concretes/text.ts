@@ -44,6 +44,7 @@ export class TextModule extends ModuleBase {
 			props: {
 				content,
 			},
+			id: moduleData.meta.id,
 		};
 	}
 }

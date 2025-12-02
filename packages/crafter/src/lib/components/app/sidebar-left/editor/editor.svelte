@@ -1,12 +1,27 @@
 <script lang="ts">
-	import type { UJLCModuleObject, UJLCSlotObject } from '@ujl-framework/types';
+	import type { UJLCSlotObject } from '@ujl-framework/types';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import { findNodeById, hasMultipleSlots, hasSlots } from './nav-tree/ujlc-tree-utils.ts';
+	import {
+		findNodeById,
+		hasSlots,
+		ROOT_NODE_ID,
+		ROOT_SLOT_NAME,
+		parseSlotSelection,
+		isRootNode,
+		isModuleObject
+	} from '$lib/tools/ujlc-tree.js';
+	import {
+		writeToBrowserClipboard,
+		readFromBrowserClipboard,
+		writeToClipboardEvent,
+		readFromClipboardEvent,
+		type UJLClipboardData
+	} from '$lib/tools/clipboard.js';
 
 	let {
 		slot
@@ -17,172 +32,161 @@
 	// Get CrafterContext for mutations
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	// Local clipboard state
-	let clipboard = $state<
-		| UJLCModuleObject
-		| {
-				type: 'slot';
-				slotName: string;
-				content: UJLCModuleObject[];
-		  }
-		| null
-	>(null);
+	// Clipboard state synchronized with browser clipboard for cross-tab support
+	let clipboard = $state<UJLClipboardData | null>(null);
 
 	// Component Picker state
 	let showComponentPicker = $state(false);
 	let insertTargetNodeId = $state<string | null>(null);
 
+	// Prevents duplicate execution when keyboard shortcuts trigger clipboard events
+	let isHandlingKeyboardShortcut = $state(false);
+
 	// Selected node id from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	// Parse selected ID to check if it's a slot (format: parentId:slotName)
-	const selectedSlotInfo = $derived(() => {
-		if (!selectedNodeId) return null;
-
-		const parts = selectedNodeId.split(':');
-		if (parts.length === 2) {
-			return {
-				parentId: parts[0],
-				slotName: parts[1]
-			};
-		}
-		return null;
-	});
+	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
 
 	// Selected node object from current slot
-	const selectedNode = $derived(() => {
+	const selectedNode = $derived.by(() => {
 		if (!selectedNodeId) return null;
 
-		// If it's a slot selection, get the parent node
-		const slotInfo = selectedSlotInfo();
-		if (slotInfo) {
-			return findNodeById(slot, slotInfo.parentId);
+		if (selectedSlotInfo) {
+			return findNodeById(slot, selectedSlotInfo.parentId);
 		}
 
-		// Otherwise, get the node directly
 		return findNodeById(slot, selectedNodeId);
 	});
 
 	// Button states
-	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo());
-	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo());
-	const canPaste = $derived(() => {
-		if (!clipboard || !selectedNodeId) return false;
+	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canDelete = $derived(
+		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId)
+	);
+	const canPaste = $derived.by(() => {
+		if (!clipboard) return false;
 
-		const slotInfo = selectedSlotInfo();
+		if (selectedNodeId === ROOT_NODE_ID) {
+			return (
+				isModuleObject(clipboard) ||
+				(clipboard.type === 'slot' && clipboard.slotName === ROOT_SLOT_NAME)
+			);
+		}
 
-		// If a slot is selected
-		if (slotInfo) {
-			const parentNode = findNodeById(slot, slotInfo.parentId);
-			if (!parentNode) return false;
+		if (!selectedNodeId) return false;
 
-			// Regular nodes can always be pasted into slots
-			if ('meta' in clipboard) {
+		if (selectedSlotInfo) {
+			const parentNode = findNodeById(slot, selectedSlotInfo.parentId);
+			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
+
+			if (isModuleObject(clipboard)) {
 				return true;
 			}
 
-			// Slots can only be pasted if the slot name matches
-			if (clipboard.type === 'slot' && parentNode.slots) {
-				return Object.keys(parentNode.slots).includes(clipboard.slotName);
+			if (clipboard.type === 'slot') {
+				if (isRootNode(selectedSlotInfo.parentId)) {
+					return clipboard.slotName === ROOT_SLOT_NAME;
+				}
+				if (parentNode?.slots) {
+					return Object.keys(parentNode.slots).includes(clipboard.slotName);
+				}
 			}
 
 			return false;
 		}
 
-		// If a node is selected
-		const node = selectedNode();
-		if (!node) return false;
-
-		// If clipboard is a regular node, check if target has slots
-		if ('meta' in clipboard) {
-			return hasSlots(node);
+		if (isRootNode(selectedNodeId)) {
+			return (
+				isModuleObject(clipboard) ||
+				(clipboard.type === 'slot' && clipboard.slotName === ROOT_SLOT_NAME)
+			);
 		}
 
-		// If clipboard is a slot, check if target has that slot type
-		if (clipboard.type === 'slot' && node.slots) {
-			return Object.keys(node.slots).includes(clipboard.slotName);
+		if (!selectedNode) return false;
+
+		if (isModuleObject(clipboard)) {
+			return hasSlots(selectedNode);
+		}
+
+		if (clipboard.type === 'slot' && selectedNode.slots) {
+			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
 		}
 
 		return false;
 	});
 
 	/**
-	 * Copy Handler - copy selected node to clipboard (without removing)
+	 * Copies the selected node to clipboard without removing it from the tree.
 	 */
-	function handleCopy(nodeId: string) {
+	async function handleCopy(nodeId: string) {
 		const copiedNode = crafter.operations.copyNode(nodeId);
 		if (copiedNode) {
 			clipboard = copiedNode;
+			await writeToBrowserClipboard(copiedNode);
 		}
 	}
 
 	/**
-	 * Cut Handler - cut selected node to clipboard
+	 * Cuts the selected node to clipboard (removes it from the tree).
 	 */
-	function handleCut(nodeId: string) {
+	async function handleCut(nodeId: string) {
 		const cutNode = crafter.operations.cutNode(nodeId);
 		if (cutNode) {
 			clipboard = cutNode;
+			await writeToBrowserClipboard(cutNode);
 		}
 	}
 
 	/**
-	 * Paste Handler - paste node or slot from clipboard into selected node or slot
+	 * Pastes a node or slot from clipboard into the selected node or slot.
 	 */
-	function handlePaste(nodeIdOrSlot: string) {
-		if (!clipboard) return;
+	async function handlePaste(nodeIdOrSlot: string) {
+		// Try to read from browser clipboard (may fail in Safari without user interaction)
+		const browserClipboard = await readFromBrowserClipboard();
+		const pasteData = browserClipboard || clipboard;
 
-		// Check if nodeIdOrSlot is a slot selection (format: parentId:slotName)
-		const parts = nodeIdOrSlot.split(':');
-		const isSlotSelection = parts.length === 2;
+		if (!pasteData) return;
 
-		// If clipboard contains a regular node
-		if ('meta' in clipboard) {
-			if (isSlotSelection) {
-				// Pasting into a specific slot
-				const [parentId, slotName] = parts;
-				const success = crafter.operations.pasteNode(clipboard, parentId, slotName);
-				if (success) {
-					clipboard = null;
-				}
+		if (browserClipboard && browserClipboard !== clipboard) {
+			clipboard = browserClipboard;
+		}
+
+		performPaste(pasteData, nodeIdOrSlot);
+	}
+
+	function performPaste(pasteData: UJLClipboardData, nodeIdOrSlot: string) {
+		const slotInfo = parseSlotSelection(nodeIdOrSlot);
+		const isSlotSelection = slotInfo !== null;
+
+		if (isModuleObject(pasteData)) {
+			if (isSlotSelection && slotInfo) {
+				crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName);
 			} else {
-				// Pasting into a node (uses first slot)
-				const success = crafter.operations.pasteNode(clipboard, nodeIdOrSlot);
-				if (success) {
-					clipboard = null;
-				}
+				crafter.operations.pasteNode(pasteData, nodeIdOrSlot);
 			}
 			return;
 		}
 
-		// If clipboard contains a slot
-		if (clipboard.type === 'slot') {
-			if (isSlotSelection) {
-				// Extract parent ID from slot selection
-				const [parentId] = parts;
-				const success = crafter.operations.pasteSlot(clipboard, parentId);
-				if (success) {
-					clipboard = null;
-				}
+		if (pasteData.type === 'slot') {
+			if (isSlotSelection && slotInfo) {
+				crafter.operations.pasteSlot(pasteData, slotInfo.parentId);
 			} else {
-				// Pasting into a node
-				const success = crafter.operations.pasteSlot(clipboard, nodeIdOrSlot);
-				if (success) {
-					clipboard = null;
-				}
+				crafter.operations.pasteSlot(pasteData, nodeIdOrSlot);
 			}
 		}
 	}
 
 	/**
-	 * Delete Handler - delete selected node without saving to clipboard
+	 * Deletes the selected node without saving it to clipboard.
 	 */
 	function handleDelete(nodeId: string) {
 		crafter.operations.deleteNode(nodeId);
 	}
 
 	/**
-	 * Insert Handler - open component picker for target node or slot
+	 * Opens the component picker for the target node or slot.
 	 */
 	function handleInsert(nodeIdOrSlot: string) {
 		insertTargetNodeId = nodeIdOrSlot;
@@ -190,58 +194,74 @@
 	}
 
 	/**
-	 * Component Select Handler - insert selected component
+	 * Inserts a component into a specific slot.
+	 */
+	function handleSlotInsert(componentType: string, parentId: string, slotName: string): boolean {
+		if (isRootNode(parentId)) {
+			crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, 'into');
+			return true;
+		}
+
+		const targetNode = findNodeById(slot, parentId);
+		if (!targetNode) {
+			return false;
+		}
+
+		crafter.operations.insertNode(componentType, parentId, slotName, 'into');
+		return true;
+	}
+
+	/**
+	 * Inserts a component into a node (determines slot automatically).
+	 */
+	function handleNodeInsert(componentType: string, nodeId: string): boolean {
+		if (isRootNode(nodeId)) {
+			crafter.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, 'into');
+			return true;
+		}
+
+		const targetNode = findNodeById(slot, nodeId);
+		if (!targetNode) {
+			return false;
+		}
+
+		let slotName: string | undefined = undefined;
+
+		if (targetNode.slots) {
+			const slotNames = Object.keys(targetNode.slots);
+
+			if (slotNames.length === 1) {
+				slotName = slotNames[0];
+			} else if (slotNames.length > 1) {
+				slotName = slotNames[0];
+			}
+		}
+
+		crafter.operations.insertNode(componentType, nodeId, slotName, 'into');
+		return true;
+	}
+
+	/**
+	 * Inserts the selected component into the target node or slot.
 	 */
 	function handleComponentSelect(componentType: string) {
 		if (!insertTargetNodeId) return;
 
-		// Check if insertTargetNodeId is a slot (contains ':')
-		const parts = insertTargetNodeId.split(':');
+		const slotInfo = parseSlotSelection(insertTargetNodeId);
 
-		if (parts.length === 2) {
-			// It's a slot: parentId:slotName
-			const [parentId, slotName] = parts;
-			const targetNode = findNodeById(slot, parentId);
-
-			if (!targetNode) {
-				return;
-			}
-
-			// Insert component into specific slot
-			crafter.operations.insertNode(componentType, parentId, slotName, 'into');
+		if (slotInfo) {
+			const { parentId, slotName } = slotInfo;
+			handleSlotInsert(componentType, parentId, slotName);
 		} else {
-			// It's a regular node
-			const targetNode = findNodeById(slot, insertTargetNodeId);
-			if (!targetNode) {
-				return;
-			}
-
-			// Determine slot name
-			let slotName: string | undefined = undefined;
-
-			if (targetNode.slots) {
-				const slotNames = Object.keys(targetNode.slots);
-
-				// If exactly one slot, use it
-				if (slotNames.length === 1) {
-					slotName = slotNames[0];
-				}
-				// If multiple slots, use first one as fallback (shouldn't happen as Insert is disabled)
-				else if (slotNames.length > 1) {
-					slotName = slotNames[0];
-				}
-			}
-
-			// Insert component
-			crafter.operations.insertNode(componentType, insertTargetNodeId, slotName, 'into');
+			handleNodeInsert(componentType, insertTargetNodeId);
 		}
 
-		// Reset state
 		insertTargetNodeId = null;
+		showComponentPicker = false;
 	}
 
 	/**
-	 * Handle Slot Click - update URL with parent:slotname format
+	 * Handles slot click and updates URL with parent:slotName format.
 	 */
 	async function handleSlotClick(parentId: string, slotName: string) {
 		const url = new URL($page.url);
@@ -250,26 +270,18 @@
 		await goto(url, { replaceState: true, noScroll: true });
 	}
 
-	/**
-	 * Keyboard Event Handler
-	 */
 	function handleKeyDown(event: KeyboardEvent) {
-		if (!selectedNodeId) return;
+		if (!selectedNodeId && !clipboard) return;
 
-		const slotInfo = selectedSlotInfo();
-
-		// Ctrl/Cmd + I for insert
 		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
-			if (slotInfo) {
-				// Slot is selected - can always insert
+			if (selectedSlotInfo && selectedNodeId) {
 				event.preventDefault();
 				handleInsert(selectedNodeId);
-			} else {
-				// node is selected - check if can insert
-				const node = selectedNode();
-				const canInsert = node && hasSlots(node) && !hasMultipleSlots(node);
+			} else if (selectedNodeId) {
+				// Allow insert if node has slots (single or multiple) - enables inserting into empty containers
+				const canInsertNode = selectedNode && hasSlots(selectedNode);
 
-				if (canInsert) {
+				if (canInsertNode) {
 					event.preventDefault();
 					handleInsert(selectedNodeId);
 				}
@@ -277,54 +289,146 @@
 			return;
 		}
 
-		// Ctrl/Cmd + V for paste - works for both nodes and slots
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-			if (canPaste()) {
+			if (canPaste) {
 				event.preventDefault();
-				handlePaste(selectedNodeId);
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				const targetId = selectedNodeId || ROOT_NODE_ID;
+				handlePaste(targetId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
 			}
 			return;
 		}
 
-		// Don't allow copy/cut/delete on slots - only on nodes
-		if (slotInfo) return;
+		if (event.key === 'Delete' || event.key === 'Backspace') {
+			if (canDelete && selectedNodeId) {
+				event.preventDefault();
+				handleDelete(selectedNodeId);
+			}
+			return;
+		}
 
-		// Ctrl/Cmd + C for copy (nodes only)
+		if (selectedSlotInfo || !selectedNodeId) return;
+
 		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
 			if (canCopy) {
 				event.preventDefault();
-				handleCopy(selectedNodeId);
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				handleCopy(selectedNodeId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
 			}
 		}
 
-		// Ctrl/Cmd + X for cut (nodes only)
 		if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
 			if (canCut) {
 				event.preventDefault();
-				handleCut(selectedNodeId);
-			}
-		}
-
-		// Delete key to remove selected node (nodes only)
-		if (event.key === 'Delete') {
-			if (canCut) {
-				event.preventDefault();
-				handleDelete(selectedNodeId);
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				handleCut(selectedNodeId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
 			}
 		}
 	}
 
-	// Add keyboard event listener on mount
+	/**
+	 * Handles copy event from context menu or other sources.
+	 */
+	function handleCopyEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCopy) return;
+
+		const copiedNode = crafter.operations.copyNode(selectedNodeId);
+		if (copiedNode) {
+			clipboard = copiedNode;
+			writeToClipboardEvent(event, copiedNode);
+			writeToBrowserClipboard(copiedNode);
+		}
+	}
+
+	/**
+	 * Handles cut event from context menu or other sources.
+	 */
+	function handleCutEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCut) return;
+
+		const cutNode = crafter.operations.cutNode(selectedNodeId);
+		if (cutNode) {
+			clipboard = cutNode;
+			writeToClipboardEvent(event, cutNode);
+			writeToBrowserClipboard(cutNode);
+		}
+	}
+
+	/**
+	 * Handles paste event from context menu or other sources.
+	 */
+	function handlePasteEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (!canPaste) return;
+
+		const eventData = readFromClipboardEvent(event);
+		const pasteData = eventData || clipboard;
+		if (!pasteData) return;
+
+		if (eventData && eventData !== clipboard) {
+			clipboard = eventData;
+		}
+
+		const targetId = selectedNodeId || ROOT_NODE_ID;
+		performPaste(pasteData, targetId);
+	}
+
 	onMount(() => {
 		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('copy', handleCopyEvent);
+		window.addEventListener('cut', handleCutEvent);
+		window.addEventListener('paste', handlePasteEvent);
+
+		readFromBrowserClipboard().then((data) => {
+			if (data) {
+				clipboard = data;
+			}
+		});
+
+		const handleFocus = () => {
+			readFromBrowserClipboard().then((data) => {
+				if (data && data !== clipboard) {
+					clipboard = data;
+				}
+			});
+		};
+
+		window.addEventListener('focus', handleFocus);
+
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('copy', handleCopyEvent);
+			window.removeEventListener('cut', handleCutEvent);
+			window.removeEventListener('paste', handlePasteEvent);
+			window.removeEventListener('focus', handleFocus);
 		};
 	});
 
 	/**
-	 * Move Handler for Drag & Drop
-	 * Returns true if move was successful, false if rejected
+	 * Handles node move operation for drag & drop.
+	 * @returns true if move was successful, false if rejected
 	 */
 	function handleNodeMove(
 		nodeId: string,
@@ -335,38 +439,30 @@
 		return crafter.operations.moveNode(nodeId, targetId, slotName, position);
 	}
 
-	/**
-	 * Slot Copy Handler - copies a complete slot with all its content
-	 */
-	function handleSlotCopy(parentId: string, slotName: string) {
+	async function handleSlotCopy(parentId: string, slotName: string) {
 		const slotData = crafter.operations.copySlot(parentId, slotName);
 		if (slotData) {
 			clipboard = slotData;
+			await writeToBrowserClipboard(slotData);
 		}
 	}
 
-	/**
-	 * Slot Cut Handler - cuts a complete slot (empties it and saves to clipboard)
-	 */
-	function handleSlotCut(parentId: string, slotName: string) {
+	async function handleSlotCut(parentId: string, slotName: string) {
 		const slotData = crafter.operations.cutSlot(parentId, slotName);
 		if (slotData) {
 			clipboard = slotData;
+			await writeToBrowserClipboard(slotData);
 		}
 	}
 
-	/**
-	 * Slot Paste Handler - pastes into a specific slot
-	 */
 	function handleSlotPaste(targetParentId: string, slotName: string) {
-		// Format as slot selection: parentId:slotName
 		handlePaste(`${targetParentId}:${slotName}`);
 	}
 
 	/**
-	 * Slot Move Handler for Drag & Drop
-	 * Moves an entire slot (with all its content) from one parent to another
-	 * Returns true if move was successful, false if rejected
+	 * Handles slot move operation for drag & drop.
+	 * Moves an entire slot (with all its content) from one parent to another.
+	 * @returns true if move was successful, false if rejected
 	 */
 	function handleSlotMove(
 		sourceParentId: string,
