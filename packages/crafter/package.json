@@ -13,8 +13,17 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest --coverage",
+		"test:run": "vitest run",
+		"test:unit": "vitest",
+		"test": "pnpm test:run",
 		"test:e2e": "playwright test",
-		"test": "echo 'The tests are temporarily disabled in this package. Change this to `pnpm run test:e2e` when first tests are implemented.'"
+		"test:e2e:ci": "playwright test --reporter=list --reporter=junit",
+		"test:e2e:headed": "playwright test --headed",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:debug": "playwright test --debug",
+		"test:e2e:codegen": "playwright codegen http://localhost:5173"
 	},
 	"files": [
 		"dist",
@@ -80,6 +89,13 @@
 		"svelte"
 	],
 	"dependencies": {
-		"colorjs.io": "^0.5.2"
+		"@testing-library/svelte": "^5.2.3",
+		"@vitest/ui": "^2.1.8",
+		"@vitest/coverage-v8": "^2.1.8",
+		"colorjs.io": "^0.5.2",
+		"jsdom": "26.1.0",
+		"vitest": "3.2.3",
+		"@testing-library/jest-dom": "^6.6.3",
+		"@testing-library/user-event": "^14.5.2"
 	}
 }

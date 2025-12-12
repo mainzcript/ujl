@@ -31,6 +31,7 @@
 	} from '$lib/tools/ujlc-tree.js';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.ts';
+	import { test, testId } from '$lib/utils/test-attrs.ts';
 
 	let {
 		node,
@@ -157,7 +158,7 @@
 {/snippet}
 
 {#snippet slotChildrenContent()}
-	<SidebarMenuSub class="mr-0 pe-0">
+	<SidebarMenuSub class="mr-0 pe-0" {...test('sub item', { level })}>
 		{#if showSlotsAsGroups}
 			<!-- Multiple slots or no children: show all slots as groups (including empty) -->
 			{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
@@ -237,9 +238,12 @@
 {#if level === 0}
 	{#if hasChildren(node)}
 		<!-- Root level node with children or empty slots -->
-		<SidebarMenuItem class="relative">
+		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
 			{#if showDropBefore}
-				<div class="drop-indicator drop-indicator-before"></div>
+				<div
+					class="drop-indicator drop-indicator-before"
+					{...testId('drop-indicator-before')}
+				></div>
 			{/if}
 			<Collapsible open={isExpanded} onOpenChange={isRootNode ? undefined : handleOpenChange}>
 				<CollapsibleTrigger class="group">
@@ -249,6 +253,7 @@
 								<div
 									role="button"
 									tabindex="0"
+									data-tree-node-id={node.meta.id}
 									class="group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md {isSelected
 										? 'node-selected text-primary'
 										: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
@@ -297,14 +302,17 @@
 				</CollapsibleContent>
 			</Collapsible>
 			{#if showDropAfter}
-				<div class="drop-indicator drop-indicator-after"></div>
+				<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
 			{/if}
 		</SidebarMenuItem>
 	{:else}
 		<!-- Root level node without children -->
-		<SidebarMenuItem class="relative">
+		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
 			{#if showDropBefore}
-				<div class="drop-indicator drop-indicator-before"></div>
+				<div
+					class="drop-indicator drop-indicator-before"
+					{...testId('drop-indicator-before')}
+				></div>
 			{/if}
 			<SidebarMenuButton>
 				{#snippet child({ props })}
@@ -312,6 +320,7 @@
 						type="button"
 						{...props}
 						tabindex="0"
+						data-tree-node-id={node.meta.id}
 						class="group/root {props.class || ''} {isSelected
 							? 'selected text-primary'
 							: ''} {isDragging ? 'opacity-50' : ''} {showDropInto
@@ -324,6 +333,7 @@
 						ondragleave={onDragLeave}
 						ondrop={(e) => onDrop(e, node.meta.id)}
 						ondragend={onDragEnd}
+						{...testId('nav-tree-item-button')}
 					>
 						<span class="flex-1 overflow-hidden text-ellipsis">{displayName}</span>
 						<DropdownMenu bind:open={dropdownOpen}>
@@ -348,7 +358,7 @@
 				{/snippet}
 			</SidebarMenuButton>
 			{#if showDropAfter}
-				<div class="drop-indicator drop-indicator-after"></div>
+				<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
 			{/if}
 		</SidebarMenuItem>
 	{/if}
@@ -356,7 +366,7 @@
 	<!-- Nested level node with children or empty slots -->
 	<div class="relative">
 		{#if showDropBefore}
-			<div class="drop-indicator drop-indicator-before"></div>
+			<div class="drop-indicator drop-indicator-before" {...testId('drop-indicator-before')}></div>
 		{/if}
 		<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
 			<CollapsibleTrigger class="group">
@@ -366,6 +376,7 @@
 							<div
 								role="button"
 								tabindex="0"
+								data-tree-node-id={node.meta.id}
 								class="group/dropdown flex h-full w-full items-center justify-between rounded-md {isSelected
 									? 'node-selected text-primary'
 									: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
@@ -414,19 +425,20 @@
 			</CollapsibleContent>
 		</Collapsible>
 		{#if showDropAfter}
-			<div class="drop-indicator drop-indicator-after"></div>
+			<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
 		{/if}
 	</div>
 {:else}
 	<!-- Nested level node without children (leaf node) -->
 	<div class="relative">
 		{#if showDropBefore}
-			<div class="drop-indicator drop-indicator-before"></div>
+			<div class="drop-indicator drop-indicator-before" {...testId('drop-indicator-before')}></div>
 		{/if}
 		<SidebarMenuSubButton class="p-0">
 			<div
 				role="button"
 				tabindex="0"
+				data-tree-node-id={node.meta.id}
 				class="group/node flex h-full w-full items-center justify-between rounded-md ps-2 {showDropInto
 					? 'drop-target'
 					: ''} {isSelected ? 'node-selected text-primary' : ''} {isDragging ? 'opacity-50' : ''}"
@@ -464,7 +476,7 @@
 			</div>
 		</SidebarMenuSubButton>
 		{#if showDropAfter}
-			<div class="drop-indicator drop-indicator-after"></div>
+			<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
 		{/if}
 	</div>
 {/if}

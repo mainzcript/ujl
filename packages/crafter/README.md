@@ -59,7 +59,7 @@ The Crafter provides seamless bidirectional synchronization between the navigati
 - **Expand State Management**: `app.svelte` maintains `expandedNodeIds` Set with reactive mutations (`.add()`, `.delete()`)
 - **Context API**: `expandToNode()`, `setNodeExpanded()`, `getExpandedNodeIds()` available via `CrafterContext`
 - **Controlled Collapsibles**: `nav-tree-item.svelte` uses `open={isExpanded}` bound to central state
-- **Path Finding**: `findPathToNode()` in `ujlc-tree-utils.ts` recursively finds all parent IDs to target node
+- **Path Finding**: `findPathToNode()` in `ujlc-tree.ts` recursively finds all parent IDs to target node
 - **Preview Handler**: `handleModuleClick()` in `preview.svelte` orchestrates expand → select → scroll sequence
 
 ### Context API
@@ -116,14 +116,14 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
 
   - All operations return `boolean` (success/failure) or the affected node/slot data
   - Operations validate inputs and prevent invalid modifications (e.g., moving node into itself, deleting root)
-  - All tree mutations use immutable utilities from `ujlc-tree-utils.ts`
+  - All tree mutations use immutable utilities from `ujlc-tree.ts`
   - Component insertion uses `getComponentDefinition()` and `createNodeFromDefinition()` from component library
 
 #### Helper Utilities
 
 - `generateNodeId()` - Generates unique IDs using `generateUid(10)` from `@ujl-framework/core` (nanoid with 10 chars)
 - `isDescendant(node, targetId)` - Checks if node is descendant of target
-- `findPathToNode(nodes, targetId)` - Finds all parent IDs from root to target (exported from `ujlc-tree-utils.ts`)
+- `findPathToNode(nodes, targetId)` - Finds all parent IDs from root to target (exported from `ujlc-tree.ts`)
 
 **Why Functional Updates?**
 
@@ -206,7 +206,7 @@ This ensures:
   - Provides unified event handlers for both node and slot dragging
   - Returns drag state and handlers for use in tree components
 
-- **`ujlc-tree-utils.ts`**: Immutable tree manipulation utilities
+- **`ujlc-tree.ts`**: Immutable tree manipulation utilities
   - **Search**:
     - `findNodeById(nodes, targetId)` - Recursively finds nodes by ID
     - `findParentOfNode(nodes, targetId)` - Finds parent, slot name, and index of a node
@@ -354,7 +354,7 @@ Drag state includes:
 
 #### Tree Utilities
 
-All tree manipulations in `ujlc-tree-utils.ts` are **immutable**:
+All tree manipulations in `ujlc-tree.ts` are **immutable**:
 
 - **Search**: `findNodeById()`, `findParentOfNode()`, `findPathToNode()` - recursive traversal
 - **Modification**: `removeNodeFromTree()`, `insertNodeIntoSlot()`, `insertNodeAtPosition()`, `updateNodeInTree()`
@@ -373,3 +373,322 @@ The ambient flavor is unique as it serves as the base background color. Instead 
 
 All color utilities live in the `$lib/tools/colors/` toolkit and are re-exported from `$lib/tools/colors/index.js` for a single, cohesive API.
 Color editing in the UI is handled by the `ColorPaletteInput` component, which receives a `colorSet` and the shared `palette` as read-only props, plus the current `flavor`, and reports changes via an `onChange` or `onOriginalChange` callback, following a unidirectional data flow (props down, events up).
+
+## Testing-Strategie:
+
+### Übersicht
+
+Das UJL Crafter Projekt verwendet eine zweigleisige Test-Strategie mit **Unit Tests** (Vitest) für Logik/Komponenten und **E2E Tests** (Playwright) für User-Flows. Die Tests sind tief in die CI/CD-Pipeline integriert und stellen sicher, dass sowohl isolierte Funktionalität als auch komplette User-Journeys zuverlässig funktionieren.
+
+---
+
+### Test-Frameworks
+
+#### Vitest (Unit Tests)
+
+- **Framework**: Vitest 3.2.3 mit JSDOM-Umgebung
+- **Testing Library**: @testing-library/svelte 5.2.3
+- **Coverage**: v8 Provider (Text, JSON, HTML Reports)
+- **Konfiguration**: `vitest.config.ts`
+- **Test-Pattern**: `src/**/*.{test,spec}.{js,ts}`
+
+#### Playwright (E2E Tests)
+
+- **Framework**: Playwright 1.56.1
+- **Browser**: Chromium (weitere optional aktivierbar)
+- **Konfiguration**: `playwright.config.ts`
+- **Test-Pattern**: `e2e/**/*.test.ts`
+- **Timeouts**: 30s pro Test, 120s für Webserver-Start
+
+---
+
+### Unit Tests
+
+#### Abgedeckte Bereiche
+
+##### 1. **Tree Utilities** (`ujlc-tree.test.ts`)
+
+Umfassende Tests für die Baum-Manipulation-Logik:
+
+- **Node-Operationen**:
+  - `findNodeById()` - Findet Nodes auf allen Verschachtelungsebenen
+  - `findParentOfNode()` - Ermittelt Parent-Node, Slot-Namen und Index
+  - `removeNodeFromTree()` - Immutable Node-Entfernung
+  - `insertNodeIntoSlot()` - Einfügen in bestehende/neue Slots
+  - `insertNodeAtPosition()` - Positioniertes Einfügen (before/middle/after)
+  - `updateNodeInTree()` - Immutable Node-Updates (Felder, Metadaten)
+
+- **Slot-Operationen**:
+  - `getFirstSlotName()` - Erster Slot-Name
+  - `hasSlots()` - Slot-Existenz-Check
+  - `hasMultipleSlots()` - Multi-Slot-Detection
+  - `getAllSlotEntries()` - Alle Slots inkl. leerer
+
+- **Display & Utility**:
+  - `getDisplayName()` - Generiert Anzeigenamen (Title/Label/Headline/Content)
+  - `formatTypeName()` - Kebab-case → Title Case Konvertierung
+  - `getChildren()` - Alle Kinder über alle Slots
+  - `hasChildren()` - Kinder-Existenz-Check
+
+- **Drag & Drop / Clipboard**:
+  - `canAcceptDrop()` - Drop-Ziel-Validierung
+  - `canNodeAcceptPaste()` - Paste-Ziel-Validierung (Node/Slot-Clipboard)
+
+**Besonderheiten**:
+
+- Alle Operationen sind **immutable** (Original-Tree unverändert)
+- Tests verwenden Mock-Factory (`createMockNode`, `createMockTree`, `createMockMultiSlotTree`)
+- Edge-Cases: Leere Trees, nicht existierende Nodes, verschachtelte Multi-Slot-Strukturen
+
+##### 2. **Context API** (`context.test.ts`)
+
+Tests für zentrale App-Context-Funktionen:
+
+- **ID-Generierung**:
+  - `generateNodeId()` - 10-Zeichen IDs, Einzigartigkeit, valide Zeichen
+
+- **Path-Finding**:
+  - `findPathToNode()` - Findet Parent-Pfade für Tree-Expansion
+  - Funktioniert mit tief verschachtelten Nodes
+  - Gibt leeres Array für Root-Nodes zurück
+  - Null für nicht existierende Nodes
+
+**Test-Daten**: Verwendet Mock-Factory für konsistente Test-Trees
+
+#### Test-Setup (`setup.ts`)
+
+- **Cleanup**: Automatisches Cleanup nach jedem Test via `@testing-library/svelte`
+- **Custom Matchers**:
+  - `toBeValidNodeId(string)` - Validiert 10-Zeichen Node-IDs
+
+---
+
+### E2E Tests
+
+#### Abgedeckte User-Flows
+
+##### 1. **Page Setup** (`page-setup.test.ts`)
+
+Grundlegende App-Struktur und -Verhalten:
+
+- **Disclaimer-Dialog**:
+  - Erscheint beim ersten Besuch
+  - "Got it"-Button schließt Dialog
+  - Wird nach Dismissal nicht mehr angezeigt (LocalStorage)
+
+- **Layout-Struktur**:
+  - 3 Hauptbereiche sichtbar: Sidebar Left, Preview, Sidebar Right
+  - Header mit Breadcrumb-Navigation
+  - Sticky Header-Positionierung
+
+- **Sidebar-Trigger**:
+  - Mode-Switcher (Editor/Designer) in Sidebar Left
+  - Dropdown-Menü funktioniert
+  - Mode-Wechsel aktualisiert Sidebar-Inhalt
+
+##### 2. **Editor Mode** (`editor.test.ts`)
+
+Navigation Tree und Node-Interaktionen:
+
+- **Navigation Tree**:
+  - Sichtbar mit Root-Node "Document"
+  - Root-Nodes werden angezeigt
+  - Nodes haben Text-Content
+
+- **Node-Expansion**:
+  - Chevron-Click togglet Expansion
+  - `data-state="open/closed"` korrekt gesetzt
+  - Collapsible-Animation funktioniert
+
+- **Node-Selection**:
+  - Click auf Node-Button selektiert Node
+  - URL-Parameter `?selected=nodeId` wird gesetzt
+  - Selektierter Node ist visuell hervorgehoben
+
+##### 3. **Preview Interactions** (`preview.test.ts`)
+
+Preview-Rendering und Editor-Synchronisation:
+
+- **Basic Rendering**:
+  - Preview rendert Komponenten mit `data-ujl-module-id`
+  - Clickable Components haben `role="button"`
+  - Content wird korrekt angezeigt
+
+- **Click-to-Select**:
+  - Click auf Preview-Component selektiert Node im Tree
+  - URL enthält `?selected=moduleId`
+  - Component erhält `.ujl-selected` CSS-Klasse
+
+- **Expand-to-Node**:
+  - Click auf tief verschachtelte Component expandiert Parent-Nodes
+  - Tree wird automatisch zum selektierten Node gescrollt
+  - Path-Finding-Algorithmus funktioniert korrekt
+
+- **Hover Effects**:
+  - Hover auf Component zeigt Outline (2px solid)
+  - Child-Hover entfernt Parent-Outline (CSS `:has()` Selector)
+  - Hover-State wird korrekt verwaltet
+
+- **Tree-to-Preview Scroll**:
+  - Click auf Tree-Node scrollt Preview zu Component
+  - Nur wenn Component außerhalb Viewport (Smart Scrolling)
+  - Scroll-Position bleibt stabil wenn bereits sichtbar
+
+- **Theme Changes**:
+  - Preview-Selection bleibt bei Theme-Änderungen erhalten
+  - Designer-Mode: Theme-Änderungen reflektieren sich im Preview
+  - Selection-State bleibt über Mode-Wechsel hinweg erhalten
+
+##### 4. **Sidebar Right** (`sidebar-right.test.ts`)
+
+Export/Import und Property-Editing:
+
+- **Export-Dropdown**:
+  - Button öffnet Dropdown-Menü
+  - "Export Theme" und "Export Content" Optionen sichtbar
+  - Dropdown schließt nach Aktion
+
+- **Import-Dropdown**:
+  - Button öffnet Dropdown-Menü
+  - "Import Theme" und "Import Content" Optionen sichtbar
+
+- **Property Editing** (wenn Node selektiert):
+  - Field-Inputs werden für selektierten Node angezeigt
+  - Inputs sind korrekt an Node-Fields gebunden
+
+#### Test-Utilities
+
+##### Test Attributes (`test-attrs.ts`)
+
+Conditional Test-Attribute für E2E-Tests:
+
+```typescript
+testId('my-component'); // → {data-testid: 'my-component'}
+testAttrs({ nodeId: '123' }); // → {data-node-id: '123'}
+test('item', { nodeId: '123' }); // → Kombiniert testId + testAttrs
+```
+
+**Aktivierung**: Nur wenn `PUBLIC_TEST_MODE=true` gesetzt ist
+**Verwendung**: Ermöglicht stabile Selektoren ohne Prod-Overhead
+
+---
+
+### CI/CD Integration
+
+#### GitLab CI Pipeline (`.gitlab-ci.yml`)
+
+#### Stages
+
+1. **install** - Dependencies installieren (mit Cache)
+2. **build** - Packages + Docs bauen
+3. **test** - Unit + E2E Tests parallel
+4. **quality** - Linting + Type-Checking
+5. **deploy** - GitLab Pages (nur main/develop)
+
+##### Test-Jobs
+
+###### `test_unit`
+
+```yaml
+stage: test
+image: node:22-slim
+script: pnpm test
+retry: max 2
+```
+
+- Führt alle Vitest-Tests aus
+- Cached Dependencies von install-Stage
+- Retries bei Runner-Failures
+
+###### `test_e2e`
+
+```yaml
+stage: test
+image: mcr.microsoft.com/playwright:v1.56.1-jammy
+script: pnpm test:e2e:ci
+artifacts:
+  - test-results/ (JUnit XML)
+  - playwright-report/ (HTML)
+```
+
+- Playwright-Browser im Docker-Image enthalten
+- JUnit-Reports für GitLab-Integration
+- HTML-Reports als Artifacts (1 Woche Retention)
+- Retries: 2x bei fehlgeschlagenen Tests
+
+---
+
+### Test-Ausführung
+
+#### Lokal
+
+##### Unit Tests
+
+```bash
+pnpm test              # Einmalige Ausführung
+pnpm test:unit         # Watch-Mode
+pnpm test:ui           # Vitest UI öffnen
+pnpm test:coverage     # Coverage-Report
+```
+
+##### E2E Tests
+
+```bash
+pnpm test:e2e          # Headless
+pnpm test:e2e:headed   # Mit Browser-Fenster
+pnpm test:e2e:ui       # Playwright UI
+pnpm test:e2e:debug    # Debug-Mode
+pnpm test:e2e:codegen  # Test-Generator
+```
+
+#### CI
+
+```bash
+# In GitLab CI automatisch ausgeführt
+pnpm test              # Unit Tests
+pnpm test:e2e:ci       # E2E mit JUnit-Reporter
+```
+
+---
+
+### Coverage
+
+#### Ausschlüsse
+
+- `node_modules/`
+- `src/tests/` (Test-Utilities)
+- `**/*.d.ts` (Type Definitions)
+- `**/*.config.*` (Config-Files)
+- `**/mockData.ts` (Test-Daten)
+- `**/*.{test,spec}.ts` (Test-Files selbst)
+
+#### Reports
+
+- **Text**: Console-Output
+- **JSON**: Maschinen-lesbar
+- **HTML**: Interaktiver Browser-Report
+
+---
+
+### Best Practices
+
+#### Unit Tests
+
+1. **Isolation**: Jeder Test läuft isoliert (Cleanup nach jedem Test)
+2. **Immutability**: Tests verifizieren, dass Originaldaten unverändert bleiben
+3. **Edge Cases**: Leere Inputs, nicht existierende Daten, Grenzwerte
+4. **Mock Data**: Konsistente Mock-Factory für reproduzierbare Tests
+
+#### E2E Tests
+
+1. **BeforeEach Setup**: Immer sauberer State (Clear Storage, Dismiss Disclaimer)
+2. **Explicit Waits**: `waitForTimeout()` für Animationen, `waitForLoadState()` für Navigation
+3. **Smart Selectors**: Bevorzuge `data-testid` über CSS-Selektoren
+4. **Retry Logic**: CI-Tests mit 2x Retry bei Flakiness
+5. **Artifacts**: Screenshots/Videos bei Failures für Debugging
+
+#### Test-Attribute
+
+- Nur in Test-Mode aktiviert (`PUBLIC_TEST_MODE=true`)
+- Keine Performance-Impact in Production
+- Stabile Selektoren unabhängig von UI-Änderungen

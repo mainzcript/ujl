@@ -56,7 +56,7 @@
 			} else {
 				console.warn('[Preview] Tree item not found after expansion:', nodeId);
 			}
-		}, 200); // Increased from 100ms to 200ms to account for expansion animation
+		}, 300);
 	}
 
 	/**
