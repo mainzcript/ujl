@@ -9,6 +9,7 @@ node_modules
 /.svelte-kit
 /build
 /dist
+/playwright-report
 
 # OS
 .DS_Store
@@ -19,6 +20,8 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+env/.env.local
+env/.env.*.local
 
 # Vite
 vite.config.js.timestamp-*

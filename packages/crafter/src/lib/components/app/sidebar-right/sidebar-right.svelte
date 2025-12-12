@@ -6,18 +6,6 @@
 		SidebarGroup,
 		SidebarGroupLabel,
 		SidebarGroupContent,
-		Input,
-		Textarea,
-		Select,
-		SelectTrigger,
-		SelectContent,
-		SelectItem,
-		SelectLabel,
-		SelectGroup,
-		Switch,
-		Label,
-		Slider,
-		Text,
 		Button,
 		DropdownMenu,
 		DropdownMenuTrigger,
@@ -29,6 +17,13 @@
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
+	import { page } from '$app/stores';
+	import { getContext } from 'svelte';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
+	import { getComponentDefinition } from '@ujl-framework/examples/components';
+	import { findNodeById } from '$lib/tools/ujlc-tree.ts';
+	import { FieldInput } from './components/index.js';
+	import { testId } from '$lib/utils/test-attrs.ts';
 
 	let {
 		ref = $bindable(null),
@@ -44,9 +39,63 @@
 		onImportContent?: (file: File) => void;
 	} = $props();
 
+	// Get Crafter Context
+	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+	const sidebar = useSidebar();
+
+	// Hidden file inputs for import
 	let themeFileInput: HTMLInputElement | null = $state(null);
 	let contentFileInput: HTMLInputElement | null = $state(null);
 
+	// Reactive: Selected Node ID from URL
+	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+
+	// Check if selection is a slot (format: parentId:slotName)
+	const isSlotSelected = $derived(() => {
+		return selectedNodeId?.includes(':') || false;
+	});
+
+	// Reactive: Find selected node in tree
+	const selectedNode = $derived(() => {
+		if (!selectedNodeId || isSlotSelected()) return null;
+
+		const rootSlot = crafter.getRootSlot();
+		return findNodeById(rootSlot, selectedNodeId);
+	});
+
+	// Reactive: Get component definition for selected node
+	const componentDef = $derived(() => {
+		if (!selectedNode()) return null;
+		return getComponentDefinition(selectedNode()!.type);
+	});
+
+	// Reactive: Get field definitions
+	const fieldDefinitions = $derived(() => {
+		return componentDef()?.fields || {};
+	});
+
+	// Reactive: Check if there are any editable fields
+	const hasEditableFields = $derived(() => {
+		return Object.keys(fieldDefinitions()).length > 0;
+	});
+
+	/**
+	 * Handler for field updates from FieldInput components
+	 * Calls the context API to update the node field immutably
+	 */
+	function handleFieldUpdate(fieldName: string, newValue: unknown) {
+		if (!selectedNodeId || isSlotSelected()) return;
+
+		const success = crafter.operations.updateNodeField(selectedNodeId, fieldName, newValue);
+
+		if (!success) {
+			console.error('[SidebarRight] Failed to update field:', fieldName);
+		}
+	}
+
+	/**
+	 * Handler for theme file selection
+	 */
 	function handleThemeFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -56,6 +105,9 @@
 		}
 	}
 
+	/**
+	 * Handler for content file selection
+	 */
 	function handleContentFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -64,23 +116,6 @@
 			target.value = ''; // Reset input
 		}
 	}
-
-	const sidebar = useSidebar();
-
-	// Form state
-	let titleValue = $state('UJL Framework Example');
-	let descriptionValue = $state('A comprehensive example showcasing UJL framework capabilities');
-	let selectValue = $state<string | undefined>(undefined);
-	let switchValue = $state(false);
-	let sliderValue = $state(50);
-
-	const selectOptions = [
-		{ value: 'container', label: 'Container' },
-		{ value: 'text', label: 'Text' },
-		{ value: 'grid', label: 'Grid' },
-		{ value: 'card', label: 'Card' },
-		{ value: 'button', label: 'Button' }
-	];
 </script>
 
 <Sidebar
@@ -88,7 +123,9 @@
 	collapsible="none"
 	class="sticky top-0 hidden h-svh border-l lg:flex"
 	{...restProps}
+	{...testId('sidebar-right')}
 >
+	<!-- Header with Export/Import buttons -->
 	<SidebarHeader class="border-b border-sidebar-border">
 		<div class="flex items-center justify-end gap-2">
 			<!-- Hidden file inputs -->
@@ -164,92 +201,99 @@
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			<Button variant="primary" size="sm" onclick={() => alert('This will be implemented soon')}
-				>Save</Button
-			>
+
+			<!-- Save Button (future implementation) -->
+			<Button variant="primary" size="sm" onclick={() => alert('Save functionality coming soon!')}>
+				Save
+			</Button>
 		</div>
 	</SidebarHeader>
+
+	<!-- Content Area -->
 	<SidebarContent class="overflow-y-auto">
-		<SidebarGroup>
-			<SidebarGroupLabel>Properties</SidebarGroupLabel>
-			<SidebarGroupContent class="space-y-4 p-4">
-				<!-- Title Input -->
-				<div class="space-y-2">
-					<Label for="title" class="text-xs">Title</Label>
-					<Input id="title" bind:value={titleValue} placeholder="Enter title..." />
-				</div>
-
-				<!-- Description Textarea -->
-				<div class="space-y-2">
-					<Label for="description" class="text-xs">Description</Label>
-					<Textarea
-						id="description"
-						bind:value={descriptionValue}
-						placeholder="Enter description..."
-						rows={3}
-					/>
-				</div>
-
-				<!-- Type Select -->
-				<div class="space-y-2">
-					<Label for="type" class="text-xs">Type</Label>
-					<Select type="single" bind:value={selectValue}>
-						<SelectTrigger id="type" class="w-full">
-							{selectValue || 'Select type...'}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Module Types</SelectLabel>
-								{#each selectOptions as option (option.value)}
-									<SelectItem value={option.value} label={option.label}>
-										{option.label}
-									</SelectItem>
-								{/each}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-
-				<!-- Switch -->
-				<div class="space-y-2">
-					<div class="flex items-center justify-between">
-						<Label for="enabled" class="text-xs">Enabled</Label>
-						<Switch id="enabled" bind:checked={switchValue} />
+		{#if !selectedNodeId}
+			<!-- No selection state -->
+			<div class="flex h-full items-center justify-center p-8 text-center">
+				<div class="space-y-3">
+					<div class="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
+						<ShareIcon class="size-8 text-muted-foreground" />
+					</div>
+					<div class="space-y-1">
+						<p class="text-sm font-medium">No component selected</p>
+						<p class="text-xs text-muted-foreground">
+							Select a component in the tree or preview to edit its properties
+						</p>
 					</div>
 				</div>
-
-				<!-- Slider -->
-				<div class="space-y-2">
-					<div class="flex items-center justify-between">
-						<Label for="opacity" class="text-xs">Opacity</Label>
-						<Text size="xs" intensity="muted">{sliderValue}%</Text>
+			</div>
+		{:else if isSlotSelected()}
+			<!-- Slot selection state -->
+			<div class="flex h-full items-center justify-center p-8 text-center">
+				<div class="space-y-3">
+					<div class="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
+						<FileJsonIcon class="size-8 text-muted-foreground" />
 					</div>
-					<Slider
-						id="opacity"
-						type="single"
-						bind:value={sliderValue}
-						max={100}
-						step={1}
-						class="w-full"
-					/>
+					<div class="space-y-1">
+						<p class="text-sm font-medium">Slot selected</p>
+						<p class="text-xs text-muted-foreground">
+							Slots don't have editable properties. Select a component instead.
+						</p>
+					</div>
 				</div>
+			</div>
+		{:else if !selectedNode()}
+			<!-- Node not found (should not happen normally) -->
+			<div class="flex h-full items-center justify-center p-8 text-center">
+				<div class="space-y-3">
+					<div
+						class="mx-auto flex size-16 items-center justify-center rounded-full bg-destructive/10"
+					>
+						<ShareIcon class="size-8 text-destructive" />
+					</div>
+					<div class="space-y-1">
+						<p class="text-sm font-medium text-destructive">Component not found</p>
+						<p class="text-xs text-muted-foreground">
+							The selected component could not be found in the document tree.
+						</p>
+					</div>
+				</div>
+			</div>
+		{:else}
+			<!-- Properties Form -->
+			<div class="h-full">
+				<!-- Component Info Header -->
+				<SidebarGroup>
+					<SidebarGroupLabel>
+						<span class="text-sm">{componentDef()?.label || selectedNode()!.type}</span>
+					</SidebarGroupLabel>
+				</SidebarGroup>
 
-				<!-- Additional Input Fields -->
-				<div class="space-y-2">
-					<Label for="url" class="text-xs">URL</Label>
-					<Input id="url" type="url" placeholder="https://example.com" />
-				</div>
-
-				<div class="space-y-2">
-					<Label for="email" class="text-xs">Email</Label>
-					<Input id="email" type="email" placeholder="email@example.com" />
-				</div>
-
-				<div class="space-y-2">
-					<Label for="number" class="text-xs">Number</Label>
-					<Input id="number" type="number" placeholder="0" />
-				</div>
-			</SidebarGroupContent>
-		</SidebarGroup>
+				<!-- Editable Properties -->
+				{#if hasEditableFields()}
+					<SidebarGroup>
+						<!-- <SidebarGroupLabel>Properties</SidebarGroupLabel> -->
+						<SidebarGroupContent class="space-y-6 p-2 pt-0">
+							{#each Object.entries(fieldDefinitions()) as [fieldName, fieldDef] (fieldName)}
+								<FieldInput
+									{fieldName}
+									definition={fieldDef}
+									value={selectedNode()!.fields[fieldName]}
+									onChange={(value) => handleFieldUpdate(fieldName, value)}
+								/>
+							{/each}
+						</SidebarGroupContent>
+					</SidebarGroup>
+				{:else}
+					<SidebarGroup>
+						<SidebarGroupLabel>Properties</SidebarGroupLabel>
+						<SidebarGroupContent class="p-4">
+							<p class="text-xs text-muted-foreground italic">
+								This component type has no editable properties.
+							</p>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				{/if}
+			</div>
+		{/if}
 	</SidebarContent>
 </Sidebar>

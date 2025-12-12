@@ -11,6 +11,7 @@
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 	import { createVirtualRootNode } from '$lib/tools/ujlc-tree.js';
+	import { testId } from '$lib/utils/test-attrs.ts';
 
 	let {
 		nodes,
@@ -87,7 +88,7 @@
 	}
 </script>
 
-<SidebarGroup>
+<SidebarGroup {...testId('nav-tree')}>
 	<SidebarGroupLabel>Document</SidebarGroupLabel>
 	<SidebarGroupContent>
 		<SidebarMenu class="mr-0">

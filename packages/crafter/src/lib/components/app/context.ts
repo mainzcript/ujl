@@ -66,6 +66,20 @@ export type CrafterContext = {
 	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void;
 
 	/**
+	 * Get the current root slot (reactive getter for property panel).
+	 * Returns the current state of the root slot for read-only access.
+	 *
+	 * @returns The current root slot array
+	 *
+	 * @example
+	 * ```ts
+	 * const rootSlot = crafter.getRootSlot();
+	 * const node = findNodeById(rootSlot, nodeId);
+	 * ```
+	 */
+	getRootSlot: () => UJLCSlotObject;
+
+	/**
 	 * Set the currently selected node ID
 	 * This triggers navigation and updates the URL
 	 */
@@ -198,6 +212,40 @@ export type CrafterContext = {
 			targetParentId: string,
 			targetSlotName: string
 		) => boolean;
+
+		/**
+		 * Updates a single field of a node (for property panel).
+		 * Performs immutable update and updates the updated_at timestamp.
+		 *
+		 * @param nodeId - The node ID to update
+		 * @param fieldName - The field name to update
+		 * @param value - The new value for the field
+		 * @returns true if successful, false if node not found
+		 *
+		 * @example
+		 * ```ts
+		 * crafter.operations.updateNodeField('node-123', 'title', 'New Title');
+		 * ```
+		 */
+		updateNodeField: (nodeId: string, fieldName: string, value: unknown) => boolean;
+
+		/**
+		 * Updates multiple fields of a node at once (bulk update).
+		 * More efficient than multiple updateNodeField calls.
+		 *
+		 * @param nodeId - The node ID to update
+		 * @param updates - Record of field names to new values
+		 * @returns true if successful, false if node not found
+		 *
+		 * @example
+		 * ```ts
+		 * crafter.operations.updateNodeFields('node-123', {
+		 *   title: 'New Title',
+		 *   description: 'New Description'
+		 * });
+		 * ```
+		 */
+		updateNodeFields: (nodeId: string, updates: Record<string, unknown>) => boolean;
 	};
 
 	// Future extensions (planned but not yet implemented):
@@ -790,6 +838,62 @@ export function createOperations(
 
 				return updatedSlot;
 			});
+			return true;
+		},
+
+		// Update single field
+		updateNodeField(nodeId: string, fieldName: string, value: unknown): boolean {
+			const slot = getSlot();
+			const node = findNodeById(slot, nodeId);
+
+			if (!node) {
+				console.warn('[updateNodeField] Node not found:', nodeId);
+				return false;
+			}
+
+			// Update field immutably with new timestamp
+			updateRootSlot((currentSlot) => {
+				return updateNodeInTree(currentSlot, nodeId, (node: UJLCModuleObject) => ({
+					...node,
+					fields: {
+						...node.fields,
+						[fieldName]: value
+					},
+					meta: {
+						...node.meta,
+						updated_at: new Date().toISOString()
+					}
+				}));
+			});
+
+			return true;
+		},
+
+		// Update multiple fields at once
+		updateNodeFields(nodeId: string, updates: Record<string, unknown>): boolean {
+			const slot = getSlot();
+			const node = findNodeById(slot, nodeId);
+
+			if (!node) {
+				console.warn('[updateNodeFields] Node not found:', nodeId);
+				return false;
+			}
+
+			// Update all fields immutably with new timestamp
+			updateRootSlot((currentSlot) => {
+				return updateNodeInTree(currentSlot, nodeId, (node: UJLCModuleObject) => ({
+					...node,
+					fields: {
+						...node.fields,
+						...updates
+					},
+					meta: {
+						...node.meta,
+						updated_at: new Date().toISOString()
+					}
+				}));
+			});
+
 			return true;
 		}
 	};

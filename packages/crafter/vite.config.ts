@@ -4,5 +4,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit(), devtoolsJson()]
+	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
+	// Custom env directory
+	envDir: './env',
+
+	// Prefix für public env variables (Standard: PUBLIC_)
+	envPrefix: 'PUBLIC_'
 });

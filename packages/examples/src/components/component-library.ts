@@ -1,5 +1,6 @@
 import type { ComponentDefinition, ComponentLibrary, UJLCModuleObject } from "@ujl-framework/types";
 
+import { extractDefaultValues } from "@ujl-framework/types";
 /**
  * TODO: This manual component library should be automatically generated from the Module Registry
  *
@@ -20,6 +21,13 @@ import type { ComponentDefinition, ComponentLibrary, UJLCModuleObject } from "@u
  *
  * @deprecated This manual approach should be replaced with automatic generation from Registry
  */
+
+/**
+ * Component Library based on showcase.ujlc.json
+ * Contains all component types used in the example document
+ *
+ * UPDATED: Now uses FieldDefinition objects instead of plain default values
+ */
 export const componentLibrary: ComponentLibrary = [
 	// Layout Components
 	{
@@ -27,10 +35,9 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Container",
 		description: "A container for grouping and organizing content",
 		category: "layout",
-		defaultFields: {},
+		fields: {}, // Container has no editable fields
 		defaultSlots: {
 			body: [],
-			// header: [],
 		},
 		tags: ["wrapper", "section", "group"],
 	},
@@ -39,7 +46,7 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Grid",
 		description: "A responsive grid layout for arranging items",
 		category: "layout",
-		defaultFields: {},
+		fields: {}, // Grid has no editable fields
 		defaultSlots: {
 			items: [],
 		},
@@ -52,8 +59,15 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Text",
 		description: "A simple text block for paragraphs and content",
 		category: "content",
-		defaultFields: {
-			content: "Enter your text here...",
+		fields: {
+			content: {
+				type: "textarea",
+				label: "Content",
+				placeholder: "Enter your text here...",
+				description: "The text content to display",
+				required: true,
+				defaultValue: "Enter your text here...",
+			},
 		},
 		defaultSlots: {},
 		tags: ["paragraph", "content", "copy"],
@@ -63,9 +77,23 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Card",
 		description: "A card component with title and description",
 		category: "content",
-		defaultFields: {
-			title: "Card Title",
-			description: "Card description goes here",
+		fields: {
+			title: {
+				type: "text",
+				label: "Title",
+				placeholder: "Card Title",
+				description: "The card title",
+				required: true,
+				defaultValue: "Card Title",
+			},
+			description: {
+				type: "textarea",
+				label: "Description",
+				placeholder: "Card description goes here",
+				description: "The card description text",
+				required: true,
+				defaultValue: "Card description goes here",
+			},
 		},
 		defaultSlots: {
 			content: [],
@@ -79,9 +107,23 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Button",
 		description: "A clickable button with label and link",
 		category: "interactive",
-		defaultFields: {
-			label: "Click me",
-			href: "",
+		fields: {
+			label: {
+				type: "text",
+				label: "Button Text",
+				placeholder: "Click me",
+				description: "The text displayed on the button",
+				required: true,
+				defaultValue: "Click me",
+			},
+			href: {
+				type: "url",
+				label: "Link URL",
+				placeholder: "https://example.com",
+				description: "The URL the button links to",
+				required: false,
+				defaultValue: "",
+			},
 		},
 		defaultSlots: {},
 		tags: ["cta", "action", "link", "click"],
@@ -91,13 +133,55 @@ export const componentLibrary: ComponentLibrary = [
 		label: "Call to Action",
 		description: "A prominent call-to-action section with headline and buttons",
 		category: "interactive",
-		defaultFields: {
-			headline: "Ready to get started?",
-			description: "Join us and start building amazing things",
-			actionButtonPrimaryLabel: "Get Started",
-			actionButtonPrimaryUrl: "",
-			actionButtonSecondaryLabel: "Learn More",
-			actionButtonSecondaryUrl: "",
+		fields: {
+			headline: {
+				type: "text",
+				label: "Headline",
+				placeholder: "Ready to get started?",
+				description: "The main headline text",
+				required: true,
+				defaultValue: "Ready to get started?",
+			},
+			description: {
+				type: "textarea",
+				label: "Description",
+				placeholder: "Join us and start building amazing things",
+				description: "The description text below the headline",
+				required: true,
+				defaultValue: "Join us and start building amazing things",
+			},
+			actionButtonPrimaryLabel: {
+				type: "text",
+				label: "Primary Button Text",
+				placeholder: "Get Started",
+				description: "Text for the primary action button",
+				required: true,
+				defaultValue: "Get Started",
+			},
+			actionButtonPrimaryUrl: {
+				type: "url",
+				label: "Primary Button URL",
+				placeholder: "https://example.com",
+				description: "URL for the primary action button",
+				required: false,
+				defaultValue: "",
+			},
+			actionButtonSecondaryLabel: {
+				type: "text",
+				label: "Secondary Button Text",
+				placeholder: "Learn More",
+				description: "Text for the secondary action button",
+				required: false,
+				defaultValue: "Learn More",
+			},
+			actionButtonSecondaryUrl: {
+				type: "url",
+				label: "Secondary Button URL",
+				placeholder: "https://example.com",
+				description: "URL for the secondary action button",
+				required: false,
+				defaultValue: "",
+			},
 		},
 		defaultSlots: {},
 		tags: ["cta", "banner", "hero", "conversion", "action"],
@@ -109,7 +193,7 @@ export const componentLibrary: ComponentLibrary = [
  * @param type - The component type to find
  * @returns The component definition or undefined if not found
  */
-export function getComponentDefinition(type: string): ComponentLibrary[number] | undefined {
+export function getComponentDefinition(type: string): ComponentDefinition | undefined {
 	return componentLibrary.find((comp: ComponentDefinition) => comp.type === type);
 }
 
@@ -119,24 +203,26 @@ export function getComponentDefinition(type: string): ComponentLibrary[number] |
  * @returns Array of component definitions in that category
  */
 export function getComponentsByCategory(
-	category: ComponentLibrary[number]["category"]
+	category: ComponentDefinition["category"]
 ): ComponentLibrary {
 	return componentLibrary.filter((comp: ComponentDefinition) => comp.category === category);
 }
 
 /**
  * Creates a new UJLCModuleObject from a component definition
+ * UPDATED: Now uses extractDefaultValues to get field defaults
+ *
  * @param definition - The component definition to create from
  * @param id - The unique ID for the new node
  * @returns A new UJLCModuleObject instance
  */
 export function createNodeFromDefinition(
-	definition: ComponentLibrary[number],
+	definition: ComponentDefinition,
 	id: string
 ): UJLCModuleObject {
 	return {
 		type: definition.type,
-		fields: { ...definition.defaultFields },
+		fields: extractDefaultValues(definition.fields),
 		slots: definition.defaultSlots ? { ...definition.defaultSlots } : {},
 		meta: {
 			id,

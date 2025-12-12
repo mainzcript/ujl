@@ -67,9 +67,12 @@
 	 */
 	function setNodeExpanded(nodeId: string, expanded: boolean) {
 		if (expanded) {
-			expandedNodeIds.add(nodeId);
+			expandedNodeIds = new Set([...expandedNodeIds, nodeId]);
 		} else {
-			expandedNodeIds.delete(nodeId);
+			/* eslint-disable svelte/prefer-svelte-reactivity */
+			const newSet = new Set(expandedNodeIds);
+			newSet.delete(nodeId);
+			expandedNodeIds = newSet;
 		}
 	}
 
@@ -82,14 +85,12 @@
 		const path = findPathToNode(ujlcDocument.ujlc.root, nodeId);
 
 		if (!path) {
-			// console.warn('[Crafter] Could not find path to node:', nodeId);
+			console.warn('[Crafter] Could not find path to node:', nodeId);
 			return;
 		}
 
-		// Expand all nodes in the path
-		for (const parentId of path) {
-			expandedNodeIds.add(parentId);
-		}
+		// Create new Set with all existing + new parent IDs
+		expandedNodeIds = new Set([...expandedNodeIds, ...path]);
 	}
 
 	/**
@@ -220,6 +221,7 @@
 	const crafterContext: CrafterContext = {
 		updateTokenSet,
 		updateRootSlot,
+		getRootSlot: () => ujlcDocument.ujlc.root, // NEW: Getter für reactive access
 		setSelectedNodeId,
 		getExpandedNodeIds: () => expandedNodeIds,
 		setNodeExpanded,

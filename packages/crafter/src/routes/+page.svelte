@@ -9,6 +9,7 @@
 		Button
 	} from '@ujl-framework/ui';
 	import { onMount } from 'svelte';
+	import { env } from '$env/dynamic/public';
 
 	/**
 	 * Disclaimer dialog state
@@ -18,6 +19,12 @@
 	let showDisclaimer = $state(false);
 
 	onMount(() => {
+		// dont show disclaimer in test mode
+		if (env.PUBLIC_TEST_MODE === 'true') {
+			showDisclaimer = false;
+			return;
+		}
+
 		// Check if user has dismissed the disclaimer
 		const dismissed = localStorage.getItem(DISCLAIMER_STORAGE_KEY);
 		if (!dismissed) {

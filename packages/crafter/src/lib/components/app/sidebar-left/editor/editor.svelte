@@ -118,6 +118,35 @@
 	});
 
 	/**
+	 * Checks if the event target is an editable element (input, textarea, contenteditable).
+	 * If true, we should not intercept copy/paste events and let the browser handle them.
+	 */
+	function isEditableElement(target: EventTarget | null): boolean {
+		if (!target || !(target instanceof HTMLElement)) {
+			return false;
+		}
+
+		const tagName = target.tagName.toLowerCase();
+
+		// Check for input and textarea elements
+		if (tagName === 'input' || tagName === 'textarea') {
+			return true;
+		}
+
+		// Check for contenteditable elements
+		if (target.isContentEditable) {
+			return true;
+		}
+
+		// Also check for select elements
+		if (tagName === 'select') {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Copies the selected node to clipboard without removing it from the tree.
 	 */
 	async function handleCopy(nodeId: string) {
@@ -271,6 +300,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
+		if (isEditableElement(event.target)) return;
 		if (!selectedNodeId && !clipboard) return;
 
 		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
@@ -304,7 +334,7 @@
 			return;
 		}
 
-		if (event.key === 'Delete' || event.key === 'Backspace') {
+		if (event.key === 'Delete') {
 			if (canDelete && selectedNodeId) {
 				event.preventDefault();
 				handleDelete(selectedNodeId);
@@ -347,6 +377,8 @@
 	function handleCopyEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
 
+		if (isEditableElement(event.target)) return;
+
 		if (!selectedNodeId || selectedSlotInfo) return;
 		if (!canCopy) return;
 
@@ -364,6 +396,8 @@
 	function handleCutEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
 
+		if (isEditableElement(event.target)) return;
+
 		if (!selectedNodeId || selectedSlotInfo) return;
 		if (!canCut) return;
 
@@ -380,6 +414,8 @@
 	 */
 	function handlePasteEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event.target)) return;
 
 		if (!canPaste) return;
 

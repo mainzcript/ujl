@@ -5,6 +5,7 @@
 	import ClipboardPasteIcon from '@lucide/svelte/icons/clipboard-paste';
 	import DeleteIcon from '@lucide/svelte/icons/trash-2';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import { testId } from '$lib/utils/test-attrs.ts';
 
 	let {
 		nodeId,
@@ -46,6 +47,7 @@
 				onClose?.();
 			}}
 			class="justify-start gap-2"
+			{...testId('context-menu-insert')}
 		>
 			<PlusIcon class="size-4" />
 			<span>Insert</span>
@@ -63,6 +65,7 @@
 			disabled={!canCut}
 			onclick={() => onCut(nodeId)}
 			class="justify-start gap-2"
+			{...testId('context-menu-cut')}
 		>
 			<ScissorsIcon class="size-4" />
 			<span>Cut</span>
@@ -77,6 +80,7 @@
 			disabled={!canCopy}
 			onclick={() => onCopy(nodeId)}
 			class="justify-start gap-2"
+			{...testId('context-menu-copy')}
 		>
 			<CopyIcon class="size-4" />
 			<span>Copy</span>
@@ -91,6 +95,7 @@
 			disabled={!canPaste}
 			onclick={() => onPaste(nodeId)}
 			class="justify-start gap-2"
+			{...testId('context-menu-paste')}
 		>
 			<ClipboardPasteIcon class="size-4" />
 			<span>Paste</span>
@@ -106,6 +111,7 @@
 			disabled={!canDelete}
 			onclick={() => onDelete(nodeId)}
 			class="justify-start gap-2 text-destructive hover:text-destructive"
+			{...testId('context-menu-delete')}
 		>
 			<DeleteIcon class="size-4" />
 			<span>Delete</span>

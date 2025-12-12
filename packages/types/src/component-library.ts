@@ -45,15 +45,74 @@ export const CATEGORY_LABELS: Record<(typeof COMPONENT_CATEGORIES)[number], stri
 } as const;
 
 /**
- * Component Definition Schema
- * Describes available components in the library (templates for new instances)
+ * Field Types - Defines which input component to use for each field
+ */
+export const FIELD_TYPES = [
+	"text",
+	"textarea",
+	"number",
+	"boolean",
+	"select",
+	"url",
+	"email",
+	"richtext",
+] as const;
+
+export type FieldType = (typeof FIELD_TYPES)[number];
+
+/**
+ * Select Option Schema
+ * Used for select and radio field types
+ */
+export const SelectOptionSchema = z.object({
+	label: z.string(),
+	value: z.string(),
+});
+
+export type SelectOption = z.infer<typeof SelectOptionSchema>;
+
+/**
+ * Field Definition Schema
+ * Describes how a field should be rendered and validated in the property panel
+ *
+ * @property type - The input component type to use
+ * @property label - Human-readable label for the field
+ * @property placeholder - Placeholder text for input fields
+ * @property description - Help text shown below the input
+ * @property required - Whether the field is required
+ * @property min - Minimum value (for number types)
+ * @property max - Maximum value (for number types)
+ * @property step - Step value (for number types)
+ * @property options - Available options (for select types)
+ * @property defaultValue - Default value when creating new instances
+ */
+export const FieldDefinitionSchema = z.object({
+	type: z.enum(FIELD_TYPES),
+	label: z.string(),
+	placeholder: z.string().optional(),
+	description: z.string().optional(),
+	required: z.boolean().optional(),
+	min: z.number().optional(),
+	max: z.number().optional(),
+	step: z.number().optional(),
+	options: z.array(SelectOptionSchema).optional(),
+	defaultValue: z.unknown(),
+});
+
+export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
+
+/**
+ * Component Definition Schema (UPDATED)
+ * Describes available components in the library with their editable fields
+ *
+ * BREAKING CHANGE: `defaultFields` replaced with `fields` containing FieldDefinitions
  */
 export const ComponentDefinitionSchema = z.object({
 	type: z.string(),
 	label: z.string(),
 	description: z.string().optional(),
 	category: z.enum(COMPONENT_CATEGORIES),
-	defaultFields: z.record(z.string(), z.unknown()),
+	fields: z.record(z.string(), FieldDefinitionSchema),
 	defaultSlots: z.record(z.string(), z.array(z.never())).optional(),
 	tags: z.array(z.string()).optional(),
 });
@@ -65,7 +124,6 @@ export const ComponentLibrarySchema = z.array(ComponentDefinitionSchema);
 
 /**
  * Component Definition Type
- * Icon field is added separately as ComponentType can't be validated by Zod
  */
 export type ComponentDefinition = z.infer<typeof ComponentDefinitionSchema>;
 
@@ -80,12 +138,12 @@ export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number];
 export type ComponentLibrary = ComponentDefinition[];
 
 /**
- * Validator for component library (validates all fields except icon)
+ * Validator for component library
  * @param data - The component library data to validate
  * @returns The validated component library
  * @throws {ZodError} If validation fails
  */
-export function validateComponentLibrary(data: unknown): Omit<ComponentDefinition, "icon">[] {
+export function validateComponentLibrary(data: unknown): ComponentDefinition[] {
 	return ComponentLibrarySchema.parse(data);
 }
 
@@ -96,4 +154,33 @@ export function validateComponentLibrary(data: unknown): Omit<ComponentDefinitio
  */
 export function getCategoryLabel(category: ComponentCategory): string {
 	return CATEGORY_LABELS[category];
+}
+
+/**
+ * Helper function to extract default values from field definitions
+ * Used when creating new component instances
+ *
+ * @param fields - Record of field definitions
+ * @returns Record of field names to their default values
+ *
+ * @example
+ * ```ts
+ * const fields = {
+ *   title: { type: 'text', label: 'Title', defaultValue: 'Untitled' },
+ *   count: { type: 'number', label: 'Count', defaultValue: 0 }
+ * };
+ * const defaults = extractDefaultValues(fields);
+ * // { title: 'Untitled', count: 0 }
+ * ```
+ */
+export function extractDefaultValues(
+	fields: Record<string, FieldDefinition>
+): Record<string, unknown> {
+	const defaults: Record<string, unknown> = {};
+
+	for (const [fieldName, fieldDef] of Object.entries(fields)) {
+		defaults[fieldName] = fieldDef.defaultValue;
+	}
+
+	return defaults;
 }
