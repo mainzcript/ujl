@@ -4,37 +4,37 @@
 	import { cn } from '$lib/utils.js';
 
 	let {
-		class: className = '', // Additional CSS classes
-		activeClass = '', // Class when link is active
-		inactiveClass = '', // Class when link is inactive
-		children, // Slot content (render function)
-		href = '#', // Link target
-		external = false, // Open in new tab if true
-		underline = false, // Underline style if true
-		currentUrl, // Optional: URL object for current page
-		active, // Optional: explicit active state
-		...restProps // All other props
+		class: className = '',
+		activeClass = '',
+		inactiveClass = '',
+		children,
+		href = '#',
+		external = false,
+		underline = false,
+		currentUrl,
+		active,
+		...restProps
 	} = $props();
 
-	// Optional: Context support for ujl:url
 	const contextUrl = getContext<{ url: URL }>('ujl:url');
-	const effectiveUrl = currentUrl ?? contextUrl?.url;
+	const effectiveUrl = $derived(currentUrl ?? contextUrl?.url);
 
-	// Browser detection (SSR-safe)
 	const browser = typeof window !== 'undefined';
 
-	// Base styles for all links (hover and transition)
-	const baseStyle = 'hover:opacity-80 duration-200 text-flavor-foreground-accent';
-	// Underline style if enabled
-	const underlineStyle = underline ? 'underline underline-offset-4' : '';
+	const baseStyle =
+		'hover:opacity-80 duration-200 text-flavor-foreground-accent font-(--typography-link-weight)';
+	const underlineStyle = $derived(
+		underline !== undefined
+			? underline
+				? 'underline underline-offset-4'
+				: ''
+			: '[text-decoration:var(--typography-link-decoration)]'
+	);
 
-	// URL resolution: currentUrl from Props/Context, otherwise window.location as fallback
 	let url = $derived(browser ? new URL(href, effectiveUrl ?? window.location.href) : null);
 
-	// State: is the hash target (fragment) currently visible?
 	let hashActive: boolean = $state(false);
 
-	// Effect: If the link has a hash, track the visibility of the target element
 	$effect(() => {
 		if (url?.hash) {
 			const element = document.getElementById(url.hash.slice(1));
@@ -52,7 +52,6 @@
 		}
 	});
 
-	// Active state: explicitly passed or automatically calculated
 	let computedActive = $derived(
 		active !== undefined
 			? active
@@ -63,7 +62,6 @@
 				: false
 	);
 
-	// Choose the class based on whether the link is active
 	const dynamicClass = $derived(computedActive ? activeClass : inactiveClass);
 </script>
 

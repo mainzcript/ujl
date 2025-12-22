@@ -1,15 +1,25 @@
-<!--
-	Designer sidebar for editing theme tokens (colors, radius, etc.).
-	Reads tokens from props, updates them via CrafterContext.updateTokenSet and delegates UI to group components.
--->
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { UJLTTokenSet, UJLTFlavor, UJLTAmbientColorSet } from '@ujl-framework/types';
+	import type {
+		UJLTTokenSet,
+		UJLTFlavor,
+		UJLTAmbientColorSet,
+		UJLTTypographyBase,
+		UJLTTypographyHeading,
+		UJLTTypographyHighlight,
+		UJLTTypographyLink,
+		UJLTTypographyCode
+	} from '@ujl-framework/types';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import { updateFlavorByOriginal } from '$lib/tools/colors/index.ts';
-	import AmbientColorGroup from './components/ambient-color-group.svelte';
-	import ThemeColorsGroup from './components/theme-colors-group.svelte';
-	import NotificationColorsGroup from './components/notification-colors-group.svelte';
+	import AmbientColorGroup from './components/colors/ambient-color-group.svelte';
+	import ThemeColorsGroup from './components/colors/theme-colors-group.svelte';
+	import NotificationColorsGroup from './components/colors/notification-colors-group.svelte';
+	import BaseTypographyGroup from './components/typography/base-typography-group.svelte';
+	import HeadingTypographyGroup from './components/typography/heading-typography-group.svelte';
+	import HighlightTypographyGroup from './components/typography/highlight-typography-group.svelte';
+	import LinkTypographyGroup from './components/typography/link-typography-group.svelte';
+	import CodeTypographyGroup from './components/typography/code-typography-group.svelte';
 	import AppearanceGroup from './components/appearance-group.svelte';
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
@@ -50,27 +60,113 @@
 		});
 	}
 
-	/**
-	 * Parses the radius value from tokens.
-	 *
-	 * @param tokens - The token set to parse
-	 * @returns Radius value in rem units (as a number)
-	 */
-	function parseRadius(tokens: UJLTTokenSet): number {
-		const match = tokens.radius.match(/^([\d.]+)/);
-		return match ? Number.parseFloat(match[1]) : 0.75;
-	}
-
-	/**
-	 * Helper function to update the radius token.
-	 * This is the only mutation path for radius, ensuring unidirectional data flow.
-	 *
-	 * @param value - The new radius value in rem units (as a number)
-	 */
+	// Ensures unidirectional data flow by centralizing all radius mutations
 	function updateRadiusToken(value: number) {
 		crafter.updateTokenSet((oldTokens) => ({
 			...oldTokens,
-			radius: `${value}rem`
+			radius: value
+		}));
+	}
+
+	// Ensures unidirectional data flow by centralizing all spacing mutations
+	function updateSpacingToken(value: number) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			spacing: value
+		}));
+	}
+
+	/**
+	 * Helper function to update the base typography token.
+	 * Merges partial updates into the existing base typography object.
+	 * This is the only mutation path for base typography, ensuring unidirectional data flow.
+	 *
+	 * @param updates - Partial updates to apply to base typography
+	 */
+	function updateBaseTypography(updates: Partial<UJLTTypographyBase>) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			typography: {
+				...oldTokens.typography,
+				base: {
+					...oldTokens.typography.base,
+					...updates
+				}
+			}
+		}));
+	}
+
+	/**
+	 * Helper function to update the heading typography token.
+	 * Merges partial updates into the existing heading typography object.
+	 * This is the only mutation path for heading typography, ensuring unidirectional data flow.
+	 *
+	 * @param updates - Partial updates to apply to heading typography
+	 */
+	function updateHeadingTypography(updates: Partial<UJLTTypographyHeading>) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			typography: {
+				...oldTokens.typography,
+				heading: {
+					...oldTokens.typography.heading,
+					...updates
+				}
+			}
+		}));
+	}
+
+	/**
+	 * Helper function to update the highlight typography token.
+	 * Merges partial updates into the existing highlight typography object.
+	 * This is the only mutation path for highlight typography, ensuring unidirectional data flow.
+	 *
+	 * @param updates - Partial updates to apply to highlight typography
+	 */
+	function updateHighlightTypography(updates: Partial<UJLTTypographyHighlight>) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			typography: {
+				...oldTokens.typography,
+				highlight: {
+					...oldTokens.typography.highlight,
+					...updates
+				}
+			}
+		}));
+	}
+
+	/**
+	 * Helper function to update the link typography token.
+	 * Merges partial updates into the existing link typography object.
+	 * This is the only mutation path for link typography, ensuring unidirectional data flow.
+	 *
+	 * @param updates - Partial updates to apply to link typography
+	 */
+	function updateLinkTypography(updates: Partial<UJLTTypographyLink>) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			typography: {
+				...oldTokens.typography,
+				link: {
+					...oldTokens.typography.link,
+					...updates
+				}
+			}
+		}));
+	}
+
+	// Ensures unidirectional data flow by centralizing all code typography mutations
+	function updateCodeTypography(updates: Partial<UJLTTypographyCode>) {
+		crafter.updateTokenSet((oldTokens) => ({
+			...oldTokens,
+			typography: {
+				...oldTokens.typography,
+				code: {
+					...oldTokens.typography.code,
+					...updates
+				}
+			}
 		}));
 	}
 </script>
@@ -107,8 +203,27 @@
 	onInfoChange={(hex) => updateColorToken('info', hex)}
 />
 
+<BaseTypographyGroup typography={tokens.typography.base} onChange={updateBaseTypography} />
+
+<HeadingTypographyGroup
+	typography={tokens.typography.heading}
+	palette={tokens.color}
+	onChange={updateHeadingTypography}
+/>
+
+<HighlightTypographyGroup
+	typography={tokens.typography.highlight}
+	palette={tokens.color}
+	onChange={updateHighlightTypography}
+/>
+
+<LinkTypographyGroup typography={tokens.typography.link} onChange={updateLinkTypography} />
+
+<CodeTypographyGroup typography={tokens.typography.code} onChange={updateCodeTypography} />
+
 <AppearanceGroup
-	radiusValue={parseRadius(tokens)}
-	radiusDisplayValue={parseRadius(tokens)}
+	radiusValue={tokens.radius}
 	onRadiusChange={updateRadiusToken}
+	spacingValue={tokens.spacing}
+	onSpacingChange={updateSpacingToken}
 />

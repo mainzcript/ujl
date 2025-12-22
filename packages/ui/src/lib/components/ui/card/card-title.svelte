@@ -9,7 +9,7 @@
 		children,
 		level = 4 as HeadingLevel,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & { level?: HeadingLevel } = $props();
+	}: WithElementRef<HTMLAttributes<HTMLElement>> & { level?: HeadingLevel } = $props();
 </script>
 
 <Heading data-slot="card-title" {level} class={cn('leading-none', className)} {...restProps}>

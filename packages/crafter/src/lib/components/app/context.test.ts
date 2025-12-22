@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createOperations, generateNodeId, findPathToNode } from './context.js';
-import { createMockTree, createMockNode, createMockMultiSlotTree } from '$lib/../tests/mockData.js';
+import {
+	createMockTree,
+	createMockNode,
+	createMockMultiSlotTree
+} from '../../../tests/mockData.js';
 import type { UJLCSlotObject } from '@ujl-framework/types';
 
 describe('context', () => {
@@ -70,7 +74,9 @@ describe('context', () => {
 	describe('createOperations', () => {
 		let slot: UJLCSlotObject;
 		let getSlot: () => UJLCSlotObject;
-		let updateRootSlot: ReturnType<typeof vi.fn>;
+		let updateRootSlot: ReturnType<
+			typeof vi.fn<(fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void>
+		>;
 		let operations: ReturnType<typeof createOperations>;
 
 		beforeEach(() => {

@@ -8,12 +8,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* TODO: Add fonts */
-/* @theme {
-	--font-mono: 'JetBrains Mono', monospace;
-	--font-sans: 'Inter', sans-serif;
-} */
-
 :root,
 :host,
 [data-ujl-theme] {
@@ -105,6 +99,11 @@
 	--chart-3: 0.398 0.07 227.392;
 	--chart-4: 0.828 0.189 84.429;
 	--chart-5: 0.769 0.188 70.08;
+
+	/* Typography */
+	--text-base: var(--typography-base-size);
+
+	font-family: var(--font-base);
 }
 
 [data-ujl-theme].dark,
@@ -214,6 +213,8 @@
 	--flavor-800: var(--ambient-800);
 	--flavor-900: var(--ambient-900);
 	--flavor-950: var(--ambient-950);
+	--flavor-heading: var(--ambient-heading);
+	--flavor-highlight: var(--ambient-highlight);
 	--flavor-foreground: var(--ambient-foreground);
 	--flavor-foreground-ambient: var(--ambient-foreground-ambient);
 	--flavor-foreground-primary: var(--ambient-foreground-primary);
@@ -252,6 +253,8 @@
 	--flavor-foreground-warning: var(--primary-foreground-warning);
 	--flavor-foreground-destructive: var(--primary-foreground-destructive);
 	--flavor-foreground-info: var(--primary-foreground-info);
+	--flavor-heading: var(--primary-heading);
+	--flavor-highlight: var(--primary-highlight);
 }
 
 .flavor-secondary {
@@ -276,6 +279,8 @@
 	--flavor-foreground-warning: var(--secondary-foreground-warning);
 	--flavor-foreground-destructive: var(--secondary-foreground-destructive);
 	--flavor-foreground-info: var(--secondary-foreground-info);
+	--flavor-heading: var(--secondary-heading);
+	--flavor-highlight: var(--secondary-highlight);
 }
 
 .flavor-accent {
@@ -300,6 +305,8 @@
 	--flavor-foreground-warning: var(--accent-foreground-warning);
 	--flavor-foreground-destructive: var(--accent-foreground-destructive);
 	--flavor-foreground-info: var(--accent-foreground-info);
+	--flavor-heading: var(--accent-heading);
+	--flavor-highlight: var(--accent-highlight);
 }
 
 .flavor-success {
@@ -324,6 +331,8 @@
 	--flavor-foreground-warning: var(--success-foreground-warning);
 	--flavor-foreground-destructive: var(--success-foreground-destructive);
 	--flavor-foreground-info: var(--success-foreground-info);
+	--flavor-heading: var(--success-heading);
+	--flavor-highlight: var(--success-highlight);
 }
 
 .flavor-warning {
@@ -348,6 +357,8 @@
 	--flavor-foreground-warning: var(--warning-foreground-warning);
 	--flavor-foreground-destructive: var(--warning-foreground-destructive);
 	--flavor-foreground-info: var(--warning-foreground-info);
+	--flavor-heading: var(--warning-heading);
+	--flavor-highlight: var(--warning-highlight);
 }
 
 .flavor-destructive {
@@ -372,6 +383,8 @@
 	--flavor-foreground-warning: var(--destructive-foreground-warning);
 	--flavor-foreground-destructive: var(--destructive-foreground-destructive);
 	--flavor-foreground-info: var(--destructive-foreground-info);
+	--flavor-heading: var(--destructive-heading);
+	--flavor-highlight: var(--destructive-highlight);
 }
 
 .flavor-info {
@@ -396,9 +409,22 @@
 	--flavor-foreground-warning: var(--info-foreground-warning);
 	--flavor-foreground-destructive: var(--info-foreground-destructive);
 	--flavor-foreground-info: var(--info-foreground-info);
+	--flavor-heading: var(--info-heading);
+	--flavor-highlight: var(--info-highlight);
 }
 
 @theme inline {
+	/* Typography - All sizes relative to text-base (calculated at runtime) */
+	--text-xs: calc(var(--text-base) * 0.75);
+	--text-sm: calc(var(--text-base) * 0.875);
+	--text-lg: calc(var(--text-base) * 1.125);
+	--text-xl: calc(var(--text-base) * 1.25);
+	--text-2xl: calc(var(--text-base) * 1.5);
+	--text-3xl: calc(var(--text-base) * 1.875);
+	--text-4xl: calc(var(--text-base) * 2.25);
+	--text-5xl: calc(var(--text-base) * 3);
+	--text-6xl: calc(var(--text-base) * 3.75);
+
 	/* Border radius */
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -415,6 +441,8 @@
 	/* Background and foreground colors */
 	--color-background: oklch(var(--flavor));
 	--color-foreground: oklch(var(--flavor-foreground));
+	--color-heading: oklch(var(--flavor-heading));
+	--color-highlight: oklch(var(--flavor-highlight));
 
 	/* Flavor colors */
 	--color-flavor: oklch(var(--flavor));
@@ -438,6 +466,8 @@
 	--color-flavor-foreground-warning: oklch(var(--flavor-foreground-warning));
 	--color-flavor-foreground-destructive: oklch(var(--flavor-foreground-destructive));
 	--color-flavor-foreground-info: oklch(var(--flavor-foreground-info));
+	--color-flavor-heading: oklch(var(--flavor-heading));
+	--color-flavor-highlight: oklch(var(--flavor-highlight));
 
 	/* Primary color */
 	--color-primary: oklch(var(--primary));
@@ -453,6 +483,8 @@
 	--color-primary-900: oklch(var(--primary-900));
 	--color-primary-950: oklch(var(--primary-950));
 	--color-primary-foreground: oklch(var(--primary-foreground));
+	--color-primary-heading: oklch(var(--primary-heading));
+	--color-primary-highlight: oklch(var(--primary-highlight));
 
 	/* Secondary color */
 	--color-secondary: oklch(var(--secondary));
@@ -468,6 +500,8 @@
 	--color-secondary-900: oklch(var(--secondary-900));
 	--color-secondary-950: oklch(var(--secondary-950));
 	--color-secondary-foreground: oklch(var(--secondary-foreground));
+	--color-secondary-heading: oklch(var(--secondary-heading));
+	--color-secondary-highlight: oklch(var(--secondary-highlight));
 
 	/* Accent color */
 	--color-accent: oklch(var(--accent));
@@ -483,6 +517,8 @@
 	--color-accent-900: oklch(var(--accent-900));
 	--color-accent-950: oklch(var(--accent-950));
 	--color-accent-foreground: oklch(var(--accent-foreground));
+	--color-accent-heading: oklch(var(--accent-heading));
+	--color-accent-highlight: oklch(var(--accent-highlight));
 
 	/* Ambient color */
 	--color-ambient: oklch(var(--ambient));
@@ -498,6 +534,8 @@
 	--color-ambient-900: oklch(var(--ambient-900));
 	--color-ambient-950: oklch(var(--ambient-950));
 	--color-ambient-foreground: oklch(var(--ambient-foreground));
+	--color-ambient-heading: oklch(var(--ambient-heading));
+	--color-ambient-highlight: oklch(var(--ambient-highlight));
 
 	/* Success color */
 	--color-success: oklch(var(--success));
@@ -513,6 +551,8 @@
 	--color-success-900: oklch(var(--success-900));
 	--color-success-950: oklch(var(--success-950));
 	--color-success-foreground: oklch(var(--success-foreground));
+	--color-success-heading: oklch(var(--success-heading));
+	--color-success-highlight: oklch(var(--success-highlight));
 
 	/* Warning color */
 	--color-warning: oklch(var(--warning));
@@ -528,6 +568,8 @@
 	--color-warning-900: oklch(var(--warning-900));
 	--color-warning-950: oklch(var(--warning-950));
 	--color-warning-foreground: oklch(var(--warning-foreground));
+	--color-warning-heading: oklch(var(--warning-heading));
+	--color-warning-highlight: oklch(var(--warning-highlight));
 
 	/* Destructive color */
 	--color-destructive: oklch(var(--destructive));
@@ -543,6 +585,8 @@
 	--color-destructive-900: oklch(var(--destructive-900));
 	--color-destructive-950: oklch(var(--destructive-950));
 	--color-destructive-foreground: oklch(var(--destructive-foreground));
+	--color-destructive-heading: oklch(var(--destructive-heading));
+	--color-destructive-highlight: oklch(var(--destructive-highlight));
 
 	/* Info color */
 	--color-info: oklch(var(--info));
@@ -558,6 +602,8 @@
 	--color-info-900: oklch(var(--info-900));
 	--color-info-950: oklch(var(--info-950));
 	--color-info-foreground: oklch(var(--info-foreground));
+	--color-info-heading: oklch(var(--info-heading));
+	--color-info-highlight: oklch(var(--info-highlight));
 
 	/* Other shadcn colors */
 	--color-popover: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);

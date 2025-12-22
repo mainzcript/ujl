@@ -17,6 +17,7 @@
 		type CrafterContext
 	} from './context.js';
 	import { downloadJsonFile, readJsonFile } from '$lib/tools/files.ts';
+	import { logger } from '$lib/utils/logger.js';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
 	import SidebarRight from './sidebar-right/sidebar-right.svelte';
@@ -85,7 +86,7 @@
 		const path = findPathToNode(ujlcDocument.ujlc.root, nodeId);
 
 		if (!path) {
-			console.warn('[Crafter] Could not find path to node:', nodeId);
+			logger.warn('Could not find path to node:', nodeId);
 			return;
 		}
 
@@ -187,7 +188,7 @@
 			const validatedDocument = validateUJLTDocument(data as unknown as UJLTDocument);
 			ujltDocument = validatedDocument;
 		} catch (error) {
-			console.error('Theme validation failed:', error);
+			logger.error('Theme validation failed:', error);
 			alert('The imported theme file is invalid. Please check the file format.');
 		}
 	}
@@ -209,7 +210,7 @@
 			const validatedDocument = validateUJLCDocument(data as unknown as UJLCDocument);
 			ujlcDocument = validatedDocument;
 		} catch (error) {
-			console.error('Content validation failed:', error);
+			logger.error('Content validation failed:', error);
 			alert('The imported content file is invalid. Please check the file format.');
 		}
 	}
@@ -221,7 +222,7 @@
 	const crafterContext: CrafterContext = {
 		updateTokenSet,
 		updateRootSlot,
-		getRootSlot: () => ujlcDocument.ujlc.root, // NEW: Getter für reactive access
+		getRootSlot: () => ujlcDocument.ujlc.root,
 		setSelectedNodeId,
 		getExpandedNodeIds: () => expandedNodeIds,
 		setNodeExpanded,

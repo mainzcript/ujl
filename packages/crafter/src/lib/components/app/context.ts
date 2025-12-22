@@ -19,6 +19,7 @@ import {
 	getComponentDefinition,
 	createNodeFromDefinition
 } from '@ujl-framework/examples/components';
+import { logger } from '$lib/utils/logger.js';
 
 /**
  * Editor context API for managing UJL document state.
@@ -260,21 +261,6 @@ export type CrafterContext = {
 export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
 
 /**
- * Logs a warning message for operation failures
- * Centralized logging for consistent error handling
- *
- * @param message - The warning message
- * @param details - Optional additional details
- */
-function logWarning(message: string, details?: unknown): void {
-	if (details !== undefined) {
-		console.warn(`[Crafter] ${message}`, details);
-	} else {
-		console.warn(`[Crafter] ${message}`);
-	}
-}
-
-/**
  * Generates a unique random ID for a node.
  * Uses the framework's centralized ID generator from @ujl-framework/core.
  * Uses a shorter ID length (10 characters) for better UX in URLs and UI.
@@ -344,16 +330,15 @@ export function createOperations(
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				logWarning('Node not found');
+				logger.warn('Node not found');
 				return null;
 			}
 
 			if (isRootNode(nodeId)) {
-				logWarning('Cannot copy root node');
+				logger.warn('Cannot copy root node');
 				return null;
 			}
 
-			// Clone preserving IDs (new IDs assigned at paste time)
 			return deepCloneModule(node);
 		},
 
@@ -368,18 +353,18 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetId);
 
 			if (!node || !targetNode) {
-				logWarning('Node or target not found');
+				logger.warn('Node or target not found');
 				return false;
 			}
 
 			if (isRootNode(nodeId)) {
-				logWarning('Cannot move root node');
+				logger.warn('Cannot move root node');
 				return false;
 			}
 
 			const parentInfo = findParentOfNode(slot, nodeId);
 			if (!parentInfo) {
-				logWarning('Cannot find parent of node');
+				logger.warn('Cannot find parent of node');
 				return false;
 			}
 
@@ -387,17 +372,17 @@ export function createOperations(
 				const targetParentInfo = findParentOfNode(slot, targetId);
 
 				if (!targetParentInfo) {
-					logWarning('Cannot find parent of target node');
+					logger.warn('Cannot find parent of target node');
 					return false;
 				}
 
 				if (isRootNode(targetId)) {
-					logWarning('Cannot move relative to root node');
+					logger.warn('Cannot move relative to root node');
 					return false;
 				}
 
 				if (isDescendant(node, targetId)) {
-					logWarning('Cannot move node into itself or its descendants');
+					logger.warn('Cannot move node into itself or its descendants');
 					return false;
 				}
 
@@ -424,7 +409,7 @@ export function createOperations(
 					});
 				} else {
 					if (!targetParentInfo.parent) {
-						logWarning('Cannot find parent of target node');
+						logger.warn('Cannot find parent of target node');
 						return false;
 					}
 					updateRootSlot((currentSlot) => {
@@ -450,24 +435,24 @@ export function createOperations(
 			}
 
 			if (!hasSlots(targetNode)) {
-				logWarning('Target node has no slots - cannot accept children');
+				logger.warn('Target node has no slots - cannot accept children');
 				return false;
 			}
 
 			if (isDescendant(node, targetId)) {
-				logWarning('Cannot move node into itself or its descendants');
+				logger.warn('Cannot move node into itself or its descendants');
 				return false;
 			}
 
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				logWarning('Target node has no valid slot');
+				logger.warn('Target node has no valid slot');
 				return false;
 			}
 
 			if (!targetNode.slots?.[targetSlotName]) {
-				logWarning('Specified slot does not exist on target node', targetSlotName);
+				logger.warn('Specified slot does not exist on target node', targetSlotName);
 				return false;
 			}
 			updateRootSlot((currentSlot) => {
@@ -483,7 +468,7 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetId);
 
 			if (!node || !targetNode) {
-				logWarning('Node or target not found');
+				logger.warn('Node or target not found');
 				return false;
 			}
 
@@ -491,19 +476,19 @@ export function createOperations(
 			const targetParentInfo = findParentOfNode(slot, targetId);
 
 			if (!nodeParentInfo || !targetParentInfo) {
-				logWarning('Cannot find parent info');
+				logger.warn('Cannot find parent info');
 				return false;
 			}
 
 			if (!nodeParentInfo.parent || !targetParentInfo.parent) {
-				logWarning('Cannot find parent info');
+				logger.warn('Cannot find parent info');
 				return false;
 			}
 			if (
 				nodeParentInfo.parent.meta.id !== targetParentInfo.parent.meta.id ||
 				nodeParentInfo.slotName !== targetParentInfo.slotName
 			) {
-				logWarning('Nodes must be siblings to reorder');
+				logger.warn('Nodes must be siblings to reorder');
 				return false;
 			}
 
@@ -524,7 +509,7 @@ export function createOperations(
 				});
 			} else {
 				if (!nodeParentInfo.parent) {
-					logWarning('Cannot find parent of node');
+					logger.warn('Cannot find parent of node');
 					return false;
 				}
 				updateRootSlot((currentSlot) => {
@@ -546,12 +531,12 @@ export function createOperations(
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				logWarning('Node not found');
+				logger.warn('Node not found');
 				return false;
 			}
 
 			if (isRootNode(nodeId)) {
-				logWarning('Cannot delete root node');
+				logger.warn('Cannot delete root node');
 				return false;
 			}
 			updateRootSlot((currentSlot) => {
@@ -561,7 +546,6 @@ export function createOperations(
 		},
 
 		cutNode(nodeId: string): UJLCModuleObject | null {
-			// Cut = Copy + Delete (IDs preserved until paste)
 			const copiedNode = this.copyNode(nodeId);
 			if (!copiedNode) {
 				return null;
@@ -588,19 +572,19 @@ export function createOperations(
 
 			const targetNode = findNodeById(slot, targetId);
 			if (!targetNode) {
-				logWarning('Target node not found');
+				logger.warn('Target node not found');
 				return false;
 			}
 
 			if (!hasSlots(targetNode)) {
-				logWarning('Target node has no slots');
+				logger.warn('Target node has no slots');
 				return false;
 			}
 
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				logWarning('Target node has no valid slot');
+				logger.warn('Target node has no valid slot');
 				return false;
 			}
 			updateRootSlot((currentSlot) => {
@@ -619,7 +603,7 @@ export function createOperations(
 
 			const componentDefinition = getComponentDefinition(componentType);
 			if (!componentDefinition) {
-				logWarning('Component type not found in library', componentType);
+				logger.warn('Component type not found in library', componentType);
 				return false;
 			}
 
@@ -635,7 +619,7 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetId);
 
 			if (!targetNode) {
-				logWarning('Target node not found');
+				logger.warn('Target node not found');
 				return false;
 			}
 
@@ -643,12 +627,12 @@ export function createOperations(
 				const targetParentInfo = findParentOfNode(slot, targetId);
 
 				if (!targetParentInfo) {
-					logWarning('Cannot find parent of target node');
+					logger.warn('Cannot find parent of target node');
 					return false;
 				}
 
 				if (!targetParentInfo.parent) {
-					logWarning('Cannot find parent of target node');
+					logger.warn('Cannot find parent of target node');
 					return false;
 				}
 
@@ -683,19 +667,19 @@ export function createOperations(
 			}
 
 			if (!hasSlots(targetNode)) {
-				logWarning('Target node has no slots - cannot accept children');
+				logger.warn('Target node has no slots - cannot accept children');
 				return false;
 			}
 
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
 
 			if (!targetSlotName) {
-				logWarning('Target node has no valid slot');
+				logger.warn('Target node has no valid slot');
 				return false;
 			}
 
 			if (!targetNode.slots?.[targetSlotName]) {
-				logWarning('Specified slot does not exist on target node', targetSlotName);
+				logger.warn('Specified slot does not exist on target node', targetSlotName);
 				return false;
 			}
 			updateRootSlot((currentSlot) => {
@@ -712,7 +696,7 @@ export function createOperations(
 			const parentNode = findNodeById(slot, parentId);
 
 			if (!parentNode?.slots?.[slotName]) {
-				logWarning('Slot not found', slotName);
+				logger.warn('Slot not found', slotName);
 				return null;
 			}
 
@@ -729,7 +713,6 @@ export function createOperations(
 			parentId: string,
 			slotName: string
 		): { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null {
-			// Cut = Copy + Clear (IDs preserved until paste)
 			const copiedSlot = this.copySlot(parentId, slotName);
 			if (!copiedSlot) {
 				return null;
@@ -754,12 +737,12 @@ export function createOperations(
 			const targetNode = findNodeById(slot, targetParentId);
 
 			if (!targetNode || !hasSlots(targetNode)) {
-				logWarning('Target node has no slots');
+				logger.warn('Target node has no slots');
 				return false;
 			}
 
 			if (!Object.keys(targetNode.slots).includes(slotData.slotName)) {
-				logWarning('Target does not have slot', slotData.slotName);
+				logger.warn('Target does not have slot', slotData.slotName);
 				return false;
 			}
 
@@ -787,7 +770,7 @@ export function createOperations(
 			const slot = getSlot();
 
 			if (sourceParentId === targetParentId && sourceSlotName === targetSlotName) {
-				logWarning('Cannot move slot to itself');
+				logger.warn('Cannot move slot to itself');
 				return false;
 			}
 
@@ -795,17 +778,17 @@ export function createOperations(
 			const targetParent = findNodeById(slot, targetParentId);
 
 			if (!sourceParent?.slots?.[sourceSlotName]) {
-				logWarning('Source slot not found', sourceSlotName);
+				logger.warn('Source slot not found', sourceSlotName);
 				return false;
 			}
 
 			if (!targetParent || !hasSlots(targetParent)) {
-				logWarning('Target node has no slots');
+				logger.warn('Target node has no slots');
 				return false;
 			}
 
 			if (!targetParent.slots?.[targetSlotName]) {
-				logWarning(
+				logger.warn(
 					`Target node doesn't have slot "${targetSlotName}". Available slots:`,
 					Object.keys(targetParent.slots)
 				);
@@ -841,13 +824,12 @@ export function createOperations(
 			return true;
 		},
 
-		// Update single field
 		updateNodeField(nodeId: string, fieldName: string, value: unknown): boolean {
 			const slot = getSlot();
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				console.warn('[updateNodeField] Node not found:', nodeId);
+				logger.warn('Node not found for updateNodeField', nodeId);
 				return false;
 			}
 
@@ -869,13 +851,12 @@ export function createOperations(
 			return true;
 		},
 
-		// Update multiple fields at once
 		updateNodeFields(nodeId: string, updates: Record<string, unknown>): boolean {
 			const slot = getSlot();
 			const node = findNodeById(slot, nodeId);
 
 			if (!node) {
-				console.warn('[updateNodeFields] Node not found:', nodeId);
+				logger.warn('Node not found for updateNodeFields', nodeId);
 				return false;
 			}
 

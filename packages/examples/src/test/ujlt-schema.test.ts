@@ -27,15 +27,18 @@ describe("UJLT Schema Validation", () => {
 			const theme: UJLTDocument = result.data;
 
 			expect(theme.ujlt.meta._version).toBe("0.0.1");
-			expect(theme.ujlt.tokens.radius).toBe("0.75rem");
+			expect(theme.ujlt.tokens.radius).toBe(0.75);
+			expect(theme.ujlt.tokens.spacing).toBe(0.25);
 			expect(theme.ujlt.tokens.color.primary).toBeDefined();
 			expect(theme.ujlt.tokens.color.ambient).toBeDefined();
 			expect(theme.ujlt.tokens.typography).toBeDefined();
-			expect(theme.ujlt.tokens.typography.base.font).toBe("Inter");
-			expect(theme.ujlt.tokens.typography.heading.weight).toBe("700");
+			expect(theme.ujlt.tokens.typography.base.font).toBe("Inter Variable");
+			expect(theme.ujlt.tokens.typography.heading.weight).toBe(700);
 			expect(theme.ujlt.tokens.typography.highlight.flavor).toBe("accent");
+			expect(theme.ujlt.tokens.typography.highlight.bold).toBe(true);
 			expect(theme.ujlt.tokens.typography.link.underline).toBe(false);
-			expect(theme.ujlt.tokens.typography.mono.font).toBe("JetBrains Mono");
+			expect(theme.ujlt.tokens.typography.link.bold).toBe(false);
+			expect(theme.ujlt.tokens.typography.code.font).toBe("JetBrains Mono Variable");
 		});
 
 		it("should have valid OKLCH values", () => {
@@ -153,7 +156,8 @@ describe("UJLT Schema Validation", () => {
 							destructive: {} as any,
 							info: {} as any,
 						},
-						radius: "0.5rem",
+						radius: 0.5,
+						spacing: 0.25,
 					},
 				},
 			};
@@ -214,7 +218,8 @@ describe("UJLT Schema Validation", () => {
 							destructive: {} as any,
 							info: {} as any,
 						},
-						radius: "0.5rem",
+						radius: 0.5,
+						spacing: 0.25,
 					},
 				},
 			};
@@ -275,7 +280,8 @@ describe("UJLT Schema Validation", () => {
 							destructive: {} as any,
 							info: {} as any,
 						},
-						radius: "0.5rem",
+						radius: 0.5,
+						spacing: 0.25,
 					},
 				},
 			};
@@ -290,7 +296,8 @@ describe("UJLT Schema Validation", () => {
 					// meta is missing
 					tokens: {
 						color: {},
-						radius: "0.5rem",
+						radius: 0.5,
+						spacing: 0.25,
 					},
 				},
 			};
@@ -351,7 +358,8 @@ describe("UJLT Schema Validation", () => {
 							destructive: {} as any,
 							info: {} as any,
 						},
-						radius: "0.5rem",
+						radius: 0.5,
+						spacing: 0.25,
 					},
 				},
 			};

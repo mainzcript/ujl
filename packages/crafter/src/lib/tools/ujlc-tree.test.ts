@@ -17,7 +17,7 @@ import {
 	canAcceptDrop,
 	canNodeAcceptPaste
 } from '$lib/tools/ujlc-tree.ts';
-import { createMockNode, createMockTree, createMockMultiSlotTree } from '$lib/../tests/mockData.js';
+import { createMockNode, createMockTree, createMockMultiSlotTree } from '../../tests/mockData.js';
 
 describe('ujlc-tree-utils', () => {
 	describe('findNodeById', () => {

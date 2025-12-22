@@ -15,7 +15,7 @@
 	bind:ref
 	data-slot="input-group-control"
 	class={cn(
-		'bg-input/15',
+		'bg-input/15 text-foreground',
 		'flex-1 resize-none rounded-none border-0 py-3 shadow-none focus-visible:ring-0',
 		className
 	)}

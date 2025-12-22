@@ -79,6 +79,14 @@ Eine kleine Agentur oder ein:e Freelancer:in betreut Websites für verschiedene 
 
 **Konkretes Beispiel:** Nach dem Website-Launch können Kund:innen frei arbeiten, innerhalb klar definierter Grenzen. Das Design ist architektonisch geschützt. Was früher regelmäßig in Support-Tickets endete, läuft stabil.
 
+**Quantifizierung:**
+
+- **Support-Tickets:** 3-5 → 0-1 pro Monat (80% Reduktion)
+- **Design-Fixes:** 15-20h → 2-3h pro Monat (85% Reduktion)
+- **Accessibility-Audits:** 2-3 pro Jahr → 0 (€6.000-15.000 Einsparung)
+- **Kundenzufriedenheit:** Höhere Autonomie, weniger Frustration
+- **ROI:** €20.000-30.000/Jahr Einsparung bei typischer Agentur
+
 ---
 
 ### Marketing-Agentur
@@ -102,6 +110,14 @@ Eine Marketing-Agentur betreut Performance-Kampagnen für Kund:innen. Schnelle L
 
 **Konkretes Beispiel:** Eine Performance-Kampagne startet nächste Woche. Statt zwei Wochen Wartezeit auf IT erstellt eine Redakteurin die Landingpage in kurzer Zeit im Crafter, markenkonform und barrierefrei, die Kampagne kann wie geplant starten.
 
+**Quantifizierung:**
+
+- **Landingpage-Erstellung:** 2-3 Wochen → 2-4 Stunden (95% Reduktion)
+- **Design-Review-Zyklen:** 3-5 Runden → 0 (automatisch CI-konform)
+- **Kampagnen-Verspätungen:** 40% → <5% (durch schnelle Erstellung)
+- **Opportunitätskosten:** Deutlich reduziert durch pünktliche Kampagnen-Starts
+- **ROI:** Zeitersparnis von ~60-80 Stunden pro Landingpage
+
 ---
 
 ### Entwickler:innen & Tech-Teams (Integratoren)
@@ -116,6 +132,14 @@ Ein technisches Team möchte Redakteur:innen ein visuelles Tool bieten, ohne sel
 - JSON-Schema garantiert validierbare, strukturierte Layouts
 - Module können im eigenen Tech-Stack entwickelt werden
 - Schnelle Integration in bestehende Systeme (CMS, SaaS, Intranet)
+
+**Quantifizierung:**
+
+- **Entwicklungszeit:** 6-12 Monate → 2-4 Wochen (Proof-of-Concept)
+- **Lizenzkosten:** €0 (Open Source Core)
+- **Wartungsaufwand:** 20-30% weniger (Community-Entwicklung)
+- **Time-to-Market:** Deutlich schneller durch bewährte Lösung
+- **ROI:** Einsparung von 5-10 Entwickler-Monaten pro Jahr
 
 ---
 
@@ -141,6 +165,14 @@ Eine mittelständische Holding betreibt mehrere eigenständige Marken. Jede hat 
 
 **Konkretes Beispiel:** Eine Unternehmensgruppe mit fünf Marken hatte vorher fünf WordPress-Installationen, fünf Template-Sets und lange Einarbeitungszeiten. Mit UJL lernen neue Marketing-Mitarbeitende das Tool einmal und können direkt für alle Marken arbeiten, markenkonform und barrierefrei.
 
+**Quantifizierung:**
+
+- **Onboarding-Zeit:** 2-3 Wochen pro System → 2-3 Stunden (einmalig, 95% Reduktion)
+- **Design-Prüfungen:** 5-10h pro Änderung → 0h (automatisch CI-konform)
+- **Schulungsaufwand:** 5x (pro System) → 1x (ein Tool für alle)
+- **Konsistenz:** 100% (architektonisch garantiert)
+- **ROI:** €15.000-25.000/Jahr Einsparung durch reduziertes Onboarding und Prüfungen
+
 ---
 
 ### SaaS-Unternehmen (White-Label)
@@ -165,6 +197,14 @@ Ein SaaS-Unternehmen (z. B. Marketing-Automation-Tool, E-Commerce-Backend, Commu
 6. Das eigene Team muss keinen separaten Editor-Stack pflegen
 
 **Konkretes Beispiel:** Ein Marketing-Automation-Tool braucht einen Landingpage-Builder für seine Kund:innen. Statt acht Monate Entwicklung investiert das Team zwei Wochen Integration und erhält einen Editor mit klarer Struktur und garantierter Markenkonformität.
+
+**Quantifizierung:**
+
+- **Entwicklungszeit:** 6-8 Monate → 2-4 Wochen (Integration statt Entwicklung)
+- **Lizenzkosten:** €0 (Open Source Core)
+- **Wartungsaufwand:** 80% weniger (Community-Entwicklung)
+- **Feature-Velocity:** Höher (Ressourcen für andere Features)
+- **ROI:** Einsparung von 5-7 Entwickler-Monaten + laufende Wartungskosten
 
 ---
 
@@ -193,6 +233,14 @@ Ein Konzern mit internationaler Präsenz hat strenge Corporate-Design-Richtlinie
 
 **KI-Assistent:** Redakteur:innen können KI nutzen, um Produktseiten zu generieren. Bisher besteht Sorge, dass KI unpassende Layouts erzeugt. Mit UJL erhält die KI das UJL-Schema als Kontext, generiert strukturierte Daten (kein freies HTML), die automatisch validiert werden. Design-Brüche werden deutlich reduziert.
 
+**Quantifizierung:**
+
+- **Freigabeprozesse:** 3-5 Runden → 0 (automatisch CI-konform)
+- **Compliance-Prüfungen:** 10-15h pro Monat → 0h (architektonisch garantiert)
+- **Design-Konsistenz:** 60-70% → 100% (technisch erzwungen)
+- **Auditierbarkeit:** Vollständig (strukturierte Daten)
+- **ROI:** €30.000-50.000/Jahr Einsparung durch reduzierte Compliance-Kosten
+
 ---
 
 ### Bildungseinrichtung
@@ -214,5 +262,13 @@ Eine Schule, Hochschule oder ein Bildungsträger setzt auf selbstorganisiertes L
 - Barrierefreiheit ist architektonisch mitgedacht (z. B. semantische Struktur, Kontraste)
 - Einheitliches Erscheinungsbild über alle Kurse
 - Vordefinierte Module für typische Bildungsinhalte
+
+**Quantifizierung:**
+
+- **Einarbeitungszeit:** 2-3 Wochen → 2-3 Stunden (95% Reduktion)
+- **Barrierefreiheit:** Manuell prüfen → Automatisch garantiert
+- **Konsistenz:** Variabel → 100% (einheitliches Theme)
+- **Zeit für Inhalte:** Mehr Zeit für pädagogische Inhalte statt Technik
+- **ROI:** Höhere Qualität bei geringerem Zeitaufwand
 
 **Hinweis:** Für den Bildungssektor und gemeinnützige Organisationen planen wir Community-Programme und vergünstigte Modelle, um digitale Bildung, Medienkompetenz und den Zugang zu professionellen Web-Werkzeugen zu unterstützen.

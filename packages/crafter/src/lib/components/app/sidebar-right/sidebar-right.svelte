@@ -24,6 +24,7 @@
 	import { findNodeById } from '$lib/tools/ujlc-tree.ts';
 	import { FieldInput } from './components/index.js';
 	import { testId } from '$lib/utils/test-attrs.ts';
+	import { logger } from '$lib/utils/logger.js';
 
 	let {
 		ref = $bindable(null),
@@ -39,15 +40,12 @@
 		onImportContent?: (file: File) => void;
 	} = $props();
 
-	// Get Crafter Context
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const sidebar = useSidebar();
 
-	// Hidden file inputs for import
 	let themeFileInput: HTMLInputElement | null = $state(null);
 	let contentFileInput: HTMLInputElement | null = $state(null);
 
-	// Reactive: Selected Node ID from URL
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	// Check if selection is a slot (format: parentId:slotName)
@@ -55,7 +53,6 @@
 		return selectedNodeId?.includes(':') || false;
 	});
 
-	// Reactive: Find selected node in tree
 	const selectedNode = $derived(() => {
 		if (!selectedNodeId || isSlotSelected()) return null;
 
@@ -63,18 +60,15 @@
 		return findNodeById(rootSlot, selectedNodeId);
 	});
 
-	// Reactive: Get component definition for selected node
 	const componentDef = $derived(() => {
 		if (!selectedNode()) return null;
 		return getComponentDefinition(selectedNode()!.type);
 	});
 
-	// Reactive: Get field definitions
 	const fieldDefinitions = $derived(() => {
 		return componentDef()?.fields || {};
 	});
 
-	// Reactive: Check if there are any editable fields
 	const hasEditableFields = $derived(() => {
 		return Object.keys(fieldDefinitions()).length > 0;
 	});
@@ -89,13 +83,10 @@
 		const success = crafter.operations.updateNodeField(selectedNodeId, fieldName, newValue);
 
 		if (!success) {
-			console.error('[SidebarRight] Failed to update field:', fieldName);
+			logger.error('Failed to update field:', fieldName);
 		}
 	}
 
-	/**
-	 * Handler for theme file selection
-	 */
 	function handleThemeFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -105,9 +96,6 @@
 		}
 	}
 
-	/**
-	 * Handler for content file selection
-	 */
 	function handleContentFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -125,10 +113,8 @@
 	{...restProps}
 	{...testId('sidebar-right')}
 >
-	<!-- Header with Export/Import buttons -->
 	<SidebarHeader class="border-b border-sidebar-border">
 		<div class="flex items-center justify-end gap-2">
-			<!-- Hidden file inputs -->
 			<input
 				type="file"
 				accept=".ujlt.json,application/json"
@@ -144,7 +130,6 @@
 				class="hidden"
 			/>
 
-			<!-- Import Dropdown -->
 			<DropdownMenu>
 				<DropdownMenuTrigger title="Import">
 					{#snippet child({ props })}
@@ -176,7 +161,6 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<!-- Export Dropdown -->
 			<DropdownMenu>
 				<DropdownMenuTrigger title="Export">
 					{#snippet child({ props })}
@@ -202,17 +186,15 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<!-- Save Button (future implementation) -->
+			<!-- TODO: Implement save functionality -->
 			<Button variant="primary" size="sm" onclick={() => alert('Save functionality coming soon!')}>
 				Save
 			</Button>
 		</div>
 	</SidebarHeader>
 
-	<!-- Content Area -->
 	<SidebarContent class="overflow-y-auto">
 		{#if !selectedNodeId}
-			<!-- No selection state -->
 			<div class="flex h-full items-center justify-center p-8 text-center">
 				<div class="space-y-3">
 					<div class="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
@@ -227,7 +209,6 @@
 				</div>
 			</div>
 		{:else if isSlotSelected()}
-			<!-- Slot selection state -->
 			<div class="flex h-full items-center justify-center p-8 text-center">
 				<div class="space-y-3">
 					<div class="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
@@ -242,7 +223,7 @@
 				</div>
 			</div>
 		{:else if !selectedNode()}
-			<!-- Node not found (should not happen normally) -->
+			<!-- Error state: Node not found (should not happen normally) -->
 			<div class="flex h-full items-center justify-center p-8 text-center">
 				<div class="space-y-3">
 					<div
@@ -259,19 +240,15 @@
 				</div>
 			</div>
 		{:else}
-			<!-- Properties Form -->
 			<div class="h-full">
-				<!-- Component Info Header -->
 				<SidebarGroup>
 					<SidebarGroupLabel>
 						<span class="text-sm">{componentDef()?.label || selectedNode()!.type}</span>
 					</SidebarGroupLabel>
 				</SidebarGroup>
 
-				<!-- Editable Properties -->
 				{#if hasEditableFields()}
 					<SidebarGroup>
-						<!-- <SidebarGroupLabel>Properties</SidebarGroupLabel> -->
 						<SidebarGroupContent class="space-y-6 p-2 pt-0">
 							{#each Object.entries(fieldDefinitions()) as [fieldName, fieldDef] (fieldName)}
 								<FieldInput

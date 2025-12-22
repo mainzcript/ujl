@@ -59,7 +59,7 @@ export function createMockMultiSlotTree(): UJLCSlotObject {
 		{
 			header: [headerItem],
 			body: [bodyItem1, bodyItem2],
-			footer: [footerItem] // ← Stelle sicher, dass footer einen Item hat
+			footer: [footerItem]
 		}
 	);
 
@@ -67,108 +67,92 @@ export function createMockMultiSlotTree(): UJLCSlotObject {
 }
 
 /**
- * Mock token set
+ * Mock token set matching the current typography schema
  */
 export function createMockTokenSet(): UJLTTokenSet {
+	// Shared mock shades for all flavors
+	const mockShades = {
+		'50': { l: 0.985, c: 0.0012, h: 286.38 },
+		'100': { l: 0.9674, c: 0.0013, h: 286.375 },
+		'200': { l: 0.9225, c: 0.0021, h: 274.715 },
+		'300': { l: 0.8703, c: 0.005, h: 264.09 },
+		'400': { l: 0.7067, c: 0.0126, h: 265.776 },
+		'500': { l: 0.5537, c: 0.0188, h: 264.576 },
+		'600': { l: 0.4435, c: 0.024, h: 261.841 },
+		'700': { l: 0.3714, c: 0.029, h: 259.939 },
+		'800': { l: 0.2774, c: 0.0338, h: 258.624 },
+		'900': { l: 0.2091, c: 0.0385, h: 259.93 },
+		'950': { l: 0.1296, c: 0.0359, h: 260.946 }
+	};
+
+	const mockForegroundMap = {
+		ambient: '950' as const,
+		primary: '600' as const,
+		secondary: '700' as const,
+		accent: '600' as const,
+		success: '700' as const,
+		warning: '700' as const,
+		destructive: '600' as const,
+		info: '600' as const
+	};
+
+	const mockDarkForegroundMap = {
+		ambient: '50' as const,
+		primary: '300' as const,
+		secondary: '300' as const,
+		accent: '300' as const,
+		success: '400' as const,
+		warning: '300' as const,
+		destructive: '300' as const,
+		info: '300' as const
+	};
+
+	const createStandardColorSet = (hex: string) => ({
+		light: '600' as const,
+		lightForeground: mockForegroundMap,
+		dark: '600' as const,
+		darkForeground: mockDarkForegroundMap,
+		shades: mockShades,
+		_original: { hex }
+	});
+
 	return {
 		color: {
 			ambient: {
 				light: '50',
-				lightForeground: {
-					ambient: '950',
-					primary: '600',
-					secondary: '700',
-					accent: '600',
-					success: '700',
-					warning: '700',
-					destructive: '600',
-					info: '600'
-				},
+				lightForeground: mockForegroundMap,
 				dark: '950',
-				darkForeground: {
-					ambient: '50',
-					primary: '300',
-					secondary: '300',
-					accent: '300',
-					success: '400',
-					warning: '300',
-					destructive: '300',
-					info: '300'
-				},
-				shades: {
-					'50': { l: 0.985, c: 0.0012, h: 286.38 },
-					'100': { l: 0.9674, c: 0.0013, h: 286.375 },
-					'200': { l: 0.9225, c: 0.0021, h: 274.715 },
-					'300': { l: 0.8703, c: 0.005, h: 264.09 },
-					'400': { l: 0.7067, c: 0.0126, h: 265.776 },
-					'500': { l: 0.5537, c: 0.0188, h: 264.576 },
-					'600': { l: 0.4435, c: 0.024, h: 261.841 },
-					'700': { l: 0.3714, c: 0.029, h: 259.939 },
-					'800': { l: 0.2774, c: 0.0338, h: 258.624 },
-					'900': { l: 0.2091, c: 0.0385, h: 259.93 },
-					'950': { l: 0.1296, c: 0.0359, h: 260.946 }
-				},
+				darkForeground: mockDarkForegroundMap,
+				shades: mockShades,
 				_original: { lightHex: '#f4f4f5', darkHex: '#334155' }
 			},
-			primary: {
-				light: '600',
-				lightForeground: {
-					ambient: '200',
-					primary: '100',
-					secondary: '200',
-					accent: '100',
-					success: '200',
-					warning: '200',
-					destructive: '100',
-					info: '100'
-				},
-				dark: '600',
-				darkForeground: {
-					ambient: '50',
-					primary: '100',
-					secondary: '200',
-					accent: '100',
-					success: '200',
-					warning: '200',
-					destructive: '100',
-					info: '100'
-				},
-				shades: {
-					'50': { l: 0.9636, c: 0.0172, h: 268.754 },
-					'100': { l: 0.9304, c: 0.0336, h: 269.33 },
-					'200': { l: 0.8723, c: 0.0778, h: 270.018 },
-					'300': { l: 0.7896, c: 0.1476, h: 267.963 },
-					'400': { l: 0.6798, c: 0.2019, h: 266.027 },
-					'500': { l: 0.5926, c: 0.2162, h: 263.952 },
-					'600': { l: 0.5461, c: 0.2152, h: 262.881 },
-					'700': { l: 0.4632, c: 0.2172, h: 264.089 },
-					'800': { l: 0.4033, c: 0.2074, h: 267.047 },
-					'900': { l: 0.3628, c: 0.1682, h: 272.267 },
-					'950': { l: 0.2612, c: 0.1034, h: 279.79 }
-				},
-				_original: { hex: '#2563eb' }
-			}
-			// ... weitere Flavors (verkürzt für Beispiel)
-		} as UJLTTokenSet['color'],
-		radius: '0.75rem',
+			primary: createStandardColorSet('#2563eb'),
+			secondary: createStandardColorSet('#64748b'),
+			accent: createStandardColorSet('#8b5cf6'),
+			success: createStandardColorSet('#22c55e'),
+			warning: createStandardColorSet('#f59e0b'),
+			destructive: createStandardColorSet('#ef4444'),
+			info: createStandardColorSet('#3b82f6')
+		},
+		radius: 0.75,
+		spacing: 0.25,
 		typography: {
 			base: {
-				font: 'Inter',
+				font: 'Inter Variable',
 				size: 1,
-				lineHeight: '1.5',
-				letterSpacing: '0',
-				weight: '400',
+				lineHeight: 1.5,
+				letterSpacing: 0,
+				weight: 400,
 				italic: false,
 				underline: false,
-				textTransform: 'none',
-				flavor: 'ambient'
+				textTransform: 'none'
 			},
 			heading: {
-				font: 'Inter',
+				font: 'Inter Variable',
 				size: 1,
-				lineHeight: '1.2',
-				letterSpacing: '0',
-				weight: '700',
+				lineHeight: 1.2,
+				letterSpacing: 0,
+				weight: 700,
 				italic: false,
 				underline: false,
 				textTransform: 'none',
@@ -176,24 +160,20 @@ export function createMockTokenSet(): UJLTTokenSet {
 			},
 			highlight: {
 				flavor: 'accent',
-				weight: '700',
+				bold: true,
 				italic: false,
 				underline: false
 			},
 			link: {
-				weight: '400',
+				bold: false,
 				underline: false
 			},
-			mono: {
-				font: 'JetBrains Mono',
+			code: {
+				font: 'JetBrains Mono Variable',
 				size: 0.95,
-				lineHeight: '1.5',
-				letterSpacing: '0',
-				weight: '400',
-				italic: false,
-				underline: false,
-				textTransform: 'none',
-				flavor: 'ambient'
+				lineHeight: 1.5,
+				letterSpacing: 0,
+				weight: 400
 			}
 		}
 	};

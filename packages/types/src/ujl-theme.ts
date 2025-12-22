@@ -150,62 +150,53 @@ const UJLTColorPaletteSchema = z.object({
 });
 
 /**
- * Font weight schema - numeric values 100-900 as strings (consistent with shades)
+ * Font weight schema - numeric values 100-900 as integers.
+ * Uses number type (not string) as per Design Tokens Format Module best practices.
+ * Font weight is a CSS value, not an object key, so it doesn't need to be a string like shade keys.
  */
-const UJLTFontWeightSchema = z.string().refine(
-	val => {
-		const num = parseInt(val, 10);
-		return !isNaN(num) && num >= 100 && num <= 900;
-	},
-	{ message: "Font weight must be a string representing a number between 100 and 900" }
-);
+const UJLTFontWeightSchema = z.number().int().min(100).max(900);
 
-/** Typography style schema for base and heading tokens */
-const UJLTTypographyStyleSchema = z.object({
-	font: z.string(), // z.B. "Inter"
-	// Relativer Faktor zwischen 0 und 1 – konkrete CSS-Size wird in der UI-Library berechnet
-	size: z.number().min(0).max(1),
-	lineHeight: z.string(), // z.B. "1.5" oder "1.5rem"
-	letterSpacing: z.string(), // z.B. "-0.01em"
+/** Typography style schema base (without flavor) - used for base typography */
+const UJLTTypographyStyleBaseSchema = z.object({
+	font: z.string(),
+	size: z.number().min(0), // Relative to root font size (rem units)
+	lineHeight: z.number().min(0), // Relative to element font size (em units)
+	letterSpacing: z.number(), // Relative to element font size (em units)
 	weight: UJLTFontWeightSchema,
 	italic: z.boolean(),
 	underline: z.boolean(),
 	textTransform: z.enum(["none", "capitalize", "uppercase", "lowercase"]),
-	// Typografie darf nur auf Basis-Flavors zugreifen
-	flavor: z.enum(typographyFlavors),
 });
 
-/** Base typography for body text */
-const UJLTTypographyBaseSchema = UJLTTypographyStyleSchema;
+/** Base typography for body text - flavor is fixed to ambient to maintain consistency */
+const UJLTTypographyBaseSchema = UJLTTypographyStyleBaseSchema;
 
-/** Heading typography - UI components derive H1-H6 from this */
-const UJLTTypographyHeadingSchema = UJLTTypographyStyleSchema;
+/** Heading typography - supports flavor selection for semantic color differentiation */
+const UJLTTypographyHeadingSchema = UJLTTypographyStyleBaseSchema.extend({
+	flavor: z.enum(typographyFlavors),
+});
 
 /** Minimal emphasis token for inline text */
 const UJLTTypographyHighlightSchema = z.object({
 	flavor: z.enum(typographyFlavors),
-	weight: UJLTFontWeightSchema,
+	bold: z.boolean(),
 	italic: z.boolean(),
 	underline: z.boolean(),
 });
 
 /** Minimal link configuration - states handled in UI library */
 const UJLTTypographyLinkSchema = z.object({
-	weight: UJLTFontWeightSchema,
+	bold: z.boolean(),
 	underline: z.boolean(),
 });
 
-/** Monospace font family - scaling/spacing handled in UI library */
-const UJLTTypographyMonoSchema = z.object({
-	font: z.string(), // z.B. "JetBrains Mono"
-	size: z.number().min(0).max(1), // relativer Faktor, analog base/heading
-	lineHeight: z.string(),
-	letterSpacing: z.string(),
+/** Code font family - scaling/spacing handled in UI library */
+const UJLTTypographyCodeSchema = z.object({
+	font: z.string(),
+	size: z.number().min(0), // Relative to root font size (rem units)
+	lineHeight: z.number().min(0), // Relative to element font size (em units)
+	letterSpacing: z.number(), // Relative to element font size (em units)
 	weight: UJLTFontWeightSchema,
-	italic: z.boolean(),
-	underline: z.boolean(),
-	textTransform: z.enum(["none", "capitalize", "uppercase", "lowercase"]),
-	flavor: z.enum(typographyFlavors),
 });
 
 /** Complete typography schema */
@@ -214,13 +205,14 @@ const UJLTTypographySchema = z.object({
 	heading: UJLTTypographyHeadingSchema,
 	highlight: UJLTTypographyHighlightSchema,
 	link: UJLTTypographyLinkSchema,
-	mono: UJLTTypographyMonoSchema,
+	code: UJLTTypographyCodeSchema,
 });
 
 /** Token set schema */
 const UJLTTokenSetSchema = z.object({
 	color: UJLTColorPaletteSchema,
-	radius: z.string(), // CSS border-radius value
+	radius: z.number().min(0), // CSS border-radius in rem units (e.g., 0.75) - consistent with typography size
+	spacing: z.number().min(0), // CSS spacing unit in rem units (e.g., 0.25)
 	typography: UJLTTypographySchema,
 });
 
@@ -267,12 +259,12 @@ export type UJLTDocument = z.infer<typeof UJLTDocumentSchema>;
 
 // Typography types
 export type UJLTFontWeight = z.infer<typeof UJLTFontWeightSchema>;
-export type UJLTTypographyStyle = z.infer<typeof UJLTTypographyStyleSchema>;
+export type UJLTTypographyStyle = z.infer<typeof UJLTTypographyStyleBaseSchema>;
 export type UJLTTypographyBase = z.infer<typeof UJLTTypographyBaseSchema>;
 export type UJLTTypographyHeading = z.infer<typeof UJLTTypographyHeadingSchema>;
 export type UJLTTypographyHighlight = z.infer<typeof UJLTTypographyHighlightSchema>;
 export type UJLTTypographyLink = z.infer<typeof UJLTTypographyLinkSchema>;
-export type UJLTTypographyMono = z.infer<typeof UJLTTypographyMonoSchema>;
+export type UJLTTypographyCode = z.infer<typeof UJLTTypographyCodeSchema>;
 export type UJLTTypography = z.infer<typeof UJLTTypographySchema>;
 
 // Flavor types

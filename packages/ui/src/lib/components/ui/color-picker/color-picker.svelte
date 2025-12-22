@@ -192,7 +192,7 @@
 		onchange={handleTextInputChange}
 		{placeholder}
 		{disabled}
-		class="!pl-0.5"
+		class="pl-0.5!"
 		autocomplete="off"
 		spellcheck="false"
 		data-form-type="other"
