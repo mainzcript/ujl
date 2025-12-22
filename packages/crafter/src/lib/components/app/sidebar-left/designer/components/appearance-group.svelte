@@ -1,56 +1,29 @@
-<!--
-	Appearance group for editing border radius.
-	Uses local slider state and reports changes via onRadiusChange; designer.svelte performs token updates.
--->
 <script lang="ts">
 	import {
 		SidebarGroup,
 		SidebarGroupLabel,
 		SidebarGroupContent,
-		Slider,
-		Label,
-		Text,
 		Collapsible,
 		CollapsibleTrigger,
 		CollapsibleContent
 	} from '@ujl-framework/ui';
+	import { NumberSliderWithInput } from '$lib/components/ui/index.js';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	let {
 		radiusValue,
-		radiusDisplayValue,
-		onRadiusChange
+		onRadiusChange,
+		spacingValue,
+		onSpacingChange
 	}: {
 		radiusValue: number;
-		radiusDisplayValue: number;
 		onRadiusChange?: (value: number) => void;
+		spacingValue: number;
+		onSpacingChange?: (value: number) => void;
 	} = $props();
-
-	// Local state for the slider, initialized from prop
-	// Note: We use $state here because the Slider component requires a bindable value.
-	let sliderValue = $state(radiusValue);
-
-	// Track previous value to detect user-initiated changes
-	let previousValue = $state(radiusValue);
-
-	// Sync sliderValue with prop when it changes externally
-	$effect(() => {
-		if (radiusValue !== previousValue) {
-			sliderValue = radiusValue;
-			previousValue = radiusValue;
-		}
-	});
-
-	// Call onChange when sliderValue changes from user interaction
-	$effect(() => {
-		if (sliderValue !== previousValue && sliderValue !== radiusValue && onRadiusChange) {
-			previousValue = sliderValue;
-			onRadiusChange(sliderValue);
-		}
-	});
 </script>
 
-<Collapsible open class="group/collapsible">
+<Collapsible class="group/collapsible">
 	<SidebarGroup>
 		<SidebarGroupLabel>
 			{#snippet child({ props })}
@@ -64,21 +37,28 @@
 		</SidebarGroupLabel>
 		<CollapsibleContent>
 			<SidebarGroupContent class="space-y-8 p-4">
-				<div class="space-y-2">
-					<div class="flex items-center justify-between">
-						<Label for="radius" class="text-xs">Radius</Label>
-						<Text size="xs" intensity="muted">{radiusDisplayValue} rem</Text>
-					</div>
-					<Slider
-						id="radius"
-						type="single"
-						bind:value={sliderValue}
-						min={0}
-						max={2}
-						step={0.05}
-						class="w-full"
-					/>
-				</div>
+				<NumberSliderWithInput
+					id="radius"
+					label="Radius"
+					bind:value={radiusValue}
+					suffix="rem"
+					step={0.05}
+					min={0}
+					sliderMin={0}
+					sliderMax={2}
+					onchange={() => onRadiusChange?.(radiusValue)}
+				/>
+				<NumberSliderWithInput
+					id="spacing"
+					label="Spacing"
+					bind:value={spacingValue}
+					suffix="rem"
+					step={0.01}
+					min={0}
+					sliderMin={0.1}
+					sliderMax={0.4}
+					onchange={() => onSpacingChange?.(spacingValue)}
+				/>
 			</SidebarGroupContent>
 		</CollapsibleContent>
 	</SidebarGroup>

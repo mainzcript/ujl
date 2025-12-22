@@ -15,9 +15,9 @@ The Crafter manages two distinct document types:
   - The `root` slot (`ujlc.root`) is an array of root-level modules that form the document structure
   - This is passed to components as `contentSlot` prop
 
-- **`UJLTDocument`** (theme): Contains design tokens (colors, radius, etc.) for styling
+- **`UJLTDocument`** (theme): Contains design tokens (colors, typography, spacing, radius, etc.) for styling
   - Structure: `{ ujlt: { meta: {...}, tokens: UJLTTokenSet } }`
-  - The `tokens` object (`ujlt.tokens`) contains color palettes and design values
+  - The `tokens` object (`ujlt.tokens`) contains color palettes, typography settings, spacing, radius, and other design values
   - This is passed to components as `tokenSet` prop
 
 ### Single Source of Truth
@@ -68,7 +68,7 @@ All mutations go through a central **Crafter Context API** (`context.ts`):
 
 #### Theme & Content Mutations
 
-- `updateTokenSet(fn)` - Updates theme tokens (colors, radius, etc.)
+- `updateTokenSet(fn)` - Updates theme tokens (colors, typography, spacing, radius, etc.)
   - Receives a function that takes the current `UJLTTokenSet` and returns a new one
   - Updates `ujltDocument.ujlt.tokens` immutably
   - This is the only mutation entrypoint for theme changes
@@ -161,7 +161,8 @@ This ensures:
   - Includes navigation sidebar with header, content area, and footer
 
 - **`designer.svelte`**: Reads `tokens` (theme tokens) from props, uses context API for mutations
-  - Provides UI for editing colors, radius, and other theme tokens
+  - Provides UI for editing colors, typography (base, heading, highlight, link, code), spacing, radius, and other theme tokens
+  - Typography editor includes font selection, size, line height, letter spacing, weight, and style toggles (italic, underline, text transform)
   - All changes go through `crafter.updateTokenSet()`
 
 - **`editor.svelte`**: Reads `slot` (content structure) from props, uses context API for mutations
@@ -364,7 +365,9 @@ All tree manipulations in `ujlc-tree.ts` are **immutable**:
 
 All functions create new objects instead of mutating inputs, ensuring predictable reactivity.
 
-### Color Theme Generation
+### Theme Token Generation
+
+#### Color Theme Generation
 
 The Crafter generates Tailwind-like OKLCH color palettes from a single input color and derives light/dark variants plus complete foreground matrices for all flavor combinations using APCA contrast. Only the `shades` field of each color set stores actual OKLCH values; all other color tokens (e.g. `light`, `dark`, `lightForeground`, `darkForeground`) are shade references that point to entries in `shades`.
 
@@ -373,6 +376,21 @@ The ambient flavor is unique as it serves as the base background color. Instead 
 
 All color utilities live in the `$lib/tools/colors/` toolkit and are re-exported from `$lib/tools/colors/index.js` for a single, cohesive API.
 Color editing in the UI is handled by the `ColorPaletteInput` component, which receives a `colorSet` and the shared `palette` as read-only props, plus the current `flavor`, and reports changes via an `onChange` or `onOriginalChange` callback, following a unidirectional data flow (props down, events up).
+
+#### Typography & Spacing
+
+The Designer mode provides comprehensive typography editing for five typography styles:
+
+- **Base Text**: Font, size, line height, letter spacing, weight, italic, underline, text transform
+- **Headings**: Same as base, plus flavor selection (ambient, primary, secondary, accent)
+- **Code**: Font (monospace), size, line height, letter spacing, weight
+- **Highlight**: Flavor selection, bold, italic, underline
+- **Link**: Bold, underline
+
+Typography tokens are edited via dedicated group components (`base-typography-group.svelte`, `heading-typography-group.svelte`, etc.) that provide UI controls for each property. All typography changes flow through `updateBaseTypography()`, `updateHeadingTypography()`, etc. functions in `designer.svelte`, which use the context API's `updateTokenSet()` for immutable updates.
+
+**Spacing & Radius:**
+The Designer also provides controls for global spacing and border radius tokens via the `AppearanceGroup` component. These values are used throughout the theme for consistent spacing and rounded corners.
 
 ## Testing-Strategie:
 
@@ -406,7 +424,20 @@ Das UJL Crafter Projekt verwendet eine zweigleisige Test-Strategie mit **Unit Te
 
 #### Abgedeckte Bereiche
 
-##### 1. **Tree Utilities** (`ujlc-tree.test.ts`)
+##### 1. **Designer Update Functions** (`designer.test.ts`)
+
+Unit tests for theme token update functions:
+
+- **Typography Updates**:
+  - `updateBaseTypography()` - Merges partial updates, preserves existing fields, handles multiple fields
+  - `updateHeadingTypography()` - Same as base, plus flavor updates
+- **Token Updates**:
+  - `updateSpacingToken()` - Updates spacing value, preserves other tokens, handles zero values
+  - `updateRadiusToken()` - Updates radius value, preserves other tokens, handles zero values
+
+**Test Pattern**: Uses mock `CrafterContext` to test update logic without Svelte component rendering. Validates merge behavior, field preservation, and edge cases.
+
+##### 2. **Tree Utilities** (`ujlc-tree.test.ts`)
 
 Umfassende Tests für die Baum-Manipulation-Logik:
 
@@ -440,7 +471,7 @@ Umfassende Tests für die Baum-Manipulation-Logik:
 - Tests verwenden Mock-Factory (`createMockNode`, `createMockTree`, `createMockMultiSlotTree`)
 - Edge-Cases: Leere Trees, nicht existierende Nodes, verschachtelte Multi-Slot-Strukturen
 
-##### 2. **Context API** (`context.test.ts`)
+##### 3. **Context API** (`context.test.ts`)
 
 Tests für zentrale App-Context-Funktionen:
 
@@ -467,7 +498,20 @@ Tests für zentrale App-Context-Funktionen:
 
 #### Abgedeckte User-Flows
 
-##### 1. **Page Setup** (`page-setup.test.ts`)
+##### 1. **Typography & Spacing Editor** (`typography-spacing.test.ts`)
+
+E2E tests for Designer mode typography and spacing editing:
+
+- **Typography Groups**: Verifies all typography groups (Base Text, Headings, Code, Highlight, Link) are visible and collapsible
+- **Font Selection**: Tests font combobox interaction and selection persistence
+- **Size Updates**: Tests number slider with input for typography size changes
+- **Flavor Selection**: Tests heading typography flavor selection (ambient, primary, secondary, accent)
+- **Spacing Updates**: Tests spacing token editing via number slider
+- **Radius Updates**: Tests radius token editing via number slider
+
+**Test Pattern**: Switches to Designer mode, opens collapsible groups, interacts with UI controls, and verifies changes persist.
+
+##### 2. **Page Setup** (`page-setup.test.ts`)
 
 Grundlegende App-Struktur und -Verhalten:
 
@@ -486,7 +530,7 @@ Grundlegende App-Struktur und -Verhalten:
   - Dropdown-Menü funktioniert
   - Mode-Wechsel aktualisiert Sidebar-Inhalt
 
-##### 2. **Editor Mode** (`editor.test.ts`)
+##### 3. **Editor Mode** (`editor.test.ts`)
 
 Navigation Tree und Node-Interaktionen:
 
@@ -505,7 +549,7 @@ Navigation Tree und Node-Interaktionen:
   - URL-Parameter `?selected=nodeId` wird gesetzt
   - Selektierter Node ist visuell hervorgehoben
 
-##### 3. **Preview Interactions** (`preview.test.ts`)
+##### 4. **Preview Interactions** (`preview.test.ts`)
 
 Preview-Rendering und Editor-Synchronisation:
 
@@ -539,7 +583,7 @@ Preview-Rendering und Editor-Synchronisation:
   - Designer-Mode: Theme-Änderungen reflektieren sich im Preview
   - Selection-State bleibt über Mode-Wechsel hinweg erhalten
 
-##### 4. **Sidebar Right** (`sidebar-right.test.ts`)
+##### 5. **Sidebar Right** (`sidebar-right.test.ts`)
 
 Export/Import und Property-Editing:
 

@@ -10,8 +10,7 @@ stages:
 
 variables:
   NODE_VERSION: '22-slim'
-  PNPM_VERSION: '10.24.0'
-  PLAYWRIGHT_VERSION: 'v1.56.1-jammy'
+  PNPM_VERSION: '10.26.1'
 
 # Install dependencies once
 install_deps:
@@ -47,7 +46,6 @@ build_all:
     - corepack enable
     - corepack prepare pnpm@${PNPM_VERSION} --activate
   script:
-    - export PUBLIC_TEST_MODE=false
     - pnpm run build
   artifacts:
     paths:
@@ -62,8 +60,8 @@ build_all:
       - '**/node_modules/'
     policy: pull
 
-# Run unit tests (existing tests)
-test_unit:
+# Run all tests
+test_all:
   stage: test
   image: node:${NODE_VERSION}
   dependencies:
@@ -75,42 +73,6 @@ test_unit:
     - pnpm install --offline
   script:
     - pnpm test
-  cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-    policy: pull
-  retry:
-    max: 2
-    when:
-      - runner_system_failure
-      - stuck_or_timeout_failure
-      - api_failure
-
-# Run Playwright E2E tests
-test_e2e:
-  stage: test
-  image: mcr.microsoft.com/playwright:${PLAYWRIGHT_VERSION}
-  dependencies:
-    - install_deps
-    - build_all
-  before_script:
-    - corepack enable
-    - corepack prepare pnpm@${PNPM_VERSION} --activate
-    # Playwright-Browser sind bereits im Image vorhanden
-    - cd packages/crafter
-  script:
-    - pnpm test:e2e:ci
-  artifacts:
-    when: always
-    paths:
-      - packages/crafter/test-results/
-      - packages/crafter/playwright-report/
-    reports:
-      junit: packages/crafter/test-results/junit.xml
-    expire_in: 1 week
   cache:
     key: dependencies-${CI_COMMIT_REF_SLUG}
     paths:

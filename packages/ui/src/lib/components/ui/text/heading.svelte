@@ -2,7 +2,7 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const headingVariants = tv({
-		base: 'font-bold text-foreground text-pretty hyphens-auto',
+		base: '[--text-base:var(--typography-heading-size)] [--tw-leading:var(--typography-heading-line-height)] [font-family:var(--typography-heading-font)] font-(--typography-heading-weight) tracking-(--typography-heading-letter-spacing) [font-style:var(--typography-heading-style)] [text-decoration:var(--typography-heading-decoration)] [text-transform:var(--typography-heading-transform)] text-heading text-pretty hyphens-auto',
 		variants: {
 			level: {
 				1: 'text-4xl sm:text-5xl',
@@ -22,19 +22,28 @@
 </script>
 
 <script lang="ts">
-	import { cn } from '$lib/utils.js';
-	import { Text, type TextWeight } from '$lib/index.js';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { cn, type WithElementRef } from '$lib/utils.js';
 
 	let {
+		ref = $bindable(null),
 		class: className = '',
 		children,
 		level = 2 as HeadingLevel,
-		as = `h${level}`,
-		weight = 'bold' as TextWeight,
+		as = `h${level}` as keyof HTMLElementTagNameMap,
 		...restProps
+	}: WithElementRef<HTMLAttributes<HTMLElement>> & {
+		level?: HeadingLevel;
+		as?: keyof HTMLElementTagNameMap;
+		children?: import('svelte').Snippet;
 	} = $props();
 </script>
 
-<Text {as} size="xl" {weight} class={cn(headingVariants({ level }), className)} {...restProps}>
-	{@render children()}
-</Text>
+<svelte:element
+	this={as}
+	bind:this={ref}
+	class={cn(headingVariants({ level }), className)}
+	{...restProps}
+>
+	{@render children?.()}
+</svelte:element>

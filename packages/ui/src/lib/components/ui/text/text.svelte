@@ -2,7 +2,7 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const textVariants = tv({
-		base: 'max-w-prose text-pretty hyphens-auto',
+		base: 'max-w-prose text-pretty hyphens-auto tracking-(--typography-base-letter-spacing) [font-style:var(--typography-base-style)] [text-decoration:var(--typography-base-decoration)] [text-transform:var(--typography-base-transform)]',
 		variants: {
 			size: {
 				default: 'text-base',
@@ -17,10 +17,12 @@
 				'6xl': 'text-6xl'
 			},
 			weight: {
-				normal: 'font-normal',
-				medium: 'font-medium',
-				semibold: 'font-semibold',
-				bold: 'font-bold'
+				default: 'font-(--typography-base-weight)',
+				bold: 'font-(--typography-bold-weight)'
+			},
+			leading: {
+				default: 'leading-(--typography-base-line-height)',
+				none: 'leading-none'
 			},
 			intensity: {
 				muted: 'text-foreground/60',
@@ -30,7 +32,8 @@
 		},
 		defaultVariants: {
 			size: 'default',
-			weight: 'normal',
+			weight: 'default',
+			leading: 'default',
 			intensity: 'default'
 		}
 	});
@@ -48,9 +51,9 @@
 		ref = $bindable(null),
 		class: className = '',
 		children,
-		as = 'p', // `p` is the default element
+		as = 'p',
 		size = 'default' as TextSize,
-		weight = 'normal' as TextWeight,
+		weight = 'default' as TextWeight,
 		intensity = 'default' as TextIntensity,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLElement>> & {

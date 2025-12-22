@@ -5,7 +5,7 @@
 		ref = $bindable(null),
 		children,
 		size = 'sm' as TextSize,
-		weight = 'normal' as TextWeight,
+		weight = 'default' as TextWeight,
 		...restProps
 	}: {
 		ref?: HTMLElement | null;

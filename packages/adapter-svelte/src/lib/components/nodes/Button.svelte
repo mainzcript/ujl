@@ -11,7 +11,7 @@
 
 	let { node, showMetadata = false, eventCallback }: Props = $props();
 
-	const handleClick = createModuleClickHandler(node.id, eventCallback);
+	const handleClick = $derived(createModuleClickHandler(node.id, eventCallback));
 </script>
 
 <Button

@@ -64,7 +64,7 @@
 	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
 
 	// Create drag handler with slot move support
-	const dragHandler = createDragHandler(onNodeMove, onSlotMove);
+	const dragHandler = $derived(createDragHandler(onNodeMove, onSlotMove));
 
 	/**
 	 * Create virtual root node that represents the document

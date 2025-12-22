@@ -250,6 +250,70 @@
 	--info-dark-foreground-destructive: var(--ambient-950);
 	--info-dark-foreground-info: var(--ambient-950);
 
+	/* Heading colors */
+	--primary-heading: var(--primary-foreground);
+	--secondary-heading: var(--secondary-foreground);
+	--accent-heading: var(--accent-foreground);
+	--ambient-heading: var(--ambient-foreground);
+	--success-heading: var(--success-foreground);
+	--warning-heading: var(--warning-foreground);
+	--destructive-heading: var(--destructive-foreground);
+	--info-heading: var(--info-foreground);
+
+	/* Highlight colors */
+	--primary-highlight: var(--primary-foreground);
+	--secondary-highlight: var(--secondary-foreground);
+	--accent-highlight: var(--accent-foreground);
+	--ambient-highlight: var(--ambient-foreground);
+	--success-highlight: var(--success-foreground);
+	--warning-highlight: var(--warning-foreground);
+	--destructive-highlight: var(--destructive-foreground);
+	--info-highlight: var(--info-foreground);
+
 	/* Radius for rounded corners */
 	--radius: 0.1rem;
+
+	/* Spacing unit */
+	--spacing: 0.25rem;
+
+	/* Base typography */
+	--font-base: system-ui, sans-serif;
+	--typography-base-font: system-ui, sans-serif;
+	--typography-base-size: 1rem;
+	--typography-base-line-height: 1.5em;
+	--typography-base-letter-spacing: 0em;
+	--typography-base-weight: 400;
+	--typography-bold-weight: 600;
+	--typography-base-style: normal;
+	--typography-base-decoration: none;
+	--typography-base-transform: none;
+
+	/* Heading typography */
+	--typography-heading-font: system-ui, sans-serif;
+	--typography-heading-size: 1rem;
+	--typography-heading-line-height: 1.2em;
+	--typography-heading-letter-spacing: 0em;
+	--typography-heading-weight: 700;
+	--typography-heading-style: normal;
+	--typography-heading-decoration: none;
+	--typography-heading-transform: none;
+	--typography-heading-flavor: ambient;
+
+	/* Highlight typography */
+	--typography-highlight-weight: 600;
+	--typography-highlight-style: normal;
+	--typography-highlight-decoration: none;
+	--typography-highlight-flavor: accent;
+
+	/* Link typography */
+	--typography-link-weight: 400;
+	--typography-link-decoration: none;
+
+	/* Code typography */
+	--font-mono: monospace;
+	--typography-code-font: monospace;
+	--typography-code-size: 0.95rem;
+	--typography-code-line-height: 1.5em;
+	--typography-code-letter-spacing: 0em;
+	--typography-code-weight: 400;
 }

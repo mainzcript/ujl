@@ -65,7 +65,7 @@
 	}: ButtonProps = $props();
 
 	// Determine element type
-	const elementType = as || (href ? 'a' : 'button');
+	const elementType = $derived(as || (href ? 'a' : 'button'));
 
 	// Touch event handlers for better mobile interaction
 	function handleTouchStart(event: TouchEvent) {
@@ -87,13 +87,13 @@
 	};
 
 	// For div/span elements, only use basic props
-	const basicProps = {
+	const basicProps = $derived({
 		role: restProps.role,
 		tabindex: restProps.tabindex,
 		'aria-label': restProps['aria-label'],
 		'aria-describedby': restProps['aria-describedby'],
 		'data-testid': restProps['data-testid']
-	};
+	});
 </script>
 
 {#if elementType === 'a'}

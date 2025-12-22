@@ -26,18 +26,18 @@
 		"prepare": "pnpm run build"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^1.4.1",
-		"@eslint/js": "^9.39.1",
-		"@types/node": "^24.10.1",
-		"eslint": "^9.39.1",
+		"@eslint/compat": "^2.0.0",
+		"@eslint/js": "^9.39.2",
+		"@types/node": "^25.0.3",
+		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"globals": "^16.5.0",
-		"prettier": "^3.6.2",
-		"prettier-plugin-organize-imports": "^3.2.4",
+		"prettier": "^3.7.4",
+		"prettier-plugin-organize-imports": "^4.3.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.46.4"
+		"typescript-eslint": "^8.50.0"
 	},
 	"dependencies": {
-		"zod": "^4.1.12"
+		"zod": "^4.2.1"
 	}
 }

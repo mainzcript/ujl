@@ -12,6 +12,6 @@ export declare function createMockTree(): UJLCSlotObject;
  */
 export declare function createMockMultiSlotTree(): UJLCSlotObject;
 /**
- * Mock token set
+ * Mock token set matching the current typography schema
  */
 export declare function createMockTokenSet(): UJLTTokenSet;

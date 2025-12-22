@@ -9,7 +9,7 @@ import {
 	readFromClipboardEvent,
 	type UJLClipboardData
 } from './clipboard.js';
-import { createMockNode } from '$lib/../tests/mockData.js';
+import { createMockNode } from '../../tests/mockData.js';
 
 describe('clipboard', () => {
 	// Mock data
@@ -328,9 +328,7 @@ describe('clipboard', () => {
 			} as unknown as ClipboardEvent;
 
 			expect(() => writeToClipboardEvent(mockEvent, mockNode)).not.toThrow();
-			expect(consoleSpy).toHaveBeenCalledWith(
-				'[UJL Clipboard] ClipboardEvent has no clipboardData'
-			);
+			expect(consoleSpy).toHaveBeenCalledWith('[Crafter] ClipboardEvent has no clipboardData');
 
 			consoleSpy.mockRestore();
 		});

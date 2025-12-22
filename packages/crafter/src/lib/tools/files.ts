@@ -5,6 +5,8 @@
  * different components. They do not depend on Svelte APIs.
  */
 
+import { logger } from '$lib/utils/logger.js';
+
 /**
  * Downloads an arbitrary data object as a pretty-printed JSON file.
  *
@@ -33,7 +35,7 @@ export async function readJsonFile(file: File): Promise<unknown | null> {
 		const text = await file.text();
 		return JSON.parse(text);
 	} catch (error) {
-		console.error('Failed to read or parse JSON file:', error);
+		logger.error('Failed to read or parse JSON file:', error);
 		return null;
 	}
 }

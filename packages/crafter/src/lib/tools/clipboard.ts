@@ -3,6 +3,7 @@
  */
 
 import type { UJLCModuleObject } from '@ujl-framework/types';
+import { logger } from '$lib/utils/logger.js';
 
 /**
  * Clipboard data format for UJL editor
@@ -91,7 +92,7 @@ export async function writeToBrowserClipboard(data: UJLClipboardData): Promise<v
 		await navigator.clipboard.writeText(serializeClipboard(data));
 	} catch (error) {
 		// Silently fail if clipboard unavailable (permissions or context)
-		console.warn('[UJL Clipboard] Failed to write to browser clipboard:', error);
+		logger.warn('Failed to write to browser clipboard:', error);
 	}
 }
 
@@ -147,7 +148,7 @@ export async function readFromBrowserClipboard(): Promise<UJLClipboardData | nul
  */
 export function writeToClipboardEvent(event: ClipboardEvent, data: UJLClipboardData): void {
 	if (!event.clipboardData) {
-		console.warn('[UJL Clipboard] ClipboardEvent has no clipboardData');
+		logger.warn('ClipboardEvent has no clipboardData');
 		return;
 	}
 

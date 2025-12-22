@@ -7,9 +7,9 @@ description: "Unser Weg zum UJL-Ökosystem – Phasen, Meilensteine und Abhängi
 
 ## Unser Weg zum UJL-Ökosystem
 
-::: warning Abhängigkeit von Förderung
+::: info Realistische Planung
 
-Die Roadmap ist **stark abhängig von Fördermitteln**. Mit Fördermitteln können wir uns voll auf UJL konzentrieren; ohne Förderung müssen wir parallel für unseren Lebensunterhalt sorgen, was die Entwicklung deutlich verzögert. Diese Roadmap dient als Leitfaden, nicht als starre Verpflichtung.
+Die Roadmap basiert auf realistischen Entwicklungsgeschwindigkeiten mit 2 Vollzeit-Entwickler:innen. Zeitangaben können sich je nach verfügbaren Ressourcen, Teamgröße und Funding ändern. Diese Roadmap dient als Leitfaden, nicht als starre Verpflichtung.
 
 :::
 
@@ -19,9 +19,11 @@ Die folgenden Phasen skizzieren den groben Pfad von der stabilen Basis bis zum u
 
 **Status:** In aktiver Entwicklung
 
-**Zeitrahmen:** Förderdauer (6 Monate)
+**Zeitrahmen:** 6-9 Monate (mit 2 FTE)
 
-Ziel dieser Phase ist ein funktionsfähiger Prototyp, der in ersten Kundenprojekten getestet werden kann. Diese Phase ist vollständig innerhalb der sechsmonatigen Förderung realistisch umsetzbar.
+**Ziel:** Funktionsfähiger MVP für erste Kundenprojekte
+
+Ziel dieser Phase ist ein funktionsfähiger MVP, der in ersten Kundenprojekten getestet werden kann. Mit 2 Vollzeit-Entwickler:innen ist diese Phase in 6-9 Monaten realistisch umsetzbar.
 
 **Geplante Ergebnisse:**
 
@@ -53,7 +55,7 @@ Ziel dieser Phase ist ein funktionsfähiger Prototyp, der in ersten Kundenprojek
 
 ## Phase 1 – Launch & Community
 
-**Zeitrahmen:** Im ersten Jahr nach Projektstart
+**Zeitrahmen:** 6-12 Monate nach Phase 0
 
 - **MVP veröffentlichen:** Sobald Core und Crafter stabil sind, erfolgt der Open-Source-Launch auf GitHub. Ein klarer Pitch und ein 15-Minuten-Tutorial erleichtern den Einstieg.
 - **Community aufbauen:** Discord-Server, GitHub Discussions und erste Blog-Posts/Talks initiieren. Ziel ist ein kleines Ökosystem aus ersten Anwendern und Beitragenden.
@@ -62,7 +64,7 @@ Ziel dieser Phase ist ein funktionsfähiger Prototyp, der in ersten Kundenprojek
 
 ## Phase 2 – Adoption & Integrationen
 
-**Zeitrahmen:** Mittelfristig (1-2 Jahre nach Launch)
+**Zeitrahmen:** 12-24 Monate nach Launch
 
 Nach dem MVP konzentrieren wir uns auf die Erweiterbarkeit und erste Partnerschaften. Prioritäten können sich je nach Community-Feedback ändern. Konkrete Feature-Details können sich ändern.
 
@@ -125,7 +127,7 @@ Diese Phase ist stark von Nutzerfeedback abhängig. Ohne signifikante Nachfrage 
 
 ## Erfolgskriterien
 
-Wir messen den Fortschritt mit geeigneten Kennzahlen. Die folgenden Ziele sind grobe Schätzungen und hängen stark von Fördermitteln und verfügbarer Entwicklungszeit ab:
+Wir messen den Fortschritt mit geeigneten Kennzahlen. Die folgenden Ziele sind grobe Schätzungen und hängen stark von verfügbarer Entwicklungszeit und Teamgröße ab:
 
 ### Impact & Adoption
 

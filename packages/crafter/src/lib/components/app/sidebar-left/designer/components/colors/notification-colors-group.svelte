@@ -13,7 +13,7 @@
 	} from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
-	import { ColorPaletteInput } from '$lib/components/ui/color-palette-input/index.js';
+	import { ColorPaletteInput } from '$lib/components/ui/index.js';
 
 	let {
 		palette,
@@ -38,7 +38,7 @@
 	} = $props();
 </script>
 
-<Collapsible open class="group/collapsible">
+<Collapsible class="group/collapsible">
 	<SidebarGroup>
 		<SidebarGroupLabel>
 			{#snippet child({ props })}
