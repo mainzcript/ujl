@@ -1,5 +1,30 @@
 // packages/crafter/src/tests/mockData.ts
-import type { UJLCModuleObject, UJLCSlotObject, UJLTTokenSet } from '@ujl-framework/types';
+import type {
+	UJLCModuleObject,
+	UJLCSlotObject,
+	UJLTTokenSet,
+	ProseMirrorDocument
+} from '@ujl-framework/types';
+
+/**
+ * Helper function to convert a string to a ProseMirror Document
+ */
+function textToProseMirror(text: string): ProseMirrorDocument {
+	return {
+		type: 'doc',
+		content: [
+			{
+				type: 'paragraph',
+				content: [
+					{
+						type: 'text',
+						text: text
+					}
+				]
+			}
+		]
+	};
+}
 
 /**
  * Mock node factory
@@ -10,6 +35,11 @@ export function createMockNode(
 	fields: Record<string, unknown> = {},
 	slots: Record<string, UJLCModuleObject[]> = {}
 ): UJLCModuleObject {
+	// Convert string content fields to ProseMirror Documents for text modules
+	if (type === 'text' && 'content' in fields && typeof fields.content === 'string') {
+		fields = { ...fields, content: textToProseMirror(fields.content as string) };
+	}
+
 	return {
 		type,
 		meta: {

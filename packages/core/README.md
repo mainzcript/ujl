@@ -2,13 +2,17 @@
 
 **The Heart of the UJL Framework** - A modular, type-safe system for building dynamic web layouts using an Abstract Syntax Tree (AST) architecture.
 
-UJL Core provides the foundational building blocks for creating reusable, composable web layouts. Instead of writing HTML directly, you define layouts using `.ujlc.json` documents that get composed into AST nodes and rendered through adapters. This separation enables powerful features like:
+UJL Core provides the foundational building blocks for creating reusable, composable web layouts. Instead of writing HTML directly, you define layouts using `.ujlc.json` documents that get composed into AST nodes and rendered through adapters. This architectural approach enables **Brand-Compliance by Design** – design rules are enforced at the schema level, making it impossible for content editors to break brand guidelines or accessibility standards.
+
+This separation enables powerful features like:
 
 - **Modular Architecture**: Create reusable modules with fields and slots
 - **Type Safety**: Full TypeScript support with compile-time validation
 - **Extensibility**: Easy to add custom modules and field types
 - **Multiple Outputs**: Render to HTML, Svelte components, or any format via adapters
-- **LLM-Ready**: JSON-based structure optimized for AI assistance
+- **AI-native**: JSON-based structure optimized for LLMs. AI generates structured data that is validated against schemas before rendering, ensuring brand compliance and accessibility
+- **Brand-Compliance by Design**: Schema validation ensures only valid, brand-compliant layouts can be created
+- **Accessibility Built-in**: Semantic HTML and WCAG-compliant structures are enforced through the module system
 
 ---
 
@@ -84,14 +88,14 @@ Output
 
 ### Core Concepts
 
-- **UJL Documents**: JSON-based layout descriptions with metadata and hierarchical module structure
-- **Modules**: Reusable building blocks with fields (data) and slots (content areas)
-- **Fields**: Type-safe data containers with validation, parsing, and fitting logic
-- **Slots**: Nested content areas that can contain other modules
-- **Composer**: Orchestrates the composition process using the module registry
-- **AST**: Abstract intermediate representation that separates composition from rendering
-- **Module IDs**: Unique identifiers preserved from UJLC documents to AST nodes for tracking and selection
-- **Adapters**: Convert AST nodes to specific output formats (HTML, Svelte components, etc.)
+For a high-level overview of UJL's architecture and core concepts, see the [UJL Framework README](../../../README.md#core-concepts).
+
+This package implements the composition layer:
+
+- **UJL Documents**: JSON-based layout descriptions (see types in `@ujl-framework/types`)
+- **Composer**: Orchestrates composition using the module registry
+- **Module Registry**: Manages available modules and provides type-safe access
+- **AST Generation**: Creates abstract nodes with preserved IDs for downstream adapters
 
 ### Module ID Propagation
 
@@ -192,17 +196,49 @@ registry.registerModule(new CustomModule());
 const composer = new Composer(registry);
 ```
 
-> **⚠️ TODO: Component Library Generation**
->
-> Currently, the Component Library (used by the Crafter's component picker) is manually maintained in `@ujl-framework/examples`. This creates a maintenance burden and makes it difficult for developers to add new modules.
->
-> **Future Improvement:** The Component Library should be automatically generated from the Module Registry. This requires:
->
-> 1. Extending `ModuleBase` with optional metadata (label, description, category, tags)
-> 2. Creating a function to convert `ModuleBase` instances to `ComponentDefinition`
-> 3. Generating the library from the registry at runtime or build time
->
-> See `packages/core/src/modules/base.ts` and `packages/core/src/modules/registry.ts` for TODO comments.
+### Direct Module Registry Access
+
+UI components can access modules directly from the registry. This provides a single source of truth without transformation overhead.
+
+**Usage:**
+
+```typescript
+const composer = new Composer();
+
+// Get all registered modules
+const modules = composer.getRegistry().getAllModules();
+
+// Get a specific module by type
+const module = composer.getRegistry().getModule("text");
+
+// Access module properties
+if (module) {
+	const label = module.label;
+	const category = module.category;
+
+	// Access field entries
+	for (const fieldEntry of module.fields) {
+		const fieldType = fieldEntry.field.getFieldType();
+		const label = fieldEntry.field.config.label;
+		const placeholder = fieldEntry.field.config.placeholder;
+		const defaultValue = fieldEntry.field.config.default;
+	}
+}
+```
+
+**Module UI Metadata:**
+All modules must provide UI metadata when implementing `ModuleBase`:
+
+- `label: string` - Human-readable display name
+- `description: string` - Description for component picker
+- `category: ComponentCategory` - Category for grouping modules
+- `tags: readonly string[]` - Searchable tags for filtering
+- `icon: string` - SVG icon content (inner content of the SVG tag, without the svg wrapper). Use `getSvgIcon()` to get the complete SVG string with standardized attributes.
+
+**Field Configuration:**
+Fields support optional UI metadata in their config:
+
+- `placeholder?: string` - Placeholder text for input fields
 
 ## Built-in Modules & Fields
 
@@ -216,13 +252,44 @@ const composer = new Composer(registry);
 | `card`           | Content cards     | `title`, `description`                     | `content`           |
 | `grid`           | Grid layout       | None                                       | `items` (unlimited) |
 | `call-to-action` | Action blocks     | `headline`, `description`, `actionButton*` | None                |
+| `image`          | Image display     | `image`, `alt`                             | None                |
 
 ### Fields
 
-| Field         | Purpose       | Key Config              |
-| ------------- | ------------- | ----------------------- |
-| `TextField`   | Text input    | `maxLength`, `default`  |
-| `NumberField` | Numeric input | `min`, `max`, `default` |
+| Field           | Purpose            | Key Config                       |
+| --------------- | ------------------ | -------------------------------- |
+| `TextField`     | Text input         | `maxLength`, `default`           |
+| `NumberField`   | Numeric input      | `min`, `max`, `default`          |
+| `RichTextField` | Rich text (TipTap) | `default` (ProseMirror Document) |
+| `ImageField`    | Image upload       | `default` (UJLImageData \| null) |
+
+### Rich Text Schema
+
+The core package exports a shared TipTap schema configuration (`ujlRichTextExtensions`) that ensures consistency between editors and serializers:
+
+```typescript
+import { ujlRichTextExtensions } from "@ujl-framework/core";
+import { Editor } from "@tiptap/core";
+
+const editor = new Editor({
+	extensions: ujlRichTextExtensions,
+});
+```
+
+**Supported Extensions:**
+
+- Document, Paragraph, Text (base)
+- Heading (h1-h6)
+- Bold, Italic, Code (marks)
+- HardBreak, Blockquote, HorizontalRule
+- BulletList, OrderedList, ListItem
+
+**Disabled Extensions (UI-only):**
+
+- UndoRedo (editor state only)
+- Dropcursor, Gapcursor (UI only)
+
+This schema is used by both the Crafter editor and the adapter serializers to ensure WYSIWYG consistency.
 
 ## API Reference
 

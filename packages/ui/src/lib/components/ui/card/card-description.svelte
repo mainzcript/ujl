@@ -1,21 +1,19 @@
 <script lang="ts">
-	import { Text, type TextSize, type TextWeight } from '$lib/index.js';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { Text } from '$lib/index.js';
+	import { type WithElementRef } from '$lib/utils.js';
 
 	let {
 		ref = $bindable(null),
 		children,
-		size = 'sm' as TextSize,
-		weight = 'default' as TextWeight,
+		as,
 		...restProps
-	}: {
-		ref?: HTMLElement | null;
+	}: WithElementRef<HTMLAttributes<HTMLElement>> & {
 		children?: import('svelte').Snippet;
-		size?: TextSize;
-		weight?: TextWeight;
-		[key: string]: unknown;
+		as?: keyof HTMLElementTagNameMap;
 	} = $props();
 </script>
 
-<Text bind:ref data-slot="card-description" {size} {weight} intensity="muted" {...restProps}>
+<Text bind:ref data-slot="card-description" {as} size="sm" intensity="muted" {...restProps}>
 	{@render children?.()}
 </Text>

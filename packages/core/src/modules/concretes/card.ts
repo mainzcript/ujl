@@ -1,5 +1,6 @@
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
+import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/index.js";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
@@ -13,6 +14,11 @@ import { Slot } from "../slot.js";
 export class CardModule extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "card";
+	public readonly label = "Card";
+	public readonly description = "A card component with title and description";
+	public readonly category = "content" as const;
+	public readonly tags = ["feature", "info", "box", "panel"] as const;
+	public readonly icon = '<rect width="18" height="18" x="3" y="3" rx="2"/>';
 
 	/** Field definitions available in this module */
 	public readonly fields = [
@@ -27,11 +33,18 @@ export class CardModule extends ModuleBase {
 		},
 		{
 			key: "description",
-			field: new TextField({
+			field: new RichTextField({
 				label: "Card Description",
 				description: "Detailed description of the card",
-				default: "",
-				maxLength: 500,
+				default: {
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [],
+						},
+					],
+				},
 			}),
 		},
 	];
@@ -47,6 +60,16 @@ export class CardModule extends ModuleBase {
 		},
 	];
 
+	private readonly EMPTY_DOCUMENT: ProseMirrorDocument = {
+		type: "doc",
+		content: [
+			{
+				type: "paragraph",
+				content: [],
+			},
+		],
+	};
+
 	/**
 	 * Compose a feature card module into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
@@ -54,8 +77,8 @@ export class CardModule extends ModuleBase {
 	 * @returns Composed abstract syntax tree node
 	 */
 	public compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-		const title = (moduleData.fields.title as string) || "Default Feature";
-		const description = (moduleData.fields.description as string) || "Default description";
+		const title = this.parseField(moduleData, "title", "Card Title");
+		const description = this.parseField(moduleData, "description", this.EMPTY_DOCUMENT);
 
 		// Compose child modules in the items slot
 		const contentSlot = moduleData.slots.content;

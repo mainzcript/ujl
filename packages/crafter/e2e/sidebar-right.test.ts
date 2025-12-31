@@ -381,7 +381,7 @@ test.describe('Editor Sidebar Right Tests', () => {
 		});
 	});
 
-	test('field labels show required indicator when field is required', async ({ page }) => {
+	test('field labels are displayed correctly', async ({ page }) => {
 		// Wait for tree to load
 		await page.waitForTimeout(500);
 
@@ -390,16 +390,18 @@ test.describe('Editor Sidebar Right Tests', () => {
 		await nodeButton.click();
 		await page.waitForTimeout(300);
 
-		// Check if any fields have required indicator (asterisk)
+		// Check if field labels are displayed
 		const sidebarRight = page.locator('[data-testid="sidebar-right"]');
-		const requiredIndicators = sidebarRight.locator('span[title="Required field"]');
+		const fieldLabels = sidebarRight.locator('label');
 
-		const hasRequiredFields = (await requiredIndicators.count()) > 0;
-
-		if (hasRequiredFields) {
-			// Verify the indicator contains an asterisk
-			const firstIndicator = requiredIndicators.first();
-			await expect(firstIndicator).toHaveText('*');
+		const labelCount = await fieldLabels.count();
+		if (labelCount > 0) {
+			// Verify at least one label is visible and has text
+			const firstLabel = fieldLabels.first();
+			await expect(firstLabel).toBeVisible();
+			const labelText = await firstLabel.textContent();
+			expect(labelText).toBeTruthy();
+			expect(labelText?.trim().length).toBeGreaterThan(0);
 		}
 	});
 });

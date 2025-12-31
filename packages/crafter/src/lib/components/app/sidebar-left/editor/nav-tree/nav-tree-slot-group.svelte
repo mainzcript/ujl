@@ -16,7 +16,7 @@
 	} from '@ujl-framework/ui';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
-	import { formatSlotName } from '$lib/tools/ujlc-tree.js';
+	import { formatSlotName } from '$lib/utils/ujlc-tree.js';
 	import { test, testId } from '$lib/utils/test-attrs.ts';
 
 	let {

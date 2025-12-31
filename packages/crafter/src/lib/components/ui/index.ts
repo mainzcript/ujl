@@ -6,3 +6,6 @@ export * from './font-combobox/index.js';
 export * from './flavor-select/index.js';
 export * from './style-toggles/index.js';
 export * from './font-weight-slider/index.js';
+export * from './field-input/index.js';
+export * from './media-picker/index.js';
+export * from './richtext-input/index.js';

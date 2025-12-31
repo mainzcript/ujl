@@ -1,152 +1,101 @@
 ---
 title: "Roadmap"
-description: "Unser Weg zum UJL-Ökosystem – Phasen, Meilensteine und Abhängigkeiten"
+description: "Geplante Entwicklungsschritte und Meilensteine von UJL"
 ---
 
 # Roadmap
 
-## Unser Weg zum UJL-Ökosystem
+## Ausgangspunkt
 
-::: info Realistische Planung
+UJL befindet sich bereits in aktiver Entwicklung. Ein stabiler technischer Kern, ein funktionsfähiger Editor-Prototyp sowie eine modulare Projektstruktur sind vorhanden und werden produktiv weiterentwickelt.
 
-Die Roadmap basiert auf realistischen Entwicklungsgeschwindigkeiten mit 2 Vollzeit-Entwickler:innen. Zeitangaben können sich je nach verfügbaren Ressourcen, Teamgröße und Funding ändern. Diese Roadmap dient als Leitfaden, nicht als starre Verpflichtung.
+Diese Roadmap beschreibt die nächsten Entwicklungsschritte auf dem Weg von einem technisch belastbaren Kern hin zu einem marktreifen, offen nutzbaren System.
 
-:::
+Zeitliche Angaben werden bewusst **nicht als fixe Fristen**, sondern als **Abfolge von Entwicklungszuständen** formuliert. Der tatsächliche Fortschritt hängt maßgeblich von verfügbaren Ressourcen und Finanzierung ab.
 
-Die folgenden Phasen skizzieren den groben Pfad von der stabilen Basis bis zum umfassenden Ökosystem. Zeitangaben sind nur Richtwerte und variieren je nach Teamgröße und Funding.
+## Phase 1 – Stabilisierung & Vervollständigung des MVP
 
-## Phase 0 – Foundation
+**Ziel:**  
+Ein technisch stabiles, konsistent nutzbares Produkt, das sich für reale Pilotprojekte eignet.
 
-**Status:** In aktiver Entwicklung
+In dieser Phase liegt der Fokus auf der **Absicherung und Vervollständigung** der bereits existierenden Kernkomponenten. Ziel ist es, aus dem bestehenden Entwicklungsstand ein echtes Minimum Viable Product zu formen, das nicht nur demonstriert, sondern produktiv eingesetzt werden kann.
 
-**Zeitrahmen:** 6-9 Monate (mit 2 FTE)
+**Schwerpunkte dieser Phase:**
 
-**Ziel:** Funktionsfähiger MVP für erste Kundenprojekte
+- Konsolidierung des UJL Core (Schema, Modul-System, Rendering-Pipeline)
+- Fertigstellung des Crafter-Editors für redaktionelles Arbeiten
+- Etablierung eines konsistenten Theme- und Design-Token-Systems
+- Einführung eines einfachen Backend-Services (z. B. für Medienverwaltung)
+- Verbesserung von Dokumentation, Setup und Developer Experience
 
-Ziel dieser Phase ist ein funktionsfähiger MVP, der in ersten Kundenprojekten getestet werden kann. Mit 2 Vollzeit-Entwickler:innen ist diese Phase in 6-9 Monaten realistisch umsetzbar.
+**Ergebnis dieser Phase:**  
+UJL kann in abgeschlossenen Projekten eingesetzt werden, Inhalte lassen sich stabil erstellen, speichern und rendern. Der Editor ist für Redakteur:innen nutzbar, ohne dass grundlegende Funktionen fehlen.
 
-**Geplante Ergebnisse:**
+## Phase 2 – Pilotierung in realen Projekten
 
-- Stabiler Core (Composer, Modul-System, JSON-Schemas)
-- Crafter MVP (Editor + Designer-Modus)
-- 10–15 Basis-Module (Hero, Grid, CTA, etc.)
-- Design Tokens / Theme-System
-- Demo & Dokumentation mit Getting-Started-Guide
-- Agentur-Pilotprojekte (2–3 Partner)
+**Ziel:**  
+Validierung von UJL unter realen Produktionsbedingungen.
 
-### Aktueller Status (Ende 2025)
+Nach der technischen Stabilisierung folgt bewusst eine Phase, in der UJL **gezielt in echten Projekten eingesetzt** wird. Diese Pilotierungen dienen nicht primär der Skalierung, sondern der Validierung von Architektur, Bedienbarkeit und Erweiterbarkeit.
 
-#### Fortgeschritten (noch nicht stabil)
+Der Fokus liegt dabei auf Partnern mit realen Anforderungen, insbesondere aus dem Agentur- und Projektumfeld.
 
-| Package                           | Beschreibung                                | Status                       |
-| --------------------------------- | ------------------------------------------- | ---------------------------- |
-| **@ujl-framework/types**          | TypeScript-Typen, JSON-Schemas, Validierung | Funktioniert, wird erweitert |
-| **@ujl-framework/core**           | Composer, Module, Fields, Renderer-API      | Funktioniert, wird erweitert |
-| **@ujl-framework/ui**             | UI-Komponenten auf Basis von shadcn-svelte  | Basis vorhanden              |
-| **@ujl-framework/adapter-svelte** | Svelte 5 Adapter                            | Funktioniert, wird erweitert |
-| **@ujl-framework/adapter-web**    | Web Components Adapter (Wrapper um Svelte)  | Funktioniert, wird erweitert |
+**Schwerpunkte dieser Phase:**
 
-#### In aktiver Entwicklung
+- Einsatz von UJL in ausgewählten Pilotprojekten
+- Sammlung von strukturiertem Feedback aus realer Nutzung
+- Identifikation typischer Integrations- und Workflow-Hürden
+- Erweiterung des Modulkatalogs auf Basis realer Anforderungen
+- Verbesserung der Editor-UX auf Grundlage echter Nutzungsszenarien
 
-| Package                    | Beschreibung                  | ETA        |
-| -------------------------- | ----------------------------- | ---------- |
-| **@ujl-framework/crafter** | Visueller WYSIWYG-Editor      | Q1/Q2 2026 |
-| **Media Service**          | Backend für Medien-Management | Q1/Q2 2026 |
+**Ergebnis dieser Phase:**  
+UJL ist nicht nur technisch funktionsfähig, sondern **praxisvalidiert**. Typische Fehlerquellen, UX-Probleme und Integrationsfragen sind identifiziert und adressiert.
 
-## Phase 1 – Launch & Community
+## Phase 3 – Öffnung & Community-Readiness
 
-**Zeitrahmen:** 6-12 Monate nach Phase 0
+**Ziel:**  
+Vorbereitung auf öffentliche Nutzung und externe Beiträge.
 
-- **MVP veröffentlichen:** Sobald Core und Crafter stabil sind, erfolgt der Open-Source-Launch auf GitHub. Ein klarer Pitch und ein 15-Minuten-Tutorial erleichtern den Einstieg.
-- **Community aufbauen:** Discord-Server, GitHub Discussions und erste Blog-Posts/Talks initiieren. Ziel ist ein kleines Ökosystem aus ersten Anwendern und Beitragenden.
-- **Pilotprojekte mit Agenturen:** 2–5 Web- und Marketing-Agenturen, die UJL in echten Kundenprojekten testen. Diese Pilotprojekte sind ein wesentlicher Bestandteil von Phase 1, weil sie frühe reale Anwendungsszenarien und schnelles Feedback ermöglichen. Das liefert wertvolle Erkenntnisse für Stabilität, UI/UX und Modulkatalog.
-- **Erste CMS-Integration:** Eine Headless-CMS-Integration (z.B. Sanity oder PayloadCMS) als Proof of Concept bereitstellen.
+Auf Basis der Pilotierung wird UJL für eine breitere Nutzung geöffnet. Diese Phase dient nicht der maximalen Reichweite, sondern der **kontrollierten Öffnung** für Entwickler:innen, Agenturen und frühe Anwender:innen.
 
-## Phase 2 – Adoption & Integrationen
+**Schwerpunkte dieser Phase:**
 
-**Zeitrahmen:** 12-24 Monate nach Launch
+- Öffentliche Bereitstellung des Open-Source-Repositories
+- Klare Contributor-Guidelines und Projektstruktur
+- Ausbau der Dokumentation (Getting Started, Architekturüberblick)
+- Etablierung erster Community-Kanäle
+- Technische Vorbereitung für externe Erweiterungen
 
-Nach dem MVP konzentrieren wir uns auf die Erweiterbarkeit und erste Partnerschaften. Prioritäten können sich je nach Community-Feedback ändern. Konkrete Feature-Details können sich ändern.
+**Ergebnis dieser Phase:**  
+UJL ist offen nutzbar, nachvollziehbar dokumentiert und strukturell so aufgestellt, dass externe Beiträge möglich und sinnvoll sind.
 
-- **Plugin-System:** Entwickler:innen ermöglichen, eigene Module und Adapter über eine Plugin-Registry zu erstellen.
-- **Gezielte CMS-Integrationen:** Integration für ausgewählte Headless-CMS wie Sanity, Strapi oder PayloadCMS entwickeln. Weitere Integrationen (z.B. WordPress) sind optional und vom Nutzen/Aufwand abhängig.
-- **Basis-AI-Features:** KI-Assistenz einführen: Schema-Export, Validierung von KI-Output und Beispiel-Prompts.
-- **Community-Programme:** Contributor-Guidelines, Showcase-Projekte und regelmäßige Community-Calls etablieren.
+## Phase 4 – Erweiterbarkeit & Integrationen
 
-### CMS-Integrationen
+**Ziel:**  
+UJL als erweiterbares System etablieren.
 
-::: info Ideenpool – Priorisierung offen
+In dieser Phase wird der Fokus auf **Erweiterbarkeit und Integration** gelegt. UJL soll sich sauber in bestehende Systemlandschaften einfügen lassen und gezielt an unterschiedliche Anwendungsfälle anpassbar sein.
 
-Die folgenden CMS-Integrationen sind **Ideen, die Sinn ergeben würden**, aber noch nicht fest priorisiert sind. Nicht alle werden bis 2027 realisiert, die Priorität hängt von Nutzen, Aufwand und Community-Interesse ab. Manche Integrationen könnten auch von der Community entwickelt werden.
+**Schwerpunkte dieser Phase:**
 
-:::
+- Konzeption und Umsetzung eines Erweiterungs- bzw. Plugin-Mechanismus
+- Erste gezielte CMS-Integrationen (z. B. Headless-CMS)
+- Stabilisierung der Adapter-Architektur
+- Verbesserung der Integrationsdokumentation
 
-| CMS            | Potenzielle Priorität | Mögliche Features      | Begründung                                                                                                                                                                                         |
-| -------------- | --------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sanity**     | Hoch                  | Custom Input Component | Headless-First, passt zu Primary Target (SaaS)                                                                                                                                                     |
-| **Strapi**     | Hoch                  | Custom Field Plugin    | Headless-First, passt zu Primary Target (SaaS)                                                                                                                                                     |
-| **PayloadCMS** | Hoch                  | Custom Field + Block   | Headless-First, passt zu Primary Target (SaaS)                                                                                                                                                     |
-| **WordPress**  | Mittel                | Plugin/Block           | Riesiger Markt (~43% aller Websites), relevant für Agenturen (Secondary Target), aber: PHP-Backend = technologischer Mismatch, höherer Aufwand, WordPress möglicherweise am Peak (Markt schrumpft) |
-| **Contentful** | Mittel                | App Framework          | Enterprise-Fokus, kleinerer Markt                                                                                                                                                                  |
+**Ergebnis dieser Phase:**  
+UJL lässt sich konsistent erweitern und in bestehende Stacks integrieren, ohne den Core zu verändern. Das System ist anschlussfähig für unterschiedliche Nutzungsszenarien.
 
-### AI-Integration (Basis)
+## Phase 5 – Weiterführende Funktionen & Perspektive
 
-- Schema-Export für AI-Kontext
-- Validierung von KI-generiertem Output
-- Beispiel-Prompts und Templates
+**Ziel:**  
+Schrittweise Weiterentwicklung auf Basis realer Nutzung.
 
-## Phase 3 – Scale & Monetarisierung
+Alle weiterführenden Funktionen werden **nicht vorab fest versprochen**, sondern ergeben sich aus Nutzung, Feedback und Nachfrage. Dazu zählen unter anderem:
 
-**Zeitrahmen:** Langfristig (nach erfolgreichem Community-Aufbau)
+- weitergehende KI-Unterstützung im Authoring-Prozess
+- Versionierung und Änderungsverfolgung
+- kollaborative Funktionen
+- optionale Hosting- oder Service-Angebote
 
-In dieser Phase erweitern wir das Angebot und beginnen mit ersten Monetarisierungsansätzen. Die Prioritäten hängen von Community-Feedback und Marktnachfrage ab. Konkrete Feature-Details können sich ändern.
-
-**Beispiele für mögliche Monetarisierung:**
-
-- **Hosted Crafter (SaaS):** Bereitstellung eines gehosteten Editors mit Pro- und Enterprise-Plänen. Pro-Plan mit grundlegenden Team-Funktionen, Enterprise-Plan mit SSO, Audit-Logs und SLA.
-- **Multi-Format-Renderer:** Unterstützung weiterer Ausgabeformate (PDF, Email-HTML, AMP, React Native) für vielfältige Use Cases.
-- **Advanced AI:** Erweiterte KI-Features wie Content-Generierung, Smart-Suggestions oder Übersetzungen.
-- **Academy & Training (optional):** Zertifizierungen und Schulungen für Partner.
-
-### Hosted Crafter (Langfristig)
-
-Langfristig planen wir ein Open-Core-Modell mit einem gehosteten Editor (z.B. Pro-Plan ab ca. €49/Monat). Details hängen von Feedback und Marktresonanz ab. Der Core bleibt dauerhaft Open Source, sodass Teams auch selbst hosten können.
-
-## Phase 4 – Ecosystem & Advanced
-
-**Zeitrahmen:** Langfristig (3+ Jahre nach Launch)
-
-Langfristig planen wir den Aufbau eines vollständigen Ökosystems. Die Realisierung hängt von Marktresonanz und Ressourcen ab.
-
-- **Real-Time Collaboration:** Gleichzeitiges Bearbeiten mit Nutzer-Präsenz, Kommentaren und Feedback.
-- **Version Control & Workflows:** Git-ähnliche Historie, Branching/Merging sowie Approval-Workflows und automatisiertes Publishing.
-- **White-Label & API-First:** Anpassbares Branding, eigene Deployments und API-First-Ansatz für OEM-Partner.
-- **Vertikale Expansion:** Optionale Spezialisierungen wie Bildung (UJL for Education) sowie Community-Programme und vergünstigte Modelle für Gemeinden, Schulen, Hochschulen und gemeinnützige Organisationen.
-
-Diese Phase ist stark von Nutzerfeedback abhängig. Ohne signifikante Nachfrage könnten einzelne Punkte entfallen oder verschoben werden.
-
-## Erfolgskriterien
-
-Wir messen den Fortschritt mit geeigneten Kennzahlen. Die folgenden Ziele sind grobe Schätzungen und hängen stark von verfügbarer Entwicklungszeit und Teamgröße ab:
-
-### Impact & Adoption
-
-| KPI                                      | Ziel          | Zeitrahmen            |
-| ---------------------------------------- | ------------- | --------------------- |
-| **OSS-Nutzer/Integrationen**             | 50+ Projekte  | 12 Monate nach Launch |
-| **Barrierefreie & CI-konforme Projekte** | 100+ Websites | 18 Monate nach Launch |
-| **GitHub Stars**                         | 500+          | 18 Monate nach Launch |
-| **npm Downloads/Monat**                  | 2.000+        | 12 Monate nach Launch |
-| **Aktive Nutzer (MAU)**                  | 1.000+        | 12 Monate nach Launch |
-
-### Wirtschaftliche Tragfähigkeit (Langfristig)
-
-Die folgenden Zahlen sind **Minimalziele für wirtschaftliche Tragfähigkeit**. Langfristig erwarten wir durch höhere Adoption und mehr Enterprise-Integrationen deutlich wachsende Einnahmen.
-
-| KPI                 | Minimalziel (Survival) | Realistischer Zielkorridor | Zeitrahmen |
-| ------------------- | ---------------------- | -------------------------- | ---------- |
-| **Zahlende Kunden** | 50+                    | 100-200+                   | 3+ Jahre   |
-| **MRR**             | €20-30k                | €40-80k                    | 3+ Jahre   |
-| **Break-Even**      | Erreicht               | Erreicht                   | 3+ Jahre   |
-
-**Hinweis zu MRR:** Die Minimalziele (€20-30k) basieren auf einem Mix aus Pro-Kunden (€49/Monat) und Enterprise-Kunden (€1.500-2.000+/Monat). Beispiel: 12 Enterprise-Kunden à €1.800 + 50 Pro-Kunden à €49 = €21.600 + €2.450 = €24.050/Monat. Der realistische Zielkorridor (€40-80k) ergibt sich durch Skalierung, wachsende Community und höhere Enterprise-Anteile.
+Diese Aspekte werden bewusst **nachgelagert betrachtet**, um die Stabilität und Offenheit des Kerns nicht zu gefährden.

@@ -1,4 +1,4 @@
-/* TODO: Add fonts */
+/* Fonts use system defaults - custom font families can be configured via theme tokens */
 
 :root,
 [data-ujl-theme] {

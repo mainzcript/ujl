@@ -155,7 +155,7 @@ export default defineConfig(
 		},
 	},
 	{
-		files: ["**/*.test.ts", "**/*.spec.ts"],
+		files: ["**/*.test.ts"],
 		rules: {
 			// Relaxed rules for test files
 			"@typescript-eslint/no-explicit-any": "off",

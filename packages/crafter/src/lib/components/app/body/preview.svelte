@@ -5,7 +5,7 @@
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
 	import '@ujl-framework/adapter-svelte/styles';
 	import { getContext } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -21,7 +21,7 @@
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	const composer = new Composer();
 	const ast = $derived.by(() => composer.compose(ujlcDocument));
@@ -118,7 +118,8 @@
 </div>
 
 <style>
-	:global([data-ujl-module-id][role='button']:not(.ujl-selected):hover) {
+	:global([data-ujl-module-id][role='button']:not(.ujl-selected):hover),
+	:global(button[data-ujl-module-id]:not(.ujl-selected):hover) {
 		outline: 2px solid oklch(var(--primary) / 0.7);
 		outline-offset: 2px;
 		border-radius: var(--radius);
@@ -130,7 +131,10 @@
 		border-radius: var(--radius);
 	}
 
-	:global([data-ujl-module-id][role='button']:has([data-ujl-module-id][role='button']:hover)) {
+	:global([data-ujl-module-id][role='button']:has([data-ujl-module-id][role='button']:hover)),
+	:global([data-ujl-module-id][role='button']:has(button[data-ujl-module-id]:hover)),
+	:global(button[data-ujl-module-id]:has([data-ujl-module-id][role='button']:hover)),
+	:global(button[data-ujl-module-id]:has(button[data-ujl-module-id]:hover)) {
 		outline: none !important;
 	}
 </style>

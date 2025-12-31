@@ -12,6 +12,12 @@ import { Slot } from "../slot.js";
 export class GridModule extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "grid";
+	public readonly label = "Grid";
+	public readonly description = "A responsive grid layout for arranging items";
+	public readonly category = "layout" as const;
+	public readonly tags = ["layout", "columns", "responsive", "flex"] as const;
+	public readonly icon =
+		'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>';
 
 	/** Field definitions available in this module */
 	public readonly fields = [];

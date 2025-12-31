@@ -1,122 +1,23 @@
 ---
 title: "Vision & Wertversprechen"
-description: "Was UJL ist, warum es existiert und welche Probleme es löst"
+description: "Was UJL ist, welches Problem es löst und warum es gebraucht wird"
 ---
 
 # Vision & Wertversprechen
 
 ## Was ist UJL?
 
-**Unified JSON Layout (UJL)** ist der neue Standard für strukturierte Web-Layouts. Das Kernversprechen:
+**Unified JSON Layout (UJL)** ist ein Open-Source-Framework für visuelles Content-Authoring im Web.
 
-> **Erstelle und pflege garantiert markenkonforme und barrierefreie Websites mit KI.**
+UJL stellt einen Drag-&-Drop-Editor bereit, mit dem Inhalte visuell erstellt und gepflegt werden können, ohne dass Redakteur:innen Farben, Abstände, Typografie oder semantische Strukturen frei verändern können. Inhalte lassen sich flexibel aufbauen und anpassen, während Design-Entscheidungen systematisch geschützt bleiben. Typische Fehler bei Kontrast, Struktur oder Semantik sind dabei technisch ausgeschlossen.
 
-Dafür entwickeln wir den ersten Drag & Drop-Editor, in dem Redakteur:innen KI-gestützt arbeiten, ohne das Corporate Design brechen zu können. Barrierefreiheit ist dabei kein Add-on, sondern architektonisch garantiert. Das nennen wir _Brand-Compliance by Design_.
+> **UJL trennt Inhalt und Design konsequent auf technischer Ebene.**  
+> Redakteur:innen bearbeiten Inhalte – Designregeln sind für sie nicht veränderbar.
 
-## Das Problem
+Im Unterschied zu klassischen Page Buildern basiert UJL nicht auf frei editierbarem HTML oder CSS, sondern auf **strukturierten Daten**, die vor dem Rendern gegen definierte Regeln validiert werden. Alles, was im Editor gebaut werden kann, ist damit per Definition markenkonform und barrierearm – innerhalb der zuvor konfigurierten Leitplanken.
 
-### Brand-Compliance-Dilemma
-
-Jedes Web-Team kennt das Problem: Redakteur:innen wollen schnell Inhalte ändern, während Designer:innen die Marke schützen möchten. Klassische Lösungen versagen.
-
-- **Strenge Freigabeprozesse** → 3 Wochen für eine Landingpage, frustrierte Teams
-- **Drag & Drop-Builder** → Design bricht nach 3 Monaten, inkonsistente Markenwahrnehmung
-- **Entwickler:innen als Flaschenhals** → Jede Änderung wird zum Ticket, Marketing ist blockiert
-
-Das Ergebnis: Entweder langsam und teuer, oder schnell und chaotisch. Unternehmen müssen sich zwischen Autonomie und Markenkonsistenz entscheiden.
-
-### KI-Chaos
-
-Noch schlimmer wird es, wenn KI-Tools Websites bearbeiten.
-KI-Modelle werden immer intelligenter, aber sie bleiben dennoch vergesslich und eigenwillig. Sie haben keinen dauerhaften Speicher, nur den aktuellen Kontext. Das bedeutet:
-
-- **In jedem Prompt** müssten Design-Richtlinien mitgegeben werden
-- **Bei jedem Request** hofft man, dass die KI sie korrekt interpretiert
-- **Alternative:** Eigene Modelle trainieren → teuer, energieintensiv, wartungsaufwändig, selbst diese können keine Markenkonformität garantieren
-
-Das Ergebnis: KI-generierter Content ist optisch oft okay, aber viel zu selten wirklich markenkonform. Die Konsistenz der Corporate Identity wird nicht gewährleistet.
-
-### Barriere-Monster
-
-Barrierefreiheit wird oft nachträglich "aufgesetzt", mit vorhersehbaren Problemen:
-
-- **Accessibility-Audits** → Teure externe Prüfungen nach dem Launch
-- **Freie Gestaltung** → Redakteur:innen können Kontraste brechen
-- **Keine Durchsetzung** → WCAG-Richtlinien sind "Best Practices", keine technische Garantie
-
-Das Ergebnis: Rechtliche Risiken, schlechte Nutzererfahrung für Menschen mit Beeinträchtigungen, teure Nachbesserungen. Besonders kritisch für öffentliche Einrichtungen und Bildungssektor seit 2025 (BFSG).
-
-## Die UJL-Lösung: _Brand-Compliance by Design_
-
-UJL löst das Problem nicht durch größere Modelle oder KI-Training, sondern durch **Rollenspezifische Tools**.
-
-**Was UJL anders macht:**
-
-1. **Module sind vordefiniert** – UJL liefert die wichtigsten Bausteine mit (Hero, Feature-Grid, Call-to-Action, etc.)
-2. **Designer:innen definieren das Theme** – Farben, Schriften, Abstände, alle Design-Regeln
-3. **Redakteur:innen kombinieren Module** – Sie wählen aus verfügbaren Bausteinen, Design ist geschützt
-4. **KI generiert Strukturierte Daten** – Nicht direkt HTML/CSS, sondern JSON oder TOON, das gegen ein Schema validiert wird
-
-**Das Ergebnis:**
-
-- **Redakteur:innen arbeiten autonom** – Keine Tickets, keine Wartezeiten
-- **Design ist geschützt** – Technisch unmöglich zu brechen
-- **Barrierefreiheit garantiert** – WCAG-Kontraste und semantisches HTML erzwungen
-- **KI ist kontrollierbar** – Das Schema erzwingt Gültigkeit
-- **Keine Freigabeschleifen** – Alles ist automatisch CI-konform UND barrierefrei
-
-## Warum UJL statt Alternative X?
-
-UJL unterscheidet sich fundamental von bestehenden Lösungen durch seine architektonische Herangehensweise:
-
-| Feature                    | UJL                | GrapesJS                         | WordPress                      | Webflow                  |
-| -------------------------- | ------------------ | -------------------------------- | ------------------------------ | ------------------------ |
-| Garantierte CI-Konformität | ✅ Architektonisch | ❌ Kann gebrochen werden         | ❌ Kann gebrochen werden       | ❌ Kann gebrochen werden |
-| Barrierefreiheit           | ✅ Erzwungen       | ⚠️ Optional                      | ⚠️ Optional                    | ⚠️ Optional              |
-| KI-Integration             | ✅ AI-Native       | ⚠️ Über Studio (kostenpflichtig) | ⚠️ Abhängig von Themes/Plugins | ✅ Vorhanden             |
-| Open Source                | ✅ MIT-Lizenz      | ✅ BSD-3-Clause                  | ✅ GPL                         | ❌ Proprietär            |
-| Integration                | ✅ Framework       | ✅ Framework                     | ⚠️ Plugin-System               | ❌ Plattform             |
-
-**Der entscheidende Unterschied:** Während andere Tools Design-Regeln als "Best Practices" behandeln, erzwingt UJL sie technisch. Das macht Markenkonformität und Barrierefreiheit nicht optional, sondern garantiert.
-
-**Die technische Umsetzung:**
-
-UJL trennt strikt zwischen Inhalt (`.ujlc.json`), Design (`.ujlt.json`) und Modulstruktur. Redakteur:innen haben nur Zugriff auf Inhalt, das Design ist für sie nicht erreichbar.
-
-## Return on Investment
-
-UJL spart Zeit und Kosten durch Automatisierung und architektonische Garantien. Die folgenden Zahlen basieren auf realistischen Schätzungen typischer Web-Teams.
-
-### Zeitersparnis
-
-- **Landingpage-Erstellung:** 3 Wochen → 2-4 Stunden (95% Reduktion)
-- **Design-Review-Zyklen:** 5 Runden → 0 (automatisch CI-konform)
-- **Accessibility-Audits:** 2-3 Tage pro Projekt → Nicht mehr nötig
-- **Support-Tickets (Design-Fixes):** 3-5 pro Monat → 0-1 pro Monat (80% Reduktion)
-- **Onboarding neuer Redakteur:innen:** 2-3 Wochen → 2-3 Stunden (95% Reduktion)
-
-### Kostenreduktion
-
-- **Entwickler-Tickets:** 80% weniger (Marketing arbeitet autonom)
-- **Accessibility-Audits:** €2.000-5.000 pro Projekt → €0 (architektonisch garantiert)
-- **Design-Fixes:** 15-20h/Monat → 2-3h/Monat (85% Reduktion)
-- **Freigabeprozesse:** 5-10h pro Landingpage → 0h (automatisch CI-konform)
-
-### ROI-Beispiel (Web-Agentur)
-
-**Vor UJL:**
-
-- 10-20 Kund:innen pro Jahr
-- 3-5 Support-Tickets/Monat für Design-Fixes (15-20h/Monat)
-- 2-3 Accessibility-Audits pro Jahr (€6.000-15.000)
-- **Gesamtkosten:** ~€25.000-35.000/Jahr (Support + Audits)
-
-**Mit UJL:**
-
-- Support-Tickets: 0-1/Monat (2-3h/Monat)
-- Accessibility-Audits: Nicht mehr nötig
-- **Gesamtkosten:** ~€3.000-5.000/Jahr (minimaler Support)
-- **Einsparung:** €20.000-30.000/Jahr
+UJL ist bewusst **kein CMS** und **keine Plattform**.  
+Es ist ein **visueller Layout-Layer**, der bestehende CMS- und Frontend-Systeme ergänzt, ohne sie zu ersetzen.
 
 ::: tip Frühe Vorschau
 
@@ -126,113 +27,73 @@ Du möchtest sehen, wie UJL in der Praxis aussieht? Wir haben eine frühe Vorsch
 
 :::
 
-## Unsere Kernprinzipien
+## Das zugrunde liegende Problem
 
-### 1. Garantierte Markenkonformität & Barrierefreiheit
+### 1. Das Brand-Compliance-Dilemma
 
-Das zentrale Versprechen: **Redakteur:innen können weder Design noch Accessibility brechen.**
+In nahezu jedem Webprojekt entsteht derselbe strukturelle Konflikt. Redakteur:innen sollen Inhalte schnell und eigenständig pflegen können, Designer:innen müssen sicherstellen, dass das Corporate Design eingehalten wird, und Entwickler:innen geraten zwischen beide Seiten, weil jede Änderung technische Eingriffe erfordert.
 
-So funktioniert es:
+Klassische Lösungsansätze verschieben dieses Problem, lösen es aber nicht. Strenge Freigabeprozesse verhindern Designfehler, führen jedoch zu langen Durchlaufzeiten und blockierten Teams. Visuelle Page Builder beschleunigen zwar die Content-Erstellung, lassen jedoch Gestaltungsfreiheiten zu, die langfristig zu Design-Drift und inkonsistenten Markenauftritten führen. Manuelle Kontrollen sind teuer, fehleranfällig und nicht skalierbar.
 
-- **Strikte Trennung** – Inhalt und Design sind technisch getrennt, nicht nur organisatorisch
-- **Theme-Definition** – Designer:innen legen Farben, Schriften, Abstände zentral fest (inklusive WCAG-konformer Kontraste)
-- **Modulare Bausteine** – Redakteur:innen kombinieren vordefinierte Module, jede Kombination ist valide
-- **Semantisches HTML** – Die UI-Library erzwingt ARIA-Labels, Alt-Texte und strukturierte Daten
+Das Ergebnis ist ein systemischer Zielkonflikt: Organisationen müssen sich zwischen Geschwindigkeit und Markenkonsistenz entscheiden.
 
-**Der Unterschied zu klassischen Buildern:** Wenn Redakteur:innen Buttons beliebig einfärben können, sind garantierte Kontraste unmöglich. UJL erzwingt sie per Architektur. Keine Freigabeschleifen, keine nachträglichen Accessibility-Audits, keine Design-Polizei.
+### 2. KI verschärft das Problem
 
-### 2. AI-native
+KI-gestützte Werkzeuge versprechen eine noch schnellere Content-Erstellung, verschärfen jedoch bestehende Risiken. Design- und Markenregeln müssen bei jeder Anfrage neu erklärt werden, Ergebnisse sind nicht deterministisch und schwer reproduzierbar, und Markenkonformität wird zur Frage des Zufalls statt zu einer verlässlichen Eigenschaft.
 
-Statt KI zu trainieren oder komplexe Prompts zu schreiben, setzt UJL auf strukturelle Kontrolle:
+In der Praxis entstehen Inhalte, die optisch oft „ausreichend“ wirken, aber nicht belastbar markenkonform sind. Gerade in größeren Organisationen ist diese Unzuverlässigkeit nicht akzeptabel.
 
-- **100% garantierte Markenkonformität** – KI generiert simple JSON-Daten/TOON, die gegen ein Schema validiert werden, bevor sie in die Website eingefügt werden.
-- **Effiziente Bearbeitung** – Kein Prompt-Engineering für Design-Regeln nötig
-- **Kleine Modelle, große Wirkung** – Die JSON-Abstraktion in Verbindung mit TOON zur Tokenverringerung ermöglicht es, mit deutlich kleineren Modellen zu arbeiten. Das spart Kosten und Energie, wichtig für nachhaltige KI-Nutzung und niedrige Betriebskosten.
-- **Digitale Souveränität** – Modelle können frei gewählt werden. Beispielsweise OpenAI, Claude, Mistral oder lokale Modelle.
+### 3. Barrierefreiheit als Nacharbeit
 
-Die KI generiert strukturierte Daten, das Schema erzwingt Konformität. Ein architektonischer Vorteil, der auch bei größeren Modellen Kosten und Energie spart.
+Barrierefreiheit wird in vielen Projekten erst am Ende berücksichtigt – häufig ausgelöst durch externe Audits oder regulatorische Anforderungen wie den EU Accessibility Act. Die Ursache liegt jedoch tiefer: Redaktionelle Werkzeuge erlauben Gestaltungsfreiheiten, die Barrierefreiheit unabsichtlich unterlaufen können.
 
-### 3. Rollenbasiertes Arbeiten
+Die Folge sind teure Nachbesserungen, rechtliche Risiken und eine schlechtere Nutzererfahrung.
 
-Alle machen das, was sie am besten können, ohne einander in die Quere zu kommen:
+## Die Lösung: Brand-Compliance by Design
 
-| Rolle                | Verantwortung          | Tool               |
-| -------------------- | ---------------------- | ------------------ |
-| **Entwickler:innen** | Module & Integrationen | Code, API          |
-| **Designer:innen**   | Corporate Identity     | Crafter (Designer) |
-| **Redakteur:innen**  | Inhalte                | Crafter (Editor)   |
+UJL löst diese Probleme nicht durch zusätzliche Kontrollen oder komplexere Prozesse, sondern durch Architektur.
 
-Klare Grenzen, klare Verantwortung, keine Konflikte.
+Redakteur:innen arbeiten visuell und flexibel, während Designer:innen Regeln einmal zentral definieren. Das System stellt sicher, dass ungültige Kombinationen gar nicht erst entstehen können. Gestaltung ist frei, aber nicht beliebig.
 
-### 4. Plug-in statt Neubeginn
+Konkret bedeutet das: Inhalte werden aus klar definierten Modulen aufgebaut, Design-Systeme werden zentral festgelegt, und visuelles Arbeiten findet ausschließlich innerhalb sicherer Grenzen statt. Statt freiem HTML erzeugt UJL strukturierte Daten, die vor dem Rendern automatisch validiert werden.
 
-- Integration in bestehende Systeme (Sanity, PayloadCMS, Strapi, etc.)
-- Kein Systemwechsel notwendig, CMS und Frontend bleiben bestehen
-- Adapter-Architektur für jedes Framework
+Das Ergebnis ist ein Arbeitsprozess, in dem Redakteur:innen selbstständig arbeiten können, Markenauftritte konsistent bleiben und Barrierefreiheit systematisch eingehalten wird. Review- und Korrekturschleifen werden dadurch weitgehend überflüssig.
 
-### 5. Open Source & Unabhängigkeit
+## Warum UJL anders ist als bestehende Tools
 
-UJL ist quelloffen aus Überzeugung:
+Viele bestehende Werkzeuge behandeln Design- und Accessibility-Regeln als Empfehlungen. UJL behandelt sie als technische Rahmenbedingungen.
 
-- Volle Kontrolle über Code und Daten
-- Keine Abhängigkeit von Drittanbietern
-- Community kann beitragen und erweitern
-- **Lizenz:** MIT (permissive Open-Source-Lizenz, maximal kompatibel für Integrationen)
+Kurz gesagt:  
+Was in UJL gebaut werden kann, ist per Definition innerhalb der Leitplanken.
 
-## UJL in deinem Stack
+Governance verlagert sich damit weg von manuellen Kontrollen hin zu architektonischer Absicherung.
 
-UJL ist **keine Plattform**, sondern ein **Layer**. Es ersetzt keine Systeme, sondern verbindet sie:
+## KI – sinnvoll integriert, nicht unkontrolliert
 
-```plantuml
-@startuml
-!define LAYER_COLOR #E8F4F8
-!define UJL_COLOR #4A90E2
+UJL ist so aufgebaut, dass KI unterstützt, ohne Kontrolle zu übernehmen. KI-Systeme erzeugen strukturierte Inhalte statt freies Markup. Diese Ergebnisse werden automatisch validiert, bevor sie Bestandteil einer Seite werden.
 
-skinparam rectangle {
-    BackgroundColor LAYER_COLOR
-    BorderColor #2C5F8D
-    FontColor #333333
-}
+Das ermöglicht effizientere Content-Erstellung, reduziert den Prompt-Aufwand und erlaubt den Einsatz kleinerer oder lokaler Modelle. Markenkonformität und Barrierefreiheit bleiben dabei jederzeit gewährleistet.
 
-skinparam component {
-    BackgroundColor UJL_COLOR
-    BorderColor #2C5F8D
-    FontColor white
-    FontStyle bold
-}
+## Rollenbasiertes Arbeiten ohne Reibung
 
-rectangle "Frontend\n(Next.js, Nuxt, SvelteKit)" as frontend
-component "UJL\nVisueller Layout-Layer" as ujl
-rectangle "CMS\n(Sanity, Strapi, Payload)" as cms
+UJL trennt Verantwortlichkeiten klar. Designer:innen definieren Design-Systeme, Redakteur:innen erstellen Inhalte, Entwickler:innen erweitern Module und integrieren UJL in bestehende Systeme. Jede Rolle arbeitet innerhalb ihres Fachbereichs, ohne unbeabsichtigt die Arbeit der anderen zu gefährden.
 
-frontend -down-> ujl
-ujl -down-> cms
+## Integration statt Systemwechsel
 
-@enduml
-```
+UJL ersetzt keine bestehenden Systeme. CMS bleiben CMS, Frontends bleiben Frontends. UJL ergänzt die visuelle Ebene dazwischen.
 
-**Die Idee:** Dein CMS bleibt dein CMS. Dein Frontend bleibt dein Frontend. UJL gibt Redakteur:innen die visuelle Ebene, die bisher gefehlt hat, ohne Systemwechsel, ohne Vendor-Lock-in.
+Das reduziert den Einführungsaufwand, vermeidet Lock-in und ermöglicht eine schrittweise Adoption.
 
 ## Gesellschaftliche Relevanz
 
-Wir adressieren mehrere folgende zentrale gesellschaftliche Herausforderungen im digitalen Raum:
+UJL adressiert zentrale Herausforderungen moderner digitaler Arbeit.
 
-### Digitale Barrierefreiheit
+Barrierefreiheit wird nicht nachträglich geprüft, sondern bereits beim Erstellen abgesichert. Das senkt Kosten, reduziert Risiken und verbessert digitale Teilhabe – insbesondere unter steigenden regulatorischen Anforderungen.
 
-UJL erzwingt WCAG-konforme und semantisch korrekte Inhalte technisch — nicht optional. Damit können auch Personen ohne Web-Expertise barrierefreie Websites erstellen. Dies reduziert strukturelle Hürden für Menschen mit Behinderungen und fördert Inklusion im öffentlichen und privaten Sektor.
+Strukturierte Daten ermöglichen zudem eine ressourcenschonendere KI-Nutzung. Durch Open Source, Self-Hosting und transparente Architektur stärkt UJL digitale Souveränität und Vertrauen. Gleichzeitig senkt es die Hürden für professionelle Webgestaltung, da auch Nicht-Techniker:innen hochwertige, konsistente Inhalte erstellen können.
 
-### Nachhaltige und verantwortungsvolle KI-Nutzung
+## Unsere Vision
 
-Unser Framework ist AI-native: Module, Layouts und Interaktionen sind so gut für KI-Systeme aufbereitet, dass kleine Modelle ohne wesentlichen Qualitätsverlust eingesetzt werden können. Das reduziert Energiebedarf und KI-gestützte Content-Erstellung wird ökologisch verträglicher.
+Wir glauben, dass visuelles Arbeiten im Web frei, schnell und verantwortungsvoll sein sollte.
 
-### Digitale Souveränität & Datenschutz
-
-Durch die offene Architektur (Open Source, MIT-Lizenz) können Organisationen UJL vollständig selbst betreiben. Das stärkt die Kontrolle über Daten, reduziert Abhängigkeiten von proprietären Plattformen und ermöglicht transparente Sicherheitsprüfungen.
-
-### Zugang zu digitaler Gestaltung für Nicht-Techniker:innen
-
-UJL vereinfacht die Erstellung qualitativ hochwertiger, barrierefreier Inhalte für Menschen ohne technische Kenntnisse. Damit senken wir Hürden für digitale Teilhabe und ermöglichen mehr Menschen, sichtbare, professionelle Inhalte zu publizieren.
-
-### Gemeinwohlorientierte Verbreitung
-
-Mittelfristig planen wir Community-Programme und vergünstigte Modelle für Gemeinden, Schulen, Hochschulen und gemeinnützige Organisationen. Damit unterstützen wir digitale Bildung, Medienkompetenz und den Zugang zu professionellen Web-Werkzeugen im Bildungs- und Non-Profit-Sektor.
+UJL steht für eine neue Generation von Werkzeugen, bei denen Qualität, Barrierefreiheit und Markenkonsistenz keine Zusatzarbeit darstellen, sondern systemische Eigenschaften sind. Langfristig soll UJL dazu beitragen, dass visuelles Authoring kein Trade-off zwischen Tempo und Qualität mehr ist, sondern beides gleichzeitig ermöglicht.

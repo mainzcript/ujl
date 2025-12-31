@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { UJLTTokenSet } from '@ujl-framework/types';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { generateThemeCSSVariables } from '$lib/tools/index.js';
+	import { generateThemeCSSVariables } from '$lib/utils/index.js';
 	import { generateUid } from '@ujl-framework/core';
 	import { setUjlThemeContext } from './context.js';
 	import { mode } from 'mode-watcher';

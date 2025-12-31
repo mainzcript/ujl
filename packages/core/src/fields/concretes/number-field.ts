@@ -1,5 +1,6 @@
 import type { UJLCFieldObject } from "@ujl-framework/types";
 import { BaseFieldConfig, FieldBase } from "../base.js";
+import type { FieldType } from "../types.js";
 
 /**
  * Value type for number fields
@@ -74,5 +75,13 @@ export class NumberField extends FieldBase<NumberFieldValue, NumberFieldConfig> 
 	 */
 	public validate(raw: UJLCFieldObject): raw is number {
 		return typeof raw === "number";
+	}
+
+	/**
+	 * Get the UI field type for number fields
+	 * @returns "number" as the field type
+	 */
+	public getFieldType(): FieldType {
+		return "number";
 	}
 }

@@ -18,7 +18,8 @@
 		Card,
 		Grid,
 		GridItem,
-		CallToAction
+		CallToAction,
+		Image
 	} from './nodes/index.js';
 
 	interface Props {
@@ -50,6 +51,8 @@
 	<GridItem {node} {showMetadata} {eventCallback} />
 {:else if node.type === NODE_TYPES.CALL_TO_ACTION}
 	<CallToAction {node} {showMetadata} {eventCallback} />
+{:else if node.type === NODE_TYPES.IMAGE}
+	<Image {node} {showMetadata} {eventCallback} />
 {:else}
 	{@const errorNode: UJLAbstractErrorNode = {
 		type: NODE_TYPES.ERROR,

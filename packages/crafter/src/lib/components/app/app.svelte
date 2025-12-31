@@ -12,11 +12,13 @@
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 	import {
 		CRAFTER_CONTEXT,
+		COMPOSER_CONTEXT,
 		createOperations,
 		findPathToNode,
 		type CrafterContext
 	} from './context.js';
-	import { downloadJsonFile, readJsonFile } from '$lib/tools/files.ts';
+	import { Composer } from '@ujl-framework/core';
+	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.ts';
 	import { logger } from '$lib/utils/logger.js';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
@@ -24,7 +26,7 @@
 	import Header from './header/header.svelte';
 	import Body from './body/preview.svelte';
 	import { type CrafterMode } from './types.js';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 
 	/**
@@ -140,7 +142,7 @@
 	 * Updates the URL with ?selected=nodeId query parameter
 	 */
 	function setSelectedNodeId(nodeId: string | null): void {
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 
 		if (nodeId) {
 			url.searchParams.set('selected', nodeId);
@@ -215,8 +217,11 @@
 		}
 	}
 
+	// Create shared Composer instance for Module Registry access
+	const composer = new Composer();
+
 	// Create operations using the factory function
-	const operations = createOperations(() => ujlcDocument.ujlc.root, updateRootSlot);
+	const operations = createOperations(() => ujlcDocument.ujlc.root, updateRootSlot, composer);
 
 	// Provide context API to child components
 	const crafterContext: CrafterContext = {
@@ -231,6 +236,7 @@
 	};
 
 	setContext(CRAFTER_CONTEXT, crafterContext);
+	setContext(COMPOSER_CONTEXT, composer);
 </script>
 
 <SidebarProvider>

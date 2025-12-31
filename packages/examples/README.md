@@ -31,18 +31,6 @@ examples/
 └── documents/            # Legacy location (still referenced in package.json)
 ```
 
-## Component Library
-
-This package includes a manual Component Library definition in `src/components/component-library.ts` that is used by the Crafter's component picker.
-
-> **⚠️ TODO: Automatic Generation from Registry**
->
-> The Component Library is currently manually maintained, which creates a maintenance burden. When modules are added or changed in `@ujl-framework/core`, this file must be manually updated.
->
-> **Future Improvement:** The Component Library should be automatically generated from the Module Registry in `@ujl-framework/core`. This would eliminate manual maintenance and make it easier for developers to add new modules.
->
-> See `src/components/component-library.ts` for TODO comments and details.
-
 ## Contributing
 
 When adding new example files:
@@ -54,5 +42,6 @@ When adding new example files:
 
 When adding new modules to `@ujl-framework/core`:
 
-1. **Currently:** Manually update `src/components/component-library.ts` with the new module definition
-2. **Future:** This will be automatic once Component Library generation from Registry is implemented
+1. Implement `ModuleBase` with optional UI metadata (label, description, category, tags)
+2. Register the module in the default registry
+3. Modules are automatically available in the registry - no manual updates needed!

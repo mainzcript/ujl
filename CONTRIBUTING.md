@@ -115,3 +115,10 @@ The following packages are linked and versioned together:
 - `@ujl-framework/examples`
 - `@ujl-framework/demo`
 - `@ujl-framework/docs`
+
+## Development Guidelines
+
+For detailed guidelines, see the [docs/](./docs/) directory:
+
+- [Testing Guidelines](./docs/testing.md) - Test infrastructure and best practices
+- [Code Review Process](./docs/code-review.md) - Code review standards and workflow

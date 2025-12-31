@@ -17,12 +17,12 @@
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
-	import { getComponentDefinition } from '@ujl-framework/examples/components';
-	import { findNodeById } from '$lib/tools/ujlc-tree.ts';
-	import { FieldInput } from './components/index.js';
+	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
+	import { Composer, type AnyModule } from '@ujl-framework/core';
+	import { findNodeById } from '$lib/utils/ujlc-tree.ts';
+	import { FieldInput } from '../../ui/index.js';
 	import { testId } from '$lib/utils/test-attrs.ts';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -41,12 +41,13 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 	const sidebar = useSidebar();
 
 	let themeFileInput: HTMLInputElement | null = $state(null);
 	let contentFileInput: HTMLInputElement | null = $state(null);
 
-	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	// Check if selection is a slot (format: parentId:slotName)
 	const isSlotSelected = $derived(() => {
@@ -60,18 +61,23 @@
 		return findNodeById(rootSlot, selectedNodeId);
 	});
 
-	const componentDef = $derived(() => {
+	const module = $derived(() => {
 		if (!selectedNode()) return null;
-		return getComponentDefinition(selectedNode()!.type);
+		return composer.getRegistry().getModule(selectedNode()!.type);
 	});
 
-	const fieldDefinitions = $derived(() => {
-		return componentDef()?.fields || {};
+	const fieldEntries = $derived(() => {
+		return module()?.fields || [];
 	});
 
 	const hasEditableFields = $derived(() => {
-		return Object.keys(fieldDefinitions()).length > 0;
+		return fieldEntries().length > 0;
 	});
+
+	function getModuleLabel(module: AnyModule | null | undefined): string {
+		if (!module) return '';
+		return module.label ?? '';
+	}
 
 	/**
 	 * Handler for field updates from FieldInput components
@@ -186,7 +192,7 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<!-- TODO: Implement save functionality -->
+			<!-- TODO: Implement save functionality - placeholder UI until backend API is ready -->
 			<Button variant="primary" size="sm" onclick={() => alert('Save functionality coming soon!')}>
 				Save
 			</Button>
@@ -243,19 +249,19 @@
 			<div class="h-full">
 				<SidebarGroup>
 					<SidebarGroupLabel>
-						<span class="text-sm">{componentDef()?.label || selectedNode()!.type}</span>
+						<span class="text-sm">{getModuleLabel(module())}</span>
 					</SidebarGroupLabel>
 				</SidebarGroup>
 
 				{#if hasEditableFields()}
 					<SidebarGroup>
 						<SidebarGroupContent class="space-y-6 p-2 pt-0">
-							{#each Object.entries(fieldDefinitions()) as [fieldName, fieldDef] (fieldName)}
+							{#each fieldEntries() as fieldEntry (fieldEntry.key)}
 								<FieldInput
-									{fieldName}
-									definition={fieldDef}
-									value={selectedNode()!.fields[fieldName]}
-									onChange={(value) => handleFieldUpdate(fieldName, value)}
+									fieldName={fieldEntry.key}
+									{fieldEntry}
+									value={selectedNode()!.fields[fieldEntry.key]}
+									onChange={(value: unknown) => handleFieldUpdate(fieldEntry.key, value)}
 								/>
 							{/each}
 						</SidebarGroupContent>

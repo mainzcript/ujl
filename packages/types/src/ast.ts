@@ -1,3 +1,5 @@
+import type { UJLImageData } from "./media.js";
+import type { ProseMirrorDocument } from "./prosemirror.js";
 import type { UJLTTokenSet } from "./ujl-theme.js";
 
 type UJLAbstractWrapperNode = {
@@ -36,7 +38,7 @@ type UJLAbstractCardNode = {
 	type: "card";
 	props: {
 		title: string;
-		description: string;
+		description: ProseMirrorDocument;
 		children?: UJLAbstractNode[];
 	};
 	id: string;
@@ -45,7 +47,7 @@ type UJLAbstractCardNode = {
 type UJLAbstractTextNode = {
 	type: "text";
 	props: {
-		content: string;
+		content: ProseMirrorDocument;
 	};
 	id: string;
 };
@@ -79,11 +81,20 @@ type UJLAbstractCallToActionModuleNode = {
 	type: "call-to-action";
 	props: {
 		headline: string;
-		description: string;
+		description: ProseMirrorDocument;
 		actionButtons: {
 			primary: UJLAbstractButtonNode;
 			secondary?: UJLAbstractButtonNode;
 		};
+	};
+	id: string;
+};
+
+type UJLAbstractImageNode = {
+	type: "image";
+	props: {
+		image: UJLImageData | null; // null when no image is selected (shows placeholder)
+		alt: string; // From module field
 	};
 	id: string;
 };
@@ -104,7 +115,8 @@ export type UJLAbstractNode =
 	| UJLAbstractButtonNode
 	| UJLAbstractGridNode
 	| UJLAbstractGridItemNode
-	| UJLAbstractCallToActionModuleNode;
+	| UJLAbstractCallToActionModuleNode
+	| UJLAbstractImageNode;
 
 // Export individual node types for more specific typing
 export type {
@@ -115,6 +127,7 @@ export type {
 	UJLAbstractErrorNode,
 	UJLAbstractGridItemNode,
 	UJLAbstractGridNode,
+	UJLAbstractImageNode,
 	UJLAbstractRawHtmlNode,
 	UJLAbstractTextNode,
 	UJLAbstractWrapperNode,

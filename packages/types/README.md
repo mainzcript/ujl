@@ -1,7 +1,18 @@
-## Validation
+# @ujl-framework/types
 
-UJL provides runtime validation for both theme and content files using Zod schemas.
-This package also includes types for the ujl-framework.
+**Type Definitions and Validation** - TypeScript types, Zod schemas, and validation utilities for the UJL Framework.
+
+This package provides runtime validation for both theme and content files using Zod schemas. It also includes all TypeScript type definitions for the UJL Framework, ensuring type safety across the entire ecosystem.
+
+---
+
+## Installation
+
+```bash
+pnpm add @ujl-framework/types
+```
+
+## Validation
 
 ### Quick Start
 
