@@ -1,5 +1,6 @@
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
+import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/concretes/text-field.js";
 import { ModuleBase } from "../base.js";
 
@@ -12,6 +13,12 @@ import { ModuleBase } from "../base.js";
 export class CallToActionModule extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "call-to-action";
+	public readonly label = "Call to Action";
+	public readonly description = "A prominent call-to-action section with headline and buttons";
+	public readonly category = "interactive" as const;
+	public readonly tags = ["cta", "banner", "hero", "conversion", "action"] as const;
+	public readonly icon =
+		'<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>';
 
 	/** Field definitions available in this module */
 	public readonly fields = [
@@ -26,11 +33,23 @@ export class CallToActionModule extends ModuleBase {
 		},
 		{
 			key: "description",
-			field: new TextField({
+			field: new RichTextField({
 				label: "CTA Description",
 				description: "Supporting description text for the call-to-action",
-				default: "Take action now and join thousands of satisfied users!",
-				maxLength: 500,
+				default: {
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [
+								{
+									type: "text",
+									text: "Take action now and join thousands of satisfied users!",
+								},
+							],
+						},
+					],
+				},
 			}),
 		},
 		{
@@ -75,62 +94,51 @@ export class CallToActionModule extends ModuleBase {
 	public readonly slots = [];
 
 	/**
+	 * Default empty ProseMirror document
+	 */
+	private readonly EMPTY_DOCUMENT: ProseMirrorDocument = {
+		type: "doc",
+		content: [
+			{
+				type: "paragraph",
+				content: [],
+			},
+		],
+	};
+
+	/**
 	 * Compose a call-to-action module into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
 	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		const headlineField = this.fields.find(field => field.key === "headline");
-		const headline = headlineField?.field.parse(moduleData.fields.headline);
-		const descriptionField = this.fields.find(field => field.key === "description");
-		const description = descriptionField?.field.parse(moduleData.fields.description);
-
-		// Handle button objects
-		const primaryButtonLabelField = this.fields.find(
-			field => field.key === "actionButtonPrimaryLabel"
-		);
-		const primaryButtonHrefField = this.fields.find(
-			field => field.key === "actionButtonPrimaryUrl"
-		);
-		const secondaryButtonLabelField = this.fields.find(
-			field => field.key === "actionButtonSecondaryLabel"
-		);
-		const secondaryButtonHrefField = this.fields.find(
-			field => field.key === "actionButtonSecondaryUrl"
-		);
-		const primaryButtonLabel = primaryButtonLabelField?.field.parse(
-			moduleData.fields.actionButtonPrimaryLabel
-		);
-		const primaryButtonHref = primaryButtonHrefField?.field.parse(
-			moduleData.fields.actionButtonPrimaryUrl
-		);
-		const secondaryButtonLabel = secondaryButtonLabelField?.field.parse(
-			moduleData.fields.actionButtonSecondaryLabel
-		);
-		const secondaryButtonHref = secondaryButtonHrefField?.field.parse(
-			moduleData.fields.actionButtonSecondaryUrl
-		);
+		const headline = this.parseField(moduleData, "headline", "");
+		const description = this.parseField(moduleData, "description", this.EMPTY_DOCUMENT);
+		const primaryButtonLabel = this.parseField(moduleData, "actionButtonPrimaryLabel", "");
+		const primaryButtonHref = this.parseField(moduleData, "actionButtonPrimaryUrl", "");
+		const secondaryButtonLabel = this.parseField(moduleData, "actionButtonSecondaryLabel", "");
+		const secondaryButtonHref = this.parseField(moduleData, "actionButtonSecondaryUrl", "");
 
 		return {
 			type: "call-to-action",
 			props: {
-				headline: headline ?? "",
-				description: description ?? "",
+				headline,
+				description,
 				actionButtons: {
 					primary: {
 						type: "button",
 						props: {
-							label: primaryButtonLabel ?? "",
-							href: primaryButtonHref ?? "",
+							label: primaryButtonLabel,
+							href: primaryButtonHref,
 						},
 						id: `${moduleData.meta.id}-primary-button`,
 					},
 					secondary: {
 						type: "button",
 						props: {
-							label: secondaryButtonLabel ?? "",
-							href: secondaryButtonHref ?? "",
+							label: secondaryButtonLabel,
+							href: secondaryButtonHref,
 						},
 						id: `${moduleData.meta.id}-secondary-button`,
 					},

@@ -81,13 +81,11 @@ test.describe('Editor Mode Tests', () => {
 		// Verify initial state is collapsed
 		const children = item.locator('[data-slot="collapsible-content"]').first();
 		const stateAttr = await children.getAttribute('data-state');
-		console.log('Initial stateAttr:', stateAttr);
 
 		// Click the chevron to expand
 		await chevron.click();
 		await page.waitForTimeout(400);
 
-		console.log('StateAttr after click:', await children.getAttribute('data-state'));
 		await page.waitForTimeout(400);
 
 		// Verify state is now expanded
@@ -319,7 +317,7 @@ test.describe('Editor Mode Tests', () => {
 		const hasComponentIndicators =
 			dialogContent?.includes('Component') ||
 			dialogContent?.includes('Insert') ||
-			(await dialog.locator('input[type="search"]').isVisible());
+			(await dialog.locator('input[placeholder*="Search"]').isVisible());
 
 		expect(hasComponentIndicators).toBe(true);
 
@@ -408,7 +406,8 @@ test.describe('Editor Component Operations Tests', () => {
 			// Verify component picker dialog is visible
 			const dialog = page.getByRole('dialog');
 			await expect(dialog).toBeVisible();
-			await expect(dialog.getByRole('heading', { name: 'Insert Component' })).toBeVisible();
+			const searchInput = dialog.locator('input[placeholder*="Search"]');
+			await expect(searchInput).toBeVisible();
 		});
 
 		test('shows search input in component picker', async ({ page }) => {
@@ -448,11 +447,10 @@ test.describe('Editor Component Operations Tests', () => {
 			await searchInput.fill('button');
 			await page.waitForTimeout(300);
 
-			// Should have fewer buttons after filtering (or at least show button component)
+			// Should show button component after filtering
 			const hasButtonComponent = await dialog
-				.locator('[data-scroll-area-root] span')
-				.first()
-				.getByText('Button', { exact: false })
+				.locator('[data-slot="command-item"]')
+				.filter({ hasText: 'Button' })
 				.isVisible();
 			expect(hasButtonComponent).toBe(true);
 		});
@@ -494,11 +492,10 @@ test.describe('Editor Component Operations Tests', () => {
 
 			const dialog = page.getByRole('dialog');
 
-			// Verify at least one category heading exists
-			// Categories are typically uppercase text (LAYOUT, CONTENT, etc.)
-			const categoryHeadings = dialog.locator('h3');
-			const headingCount = await categoryHeadings.count();
-			expect(headingCount).toBeGreaterThan(0);
+			// Verify at least one category group exists
+			const categoryGroups = dialog.locator('[data-slot="command-group"]');
+			const groupCount = await categoryGroups.count();
+			expect(groupCount).toBeGreaterThan(0);
 		});
 
 		test('inserts component when selected from picker', async ({ page }) => {
@@ -522,13 +519,13 @@ test.describe('Editor Component Operations Tests', () => {
 			const dialog = page.getByRole('dialog');
 
 			// Try to find a simple component to insert
-			const componentButton = dialog
-				.locator('button')
+			const componentItem = dialog
+				.locator('[data-slot="command-item"]')
 				.filter({ hasText: /Button|Text|Heading/ })
 				.first();
 
-			if (await componentButton.isVisible()) {
-				await componentButton.click();
+			if (await componentItem.isVisible()) {
+				await componentItem.click();
 				await page.waitForTimeout(500);
 
 				// Verify dialog closed
@@ -650,7 +647,8 @@ test.describe('Editor Component Operations Tests', () => {
 				// Verify component picker opened
 				const dialog = page.getByRole('dialog');
 				await expect(dialog).toBeVisible();
-				await expect(dialog.getByRole('heading', { name: 'Insert Component' })).toBeVisible();
+				const searchInput = dialog.locator('input[placeholder*="Search"]');
+				await expect(searchInput).toBeVisible();
 			}
 		});
 

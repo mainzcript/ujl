@@ -15,6 +15,21 @@ export class TEMPLATE_Module extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "template"; // TODO: Change to your module type name
 
+	/** Human-readable display name */
+	public readonly label = "Template"; // TODO: Set appropriate label
+
+	/** Description for component picker */
+	public readonly description = "TODO: Add description for your module";
+
+	/** Category for grouping modules */
+	public readonly category = "content" as const; // TODO: Choose appropriate category
+
+	/** Searchable tags for filtering */
+	public readonly tags = [] as const; // TODO: Add relevant tags
+
+	/** SVG icon content (inner content of the SVG tag, without the svg wrapper) */
+	public readonly icon = '<rect width="18" height="18" x="3" y="3" rx="2"/>'; // TODO: Replace with appropriate icon SVG content
+
 	/** Field definitions available in this module */
 	public readonly fields = [
 		// TODO: Add your field definitions here

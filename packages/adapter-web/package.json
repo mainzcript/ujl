@@ -9,8 +9,7 @@
 	},
 	"files": [
 		"dist",
-		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.test.*"
 	],
 	"sideEffects": [
 		"**/*.css",
@@ -38,9 +37,9 @@
 		"prettier": "^3.7.4",
 		"prettier-plugin-svelte": "^3.4.1",
 		"publint": "^0.3.16",
-		"svelte": "^5.46.0",
+		"svelte": "^5.46.1",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.50.0",
+		"typescript-eslint": "^8.51.0",
 		"vite": "^7.3.0",
 		"vite-plugin-dts": "^4.5.4"
 	},

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { ComponentDefinition, ComponentCategory } from '@ujl-framework/types';
-	import { CATEGORY_LABELS } from '@ujl-framework/types';
 	import {
-		Dialog,
-		DialogContent,
-		DialogHeader,
-		DialogTitle,
-		Input,
-		Button,
-		ScrollArea
+		CommandDialog,
+		CommandInput,
+		CommandList,
+		CommandEmpty,
+		CommandGroup,
+		CommandItem,
+		CommandSeparator
 	} from '@ujl-framework/ui';
-	import { componentLibrary } from '@ujl-framework/examples/components';
+	import { getContext } from 'svelte';
+	import { Composer, type AnyModule, type ComponentCategory } from '@ujl-framework/core';
+	import { COMPOSER_CONTEXT } from '../../context.js';
 
 	let {
 		open = $bindable(false),
@@ -20,126 +20,102 @@
 		onSelect: (componentType: string) => void;
 	} = $props();
 
-	// Search query
-	let searchQuery = $state('');
+	const composer = getContext<Composer>(COMPOSER_CONTEXT);
+	const modules = $derived(composer.getRegistry().getAllModules());
 
-	// Filtered and grouped components
-	const filteredComponents = $derived(() => {
-		const query = searchQuery.toLowerCase().trim();
+	/**
+	 * Get module label
+	 */
+	function getModuleLabel(module: AnyModule): string {
+		return module.label ?? '';
+	}
 
-		if (!query) {
-			// No search - return all components grouped
-			return componentLibrary.reduce(
-				(acc: Record<string, ComponentDefinition[]>, comp: ComponentDefinition) => {
-					if (!acc[comp.category]) {
-						acc[comp.category] = [];
-					}
-					acc[comp.category].push(comp);
-					return acc;
-				},
-				{} as Record<string, ComponentDefinition[]>
-			);
-		}
+	/**
+	 * Get module category
+	 */
+	function getModuleCategory(module: AnyModule): ComponentCategory {
+		return (module.category ?? 'content') as ComponentCategory;
+	}
 
-		// Search filter
-		const filtered = componentLibrary.filter(
-			(comp: ComponentDefinition) =>
-				comp.label.toLowerCase().includes(query) ||
-				comp.description?.toLowerCase().includes(query) ||
-				comp.tags?.some((tag: string) => tag.toLowerCase().includes(query))
-		);
+	/**
+	 * Format category name for display (capitalize first letter)
+	 */
+	function formatCategory(category: ComponentCategory): string {
+		return category.charAt(0).toUpperCase() + category.slice(1);
+	}
 
-		// Group filtered results
-		return filtered.reduce(
-			(acc: Record<string, ComponentDefinition[]>, comp: ComponentDefinition) => {
-				if (!acc[comp.category]) {
-					acc[comp.category] = [];
+	/**
+	 * Get keywords for search (label, description, tags)
+	 */
+	function getModuleKeywords(module: AnyModule): string[] {
+		const keywords: string[] = [];
+		if (module.label) keywords.push(module.label);
+		if (module.description) keywords.push(module.description);
+		if (module.tags) keywords.push(...module.tags);
+		return keywords;
+	}
+
+	/**
+	 * Group modules by category
+	 */
+	const groupedModules = $derived(() => {
+		return modules.reduce(
+			(acc: Record<string, AnyModule[]>, module: AnyModule) => {
+				const category = getModuleCategory(module);
+				if (!acc[category]) {
+					acc[category] = [];
 				}
-				acc[comp.category].push(comp);
+				acc[category].push(module);
 				return acc;
 			},
-			{} as Record<string, ComponentDefinition[]>
+			{} as Record<string, AnyModule[]>
 		);
 	});
 
-	// Handle component selection
+	/**
+	 * Get sorted category keys for consistent ordering
+	 */
+	const sortedCategoryKeys = $derived(Object.keys(groupedModules()).sort());
+
+	/**
+	 * Handle component selection and close dialog
+	 */
 	function handleSelect(componentType: string) {
 		onSelect(componentType);
 		open = false;
-		resetState();
 	}
-
-	// Reset state
-	function resetState() {
-		searchQuery = '';
-	}
-
-	// Reset state when dialog closes
-	$effect(() => {
-		if (!open) {
-			resetState();
-		}
-	});
 </script>
 
-<Dialog bind:open>
-	<DialogContent>
-		<DialogHeader>
-			<DialogTitle>Insert Component</DialogTitle>
-		</DialogHeader>
-
-		<div class="grid gap-4 py-4">
-			<!-- Search Input -->
-			<Input bind:value={searchQuery} placeholder="Search components..." class="w-full" autofocus />
-
-			<!-- Component List -->
-			<ScrollArea class="max-h-[50vh] pr-2 sm:pr-4">
-				{#if Object.keys(filteredComponents()).length === 0}
-					<div
-						class="flex items-center justify-center py-8 text-sm text-muted-foreground sm:text-base"
-					>
-						No components found.
-					</div>
-				{:else}
-					<div class="space-y-3 sm:space-y-4">
-						{#each Object.entries(filteredComponents()) as [category, components] (category)}
-							{@const typedComponents = components as ComponentDefinition[]}
-							{@const typedCategory = category as ComponentCategory}
-							{#if typedComponents.length > 0}
-								<div>
-									<h3
-										class="mb-1.5 text-xs font-semibold text-muted-foreground uppercase sm:mb-2 sm:text-sm"
-									>
-										{CATEGORY_LABELS[typedCategory]}
-									</h3>
-									<div class="space-y-1">
-										{#each typedComponents as component (component.type)}
-											<Button
-												variant="ghost"
-												class="h-auto w-full justify-start gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3"
-												onclick={() => handleSelect(component.type)}
-											>
-												<div class="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-													<span class="text-left text-sm font-medium sm:text-base"
-														>{component.label}</span
-													>
-													{#if component.description}
-														<span
-															class="line-clamp-2 text-left text-xs text-muted-foreground sm:line-clamp-1"
-														>
-															{component.description}
-														</span>
-													{/if}
-												</div>
-											</Button>
-										{/each}
-									</div>
-								</div>
-							{/if}
-						{/each}
-					</div>
+<CommandDialog
+	bind:open
+	title="Insert Component"
+	description="Search and select a component to insert"
+>
+	<CommandInput placeholder="Search components..." />
+	<CommandList>
+		<CommandEmpty>No components found.</CommandEmpty>
+		{#each sortedCategoryKeys as category, index (category)}
+			{@const categoryModules = groupedModules()[category as ComponentCategory]}
+			{@const typedCategory = category as ComponentCategory}
+			{#if categoryModules && categoryModules.length > 0}
+				<CommandGroup heading={formatCategory(typedCategory)}>
+					{#each categoryModules as module (module.name)}
+						<CommandItem
+							value={module.name}
+							keywords={getModuleKeywords(module)}
+							onclick={() => handleSelect(module.name)}
+						>
+							<!-- SVG strings come from trusted module definitions -->
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html module.getSvgIcon()}
+							<span>{getModuleLabel(module)}</span>
+						</CommandItem>
+					{/each}
+				</CommandGroup>
+				{#if index < sortedCategoryKeys.length - 1}
+					<CommandSeparator />
 				{/if}
-			</ScrollArea>
-		</div>
-	</DialogContent>
-</Dialog>
+			{/if}
+		{/each}
+	</CommandList>
+</CommandDialog>

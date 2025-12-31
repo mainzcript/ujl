@@ -54,7 +54,7 @@ const mainzcript = [
 
 ## Wer macht UJL?
 
-UJL wird von Marius Klein initiiert. Ein Minimum Viable Product (MVP) entsteht aktuell im Rahmen einer Projektarbeit an der [Hochschule Mainz](https://www.hs-mainz.de/), die Weiterentwicklung erfolgt voraussichtlich im Software-Studio [mainzcript GbR](https://mainzcript.eu/) - Gesellschafter: Marius Klein und Lukas Antoine.
+UJL wird von Marius Klein initiiert. Ein Prototyp entsteht aktuell im Rahmen einer Projektarbeit an der [Hochschule Mainz](https://www.hs-mainz.de/), die Weiterentwicklung erfolgt voraussichtlich im Software-Studio [mainzcript GbR](https://mainzcript.eu/) - Gesellschafter: Marius Klein und Lukas Antoine.
 
 ## Pionier-Core-Team
 

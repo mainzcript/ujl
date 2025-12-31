@@ -68,4 +68,20 @@ export class Composer {
 			id: "__root__",
 		};
 	}
+
+	/**
+	 * Get the module registry instance
+	 * Useful for accessing registry methods and modules directly
+	 */
+	public getRegistry(): ModuleRegistry {
+		return this._module_registry;
+	}
+
+	/**
+	 * Create a new module instance from type with default values
+	 * Convenience method that delegates to registry
+	 */
+	public createModuleFromType(type: string, id: string): UJLCModuleObject {
+		return this._module_registry.createModuleFromType(type, id);
+	}
 }

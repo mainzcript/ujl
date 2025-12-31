@@ -6,6 +6,7 @@ import {
 	createMockMultiSlotTree
 } from '../../../tests/mockData.js';
 import type { UJLCSlotObject } from '@ujl-framework/types';
+import { Composer } from '@ujl-framework/core';
 
 describe('context', () => {
 	describe('generateNodeId', () => {
@@ -77,6 +78,7 @@ describe('context', () => {
 		let updateRootSlot: ReturnType<
 			typeof vi.fn<(fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void>
 		>;
+		let composer: Composer;
 		let operations: ReturnType<typeof createOperations>;
 
 		beforeEach(() => {
@@ -85,7 +87,8 @@ describe('context', () => {
 			updateRootSlot = vi.fn((fn) => {
 				slot = fn(slot);
 			});
-			operations = createOperations(getSlot, updateRootSlot);
+			composer = new Composer();
+			operations = createOperations(getSlot, updateRootSlot, composer);
 		});
 
 		describe('copyNode', () => {
@@ -111,7 +114,10 @@ describe('context', () => {
 				const result = operations.copyNode('leaf-1');
 
 				expect(result?.type).toBe('text');
-				expect(result?.fields.content).toBe('Leaf 1');
+				// content is now a ProseMirror Document
+				expect(typeof result?.fields.content).toBe('object');
+				expect(result?.fields.content).toHaveProperty('type', 'doc');
+				expect(result?.fields.content).toHaveProperty('content');
 				expect(result?.meta.updated_at).toBeDefined();
 			});
 
@@ -383,7 +389,10 @@ describe('context', () => {
 				const nested1 = slot[0].slots.body[0];
 				const inserted = nested1.slots.content[nested1.slots.content.length - 1];
 				expect(inserted.type).toBe('text');
-				expect(inserted.fields.content).toBe('Enter your text here...');
+				// content is now a ProseMirror Document
+				expect(typeof inserted.fields.content).toBe('object');
+				expect(inserted.fields.content).toHaveProperty('type', 'doc');
+				expect(inserted.fields.content).toHaveProperty('content');
 			});
 
 			it('should insert card component with slots', () => {
@@ -516,7 +525,8 @@ describe('context', () => {
 		describe('pasteSlot', () => {
 			beforeEach(() => {
 				slot = createMockMultiSlotTree();
-				operations = createOperations(getSlot, updateRootSlot);
+				composer = new Composer();
+				operations = createOperations(getSlot, updateRootSlot, composer);
 			});
 
 			it('should paste slot content with new IDs', () => {
@@ -726,13 +736,28 @@ describe('context', () => {
 
 		describe('updateNodeField', () => {
 			it('should update single field', () => {
-				const success = operations.updateNodeField('leaf-1', 'content', 'Updated Content');
+				// Convert string to ProseMirror Document for RichTextField
+				const updatedContent = {
+					type: 'doc',
+					content: [
+						{
+							type: 'paragraph',
+							content: [
+								{
+									type: 'text',
+									text: 'Updated Content'
+								}
+							]
+						}
+					]
+				};
+				const success = operations.updateNodeField('leaf-1', 'content', updatedContent);
 
 				expect(success).toBe(true);
 				expect(updateRootSlot).toHaveBeenCalled();
 
 				const updated = slot[0].slots.body[0].slots.content[0];
-				expect(updated.fields.content).toBe('Updated Content');
+				expect(updated.fields.content).toEqual(updatedContent);
 			});
 
 			it('should update timestamp', () => {
@@ -776,8 +801,23 @@ describe('context', () => {
 
 		describe('updateNodeFields', () => {
 			it('should update multiple fields', () => {
+				// Convert string to ProseMirror Document for RichTextField
+				const newContent = {
+					type: 'doc',
+					content: [
+						{
+							type: 'paragraph',
+							content: [
+								{
+									type: 'text',
+									text: 'New Content'
+								}
+							]
+						}
+					]
+				};
 				const success = operations.updateNodeFields('leaf-1', {
-					content: 'New Content',
+					content: newContent,
 					author: 'Test Author',
 					published: true
 				});
@@ -786,7 +826,7 @@ describe('context', () => {
 				expect(updateRootSlot).toHaveBeenCalled();
 
 				const updated = slot[0].slots.body[0].slots.content[0];
-				expect(updated.fields.content).toBe('New Content');
+				expect(updated.fields.content).toEqual(newContent);
 				expect(updated.fields.author).toBe('Test Author');
 				expect(updated.fields.published).toBe(true);
 			});

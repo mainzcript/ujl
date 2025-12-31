@@ -19,6 +19,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
     "@payloadcms/db-postgres": "^3.69.0",
     "@payloadcms/next": "^3.69.0",
     "@payloadcms/payload-cloud": "^3.69.0",
@@ -43,7 +44,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9.39.2",
     "eslint-config-next": "^15.5.9",
-    "jsdom": "^27.3.0",
+    "jsdom": "^27.4.0",
     "playwright": "^1.57.0",
     "playwright-core": "^1.57.0",
     "prettier": "^3.7.4",
@@ -55,6 +56,5 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10"
-  },
-  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
+  }
 }

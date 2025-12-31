@@ -12,14 +12,16 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./documents/showcase": "./src/documents/showcase.ujlc.json",
-		"./themes/default": "./src/themes/default.ujlt.json",
-		"./components": "./src/components/component-library.ts"
+		"./themes/default": "./src/themes/default.ujlt.json"
 	},
 	"scripts": {
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"check": "echo 'No check script needed'",
-		"test": "vitest",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest run --coverage",
 		"clean": "echo 'No clean script needed'",
 		"validate": "pnpm exec ujl-validate ./src/themes/default.ujlt.json && pnpm exec ujl-validate ./src/documents/showcase.ujlc.json"
 	},
@@ -35,7 +37,7 @@
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.50.0",
+		"typescript-eslint": "^8.51.0",
 		"vitest": "^4.0.16"
 	}
 }

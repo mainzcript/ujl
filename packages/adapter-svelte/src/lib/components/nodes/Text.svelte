@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { UJLAbstractTextNode } from '@ujl-framework/types';
-	import { Text } from '@ujl-framework/ui';
+	import { RichText } from '../ui/index.js';
 	import { createModuleClickHandler } from '$lib/utils/events.js';
 
 	interface Props {
@@ -14,12 +14,11 @@
 	const handleClick = $derived(createModuleClickHandler(node.id, eventCallback));
 </script>
 
-<Text
+<RichText
+	document={node.props.content}
 	data-ujl-module-id={showMetadata ? node.id : undefined}
 	onclick={eventCallback ? handleClick : undefined}
 	role={eventCallback ? 'button' : undefined}
 	tabindex={eventCallback ? 0 : undefined}
 	class={eventCallback ? 'cursor-pointer' : undefined}
->
-	{node.props.content}
-</Text>
+/>

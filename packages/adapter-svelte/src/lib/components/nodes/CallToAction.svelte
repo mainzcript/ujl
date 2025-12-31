@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { UJLAbstractCallToActionModuleNode } from '@ujl-framework/types';
-	import { Heading, Text, Card, CardContent, Button } from '@ujl-framework/ui';
+	import { Heading, Card, CardContent, Button } from '@ujl-framework/ui';
+	import { RichText } from '../ui/index.js';
 	import { createModuleClickHandler } from '$lib/utils/events.js';
 
 	interface Props {
@@ -26,9 +27,12 @@
 			{node.props.headline}
 		</Heading>
 
-		<Text size="lg" class="mx-auto text-center" intensity="muted">
-			{node.props.description}
-		</Text>
+		<RichText
+			document={node.props.description}
+			size="lg"
+			intensity="muted"
+			class="mx-auto text-center"
+		/>
 
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<Button href={node.props.actionButtons.primary.props.href} variant="primary">

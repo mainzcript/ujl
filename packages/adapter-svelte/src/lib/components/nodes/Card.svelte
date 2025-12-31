@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { UJLAbstractCardNode } from '@ujl-framework/types';
-	import { Card, CardTitle, CardDescription, CardContent, CardHeader } from '@ujl-framework/ui';
+	import { Card, CardTitle, CardContent, CardHeader } from '@ujl-framework/ui';
 	import ASTNode from '../ASTNode.svelte';
 	import { createModuleClickHandler } from '$lib/utils/events.js';
+	import { RichText } from '../ui/rich-text/index.js';
 
 	interface Props {
 		node: UJLAbstractCardNode;
@@ -24,7 +25,8 @@
 >
 	<CardHeader>
 		<CardTitle>{node.props.title}</CardTitle>
-		<CardDescription>{node.props.description}</CardDescription>
+		<!-- Card Description -->
+		<RichText document={node.props.description} size="sm" intensity="muted" />
 	</CardHeader>
 	{#if node.props.children && node.props.children.length > 0}
 		<CardContent>

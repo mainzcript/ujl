@@ -9,3 +9,4 @@ export { default as Card } from './Card.svelte';
 export { default as Grid } from './Grid.svelte';
 export { default as GridItem } from './GridItem.svelte';
 export { default as CallToAction } from './CallToAction.svelte';
+export { default as Image } from './Image.svelte';

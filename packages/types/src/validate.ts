@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
+/**
+ * CLI validation tool for UJL documents
+ *
+ * Note: Emojis are used in console output for improved CLI UX and visual feedback.
+ * This is an exception to the general "no emojis" rule, as CLI tools benefit from
+ * visual indicators (✅, ❌, 🔍, etc.) for better user experience.
+ */
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import {

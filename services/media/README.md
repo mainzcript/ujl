@@ -1,14 +1,25 @@
 # Payload CMS Media API Documentation
 
+This service provides a Payload CMS-based media management API for the UJL Framework. It handles image uploads, metadata management, and provides a RESTful API for media assets.
+
+---
+
 ## Base URL
 
 ```
 http://localhost:3000/api
 ```
 
-## Setup
+## Installation
 
-### 1. Set veriables in the .env file
+### Prerequisites
+
+- Docker and Docker Compose
+- Node.js 18+ and pnpm
+
+### Setup
+
+1. **Set variables in the .env file**
 
 ```
 DATABASE_URI=postgres://postgres:<password>@postgres:5432/ujl-media
@@ -43,7 +54,7 @@ docker-compose up postgres -d
 docker-compose logs -f payload
 ```
 
-Wait until "ready" is displayed in the logs (starting for the frst time might take a while because of installing packages)
+Wait until "ready" is displayed in the logs (starting for the first time might take a while because of installing packages)
 
 ### 3. Create first user for API Key
 
@@ -78,12 +89,12 @@ GET /api/media
 
 **Query Parameters:**
 
-- `depth` - Wie tief Relations geladen werden (default: 0)
-- `locale` - Sprachversion (`de`, `en`, `all`)
-- `limit` - Anzahl der Ergebnisse (default: 10)
-- `page` - Seitennummer (default: 1)
-- `where` - Filter-Objekt (siehe unten)
-- `sort` - Sortierung (z.B. `createdAt`, `-createdAt`)
+- `depth` - How deep relations are loaded (default: 0)
+- `locale` - Language version (`de`, `en`, `all`)
+- `limit` - Number of results (default: 10)
+- `page` - Page number (default: 1)
+- `where` - Filter object (see below)
+- `sort` - Sorting (e.g., `createdAt`, `-createdAt`)
 
 **Examples:**
 
@@ -200,7 +211,7 @@ GET /api/media/:id
 - `locale` - Language (`de`, `en`, `all`)
 - `depth` - depth of relation
 
-**Beispiel:**
+**Example:**
 
 ```bash
 GET /api/media/67890abcdef12345?locale=de
@@ -255,7 +266,7 @@ Authorization: users API-Key YOUR_API_KEY
 | `author`      | String      | ❌       | Author                              |
 | `license`     | String      | ❌       | Licence (e.g. cc0, cc-by-4.0, etc.) |
 | `sourceLink`  | String      | ❌       | Source Link                         |
-| `tags`        | JSON String | ❌       | Array von Tags                      |
+| `tags`        | JSON String | ❌       | Array of tags                       |
 | `focalX`      | Number      | ❌       | Focal point X (0-100)               |
 | `focalY`      | Number      | ❌       | Focal point Y (0-100)               |
 
@@ -436,7 +447,7 @@ GET /api/media?where[width][less_than]=2000
 GET /api/media?where[author][equals]=Max&where[license][equals]=cc-by-4.0
 ```
 
-### ODER-Concat
+### OR-Concat
 
 ```bash
 GET /api/media?where[or][0][license][equals]=cc0&where[or][1][license][equals]=cc-by-4.0
@@ -444,7 +455,7 @@ GET /api/media?where[or][0][license][equals]=cc0&where[or][1][license][equals]=c
 
 ---
 
-## Lokalization (i18n)
+## Localization (i18n)
 
 The Media collection has `localized: true` for some fields.
 
@@ -569,15 +580,15 @@ The focal point is saved as `focalX` and `focalY` (0-100).
 ## Sorting
 
 ```bash
-# Aufsteigend
+# Ascending
 GET /api/media?sort=title
 GET /api/media?sort=createdAt
 
-# Absteigend (mit Minus)
+# Descending (with minus)
 GET /api/media?sort=-createdAt
 GET /api/media?sort=-filesize
 
-# Mehrere Felder
+# Multiple fields
 GET /api/media?sort=-createdAt,title
 ```
 
@@ -586,27 +597,27 @@ GET /api/media?sort=-createdAt,title
 ## Pagination
 
 ```bash
-# Seite 2, 20 Einträge pro Seite
+# Page 2, 20 entries per page
 GET /api/media?page=2&limit=20
 
-# Alle Einträge (Vorsicht bei großen Datenmengen!)
+# All entries (Caution with large datasets!)
 GET /api/media?limit=0
 ```
 
 ---
 
-## Semantische Suche (TODO)
+## Semantic Search (TODO)
 
-Mit der Erweiterung pgvector kann man in der Postgres DB auch Embessings zu den Bildern speichern. https://github.com/pgvector/pgvector
+With the pgvector extension, embeddings can be stored in the Postgres database for images. https://github.com/pgvector/pgvector
 
 ```
 // Media.ts
 {
   name: 'embedding',
-  type: 'json', // oder 'text'
+  type: 'json', // or 'text'
   admin: {
-    hidden: true, // Im Admin verstecken
+    hidden: true, // Hide in admin
   },
-  // Hier speichert man das Array: [0.123, 0.456, ...]
+  // Store the array here: [0.123, 0.456, ...]
 }
 ```

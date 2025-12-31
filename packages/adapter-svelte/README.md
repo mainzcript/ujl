@@ -216,6 +216,34 @@ src/
 └── routes/                 # Development playground
 ```
 
+## Rich Text Serialization
+
+The adapter provides a synchronous, SSR-safe ProseMirror-to-HTML serializer:
+
+```typescript
+import { prosemirrorToHtml } from '@ujl-framework/adapter-svelte';
+import type { ProseMirrorDocument } from '@ujl-framework/types';
+
+const html = prosemirrorToHtml(doc);
+```
+
+The serializer is SSR-safe (no browser APIs required) and supports all node and mark types defined in the UJL rich text schema. For schema details, see `@ujl-framework/core` documentation.
+
+## RichText Component
+
+For rendering ProseMirror documents in Svelte components, use the `RichText` component:
+
+```svelte
+<script>
+	import { RichText } from '@ujl-framework/adapter-svelte';
+	import type { ProseMirrorDocument } from '@ujl-framework/types';
+</script>
+
+<RichText document={doc} as="div" size="lg" intensity="muted" />
+```
+
+The component accepts all `Text` component props (`size`, `weight`, `intensity`, `as`) and automatically serializes the ProseMirror document to HTML. This is the recommended approach for rendering rich text content in node components.
+
 ## Relationship to adapter-web
 
-The `adapter-web` package is built on top of `adapter-svelte` and automatically inherits all features and AST node support. When new AST nodes are added to `adapter-svelte`, they automatically work in `adapter-web` without any additional code.
+The `adapter-web` package builds on top of this adapter, compiling Svelte components into standalone Web Components. See [adapter-web README](../adapter-web/README.md#relationship-to-adapter-svelte) for details.

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { UJLCSlotObject } from '@ujl-framework/types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
@@ -14,14 +14,14 @@
 		parseSlotSelection,
 		isRootNode,
 		isModuleObject
-	} from '$lib/tools/ujlc-tree.js';
+	} from '$lib/utils/ujlc-tree.js';
 	import {
 		writeToBrowserClipboard,
 		readFromBrowserClipboard,
 		writeToClipboardEvent,
 		readFromClipboardEvent,
 		type UJLClipboardData
-	} from '$lib/tools/clipboard.js';
+	} from '$lib/utils/clipboard.js';
 
 	let {
 		slot
@@ -43,7 +43,7 @@
 	let isHandlingKeyboardShortcut = $state(false);
 
 	// Selected node id from URL
-	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	// Parse selected ID to check if it's a slot (format: parentId:slotName)
 	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
@@ -258,10 +258,7 @@
 
 		if (targetNode.slots) {
 			const slotNames = Object.keys(targetNode.slots);
-
-			if (slotNames.length === 1) {
-				slotName = slotNames[0];
-			} else if (slotNames.length > 1) {
+			if (slotNames.length > 0) {
 				slotName = slotNames[0];
 			}
 		}
@@ -293,7 +290,7 @@
 	 * Handles slot click and updates URL with parent:slotName format.
 	 */
 	async function handleSlotClick(parentId: string, slotName: string) {
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 		url.searchParams.set('selected', `${parentId}:${slotName}`);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(url, { replaceState: true, noScroll: true });

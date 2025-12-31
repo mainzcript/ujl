@@ -1,4 +1,5 @@
 import type { UJLCFieldObject } from "@ujl-framework/types";
+import type { FieldType } from "./types.js";
 
 /**
  * Base configuration interface for all field types
@@ -10,6 +11,8 @@ export type BaseFieldConfig<ValueT> = {
 	description: string;
 	/** Default value for the field */
 	default: ValueT;
+	/** Optional placeholder text for UI input fields */
+	placeholder?: string;
 };
 
 /**
@@ -50,6 +53,12 @@ export abstract class FieldBase<ValueT, ConfigT extends BaseFieldConfig<ValueT>>
 	 * @returns Fitted value of type ValueT
 	 */
 	public abstract fit(value: ValueT): ValueT;
+
+	/**
+	 * Get the UI field type for this field instance
+	 * @returns The FieldType string (e.g., "text", "number", "textarea")
+	 */
+	public abstract getFieldType(): FieldType;
 
 	/**
 	 * Serialize a typed value back to UJL format

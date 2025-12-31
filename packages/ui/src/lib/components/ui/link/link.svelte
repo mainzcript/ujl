@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import PositionSpy from '$lib/tools/positionSpy.js';
+	import PositionSpy from '$lib/utils/positionSpy.js';
 	import { cn } from '$lib/utils.js';
 
 	let {

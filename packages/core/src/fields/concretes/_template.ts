@@ -1,5 +1,6 @@
 import type { UJLCFieldObject } from "@ujl-framework/types";
 import { BaseFieldConfig, FieldBase } from "../base.js";
+import type { FieldType } from "../types.js";
 
 /**
  * Value type for template fields (after parsing)
@@ -71,6 +72,24 @@ export class TEMPLATE_Field extends FieldBase<TEMPLATE_FieldValue, TEMPLATE_Fiel
 		// - Filtering: value.filter(item => this.isValidItem(item))
 
 		return value; // TODO: Replace with actual fitting logic
+	}
+
+	/**
+	 * Get the UI field type for this field instance
+	 * @returns The FieldType string (e.g., "text", "number", "textarea", "boolean", "select", "url", "email", "richtext")
+	 */
+	public getFieldType(): FieldType {
+		// TODO: Return the appropriate FieldType for your field
+		// Common options:
+		// - "text" for single-line text input
+		// - "textarea" for multi-line text input
+		// - "number" for numeric input
+		// - "boolean" for checkbox/switch
+		// - "select" for dropdown selection
+		// - "url" for URL input
+		// - "email" for email input
+		// - "richtext" for rich text editor
+		return "text"; // TODO: Change to your field's UI type
 	}
 
 	// serialize() method is inherited from FieldBase with default implementation

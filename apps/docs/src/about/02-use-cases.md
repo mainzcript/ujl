@@ -1,274 +1,92 @@
 ---
 title: "Use Cases"
-description: "Für wen ist UJL gedacht und welche Probleme löst es für verschiedene Nutzergruppen"
+description: "Typische Anwendungsszenarien und Nutzen von UJL in der Praxis"
 ---
 
 # Use Cases
 
-## Wer profitiert von UJL?
+## Einordnung
 
-Wir entwickeln einen Editor, der sich sowohl von Entwickler:innen in bestehende Anwendungen integrieren lässt als auch von uns direkt als Cloud-Service bereitgestellt wird. Er ermöglicht Redaktionsteams eine einfache, schnelle, markenkonforme und barrierefreie Pflege von Web-Inhalten. Besonders attraktiv ist das für SaaS-Unternehmen, die ihren Nutzer:innen einen eigenen Editor anbieten möchten. Weitere Zielgruppen sind Web- und Marketing-Agenturen, mittelständische Unternehmen sowie Bildungs- und Non-Profit-Organisationen. Sie alle profitieren davon, dass der UJL Crafter Designvorgaben zuverlässig einhält, die Arbeit mit KI sicherer macht und Redakteur:innen ein Werkzeug an die Hand gibt, das moderne Webgestaltung deutlich erleichtert.
+**Unified JSON Layout (UJL)** ist ein flexibel einsetzbares Open-Source-Framework für visuelles Content-Authoring im Web. Grundsätzlich kann UJL sowohl in kleineren Projekten als auch in umfangreichen Weblandschaften eingesetzt werden.
 
-::: tip Vorschau ausprobieren
+Seinen größten strukturellen Mehrwert entfaltet UJL dort, wo Inhalte regelmäßig gepflegt werden, mehrere Rollen beteiligt sind und Qualität dauerhaft abgesichert werden muss. In solchen Umgebungen stoßen klassische visuelle Editoren häufig an konzeptionelle Grenzen: Entweder sind sie flexibel, aber schwer kontrollierbar – oder sie sind kontrolliert, aber langsam und prozesslastig.
 
-Die folgenden Use Cases werden greifbarer, wenn du den UJL Crafter selbst ausprobierst. Wir haben eine frühe Vorschau veröffentlicht – viele Features sind noch in Entwicklung, aber die Vision wird bereits sichtbar.
+Die folgenden Use Cases beschreiben typische Situationen, in denen diese Zielkonflikte auftreten, und zeigen, wie UJL sie adressiert.
 
-→ [Vorschau öffnen](https://demo.ujl-framework.org)
+## Use Case 1 – Web-Agenturen mit redaktionell gepflegten Kundenprojekten
 
-:::
+### Ausgangssituation
 
-## Early Adopter Strategy
+Web- und Digitalagenturen erstellen Websites, Landingpages und Microsites für Kund:innen. Nach dem Launch sollen Inhalte häufig durch Kundenteams selbst gepflegt werden – im Idealfall schnell, ohne Tickets und ohne Abhängigkeit von der Agentur.
 
-Unsere Go-to-Market-Strategie startet bewusst bei Web- und Marketing-Agenturen, auch wenn UJL langfristig ebenso für SaaS-Unternehmen gedacht ist. Agenturen sind für uns ideale erste Partner, weil sie UJL unmittelbar produktiv einsetzen, kurze Entscheidungswege haben und das Tool in vielen Kundenprojekten nutzen können. Diese frühe Nutzung hilft uns, Stabilität, UX und Modulkatalog in der Praxis zu schärfen und UJL so auszurichten, dass es später auch in komplexen SaaS-Umgebungen gut passt.
+In der Praxis entsteht jedoch ein bekanntes Muster: Sobald Kund:innen Zugriff auf visuelle Editoren oder freie Gestaltungsmöglichkeiten erhalten, steigt das Risiko, dass der Markenauftritt über Zeit „wegdriftet“. Layouts werden inkonsistent, Abstände und Typografie werden unsauber, Kontraste oder semantische Strukturen verschlechtern sich. Die Agentur trägt am Ende dennoch die Verantwortung – entweder durch Supportaufwand oder durch Reputationsrisiko.
 
-Agenturen profitieren besonders stark von UJL:
+### Einsatz von UJL
 
-- Sie übergeben Websites, ohne dass Kund:innen das Design „kaputt editieren“ können
-- Sie reduzieren ihren Support-Aufwand für Layout-Fragen deutlich
-- Sie können CI-konforme Landingpages sehr schnell liefern
-- Sie können UJL einmal integrieren und in viele Kundenprojekte mitnehmen
+UJL wird als visueller Layout-Layer in das bestehende Kundenprojekt integriert. Die Agentur definiert Module, Varianten und das Theme so, dass Redakteur:innen Inhalte visuell erstellen und kombinieren können, ohne das definierte Designsystem oder grundlegende Accessibility-Regeln zu verletzen. Die Freiheit liegt in der Kombination und im Aufbau der Inhalte – nicht in willkürlicher Formatierung.
 
-::: tip Pilotphase
+### Nutzen
 
-Wir suchen 2–3 Agenturen, die UJL in echten Kundenprojekten testen und mit ihrem Feedback weiterentwickeln möchten.
+Für Agenturen entsteht ein dauerhafter Qualitätsrahmen, der nicht über Schulungen oder Prozesse, sondern systemisch abgesichert wird. Inhalte können dezentral gepflegt werden, ohne dass jede Änderung wieder zu Review- und Reparaturschleifen führt. Das senkt wiederkehrenden Supportaufwand und verbessert die Skalierbarkeit von Kundenprojekten über die Zeit.
 
-Interessiert? → [info@mainzcript.eu](mailto:info@mainzcript.eu)
+## Use Case 2 – Marketing-Teams mit hohem Publikationsdruck
 
-:::
+### Ausgangssituation
 
-**Typische Probleme:**
+Marketing-Teams müssen regelmäßig neue Inhalte veröffentlichen: Kampagnen-Landingpages, Produktseiten, Event-Seiten oder Content-Hubs. Der Publikationsdruck ist hoch, Änderungen müssen kurzfristig möglich sein, und jede Verzögerung verursacht Opportunitätskosten.
 
-| Problem               | Symptom                                    | Kosten              |
-| --------------------- | ------------------------------------------ | ------------------- |
-| Design-Inkonsistenz   | Verschiedene „Blautöne“, falsche Schriften | Markenwertverlust   |
-| Entwickler-Bottleneck | 3 Wochen für eine Landingpage              | Opportunitätskosten |
-| Tool-Wildwuchs        | 15 Templates in 15 Tools                   | Wartungs-Chaos      |
-| KI-Angst              | „KI generiert Chaos“                       | Innovationsstau     |
+Viele Teams kompensieren diesen Druck mit Workarounds: Entweder bauen sie Prozesse, die langsam und schwer skalierbar sind, oder sie nutzen Tools, die Geschwindigkeit ermöglichen, aber langfristig inkonsistent werden. In beiden Fällen steigt die Wahrscheinlichkeit, dass Markenregeln und Accessibility-Anforderungen nicht mehr zuverlässig eingehalten werden.
 
-**Was UJL löst:**
+### Einsatz von UJL
 
-| Pain                                       | → Gain                                                                 |
-| ------------------------------------------ | ---------------------------------------------------------------------- |
-| _„Design bricht nach der ersten Änderung“_ | **Garantierte Markenkonformität**, Design-Bruch ist technisch begrenzt |
-| _„Barrierefreiheit ist teuer“_             | **Garantierte Barrierefreiheit**, WCAG-konform by Design               |
-| _„Jede Änderung muss durch IT“_            | Marketing kann selbst gestalten, ohne CI zu verletzen                  |
-| _„KI generiert Chaos“_                     | KI kann nur valide, strukturierte Layouts erzeugen                     |
-| _„Das dauert 3 Wochen“_                    | Inhalte können in Minuten statt in Wochen live gehen                   |
+UJL ermöglicht visuelles Authoring innerhalb definierter Leitplanken. Marketing kann Inhalte schnell erstellen, iterieren und pflegen, ohne auf freie CSS/HTML-Formatierung angewiesen zu sein. Designregeln, Komponentenvarianten und grundlegende Accessibility-Anforderungen sind so hinterlegt, dass typische Fehler gar nicht erst entstehen.
 
-## Use Cases
+### Nutzen
 
-### Web-Agentur oder Freelancer
+Der zentrale Nutzen liegt in der Kombination aus Tempo und Stabilität: Inhalte können schnell entstehen, ohne dass jede Seite erneut durch Design- oder Technikteams abgesichert werden muss. Die Arbeitsgeschwindigkeit steigt, während der Markenauftritt konsistent bleibt und nachgelagerte Korrekturen reduziert werden.
 
-**Das Szenario:**
+## Use Case 3 – Organisationen mit Compliance- und Barrierefreiheitsanforderungen
 
-Eine kleine Agentur oder ein:e Freelancer:in betreut Websites für verschiedene Kund:innen (Vereine, lokale Unternehmen, Institutionen). Nach der Übergabe sollen Kund:innen Inhalte selbstständig pflegen.
+### Ausgangssituation
 
-**Die Herausforderung:**
+In vielen Organisationen steigen die Anforderungen an Barrierefreiheit und formale Qualität digitaler Inhalte. Häufig wird Barrierefreiheit jedoch erst am Ende eines Projekts geprüft – etwa durch externe Audits oder manuelle Checks. Dadurch entstehen typische Probleme: Korrekturen werden teuer, Änderungen ziehen weitere Anpassungen nach sich, und rechtliche Risiken bleiben bestehen.
 
-- Kund:innen „brechen“ das Design nach wenigen Monaten
-- Ständige Support-Anfragen für einfache Änderungen
-- Unsicherheit, wie viel Freiheit man bei der Übergabe geben kann
+Ein Kernproblem liegt dabei selten im Wissen, sondern in den Werkzeugen: Wenn redaktionelle Systeme Freiheiten zulassen, die Kontraste, Struktur oder Semantik brechen können, ist Barrierefreiheit nur „Best Practice“ – aber keine zuverlässige Eigenschaft.
 
-**Mit UJL:**
+### Einsatz von UJL
 
-1. Die Agentur definiert Module und Theme bei der Übergabe
-2. Kund:innen können nur diese Module nutzen
-3. Jede Kombination ist automatisch CI-konform
-4. „Kaputtes Design“ wird deutlich unwahrscheinlicher
-5. Der Support-Aufwand für Layout-Themen sinkt spürbar
+UJL verlagert grundlegende Accessibility- und Strukturvorgaben in die technische Architektur. Redakteur:innen können Inhalte erstellen und pflegen, aber nicht in einen Zustand bringen, der definierte Mindeststandards verletzt – sofern diese Standards im Theme und in den Modulen korrekt konfiguriert sind. Barrierefreiheit wird dadurch nicht zu einem nachgelagerten Prüfpunkt, sondern zu einem Bestandteil des Authoring-Prozesses.
 
-**Konkretes Beispiel:** Nach dem Website-Launch können Kund:innen frei arbeiten, innerhalb klar definierter Grenzen. Das Design ist architektonisch geschützt. Was früher regelmäßig in Support-Tickets endete, läuft stabil.
+### Nutzen
 
-**Quantifizierung:**
+Die Organisation gewinnt planbare Qualität und reduziert die Abhängigkeit von nachträglichen Korrekturen. Das senkt Risiko, Aufwand und Kosten – insbesondere in Kontexten, in denen wiederkehrende Content-Änderungen stattfinden und Audits oder Prüfungen sonst regelmäßig erneut nötig wären.
 
-- **Support-Tickets:** 3-5 → 0-1 pro Monat (80% Reduktion)
-- **Design-Fixes:** 15-20h → 2-3h pro Monat (85% Reduktion)
-- **Accessibility-Audits:** 2-3 pro Jahr → 0 (€6.000-15.000 Einsparung)
-- **Kundenzufriedenheit:** Höhere Autonomie, weniger Frustration
-- **ROI:** €20.000-30.000/Jahr Einsparung bei typischer Agentur
+## Use Case 4 – SaaS-Unternehmen mit eingebettetem Editor (White-Label)
 
----
+### Ausgangssituation
 
-### Marketing-Agentur
+Viele SaaS-Produkte benötigen eine visuelle Authoring-Komponente – zum Beispiel für Landingpages, Templates, Knowledge-Bases, Emails oder andere strukturierte Inhalte. Eine Eigenentwicklung ist oft teuer und bindet langfristig Kapazitäten, weil Editoren nicht nur gebaut, sondern dauerhaft gepflegt, erweitert und abgesichert werden müssen.
 
-**Das Szenario:**
+Zusätzlich entsteht ein Governance-Problem: Sobald Endnutzer:innen Inhalte gestalten dürfen, wird es schwer, Markenregeln, Layoutlogik oder Accessibility zuverlässig durchzusetzen, ohne den Editor extrem einzuschränken oder komplexe Prozesse zu bauen.
 
-Eine Marketing-Agentur betreut Performance-Kampagnen für Kund:innen. Schnelle Landingpages sind kritisch, jede Verzögerung kostet Budget und Conversion-Potenzial. Brand-Compliance ist essentiell, besonders bei Großkunden.
+### Einsatz von UJL
 
-**Die Herausforderung:**
+UJL kann als White-Label-Editor eingebettet werden. Das SaaS-Unternehmen kontrolliert Module, Themes und Governance-Regeln zentral, während Endnutzer:innen innerhalb dieser Grenzen Inhalte visuell erstellen. Der Editor wird damit zu einer produktfähigen Komponente, die sich über strukturierte Daten und Validierungsmechanismen kontrollieren lässt.
 
-- Zeitdruck: Kampagnen brauchen schnell passende Landingpages
-- Brand-Compliance: Jede Abweichung schadet den Kund:innen
-- Entwickler-Bottleneck: Auch kleine Änderungen laufen über die IT
+### Nutzen
 
-**Mit UJL:**
+SaaS-Anbieter sparen Entwicklungszeit und reduzieren technische Schulden, weil Governance nicht nachträglich über Workflows oder Custom-Code erzwungen werden muss. Gleichzeitig steigt die Konsistenz und Verlässlichkeit der Inhalte, die im Produkt entstehen – ein Vorteil, der sich direkt auf Supportaufwand, Produktqualität und Skalierbarkeit auswirkt.
 
-1. Landingpages entstehen in kurzer Zeit aus vorbereiteten Modulen
-2. Markenkonformität bleibt erhalten, auch unter Zeitdruck
-3. Redakteur:innen arbeiten eigenständig, ohne IT-Blockade
-4. Barrierefreiheit ist automatisch berücksichtigt, keine nachträglichen Audits nötig
+## Use Case 5 – KI-gestützte Content-Erstellung mit Kontrolle
 
-**Konkretes Beispiel:** Eine Performance-Kampagne startet nächste Woche. Statt zwei Wochen Wartezeit auf IT erstellt eine Redakteurin die Landingpage in kurzer Zeit im Crafter, markenkonform und barrierefrei, die Kampagne kann wie geplant starten.
+### Ausgangssituation
 
-**Quantifizierung:**
+KI wird zunehmend genutzt, um Inhalte schneller zu erstellen oder zu variieren. Gleichzeitig verschärft KI das bekannte Governance-Problem: Generierte Inhalte sind oft inkonsistent, nicht zuverlässig reproduzierbar und nur schwer dauerhaft an Markenrichtlinien zu binden. Selbst gute Modelle benötigen wiederkehrende Prompt-Kontexte und können Regeln missverstehen oder ignorieren.
 
-- **Landingpage-Erstellung:** 2-3 Wochen → 2-4 Stunden (95% Reduktion)
-- **Design-Review-Zyklen:** 3-5 Runden → 0 (automatisch CI-konform)
-- **Kampagnen-Verspätungen:** 40% → <5% (durch schnelle Erstellung)
-- **Opportunitätskosten:** Deutlich reduziert durch pünktliche Kampagnen-Starts
-- **ROI:** Zeitersparnis von ~60-80 Stunden pro Landingpage
+### Einsatz von UJL
 
----
+UJL integriert KI dort, wo sie sinnvoll ist: als Assistenz für strukturierte Inhalte. Statt freiem Markup erzeugt KI strukturierte Daten, die gegen Schemas und Regeln validiert werden. Dadurch bleibt die Kontrolle nicht beim Prompt, sondern in der Architektur. Ungültige Kombinationen werden entweder verhindert oder müssen korrigiert werden, bevor Inhalte produktiv genutzt werden.
 
-### Entwickler:innen & Tech-Teams (Integratoren)
+### Nutzen
 
-**Das Szenario:**
-
-Ein technisches Team möchte Redakteur:innen ein visuelles Tool bieten, ohne selbst einen Editor entwickeln und dauerhaft pflegen zu müssen.
-
-**Mit UJL:**
-
-- Open-Source-Core ohne Lizenzkosten
-- JSON-Schema garantiert validierbare, strukturierte Layouts
-- Module können im eigenen Tech-Stack entwickelt werden
-- Schnelle Integration in bestehende Systeme (CMS, SaaS, Intranet)
-
-**Quantifizierung:**
-
-- **Entwicklungszeit:** 6-12 Monate → 2-4 Wochen (Proof-of-Concept)
-- **Lizenzkosten:** €0 (Open Source Core)
-- **Wartungsaufwand:** 20-30% weniger (Community-Entwicklung)
-- **Time-to-Market:** Deutlich schneller durch bewährte Lösung
-- **ROI:** Einsparung von 5-10 Entwickler-Monaten pro Jahr
-
----
-
-### Multi-Brand-Unternehmensgruppe
-
-**Das Szenario:**
-
-Eine mittelständische Holding betreibt mehrere eigenständige Marken. Jede hat eine separate Website mit eigenem CMS. Neues Marketing-Personal muss für jedes System geschult werden, eine Person prüft alle Änderungen manuell auf Markenkonformität.
-
-**Die Herausforderung:**
-
-- Langsames Onboarding (mehrere Wochen)
-- Manuelle Design-Prüfungen verzögern Veröffentlichungen
-- Hoher Schulungsaufwand bei jedem neuen Tool
-
-**Mit UJL:**
-
-1. Ein UJL-System für alle Marken
-2. Jede Marke bekommt ein eigenes Theme
-3. Dieselben Module, unterschiedliche Designs
-4. Mitarbeitende lernen den Crafter einmal
-5. Onboarding dauert eher Stunden als Wochen
-
-**Konkretes Beispiel:** Eine Unternehmensgruppe mit fünf Marken hatte vorher fünf WordPress-Installationen, fünf Template-Sets und lange Einarbeitungszeiten. Mit UJL lernen neue Marketing-Mitarbeitende das Tool einmal und können direkt für alle Marken arbeiten, markenkonform und barrierefrei.
-
-**Quantifizierung:**
-
-- **Onboarding-Zeit:** 2-3 Wochen pro System → 2-3 Stunden (einmalig, 95% Reduktion)
-- **Design-Prüfungen:** 5-10h pro Änderung → 0h (automatisch CI-konform)
-- **Schulungsaufwand:** 5x (pro System) → 1x (ein Tool für alle)
-- **Konsistenz:** 100% (architektonisch garantiert)
-- **ROI:** €15.000-25.000/Jahr Einsparung durch reduziertes Onboarding und Prüfungen
-
----
-
-### SaaS-Unternehmen (White-Label)
-
-**Das Szenario:**
-
-Ein SaaS-Unternehmen (z. B. Marketing-Automation-Tool, E-Commerce-Backend, Community-Plattform) möchte seinen Kund:innen einen visuellen Editor anbieten. Die Optionen: einen eigenen Editor entwickeln oder eine bewährte Lösung integrieren.
-
-**Die Herausforderung:**
-
-- Eigener Editor bindet über Monate Entwicklungszeit und Ressourcen
-- Laufende Pflege und Weiterentwicklung des Editors kommen hinzu
-- Diese Ressourcen fehlen bei anderen Produkt-Features
-
-**Mit UJL:**
-
-1. Open Source, keine Lizenzkosten für den Core
-2. Integration als White-Label-Lösung in das eigene Produkt
-3. Markenkonformität und Barrierefreiheit werden technisch unterstützt
-4. Community und Core-Team entwickeln UJL kontinuierlich weiter
-5. Proof-of-Concept ist in Wochen statt in vielen Monaten möglich
-6. Das eigene Team muss keinen separaten Editor-Stack pflegen
-
-**Konkretes Beispiel:** Ein Marketing-Automation-Tool braucht einen Landingpage-Builder für seine Kund:innen. Statt acht Monate Entwicklung investiert das Team zwei Wochen Integration und erhält einen Editor mit klarer Struktur und garantierter Markenkonformität.
-
-**Quantifizierung:**
-
-- **Entwicklungszeit:** 6-8 Monate → 2-4 Wochen (Integration statt Entwicklung)
-- **Lizenzkosten:** €0 (Open Source Core)
-- **Wartungsaufwand:** 80% weniger (Community-Entwicklung)
-- **Feature-Velocity:** Höher (Ressourcen für andere Features)
-- **ROI:** Einsparung von 5-7 Entwickler-Monaten + laufende Wartungskosten
-
----
-
-### Großkonzern mit dezentralen Teams
-
-**Das Szenario:**
-
-Ein Konzern mit internationaler Präsenz hat strenge Corporate-Design-Richtlinien. Viele Abteilungen und lokale Teams erstellen Inhalte, Compliance-Anforderungen sind hoch.
-
-**Die Herausforderung:**
-
-- Konsistenz über zahlreiche Märkte und Marken sicherstellen
-- Langsame Freigabeprozesse durch zentrale Design-Kontrolle
-- Jede Brand nutzt eigene Tools und Workflows
-
-**Mit UJL:**
-
-1. Zentral definierte Themes, dezentral gepflegte Inhalte
-2. Compliance wird durch die Architektur unterstützt, nicht nur durch Prozesse
-3. Inhalte liegen strukturiert vor und sind auditierbar
-4. Ein System kann mehrere Standorte und Marken bedienen
-
-**Konkrete Beispiele:**
-
-**Marketing-Landingpage:** Ein Marketing-Team braucht dringend eine Kampagnen-Landingpage. Normalerweise: Ticket an IT, mehrere Wochen Wartezeit. Mit UJL: Crafter öffnen, Module auswählen (Hero, Features, CTA), Inhalte einfügen, Vorschau prüfen, veröffentlichen.
-
-**KI-Assistent:** Redakteur:innen können KI nutzen, um Produktseiten zu generieren. Bisher besteht Sorge, dass KI unpassende Layouts erzeugt. Mit UJL erhält die KI das UJL-Schema als Kontext, generiert strukturierte Daten (kein freies HTML), die automatisch validiert werden. Design-Brüche werden deutlich reduziert.
-
-**Quantifizierung:**
-
-- **Freigabeprozesse:** 3-5 Runden → 0 (automatisch CI-konform)
-- **Compliance-Prüfungen:** 10-15h pro Monat → 0h (architektonisch garantiert)
-- **Design-Konsistenz:** 60-70% → 100% (technisch erzwungen)
-- **Auditierbarkeit:** Vollständig (strukturierte Daten)
-- **ROI:** €30.000-50.000/Jahr Einsparung durch reduzierte Compliance-Kosten
-
----
-
-### Bildungseinrichtung
-
-**Das Szenario:**
-
-Eine Schule, Hochschule oder ein Bildungsträger setzt auf selbstorganisiertes Lernen. Lehrkräfte sollen digitale Lernpfade und Materialien erstellen, ohne dafür Webentwicklung lernen zu müssen.
-
-**Die Herausforderung:**
-
-- Lehrkräfte sind Pädagog:innen, keine Programmierer:innen
-- Komplexe Tools führen zu Frust und kosten Unterrichtszeit
-- Barrierefreiheit ist wichtig, aber schwer im Alltag zu prüfen
-- Je mehr Energie in Technik fließt, desto weniger bleibt für Inhalte
-
-**Mit UJL:**
-
-- Intuitive Bearbeitung ohne Programmierkenntnisse
-- Barrierefreiheit ist architektonisch mitgedacht (z. B. semantische Struktur, Kontraste)
-- Einheitliches Erscheinungsbild über alle Kurse
-- Vordefinierte Module für typische Bildungsinhalte
-
-**Quantifizierung:**
-
-- **Einarbeitungszeit:** 2-3 Wochen → 2-3 Stunden (95% Reduktion)
-- **Barrierefreiheit:** Manuell prüfen → Automatisch garantiert
-- **Konsistenz:** Variabel → 100% (einheitliches Theme)
-- **Zeit für Inhalte:** Mehr Zeit für pädagogische Inhalte statt Technik
-- **ROI:** Höhere Qualität bei geringerem Zeitaufwand
-
-**Hinweis:** Für den Bildungssektor und gemeinnützige Organisationen planen wir Community-Programme und vergünstigte Modelle, um digitale Bildung, Medienkompetenz und den Zugang zu professionellen Web-Werkzeugen zu unterstützen.
+Die Verbindung aus KI-Unterstützung und struktureller Absicherung reduziert Prompt-Aufwand, erhöht Reproduzierbarkeit und senkt das Risiko von „off-brand“- oder „nicht-konformen“ Ergebnissen. Damit wird KI nicht zu einem Risiko, sondern zu einem steuerbaren Produktivitätshebel.

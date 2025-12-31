@@ -7,10 +7,10 @@
 		SidebarMenu
 	} from '@ujl-framework/ui';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
-	import { createVirtualRootNode } from '$lib/tools/ujlc-tree.js';
+	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
 	import { testId } from '$lib/utils/test-attrs.ts';
 
 	let {
@@ -61,7 +61,7 @@
 	} = $props();
 
 	// Selected node from URL
-	const selectedNodeId = $derived($page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	// Create drag handler with slot move support
 	const dragHandler = $derived(createDragHandler(onNodeMove, onSlotMove));
@@ -81,7 +81,7 @@
 	 * Handle node click - update URL with selected node ID
 	 */
 	async function handleNodeClick(nodeId: string) {
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 		url.searchParams.set('selected', nodeId);
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(url, { replaceState: true, noScroll: true });

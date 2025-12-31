@@ -1,3 +1,4 @@
+import type { UJLCModuleObject } from "@ujl-framework/types";
 import { ModuleBase } from "./base.js";
 import type { AnyModule } from "./index.js";
 
@@ -6,17 +7,6 @@ import type { AnyModule } from "./index.js";
  *
  * Provides dynamic registration and lookup of modules by name.
  * Used by the Composer to find and instantiate modules.
- *
- * TODO: Add method to generate ComponentLibrary from registered modules
- * This would allow automatic generation of ComponentLibrary for the Crafter's component picker,
- * eliminating the need for manual maintenance in packages/examples/src/components/component-library.ts
- *
- * Example:
- * ```typescript
- * const registry = new ModuleRegistry();
- * registry.registerModule(new ContainerModule());
- * const componentLibrary = registry.generateComponentLibrary();
- * ```
  */
 export class ModuleRegistry {
 	protected _modules: AnyModule[] = [];
@@ -38,5 +28,64 @@ export class ModuleRegistry {
 
 	public getModule(name: string): AnyModule | undefined {
 		return this._modules.find(module => module.name === name);
+	}
+
+	/**
+	 * Get all registered modules
+	 * @returns Array of all registered modules (immutable copy)
+	 */
+	public getAllModules(): AnyModule[] {
+		return [...this._modules];
+	}
+
+	/**
+	 * Generate a human-readable label from module name
+	 * Example: "call-to-action" → "Call To Action"
+	 * @param name - Module name (e.g., "call-to-action")
+	 * @returns Human-readable label (e.g., "Call To Action")
+	 */
+	public static generateLabelFromName(name: string): string {
+		return name
+			.split("-")
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(" ");
+	}
+
+	/**
+	 * Create a new UJLCModuleObject from a module type with default values
+	 * Uses module field defaults to ensure new instances start with valid configuration
+	 * @param type - Module type name
+	 * @param id - Unique ID for the new module
+	 * @returns New UJLCModuleObject with default field values and empty slots
+	 * @throws Error if module type not found
+	 */
+	public createModuleFromType(type: string, id: string): UJLCModuleObject {
+		const module = this.getModule(type);
+		if (!module) {
+			throw new Error(`Module type "${type}" not found in registry`);
+		}
+
+		// Extract default field values
+		const fields: Record<string, unknown> = {};
+		for (const fieldEntry of module.fields) {
+			fields[fieldEntry.key] = fieldEntry.field.config.default;
+		}
+
+		// Create empty slots
+		const slots: Record<string, UJLCModuleObject[]> = {};
+		for (const slotEntry of module.slots) {
+			slots[slotEntry.key] = [];
+		}
+
+		return {
+			type: module.name,
+			fields,
+			slots,
+			meta: {
+				id,
+				updated_at: new Date().toISOString(),
+				_embedding: [],
+			},
+		};
 	}
 }

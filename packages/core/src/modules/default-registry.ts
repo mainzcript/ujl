@@ -3,6 +3,7 @@ import { CallToActionModule } from "./concretes/call-to-action.js";
 import { CardModule } from "./concretes/card.js";
 import { ContainerModule } from "./concretes/container.js";
 import { GridModule } from "./concretes/grid.js";
+import { ImageModule } from "./concretes/image.js";
 import { TextModule } from "./concretes/text.js";
 import { ModuleRegistry } from "./registry.js";
 
@@ -24,6 +25,7 @@ export function createDefaultRegistry(): ModuleRegistry {
 	registry.registerModule(new CardModule());
 	registry.registerModule(new TextModule());
 	registry.registerModule(new CallToActionModule());
+	registry.registerModule(new ImageModule());
 
 	return registry;
 }

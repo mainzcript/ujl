@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { Button } from '@ujl-framework/ui';
+	import { Button, Kbd, KbdGroup } from '@ujl-framework/ui';
 	import ScissorsIcon from '@lucide/svelte/icons/scissors';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import ClipboardPasteIcon from '@lucide/svelte/icons/clipboard-paste';
 	import DeleteIcon from '@lucide/svelte/icons/trash-2';
+	import BackspaceIcon from '@lucide/svelte/icons/delete';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import { testId } from '$lib/utils/test-attrs.ts';
+	import { getModifierKey } from '$lib/utils/platform.ts';
 
 	let {
 		nodeId,
@@ -34,6 +36,8 @@
 		canInsert?: boolean;
 		canDelete?: boolean;
 	} = $props();
+
+	const modifierKey = $derived(getModifierKey());
 </script>
 
 <div class="flex flex-col">
@@ -51,7 +55,11 @@
 		>
 			<PlusIcon class="size-4" />
 			<span>Insert</span>
-			<span class="ml-auto text-xs text-muted-foreground">Ctrl+I</span>
+			<span class="ml-auto">
+				<KbdGroup>
+					<Kbd>{modifierKey} I</Kbd>
+				</KbdGroup>
+			</span>
 		</Button>
 		{#if canCopy || canCut || canPaste}
 			<div class="my-1 h-px bg-border"></div>
@@ -69,7 +77,11 @@
 		>
 			<ScissorsIcon class="size-4" />
 			<span>Cut</span>
-			<span class="ml-auto text-xs text-muted-foreground">Ctrl+X</span>
+			<span class="ml-auto">
+				<KbdGroup>
+					<Kbd>{modifierKey} X</Kbd>
+				</KbdGroup>
+			</span>
 		</Button>
 	{/if}
 
@@ -84,7 +96,11 @@
 		>
 			<CopyIcon class="size-4" />
 			<span>Copy</span>
-			<span class="ml-auto text-xs text-muted-foreground">Ctrl+C</span>
+			<span class="ml-auto">
+				<KbdGroup>
+					<Kbd>{modifierKey} C</Kbd>
+				</KbdGroup>
+			</span>
 		</Button>
 	{/if}
 
@@ -99,7 +115,11 @@
 		>
 			<ClipboardPasteIcon class="size-4" />
 			<span>Paste</span>
-			<span class="ml-auto text-xs text-muted-foreground">Ctrl+V</span>
+			<span class="ml-auto">
+				<KbdGroup>
+					<Kbd>{modifierKey} V</Kbd>
+				</KbdGroup>
+			</span>
 		</Button>
 	{/if}
 
@@ -115,7 +135,9 @@
 		>
 			<DeleteIcon class="size-4" />
 			<span>Delete</span>
-			<span class="ml-auto text-xs text-muted-foreground">Del</span>
+			<span class="ml-auto">
+				<BackspaceIcon class="size-3.5" />
+			</span>
 		</Button>
 	{/if}
 </div>

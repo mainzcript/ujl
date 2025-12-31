@@ -12,6 +12,11 @@ import { ModuleBase } from "../base.js";
 export class Button extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "button";
+	public readonly label = "Button";
+	public readonly description = "A clickable button with label and link";
+	public readonly category = "interactive" as const;
+	public readonly tags = ["cta", "action", "link", "click"] as const;
+	public readonly icon = '<rect width="20" height="12" x="2" y="6" rx="2"/>';
 
 	/** Field definitions available in this module */
 	public readonly fields = [

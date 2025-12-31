@@ -8,6 +8,6 @@ export default defineConfig({
 	// Custom env directory
 	envDir: './env',
 
-	// Prefix für public env variables (Standard: PUBLIC_)
+	// Prefix for public env variables (default: PUBLIC_)
 	envPrefix: 'PUBLIC_'
 });

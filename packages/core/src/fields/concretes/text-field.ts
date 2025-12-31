@@ -1,5 +1,6 @@
 import type { UJLCFieldObject } from "@ujl-framework/types";
 import { BaseFieldConfig, FieldBase } from "../base.js";
+import type { FieldType } from "../types.js";
 
 /**
  * Value type for text fields (after parsing)
@@ -48,5 +49,13 @@ export class TextField extends FieldBase<TextFieldValue, TextFieldConfig> {
 			return value.slice(0, this.config.maxLength);
 		}
 		return value;
+	}
+
+	/**
+	 * Get the UI field type for text fields
+	 * @returns "text" as the field type
+	 */
+	public getFieldType(): FieldType {
+		return "text";
 	}
 }

@@ -14,11 +14,8 @@ import {
 	deepCloneModule,
 	deepCloneModuleWithNewIds,
 	DEFAULT_NODE_ID_LENGTH
-} from '$lib/tools/ujlc-tree.js';
-import {
-	getComponentDefinition,
-	createNodeFromDefinition
-} from '@ujl-framework/examples/components';
+} from '$lib/utils/ujlc-tree.js';
+import type { Composer } from '@ujl-framework/core';
 import { logger } from '$lib/utils/logger.js';
 
 /**
@@ -152,8 +149,8 @@ export type CrafterContext = {
 		pasteNode: (node: UJLCModuleObject, targetId: string, slotName?: string) => boolean;
 
 		/**
-		 * Inserts a new node from component library
-		 * @param componentType - The component type from the library
+		 * Inserts a new node from Module Registry
+		 * @param componentType - The component type from the registry
 		 * @param targetId - The target node ID
 		 * @param slotName - Optional slot name (uses first slot if not specified)
 		 * @param position - 'before' | 'after' inserts relative to target, 'into' inserts into target's slot
@@ -259,6 +256,7 @@ export type CrafterContext = {
  * Symbol for the Crafter context key
  */
 export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
+export const COMPOSER_CONTEXT = Symbol('COMPOSER_CONTEXT');
 
 /**
  * Generates a unique random ID for a node.
@@ -322,7 +320,8 @@ export function findPathToNode(
  */
 export function createOperations(
 	getSlot: () => UJLCSlotObject,
-	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void
+	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void,
+	composer: Composer
 ): CrafterContext['operations'] {
 	return {
 		copyNode(nodeId: string): UJLCModuleObject | null {
@@ -601,13 +600,13 @@ export function createOperations(
 		): boolean {
 			const slot = getSlot();
 
-			const componentDefinition = getComponentDefinition(componentType);
-			if (!componentDefinition) {
-				logger.warn('Component type not found in library', componentType);
+			let newNode: UJLCModuleObject;
+			try {
+				newNode = composer.createModuleFromType(componentType, generateNodeId());
+			} catch {
+				logger.warn('Component type not found in registry', componentType);
 				return false;
 			}
-
-			const newNode = createNodeFromDefinition(componentDefinition, generateNodeId());
 
 			if (isRootNode(targetId)) {
 				updateRootSlot((currentSlot) => {

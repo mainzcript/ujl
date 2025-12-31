@@ -10,8 +10,8 @@ export default defineConfig({
 	test: {
 		globals: true,
 		environment: 'jsdom',
-		setupFiles: ['./src/tests/setup.ts'],
-		include: ['src/**/*.{test,spec}.{js,ts}'],
+		setupFiles: ['./vitest.setup.ts'],
+		include: ['src/**/*.test.{js,ts}'],
 		// Exclude E2E tests (handled by Playwright)
 		// Temporarily exclude nav-tree-drag-handler test due to Svelte plugin hot-update issue
 		// TODO: Re-enable when Svelte plugin is properly configured for Vitest
@@ -19,7 +19,17 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
-			exclude: ['node_modules/', 'src/tests/', '**/*.d.ts', '**/*.config.*', '**/mockData.ts']
+			exclude: [
+				'node_modules/',
+				'**/*.d.ts',
+				'**/*.config.*',
+				'**/*.test.ts',
+				'**/mockData.ts',
+				'src/tests/',
+				'src/__tests__/',
+				'e2e/',
+				'dist/'
+			]
 		}
 	},
 	resolve: {

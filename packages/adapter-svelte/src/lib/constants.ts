@@ -15,7 +15,8 @@ export const NODE_TYPES = {
 	CARD: 'card',
 	GRID: 'grid',
 	GRID_ITEM: 'grid-item',
-	CALL_TO_ACTION: 'call-to-action'
+	CALL_TO_ACTION: 'call-to-action',
+	IMAGE: 'image'
 } as const;
 
 /**

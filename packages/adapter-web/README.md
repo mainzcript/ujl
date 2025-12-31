@@ -167,25 +167,14 @@ All features from `adapter-svelte` are available in `adapter-web`:
 
 ## Event Handling
 
-When `eventCallback` is provided, module click events are handled identically to `adapter-svelte`:
+Event handling in `adapter-web` works identically to `adapter-svelte`. For implementation details, see [adapter-svelte Event Handling](../adapter-svelte/README.md#event-handling-implementation).
 
-```typescript
-// Inside the Web Component
-function handleClick(event: MouseEvent) {
-	if (eventCallback && node.id) {
-		event.preventDefault(); // Prevents default actions
-		event.stopPropagation(); // Prevents event bubbling
-		eventCallback(node.id);
-	}
-}
-```
-
-This ensures:
+Summary:
 
 - Only the clicked module triggers the callback
-- Parent modules don't receive the event
+- Events are prevented from bubbling to parent modules
 - Default behaviors are suppressed in editor mode
-- The correct module ID is passed to the callback
+- Module IDs are correctly passed to callbacks
 
 ## Development
 

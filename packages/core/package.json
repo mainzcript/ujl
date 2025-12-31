@@ -13,10 +13,14 @@
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"test": "echo 'No test script needed'",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest run --coverage",
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\""
 	},
 	"dependencies": {
+		"@tiptap/starter-kit": "^3.14.0",
 		"nanoid": "^5.1.6"
 	},
 	"devDependencies": {
@@ -31,7 +35,7 @@
 		"prettier": "^3.7.4",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.50.0",
+		"typescript-eslint": "^8.51.0",
 		"vitest": "^4.0.16"
 	}
 }
