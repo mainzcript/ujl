@@ -33,7 +33,7 @@
 		<img src={imageUrl} alt={altText} class="block h-auto w-full rounded-md" />
 	{:else}
 		<div
-			class="border-border text-muted-foreground flex aspect-[4/3] items-center justify-center rounded-md border-2 border-dashed"
+			class="border-border text-muted-foreground flex aspect-4/3 items-center justify-center rounded-md border-2 border-dashed"
 		>
 			<ImageIcon class="size-12 opacity-40" />
 		</div>

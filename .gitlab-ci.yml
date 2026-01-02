@@ -10,7 +10,7 @@ stages:
 
 variables:
   NODE_VERSION: '22-slim'
-  PNPM_VERSION: '10.26.2'
+  PNPM_VERSION: '10.27.0'
 
 # Install dependencies once
 install_deps:
