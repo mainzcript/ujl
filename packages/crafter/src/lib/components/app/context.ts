@@ -144,9 +144,15 @@ export type CrafterContext = {
 
 		/**
 		 * Pastes a node into a target node's slot
+		 * @param position - 'before' | 'after' inserts relative to target, 'into' inserts into target's slot. Default is 'after'.
 		 * @returns true if successful, false if operation was rejected
 		 */
-		pasteNode: (node: UJLCModuleObject, targetId: string, slotName?: string) => boolean;
+		pasteNode: (
+			node: UJLCModuleObject,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		) => boolean;
 
 		/**
 		 * Inserts a new node from Module Registry
@@ -556,11 +562,18 @@ export function createOperations(
 			return copiedNode;
 		},
 
-		pasteNode(node: UJLCModuleObject, targetId: string, slotName?: string): boolean {
+		pasteNode(
+			node: UJLCModuleObject,
+			targetId: string,
+			slotName?: string,
+			position?: 'before' | 'after' | 'into'
+		): boolean {
 			const slot = getSlot();
 
 			// Assign new IDs at paste time (ensures uniqueness, enables multiple pastes)
 			const clonedNode = deepCloneModuleWithNewIds(node);
+
+			const pastePosition = position ?? 'after';
 
 			if (isRootNode(targetId)) {
 				updateRootSlot((currentSlot) => {
@@ -575,6 +588,49 @@ export function createOperations(
 				return false;
 			}
 
+			if (pastePosition === 'before' || pastePosition === 'after') {
+				const targetParentInfo = findParentOfNode(slot, targetId);
+
+				if (!targetParentInfo) {
+					logger.warn('Cannot find parent of target node');
+					return false;
+				}
+
+				if (!targetParentInfo.parent) {
+					logger.warn('Cannot find parent of target node');
+					return false;
+				}
+
+				if (isRootNode(targetParentInfo.parent.meta.id)) {
+					let insertPosition = targetParentInfo.index;
+					if (pastePosition === 'after') {
+						insertPosition += 1;
+					}
+
+					updateRootSlot((currentSlot) => {
+						const newArray = [...currentSlot];
+						newArray.splice(insertPosition, 0, clonedNode);
+						return newArray;
+					});
+				} else {
+					let insertPosition = targetParentInfo.index;
+					if (pastePosition === 'after') {
+						insertPosition += 1;
+					}
+
+					updateRootSlot((currentSlot) => {
+						return insertNodeAtPosition(
+							currentSlot,
+							targetParentInfo.parent!.meta.id,
+							targetParentInfo.slotName,
+							clonedNode,
+							insertPosition
+						);
+					});
+				}
+				return true;
+			}
+
 			if (!hasSlots(targetNode)) {
 				logger.warn('Target node has no slots');
 				return false;
@@ -586,6 +642,12 @@ export function createOperations(
 				logger.warn('Target node has no valid slot');
 				return false;
 			}
+
+			if (!targetNode.slots?.[targetSlotName]) {
+				logger.warn('Specified slot does not exist on target node', targetSlotName);
+				return false;
+			}
+
 			updateRootSlot((currentSlot) => {
 				return insertNodeIntoSlot(currentSlot, targetId, targetSlotName!, clonedNode);
 			});

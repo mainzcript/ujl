@@ -315,21 +315,23 @@ describe('context', () => {
 		});
 
 		describe('pasteNode', () => {
-			it('should paste node into target slot', () => {
-				const copied = operations.copyNode('leaf-1')!;
+			it('should paste node after target by default', () => {
+				const copied = operations.copyNode('nested-1')!;
+				const originalLength = slot[0].slots.body.length;
 				const success = operations.pasteNode(copied, 'nested-2');
 
 				expect(success).toBe(true);
 				expect(updateRootSlot).toHaveBeenCalled();
 
-				const nested2 = slot[0].slots.body[1];
-				expect(nested2.slots.content.length).toBeGreaterThan(2);
+				const root = slot[0];
+				expect(root.slots.body.length).toBe(originalLength + 1);
+				expect(root.slots.body[1].meta.id).toBe('nested-2');
 			});
 
-			it('should paste into specific slot', () => {
+			it('should paste into specific slot when position is into', () => {
 				slot = createMockMultiSlotTree();
 				const copied = operations.copyNode('header-item')!;
-				const success = operations.pasteNode(copied, 'multi-slot-root', 'footer');
+				const success = operations.pasteNode(copied, 'multi-slot-root', 'footer', 'into');
 
 				expect(success).toBe(true);
 
@@ -343,11 +345,14 @@ describe('context', () => {
 				expect(success).toBe(true);
 			});
 
-			it('should reject paste into node without slots', () => {
-				const copied = operations.copyNode('nested-1')!;
+			it('should paste after node without slots (default behavior)', () => {
+				const copied = operations.copyNode('nested-2')!;
 				const success = operations.pasteNode(copied, 'leaf-1');
 
-				expect(success).toBe(false);
+				expect(success).toBe(true);
+				const updatedRoot = slot[0];
+				const nested1 = updatedRoot.slots.body[0];
+				expect(nested1.slots.content.length).toBe(2);
 			});
 
 			it('should reject paste into non-existent target', () => {
@@ -357,14 +362,61 @@ describe('context', () => {
 				expect(success).toBe(false);
 			});
 
-			it('should use first slot if no slot specified', () => {
+			it('should paste into first slot when position is into', () => {
 				const copied = operations.copyNode('leaf-1')!;
-				const success = operations.pasteNode(copied, 'nested-1');
+				const originalLength = slot[0].slots.body[0].slots.content.length;
+				const success = operations.pasteNode(copied, 'nested-1', undefined, 'into');
 
 				expect(success).toBe(true);
 
 				const nested1 = slot[0].slots.body[0];
-				expect(nested1.slots.content.length).toBeGreaterThan(1);
+				expect(nested1.slots.content.length).toBe(originalLength + 1);
+			});
+
+			it('should default to after position when no position specified', () => {
+				const copied = operations.copyNode('nested-1')!;
+				const originalLength = slot[0].slots.body.length;
+				const success = operations.pasteNode(copied, 'nested-2');
+
+				expect(success).toBe(true);
+
+				const root = slot[0];
+				expect(root.slots.body.length).toBe(originalLength + 1);
+				expect(root.slots.body[1].meta.id).toBe('nested-2');
+				expect(root.slots.body[2].meta.id).not.toBe('nested-1');
+			});
+
+			it('should paste before target node', () => {
+				const copied = operations.copyNode('nested-2')!;
+				const success = operations.pasteNode(copied, 'nested-1', undefined, 'before');
+
+				expect(success).toBe(true);
+
+				const root = slot[0];
+				expect(root.slots.body[0].meta.id).not.toBe('nested-1');
+				expect(root.slots.body[1].meta.id).toBe('nested-1');
+			});
+
+			it('should paste after target node', () => {
+				const copied = operations.copyNode('nested-2')!;
+				const success = operations.pasteNode(copied, 'nested-1', undefined, 'after');
+
+				expect(success).toBe(true);
+
+				const root = slot[0];
+				expect(root.slots.body[0].meta.id).toBe('nested-1');
+				expect(root.slots.body[1].meta.id).not.toBe('nested-2');
+			});
+
+			it('should paste into target slot when position is into', () => {
+				const copied = operations.copyNode('leaf-1')!;
+				const originalLength = slot[0].slots.body[0].slots.content.length;
+				const success = operations.pasteNode(copied, 'nested-1', undefined, 'into');
+
+				expect(success).toBe(true);
+
+				const nested1 = slot[0].slots.body[0];
+				expect(nested1.slots.content.length).toBe(originalLength + 1);
 			});
 		});
 

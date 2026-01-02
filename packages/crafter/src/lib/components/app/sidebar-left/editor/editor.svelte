@@ -191,9 +191,9 @@
 
 		if (isModuleObject(pasteData)) {
 			if (isSlotSelection && slotInfo) {
-				crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName);
+				crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, 'into');
 			} else {
-				crafter.operations.pasteNode(pasteData, nodeIdOrSlot);
+				crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, 'after');
 			}
 			return;
 		}
@@ -331,7 +331,7 @@
 			return;
 		}
 
-		if (event.key === 'Delete') {
+		if (event.key === 'Delete' || event.key === 'Backspace') {
 			if (canDelete && selectedNodeId) {
 				event.preventDefault();
 				handleDelete(selectedNodeId);
