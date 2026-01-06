@@ -131,10 +131,18 @@
 		border-radius: var(--radius);
 	}
 
-	:global([data-ujl-module-id][role='button']:has([data-ujl-module-id][role='button']:hover)),
-	:global([data-ujl-module-id][role='button']:has(button[data-ujl-module-id]:hover)),
-	:global(button[data-ujl-module-id]:has([data-ujl-module-id][role='button']:hover)),
-	:global(button[data-ujl-module-id]:has(button[data-ujl-module-id]:hover)) {
+	:global(
+		[data-ujl-module-id][role='button']:not(.ujl-selected):has(
+				[data-ujl-module-id][role='button']:hover
+			)
+	),
+	:global(
+		[data-ujl-module-id][role='button']:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
+	),
+	:global(
+		button[data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id][role='button']:hover)
+	),
+	:global(button[data-ujl-module-id]:not(.ujl-selected):has(button[data-ujl-module-id]:hover)) {
 		outline: none !important;
 	}
 </style>

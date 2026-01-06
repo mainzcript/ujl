@@ -330,6 +330,44 @@ test.describe('Preview Tests', () => {
 		}
 	});
 
+	test('preview preserves selected status when hovering over child', async ({ page }) => {
+		// Wait for preview to render
+		await page.waitForTimeout(500);
+
+		// Find a component that contains other components (nested structure)
+		const parentComponent = page.locator('[data-ujl-module-id][role="button"]').nth(1);
+
+		await expect(parentComponent).toBeVisible();
+
+		// Find a child component within it
+		const childComponent = parentComponent.locator('[data-ujl-module-id][role="button"]').first();
+		const childExists = await childComponent.isVisible().catch(() => false);
+
+		if (childExists) {
+			// Select the parent component
+			await parentComponent.click();
+			await page.waitForTimeout(300);
+
+			// Verify parent has selected status
+			await expect(parentComponent).toHaveClass(/ujl-selected/);
+			await expect(parentComponent).toHaveCSS('outline-width', '2px');
+			await expect(parentComponent).toHaveCSS('outline-style', 'solid');
+
+			// Now hover over child
+			await childComponent.hover();
+			await page.waitForTimeout(100);
+
+			// Verify parent still has selected status (should not be removed by hover)
+			await expect(parentComponent).toHaveClass(/ujl-selected/);
+			await expect(parentComponent).toHaveCSS('outline-width', '2px');
+			await expect(parentComponent).toHaveCSS('outline-style', 'solid');
+
+			// Verify child has hover outline
+			await expect(childComponent).toHaveCSS('outline-width', '2px');
+			await expect(childComponent).toHaveCSS('outline-style', 'solid');
+		}
+	});
+
 	test('preview selection persists across theme changes', async ({ page }) => {
 		// Select a component in preview
 		await page.waitForTimeout(500);
