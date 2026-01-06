@@ -175,7 +175,12 @@
 		if (isModuleObject(pasteData)) {
 			let newNodeId: string | null = null;
 			if (isSlotSelection && slotInfo) {
-				newNodeId = crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, 'into');
+				newNodeId = crafter.operations.pasteNode(
+					pasteData,
+					slotInfo.parentId,
+					slotInfo.slotName,
+					'into'
+				);
 			} else {
 				newNodeId = crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, 'after');
 			}
@@ -224,7 +229,12 @@
 	function handleNodeInsert(componentType: string, nodeId: string): boolean {
 		let newNodeId: string | null = null;
 		if (isRootNode(nodeId)) {
-			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, 'into');
+			newNodeId = crafter.operations.insertNode(
+				componentType,
+				ROOT_NODE_ID,
+				ROOT_SLOT_NAME,
+				'into'
+			);
 		} else {
 			const targetNode = findNodeById(slot, nodeId);
 			if (!targetNode) {
