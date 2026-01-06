@@ -318,9 +318,9 @@ describe('context', () => {
 			it('should paste node after target by default', () => {
 				const copied = operations.copyNode('nested-1')!;
 				const originalLength = slot[0].slots.body.length;
-				const success = operations.pasteNode(copied, 'nested-2');
+				const newNodeId = operations.pasteNode(copied, 'nested-2');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 				expect(updateRootSlot).toHaveBeenCalled();
 
 				const root = slot[0];
@@ -331,9 +331,9 @@ describe('context', () => {
 			it('should paste into specific slot when position is into', () => {
 				slot = createMockMultiSlotTree();
 				const copied = operations.copyNode('header-item')!;
-				const success = operations.pasteNode(copied, 'multi-slot-root', 'footer', 'into');
+				const newNodeId = operations.pasteNode(copied, 'multi-slot-root', 'footer', 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.footer).toHaveLength(2);
@@ -341,15 +341,15 @@ describe('context', () => {
 
 			it('should allow paste of node with same ID (new IDs generated)', () => {
 				const existingNode = slot[0].slots.body[0];
-				const success = operations.pasteNode(existingNode, 'nested-2');
-				expect(success).toBe(true);
+				const newNodeId = operations.pasteNode(existingNode, 'nested-2');
+				expect(newNodeId).toBeTruthy();
 			});
 
 			it('should paste after node without slots (default behavior)', () => {
 				const copied = operations.copyNode('nested-2')!;
-				const success = operations.pasteNode(copied, 'leaf-1');
+				const newNodeId = operations.pasteNode(copied, 'leaf-1');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 				const updatedRoot = slot[0];
 				const nested1 = updatedRoot.slots.body[0];
 				expect(nested1.slots.content.length).toBe(2);
@@ -357,17 +357,17 @@ describe('context', () => {
 
 			it('should reject paste into non-existent target', () => {
 				const copied = operations.copyNode('leaf-1')!;
-				const success = operations.pasteNode(copied, 'non-existent');
+				const newNodeId = operations.pasteNode(copied, 'non-existent');
 
-				expect(success).toBe(false);
+				expect(newNodeId).toBeNull();
 			});
 
 			it('should paste into first slot when position is into', () => {
 				const copied = operations.copyNode('leaf-1')!;
 				const originalLength = slot[0].slots.body[0].slots.content.length;
-				const success = operations.pasteNode(copied, 'nested-1', undefined, 'into');
+				const newNodeId = operations.pasteNode(copied, 'nested-1', undefined, 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const nested1 = slot[0].slots.body[0];
 				expect(nested1.slots.content.length).toBe(originalLength + 1);
@@ -376,9 +376,9 @@ describe('context', () => {
 			it('should default to after position when no position specified', () => {
 				const copied = operations.copyNode('nested-1')!;
 				const originalLength = slot[0].slots.body.length;
-				const success = operations.pasteNode(copied, 'nested-2');
+				const newNodeId = operations.pasteNode(copied, 'nested-2');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.body.length).toBe(originalLength + 1);
@@ -388,9 +388,9 @@ describe('context', () => {
 
 			it('should paste before target node', () => {
 				const copied = operations.copyNode('nested-2')!;
-				const success = operations.pasteNode(copied, 'nested-1', undefined, 'before');
+				const newNodeId = operations.pasteNode(copied, 'nested-1', undefined, 'before');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.body[0].meta.id).not.toBe('nested-1');
@@ -399,9 +399,9 @@ describe('context', () => {
 
 			it('should paste after target node', () => {
 				const copied = operations.copyNode('nested-2')!;
-				const success = operations.pasteNode(copied, 'nested-1', undefined, 'after');
+				const newNodeId = operations.pasteNode(copied, 'nested-1', undefined, 'after');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.body[0].meta.id).toBe('nested-1');
@@ -411,9 +411,9 @@ describe('context', () => {
 			it('should paste into target slot when position is into', () => {
 				const copied = operations.copyNode('leaf-1')!;
 				const originalLength = slot[0].slots.body[0].slots.content.length;
-				const success = operations.pasteNode(copied, 'nested-1', undefined, 'into');
+				const newNodeId = operations.pasteNode(copied, 'nested-1', undefined, 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const nested1 = slot[0].slots.body[0];
 				expect(nested1.slots.content.length).toBe(originalLength + 1);
@@ -422,9 +422,9 @@ describe('context', () => {
 
 		describe('insertNode', () => {
 			it('should insert component from library', () => {
-				const success = operations.insertNode('button', 'nested-1', undefined, 'into');
+				const newNodeId = operations.insertNode('button', 'nested-1', undefined, 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 				expect(updateRootSlot).toHaveBeenCalled();
 
 				const nested1 = slot[0].slots.body[0];
@@ -434,9 +434,9 @@ describe('context', () => {
 			});
 
 			it('should insert text component', () => {
-				const success = operations.insertNode('text', 'nested-1', undefined, 'into');
+				const newNodeId = operations.insertNode('text', 'nested-1', undefined, 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const nested1 = slot[0].slots.body[0];
 				const inserted = nested1.slots.content[nested1.slots.content.length - 1];
@@ -448,9 +448,9 @@ describe('context', () => {
 			});
 
 			it('should insert card component with slots', () => {
-				const success = operations.insertNode('card', 'nested-1', undefined, 'into');
+				const newNodeId = operations.insertNode('card', 'nested-1', undefined, 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const nested1 = slot[0].slots.body[0];
 				const inserted = nested1.slots.content[nested1.slots.content.length - 1];
@@ -459,9 +459,9 @@ describe('context', () => {
 			});
 
 			it('should insert before position', () => {
-				const success = operations.insertNode('text', 'nested-1', undefined, 'before');
+				const newNodeId = operations.insertNode('text', 'nested-1', undefined, 'before');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.body[0].type).toBe('text');
@@ -469,9 +469,9 @@ describe('context', () => {
 			});
 
 			it('should insert after position', () => {
-				const success = operations.insertNode('text', 'nested-1', undefined, 'after');
+				const newNodeId = operations.insertNode('text', 'nested-1', undefined, 'after');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.body[0].meta.id).toBe('nested-1');
@@ -480,22 +480,22 @@ describe('context', () => {
 
 			it('should insert into specific slot', () => {
 				slot = createMockMultiSlotTree();
-				const success = operations.insertNode('text', 'multi-slot-root', 'footer', 'into');
+				const newNodeId = operations.insertNode('text', 'multi-slot-root', 'footer', 'into');
 
-				expect(success).toBe(true);
+				expect(newNodeId).toBeTruthy();
 
 				const root = slot[0];
 				expect(root.slots.footer).toHaveLength(2);
 			});
 
 			it('should reject insert of unknown component', () => {
-				const success = operations.insertNode('unknown-type', 'nested-1');
-				expect(success).toBe(false);
+				const newNodeId = operations.insertNode('unknown-type', 'nested-1');
+				expect(newNodeId).toBeNull();
 			});
 
 			it('should reject insert into node without slots when using into', () => {
-				const success = operations.insertNode('text', 'leaf-1', undefined, 'into');
-				expect(success).toBe(false);
+				const newNodeId = operations.insertNode('text', 'leaf-1', undefined, 'into');
+				expect(newNodeId).toBeNull();
 			});
 
 			it('should generate unique ID for inserted node', () => {

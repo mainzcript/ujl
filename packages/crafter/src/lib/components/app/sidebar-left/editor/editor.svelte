@@ -173,10 +173,14 @@
 		const isSlotSelection = slotInfo !== null;
 
 		if (isModuleObject(pasteData)) {
+			let newNodeId: string | null = null;
 			if (isSlotSelection && slotInfo) {
-				crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, 'into');
+				newNodeId = crafter.operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, 'into');
 			} else {
-				crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, 'after');
+				newNodeId = crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, 'after');
+			}
+			if (newNodeId) {
+				crafter.setSelectedNodeId(newNodeId);
 			}
 			return;
 		}
@@ -200,42 +204,49 @@
 	}
 
 	function handleSlotInsert(componentType: string, parentId: string, slotName: string): boolean {
+		let newNodeId: string | null = null;
 		if (isRootNode(parentId)) {
-			crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, 'into');
+			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, 'into');
+		} else {
+			const targetNode = findNodeById(slot, parentId);
+			if (!targetNode) {
+				return false;
+			}
+			newNodeId = crafter.operations.insertNode(componentType, parentId, slotName, 'into');
+		}
+		if (newNodeId) {
+			crafter.setSelectedNodeId(newNodeId);
 			return true;
 		}
-
-		const targetNode = findNodeById(slot, parentId);
-		if (!targetNode) {
-			return false;
-		}
-
-		crafter.operations.insertNode(componentType, parentId, slotName, 'into');
-		return true;
+		return false;
 	}
 
 	function handleNodeInsert(componentType: string, nodeId: string): boolean {
+		let newNodeId: string | null = null;
 		if (isRootNode(nodeId)) {
-			crafter.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, 'into');
+			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, 'into');
+		} else {
+			const targetNode = findNodeById(slot, nodeId);
+			if (!targetNode) {
+				return false;
+			}
+
+			let slotName: string | undefined = undefined;
+
+			if (targetNode.slots) {
+				const slotNames = Object.keys(targetNode.slots);
+				if (slotNames.length > 0) {
+					slotName = slotNames[0];
+				}
+			}
+
+			newNodeId = crafter.operations.insertNode(componentType, nodeId, slotName, 'into');
+		}
+		if (newNodeId) {
+			crafter.setSelectedNodeId(newNodeId);
 			return true;
 		}
-
-		const targetNode = findNodeById(slot, nodeId);
-		if (!targetNode) {
-			return false;
-		}
-
-		let slotName: string | undefined = undefined;
-
-		if (targetNode.slots) {
-			const slotNames = Object.keys(targetNode.slots);
-			if (slotNames.length > 0) {
-				slotName = slotNames[0];
-			}
-		}
-
-		crafter.operations.insertNode(componentType, nodeId, slotName, 'into');
-		return true;
+		return false;
 	}
 
 	function handleComponentSelect(componentType: string) {
