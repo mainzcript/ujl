@@ -146,7 +146,7 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					class="w-56"
-					side={sidebar.isMobile ? 'bottom' : 'right'}
+					side={sidebar.isNarrow ? 'bottom' : 'right'}
 					align="end"
 					sideOffset={4}
 				>
@@ -177,7 +177,7 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					class="w-56"
-					side={sidebar.isMobile ? 'bottom' : 'right'}
+					side={sidebar.isNarrow ? 'bottom' : 'right'}
 					align="end"
 					sideOffset={4}
 				>

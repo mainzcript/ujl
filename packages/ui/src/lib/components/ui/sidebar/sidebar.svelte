@@ -39,19 +39,19 @@
 	>
 		{@render children?.()}
 	</div>
-{:else if sidebar.isMobile}
-	<Sheet bind:open={() => sidebar.openMobile, (v) => sidebar.setOpenMobile(v)} {...restProps}>
+{:else if sidebar.isNarrow}
+	<Sheet bind:open={() => sidebar.openNarrow, (v) => sidebar.setOpenNarrow(v)} {...restProps}>
 		<SheetContent
 			data-sidebar="sidebar"
 			data-slot="sidebar"
-			data-mobile="true"
+			data-narrow="true"
 			class="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
 			style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
 			{side}
 		>
 			<SheetHeader class="sr-only">
 				<SheetTitle>Sidebar</SheetTitle>
-				<SheetDescription>Displays the mobile sidebar.</SheetDescription>
+				<SheetDescription>Displays the sidebar in narrow layout.</SheetDescription>
 			</SheetHeader>
 			<div class="flex h-full w-full flex-col">
 				{@render children?.()}

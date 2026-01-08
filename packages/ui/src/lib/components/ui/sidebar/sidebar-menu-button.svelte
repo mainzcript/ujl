@@ -88,7 +88,7 @@
 		<TooltipContent
 			side="right"
 			align="center"
-			hidden={sidebar.state !== 'collapsed' || sidebar.isMobile}
+			hidden={sidebar.state !== 'collapsed' || sidebar.isNarrow}
 			{...tooltipContentProps}
 		>
 			{#if typeof tooltipContent === 'string'}
