@@ -263,6 +263,72 @@ Fields support optional UI metadata in their config:
 | `RichTextField` | Rich text (TipTap) | `default` (ProseMirror Document) |
 | `ImageField`    | Image upload       | `default` (UJLImageData \| null) |
 
+### Media Library System
+
+The core package provides a flexible media library system that supports both inline and backend storage modes:
+
+**Storage Modes:**
+
+- **Inline Storage** - Media stored as Base64-encoded data within UJLC documents
+- **Backend Storage** - Media stored on a Payload CMS server with references in documents
+
+**Media Library Configuration:**
+
+Media library configuration is stored in the document metadata at `ujlc.meta.media_library`:
+
+```typescript
+{
+  "ujlc": {
+    "meta": {
+      "media_library": {
+        "storage": "inline" | "backend",
+        "endpoint": "http://localhost:3000/api"  // Required for backend storage
+      }
+    },
+    "media": {
+      "media-001": {
+        "id": "media-001",
+        "storage": "inline",
+        "data": "data:image/jpeg;base64,..."  // For inline storage
+        // OR
+        "mediaId": "67890abcdef12345"  // For backend storage
+      }
+    }
+  }
+}
+```
+
+**Media Entry Types:**
+
+The `UJLCMediaEntry` type supports both storage modes:
+
+```typescript
+type UJLCMediaEntryInline = {
+	id: string;
+	storage: "inline";
+	data: string; // Base64-encoded data URL
+};
+
+type UJLCMediaEntryBackend = {
+	id: string;
+	storage: "backend";
+	mediaId: string; // Reference to Payload CMS media document
+};
+```
+
+**ImageField Integration:**
+
+The `ImageField` uses media library entries via the `UJLImageData` type:
+
+```typescript
+type UJLImageData = {
+	mediaId: string; // References entry in ujlc.media
+	alt: string;
+};
+```
+
+For more details on media library setup and configuration, see the [Media Library Setup Guide](../crafter/MEDIA_LIBRARY_SETUP.md).
+
 ### Rich Text Schema
 
 The core package exports a shared TipTap schema configuration (`ujlRichTextExtensions`) that ensures consistency between editors and serializers:

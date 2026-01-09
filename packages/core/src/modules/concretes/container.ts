@@ -25,12 +25,12 @@ export class ContainerModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
 		const children: UJLAbstractNode[] = [];
 
 		const bodySlot = moduleData.slots.body;
 		for (const childModule of bodySlot) {
-			children.push(composer.composeModule(childModule));
+			children.push(await composer.composeModule(childModule));
 		}
 
 		return {

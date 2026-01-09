@@ -64,8 +64,32 @@ describe('designer update functions', () => {
 		});
 
 		mockContext = {
+			isMediaLibraryViewActive: vi.fn(() => false),
+			setMediaLibraryViewActive: vi.fn(),
+			getMediaLibraryContext: vi.fn(() => null),
+			getMediaService: vi.fn(() => ({
+				checkConnection: vi.fn(),
+				upload: vi.fn(),
+				get: vi.fn(),
+				list: vi.fn(),
+				delete: vi.fn()
+			})),
+			getMeta: vi.fn(() => ({
+				title: 'Test Document',
+				description: 'Test Description',
+				tags: [],
+				updated_at: new Date().toISOString(),
+				_version: '1.0.0',
+				_instance: 'test-instance',
+				_embedding_model_hash: 'test-hash',
+				media_library: {
+					storage: 'inline' as const
+				}
+			})),
 			updateTokenSet: mockUpdateTokenSet,
 			updateRootSlot: vi.fn(),
+			updateMedia: vi.fn(),
+			getMedia: vi.fn(() => ({})),
 			getRootSlot: vi.fn(() => []),
 			setSelectedNodeId: vi.fn(),
 			getExpandedNodeIds: vi.fn(() => new Set()),
