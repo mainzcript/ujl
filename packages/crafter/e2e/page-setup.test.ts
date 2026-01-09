@@ -17,23 +17,29 @@ test.describe('Basic Application Tests', () => {
 		}
 	}
 
+	/**
+	 * Helper function to switch mode via the Select in the header
+	 */
+	async function switchMode(page: Page, mode: 'Editor' | 'Designer') {
+		// Find the mode select trigger in the header
+		const selectTrigger = page.locator('header button[data-slot="select-trigger"]');
+		await expect(selectTrigger).toBeVisible();
+		await selectTrigger.click();
+		await page.waitForTimeout(200);
+
+		// Find and click the mode option in the select content
+		const selectContent = page.locator('[data-slot="select-content"]');
+		await expect(selectContent).toBeVisible();
+		await selectContent.getByText(mode, { exact: true }).click();
+		await page.waitForTimeout(300);
+	}
+
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/');
 		await dismissDisclaimerIfPresent(page);
 
 		// Wait for app to load
 		await page.waitForLoadState('load');
-
-		// Ensure we're in Editor mode (default mode)
-		const sidebar = page.locator('[data-sidebar="sidebar"]').first();
-		const editorButton = sidebar.getByText('Editor');
-
-		// Check if Editor mode is active, if not, switch to it
-		const isEditorActive = await editorButton.isVisible();
-		if (isEditorActive) {
-			// Already in editor mode or mode switcher visible
-			await page.waitForTimeout(200);
-		}
 	});
 
 	test('app loads successfully', async ({ page }) => {
@@ -104,86 +110,99 @@ test.describe('Basic Application Tests', () => {
 		// Wait for app to be ready
 		await page.waitForLoadState('networkidle');
 
-		// Check for Sidebar Left (contains mode switcher and navigation)
+		// Check for Sidebar Left
 		const sidebarLeft = page.locator('[data-side="left"]');
-
 		await expect(sidebarLeft).toBeVisible();
 
-		// Verify mode switcher is in sidebar left
-		await expect(sidebarLeft.getByText(/Editor|Designer/)).toBeVisible();
+		// Verify sidebar header shows "Document" (Editor mode) or "Theme" (Designer mode)
+		// Use first() to avoid strict mode violation
+		await expect(sidebarLeft.getByText(/Document|Theme/).first()).toBeVisible();
 
-		// Check for Preview area (main content area)
-		// The preview is typically the main content area between sidebars
-		const mainContent = page.locator('main, [role="main"], .preview-area').first();
+		// Check for main content area (SidebarInset)
+		const mainContent = page.locator('[data-slot="sidebar-inset"]');
 		await expect(mainContent).toBeVisible();
 
-		// Check for Sidebar Right (contains export/import buttons)
-		const sidebarRight = page.locator('[data-testId="sidebar-right"]');
-		await expect(sidebarRight).toBeVisible();
+		// Check for header with mode switcher
+		const header = page.locator('header');
+		await expect(header).toBeVisible();
+
+		// Verify mode switcher Select is in header
+		const modeSelect = header.locator('button[data-slot="select-trigger"]');
+		await expect(modeSelect).toBeVisible();
 	});
 
-	test('header with breadcrumb is visible', async ({ page }) => {
+	test('header with mode switcher is visible', async ({ page }) => {
 		// Check for header element
 		const header = page.locator('header');
 		await expect(header).toBeVisible();
 
-		// Check for breadcrumb navigation using aria-label
-		const breadcrumb = header.locator('nav[aria-label="breadcrumb"]');
-		await expect(breadcrumb).toBeVisible();
+		// Check for mode switcher Select in header
+		const modeSelect = header.locator('button[data-slot="select-trigger"]');
+		await expect(modeSelect).toBeVisible();
 
-		// Verify breadcrumb contains "UJL Crafter" text
-		await expect(breadcrumb.getByText('UJL Crafter')).toBeVisible();
+		// Verify it shows current mode (Editor by default)
+		await expect(modeSelect).toContainText('Editor');
 
-		// Verify header has correct styling (sticky, top positioning)
-		await expect(header).toHaveCSS('position', 'sticky');
+		// Check for Save button in header
+		const saveButton = header.getByRole('button', { name: 'Save' });
+		await expect(saveButton).toBeVisible();
+
+		// Check for More Actions button (three dots menu)
+		const moreActionsButton = header.locator('button[title="More Actions"]');
+		await expect(moreActionsButton).toBeVisible();
 	});
 
-	test('sidebar trigger functions correctly', async ({ page }) => {
+	test('mode switcher functions correctly', async ({ page }) => {
+		// Get initial sidebar state - should show "Document" in Editor mode
+		const sidebarLeft = page.locator('[data-side="left"]');
+		// Use first() to avoid strict mode violation
+		await expect(sidebarLeft.getByText('Document').first()).toBeVisible();
+
+		// Switch to Designer mode
+		await switchMode(page, 'Designer');
+
+		// Verify sidebar now shows "Theme" - use first() to avoid strict mode violation
+		await expect(sidebarLeft.getByText('Theme').first()).toBeVisible();
+
+		// Switch back to Editor mode
+		await switchMode(page, 'Editor');
+
+		// Verify sidebar shows "Document" again - use first() to avoid strict mode violation
+		await expect(sidebarLeft.getByText('Document').first()).toBeVisible();
+	});
+
+	test('sidebar trigger toggles left sidebar', async ({ page }) => {
 		// Find the sidebar trigger button in header
-		const sidebarTrigger = page
-			.locator('[data-side="left"] button[data-sidebar="menu-button"]')
-			.first();
+		const sidebarTrigger = page.locator('header button[data-sidebar="trigger"]');
 		await expect(sidebarTrigger).toBeVisible();
 
 		// Get initial sidebar state
-		const sidebarLeft = page.locator('[data-side="left"]');
-
-		// The sidebar might not have a data-state initially, or it might be null
-		// Instead, check visibility or class changes
-		expect(sidebarLeft).toBeVisible();
-		expect(sidebarLeft).toHaveText(/Editor/);
+		const sidebar = page.locator('[data-slot="sidebar"]').first();
+		const initialState = await sidebar.getAttribute('data-state');
 
 		// Click the trigger
 		await sidebarTrigger.click();
-
-		const dropdown = page.locator('[data-dropdown-menu-content]');
-		expect(dropdown).toBeVisible();
-
-		await dropdown.getByText('Designer').click();
-		// Wait for animation
 		await page.waitForTimeout(400);
 
-		expect(sidebarLeft).toBeVisible();
-		expect(sidebarLeft).toHaveText(/Designer/);
+		// Verify state changed
+		const newState = await sidebar.getAttribute('data-state');
+		expect(newState).not.toBe(initialState);
 
-		// Click the trigger again to close (if applicable)
+		// Click again to toggle back
 		await sidebarTrigger.click();
-		expect(dropdown).toBeVisible();
-
-		await dropdown.getByText('Editor').click();
 		await page.waitForTimeout(400);
 
-		// Verify sidebar state toggled back
-		expect(sidebarLeft).toBeVisible();
-		expect(sidebarLeft).toHaveText(/Editor/);
+		// Verify state toggled back
+		const finalState = await sidebar.getAttribute('data-state');
+		expect(finalState).toBe(initialState);
 	});
 
 	test('sidebar trigger is keyboard accessible', async ({ page }) => {
 		// Focus the body first to ensure clean state
 		await page.locator('body').focus();
 
-		// Find the sidebar trigger (we'll use a more direct approach)
-		const sidebarTrigger = page.locator('header button[data-sidebar="trigger"]').first();
+		// Find the sidebar trigger
+		const sidebarTrigger = page.locator('header button[data-sidebar="trigger"]');
 		await expect(sidebarTrigger).toBeVisible();
 
 		// Focus the trigger directly
@@ -193,13 +212,17 @@ test.describe('Basic Application Tests', () => {
 		const isFocused = await sidebarTrigger.evaluate((el) => el === document.activeElement);
 		expect(isFocused).toBe(true);
 
+		// Get initial state
+		const sidebar = page.locator('[data-slot="sidebar"]').first();
+		const initialState = await sidebar.getAttribute('data-state');
+
 		// Activate with Enter key
 		await page.keyboard.press('Enter');
 		await page.waitForTimeout(400);
 
 		// Verify state changed
-		const sidebarLeft = page.locator('[data-side="left"]');
-		expect(sidebarLeft).not.toBeVisible();
+		const newState = await sidebar.getAttribute('data-state');
+		expect(newState).not.toBe(initialState);
 	});
 
 	test('app renders without console errors', async ({ page }) => {

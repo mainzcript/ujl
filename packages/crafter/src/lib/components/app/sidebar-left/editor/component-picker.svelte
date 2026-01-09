@@ -86,11 +86,7 @@
 	}
 </script>
 
-<CommandDialog
-	bind:open
-	title="Insert Component"
-	description="Search and select a component to insert"
->
+<CommandDialog bind:open title="Add Component" description="Search and select a component to add">
 	<CommandInput placeholder="Search components..." />
 	<CommandList>
 		<CommandEmpty>No components found.</CommandEmpty>

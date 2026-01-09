@@ -16,21 +16,19 @@ test.describe('Typography & Spacing Editor', () => {
 	}
 
 	/**
-	 * Helper function to switch to Designer mode
+	 * Helper function to switch mode via the Select in the header
 	 */
-	async function switchToDesignerMode(page: Page) {
-		const sidebarTrigger = page
-			.locator('[data-side="left"] button[data-sidebar="menu-button"]')
-			.first();
-		await expect(sidebarTrigger).toBeVisible();
-		await sidebarTrigger.click();
+	async function switchMode(page: Page, mode: 'Editor' | 'Designer') {
+		// Find the mode select trigger in the header
+		const selectTrigger = page.locator('header button[data-slot="select-trigger"]');
+		await expect(selectTrigger).toBeVisible();
+		await selectTrigger.click();
+		await page.waitForTimeout(200);
 
-		await page.waitForTimeout(300);
-
-		const dropdown = page.locator('[data-dropdown-menu-content]');
-		await expect(dropdown).toBeVisible();
-
-		await dropdown.getByText('Designer').click();
+		// Find and click the mode option in the select content
+		const selectContent = page.locator('[data-slot="select-content"]');
+		await expect(selectContent).toBeVisible();
+		await selectContent.getByText(mode, { exact: true }).click();
 		await page.waitForTimeout(300);
 	}
 
@@ -51,7 +49,7 @@ test.describe('Typography & Spacing Editor', () => {
 		await page.waitForTimeout(500);
 
 		// Switch to Designer mode
-		await switchToDesignerMode(page);
+		await switchMode(page, 'Designer');
 	});
 
 	test('typography groups are visible and collapsible', async ({ page }) => {

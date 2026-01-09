@@ -8,7 +8,6 @@
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import {
 		findNodeById,
-		hasSlots,
 		ROOT_NODE_ID,
 		ROOT_SLOT_NAME,
 		parseSlotSelection,
@@ -200,7 +199,10 @@
 	}
 
 	function handleDelete(nodeId: string) {
-		crafter.operations.deleteNode(nodeId);
+		const success = crafter.operations.deleteNode(nodeId);
+		if (success) {
+			crafter.setSelectedNodeId(null);
+		}
 	}
 
 	function handleInsert(nodeIdOrSlot: string) {
@@ -229,6 +231,7 @@
 	function handleNodeInsert(componentType: string, nodeId: string): boolean {
 		let newNodeId: string | null = null;
 		if (isRootNode(nodeId)) {
+			// Root: insert at end of document
 			newNodeId = crafter.operations.insertNode(
 				componentType,
 				ROOT_NODE_ID,
@@ -236,21 +239,13 @@
 				'into'
 			);
 		} else {
+			// Regular module: insert after current module (consistent with paste)
 			const targetNode = findNodeById(slot, nodeId);
 			if (!targetNode) {
 				return false;
 			}
 
-			let slotName: string | undefined = undefined;
-
-			if (targetNode.slots) {
-				const slotNames = Object.keys(targetNode.slots);
-				if (slotNames.length > 0) {
-					slotName = slotNames[0];
-				}
-			}
-
-			newNodeId = crafter.operations.insertNode(componentType, nodeId, slotName, 'into');
+			newNodeId = crafter.operations.insertNode(componentType, nodeId, undefined, 'after');
 		}
 		if (newNodeId) {
 			crafter.setSelectedNodeId(newNodeId);
@@ -284,23 +279,25 @@
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (isEditableElement(event.target)) return;
-		if (!selectedNodeId && !clipboard) return;
 
+		// Ctrl+I (Add) should always work, even without selection
 		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+			event.preventDefault();
 			if (selectedSlotInfo && selectedNodeId) {
-				event.preventDefault();
+				// Slot selected: insert into slot
 				handleInsert(selectedNodeId);
 			} else if (selectedNodeId) {
-				// Allow insert if node has slots (single or multiple) - enables inserting into empty containers
-				const canInsertNode = selectedNode && hasSlots(selectedNode);
-
-				if (canInsertNode) {
-					event.preventDefault();
-					handleInsert(selectedNodeId);
-				}
+				// Module selected: insert after module (consistent with paste)
+				handleInsert(selectedNodeId);
+			} else {
+				// Nothing selected: insert at end of document
+				handleInsert(ROOT_NODE_ID);
 			}
 			return;
 		}
+
+		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
+		if (!selectedNodeId && !clipboard) return;
 
 		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
 			if (canPaste) {

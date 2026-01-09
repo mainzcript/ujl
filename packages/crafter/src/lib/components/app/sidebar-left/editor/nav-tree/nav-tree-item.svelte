@@ -26,8 +26,7 @@
 		hasMultipleSlots,
 		getAllSlotEntries,
 		canAcceptDrop,
-		canNodeAcceptPaste,
-		hasSlots
+		canNodeAcceptPaste
 	} from '$lib/utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.ts';
@@ -108,8 +107,8 @@
 	const showDropInto = $derived(isDropTarget && dropPosition === 'into' && canAcceptDrop(node));
 	const hasMultiple = $derived(hasMultipleSlots(node));
 	const canPaste = $derived(canNodeAcceptPaste(node, clipboard));
-	// Allow insert if node has slots (single or multiple) - enables inserting into empty containers
-	const canInsert = $derived(hasSlots(node));
+	// Allow add for all nodes (adds after the node, consistent with paste behavior)
+	const canInsert = $derived(!isRootNode);
 
 	// Show slots as groups if node has multiple slots OR if it has no children yet
 	const showSlotsAsGroups = $derived(hasMultiple);
@@ -136,7 +135,7 @@
 	const canCutRoot = $derived(!isRootNode);
 	const canDeleteRoot = $derived(!isRootNode);
 
-	// Root node can insert into its root slot
+	// Root node can add to its root slot, other nodes can add after themselves
 	const canInsertRoot = $derived(isRootNode ? true : canInsert);
 </script>
 

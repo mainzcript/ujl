@@ -35,8 +35,7 @@
 	}
 
 	function scrollToNodeInTree(nodeId: string) {
-		// Wait for tree to expand and DOM to update
-		// Increased timeout to allow for expansion animation
+		// Timeout allows tree expansion animation to complete before scrolling
 		setTimeout(() => {
 			const treeItem = document.querySelector(`[data-tree-node-id="${nodeId}"]`);
 			if (treeItem) {

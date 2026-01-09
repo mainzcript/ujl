@@ -187,7 +187,7 @@
 							class="px-4 py-2 text-xs text-muted-foreground italic"
 							{...testId('slot-empty-state')}
 						>
-							Empty slot - drop or insert components here
+							Empty slot - drop or add components here
 						</div>
 					</SidebarMenuSubItem>
 				{:else}

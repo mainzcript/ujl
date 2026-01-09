@@ -51,10 +51,10 @@
 				onClose?.();
 			}}
 			class="justify-start gap-2"
-			{...testId('context-menu-insert')}
+			{...testId('context-menu-add')}
 		>
 			<PlusIcon class="size-4" />
-			<span>Insert</span>
+			<span>Add</span>
 			<span class="ml-auto">
 				<KbdGroup>
 					<Kbd>{modifierKey} I</Kbd>

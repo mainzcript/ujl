@@ -15,6 +15,23 @@ test.describe('Preview Tests', () => {
 		}
 	}
 
+	/**
+	 * Helper function to switch mode via the Select in the header
+	 */
+	async function switchMode(page: Page, mode: 'Editor' | 'Designer') {
+		// Find the mode select trigger in the header
+		const selectTrigger = page.locator('header button[data-slot="select-trigger"]');
+		await expect(selectTrigger).toBeVisible();
+		await selectTrigger.click();
+		await page.waitForTimeout(200);
+
+		// Find and click the mode option in the select content
+		const selectContent = page.locator('[data-slot="select-content"]');
+		await expect(selectContent).toBeVisible();
+		await selectContent.getByText(mode, { exact: true }).click();
+		await page.waitForTimeout(300);
+	}
+
 	test.beforeEach(async ({ page, context }) => {
 		// Navigate to the app
 		await page.goto('/');
@@ -125,30 +142,28 @@ test.describe('Preview Tests', () => {
 		await page.waitForTimeout(500);
 
 		// Expand the tree to access child nodes
-		const chevron = page
+		const rootItem = page
 			.locator('[data-testid="nav-tree-item"]')
-			.first()
-			.locator('button svg')
+			.or(page.locator('[data-tree-node-id="__root__"]').locator('..'))
 			.first();
-		await chevron.click();
+		const collapsible = rootItem.locator('[data-slot="collapsible"]').first();
+		const chevronButton = collapsible.locator('button').first();
+		await expect(chevronButton).toBeVisible();
+		await chevronButton.click();
 		await page.waitForTimeout(400);
 
 		// Get all tree nodes
-		const allTreeNodes = page.locator('[data-testid="nav-tree-item"]');
+		const allTreeNodes = page.locator('[data-tree-node-id]');
 		const nodeCount = await allTreeNodes.count();
 
 		// Select a node that's not the first (to ensure scrolling is needed)
 		if (nodeCount > 2) {
 			const targetNode = allTreeNodes.nth(2);
-			const nodeButton = targetNode.locator('button').last();
-
-			// Get the node ID
-			const nodeContainer = targetNode.locator('[data-tree-node-id]');
-			const nodeId = await nodeContainer.getAttribute('data-tree-node-id');
+			const nodeId = await targetNode.getAttribute('data-tree-node-id');
 			expect(nodeId).toBeTruthy();
 
 			// Click the tree node
-			await nodeButton.click();
+			await targetNode.click();
 			await page.waitForTimeout(500);
 
 			// Verify that the corresponding preview component is highlighted
@@ -156,8 +171,6 @@ test.describe('Preview Tests', () => {
 			await expect(previewComponent).toHaveClass(/ujl-selected/);
 
 			// Verify component is reasonably visible (scroll worked)
-			// Note: We can't easily verify exact scroll position in E2E,
-			// but we can check that the component is in viewport
 			const isInViewport = await previewComponent.isVisible();
 			expect(isInViewport).toBe(true);
 		}
@@ -167,13 +180,22 @@ test.describe('Preview Tests', () => {
 		// Wait for tree and preview to load
 		await page.waitForTimeout(500);
 
+		// Expand tree
+		const rootItem = page
+			.locator('[data-testid="nav-tree-item"]')
+			.or(page.locator('[data-tree-node-id="__root__"]').locator('..'))
+			.first();
+		const collapsible = rootItem.locator('[data-slot="collapsible"]').first();
+		const chevronButton = collapsible.locator('button').first();
+		await expect(chevronButton).toBeVisible();
+		await chevronButton.click();
+		await page.waitForTimeout(400);
+
 		// Select first visible node
 		const firstNode = page
-			.locator('[data-level="0"] > li[data-slot="sidebar-menu-sub-item"]')
-			.last();
-		const firstButton = firstNode.locator('button').nth(1);
-
-		await firstButton.click();
+			.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
+			.first();
+		await firstNode.click();
 		await page.waitForTimeout(500);
 
 		// Get scroll position of preview container
@@ -183,7 +205,7 @@ test.describe('Preview Tests', () => {
 		});
 
 		// Select the same node again (should NOT trigger scroll since already visible)
-		await firstButton.click();
+		await firstNode.click();
 		await page.waitForTimeout(500);
 
 		// Verify scroll position hasn't changed (much - allow small variance)
@@ -200,19 +222,7 @@ test.describe('Preview Tests', () => {
 		await page.waitForTimeout(500);
 
 		// Switch to Designer mode
-		const sidebarTrigger = page
-			.locator('[data-side="left"] button[data-sidebar="menu-button"]')
-			.first();
-		await expect(sidebarTrigger).toBeVisible();
-		await sidebarTrigger.click();
-
-		await page.waitForTimeout(300);
-
-		const dropdown = page.locator('[data-dropdown-menu-content]');
-		expect(dropdown).toBeVisible();
-
-		await dropdown.getByText('Designer').click();
-		await page.waitForTimeout(300);
+		await switchMode(page, 'Designer');
 
 		// Find the radius slider in Designer sidebar
 		const radiusSlider = page.locator('span[data-slot="slider-thumb"][aria-valuenow]').first();
@@ -226,7 +236,9 @@ test.describe('Preview Tests', () => {
 
 			// Get initial CSS variable value from the theme style tag
 			const initialCSSValue = await page.evaluate(() => {
-				const styleTag = document.querySelector('main style[data-ujl-role="styles-theme"]');
+				const styleTag = document.querySelector(
+					'[data-slot="sidebar-inset"] style[data-ujl-role="styles-theme"]'
+				);
 				if (!styleTag || !styleTag.textContent) return null;
 
 				// Parse --radius value from CSS text
@@ -253,7 +265,9 @@ test.describe('Preview Tests', () => {
 
 				// Get new CSS variable value from the theme style tag
 				const newCSSValue = await page.evaluate(() => {
-					const styleTag = document.querySelector('main style[data-ujl-role="styles-theme"]');
+					const styleTag = document.querySelector(
+						'[data-slot="sidebar-inset"] style[data-ujl-role="styles-theme"]'
+					);
 					if (!styleTag || !styleTag.textContent) return null;
 
 					// Parse --radius value from CSS text
@@ -377,20 +391,8 @@ test.describe('Preview Tests', () => {
 
 		const selectedId = await previewComponent.getAttribute('data-ujl-module-id');
 
-		// Switch to Designer mode and make a theme change
-		const sidebarTrigger = page
-			.locator('[data-side="left"] button[data-sidebar="menu-button"]')
-			.first();
-		await expect(sidebarTrigger).toBeVisible();
-		await sidebarTrigger.click();
-
-		await page.waitForTimeout(300);
-
-		const dropdown = page.locator('[data-dropdown-menu-content]');
-		expect(dropdown).toBeVisible();
-
-		await dropdown.getByText('Designer').click();
-		await page.waitForTimeout(300);
+		// Switch to Designer mode
+		await switchMode(page, 'Designer');
 
 		// Find the radius slider in Designer sidebar
 		const radiusSlider = page.locator('span[data-slot="slider-thumb"][aria-valuenow]').first();
@@ -417,11 +419,7 @@ test.describe('Preview Tests', () => {
 		}
 
 		// Switch back to Editor mode
-		await sidebarTrigger.click();
-
-		await page.waitForTimeout(300);
-		await dropdown.getByText('Editor').click();
-		await page.waitForTimeout(300);
+		await switchMode(page, 'Editor');
 
 		// Verify component is still selected
 		const stillSelected = page.locator(`[data-ujl-module-id="${selectedId}"].ujl-selected`);
