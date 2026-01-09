@@ -69,9 +69,12 @@ export abstract class ModuleBase {
 	 * Compose a module instance into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
 	 * @param composer - Composer instance for composing child modules
-	 * @returns Composed abstract syntax tree node
+	 * @returns Composed abstract syntax tree node (can be async for media resolution)
 	 */
-	public abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
+	public abstract compose(
+		moduleData: UJLCModuleObject,
+		composer: Composer
+	): UJLAbstractNode | Promise<UJLAbstractNode>;
 
 	/** Human-readable display name */
 	public abstract readonly label: string;

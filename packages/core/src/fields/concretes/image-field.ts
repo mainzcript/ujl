@@ -1,11 +1,13 @@
-import type { UJLCFieldObject, UJLImageData } from "@ujl-framework/types";
+import type { UJLCFieldObject } from "@ujl-framework/types";
 import { BaseFieldConfig, FieldBase } from "../base.js";
 import type { FieldType } from "../types.js";
 
 /**
- * Value type for media fields (after parsing)
+ * Value type for image fields in UJLC documents (Media ID)
+ * Can be string (inline storage) or number (backend storage like Payload CMS)
+ * Resolved to UJLImageData during composition
  */
-export type ImageFieldValue = UJLImageData | null;
+export type ImageFieldValue = string | number | null;
 
 /**
  * Configuration type for media fields
@@ -15,8 +17,8 @@ export type ImageFieldConfig = BaseFieldConfig<ImageFieldValue>;
 /**
  * Image field implementation for UJL
  *
- * Compression handled client-side (target: <=100KB, fallback: <=200KB).
- * @see Migration Guide - Media Library Integration (Issue)
+ * Stores Media IDs (strings) in UJLC documents.
+ * Composer resolves Media IDs to UJLImageData during composition.
  */
 export class ImageField extends FieldBase<ImageFieldValue, ImageFieldConfig> {
 	/** Default configuration for media fields */
@@ -27,39 +29,25 @@ export class ImageField extends FieldBase<ImageFieldValue, ImageFieldConfig> {
 	};
 
 	/**
-	 * Validate that a raw UJL field value is valid image data or null
+	 * Validate that a raw UJL field value is a valid Media ID (string/number) or null
 	 * @param raw - Raw UJL field value to validate
-	 * @returns Type predicate indicating if raw value is valid image data or null
+	 * @returns Type predicate indicating if raw value is valid Media ID or null
 	 */
 	public validate(raw: UJLCFieldObject): raw is ImageFieldValue {
 		if (raw === null || raw === undefined) {
 			return true;
 		}
 
-		if (typeof raw !== "object") {
-			return false;
+		// Media ID can be a non-empty string (inline) or number (backend like Payload CMS)
+		if (typeof raw === "string") {
+			return raw.length > 0;
 		}
 
-		const obj = raw as Record<string, unknown>;
-
-		// Check required field: dataUrl
-		if (typeof obj.dataUrl !== "string") {
-			return false;
+		if (typeof raw === "number") {
+			return true;
 		}
 
-		// Validate dataUrl is a Base64 Data-URL with image MIME-type
-		if (!obj.dataUrl.startsWith("data:image/")) {
-			return false;
-		}
-
-		// Validate it's a supported image type and has base64 data
-		const validMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-		const dataUrlMatch = obj.dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
-		if (!dataUrlMatch || !validMimeTypes.includes(dataUrlMatch[1]) || !dataUrlMatch[2]) {
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 
 	/**

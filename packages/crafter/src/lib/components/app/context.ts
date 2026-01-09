@@ -1,5 +1,12 @@
-import type { UJLTTokenSet, UJLCSlotObject, UJLCModuleObject } from '@ujl-framework/types';
+import type {
+	UJLTTokenSet,
+	UJLCSlotObject,
+	UJLCModuleObject,
+	UJLCMediaLibrary,
+	UJLCDocumentMeta
+} from '@ujl-framework/types';
 import { generateUid } from '@ujl-framework/core';
+import type { MediaService } from '$lib/services/index.js';
 import {
 	findNodeById,
 	findParentOfNode,
@@ -31,7 +38,30 @@ import { logger } from '$lib/utils/logger.js';
  * - Changes flow up via callbacks (onChange handlers) to updateTokenSet/updateRootSlot
  * - No local token copies or two-way bindings - data flows down, events flow up
  */
+export type MediaLibraryContext = {
+	fieldName: string;
+	nodeId: string;
+	currentValue: string | number | null;
+} | null;
+
 export type CrafterContext = {
+	/**
+	 * Get whether the media library view is active
+	 */
+	isMediaLibraryViewActive: () => boolean;
+
+	/**
+	 * Set whether the media library view is active
+	 * @param active - Whether to show the media library
+	 * @param context - Optional context for which field is being edited
+	 */
+	setMediaLibraryViewActive: (active: boolean, context?: MediaLibraryContext) => void;
+
+	/**
+	 * Get the current media library context (which field is being edited)
+	 */
+	getMediaLibraryContext: () => MediaLibraryContext;
+
 	/**
 	 * Updates the token set (theme tokens: colors, radius, etc.).
 	 * Implementations are expected to return a new token object (immutable update).
@@ -62,6 +92,43 @@ export type CrafterContext = {
 	 * ```
 	 */
 	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void;
+
+	/**
+	 * Updates the media library in the UJL content document.
+	 * Implementations are expected to return a new media library object (immutable update).
+	 *
+	 * @param fn - Function that receives the current media library and returns a new one.
+	 *             Must not mutate the input object; must return a new object instance.
+	 *
+	 * @example
+	 * ```ts
+	 * crafter.updateMedia((oldMedia) => ({
+	 *   ...oldMedia,
+	 *   [mediaId]: { dataUrl: "...", metadata: { ... } }
+	 * }));
+	 * ```
+	 */
+	updateMedia: (fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary) => void;
+
+	/**
+	 * Get the current media library (reactive getter for media operations).
+	 * Returns the current state of the media library for read-only access.
+	 *
+	 * @returns The current media library object
+	 */
+	getMedia: () => UJLCMediaLibrary;
+
+	/**
+	 * Get the media service for the current storage configuration
+	 * @returns The media service instance
+	 */
+	getMediaService: () => MediaService;
+
+	/**
+	 * Get the document metadata (for accessing media library config)
+	 * @returns The document metadata
+	 */
+	getMeta: () => UJLCDocumentMeta;
 
 	/**
 	 * Get the current root slot (reactive getter for property panel).

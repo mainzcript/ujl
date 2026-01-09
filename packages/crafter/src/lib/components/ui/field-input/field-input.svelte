@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input, Label, Text } from '@ujl-framework/ui';
 	import type { FieldEntry } from '@ujl-framework/core';
-	import type { ProseMirrorDocument, UJLImageData } from '@ujl-framework/types';
+	import type { ProseMirrorDocument } from '@ujl-framework/types';
 	import { ImageField, NumberField } from '@ujl-framework/core';
 	import { MediaPicker } from '../media-picker/index.js';
 	import { RichTextInput } from '../richtext-input/index.js';
@@ -10,12 +10,14 @@
 		fieldName,
 		fieldEntry,
 		value,
-		onChange
+		onChange,
+		nodeId
 	}: {
 		fieldName: string;
 		fieldEntry: FieldEntry;
 		value: unknown;
 		onChange: (value: unknown) => void;
+		nodeId?: string;
 	} = $props();
 
 	// Get field type and config (using $derived to avoid Svelte state warnings)
@@ -37,9 +39,10 @@
 		isNumberField(fieldEntry.field) ? fieldEntry.field.config : null
 	);
 
-	// Type guard for image data
-	const isImageData = (val: unknown): val is UJLImageData | null => {
-		return val === null || (typeof val === 'object' && val !== null && 'dataUrl' in val);
+	// Type guard for media ID (string, number, or null)
+	// Backend services may return numeric IDs (e.g., Payload CMS returns numbers)
+	const isMediaId = (val: unknown): val is string | number | null => {
+		return val === null || typeof val === 'string' || typeof val === 'number';
 	};
 
 	// Refs to input elements for manual updates
@@ -123,11 +126,11 @@
 			onChange={(newValue) => onChange(newValue)}
 		/>
 	{:else if fieldType === 'media'}
+		{@const mediaValue = isMediaId(value) ? value : null}
 		{#if isImageField(fieldEntry.field)}
-			<MediaPicker
-				value={isImageData(value) ? value : null}
-				onChange={(newValue) => onChange(newValue)}
-			/>
+			{#key value}
+				<MediaPicker value={mediaValue} {fieldName} {nodeId} />
+			{/key}
 		{/if}
 	{:else}
 		<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">

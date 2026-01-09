@@ -1,4 +1,3 @@
-import type { UJLImageData } from "@ujl-framework/types";
 import { describe, expect, it } from "vitest";
 import { ImageField } from "./image-field.js";
 
@@ -17,81 +16,48 @@ describe("ImageField", () => {
 		});
 
 		describe("invalid types", () => {
-			it("should reject non-object values", () => {
-				expect(field.validate("string")).toBe(false);
-				expect(field.validate(123)).toBe(false);
+			it("should reject non-string and non-number values", () => {
 				expect(field.validate(true)).toBe(false);
 				expect(field.validate([])).toBe(false);
-			});
-
-			it("should reject objects without dataUrl", () => {
 				expect(field.validate({})).toBe(false);
-				expect(field.validate({ other: "value" })).toBe(false);
+				expect(field.validate({ dataUrl: "something" })).toBe(false);
 			});
 
-			it("should reject objects with non-string dataUrl", () => {
-				expect(field.validate({ dataUrl: 123 })).toBe(false);
-				expect(field.validate({ dataUrl: null })).toBe(false);
-				expect(field.validate({ dataUrl: {} })).toBe(false);
+			it("should reject empty strings", () => {
+				expect(field.validate("")).toBe(false);
 			});
 		});
 
-		describe("valid Data-URLs", () => {
-			it("should accept valid JPEG Data-URL", () => {
-				const validDataUrl = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
-				expect(field.validate({ dataUrl: validDataUrl })).toBe(true);
-			});
-
-			it("should accept valid PNG Data-URL", () => {
-				const validDataUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
-				expect(field.validate({ dataUrl: validDataUrl })).toBe(true);
-			});
-
-			it("should accept valid WebP Data-URL", () => {
-				const validDataUrl =
-					"data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=";
-				expect(field.validate({ dataUrl: validDataUrl })).toBe(true);
-			});
-
-			it("should accept valid GIF Data-URL", () => {
-				const validDataUrl =
-					"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-				expect(field.validate({ dataUrl: validDataUrl })).toBe(true);
+		describe("valid number IDs", () => {
+			it("should accept number IDs (backend storage)", () => {
+				expect(field.validate(123)).toBe(true);
+				expect(field.validate(0)).toBe(true);
+				expect(field.validate(999999)).toBe(true);
 			});
 		});
 
-		describe("invalid Data-URL formats", () => {
-			it("should reject non-image Data-URLs", () => {
-				expect(field.validate({ dataUrl: "data:text/plain;base64,SGVsbG8=" })).toBe(false);
-				expect(field.validate({ dataUrl: "data:application/json;base64,{}" })).toBe(false);
+		describe("valid Media IDs", () => {
+			it("should accept valid Media ID strings", () => {
+				expect(field.validate("media-id-123")).toBe(true);
+				expect(field.validate("V1StGXR8_Z")).toBe(true);
+				expect(field.validate("image-abc-def-ghi")).toBe(true);
 			});
 
-			it("should reject Data-URLs without image prefix", () => {
-				expect(field.validate({ dataUrl: "not-a-data-url" })).toBe(false);
-				expect(field.validate({ dataUrl: "http://example.com/image.jpg" })).toBe(false);
-			});
-
-			it("should reject unsupported image MIME types", () => {
-				expect(field.validate({ dataUrl: "data:image/svg+xml;base64,PHN2Zy8+" })).toBe(false);
-				expect(field.validate({ dataUrl: "data:image/bmp;base64,Qk0=" })).toBe(false);
-				expect(field.validate({ dataUrl: "data:image/tiff;base64,SUkqAA==" })).toBe(false);
-			});
-
-			it("should reject malformed Data-URLs", () => {
-				expect(field.validate({ dataUrl: "data:image/" })).toBe(false);
-				expect(field.validate({ dataUrl: "data:image/jpeg" })).toBe(false);
-				expect(field.validate({ dataUrl: "data:" })).toBe(false);
+			it("should accept any non-empty string", () => {
+				expect(field.validate("a")).toBe(true);
+				expect(field.validate("short")).toBe(true);
+				expect(field.validate("very-long-media-id-string-with-many-characters")).toBe(true);
 			});
 		});
 
 		describe("edge cases", () => {
-			it("should handle empty dataUrl string", () => {
-				expect(field.validate({ dataUrl: "" })).toBe(false);
+			it("should reject empty string", () => {
+				expect(field.validate("")).toBe(false);
 			});
 
-			it("should handle dataUrl with extra properties", () => {
-				const validDataUrl = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
-				expect(field.validate({ dataUrl: validDataUrl, extra: "property" })).toBe(true);
+			it("should accept strings with special characters", () => {
+				expect(field.validate("media_id-123")).toBe(true);
+				expect(field.validate("media.id.456")).toBe(true);
 			});
 		});
 	});
@@ -101,11 +67,9 @@ describe("ImageField", () => {
 			expect(field.fit(null)).toBe(null);
 		});
 
-		it("should return image data unchanged", () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRg==",
-			};
-			expect(field.fit(imageData)).toEqual(imageData);
+		it("should return Media ID string unchanged", () => {
+			const mediaId = "media-id-123";
+			expect(field.fit(mediaId)).toBe(mediaId);
 		});
 	});
 

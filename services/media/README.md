@@ -21,14 +21,20 @@ http://localhost:3000/api
 
 1. **Set variables in the .env file**
 
-```
+Create a `.env` file in the `services/media` directory:
+
+```env
 DATABASE_URI=postgres://postgres:<password>@postgres:5432/ujl-media
-PAYLOAD_SECRET=
-# Added by Payload
-POSTGRES_PASSWORD=
+PAYLOAD_SECRET=<your-secret-key>
+POSTGRES_PASSWORD=<your-password>
 POSTGRES_USER=postgres
 POSTGRES_DB=payload
 ```
+
+**Security Notes:**
+- Generate a strong `PAYLOAD_SECRET` (at least 32 characters)
+- Use a strong database password
+- Never commit the `.env` file to version control
 
 ### 2. Generate Schemas
 
@@ -56,22 +62,49 @@ docker-compose logs -f payload
 
 Wait until "ready" is displayed in the logs (starting for the first time might take a while because of installing packages)
 
-### 3. Create first user for API Key
+### 4. Create first user for API Key
 
 1.  Go to `localhost:3000/admin` and create your first user (admin). This user will also be linked to the API Key.
 2.  Navigate to the collection 'Users' and select the user you just created.
 3.  Check the checkbox 'Enable API Key' and click save
-4.  Now you have an API Key you can use in the Authorization field in HTTP Requests with the following scheme:
+4.  Copy the generated API Key for use in client applications
 
-```typeScript
-let collectionName = 'users';
-let YOUR_API_KEY = ''; // API Key from user
+**Using the API Key:**
+
+```typescript
+const collectionName = 'users';
+const YOUR_API_KEY = 'your-api-key-here'; // API Key from user
 const response = await fetch('http://localhost:3000/api/media', {
- headers: {
-   Authorization: `${collectionName} API-Key ${YOUR_API_KEY}`,
- },
+  headers: {
+    Authorization: `${collectionName} API-Key ${YOUR_API_KEY}`,
+  },
 });
 ```
+
+**Integration with UJL Crafter:**
+
+To use this media service with the UJL Crafter, configure the API key in the Crafter's environment:
+
+1. Navigate to `packages/crafter/env/`
+2. Create or edit `.env.local`:
+   ```env
+   PUBLIC_MEDIA_API_KEY=your-api-key-here
+   ```
+3. Configure the UJLC document to use backend storage:
+   ```json
+   {
+     "ujlc": {
+       "meta": {
+         "media_library": {
+           "storage": "backend",
+           "endpoint": "http://localhost:3000/api"
+         }
+       }
+     }
+   }
+   ```
+
+For detailed setup instructions, see [Media Library Setup Guide](../../packages/crafter/MEDIA_LIBRARY_SETUP.md).
 
 ### Storage Adapters
 

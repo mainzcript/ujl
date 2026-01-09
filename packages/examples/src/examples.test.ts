@@ -1,16 +1,47 @@
 import { validateUJLCDocumentSafe, validateUJLTDocumentSafe } from "@ujl-framework/types";
+import { readdirSync, readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { describe, expect, it } from "vitest";
-import showcaseDocument from "./documents/showcase.ujlc.json" with { type: "json" };
-import defaultTheme from "./themes/default.ujlt.json" with { type: "json" };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const documentsDir = join(__dirname, "documents");
+const themesDir = join(__dirname, "themes");
 
 describe("Example Documents", () => {
-	it("should validate showcase document", () => {
-		const result = validateUJLCDocumentSafe(showcaseDocument);
-		expect(result.success).toBe(true);
-	});
+	const documentFiles = readdirSync(documentsDir).filter(file => file.endsWith(".ujlc.json"));
 
-	it("should validate default theme", () => {
-		const result = validateUJLTDocumentSafe(defaultTheme);
-		expect(result.success).toBe(true);
+	documentFiles.forEach(filename => {
+		it(`should validate ${filename}`, () => {
+			const filePath = join(documentsDir, filename);
+			const fileContent = readFileSync(filePath, "utf-8");
+			const document = JSON.parse(fileContent);
+
+			const result = validateUJLCDocumentSafe(document);
+			expect(result.success).toBe(true);
+			if (!result.success) {
+				console.error(`Validation errors for ${filename}:`, result.error);
+			}
+		});
+	});
+});
+
+describe("Example Themes", () => {
+	const themeFiles = readdirSync(themesDir).filter(file => file.endsWith(".ujlt.json"));
+
+	themeFiles.forEach(filename => {
+		it(`should validate ${filename}`, () => {
+			const filePath = join(themesDir, filename);
+			const fileContent = readFileSync(filePath, "utf-8");
+			const theme = JSON.parse(fileContent);
+
+			const result = validateUJLTDocumentSafe(theme);
+			expect(result.success).toBe(true);
+			if (!result.success) {
+				console.error(`Validation errors for ${filename}:`, result.error);
+			}
+		});
 	});
 });

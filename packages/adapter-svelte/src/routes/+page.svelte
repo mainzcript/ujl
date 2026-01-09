@@ -18,21 +18,26 @@
 	let error: string | null = null;
 
 	onMount(() => {
-		try {
-			// Create composer and compose the document
-			const composer = new Composer();
-			const ast = composer.compose(ujlDocument);
+		// Async initialization (fire and forget)
+		const init = async () => {
+			try {
+				// Create composer and compose the document
+				const composer = new Composer();
+				const ast = await composer.compose(ujlDocument);
 
-			// Use the Svelte adapter to render the AST with tokenSet
-			mountedComponent = svelteAdapter(ast, tokenSet, {
-				target: '#ujl-content'
-			});
+				// Use the Svelte adapter to render the AST with tokenSet
+				mountedComponent = svelteAdapter(ast, tokenSet, {
+					target: '#ujl-content'
+				});
 
-			console.log('UJL document successfully rendered with Svelte adapter!');
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Unknown error occurred';
-			console.error('Error rendering UJL document:', err);
-		}
+				console.log('UJL document successfully rendered with Svelte adapter!');
+			} catch (err) {
+				error = err instanceof Error ? err.message : 'Unknown error occurred';
+				console.error('Error rendering UJL document:', err);
+			}
+		};
+
+		init();
 
 		// Cleanup on component destroy
 		return () => {

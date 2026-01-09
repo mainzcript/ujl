@@ -1,6 +1,6 @@
 <!-- Preview that composes the UJLC document and renders it with UJLT tokens via AdapterRoot. -->
 <script lang="ts">
-	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
+	import type { UJLCDocument, UJLTDocument, UJLAbstractNode } from '@ujl-framework/types';
 	import { Composer } from '@ujl-framework/core';
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
 	import '@ujl-framework/adapter-svelte/styles';
@@ -24,7 +24,25 @@
 	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	const composer = new Composer();
-	const ast = $derived.by(() => composer.compose(ujlcDocument));
+
+	// AST composition with async media resolution
+	let ast = $state<UJLAbstractNode | null>(null);
+
+	// Create media resolver from MediaService
+	const mediaResolver = {
+		async resolve(id: string): Promise<string | null> {
+			const mediaService = crafter.getMediaService();
+			const entry = await mediaService.get(id);
+			return entry?.dataUrl ?? null;
+		}
+	};
+
+	// Re-compose when document changes
+	$effect(() => {
+		composer.compose(ujlcDocument, mediaResolver).then((composedAst) => {
+			ast = composedAst;
+		});
+	});
 
 	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 
@@ -113,7 +131,19 @@
 </script>
 
 <div bind:this={scrollContainerRef} class="h-full w-full overflow-y-auto">
-	<AdapterRoot node={ast} {tokenSet} {mode} showMetadata={true} eventCallback={handleModuleClick} />
+	{#if ast}
+		<AdapterRoot
+			node={ast}
+			{tokenSet}
+			{mode}
+			showMetadata={true}
+			eventCallback={handleModuleClick}
+		/>
+	{:else}
+		<div class="flex h-full w-full items-center justify-center">
+			<div class="text-sm text-muted-foreground">Loading preview...</div>
+		</div>
+	{/if}
 </div>
 
 <style>

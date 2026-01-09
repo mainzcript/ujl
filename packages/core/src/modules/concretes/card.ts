@@ -76,7 +76,7 @@ export class CardModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
 		const title = this.parseField(moduleData, "title", "Card Title");
 		const description = this.parseField(moduleData, "description", this.EMPTY_DOCUMENT);
 
@@ -84,7 +84,7 @@ export class CardModule extends ModuleBase {
 		const contentSlot = moduleData.slots.content;
 		const children: UJLAbstractNode[] = [];
 		for (const childModule of contentSlot) {
-			children.push(composer.composeModule(childModule));
+			children.push(await composer.composeModule(childModule));
 		}
 
 		return {
