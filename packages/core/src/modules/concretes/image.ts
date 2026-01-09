@@ -47,20 +47,26 @@ export class ImageModule extends ModuleBase {
 	/**
 	 * Compose an image module into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
-	 * @param composer - Composer instance for composing child modules
+	 * @param composer - Composer instance for composing child modules and resolving media IDs
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		const image = this.parseField(moduleData, "image", null);
+	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+		const mediaId = this.parseField(moduleData, "image", null);
 		const alt = this.parseField(moduleData, "alt", "");
 
-		// TODO: Use responsive image sizes from Media Library
-		// @see Migration Guide - Media Library Integration (Issue)
+		// Resolve Media ID to UJLImageData via MediaLibrary
+		let imageData = null;
+		if (mediaId) {
+			const mediaLibrary = composer.getMediaLibrary();
+			if (mediaLibrary) {
+				imageData = await mediaLibrary.resolve(mediaId);
+			}
+		}
 
 		return {
 			type: "image",
 			props: {
-				image, // Allows progressive enhancement - placeholder shown until image is selected
+				image: imageData, // Resolved from Media ID, null if not found or no ID
 				alt,
 			},
 			id: moduleData.meta.id,

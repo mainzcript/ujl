@@ -1,4 +1,3 @@
-// storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -20,6 +19,20 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  cors: [
+    // Allow Crafter development server
+    'http://localhost:5173',
+    // Allow Crafter preview (if different port)
+    'http://localhost:4173',
+    // Allow admin panel
+    'http://localhost:3000',
+  ],
+  csrf: [
+    // Same origins as CORS
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://localhost:3000',
+  ],
   collections: [Users, Media],
   editor: lexicalEditor(),
   localization: {

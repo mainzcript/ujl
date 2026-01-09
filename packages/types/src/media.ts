@@ -1,15 +1,32 @@
 /**
  * Image data structure for UJL
  *
- * Currently: Base64 Data-URLs stored directly in UJLC documents.
- * Future: Media IDs referencing Media Library entries.
- *
- * @see Migration Guide - Media Library Integration (Issue)
+ * Used in AST for rendering. Contains only the dataUrl needed for display.
+ * Composer resolves Media IDs to UJLImageData during composition.
  */
 export type UJLImageData = {
 	/**
-	 * Base64 Data-URL (current) or Media ID (future)
-	 * @see Migration Guide - Media Library Integration (Issue)
+	 * Base64 Data-URL for rendering
 	 */
 	dataUrl: string;
+};
+
+/**
+ * Metadata for media library entries
+ */
+export type MediaMetadata = {
+	filename: string;
+	mimeType: string;
+	filesize: number;
+	width: number;
+	height: number;
+};
+
+/**
+ * Complete entry in the Media Library
+ * Stored in UJLC document's media object
+ */
+export type MediaLibraryEntry = {
+	dataUrl: string;
+	metadata: MediaMetadata;
 };

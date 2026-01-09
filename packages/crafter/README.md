@@ -54,8 +54,54 @@ Components receive data via props (read-only) and update state through the Conte
 - **Keyboard Shortcuts**: `Ctrl+C/X/V/I`, `Delete` for copy, cut, paste, insert, delete operations
 - **Drag & Drop**: Node and slot dragging with position calculation (before/after/into), validation prevents invalid drops
 - **Component Insertion**: Searchable component picker from Module Registry, grouped by category
+- **Media Library**: Integrated media management with support for inline and backend storage modes
 
 For implementation details, see `editor.svelte`, `nav-tree-drag-handler.svelte.ts`, and `ujlc-tree.ts`.
+
+### Media Library Integration
+
+The Crafter provides a unified media management system that supports two storage modes:
+
+**Storage Modes:**
+
+- **Inline Storage** (default) - Media stored as Base64 within UJLC documents
+- **Backend Storage** - Media stored on a Payload CMS server
+
+**Key Components:**
+
+- `media-picker.svelte` - UI component for selecting and uploading media
+- `media-library-browser.svelte` - Browse and select from existing media
+- `media-library-uploader.svelte` - Upload new media files
+- `media-service.ts` - Abstract service interface for media operations
+- `inline-media-service.ts` - Implementation for inline storage
+- `backend-media-service.ts` - Implementation for backend storage via Payload CMS
+
+**Configuration:**
+
+Media library configuration is stored in the UJLC document at `ujlc.meta.media_library`:
+
+```json
+{
+	"ujlc": {
+		"meta": {
+			"media_library": {
+				"storage": "backend",
+				"endpoint": "http://localhost:3000/api"
+			}
+		}
+	}
+}
+```
+
+**Environment Variables:**
+
+For backend storage, configure the API key in `env/.env.local`:
+
+```env
+PUBLIC_MEDIA_API_KEY=your-api-key-here
+```
+
+See [MEDIA_LIBRARY_SETUP.md](./MEDIA_LIBRARY_SETUP.md) for detailed setup instructions.
 
 ### Theme Token Generation
 

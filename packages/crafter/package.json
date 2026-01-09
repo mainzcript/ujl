@@ -99,6 +99,7 @@
 		"@tiptap/pm": "^3.14.0",
 		"@tiptap/starter-kit": "^3.14.0",
 		"colorjs.io": "^0.6.0",
-		"compressorjs": "^1.2.1"
+		"compressorjs": "^1.2.1",
+		"svelte-sonner": "^1.0.7"
 	}
 }

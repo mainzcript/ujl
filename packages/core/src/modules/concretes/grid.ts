@@ -39,13 +39,13 @@ export class GridModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
 		const children: UJLAbstractNode[] = [];
 
 		// Compose child modules in the items slot
 		const itemsSlot = moduleData.slots.items;
 		for (const childModule of itemsSlot) {
-			children.push(composer.composeModule(childModule));
+			children.push(await composer.composeModule(childModule));
 		}
 
 		return {

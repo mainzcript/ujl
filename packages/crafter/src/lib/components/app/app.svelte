@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { SidebarProvider, SidebarInset } from '@ujl-framework/ui';
 	import { setContext } from 'svelte';
+	import { toast } from 'svelte-sonner';
 	import type {
 		UJLCDocument,
 		UJLTDocument,
@@ -20,6 +21,7 @@
 	import { Composer } from '@ujl-framework/core';
 	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.ts';
 	import { logger } from '$lib/utils/logger.js';
+	import { InlineMediaService, BackendMediaService } from '$lib/services/index.js';
 
 	import SidebarLeft from './sidebar-left/sidebar-left.svelte';
 	import SidebarRight from './sidebar-right/sidebar-right.svelte';
@@ -64,6 +66,18 @@
 	 * This controls which nodes show their children in the tree view
 	 */
 	let expandedNodeIds = $state<Set<string>>(new Set());
+
+	/**
+	 * Media Library View Active State
+	 * Controls whether the sidebar shows the full-screen media library view
+	 */
+	let isMediaLibraryViewActive = $state(false);
+
+	/**
+	 * Media Library Context
+	 * Stores which field is currently being edited in the media library
+	 */
+	let mediaLibraryContext = $state<import('./context.js').MediaLibraryContext>(null);
 
 	/**
 	 * Toggle a node's expanded state
@@ -138,6 +152,25 @@
 	}
 
 	/**
+	 * Updates the media library by applying a functional updater to it.
+	 * This is the only mutation entrypoint for media library and ensures immutable updates.
+	 *
+	 * @param fn - Function that receives the current media library and returns a new one
+	 *              Must return a new object, not mutate the input
+	 */
+	function updateMedia(fn: (m: typeof ujlcDocument.ujlc.media) => typeof ujlcDocument.ujlc.media) {
+		const currentMedia = ujlcDocument.ujlc.media;
+		const newMedia = fn(currentMedia);
+		ujlcDocument = {
+			...ujlcDocument,
+			ujlc: {
+				...ujlcDocument.ujlc,
+				media: newMedia
+			}
+		};
+	}
+
+	/**
 	 * Set the currently selected node ID
 	 * Updates the URL with ?selected=nodeId query parameter
 	 */
@@ -182,16 +215,19 @@
 	async function handleImportTheme(file: File) {
 		const data = await readJsonFile(file);
 		if (!data) {
-			alert('Failed to read or parse the theme file.');
+			toast.error('Failed to read or parse the theme file.');
 			return;
 		}
 
 		try {
 			const validatedDocument = validateUJLTDocument(data as unknown as UJLTDocument);
 			ujltDocument = validatedDocument;
+			toast.success('Theme imported successfully.');
 		} catch (error) {
 			logger.error('Theme validation failed:', error);
-			alert('The imported theme file is invalid. Please check the file format.');
+			toast.error('Invalid theme file', {
+				description: 'The imported theme file is invalid. Please check the file format.'
+			});
 		}
 	}
 
@@ -204,16 +240,19 @@
 	async function handleImportContent(file: File) {
 		const data = await readJsonFile(file);
 		if (!data) {
-			alert('Failed to read or parse the content file.');
+			toast.error('Failed to read or parse the content file.');
 			return;
 		}
 
 		try {
 			const validatedDocument = validateUJLCDocument(data as unknown as UJLCDocument);
 			ujlcDocument = validatedDocument;
+			toast.success('Content imported successfully.');
 		} catch (error) {
 			logger.error('Content validation failed:', error);
-			alert('The imported content file is invalid. Please check the file format.');
+			toast.error('Invalid content file', {
+				description: 'The imported content file is invalid. Please check the file format.'
+			});
 		}
 	}
 
@@ -223,10 +262,65 @@
 	// Create operations using the factory function
 	const operations = createOperations(() => ujlcDocument.ujlc.root, updateRootSlot, composer);
 
+	/**
+	 * Cached media service that automatically recreates when configuration changes.
+	 * Uses Svelte 5's $derived to track media_library config changes.
+	 * This ensures only one service instance exists and avoids repeated connection checks.
+	 */
+	const mediaService = $derived.by(() => {
+		const config = ujlcDocument.ujlc.meta.media_library;
+
+		if (config.storage === 'backend') {
+			// Get API key from environment variable
+			const apiKey = import.meta.env.PUBLIC_MEDIA_API_KEY;
+
+			if (!apiKey) {
+				logger.warn(
+					'PUBLIC_MEDIA_API_KEY not found in environment. Backend media service may not work properly.'
+				);
+			}
+
+			const service = new BackendMediaService(config.endpoint, apiKey);
+
+			// Check connection asynchronously (don't block initialization)
+			service.checkConnection().then((status) => {
+				if (!status.connected) {
+					logger.error('Backend Media Service is not reachable:', status.error);
+					toast.error('Media Library Backend Unavailable', {
+						description: `${status.error}\n\nPlease check:\n- Is the backend service running?\n- Is the endpoint correct? (${config.endpoint})\n- Is the API key configured in .env.local?`
+					});
+				}
+			});
+
+			return service;
+		}
+
+		return new InlineMediaService(() => ujlcDocument.ujlc.media, updateMedia);
+	});
+
 	// Provide context API to child components
 	const crafterContext: CrafterContext = {
+		isMediaLibraryViewActive: () => isMediaLibraryViewActive,
+		setMediaLibraryViewActive: (
+			active: boolean,
+			context?: import('./context.js').MediaLibraryContext
+		) => {
+			isMediaLibraryViewActive = active;
+			if (context !== undefined) {
+				mediaLibraryContext = context;
+			}
+			// Clear context when closing
+			if (!active) {
+				mediaLibraryContext = null;
+			}
+		},
+		getMediaLibraryContext: () => mediaLibraryContext,
 		updateTokenSet,
 		updateRootSlot,
+		updateMedia,
+		getMedia: () => ujlcDocument.ujlc.media,
+		getMediaService: () => mediaService,
+		getMeta: () => ujlcDocument.ujlc.meta,
 		getRootSlot: () => ujlcDocument.ujlc.root,
 		setSelectedNodeId,
 		getExpandedNodeIds: () => expandedNodeIds,

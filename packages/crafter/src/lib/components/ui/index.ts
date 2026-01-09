@@ -8,4 +8,6 @@ export * from './style-toggles/index.js';
 export * from './font-weight-slider/index.js';
 export * from './field-input/index.js';
 export * from './media-picker/index.js';
+export * from './media-library-browser/index.js';
+export * from './media-library-uploader/index.js';
 export * from './richtext-input/index.js';

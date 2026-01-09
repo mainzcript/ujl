@@ -1,10 +1,35 @@
 import { z } from "zod";
+import type { MediaLibraryEntry } from "./media.js";
 
 /**
  * Raw field value schema
  * Uses z.unknown() to allow any data type from UJL documents
  */
 const UJLCFieldObjectSchema = z.unknown();
+
+/**
+ * Media metadata schema
+ */
+const MediaMetadataSchema = z.object({
+	filename: z.string(),
+	mimeType: z.string(),
+	filesize: z.number(),
+	width: z.number(),
+	height: z.number(),
+});
+
+/**
+ * Media library entry schema
+ */
+const MediaLibraryEntrySchema = z.object({
+	dataUrl: z.string(),
+	metadata: MediaMetadataSchema,
+});
+
+/**
+ * Media library object schema (record of media entries)
+ */
+const MediaLibraryObjectSchema = z.record(z.string(), MediaLibraryEntrySchema);
 
 /**
  * Module metadata schema
@@ -43,6 +68,19 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
+ * Media library storage configuration schema
+ */
+const MediaLibraryStorageConfigSchema = z.discriminatedUnion("storage", [
+	z.object({
+		storage: z.literal("inline"),
+	}),
+	z.object({
+		storage: z.literal("backend"),
+		endpoint: z.string().url(),
+	}),
+]);
+
+/**
  * Document metadata schema
  */
 const UJLCDocumentMetaSchema = z.object({
@@ -53,6 +91,7 @@ const UJLCDocumentMetaSchema = z.object({
 	_version: z.string(),
 	_instance: z.string(),
 	_embedding_model_hash: z.string(),
+	media_library: MediaLibraryStorageConfigSchema.optional().default({ storage: "inline" }),
 });
 
 /**
@@ -60,6 +99,7 @@ const UJLCDocumentMetaSchema = z.object({
  */
 const UJLCObjectSchema = z.object({
 	meta: UJLCDocumentMetaSchema,
+	media: MediaLibraryObjectSchema.default({}),
 	root: UJLCSlotObjectSchema,
 });
 
@@ -79,6 +119,8 @@ export type UJLCModuleMeta = z.infer<typeof UJLCModuleMetaSchema>;
 export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 export type UJLCSlotObject = z.infer<typeof UJLCSlotObjectSchema>;
 export type UJLCDocumentMeta = z.infer<typeof UJLCDocumentMetaSchema>;
+export type UJLCMediaLibrary = Record<string, MediaLibraryEntry>;
+export type MediaLibraryStorageConfig = z.infer<typeof MediaLibraryStorageConfigSchema>;
 export type UJLCObject = z.infer<typeof UJLCObjectSchema>;
 export type UJLCDocument = z.infer<typeof UJLCDocumentSchema>;
 
