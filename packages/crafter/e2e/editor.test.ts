@@ -168,12 +168,14 @@ test.describe('Editor Mode Tests', () => {
 		await chevronButton.click();
 		await page.waitForTimeout(400);
 
-		// Find a child node (not the root)
+		// Find a child node (not the root) and wait for it to be visible
 		const childNodes = page.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]');
 		const childCount = await childNodes.count();
 
 		if (childCount > 0) {
 			const childNode = childNodes.first();
+			// Wait for the child node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			const nodeId = await childNode.getAttribute('data-tree-node-id');
 
 			// Select the child node
@@ -261,6 +263,8 @@ test.describe('Editor Mode Tests', () => {
 
 		if (childCount > 0) {
 			const childNode = childNodes.first();
+			// Wait for the child node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			const nodeId = await childNode.getAttribute('data-tree-node-id');
 
 			await childNode.click();
@@ -600,6 +604,8 @@ test.describe('Editor Component Operations Tests', () => {
 			// Find a child node's context menu button (the three-dots button)
 			// Use first() to avoid strict mode violation
 			const childItem = page.locator('[data-slot="sidebar-menu-sub-item"]').first();
+			// Wait for the child item to be visible (collapsible animation might still be running)
+			await expect(childItem).toBeVisible({ timeout: 5000 });
 			const menuButton = childItem.locator('button[data-slot="dropdown-menu-trigger"]').first();
 
 			if (await menuButton.isVisible().catch(() => false)) {
@@ -629,6 +635,8 @@ test.describe('Editor Component Operations Tests', () => {
 
 			// Find child node's context menu
 			const childItem = page.locator('[data-slot="sidebar-menu-sub-item"]').first();
+			// Wait for the child item to be visible (collapsible animation might still be running)
+			await expect(childItem).toBeVisible({ timeout: 5000 });
 			const menuButton = childItem.locator('button[data-slot="dropdown-menu-trigger"]').first();
 
 			if (await menuButton.isVisible().catch(() => false)) {
@@ -675,6 +683,8 @@ test.describe('Editor Component Operations Tests', () => {
 
 			// Find child node's context menu
 			const childItem = page.locator('[data-slot="sidebar-menu-sub-item"]').first();
+			// Wait for the child item to be visible (collapsible animation might still be running)
+			await expect(childItem).toBeVisible({ timeout: 5000 });
 			const menuButton = childItem.locator('button[data-slot="dropdown-menu-trigger"]').first();
 
 			if (await menuButton.isVisible().catch(() => false)) {
@@ -717,6 +727,8 @@ test.describe('Editor Component Operations Tests', () => {
 			const childNode = page
 				.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
 				.first();
+			// Wait for the child node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			await childNode.click();
 			await page.waitForTimeout(200);
 
@@ -769,6 +781,8 @@ test.describe('Editor Component Operations Tests', () => {
 			const childNode = page
 				.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
 				.first();
+			// Wait for the child node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			const nodeId = await childNode.getAttribute('data-tree-node-id');
 
 			// Select it
@@ -844,6 +858,8 @@ test.describe('Editor Component Operations Tests', () => {
 			const childNode = page
 				.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
 				.first();
+			// Wait for the child node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			const nodeId = await childNode.getAttribute('data-tree-node-id');
 
 			// Select it

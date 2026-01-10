@@ -125,6 +125,8 @@ test.describe('Properties Panel Tests', () => {
 
 			if (nodeCount > 0) {
 				const node = childNodes.first();
+				// Wait for the node to be visible (collapsible animation might still be running)
+				await expect(node).toBeVisible({ timeout: 5000 });
 				await node.click();
 				await page.waitForTimeout(300);
 
@@ -373,6 +375,8 @@ test.describe('Properties Panel Tests', () => {
 			const childNode = page
 				.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
 				.first();
+			// Wait for the node to be visible (collapsible animation might still be running)
+			await expect(childNode).toBeVisible({ timeout: 5000 });
 			await childNode.click();
 			await page.waitForTimeout(300);
 

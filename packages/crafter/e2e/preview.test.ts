@@ -82,7 +82,6 @@ test.describe('Preview Tests', () => {
 		// Get the module ID
 		const moduleId = await previewComponent.getAttribute('data-ujl-module-id');
 		expect(moduleId).toBeTruthy();
-		console.log('Testing module ID:', moduleId);
 
 		// Click the component in the preview
 		await previewComponent.click();
@@ -159,6 +158,8 @@ test.describe('Preview Tests', () => {
 		// Select a node that's not the first (to ensure scrolling is needed)
 		if (nodeCount > 2) {
 			const targetNode = allTreeNodes.nth(2);
+			// Wait for the node to be visible (collapsible animation might still be running)
+			await expect(targetNode).toBeVisible({ timeout: 5000 });
 			const nodeId = await targetNode.getAttribute('data-tree-node-id');
 			expect(nodeId).toBeTruthy();
 
@@ -195,6 +196,8 @@ test.describe('Preview Tests', () => {
 		const firstNode = page
 			.locator('[data-slot="sidebar-menu-sub-item"] [data-tree-node-id]')
 			.first();
+		// Wait for the node to be visible (collapsible animation might still be running)
+		await expect(firstNode).toBeVisible({ timeout: 5000 });
 		await firstNode.click();
 		await page.waitForTimeout(500);
 
@@ -297,11 +300,6 @@ test.describe('Preview Tests', () => {
 		// Find a clickable component
 		const previewComponent = page.locator('[data-ujl-module-id][role="button"]').nth(1);
 		await expect(previewComponent).toBeVisible();
-
-		console.log(
-			'Hovering over component with ID:',
-			await previewComponent.getAttribute('data-ujl-module-id')
-		);
 
 		// Hover over the component
 		await previewComponent.hover();
