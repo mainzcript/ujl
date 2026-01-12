@@ -31,8 +31,6 @@
 	} = $props();
 
 	let containerRef: HTMLElement | null = $state(null);
-	let sidebarEl: HTMLElement | null = $state(null);
-	let panelEl: HTMLElement | null = $state(null);
 
 	// Set App context (used by child components via useApp())
 	// Initialize once with initial prop values.
@@ -46,10 +44,23 @@
 	// Set App registry (used by child components to register their content)
 	const registry = setAppRegistry();
 
-	// Set refs for visibility detection
+	// ResizeObserver for responsive breakpoint detection
 	$effect(() => {
-		app.setSidebarRef(sidebarEl);
-		app.setPanelRef(panelEl);
+		if (!containerRef) return;
+
+		const observer = new ResizeObserver((entries) => {
+			const width = entries[0]?.contentRect.width ?? 0;
+			app.setContainerWidth(width);
+		});
+
+		observer.observe(containerRef);
+
+		// Initial width measurement
+		app.setContainerWidth(containerRef.offsetWidth);
+
+		return () => {
+			observer.disconnect();
+		};
 	});
 
 	$effect(() => {
@@ -61,7 +72,7 @@
 	bind:this={containerRef}
 	data-slot="app-wrapper"
 	style="--ujl-app-sidebar-width: {APP_SIDEBAR_WIDTH}; --ujl-app-panel-width: {APP_PANEL_WIDTH}; {style}"
-	class={cn('@container/ujl-app h-full bg-background', className)}
+	class={cn('h-full bg-background', className)}
 	{...restProps}
 >
 	<!-- Render children first so they can register their content -->
@@ -74,7 +85,7 @@
 			<div
 				class={cn(
 					'flex shrink-0 items-center justify-between gap-2 overflow-hidden duration-300',
-					app.sidebarOpen ? '@7xl/ujl-app:min-w-[240px]' : 'min-w-0'
+					app.sidebarDesktopOpen && app.isDesktopSidebar ? 'min-w-[240px]' : 'min-w-0'
 				)}
 			>
 				<AppSidebarTrigger />
@@ -92,20 +103,21 @@
 		<!-- Main Content -->
 		<div class="flex flex-1 gap-1">
 			<!-- Sidebar (Desktop) -->
-			<div
-				bind:this={sidebarEl}
-				class={cn(
-					'hidden h-full shrink-0 overflow-hidden duration-300 @7xl/ujl-app:block',
-					app.sidebarOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0'
-				)}
-				data-slot="app-sidebar"
-			>
-				{#if registry.sidebar}
-					<div class="h-full w-(--ujl-app-sidebar-width) p-2">
-						{@render registry.sidebar()}
-					</div>
-				{/if}
-			</div>
+			{#if app.isDesktopSidebar}
+				<div
+					class={cn(
+						'h-full shrink-0 overflow-hidden duration-300',
+						app.sidebarDesktopOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0'
+					)}
+					data-slot="app-sidebar"
+				>
+					{#if registry.sidebar}
+						<div class="h-full w-(--ujl-app-sidebar-width) p-2">
+							{@render registry.sidebar()}
+						</div>
+					{/if}
+				</div>
+			{/if}
 
 			<!-- Canvas and Panel Container -->
 			<div class="flex flex-1 flex-col gap-1">
@@ -122,49 +134,52 @@
 					{/if}
 
 					<!-- Panel (Desktop) -->
-					<div
-						bind:this={panelEl}
-						class={cn(
-							'hidden shrink-0 overflow-hidden duration-300 @5xl/ujl-app:block',
-							app.panelOpen ? 'w-sm' : '-ms-1 w-0'
-						)}
-						data-slot="app-panel"
-					>
-						{#if registry.panel}
-							<Card class="flex h-full w-sm! flex-col gap-0 p-0">
-								<div class="flex justify-end p-2">
-									<Button
-										variant="ghost"
-										size="icon"
-										class="size-6"
-										onclick={app.hidePanel}
-										title="Close Panel"
-									>
-										<XIcon class="size-4" />
-									</Button>
-								</div>
-								<div class="flex-1 p-6 pt-0">
-									{@render registry.panel()}
-								</div>
-							</Card>
-						{/if}
-					</div>
+					{#if app.isDesktopPanel}
+						<div
+							class={cn(
+								'shrink-0 overflow-hidden duration-300',
+								app.panelDesktopOpen ? 'w-sm' : '-ms-1 w-0'
+							)}
+							data-slot="app-panel"
+						>
+							{#if registry.panel}
+								<Card class="flex h-full w-sm! flex-col gap-0 p-0">
+									<div class="flex justify-end p-2">
+										<Button
+											variant="ghost"
+											size="icon"
+											class="size-6"
+											onclick={app.hidePanel}
+											title="Close Panel"
+										>
+											<XIcon class="size-4" />
+										</Button>
+									</div>
+									<div class="flex-1 p-6 pt-0">
+										{@render registry.panel()}
+									</div>
+								</Card>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Sheet fallback for Sidebar (mobile) -->
-	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
-		<SheetContent side="left" class="@7xl/ujl-app:hidden">
-			<SheetHeader />
-			<div class="flex-1 p-4 pt-0">
-				{#if registry.sidebar}
-					{@render registry.sidebar()}
-				{/if}
-			</div>
-		</SheetContent>
-	</Sheet>
+	{#if !app.isDesktopSidebar}
+		<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
+			<SheetContent side="left">
+				<SheetHeader />
+				<div class="flex-1 p-4 pt-0">
+					{#if registry.sidebar}
+						{@render registry.sidebar()}
+					{/if}
+				</div>
+			</SheetContent>
+		</Sheet>
+	{/if}
 
 	<!-- Drawer fallback for Panel (mobile) -->
 	<Drawer bind:open={() => app.panelDrawerOpen, (v) => (app.panelDrawerOpen = v)}>

@@ -34,8 +34,8 @@
 		if (onAppReady) {
 			onAppReady({
 				app,
-				getSidebarOpen: () => app.sidebarOpen,
-				getPanelOpen: () => app.panelOpen,
+				getSidebarOpen: () => app.sidebarDesktopOpen,
+				getPanelOpen: () => app.panelDesktopOpen,
 				getIsSidebarVisible: () => app.isSidebarVisible,
 				getIsPanelVisible: () => app.isPanelVisible
 			});

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
 import TestWrapper from './test-wrapper.svelte';
 import type { useApp } from './context.svelte.js';
+import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from './constants.js';
 
 type AppState = ReturnType<typeof useApp>;
 type TestHelpers = {
@@ -37,21 +38,14 @@ async function renderApp(options: {
 	return helpers;
 }
 
-// Mock getComputedStyle for visibility checks
-function mockElementVisible() {
-	const mockElement = document.createElement('div');
-	vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-		display: 'block'
-	} as CSSStyleDeclaration);
-	return mockElement;
+// Helper to set container width for desktop mode
+function setDesktopWidth(app: ReturnType<typeof useApp>, breakpoint: number) {
+	app.setContainerWidth(breakpoint);
 }
 
-function mockElementHidden() {
-	const mockElement = document.createElement('div');
-	vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-		display: 'none'
-	} as CSSStyleDeclaration);
-	return mockElement;
+// Helper to set container width for mobile mode
+function setMobileWidth(app: ReturnType<typeof useApp>, breakpoint: number) {
+	app.setContainerWidth(breakpoint - 1);
 }
 
 describe('AppState', () => {
@@ -61,15 +55,15 @@ describe('AppState', () => {
 	});
 
 	describe('state initialization', () => {
-		it('should derive sidebarOpen from props', async () => {
+		it('should derive sidebarDesktopOpen from props', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: true });
-			expect(app.sidebarOpen).toBe(true);
+			expect(app.sidebarDesktopOpen).toBe(true);
 			expect(getSidebarOpen()).toBe(true);
 		});
 
-		it('should derive panelOpen from props', async () => {
+		it('should derive panelDesktopOpen from props', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			expect(app.panelOpen).toBe(false);
+			expect(app.panelDesktopOpen).toBe(false);
 			expect(getPanelOpen()).toBe(false);
 		});
 
@@ -92,11 +86,9 @@ describe('AppState', () => {
 	});
 
 	describe('requireSidebar', () => {
-		it('should open sidebar and close sheet when element is visible', async () => {
+		it('should open sidebar and close sheet when desktop mode', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setSidebarRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.sidebarSheetOpen = true;
 			app.requireSidebar();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -105,21 +97,9 @@ describe('AppState', () => {
 			expect(app.sidebarSheetOpen).toBe(false);
 		});
 
-		it('should open sheet when element is not visible', async () => {
+		it('should open sheet when mobile mode', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
-			const mockElement = mockElementHidden();
-
-			app.setSidebarRef(mockElement);
-			app.requireSidebar();
-
-			expect(app.sidebarSheetOpen).toBe(true);
-			expect(getSidebarOpen()).toBe(false);
-		});
-
-		it('should open sheet when element ref is null', async () => {
-			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
-
-			app.setSidebarRef(null);
+			setMobileWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.requireSidebar();
 
 			expect(app.sidebarSheetOpen).toBe(true);
@@ -141,8 +121,9 @@ describe('AppState', () => {
 	});
 
 	describe('toggleSidebar', () => {
-		it('should hide sidebar when sidebarOpen is true', async () => {
+		it('should hide sidebar when sidebarDesktopOpen is true', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: true });
+			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 
 			app.toggleSidebar();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -164,9 +145,7 @@ describe('AppState', () => {
 
 		it('should require sidebar when both closed', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setSidebarRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.sidebarSheetOpen = false;
 			app.toggleSidebar();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -176,11 +155,9 @@ describe('AppState', () => {
 	});
 
 	describe('preferPanel', () => {
-		it('should open panel when element is visible', async () => {
+		it('should open panel when desktop mode', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setPanelRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = true;
 			app.preferPanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -189,21 +166,9 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should not open panel when element is not visible', async () => {
+		it('should not open panel when mobile mode', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementHidden();
-
-			app.setPanelRef(mockElement);
-			app.preferPanel();
-			await new Promise((resolve) => setTimeout(resolve, 10));
-
-			expect(getPanelOpen()).toBe(false);
-		});
-
-		it('should not open panel when element ref is null', async () => {
-			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-
-			app.setPanelRef(null);
+			setMobileWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.preferPanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -212,11 +177,9 @@ describe('AppState', () => {
 	});
 
 	describe('requirePanel', () => {
-		it('should open panel and close drawer when element is visible', async () => {
+		it('should open panel and close drawer when desktop mode', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setPanelRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = true;
 			app.requirePanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -225,21 +188,9 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should open drawer when element is not visible', async () => {
+		it('should open drawer when mobile mode', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementHidden();
-
-			app.setPanelRef(mockElement);
-			app.requirePanel();
-
-			expect(app.panelDrawerOpen).toBe(true);
-			expect(getPanelOpen()).toBe(false);
-		});
-
-		it('should open drawer when element ref is null', async () => {
-			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-
-			app.setPanelRef(null);
+			setMobileWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.requirePanel();
 
 			expect(app.panelDrawerOpen).toBe(true);
@@ -261,8 +212,9 @@ describe('AppState', () => {
 	});
 
 	describe('togglePanel', () => {
-		it('should hide panel when panelOpen is true', async () => {
+		it('should hide panel when panelDesktopOpen is true', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: true });
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 
 			app.togglePanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -284,9 +236,7 @@ describe('AppState', () => {
 
 		it('should require panel when both closed', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setPanelRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = false;
 			app.togglePanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -295,34 +245,30 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('ref setters', () => {
-		it('should set sidebar ref and use it for visibility check', async () => {
+	describe('container width setter', () => {
+		it('should set container width and use it for sidebar visibility check', async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setSidebarRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.requireSidebar();
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(getSidebarOpen()).toBe(true);
 		});
 
-		it('should set panel ref and use it for visibility check', async () => {
+		it('should set container width and use it for panel visibility check', async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
-			const mockElement = mockElementVisible();
-
-			app.setPanelRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.requirePanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			expect(getPanelOpen()).toBe(true);
 		});
 
-		it('should handle null refs gracefully', async () => {
+		it('should handle mobile width gracefully', async () => {
 			const { app } = await renderApp({ initialSidebarOpen: false, initialPanelOpen: false });
 
-			app.setSidebarRef(null);
-			app.setPanelRef(null);
+			setMobileWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
+			setMobileWidth(app, BREAKPOINT_PANEL_DESKTOP);
 
 			app.requireSidebar();
 			app.requirePanel();
@@ -332,33 +278,30 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('visibility check logic', () => {
-		it('should use getComputedStyle to check element visibility', () => {
-			const mockElement = document.createElement('div');
-			const mockStyle = { display: 'block' };
+	describe('breakpoint detection', () => {
+		it('should detect desktop sidebar mode when width >= breakpoint', async () => {
+			const { app } = await renderApp({});
+			app.setContainerWidth(BREAKPOINT_SIDEBAR_DESKTOP);
+			expect(app.isDesktopSidebar).toBe(true);
 
-			vi.spyOn(window, 'getComputedStyle').mockReturnValue(mockStyle as CSSStyleDeclaration);
-
-			const result = getComputedStyle(mockElement).display !== 'none';
-			expect(result).toBe(true);
-
-			mockStyle.display = 'none';
-			const resultHidden = getComputedStyle(mockElement).display !== 'none';
-			expect(resultHidden).toBe(false);
+			app.setContainerWidth(BREAKPOINT_SIDEBAR_DESKTOP - 1);
+			expect(app.isDesktopSidebar).toBe(false);
 		});
 
-		it('should handle null element refs', () => {
-			const element: HTMLElement | null = null;
-			const result = element !== null && getComputedStyle(element!).display !== 'none';
-			expect(result).toBe(false);
+		it('should detect desktop panel mode when width >= breakpoint', async () => {
+			const { app } = await renderApp({});
+			app.setContainerWidth(BREAKPOINT_PANEL_DESKTOP);
+			expect(app.isDesktopPanel).toBe(true);
+
+			app.setContainerWidth(BREAKPOINT_PANEL_DESKTOP - 1);
+			expect(app.isDesktopPanel).toBe(false);
 		});
 	});
 
 	describe('isSidebarVisible', () => {
 		it('should return true when desktop sidebar is open and visible', async () => {
 			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: true });
-			const mockElement = mockElementVisible();
-			app.setSidebarRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			expect(getIsSidebarVisible()).toBe(true);
@@ -384,8 +327,7 @@ describe('AppState', () => {
 	describe('isPanelVisible', () => {
 		it('should return true when desktop panel is open and visible', async () => {
 			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: true });
-			const mockElement = mockElementVisible();
-			app.setPanelRef(mockElement);
+			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			expect(getIsPanelVisible()).toBe(true);
@@ -430,7 +372,7 @@ describe('AppState', () => {
 			app.hidePanel();
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
-			expect(app.panelOpen).toBe(false);
+			expect(app.panelDesktopOpen).toBe(false);
 		});
 
 		it('should return cleanup function', async () => {
@@ -471,7 +413,7 @@ describe('AppState', () => {
 			app.hideSidebar();
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
-			expect(app.sidebarOpen).toBe(false);
+			expect(app.sidebarDesktopOpen).toBe(false);
 		});
 
 		it('should return cleanup function', async () => {

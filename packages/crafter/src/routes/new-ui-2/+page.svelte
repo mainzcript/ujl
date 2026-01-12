@@ -27,13 +27,13 @@
 
 <AppHeader>
 	<div class="flex items-center justify-between">
-		<span>
-			Header Element 1
-		</span>
-		<span>
-			Header Element 2
-		</span>
-		<Button onclick={() => app.togglePanel()} variant={app.panelOpen ? 'muted' : 'ghost'} size="icon">
+		<span> Header Element 1 </span>
+		<span> Header Element 2 </span>
+		<Button
+			onclick={() => app.togglePanel()}
+			variant={app.isPanelVisible ? 'muted' : 'ghost'}
+			size="icon"
+		>
 			<Settings2Icon />
 		</Button>
 	</div>

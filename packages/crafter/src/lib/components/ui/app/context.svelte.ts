@@ -1,5 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Snippet } from 'svelte';
+import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from './constants.js';
 
 export type AppInitOptions = {
 	initialSidebarOpen?: boolean;
@@ -8,8 +9,8 @@ export type AppInitOptions = {
 
 class AppState {
 	// Desktop States (internal reactive state)
-	#sidebarOpen = $state<boolean>(true);
-	#panelOpen = $state<boolean>(false);
+	#sidebarDesktopOpen = $state<boolean>(true);
+	#panelDesktopOpen = $state<boolean>(false);
 
 	// Mobile States
 	sidebarSheetOpen = $state(false);
@@ -19,31 +20,54 @@ class AppState {
 	#onPanelClose: (() => void) | null = null;
 	#onSidebarClose: (() => void) | null = null;
 
-	// Refs for visibility detection
-	#sidebarEl: HTMLElement | null = null;
-	#panelEl: HTMLElement | null = null;
+	// Container width for responsive breakpoint detection
+	#containerWidth = $state(0);
 
 	constructor(options?: AppInitOptions) {
-		this.#sidebarOpen = options?.initialSidebarOpen ?? true;
-		this.#panelOpen = options?.initialPanelOpen ?? false;
+		this.#sidebarDesktopOpen = options?.initialSidebarOpen ?? true;
+		this.#panelDesktopOpen = options?.initialPanelOpen ?? false;
 	}
 
 	// Desktop States (getters)
-	get sidebarOpen(): boolean {
-		return this.#sidebarOpen;
+	// NOTE: These are internal states. Consumers should use isSidebarVisible/isPanelVisible instead.
+	/**
+	 * @internal Internal state for desktop sidebar. Use `isSidebarVisible` for consumer code.
+	 */
+	get sidebarDesktopOpen(): boolean {
+		return this.#sidebarDesktopOpen;
 	}
 
-	get panelOpen(): boolean {
-		return this.#panelOpen;
+	/**
+	 * @internal Internal state for desktop panel. Use `isPanelVisible` for consumer code.
+	 */
+	get panelDesktopOpen(): boolean {
+		return this.#panelDesktopOpen;
+	}
+
+	// Breakpoint detection (derived from container width)
+	get isDesktopSidebar(): boolean {
+		return this.#containerWidth >= BREAKPOINT_SIDEBAR_DESKTOP;
+	}
+
+	get isDesktopPanel(): boolean {
+		return this.#containerWidth >= BREAKPOINT_PANEL_DESKTOP;
 	}
 
 	// Combined visibility (Desktop + Mobile)
+	/**
+	 * Returns true if the sidebar is currently visible (either as desktop sidebar or mobile sheet).
+	 * This is the recommended API for consumers - it abstracts away desktop/mobile differences.
+	 */
 	get isSidebarVisible(): boolean {
-		return (this.#canShowSidebar() && this.#sidebarOpen) || this.sidebarSheetOpen;
+		return (this.isDesktopSidebar && this.#sidebarDesktopOpen) || this.sidebarSheetOpen;
 	}
 
+	/**
+	 * Returns true if the panel is currently visible (either as desktop panel or mobile drawer).
+	 * This is the recommended API for consumers - it abstracts away desktop/mobile differences.
+	 */
 	get isPanelVisible(): boolean {
-		return (this.#canShowPanel() && this.#panelOpen) || this.panelDrawerOpen;
+		return (this.isDesktopPanel && this.#panelDesktopOpen) || this.panelDrawerOpen;
 	}
 
 	// Callback registration
@@ -63,12 +87,12 @@ class AppState {
 
 	// Sidebar methods
 	preferSidebar = () => {
-		this.#sidebarOpen = true;
+		this.#sidebarDesktopOpen = true;
 	};
 
 	requireSidebar = () => {
-		if (this.#canShowSidebar()) {
-			this.#sidebarOpen = true;
+		if (this.isDesktopSidebar) {
+			this.#sidebarDesktopOpen = true;
 			this.sidebarSheetOpen = false;
 		} else {
 			this.sidebarSheetOpen = true;
@@ -76,14 +100,13 @@ class AppState {
 	};
 
 	hideSidebar = () => {
-		this.#sidebarOpen = false;
+		this.#sidebarDesktopOpen = false;
 		this.sidebarSheetOpen = false;
 		this.#onSidebarClose?.();
 	};
 
 	toggleSidebar = () => {
-		const isOpen = this.sidebarSheetOpen || this.#sidebarOpen;
-		if (isOpen) {
+		if (this.isSidebarVisible) {
 			this.hideSidebar();
 		} else {
 			this.requireSidebar();
@@ -92,15 +115,15 @@ class AppState {
 
 	// Panel methods
 	preferPanel = () => {
-		if (this.#canShowPanel()) {
-			this.#panelOpen = true;
+		if (this.isDesktopPanel) {
+			this.#panelDesktopOpen = true;
 			this.panelDrawerOpen = false;
 		}
 	};
 
 	requirePanel = () => {
-		if (this.#canShowPanel()) {
-			this.#panelOpen = true;
+		if (this.isDesktopPanel) {
+			this.#panelDesktopOpen = true;
 			this.panelDrawerOpen = false;
 		} else {
 			this.panelDrawerOpen = true;
@@ -108,35 +131,22 @@ class AppState {
 	};
 
 	hidePanel = () => {
-		this.#panelOpen = false;
+		this.#panelDesktopOpen = false;
 		this.panelDrawerOpen = false;
 		this.#onPanelClose?.();
 	};
 
 	togglePanel = () => {
-		const isOpen = this.panelDrawerOpen || this.#panelOpen;
-		if (isOpen) {
+		if (this.isPanelVisible) {
 			this.hidePanel();
 		} else {
 			this.requirePanel();
 		}
 	};
 
-	// Visibility detection
-	#canShowSidebar(): boolean {
-		return this.#sidebarEl !== null && getComputedStyle(this.#sidebarEl).display !== 'none';
-	}
-
-	#canShowPanel(): boolean {
-		return this.#panelEl !== null && getComputedStyle(this.#panelEl).display !== 'none';
-	}
-
-	setSidebarRef(el: HTMLElement | null) {
-		this.#sidebarEl = el;
-	}
-
-	setPanelRef(el: HTMLElement | null) {
-		this.#panelEl = el;
+	// Container width setter (called by ResizeObserver)
+	setContainerWidth(width: number) {
+		this.#containerWidth = width;
 	}
 }
 

@@ -15,25 +15,27 @@
 </script>
 
 <!-- Desktop toggle button -->
-<Button
-	variant="ghost"
-	size="icon"
-	class={cn('hidden size-8 @7xl/ujl-app:flex', className)}
-	onclick={app.toggleSidebar}
-	title={app.sidebarOpen ? 'Collapse Sidebar' : 'Show Sidebar'}
->
-	{#if app.sidebarOpen}
-		<PanelLeftCloseIcon />
-	{:else}
-		<PanelLeftOpenIcon />
-	{/if}
-</Button>
+{#if app.isDesktopSidebar}
+	<Button
+		variant="ghost"
+		size="icon"
+		class={cn('size-8', className)}
+		onclick={app.toggleSidebar}
+		title={app.sidebarDesktopOpen ? 'Collapse Sidebar' : 'Show Sidebar'}
+	>
+		{#if app.sidebarDesktopOpen}
+			<PanelLeftCloseIcon />
+		{:else}
+			<PanelLeftOpenIcon />
+		{/if}
+	</Button>
+{/if}
 
 <!-- Mobile sheet trigger -->
-<div class="@7xl/ujl-app:hidden">
+{#if !app.isDesktopSidebar}
 	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
 		<SheetTriggerButton variant="ghost" size="icon" class="size-8" title="Open Sidebar">
 			<PanelLeftOpenIcon />
 		</SheetTriggerButton>
 	</Sheet>
-</div>
+{/if}
