@@ -30,18 +30,18 @@ UJL implementiert eine strikte Trennung auf höherer Abstraktionsebene:
 ```typescript
 // packages/types/src/ujl-content.ts
 export const UJLCDocumentSchema = z.object({
-  ujlc: z.object({
-    meta: UJLCMetaSchema,
-    media: z.record(z.string(), UJLCMediaEntrySchema),
-    root: z.array(z.lazy(() => UJLCModuleObjectSchema))
-  })
+	ujlc: z.object({
+		meta: UJLCMetaSchema,
+		media: z.record(z.string(), UJLCMediaEntrySchema),
+		root: z.array(z.lazy(() => UJLCModuleObjectSchema)),
+	}),
 });
 
 // packages/types/src/ujl-theme.ts
 export const UJLTDocumentSchema = z.object({
-  ujlt: z.object({
-    tokens: UJLTTokenSetSchema  // Farben, Typografie, Spacing
-  })
+	ujlt: z.object({
+		tokens: UJLTTokenSetSchema, // Farben, Typografie, Spacing
+	}),
 });
 ```
 
@@ -56,17 +56,20 @@ export const UJLTDocumentSchema = z.object({
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Garantierte Markenkonsistenz
 - ✅ Zentrale Theme-Updates wirken sofort auf alle Dokumente
 - ✅ Vereinfachte Content-Erstellung für Redakteure
 - ✅ Bessere AI-Integration durch strukturierte Daten
 
 **Negativ:**
+
 - ❌ Weniger Flexibilität für individuelle Design-Anpassungen pro Dokument
 - ❌ Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
 - ❌ Erfordert initiales Setup eines Theme-Systems
 
 **Betroffene Dateien:**
+
 - [packages/types/src/ujl-content.ts](../../../packages/types/src/ujl-content.ts)
 - [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
 - [packages/core/src/composer.ts](../../../packages/core/src/composer.ts)
@@ -90,24 +93,24 @@ Implementierung eines **Module Registry Pattern** mit abstrakter `ModuleBase`-Kl
 ```typescript
 // packages/core/src/modules/base.ts
 export abstract class ModuleBase {
-  abstract readonly name: string;
-  abstract readonly label: string;
-  abstract readonly description: string;
-  abstract readonly category: ComponentCategory;
-  abstract readonly tags: readonly string[];
-  abstract readonly icon: string;
-  abstract readonly fields: FieldSet;
-  abstract readonly slots: SlotSet;
+	abstract readonly name: string;
+	abstract readonly label: string;
+	abstract readonly description: string;
+	abstract readonly category: ComponentCategory;
+	abstract readonly tags: readonly string[];
+	abstract readonly icon: string;
+	abstract readonly fields: FieldSet;
+	abstract readonly slots: SlotSet;
 
-  abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
+	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
 }
 
 // packages/core/src/modules/registry.ts
 export class ModuleRegistry {
-  registerModule(module: ModuleBase): void;
-  getModule(name: string): AnyModule | undefined;
-  getAllModules(): AnyModule[];
-  createModuleFromType(type: string, id: string): UJLCModuleObject;
+	registerModule(module: ModuleBase): void;
+	getModule(name: string): AnyModule | undefined;
+	getAllModules(): AnyModule[];
+	createModuleFromType(type: string, id: string): UJLCModuleObject;
 }
 ```
 
@@ -116,10 +119,10 @@ export class ModuleRegistry {
 ```typescript
 // packages/core/src/fields/base.ts
 export abstract class FieldBase<ValueT, ConfigT> {
-  abstract validate(raw: UJLCFieldObject): raw is ValueT;
-  abstract fit(value: ValueT): ValueT;
-  parse(raw: UJLCFieldObject): ValueT;  // Kombination aus validate + fit
-  serialize(value: ValueT): UJLCFieldObject;
+	abstract validate(raw: UJLCFieldObject): raw is ValueT;
+	abstract fit(value: ValueT): ValueT;
+	parse(raw: UJLCFieldObject): ValueT; // Kombination aus validate + fit
+	serialize(value: ValueT): UJLCFieldObject;
 }
 ```
 
@@ -134,12 +137,14 @@ export abstract class FieldBase<ValueT, ConfigT> {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Einfache Erweiterung durch Drittanbieter
 - ✅ Vollständige Typsicherheit zur Compile-Zeit
 - ✅ Runtime-Validierung durch Zod
 - ✅ Klare Schnittstellen durch abstrakte Klassen
 
 **Negativ:**
+
 - ❌ Mehr Boilerplate-Code für neue Module
 - ❌ Lernkurve für das Modulsystem
 - ❌ Template-Dateien erforderlich für Konsistenz
@@ -149,18 +154,14 @@ export abstract class FieldBase<ValueT, ConfigT> {
 ```typescript
 // Eigenes Custom Module
 class CustomModule extends ModuleBase {
-  readonly name = "custom-module";
-  readonly label = "Custom Module";
-  readonly fields = [
-    { key: "title", field: new TextField({ label: "Title", default: "" }) }
-  ];
-  readonly slots = [
-    { key: "content", slot: new Slot({ label: "Content", max: 5 }) }
-  ];
+	readonly name = "custom-module";
+	readonly label = "Custom Module";
+	readonly fields = [{ key: "title", field: new TextField({ label: "Title", default: "" }) }];
+	readonly slots = [{ key: "content", slot: new Slot({ label: "Content", max: 5 }) }];
 
-  compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-    // Implementation
-  }
+	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+		// Implementation
+	}
 }
 
 // Registrierung
@@ -168,6 +169,7 @@ composer.registerModule(new CustomModule());
 ```
 
 **Betroffene Dateien:**
+
 - [packages/core/src/modules/registry.ts](../../../packages/core/src/modules/registry.ts)
 - [packages/core/src/modules/base.ts](../../../packages/core/src/modules/base.ts)
 - [packages/core/src/fields/base.ts](../../../packages/core/src/fields/base.ts)
@@ -192,28 +194,32 @@ Implementierung eines **Adapter Pattern** mit standardisierter Schnittstelle:
 ```typescript
 // packages/types/src/ast.ts
 export type UJLAdapter<OutputType = string, OptionsType = undefined> = (
-  node: UJLAbstractNode,
-  tokenSet: UJLTTokenSet,
-  options: OptionsType
+	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
+	options: OptionsType
 ) => OutputType;
 ```
 
 **Implementierte Adapter:**
 
 1. **Svelte Adapter** (`adapter-svelte`):
+
 ```typescript
 export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> = (
-  node, tokenSet, options
+	node,
+	tokenSet,
+	options
 ) => {
-  const instance = mount(AdapterRoot, {
-    target: resolveTarget(options.target),
-    props: { node, tokenSet, mode: options.mode, showMetadata, eventCallback }
-  });
-  return { instance, unmount: async () => unmount(instance) };
+	const instance = mount(AdapterRoot, {
+		target: resolveTarget(options.target),
+		props: { node, tokenSet, mode: options.mode, showMetadata, eventCallback },
+	});
+	return { instance, unmount: async () => unmount(instance) };
 };
 ```
 
 2. **Web Adapter** (`adapter-web`):
+
 ```svelte
 <!-- packages/adapter-web/src/components/UJLContent.svelte -->
 <svelte:options customElement={{ tag: 'ujl-content' }} />
@@ -236,12 +242,14 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Flexibilität bei Framework-Wahl
 - ✅ Web Components für universelle Einsetzbarkeit
 - ✅ Automatische Feature-Vererbung (`adapter-web` → `adapter-svelte`)
 - ✅ Einfache Erweiterung um neue Adapter (PDF, ...)
 
 **Negativ:**
+
 - ❌ Mehrfachimplementierung für jeden Adapter
 - ❌ Unterschiedliche Bundle-Größen je nach Adapter
 - ❌ Adapter müssen synchron gehalten werden
@@ -259,6 +267,7 @@ AdapterRoot.svelte                    # Entry Point + Theme Context
 ```
 
 **Betroffene Dateien:**
+
 - [packages/adapter-svelte/src/lib/adapter.ts](../../../packages/adapter-svelte/src/lib/adapter.ts)
 - [packages/adapter-web/src/index.ts](../../../packages/adapter-web/src/index.ts)
 - [packages/types/src/ast.ts](../../../packages/types/src/ast.ts)
@@ -274,6 +283,7 @@ AdapterRoot.svelte                    # Entry Point + Theme Context
 ### Kontext
 
 Verschiedene Anwendungsfälle erfordern unterschiedliche Media-Strategien:
+
 - **Standalone-Dokumente**: Sollen portabel sein ohne externe Abhängigkeiten
 - **Enterprise CMS**: Zentrale Media-Verwaltung mit Metadaten und Versionierung
 
@@ -284,50 +294,49 @@ Implementierung einer **Dual Storage Strategy** mit Resolver Pattern:
 ```typescript
 // packages/core/src/media/library.ts
 export class MediaLibrary {
-  constructor(
-    initialMedia: Record<string, MediaLibraryEntry>,
-    resolver?: MediaResolver
-  );
+	constructor(initialMedia: Record<string, MediaLibraryEntry>, resolver?: MediaResolver);
 
-  async resolve(id: string | number): Promise<UJLImageData | null>;
+	async resolve(id: string | number): Promise<UJLImageData | null>;
 }
 
 export interface MediaResolver {
-  resolve(id: string): Promise<string | null>;  // Returns data URL
+	resolve(id: string): Promise<string | null>; // Returns data URL
 }
 ```
 
 **Storage Modes:**
 
 1. **Inline Storage** (Default):
+
 ```json
 {
-  "ujlc": {
-    "meta": {
-      "media_library": { "storage": "inline" }
-    },
-    "media": {
-      "media-001": {
-        "id": "media-001",
-        "storage": "inline",
-        "data": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
-      }
-    }
-  }
+	"ujlc": {
+		"meta": {
+			"media_library": { "storage": "inline" }
+		},
+		"media": {
+			"media-001": {
+				"id": "media-001",
+				"storage": "inline",
+				"data": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+			}
+		}
+	}
 }
 ```
 
 2. **Backend Storage** (Payload CMS):
+
 ```json
 {
-  "ujlc": {
-    "meta": {
-      "media_library": {
-        "storage": "backend",
-        "endpoint": "http://localhost:3000/api"
-      }
-    }
-  }
+	"ujlc": {
+		"meta": {
+			"media_library": {
+				"storage": "backend",
+				"endpoint": "http://localhost:3000/api"
+			}
+		}
+	}
 }
 ```
 
@@ -336,25 +345,25 @@ export interface MediaResolver {
 ```typescript
 // services/media/src/collections/Media.ts
 export const Media: CollectionConfig = {
-  slug: 'media',
-  upload: {
-    imageSizes: [
-      { name: 'small', width: 500 },
-      { name: 'medium', width: 750 },
-      { name: 'large', width: 1000 },
-      { name: 'xlarge', width: 1920 }
-    ],
-    formatOptions: { format: 'webp' },
-    focalPoint: true
-  },
-  fields: [
-    { name: 'title', type: 'text', localized: true },
-    { name: 'alt', type: 'text', localized: true },
-    { name: 'description', type: 'textarea', localized: true },
-    { name: 'author', type: 'text' },
-    { name: 'license', type: 'text' },
-    { name: 'tags', type: 'array' }
-  ]
+	slug: "media",
+	upload: {
+		imageSizes: [
+			{ name: "small", width: 500 },
+			{ name: "medium", width: 750 },
+			{ name: "large", width: 1000 },
+			{ name: "xlarge", width: 1920 },
+		],
+		formatOptions: { format: "webp" },
+		focalPoint: true,
+	},
+	fields: [
+		{ name: "title", type: "text", localized: true },
+		{ name: "alt", type: "text", localized: true },
+		{ name: "description", type: "textarea", localized: true },
+		{ name: "author", type: "text" },
+		{ name: "license", type: "text" },
+		{ name: "tags", type: "array" },
+	],
 };
 ```
 
@@ -369,17 +378,20 @@ export const Media: CollectionConfig = {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Volle Portabilität mit Inline-Storage
 - ✅ Enterprise-Features mit Backend-Storage
 - ✅ Seamless switching zwischen Modi
 - ✅ Responsive images mit Payload CMS
 
 **Negativ:**
+
 - ❌ Große Dokument-Dateien bei Inline-Storage
 - ❌ Externe Abhängigkeit bei Backend-Storage
 - ❌ Komplexere Setup-Prozedur für Backend
 
 **Betroffene Dateien:**
+
 - [packages/core/src/media/library.ts](../../../packages/core/src/media/library.ts)
 - [packages/types/src/media.ts](../../../packages/types/src/media.ts)
 - [services/media/src/collections/Media.ts](../../../services/media/src/collections/Media.ts)
@@ -403,23 +415,25 @@ UJL-Dokumente werden aus externen Quellen geladen (Dateien, CMS, AI-generiert). 
 
 ```typescript
 // packages/types/src/ujl-content.ts
-export const UJLCModuleObjectSchema = z.lazy(() => z.object({
-  type: z.string(),
-  meta: UJLCModuleMetaSchema,
-  fields: z.record(z.string(), UJLCFieldObjectSchema),
-  slots: z.record(z.string(), z.array(UJLCModuleObjectSchema))  // Rekursiv
-}));
+export const UJLCModuleObjectSchema = z.lazy(() =>
+	z.object({
+		type: z.string(),
+		meta: UJLCModuleMetaSchema,
+		fields: z.record(z.string(), UJLCFieldObjectSchema),
+		slots: z.record(z.string(), z.array(UJLCModuleObjectSchema)), // Rekursiv
+	})
+);
 
 // Type-Generierung aus Schema
 export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 
 // Validator-Funktionen
 export function validateUJLCDocument(data: unknown): UJLCDocument {
-  return UJLCDocumentSchema.parse(data);  // Throws on error
+	return UJLCDocumentSchema.parse(data); // Throws on error
 }
 
 export function validateUJLCDocumentSafe(data: unknown) {
-  return UJLCDocumentSchema.safeParse(data);  // Returns Result<T, ZodError>
+	return UJLCDocumentSchema.safeParse(data); // Returns Result<T, ZodError>
 }
 ```
 
@@ -427,9 +441,11 @@ export function validateUJLCDocumentSafe(data: unknown) {
 
 ```typescript
 // Ermöglicht unendliche Verschachtelung von Modulen
-const UJLCModuleObjectSchema = z.lazy(() => z.object({
-  slots: z.record(z.string(), z.array(UJLCModuleObjectSchema))
-}));
+const UJLCModuleObjectSchema = z.lazy(() =>
+	z.object({
+		slots: z.record(z.string(), z.array(UJLCModuleObjectSchema)),
+	})
+);
 ```
 
 ### Begründung
@@ -443,12 +459,14 @@ const UJLCModuleObjectSchema = z.lazy(() => z.object({
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Garantierte Datenintegrität zur Laufzeit
 - ✅ Automatische Type-Synchronisation
 - ✅ Bessere Developer Experience mit IDE-Support
 - ✅ AI-generierte Dokumente können validiert werden
 
 **Negativ:**
+
 - ❌ Runtime-Overhead durch Validierung
 - ❌ Bundle-Size durch Zod-Library
 - ❌ Komplexere Schema-Definitionen
@@ -464,6 +482,7 @@ pnpm run validate ./path/to/file.json
 ```
 
 **Betroffene Dateien:**
+
 - [packages/types/src/ujl-content.ts](../../../packages/types/src/ujl-content.ts)
 - [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
 - [packages/types/src/cli.ts](../../../packages/types/src/cli.ts)
@@ -486,14 +505,14 @@ Wahl eines modernen UI-Frameworks für Crafter (Editor) und Adapter. Alternative
 
 ```typescript
 // packages/adapter-svelte/src/lib/adapter.ts
-import { mount, unmount } from 'svelte';
+import { mount, unmount } from "svelte";
 
 export const svelteAdapter = (node, tokenSet, options) => {
-  const instance = mount(AdapterRoot, {
-    target: resolveTarget(options.target),
-    props: { node, tokenSet, mode: options.mode }
-  });
-  return { instance, unmount: async () => unmount(instance) };
+	const instance = mount(AdapterRoot, {
+		target: resolveTarget(options.target),
+		props: { node, tokenSet, mode: options.mode },
+	});
+	return { instance, unmount: async () => unmount(instance) };
 };
 ```
 
@@ -529,22 +548,26 @@ export const svelteAdapter = (node, tokenSet, options) => {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Kleinste Bundle-Größe aller großen Frameworks
 - ✅ Bessere Performance durch Compilation
 - ✅ Einfache Custom Elements Generierung
 - ✅ Fine-grained Reactivity mit Runes
 
 **Negativ:**
+
 - ❌ Kleinere Community als React
 - ❌ Weniger Drittanbieter-Libraries
 - ❌ Svelte 5 ist noch relativ neu (Runes-System)
 
 **Alternative Frameworks erwogen:**
+
 - **React**: Größere Bundle-Size, Virtual DOM overhead
 - **Vue**: Gute Alternative, aber größerer Runtime
 - **Solid**: Exzellente Performance, aber kleinere Community
 
 **Betroffene Dateien:**
+
 - [packages/adapter-svelte/package.json](../../../packages/adapter-svelte/package.json)
 - [packages/crafter/package.json](../../../packages/crafter/package.json)
 - [packages/adapter-web/src/components/UJLContent.svelte](../../../packages/adapter-web/src/components/UJLContent.svelte)
@@ -568,12 +591,12 @@ Backend-Storage für Media Library erfordert ein Content Management System mit B
 ```typescript
 // services/media/src/payload.config.ts
 export default buildConfig({
-  collections: [Users, Media],
-  admin: { user: Users.slug },
-  typescript: { outputFile: path.resolve(__dirname, 'payload-types.ts') },
-  db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URI }
-  })
+	collections: [Users, Media],
+	admin: { user: Users.slug },
+	typescript: { outputFile: path.resolve(__dirname, "payload-types.ts") },
+	db: postgresAdapter({
+		pool: { connectionString: process.env.DATABASE_URI },
+	}),
 });
 ```
 
@@ -582,25 +605,25 @@ export default buildConfig({
 ```typescript
 // services/media/src/collections/Media.ts
 export const Media: CollectionConfig = {
-  slug: 'media',
-  upload: {
-    imageSizes: [
-      { name: 'thumbnail', width: 400, height: 300 },
-      { name: 'small', width: 500, height: null },
-      { name: 'medium', width: 750 },
-      { name: 'large', width: 1000 },
-      { name: 'xlarge', width: 1920 }
-    ],
-    formatOptions: { format: 'webp' },
-    focalPoint: true,
-    crop: true
-  },
-  access: {
-    read: () => true,  // Public read
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated
-  }
+	slug: "media",
+	upload: {
+		imageSizes: [
+			{ name: "thumbnail", width: 400, height: 300 },
+			{ name: "small", width: 500, height: null },
+			{ name: "medium", width: 750 },
+			{ name: "large", width: 1000 },
+			{ name: "xlarge", width: 1920 },
+		],
+		formatOptions: { format: "webp" },
+		focalPoint: true,
+		crop: true,
+	},
+	access: {
+		read: () => true, // Public read
+		create: isAuthenticated,
+		update: isAuthenticated,
+		delete: isAuthenticated,
+	},
 };
 ```
 
@@ -617,6 +640,7 @@ export const Media: CollectionConfig = {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Professionelle Media-Verwaltung
 - ✅ Automatische Bild-Optimierung
 - ✅ RESTful API mit Filtering/Sorting
@@ -624,6 +648,7 @@ export const Media: CollectionConfig = {
 - ✅ Multi-Language Support
 
 **Negativ:**
+
 - ❌ Externe Service-Abhängigkeit
 - ❌ Setup-Komplexität (Docker, PostgreSQL)
 - ❌ Hosting-Kosten für Backend
@@ -647,10 +672,12 @@ services:
 ```
 
 **Alternative CMS erwogen:**
+
 - **Strapi**: Ähnlich, aber schwächeres TypeScript-Support
 - **Custom Backend**: Zu viel Entwicklungsaufwand
 
 **Betroffene Dateien:**
+
 - [services/media/src/payload.config.ts](../../../services/media/src/payload.config.ts)
 - [services/media/src/collections/Media.ts](../../../services/media/src/collections/Media.ts)
 - [services/media/docker-compose.yml](../../../services/media/docker-compose.yml)
@@ -675,24 +702,24 @@ Rich Text Editing erfordert eine strukturierte, serialisierbare Darstellung. HTM
 ```typescript
 // packages/core/src/tiptap-schema.ts
 export const ujlRichTextExtensions = [
-  StarterKit.configure({
-    // Serialisierbare Extensions
-    heading: { levels: [1, 2, 3, 4, 5, 6] },
-    bold: {},
-    italic: {},
-    code: {},
-    blockquote: {},
-    bulletList: {},
-    orderedList: {},
-    listItem: {},
-    hardBreak: {},
-    horizontalRule: {},
+	StarterKit.configure({
+		// Serialisierbare Extensions
+		heading: { levels: [1, 2, 3, 4, 5, 6] },
+		bold: {},
+		italic: {},
+		code: {},
+		blockquote: {},
+		bulletList: {},
+		orderedList: {},
+		listItem: {},
+		hardBreak: {},
+		horizontalRule: {},
 
-    // UI-Extensions deaktiviert (nicht serialisierbar)
-    undoRedo: false,
-    dropcursor: false,
-    gapcursor: false
-  })
+		// UI-Extensions deaktiviert (nicht serialisierbar)
+		undoRedo: false,
+		dropcursor: false,
+		gapcursor: false,
+	}),
 ];
 ```
 
@@ -701,16 +728,16 @@ export const ujlRichTextExtensions = [
 ```typescript
 // packages/types/src/prosemirror.ts
 export type ProseMirrorDocument = {
-  type: "doc";
-  content: ProseMirrorNode[];
+	type: "doc";
+	content: ProseMirrorNode[];
 };
 
 export type ProseMirrorNode = {
-  type: string;
-  attrs?: Record<string, unknown>;
-  content?: ProseMirrorNode[];
-  marks?: ProseMirrorMark[];
-  text?: string;
+	type: string;
+	attrs?: Record<string, unknown>;
+	content?: ProseMirrorNode[];
+	marks?: ProseMirrorMark[];
+	text?: string;
 };
 ```
 
@@ -719,17 +746,20 @@ export type ProseMirrorNode = {
 ```typescript
 // packages/adapter-svelte/src/lib/components/ui/rich-text/prosemirror.ts
 export function prosemirrorToHtml(doc: ProseMirrorDocument): string {
-  if (!doc || doc.type !== 'doc') return '';
-  return serializeNodes(doc.content);
+	if (!doc || doc.type !== "doc") return "";
+	return serializeNodes(doc.content);
 }
 
 function serializeNode(node: ProseMirrorNode): string {
-  switch (node.type) {
-    case 'paragraph': return `<p>${serializeNodes(node.content)}</p>`;
-    case 'heading': return `<h${node.attrs?.level}>${serializeNodes(node.content)}</h${node.attrs?.level}>`;
-    case 'text': return applyMarks(escapeHtml(node.text), node.marks);
-    // ...
-  }
+	switch (node.type) {
+		case "paragraph":
+			return `<p>${serializeNodes(node.content)}</p>`;
+		case "heading":
+			return `<h${node.attrs?.level}>${serializeNodes(node.content)}</h${node.attrs?.level}>`;
+		case "text":
+			return applyMarks(escapeHtml(node.text), node.marks);
+		// ...
+	}
 }
 ```
 
@@ -745,12 +775,14 @@ function serializeNode(node: ProseMirrorNode): string {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Garantierte WYSIWYG-Konsistenz
 - ✅ Sicherer als HTML-Strings (kein XSS)
 - ✅ Validierbare Struktur mit Zod
 - ✅ Server-Side Rendering möglich
 
 **Negativ:**
+
 - ❌ Komplexere Schema-Verwaltung
 - ❌ Größere Bundle-Size durch ProseMirror
 - ❌ Lernkurve für ProseMirror-Konzepte
@@ -773,11 +805,13 @@ function serializeNode(node: ProseMirrorNode): string {
 ```
 
 **Alternative Editoren erwogen:**
+
 - **Quill**: Weniger strukturiert, Delta-Format
 - **Lexical**: Modern, aber weniger ausgereift
 - **ContentEditable**: Zu low-level, Cross-Browser-Probleme
 
 **Betroffene Dateien:**
+
 - [packages/core/src/tiptap-schema.ts](../../../packages/core/src/tiptap-schema.ts)
 - [packages/types/src/prosemirror.ts](../../../packages/types/src/prosemirror.ts)
 - [packages/adapter-svelte/src/lib/components/ui/rich-text/prosemirror.ts](../../../packages/adapter-svelte/src/lib/components/ui/rich-text/prosemirror.ts)
@@ -802,16 +836,16 @@ Traditionelle Farbsysteme (RGB, HSL) sind nicht perzeptuell uniform. Farb-Shades
 ```typescript
 // packages/types/src/ujl-theme.ts
 export const UJLTColorSchema = z.object({
-  l: z.number().min(0).max(100),  // Lightness (0-100)
-  c: z.number().min(0),            // Chroma (0+)
-  h: z.number().min(0).max(360)    // Hue (0-360)
+	l: z.number().min(0).max(100), // Lightness (0-100)
+	c: z.number().min(0), // Chroma (0+)
+	h: z.number().min(0).max(360), // Hue (0-360)
 });
 
 export const UJLTColorSetSchema = z.object({
-  50: UJLTColorSchema,
-  100: UJLTColorSchema,
-  // ... bis 950
-  950: UJLTColorSchema
+	50: UJLTColorSchema,
+	100: UJLTColorSchema,
+	// ... bis 950
+	950: UJLTColorSchema,
 });
 ```
 
@@ -820,16 +854,16 @@ export const UJLTColorSetSchema = z.object({
 ```typescript
 // packages/crafter/src/lib/utils/colors/generator.ts
 export function generateColorPalette(baseColor: OklchColor): ColorPalette {
-  const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+	const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
-  return shades.reduce((palette, shade) => {
-    palette[shade] = {
-      l: calculateLightness(shade),  // Perzeptuell uniform
-      c: baseColor.c,
-      h: baseColor.h
-    };
-    return palette;
-  }, {});
+	return shades.reduce((palette, shade) => {
+		palette[shade] = {
+			l: calculateLightness(shade), // Perzeptuell uniform
+			c: baseColor.c,
+			h: baseColor.h,
+		};
+		return palette;
+	}, {});
 }
 ```
 
@@ -838,16 +872,16 @@ export function generateColorPalette(baseColor: OklchColor): ColorPalette {
 ```typescript
 // packages/types/src/resolvers.ts
 export function resolveForegroundColor(
-  palette: UJLTColorSet,
-  bgFlavor: UJLTFlavor,
-  fgFlavor: UJLTFlavor,
-  mode: UJLTThemeMode
+	palette: UJLTColorSet,
+	bgFlavor: UJLTFlavor,
+	fgFlavor: UJLTFlavor,
+	mode: UJLTThemeMode
 ): UJLTColor {
-  const bgColor = palette[bgFlavor][mode === 'light' ? '50' : '950'];
-  const contrastRatio = calculateContrast(bgColor, fgColor);
+	const bgColor = palette[bgFlavor][mode === "light" ? "50" : "950"];
+	const contrastRatio = calculateContrast(bgColor, fgColor);
 
-  // WCAG AA conformance (4.5:1 für Text)
-  return ensureContrast(fgColor, bgColor, 4.5);
+	// WCAG AA conformance (4.5:1 für Text)
+	return ensureContrast(fgColor, bgColor, 4.5);
 }
 ```
 
@@ -862,12 +896,14 @@ export function resolveForegroundColor(
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Bessere Accessibility durch präzise Kontraste
 - ✅ Harmonischere Farbpaletten
 - ✅ Mathematisch korrekte Farb-Interpolation
 - ✅ Native Browser-Support (CSS `oklch()`)
 
 **Negativ:**
+
 - ❌ Komplexere Berechnungen als HSL
 - ❌ Weniger bekannt als RGB/HSL
 - ❌ Fallback für ältere Browser nötig
@@ -876,18 +912,20 @@ export function resolveForegroundColor(
 
 ```css
 :root {
-  --color-primary-50: oklch(97% 0.01 250);
-  --color-primary-500: oklch(60% 0.15 250);
-  --color-primary-950: oklch(20% 0.05 250);
+	--color-primary-50: oklch(97% 0.01 250);
+	--color-primary-500: oklch(60% 0.15 250);
+	--color-primary-950: oklch(20% 0.05 250);
 }
 ```
 
 **Alternative Farbräume erwogen:**
+
 - **HSL**: Nicht perzeptuell uniform
 - **RGB**: Keine intuitive Helligkeits-Kontrolle
 - **LCH**: Ähnlich OKLCH, aber weniger akkurat
 
 **Betroffene Dateien:**
+
 - [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
 - [packages/crafter/src/lib/utils/colors/generator.ts](../../../packages/crafter/src/lib/utils/colors/generator.ts)
 - [packages/types/src/resolvers.ts](../../../packages/types/src/resolvers.ts)
@@ -911,9 +949,9 @@ Verwaltung mehrerer interdependenter Packages erfordert ein robustes Monorepo-Sy
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - 'packages/*'
-  - 'apps/*'
-  - 'services/*'
+  - "packages/*"
+  - "apps/*"
+  - "services/*"
 ```
 
 **Workspace Protocol für interne Dependencies:**
@@ -921,11 +959,11 @@ packages:
 ```json
 // packages/crafter/package.json
 {
-  "dependencies": {
-    "@ujl-framework/core": "workspace:*",
-    "@ujl-framework/ui": "workspace:*",
-    "@ujl-framework/types": "workspace:*"
-  }
+	"dependencies": {
+		"@ujl-framework/core": "workspace:*",
+		"@ujl-framework/ui": "workspace:*",
+		"@ujl-framework/types": "workspace:*"
+	}
 }
 ```
 
@@ -934,16 +972,24 @@ packages:
 ```json
 // .changeset/config.json
 {
-  "changelog": "@changesets/changelog-github",
-  "commit": false,
-  "fixed": [
-    ["@ujl-framework/core", "@ujl-framework/ui", "@ujl-framework/crafter",
-     "@ujl-framework/adapter-svelte", "@ujl-framework/adapter-web",
-     "@ujl-framework/types", "@ujl-framework/examples", "ujl-demo",
-     "@ujl-framework/docs", "@ujl-framework/media"]
-  ],
-  "access": "public",
-  "baseBranch": "develop"
+	"changelog": "@changesets/changelog-github",
+	"commit": false,
+	"fixed": [
+		[
+			"@ujl-framework/core",
+			"@ujl-framework/ui",
+			"@ujl-framework/crafter",
+			"@ujl-framework/adapter-svelte",
+			"@ujl-framework/adapter-web",
+			"@ujl-framework/types",
+			"@ujl-framework/examples",
+			"ujl-demo",
+			"@ujl-framework/docs",
+			"@ujl-framework/media"
+		]
+	],
+	"access": "public",
+	"baseBranch": "develop"
 }
 ```
 
@@ -970,12 +1016,14 @@ git commit -m "Version packages"
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Effizientes Dependency Management
 - ✅ Koordinierte Releases aller Packages
 - ✅ Automatische Changelog-Generierung
 - ✅ Type-Safety über Package-Grenzen
 
 **Negativ:**
+
 - ❌ Komplexe Build-Dependency-Chains
 - ❌ Lernkurve für Changesets
 - ❌ Fixed Versioning erhöht Major-Versions schneller
@@ -1020,12 +1068,14 @@ build:
 ```
 
 **Alternative Monorepo-Tools erwogen:**
+
 - **npm Workspaces**: Langsamer, weniger Features
 - **Yarn Workspaces**: Gute Alternative, aber pnpm effizienter
 - **Turborepo**: Zusätzliche Komplexität, pnpm ausreichend
 - **Nx**: Overkill für aktuellen Scope
 
 **Betroffene Dateien:**
+
 - [pnpm-workspace.yaml](../../../pnpm-workspace.yaml)
 - [.changeset/config.json](../../../.changeset/config.json)
 - [.gitlab-ci.yml](../../../.gitlab-ci.yml)
@@ -1050,26 +1100,26 @@ Der UJL Crafter ist eine komplexe SvelteKit-Anwendung mit Drag & Drop, Tree-Navi
 ```typescript
 // packages/crafter/playwright.config.ts
 export default defineConfig({
-  testDir: './e2e',
-  timeout: 30000,
-  fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : 2,
-  reporter: process.env.CI ? ['list', 'junit'] : ['html', 'list'],
+	testDir: "./e2e",
+	timeout: 30000,
+	fullyParallel: true,
+	retries: process.env.CI ? 2 : 0,
+	workers: process.env.CI ? 1 : 2,
+	reporter: process.env.CI ? ["list", "junit"] : ["html", "list"],
 
-  webServer: {
-    command: 'pnpm run dev',
-    port: 5173,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    env: { PUBLIC_TEST_MODE: 'true' }
-  },
+	webServer: {
+		command: "pnpm run dev",
+		port: 5173,
+		reuseExistingServer: !process.env.CI,
+		timeout: 120000,
+		env: { PUBLIC_TEST_MODE: "true" },
+	},
 
-  use: {
-    baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure'
-  }
+	use: {
+		baseURL: "http://localhost:5173",
+		trace: "on-first-retry",
+		screenshot: "only-on-failure",
+	},
 });
 ```
 
@@ -1078,15 +1128,13 @@ export default defineConfig({
 ```typescript
 // packages/crafter/src/lib/utils/test-attrs.ts
 export function testId(id: string) {
-  return import.meta.env.PUBLIC_TEST_MODE === 'true'
-    ? { 'data-testid': id }
-    : {};
+	return import.meta.env.PUBLIC_TEST_MODE === "true" ? { "data-testid": id } : {};
 }
 
 export function testAttrs(attrs: Record<string, string>) {
-  return import.meta.env.PUBLIC_TEST_MODE === 'true'
-    ? Object.fromEntries(Object.entries(attrs).map(([k, v]) => [`data-${k}`, v]))
-    : {};
+	return import.meta.env.PUBLIC_TEST_MODE === "true"
+		? Object.fromEntries(Object.entries(attrs).map(([k, v]) => [`data-${k}`, v]))
+		: {};
 }
 ```
 
@@ -1094,28 +1142,28 @@ export function testAttrs(attrs: Record<string, string>) {
 
 ```typescript
 // packages/crafter/e2e/editor.test.ts
-test('navigation tree is visible', async ({ page }) => {
-  await page.goto('/');
+test("navigation tree is visible", async ({ page }) => {
+	await page.goto("/");
 
-  const navTree = page.locator('[data-testid="nav-tree"]');
-  await expect(navTree).toBeVisible();
+	const navTree = page.locator('[data-testid="nav-tree"]');
+	await expect(navTree).toBeVisible();
 
-  const rootNode = navTree.locator('[data-tree-node-id="__root__"]');
-  await expect(rootNode).toContainText('Document');
+	const rootNode = navTree.locator('[data-tree-node-id="__root__"]');
+	await expect(rootNode).toContainText("Document");
 });
 
-test('can select node by clicking in preview', async ({ page }) => {
-  await page.goto('/');
+test("can select node by clicking in preview", async ({ page }) => {
+	await page.goto("/");
 
-  // Click element in preview
-  await page.locator('[data-ujl-module-id="text-001"]').click();
+	// Click element in preview
+	await page.locator('[data-ujl-module-id="text-001"]').click();
 
-  // Check URL parameter
-  await expect(page).toHaveURL(/selected=text-001/);
+	// Check URL parameter
+	await expect(page).toHaveURL(/selected=text-001/);
 
-  // Check tree selection
-  const treeNode = page.locator('[data-tree-node-id="text-001"]');
-  await expect(treeNode).toHaveAttribute('data-selected', 'true');
+	// Check tree selection
+	const treeNode = page.locator('[data-tree-node-id="text-001"]');
+	await expect(treeNode).toHaveAttribute("data-selected", "true");
 });
 ```
 
@@ -1130,12 +1178,14 @@ test('can select node by clicking in preview', async ({ page }) => {
 ### Konsequenzen
 
 **Positiv:**
+
 - ✅ Vollständige User-Flow-Abdeckung
 - ✅ Screenshot-basiertes Debugging
 - ✅ Stabile Selektoren mit `data-testid`
 - ✅ CI/CD Integration
 
 **Negativ:**
+
 - ❌ Längere Test-Ausführungszeit als Unit-Tests
 - ❌ Flakiness bei komplexen Interaktionen
 - ❌ Setup-Komplexität
@@ -1167,11 +1217,13 @@ test('can select node by clicking in preview', async ({ page }) => {
    - Property editing
 
 **Alternative Testing-Frameworks erwogen:**
+
 - **Cypress**: Gute Alternative, aber langsamer als Playwright
 - **Testing Library**: Nur für Unit-Tests, nicht E2E
 - **Selenium**: Veraltet, Playwright moderner
 
 **Betroffene Dateien:**
+
 - [packages/crafter/playwright.config.ts](../../../packages/crafter/playwright.config.ts)
 - [packages/crafter/e2e/](../../../packages/crafter/e2e/)
 - [packages/crafter/src/lib/utils/test-attrs.ts](../../../packages/crafter/src/lib/utils/test-attrs.ts)
@@ -1180,19 +1232,19 @@ test('can select node by clicking in preview', async ({ page }) => {
 
 ## 9.12 Zusammenfassung: Architektur-Trade-offs
 
-| Entscheidung | Vorteil | Nachteil | Akzeptierter Trade-off |
-|--------------|---------|----------|------------------------|
-| **UJLC/UJLT Trennung** | Brand Compliance garantiert | Weniger Flexibilität | ✅ Markenkonsistenz wichtiger |
-| **Module Registry** | Erweiterbar, typsicher | Mehr Boilerplate | ✅ Type Safety rechtfertigt Aufwand |
-| **Adapter Pattern** | Framework-agnostisch | Mehrfachimplementierung | ✅ Flexibilität wichtiger |
-| **Dual Media Storage** | Portabilität + Enterprise | Komplexität | ✅ Beide Use Cases essentiell |
-| **Zod Validation** | Runtime Safety | Performance Overhead | ✅ Sicherheit wichtiger |
-| **Svelte 5** | Performance, Bundle Size | Kleinere Community | ✅ Technische Vorteile überwiegen |
-| **Payload CMS** | Feature-reich, TypeScript | Setup-Komplexität | ✅ Professionelle Media-Verwaltung nötig |
-| **TipTap/ProseMirror** | Strukturiert, WYSIWYG | Lernkurve, Bundle Size | ✅ Strukturierte Daten essentiell |
-| **OKLCH Farbraum** | Bessere Accessibility | Komplexer als HSL | ✅ Accessibility nicht verhandelbar |
-| **pnpm + Changesets** | Koordinierte Releases | Komplexe Build-Chain | ✅ Monorepo-Effizienz wichtig |
-| **Playwright E2E** | Vollständige Abdeckung | Längere Test-Zeiten | ✅ User Flows müssen getestet werden |
+| Entscheidung           | Vorteil                     | Nachteil                | Akzeptierter Trade-off                   |
+| ---------------------- | --------------------------- | ----------------------- | ---------------------------------------- |
+| **UJLC/UJLT Trennung** | Brand Compliance garantiert | Weniger Flexibilität    | ✅ Markenkonsistenz wichtiger            |
+| **Module Registry**    | Erweiterbar, typsicher      | Mehr Boilerplate        | ✅ Type Safety rechtfertigt Aufwand      |
+| **Adapter Pattern**    | Framework-agnostisch        | Mehrfachimplementierung | ✅ Flexibilität wichtiger                |
+| **Dual Media Storage** | Portabilität + Enterprise   | Komplexität             | ✅ Beide Use Cases essentiell            |
+| **Zod Validation**     | Runtime Safety              | Performance Overhead    | ✅ Sicherheit wichtiger                  |
+| **Svelte 5**           | Performance, Bundle Size    | Kleinere Community      | ✅ Technische Vorteile überwiegen        |
+| **Payload CMS**        | Feature-reich, TypeScript   | Setup-Komplexität       | ✅ Professionelle Media-Verwaltung nötig |
+| **TipTap/ProseMirror** | Strukturiert, WYSIWYG       | Lernkurve, Bundle Size  | ✅ Strukturierte Daten essentiell        |
+| **OKLCH Farbraum**     | Bessere Accessibility       | Komplexer als HSL       | ✅ Accessibility nicht verhandelbar      |
+| **pnpm + Changesets**  | Koordinierte Releases       | Komplexe Build-Chain    | ✅ Monorepo-Effizienz wichtig            |
+| **Playwright E2E**     | Vollständige Abdeckung      | Längere Test-Zeiten     | ✅ User Flows müssen getestet werden     |
 
 ---
 
@@ -1205,6 +1257,7 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 **Status:** 🔄 In Diskussion
 
 **Optionen:**
+
 - MIT License (maximal permissiv)
 - Apache 2.0 (Patent-Schutz)
 - AGPL-3.0 (Copyleft für SaaS)
@@ -1228,6 +1281,7 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 **Kontext:** Aktuell nur Svelte + Web Adapter implementiert.
 
 **Offene Fragen:**
+
 - Community-Contributions vs. offiziell maintained?
 - Adapter-API ausreichend dokumentiert?
 
