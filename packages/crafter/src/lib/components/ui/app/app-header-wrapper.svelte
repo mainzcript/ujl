@@ -5,23 +5,20 @@
 	import AppSidebarTrigger from './app-sidebar-trigger.svelte';
 	import AppLogo from './app-logo.svelte';
 	import AppHeader from './app-header.svelte';
-	import AppActions from './app-actions.svelte';
 	import AppPanelTrigger from './app-panel-trigger.svelte';
 
 	let {
 		logo,
-		header,
-		actions
+		header
 	}: {
 		logo?: Snippet;
 		header?: Snippet;
-		actions?: Snippet;
 	} = $props();
 
 	const app = useApp();
 </script>
 
-<header class="flex h-12 shrink-0 items-center gap-2">
+<header class="flex items-center gap-2">
 	<div
 		class={cn(
 			'flex shrink-0 items-center gap-2 overflow-hidden duration-300',
@@ -39,11 +36,5 @@
 		<AppHeader>{@render header()}</AppHeader>
 	{/if}
 
-	<div class="flex items-center justify-end gap-2 @5xl/ujl-app:w-sm @5xl/ujl-app:shrink-0">
-		{#if actions}
-			<AppActions>{@render actions()}</AppActions>
-		{/if}
-
-		<AppPanelTrigger />
-	</div>
+	<AppPanelTrigger />
 </header>

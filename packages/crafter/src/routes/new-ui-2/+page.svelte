@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { App, AppHeaderWrapper, AppSidebar, AppCanvas, AppPanel } from '$lib/components/ui/app';
-	import { Button } from '@ujl-framework/ui';
 
 	let sidebarOpen = $state(true);
 	let panelOpen = $state(false);
@@ -20,13 +19,8 @@
 	<div class="text-sm">Editor Header</div>
 {/snippet}
 
-{#snippet actions()}
-	<Button variant="outline" size="sm">Save</Button>
-	<Button variant="outline" size="sm">Export</Button>
-{/snippet}
-
 <App bind:sidebarOpen bind:panelOpen>
-	<AppHeaderWrapper {logo} {header} {actions} />
+	<AppHeaderWrapper {logo} {header} />
 
 	<div class="flex flex-1 gap-1">
 		<AppSidebar>

@@ -8,22 +8,20 @@
 	let {
 		logo,
 		header,
-		actions,
 		sidebar,
 		canvas,
 		panel
 	}: {
 		logo?: Snippet;
 		header?: Snippet;
-		actions?: Snippet;
 		sidebar?: Snippet;
 		canvas?: Snippet;
 		panel?: Snippet;
 	} = $props();
 </script>
 
-{#if logo || header || actions}
-	<AppHeaderWrapper {logo} {header} {actions} />
+{#if logo || header}
+	<AppHeaderWrapper {logo} {header} />
 {/if}
 
 <div class="flex flex-1 gap-1">
