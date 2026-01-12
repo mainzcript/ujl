@@ -14,7 +14,6 @@
 	const app = useApp();
 </script>
 
-<!-- Desktop toggle button -->
 {#if app.isDesktopSidebar}
 	<Button
 		variant="ghost"
@@ -31,7 +30,6 @@
 	</Button>
 {/if}
 
-<!-- Mobile sheet trigger -->
 {#if !app.isDesktopSidebar}
 	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
 		<SheetTriggerButton variant="ghost" size="icon" class="size-8" title="Open Sidebar">

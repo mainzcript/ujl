@@ -55,7 +55,7 @@
 
 		observer.observe(containerRef);
 
-		// Initial width measurement
+		// Measure initial width to set correct breakpoint state on mount
 		app.setContainerWidth(containerRef.offsetWidth);
 
 		return () => {
@@ -78,7 +78,6 @@
 	<!-- Render children first so they can register their content -->
 	{@render children?.()}
 
-	<!-- App controls the layout -->
 	<div class="mx-auto flex h-full max-w-[2000px] flex-col gap-1 p-1">
 		<!-- Header -->
 		<header class="flex items-center gap-2">

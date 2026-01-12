@@ -13,5 +13,3 @@
 		}
 	});
 </script>
-
-<!-- Content is rendered by App component -->

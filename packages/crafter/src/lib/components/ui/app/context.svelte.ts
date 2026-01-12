@@ -157,7 +157,8 @@ export type AppSlot = 'logo' | 'header' | 'sidebar' | 'canvas' | 'panel';
 
 /**
  * Registry for App component slots.
- * Allows child components to register their content, which is then rendered by App.
+ * Uses a registry pattern to decouple slot registration from rendering,
+ * allowing child components to register content without direct parent-child coupling.
  */
 class AppRegistry {
 	#slots = $state<Record<AppSlot, Snippet | null>>({
@@ -170,6 +171,7 @@ class AppRegistry {
 
 	/**
 	 * Register content for a slot.
+	 * Returns a cleanup function to unregister, ensuring proper cleanup when components unmount.
 	 * @returns Cleanup function to unregister
 	 */
 	register(slot: AppSlot, content: Snippet): () => void {
