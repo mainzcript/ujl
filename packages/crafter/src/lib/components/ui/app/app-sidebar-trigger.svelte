@@ -17,7 +17,7 @@
 <Button
 	variant="ghost"
 	size="icon"
-	class={cn('hidden size-8 @7xl/app:flex', className)}
+	class={cn('hidden size-8 @7xl/ujl-app:flex', className)}
 	onclick={app.toggleSidebar}
 	title={app.sidebarOpen ? 'Collapse Sidebar' : 'Show Sidebar'}
 >
@@ -29,7 +29,7 @@
 </Button>
 
 <!-- Sheet trigger for mobile (only visible when container < @7xl/app) -->
-<div class="@7xl/app:hidden">
+<div class="@7xl/ujl-app:hidden">
 	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
 		<SheetTriggerButton variant="ghost" size="icon" class="size-8" title="Open Sidebar">
 			<PanelLeftOpenIcon />

@@ -14,7 +14,7 @@
 </script>
 
 <!-- Drawer trigger for mobile (only visible when container < @5xl/app) -->
-<div class="@5xl/app:hidden">
+<div class="@5xl/ujl-app:hidden">
 	<Drawer bind:open={() => app.panelDrawerOpen, (v) => (app.panelDrawerOpen = v)}>
 		<DrawerTriggerButton size="icon" class="size-8" variant="ghost" title="Show Panel">
 			<Settings2Icon />
@@ -23,7 +23,7 @@
 </div>
 
 <!-- Desktop toggle button (only visible when container >= @5xl/app) -->
-<div class="hidden @5xl/app:block">
+<div class="hidden @5xl/ujl-app:block">
 	<Button
 		variant={app.panelOpen ? 'muted' : 'ghost'}
 		size="icon"

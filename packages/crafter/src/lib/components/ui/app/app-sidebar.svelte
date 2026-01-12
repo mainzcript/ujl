@@ -29,21 +29,21 @@
 <div
 	bind:this={sidebarEl}
 	class={cn(
-		'hidden h-full shrink-0 overflow-hidden duration-300 @7xl/app:block',
-		app.sidebarOpen ? 'w-(--app-sidebar-width)' : '-ms-1 w-0',
+		'hidden h-full shrink-0 overflow-hidden duration-300 @7xl/ujl-app:block',
+		app.sidebarOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0',
 		className
 	)}
 	data-slot="app-sidebar"
 	{...restProps}
 >
-	<div class="h-full w-(--app-sidebar-width) p-2">
+	<div class="h-full w-(--ujl-app-sidebar-width) p-2">
 		{@render children?.()}
 	</div>
 </div>
 
 <!-- Sheet fallback (only visible when container < @7xl/app) -->
 <Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
-	<SheetContent side="left" class="@7xl/app:hidden">
+	<SheetContent side="left" class="@7xl/ujl-app:hidden">
 		<SheetHeader />
 		<div class="flex-1 p-4 pt-0">
 			{@render children?.()}

@@ -30,7 +30,7 @@
 <div
 	bind:this={panelEl}
 	class={cn(
-		'hidden shrink-0 overflow-hidden duration-300 @5xl/app:block',
+		'hidden shrink-0 overflow-hidden duration-300 @5xl/ujl-app:block',
 		app.panelOpen ? 'w-sm' : '-ms-1 w-0',
 		className
 	)}

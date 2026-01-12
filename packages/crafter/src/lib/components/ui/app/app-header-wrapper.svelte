@@ -25,7 +25,7 @@
 	<div
 		class={cn(
 			'flex shrink-0 items-center gap-2 overflow-hidden duration-300',
-			app.sidebarOpen ? '@7xl/app:w-[240px]' : 'w-[140px]'
+			app.sidebarOpen ? '@7xl/ujl-app:w-[240px]' : 'w-[140px]'
 		)}
 	>
 		<AppSidebarTrigger />
@@ -39,7 +39,7 @@
 		<AppHeader>{@render header()}</AppHeader>
 	{/if}
 
-	<div class="flex items-center justify-end gap-2 @5xl/app:w-sm @5xl/app:shrink-0">
+	<div class="flex items-center justify-end gap-2 @5xl/ujl-app:w-sm @5xl/ujl-app:shrink-0">
 		{#if actions}
 			<AppActions>{@render actions()}</AppActions>
 		{/if}
