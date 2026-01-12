@@ -7,7 +7,7 @@
 		AppPanel,
 		useApp
 	} from '$lib/components/ui/app';
-	import { Button } from '@ujl-framework/ui';
+	import { Button, Input } from '@ujl-framework/ui';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 
 	// useApp() works here because we're inside the App layout
@@ -39,8 +39,12 @@
 	</div>
 </AppHeader>
 
-<AppSidebar>Sidebar Content</AppSidebar>
+<AppSidebar>
+	<Input placeholder="Test Input" />
+</AppSidebar>
 
 <AppCanvas>This is the canvas content.</AppCanvas>
 
-<AppPanel>This is the panel content.</AppPanel>
+<AppPanel>
+	<Input placeholder="Test Input" />
+</AppPanel>

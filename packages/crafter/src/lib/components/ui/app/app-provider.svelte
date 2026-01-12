@@ -63,6 +63,22 @@
 		};
 	});
 
+	// Auto-close drawer and open desktop panel when transitioning from mobile to desktop
+	$effect(() => {
+		if (app.isDesktopPanel && app.panelDrawerOpen) {
+			app.panelDrawerOpen = false;
+			app.preferPanel();
+		}
+	});
+
+	// Auto-close sheet and open desktop sidebar when transitioning from mobile to desktop
+	$effect(() => {
+		if (app.isDesktopSidebar && app.sidebarSheetOpen) {
+			app.sidebarSheetOpen = false;
+			app.preferSidebar();
+		}
+	});
+
 	$effect(() => {
 		ref = containerRef;
 	});
