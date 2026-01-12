@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
-	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import { useAppRegistry } from './context.svelte.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		children,
-		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-		children?: Snippet;
-	} = $props();
+	let { children }: { children?: Snippet } = $props();
+
+	const registry = useAppRegistry();
+
+	// Register content so App can render it in the header
+	$effect(() => {
+		if (children) {
+			return registry.register('header', children);
+		}
+	});
 </script>
 
-<div class={cn('flex-1 overflow-hidden', className)} bind:this={ref} {...restProps}>
-	{@render children?.()}
-</div>
+<!-- Content is rendered by App component -->

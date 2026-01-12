@@ -14,6 +14,7 @@
 	const app = useApp();
 </script>
 
+<!-- Desktop toggle button -->
 <Button
 	variant="ghost"
 	size="icon"
@@ -28,7 +29,7 @@
 	{/if}
 </Button>
 
-<!-- Sheet trigger for mobile (only visible when container < @7xl/app) -->
+<!-- Mobile sheet trigger -->
 <div class="@7xl/ujl-app:hidden">
 	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
 		<SheetTriggerButton variant="ghost" size="icon" class="size-8" title="Open Sidebar">

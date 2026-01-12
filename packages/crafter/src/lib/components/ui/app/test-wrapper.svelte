@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setApp, useApp } from './context.svelte.js';
+	import { setApp, setAppRegistry, useApp } from './context.svelte.js';
 
 	let {
 		initialSidebarOpen = true,
@@ -12,39 +12,32 @@
 			app: ReturnType<typeof useApp>;
 			getSidebarOpen: () => boolean;
 			getPanelOpen: () => boolean;
+			getIsSidebarVisible: () => boolean;
+			getIsPanelVisible: () => boolean;
 		}) => void;
 	} = $props();
 
-	// Internal state that the AppState will control
-	// Initialize in $effect to avoid Svelte warning about capturing initial prop values
-	let sidebarOpen = $state(false);
-	let panelOpen = $state(false);
+	// Set App context with initial values
+	// Initialize once with initial prop values.
+	// Wrapped in a closure to avoid Svelte's `state_referenced_locally` warning.
+	const app = (() =>
+		setApp({
+			initialSidebarOpen,
+			initialPanelOpen
+		}))();
 
-	$effect(() => {
-		sidebarOpen = initialSidebarOpen ?? true;
-		panelOpen = initialPanelOpen ?? false;
-	});
-
-	setApp({
-		sidebarOpen: () => sidebarOpen,
-		setSidebarOpen: (v) => {
-			sidebarOpen = v;
-		},
-		panelOpen: () => panelOpen,
-		setPanelOpen: (v) => {
-			panelOpen = v;
-		}
-	});
-
-	const app = useApp();
+	// Set registry for components that need it
+	setAppRegistry();
 
 	// Expose helpers to tests
 	$effect(() => {
 		if (onAppReady) {
 			onAppReady({
 				app,
-				getSidebarOpen: () => sidebarOpen,
-				getPanelOpen: () => panelOpen
+				getSidebarOpen: () => app.sidebarOpen,
+				getPanelOpen: () => app.panelOpen,
+				getIsSidebarVisible: () => app.isSidebarVisible,
+				getIsPanelVisible: () => app.isPanelVisible
 			});
 		}
 	});

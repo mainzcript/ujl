@@ -8,6 +8,8 @@ type TestHelpers = {
 	app: AppState;
 	getSidebarOpen: () => boolean;
 	getPanelOpen: () => boolean;
+	getIsSidebarVisible: () => boolean;
+	getIsPanelVisible: () => boolean;
 };
 
 // Helper to render and get app instance
@@ -349,6 +351,142 @@ describe('AppState', () => {
 			const element: HTMLElement | null = null;
 			const result = element !== null && getComputedStyle(element!).display !== 'none';
 			expect(result).toBe(false);
+		});
+	});
+
+	describe('isSidebarVisible', () => {
+		it('should return true when desktop sidebar is open and visible', async () => {
+			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: true });
+			const mockElement = mockElementVisible();
+			app.setSidebarRef(mockElement);
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsSidebarVisible()).toBe(true);
+		});
+
+		it('should return true when mobile sheet is open', async () => {
+			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: false });
+			app.sidebarSheetOpen = true;
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsSidebarVisible()).toBe(true);
+		});
+
+		it('should return false when both desktop and mobile are closed', async () => {
+			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: false });
+			app.sidebarSheetOpen = false;
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsSidebarVisible()).toBe(false);
+		});
+	});
+
+	describe('isPanelVisible', () => {
+		it('should return true when desktop panel is open and visible', async () => {
+			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: true });
+			const mockElement = mockElementVisible();
+			app.setPanelRef(mockElement);
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsPanelVisible()).toBe(true);
+		});
+
+		it('should return true when mobile drawer is open', async () => {
+			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: false });
+			app.panelDrawerOpen = true;
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsPanelVisible()).toBe(true);
+		});
+
+		it('should return false when both desktop and mobile are closed', async () => {
+			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: false });
+			app.panelDrawerOpen = false;
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			expect(getIsPanelVisible()).toBe(false);
+		});
+	});
+
+	describe('onPanelClose callback', () => {
+		it('should call callback when panel is closed', async () => {
+			const { app } = await renderApp({ initialPanelOpen: true });
+			let callbackCalled = false;
+
+			app.onPanelClose(() => {
+				callbackCalled = true;
+			});
+
+			app.hidePanel();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(callbackCalled).toBe(true);
+		});
+
+		it('should not call callback if not set', async () => {
+			const { app } = await renderApp({ initialPanelOpen: true });
+
+			// Should not throw
+			app.hidePanel();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(app.panelOpen).toBe(false);
+		});
+
+		it('should return cleanup function', async () => {
+			const { app } = await renderApp({ initialPanelOpen: true });
+			let callbackCalled = false;
+
+			const cleanup = app.onPanelClose(() => {
+				callbackCalled = true;
+			});
+
+			cleanup();
+			app.hidePanel();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(callbackCalled).toBe(false);
+		});
+	});
+
+	describe('onSidebarClose callback', () => {
+		it('should call callback when sidebar is closed', async () => {
+			const { app } = await renderApp({ initialSidebarOpen: true });
+			let callbackCalled = false;
+
+			app.onSidebarClose(() => {
+				callbackCalled = true;
+			});
+
+			app.hideSidebar();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(callbackCalled).toBe(true);
+		});
+
+		it('should not call callback if not set', async () => {
+			const { app } = await renderApp({ initialSidebarOpen: true });
+
+			// Should not throw
+			app.hideSidebar();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(app.sidebarOpen).toBe(false);
+		});
+
+		it('should return cleanup function', async () => {
+			const { app } = await renderApp({ initialSidebarOpen: true });
+			let callbackCalled = false;
+
+			const cleanup = app.onSidebarClose(() => {
+				callbackCalled = true;
+			});
+
+			cleanup();
+			app.hideSidebar();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
+			expect(callbackCalled).toBe(false);
 		});
 	});
 });

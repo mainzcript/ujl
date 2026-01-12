@@ -1,36 +1,55 @@
 <script lang="ts">
+	import {
+		Button,
+		Card,
+		Drawer,
+		DrawerContent,
+		Sheet,
+		SheetContent,
+		SheetHeader
+	} from '@ujl-framework/ui';
 	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
-	import { setApp } from './context.svelte.js';
+	import XIcon from '@lucide/svelte/icons/x';
+	import { setApp, setAppRegistry } from './context.svelte.js';
 	import { APP_SIDEBAR_WIDTH, APP_PANEL_WIDTH } from './constants.js';
+	import AppSidebarTrigger from './app-sidebar-trigger.svelte';
 
 	let {
 		ref = $bindable(null),
-		sidebarOpen = $bindable(true),
-		panelOpen = $bindable(false),
+		initialSidebarOpen = true,
+		initialPanelOpen = true,
 		class: className,
 		style,
 		children,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
-		sidebarOpen?: boolean;
-		panelOpen?: boolean;
+		initialSidebarOpen?: boolean;
+		initialPanelOpen?: boolean;
 		children?: Snippet;
 	} = $props();
 
 	let containerRef: HTMLElement | null = $state(null);
+	let sidebarEl: HTMLElement | null = $state(null);
+	let panelEl: HTMLElement | null = $state(null);
 
 	// Set App context (used by child components via useApp())
-	setApp({
-		sidebarOpen: () => sidebarOpen,
-		setSidebarOpen: (v) => {
-			sidebarOpen = v;
-		},
-		panelOpen: () => panelOpen,
-		setPanelOpen: (v) => {
-			panelOpen = v;
-		}
+	// Initialize once with initial prop values.
+	// Wrapped in a closure to avoid Svelte's `state_referenced_locally` warning.
+	const app = (() =>
+		setApp({
+			initialSidebarOpen,
+			initialPanelOpen
+		}))();
+
+	// Set App registry (used by child components to register their content)
+	const registry = setAppRegistry();
+
+	// Set refs for visibility detection
+	$effect(() => {
+		app.setSidebarRef(sidebarEl);
+		app.setPanelRef(panelEl);
 	});
 
 	$effect(() => {
@@ -45,7 +64,116 @@
 	class={cn('@container/ujl-app h-full bg-background', className)}
 	{...restProps}
 >
+	<!-- Render children first so they can register their content -->
+	{@render children?.()}
+
+	<!-- App controls the layout -->
 	<div class="mx-auto flex h-full max-w-[2000px] flex-col gap-1 p-1">
-		{@render children?.()}
+		<!-- Header -->
+		<header class="flex items-center gap-2">
+			<div
+				class={cn(
+					'flex shrink-0 items-center justify-between gap-2 overflow-hidden duration-300',
+					app.sidebarOpen ? '@7xl/ujl-app:min-w-[240px]' : 'min-w-0'
+				)}
+			>
+				<AppSidebarTrigger />
+
+				{#if registry.logo}
+					<div class="flex items-center">{@render registry.logo()}</div>
+				{/if}
+			</div>
+
+			{#if registry.header}
+				<div class="flex-1 overflow-hidden">{@render registry.header()}</div>
+			{/if}
+		</header>
+
+		<!-- Main Content -->
+		<div class="flex flex-1 gap-1">
+			<!-- Sidebar (Desktop) -->
+			<div
+				bind:this={sidebarEl}
+				class={cn(
+					'hidden h-full shrink-0 overflow-hidden duration-300 @7xl/ujl-app:block',
+					app.sidebarOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0'
+				)}
+				data-slot="app-sidebar"
+			>
+				{#if registry.sidebar}
+					<div class="h-full w-(--ujl-app-sidebar-width) p-2">
+						{@render registry.sidebar()}
+					</div>
+				{/if}
+			</div>
+
+			<!-- Canvas and Panel Container -->
+			<div class="flex flex-1 flex-col gap-1">
+				<div class="flex flex-1 gap-1 rounded-xl border border-border bg-foreground/5 p-1">
+					<!-- Canvas -->
+					{#if registry.canvas}
+						<main class="flex-1" data-slot="app-canvas">
+							<Card class="relative h-full w-full overflow-hidden p-0">
+								<div class="absolute top-0 right-0 h-full w-full overflow-auto">
+									{@render registry.canvas()}
+								</div>
+							</Card>
+						</main>
+					{/if}
+
+					<!-- Panel (Desktop) -->
+					<div
+						bind:this={panelEl}
+						class={cn(
+							'hidden shrink-0 overflow-hidden duration-300 @5xl/ujl-app:block',
+							app.panelOpen ? 'w-sm' : '-ms-1 w-0'
+						)}
+						data-slot="app-panel"
+					>
+						{#if registry.panel}
+							<Card class="flex h-full w-sm! flex-col gap-0 p-0">
+								<div class="flex justify-end p-2">
+									<Button
+										variant="ghost"
+										size="icon"
+										class="size-6"
+										onclick={app.hidePanel}
+										title="Close Panel"
+									>
+										<XIcon class="size-4" />
+									</Button>
+								</div>
+								<div class="flex-1 p-6 pt-0">
+									{@render registry.panel()}
+								</div>
+							</Card>
+						{/if}
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
+
+	<!-- Sheet fallback for Sidebar (mobile) -->
+	<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
+		<SheetContent side="left" class="@7xl/ujl-app:hidden">
+			<SheetHeader />
+			<div class="flex-1 p-4 pt-0">
+				{#if registry.sidebar}
+					{@render registry.sidebar()}
+				{/if}
+			</div>
+		</SheetContent>
+	</Sheet>
+
+	<!-- Drawer fallback for Panel (mobile) -->
+	<Drawer bind:open={() => app.panelDrawerOpen, (v) => (app.panelDrawerOpen = v)}>
+		<DrawerContent>
+			<div class="mx-auto w-full max-w-sm p-4">
+				{#if registry.panel}
+					{@render registry.panel()}
+				{/if}
+			</div>
+		</DrawerContent>
+	</Drawer>
 </div>
