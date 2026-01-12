@@ -1,21 +1,23 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
-	// Note: Svelte plugin temporarily disabled due to hot-update plugin issue in Vitest
-	// The plugin tries to access SvelteKit config which doesn't exist in test environment
-	// Most tests (pure TypeScript functions) work without it
-	// TODO: Re-enable when Svelte plugin is properly configured for Vitest
-	// plugins: [svelte({ hot: false, compilerOptions: { dev: true } })],
+	plugins: [
+		svelte({
+			hot: !process.env.VITEST,
+			compilerOptions: {
+				dev: true
+			}
+		})
+	],
 	test: {
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: ['./vitest.setup.ts'],
 		include: ['src/**/*.test.{js,ts}'],
 		// Exclude E2E tests (handled by Playwright)
-		// Temporarily exclude nav-tree-drag-handler test due to Svelte plugin hot-update issue
-		// TODO: Re-enable when Svelte plugin is properly configured for Vitest
-		exclude: ['e2e/**', 'node_modules/**', '**/nav-tree-drag-handler.test.ts'],
+		exclude: ['e2e/**', 'node_modules/**'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
@@ -35,6 +37,8 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			$lib: resolve(__dirname, './src/lib')
-		}
+		},
+		// Use browser condition for tests to enable client-side Svelte
+		conditions: ['browser', 'import', 'module', 'default']
 	}
 });

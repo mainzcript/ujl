@@ -1,0 +1,18 @@
+<script lang="ts">
+	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import type { Snippet } from 'svelte';
+
+	let {
+		ref = $bindable(null),
+		class: className,
+		children,
+		...restProps
+	}: WithElementRef<HTMLAttributes<HTMLDivElement>> & {
+		children?: Snippet;
+	} = $props();
+</script>
+
+<div class={cn('flex flex-1 items-center justify-end', className)} bind:this={ref} {...restProps}>
+	{@render children?.()}
+</div>

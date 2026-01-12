@@ -11,6 +11,6 @@
 	const tokenSet = themeDocument.ujlt.tokens;
 </script>
 
-<UJLTheme tokens={tokenSet}>
+<UJLTheme tokens={tokenSet} class="h-screen">
 	{@render children()}
 </UJLTheme>
