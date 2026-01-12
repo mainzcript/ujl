@@ -30,13 +30,13 @@
 	bind:this={sidebarEl}
 	class={cn(
 		'hidden h-full shrink-0 overflow-hidden duration-300 @7xl/app:block',
-		app.sidebarOpen ? 'w-[var(--app-sidebar-width)]' : '-ms-1 w-0',
+		app.sidebarOpen ? 'w-(--app-sidebar-width)' : '-ms-1 w-0',
 		className
 	)}
 	data-slot="app-sidebar"
 	{...restProps}
 >
-	<div class="h-full w-[var(--app-sidebar-width)] p-2">
+	<div class="h-full w-(--app-sidebar-width) p-2">
 		{@render children?.()}
 	</div>
 </div>
