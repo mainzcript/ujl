@@ -140,7 +140,7 @@
 					<!-- Canvas -->
 					{#if registry.canvas}
 						<main class="flex-1" data-slot="app-canvas">
-							<Card class="relative h-full w-full overflow-hidden p-0">
+							<Card class="relative h-full w-full overflow-hidden p-0 shadow-none">
 								<div class="absolute top-0 right-0 h-full w-full overflow-auto">
 									{@render registry.canvas()}
 								</div>
@@ -158,7 +158,7 @@
 							data-slot="app-panel"
 						>
 							{#if registry.panel}
-								<Card class="flex h-full w-sm! flex-col gap-0 p-0">
+								<Card class="flex h-full w-sm! flex-col gap-0 p-0 shadow-none">
 									<div class="flex justify-end p-2">
 										<Button
 											variant="ghost"
