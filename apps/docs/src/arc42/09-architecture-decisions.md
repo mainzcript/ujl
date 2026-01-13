@@ -68,12 +68,6 @@ export const UJLTDocumentSchema = z.object({
 - ❌ Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
 - ❌ Erfordert initiales Setup eines Theme-Systems
 
-**Betroffene Dateien:**
-
-- [packages/types/src/ujl-content.ts](../../../packages/types/src/ujl-content.ts)
-- [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
-- [packages/core/src/composer.ts](../../../packages/core/src/composer.ts)
-
 ---
 
 ## 9.2 ADR-002: Modulares Plugin-System mit Registry Pattern
@@ -168,13 +162,6 @@ class CustomModule extends ModuleBase {
 composer.registerModule(new CustomModule());
 ```
 
-**Betroffene Dateien:**
-
-- [packages/core/src/modules/registry.ts](../../../packages/core/src/modules/registry.ts)
-- [packages/core/src/modules/base.ts](../../../packages/core/src/modules/base.ts)
-- [packages/core/src/fields/base.ts](../../../packages/core/src/fields/base.ts)
-- [packages/core/src/modules/concretes/](../../../packages/core/src/modules/concretes/)
-
 ---
 
 ## 9.3 ADR-003: Adapter Pattern für Framework-Agnostisches Rendering
@@ -265,12 +252,6 @@ AdapterRoot.svelte                    # Entry Point + Theme Context
       ├─ nodes/Grid.svelte
       └─ ... (weitere Module)
 ```
-
-**Betroffene Dateien:**
-
-- [packages/adapter-svelte/src/lib/adapter.ts](../../../packages/adapter-svelte/src/lib/adapter.ts)
-- [packages/adapter-web/src/index.ts](../../../packages/adapter-web/src/index.ts)
-- [packages/types/src/ast.ts](../../../packages/types/src/ast.ts)
 
 ---
 
@@ -390,13 +371,6 @@ export const Media: CollectionConfig = {
 - ❌ Externe Abhängigkeit bei Backend-Storage
 - ❌ Komplexere Setup-Prozedur für Backend
 
-**Betroffene Dateien:**
-
-- [packages/core/src/media/library.ts](../../../packages/core/src/media/library.ts)
-- [packages/types/src/media.ts](../../../packages/types/src/media.ts)
-- [services/media/src/collections/Media.ts](../../../services/media/src/collections/Media.ts)
-- [packages/crafter/MEDIA_LIBRARY_SETUP.md](../../../packages/crafter/MEDIA_LIBRARY_SETUP.md)
-
 ---
 
 ## 9.5 ADR-005: Zod-basierte Runtime Validation mit TypeScript Type Inference
@@ -481,12 +455,6 @@ pnpm run validate ./path/to/file.json
 # Detaillierte Fehlerberichte bei Validierung
 ```
 
-**Betroffene Dateien:**
-
-- [packages/types/src/ujl-content.ts](../../../packages/types/src/ujl-content.ts)
-- [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
-- [packages/types/src/cli.ts](../../../packages/types/src/cli.ts)
-
 ---
 
 ## 9.6 ADR-006: Svelte 5 als primäres UI-Framework
@@ -565,12 +533,6 @@ export const svelteAdapter = (node, tokenSet, options) => {
 - **React**: Größere Bundle-Size, Virtual DOM overhead
 - **Vue**: Gute Alternative, aber größerer Runtime
 - **Solid**: Exzellente Performance, aber kleinere Community
-
-**Betroffene Dateien:**
-
-- [packages/adapter-svelte/package.json](../../../packages/adapter-svelte/package.json)
-- [packages/crafter/package.json](../../../packages/crafter/package.json)
-- [packages/adapter-web/src/components/UJLContent.svelte](../../../packages/adapter-web/src/components/UJLContent.svelte)
 
 ---
 
@@ -675,13 +637,6 @@ services:
 
 - **Strapi**: Ähnlich, aber schwächeres TypeScript-Support
 - **Custom Backend**: Zu viel Entwicklungsaufwand
-
-**Betroffene Dateien:**
-
-- [services/media/src/payload.config.ts](../../../services/media/src/payload.config.ts)
-- [services/media/src/collections/Media.ts](../../../services/media/src/collections/Media.ts)
-- [services/media/docker-compose.yml](../../../services/media/docker-compose.yml)
-- [services/media/README.md](../../../services/media/README.md)
 
 ---
 
@@ -810,13 +765,6 @@ function serializeNode(node: ProseMirrorNode): string {
 - **Lexical**: Modern, aber weniger ausgereift
 - **ContentEditable**: Zu low-level, Cross-Browser-Probleme
 
-**Betroffene Dateien:**
-
-- [packages/core/src/tiptap-schema.ts](../../../packages/core/src/tiptap-schema.ts)
-- [packages/types/src/prosemirror.ts](../../../packages/types/src/prosemirror.ts)
-- [packages/adapter-svelte/src/lib/components/ui/rich-text/prosemirror.ts](../../../packages/adapter-svelte/src/lib/components/ui/rich-text/prosemirror.ts)
-- [packages/crafter/src/lib/components/ui/richtext-input/richtext-input.svelte](../../../packages/crafter/src/lib/components/ui/richtext-input/richtext-input.svelte)
-
 ---
 
 ## 9.9 ADR-009: OKLCH Farbraum für Design Tokens
@@ -923,12 +871,6 @@ export function resolveForegroundColor(
 - **HSL**: Nicht perzeptuell uniform
 - **RGB**: Keine intuitive Helligkeits-Kontrolle
 - **LCH**: Ähnlich OKLCH, aber weniger akkurat
-
-**Betroffene Dateien:**
-
-- [packages/types/src/ujl-theme.ts](../../../packages/types/src/ujl-theme.ts)
-- [packages/crafter/src/lib/utils/colors/generator.ts](../../../packages/crafter/src/lib/utils/colors/generator.ts)
-- [packages/types/src/resolvers.ts](../../../packages/types/src/resolvers.ts)
 
 ---
 
@@ -1074,13 +1016,6 @@ build:
 - **Turborepo**: Zusätzliche Komplexität, pnpm ausreichend
 - **Nx**: Overkill für aktuellen Scope
 
-**Betroffene Dateien:**
-
-- [pnpm-workspace.yaml](../../../pnpm-workspace.yaml)
-- [.changeset/config.json](../../../.changeset/config.json)
-- [.gitlab-ci.yml](../../../.gitlab-ci.yml)
-- [package.json](../../../package.json)
-
 ---
 
 ## 9.11 ADR-011: Playwright für E2E Testing des Crafters
@@ -1222,12 +1157,6 @@ test("can select node by clicking in preview", async ({ page }) => {
 - **Testing Library**: Nur für Unit-Tests, nicht E2E
 - **Selenium**: Veraltet, Playwright moderner
 
-**Betroffene Dateien:**
-
-- [packages/crafter/playwright.config.ts](../../../packages/crafter/playwright.config.ts)
-- [packages/crafter/e2e/](../../../packages/crafter/e2e/)
-- [packages/crafter/src/lib/utils/test-attrs.ts](../../../packages/crafter/src/lib/utils/test-attrs.ts)
-
 ---
 
 ## 9.12 Zusammenfassung: Architektur-Trade-offs
@@ -1284,16 +1213,6 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 
 - Community-Contributions vs. offiziell maintained?
 - Adapter-API ausreichend dokumentiert?
-
----
-
-## 9.14 Referenzen
-
-- [UJL Framework README](../../../README.md)
-- [Vision & Wertversprechen](/about/01-vision)
-- [Testing Guidelines](../../../docs/testing.md)
-- [Contributing Guide](../../../CONTRIBUTING.md)
-- [Package READMEs](../../../packages/)
 
 ---
 
