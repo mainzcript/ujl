@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		SidebarTrigger,
 		Button,
 		DropdownMenu,
 		DropdownMenuTrigger,
@@ -16,8 +15,8 @@
 		ToggleGroup,
 		ToggleGroupItem
 	} from '@ujl-framework/ui';
+	import { useApp } from '$lib/components/ui/app';
 	import type { CrafterMode } from '../types.js';
-	import Maximize2Icon from '@lucide/svelte/icons/maximize-2';
 	import ThreeDotsIcon from '@lucide/svelte/icons/more-vertical';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
 	import ShareIcon from '@lucide/svelte/icons/share';
@@ -26,15 +25,13 @@
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
 	import TabletIcon from '@lucide/svelte/icons/tablet';
 	import SmartphoneIcon from '@lucide/svelte/icons/smartphone';
-	import PanelRightIcon from '@lucide/svelte/icons/panel-right';
+	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 
 	let {
 		mode,
 		onModeChange,
-		viewportSizeString,
-		onViewportSizeChange,
-		showRightSidebar = false,
-		onOpenRightSheet,
+		viewportType,
+		onViewportTypeChange,
 		onSave,
 		onImportTheme,
 		onImportContent,
@@ -43,16 +40,16 @@
 	}: {
 		mode: CrafterMode;
 		onModeChange?: (mode: CrafterMode) => void;
-		viewportSizeString?: string;
-		onViewportSizeChange?: (size: string | undefined) => void;
-		showRightSidebar?: boolean;
-		onOpenRightSheet?: () => void;
+		viewportType?: string | undefined;
+		onViewportTypeChange?: (type: string | undefined) => void;
 		onSave?: () => void;
 		onImportTheme?: (file: File) => void;
 		onImportContent?: (file: File) => void;
 		onExportTheme?: () => void;
 		onExportContent?: () => void;
 	} = $props();
+
+	const app = useApp();
 
 	let themeFileInput: HTMLInputElement | null = $state(null);
 	let contentFileInput: HTMLInputElement | null = $state(null);
@@ -97,15 +94,10 @@
 	class="hidden"
 />
 
-<header class="flex shrink-0 items-center justify-between gap-2 px-4 py-2">
+<div class="flex items-center justify-between py-2">
 	<div class="flex items-center gap-2">
-		<SidebarTrigger>
-			<Maximize2Icon />
-			<span class="sr-only">Toggle Fullscreen</span>
-		</SidebarTrigger>
-
 		<Select type="single" value={mode} onValueChange={handleModeChange}>
-			<SelectTrigger class="w-[150px]">
+			<SelectTrigger>
 				{#if mode === 'editor'}
 					<PencilRulerIcon />
 					<span>Editor</span>
@@ -128,49 +120,32 @@
 				</SelectGroup>
 			</SelectContent>
 		</Select>
-	</div>
 
-	<div>
 		<ToggleGroup
 			type="single"
-			value={viewportSizeString}
-			onValueChange={(value) => onViewportSizeChange?.(value)}
+			value={viewportType}
+			onValueChange={(value) => onViewportTypeChange?.(value)}
 		>
-			<ToggleGroupItem value="1024" aria-label="Desktop View (1024px)">
+			<ToggleGroupItem value="desktop" title="Desktop View (1024px)">
 				<MonitorIcon />
-				<span class="sr-only">Desktop (1024px)</span>
 			</ToggleGroupItem>
-			<ToggleGroupItem value="768" aria-label="Tablet View (768px)">
+			<ToggleGroupItem value="tablet" title="Tablet View (768px)">
 				<TabletIcon class="-rotate-90" />
-				<span class="sr-only">Tablet (768px)</span>
 			</ToggleGroupItem>
-			<ToggleGroupItem value="375" aria-label="Mobile View (375px)">
+			<ToggleGroupItem value="mobile" title="Mobile View (375px)">
 				<SmartphoneIcon />
-				<span class="sr-only">Mobile (375px)</span>
 			</ToggleGroupItem>
 		</ToggleGroup>
 	</div>
 
 	<div class="flex items-center gap-2">
-		{#if !showRightSidebar && onOpenRightSheet}
-			<Button
-				variant="ghost"
-				size="icon"
-				class="size-7"
-				onclick={() => onOpenRightSheet()}
-				title="Open Properties Panel"
-			>
-				<PanelRightIcon />
-				<span class="sr-only">Open Properties Panel</span>
-			</Button>
-		{/if}
 		{#if onSave}
 			<Button variant="accent" size="sm" onclick={() => onSave()}>Save</Button>
 		{/if}
 		<DropdownMenu>
 			<DropdownMenuTrigger>
 				{#snippet child({ props })}
-					<Button variant="muted" size="icon" class="size-8" {...props} title="More Actions">
+					<Button variant="ghost" size="icon" class="size-8" {...props} title="More Actions">
 						<ThreeDotsIcon />
 					</Button>
 				{/snippet}
@@ -213,5 +188,12 @@
 				{/if}
 			</DropdownMenuContent>
 		</DropdownMenu>
+		<Button
+			onclick={() => app.togglePanel()}
+			variant={app.isPanelVisible ? 'muted' : 'ghost'}
+			size="icon"
+		>
+			<Settings2Icon />
+		</Button>
 	</div>
-</header>
+</div>

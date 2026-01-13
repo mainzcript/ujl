@@ -1,5 +1,5 @@
 <script lang="ts">
-	import App from '$lib/components/app/app.svelte';
+	import { UJLCrafter } from '$lib/components/ujl-crafter';
 	import {
 		Dialog,
 		DialogContent,
@@ -54,4 +54,4 @@
 	</DialogContent>
 </Dialog>
 
-<App />
+<UJLCrafter />

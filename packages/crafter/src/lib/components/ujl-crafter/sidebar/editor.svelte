@@ -5,7 +5,7 @@
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import {
 		findNodeById,
 		ROOT_NODE_ID,
@@ -23,9 +23,9 @@
 	} from '$lib/utils/clipboard.js';
 
 	let {
-		slot
+		rootSlot
 	}: {
-		slot: UJLCSlotObject;
+		rootSlot: UJLCSlotObject;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
@@ -48,10 +48,10 @@
 		if (!selectedNodeId) return null;
 
 		if (selectedSlotInfo) {
-			return findNodeById(slot, selectedSlotInfo.parentId);
+			return findNodeById(rootSlot, selectedSlotInfo.parentId);
 		}
 
-		return findNodeById(slot, selectedNodeId);
+		return findNodeById(rootSlot, selectedNodeId);
 	});
 
 	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
@@ -72,7 +72,7 @@
 		if (!selectedNodeId) return false;
 
 		if (selectedSlotInfo) {
-			const parentNode = findNodeById(slot, selectedSlotInfo.parentId);
+			const parentNode = findNodeById(rootSlot, selectedSlotInfo.parentId);
 			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
 
 			if (isModuleObject(clipboard)) {
@@ -215,7 +215,7 @@
 		if (isRootNode(parentId)) {
 			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, 'into');
 		} else {
-			const targetNode = findNodeById(slot, parentId);
+			const targetNode = findNodeById(rootSlot, parentId);
 			if (!targetNode) {
 				return false;
 			}
@@ -240,7 +240,7 @@
 			);
 		} else {
 			// Regular module: insert after current module (consistent with paste)
-			const targetNode = findNodeById(slot, nodeId);
+			const targetNode = findNodeById(rootSlot, nodeId);
 			if (!targetNode) {
 				return false;
 			}
@@ -488,7 +488,7 @@
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
 	<div class="p-2">
 		<NavTree
-			nodes={slot}
+			nodes={rootSlot}
 			{clipboard}
 			onCopy={handleCopy}
 			onCut={handleCut}

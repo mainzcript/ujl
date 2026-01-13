@@ -1,20 +1,14 @@
 <script lang="ts">
-	import {
-		SidebarProvider,
-		SidebarInset,
-		Sidebar,
-		SidebarHeader,
-		SidebarContent,
-		SidebarRail,
-		Sheet,
-		SheetContent,
-		SheetHeader,
-		SheetTitle,
-		Text,
-		Link
-	} from '@ujl-framework/ui';
+	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '$lib/components/ui/app';
+	import { Badge } from '@ujl-framework/ui';
 	import { setContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import Header from './header/header.svelte';
+	import Editor from './sidebar/editor.svelte';
+	import Preview from './canvas/preview.svelte';
+	import PropertiesPanel from './panel/properties-panel.svelte';
+	import DesignerPanel from './panel/designer-panel.svelte';
+	import CrafterEffects from './crafter-effects.svelte';
 	import type {
 		UJLCDocument,
 		UJLTDocument,
@@ -35,50 +29,34 @@
 	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.ts';
 	import { logger } from '$lib/utils/logger.js';
 	import { InlineMediaService, BackendMediaService } from '$lib/services/index.js';
-
-	import Editor from './sidebar-left/editor/editor.svelte';
-	import Designer from './sidebar-left/designer/designer.svelte';
-	import SidebarRightContent from './sidebar-right/sidebar-right.svelte';
-	import Preview from './body/preview.svelte';
-	import Header from './header/header.svelte';
 	import { type CrafterMode, type ViewportSize } from './types.js';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 
+	// Note: App context is set by the <App> component, we access it via useApp() where needed
+
 	// ============================================================================
-	// UI STATE
+	// VIEWPORT SIZE STATE
 	// ============================================================================
 
-	const RIGHT_SIDEBAR_BREAKPOINT = 1280;
+	// Viewport type for toggle group
+	let viewportType = $state<string | undefined>(undefined);
 
-	let containerRef: HTMLElement | null = $state(null);
-	let containerWidth = $state(0);
-	let rightSheetOpen = $state(false);
+	// Viewport-Size-Map
+	const VIEWPORT_SIZES: Record<string, number> = {
+		desktop: 1024,
+		tablet: 768,
+		mobile: 375
+	};
 
-	// ToggleGroup uses strings, so we store as string and convert to number
-	let viewportSizeString = $state<string | undefined>(undefined);
-
-	let viewportSize = $derived<ViewportSize>(
-		viewportSizeString ? (Number.parseInt(viewportSizeString) as ViewportSize) : null
+	// Derived viewport size (Pixel oder null)
+	const viewportSize = $derived<ViewportSize>(
+		viewportType ? ((VIEWPORT_SIZES[viewportType] ?? null) as ViewportSize) : null
 	);
 
-	let showRightSidebar = $derived(containerWidth >= RIGHT_SIDEBAR_BREAKPOINT);
-
-	$effect(() => {
-		if (!containerRef) return;
-
-		const observer = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				containerWidth = entry.contentRect.width;
-			}
-		});
-
-		observer.observe(containerRef);
-
-		return () => {
-			observer.disconnect();
-		};
-	});
+	// ============================================================================
+	// DOCUMENT STATE
+	// ============================================================================
 
 	/**
 	 * Single Source of Truth: Load and validate documents
@@ -247,8 +225,12 @@
 		}
 	}
 
+	function handleSave() {
+		toast.info('Save functionality coming soon!');
+	}
+
 	// ============================================================================
-	// CONTEXT
+	// CONTEXT SETUP
 	// ============================================================================
 
 	const composer = new Composer();
@@ -322,119 +304,48 @@
 	setContext(COMPOSER_CONTEXT, composer);
 </script>
 
-<div bind:this={containerRef} class="relative mx-auto flex w-full flex-1">
-	<SidebarProvider>
-		<!-- LEFT SIDEBAR -->
-		<Sidebar variant="inset" side="left">
-			<SidebarHeader>
-				<div class="flex items-center gap-2 px-2 py-1">
-					<span class="text-sm font-semibold">
-						{mode === 'editor' ? 'Document' : 'Theme'}
-					</span>
-				</div>
-			</SidebarHeader>
-			<SidebarContent>
-				{#if mode === 'editor'}
-					<Editor slot={ujlcDocument.ujlc.root} />
-				{:else}
-					<Designer tokens={ujltDocument.ujlt.tokens} />
-				{/if}
-			</SidebarContent>
-			<SidebarRail />
-		</Sidebar>
+<App>
+	<!-- Panel-Auto-Open and Close Callback Logic -->
+	<CrafterEffects {mode} {setSelectedNodeId} />
 
-		<!-- MAIN CONTENT AREA -->
-		<SidebarInset
-			class="overflow-hidden border border-border"
-			style="height: calc(100svh - var(--spacing) * 4);"
-		>
-			<Header
-				{mode}
-				onModeChange={handleModeChange}
-				{viewportSizeString}
-				onViewportSizeChange={(size) => (viewportSizeString = size)}
-				{showRightSidebar}
-				onOpenRightSheet={() => (rightSheetOpen = true)}
-				onSave={() => toast.info('Save functionality coming soon!')}
-				onImportTheme={handleImportTheme}
-				onImportContent={handleImportContent}
-				onExportTheme={handleExportTheme}
-				onExportContent={handleExportContent}
-			/>
+	<AppLogo>
+		<Badge>UJL</Badge>
+	</AppLogo>
 
-			<div class="flex h-0 flex-1 justify-center">
-				<div
-					class="mx-2 overflow-auto rounded border border-border/50 bg-muted/10 transition-all duration-300"
-					style={viewportSize
-						? `width: ${viewportSize}px; max-width: calc(100% - var(--spacing) * 4);`
-						: 'width: 100%;'}
-				>
-					<div
-						class="transition-all duration-300"
-						style={viewportSize ? `width: ${viewportSize}px;` : 'width: 100%;'}
-					>
-						<Preview {ujlcDocument} {ujltDocument} />
-					</div>
-				</div>
+	<AppHeader>
+		<Header
+			{mode}
+			onModeChange={handleModeChange}
+			{viewportType}
+			onViewportTypeChange={(type) => (viewportType = type)}
+			onSave={handleSave}
+			onImportTheme={handleImportTheme}
+			onImportContent={handleImportContent}
+			onExportTheme={handleExportTheme}
+			onExportContent={handleExportContent}
+		/>
+	</AppHeader>
+
+	<AppSidebar>
+		<Editor rootSlot={ujlcDocument.ujlc.root} />
+	</AppSidebar>
+
+	<AppCanvas>
+		<div class="h-full overflow-auto">
+			<div
+				class="mx-auto min-w-[375px] duration-300"
+				style={viewportSize ? `width: ${viewportSize}px;` : 'width: 100%;'}
+			>
+				<Preview {ujlcDocument} {ujltDocument} crafterMode={mode} />
 			</div>
+		</div>
+	</AppCanvas>
 
-			<div class="flex shrink-0 items-center justify-center gap-4 p-2">
-				<Text size="xs" intensity="muted">
-					UJL Crafter ·
-					<Link
-						href="https://ujl-framework.org/"
-						external={true}
-						active={false}
-						currentUrl={undefined}
-						title="Info"
-					>
-						Landing Page
-					</Link>
-					·
-					<Link
-						href="https://ujl-framework.org/legal/imprint.html"
-						external={true}
-						active={false}
-						currentUrl={undefined}
-						title="Imprint"
-					>
-						Imprint
-					</Link>
-					·
-					<Link
-						href="https://ujl-framework.org/legal/privacy.html"
-						external={true}
-						active={false}
-						currentUrl={undefined}
-						title="Privacy"
-					>
-						Privacy
-					</Link>
-				</Text>
-			</div>
-		</SidebarInset>
-
-		{#if showRightSidebar}
-			<Sidebar variant="inset" side="right">
-				<SidebarHeader>
-					<div class="flex items-center gap-2 px-2 py-1">
-						<span class="text-sm font-semibold">Properties</span>
-					</div>
-				</SidebarHeader>
-				<SidebarContent>
-					<SidebarRightContent />
-				</SidebarContent>
-			</Sidebar>
+	<AppPanel>
+		{#if mode === 'editor'}
+			<PropertiesPanel />
+		{:else}
+			<DesignerPanel tokens={ujltDocument.ujlt.tokens} />
 		{/if}
-	</SidebarProvider>
-</div>
-
-<!-- Sheet for right panel when container is too narrow - outside Provider to avoid context issues -->
-<Sheet bind:open={rightSheetOpen}>
-	<SheetContent side="right" class="w-80">
-		<SheetHeader>
-			<SheetTitle>Properties</SheetTitle>
-		</SheetHeader>
-		<SidebarRightContent />
-	</SheetContent>
-</Sheet>
+	</AppPanel>
+</App>

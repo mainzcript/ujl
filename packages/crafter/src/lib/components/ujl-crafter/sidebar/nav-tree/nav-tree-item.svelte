@@ -29,7 +29,7 @@
 		canNodeAcceptPaste
 	} from '$lib/utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.ts';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 	import { test, testId } from '$lib/utils/test-attrs.ts';
 
 	let {

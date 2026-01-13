@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Text } from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import type { MediaLibraryEntry } from '@ujl-framework/types';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -32,10 +33,10 @@
 		isLoadingPreview = true;
 		mediaService
 			.get(mediaId)
-			.then((entry) => {
+			.then((entry: MediaLibraryEntry | null) => {
 				previewUrl = entry?.dataUrl ?? null;
 			})
-			.catch((err) => {
+			.catch((err: unknown) => {
 				logger.error('[MediaPicker] Failed to load media preview:', err);
 				previewUrl = null;
 			})

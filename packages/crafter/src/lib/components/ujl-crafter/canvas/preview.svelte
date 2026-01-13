@@ -9,14 +9,18 @@
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import { logger } from '$lib/utils/logger.js';
 
+	import type { CrafterMode } from '../types.js';
+
 	let {
 		ujlcDocument,
 		ujltDocument,
-		mode = 'system'
+		mode = 'system',
+		crafterMode = 'editor'
 	}: {
 		ujlcDocument: UJLCDocument;
 		ujltDocument: UJLTDocument;
 		mode?: 'light' | 'dark' | 'system';
+		crafterMode?: CrafterMode;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
@@ -116,6 +120,14 @@
 	}
 
 	$effect(() => {
+		// Only show selection in editor mode
+		if (crafterMode !== 'editor') {
+			document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
+				el.classList.remove('ujl-selected');
+			});
+			return;
+		}
+
 		document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
 			el.classList.remove('ujl-selected');
 		});
@@ -130,14 +142,18 @@
 	});
 </script>
 
-<div bind:this={scrollContainerRef} class="h-full w-full overflow-y-auto">
+<div
+	bind:this={scrollContainerRef}
+	class="h-full w-full overflow-y-auto"
+	class:ujl-editor-mode={crafterMode === 'editor'}
+>
 	{#if ast}
 		<AdapterRoot
 			node={ast}
 			{tokenSet}
 			{mode}
 			showMetadata={true}
-			eventCallback={handleModuleClick}
+			eventCallback={crafterMode === 'editor' ? handleModuleClick : undefined}
 		/>
 	{:else}
 		<div class="flex h-full w-full items-center justify-center">
@@ -147,31 +163,38 @@
 </div>
 
 <style>
-	:global([data-ujl-module-id][role='button']:not(.ujl-selected):hover),
-	:global(button[data-ujl-module-id]:not(.ujl-selected):hover) {
+	/* Only show hover/selection styles in editor mode */
+	:global(.ujl-editor-mode [data-ujl-module-id][role='button']:not(.ujl-selected):hover),
+	:global(.ujl-editor-mode button[data-ujl-module-id]:not(.ujl-selected):hover) {
 		outline: 2px solid oklch(var(--primary) / 0.7);
 		outline-offset: 2px;
 		border-radius: var(--radius);
 	}
 
-	:global([data-ujl-module-id].ujl-selected) {
+	:global(.ujl-editor-mode [data-ujl-module-id].ujl-selected) {
 		outline: 2px solid oklch(var(--primary));
 		outline-offset: 2px;
 		border-radius: var(--radius);
 	}
 
 	:global(
-		[data-ujl-module-id][role='button']:not(.ujl-selected):has(
+		.ujl-editor-mode
+			[data-ujl-module-id][role='button']:not(.ujl-selected):has(
 				[data-ujl-module-id][role='button']:hover
 			)
 	),
 	:global(
-		[data-ujl-module-id][role='button']:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
+		.ujl-editor-mode
+			[data-ujl-module-id][role='button']:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
 	),
 	:global(
-		button[data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id][role='button']:hover)
+		.ujl-editor-mode
+			button[data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id][role='button']:hover)
 	),
-	:global(button[data-ujl-module-id]:not(.ujl-selected):has(button[data-ujl-module-id]:hover)) {
+	:global(
+		.ujl-editor-mode
+			button[data-ujl-module-id]:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
+	) {
 		outline: none !important;
 	}
 </style>

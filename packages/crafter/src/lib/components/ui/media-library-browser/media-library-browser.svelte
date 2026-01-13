@@ -12,8 +12,8 @@
 		DialogCloseButton
 	} from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/app/context.js';
-	import type { MediaMetadata } from '@ujl-framework/types';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import type { MediaMetadata, MediaLibraryEntry } from '@ujl-framework/types';
 	import XIcon from '@lucide/svelte/icons/x';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
@@ -42,7 +42,7 @@
 		isLoading = true;
 		try {
 			const entries = await mediaService.list();
-			mediaEntries = entries.map(({ id, entry }) => ({
+			mediaEntries = entries.map(({ id, entry }: { id: string; entry: MediaLibraryEntry }) => ({
 				id,
 				dataUrl: entry.dataUrl,
 				metadata: entry.metadata
@@ -143,7 +143,7 @@
 
 					<!-- Overlay with actions -->
 					<div
-						class="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+						class="absolute inset-0 flex items-end bg-linear-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
 					>
 						<div class="flex w-full items-center justify-between p-2">
 							<Button

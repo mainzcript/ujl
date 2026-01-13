@@ -158,21 +158,19 @@
 							data-slot="app-panel"
 						>
 							{#if registry.panel}
-								<Card class="flex h-full w-sm! flex-col gap-0 p-0 shadow-none">
-									<div class="flex justify-end p-2">
-										<Button
-											variant="ghost"
-											size="icon"
-											class="size-6"
-											onclick={app.hidePanel}
-											title="Close Panel"
-										>
-											<XIcon class="size-4" />
-										</Button>
-									</div>
-									<div class="flex-1 p-6 pt-0">
+								<Card class="relative h-full w-sm! flex-col gap-0 p-0 shadow-none">
+									<div class="absolute top-0 left-0 h-full w-full">
 										{@render registry.panel()}
 									</div>
+									<Button
+										variant="ghost"
+										size="icon"
+										class="absolute top-2 right-2 size-6"
+										onclick={app.hidePanel}
+										title="Close Panel"
+									>
+										<XIcon class="size-4" />
+									</Button>
 								</Card>
 							{/if}
 						</div>

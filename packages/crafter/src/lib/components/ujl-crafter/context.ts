@@ -29,11 +29,11 @@ import { logger } from '$lib/utils/logger.js';
  * Editor context API for managing UJL document state.
  * All mutations go through this API to maintain a single source of truth.
  *
- * This context is provided by `app.svelte` and consumed by child components
+ * This context is provided by `ujl-crafter.svelte` and consumed by child components
  * that need to update the document state (e.g., Designer, Editor).
  *
  * Architecture: Unidirectional data flow
- * - Tokens and documents are owned by app.svelte (Single Source of Truth)
+ * - Tokens and documents are owned by ujl-crafter.svelte (Single Source of Truth)
  * - Child components receive tokens as read-only props
  * - Changes flow up via callbacks (onChange handlers) to updateTokenSet/updateRootSlot
  * - No local token copies or two-way bindings - data flows down, events flow up
@@ -328,8 +328,8 @@ export type CrafterContext = {
 /**
  * Symbol for the Crafter context key
  */
-export const CRAFTER_CONTEXT = Symbol('CRAFTER_CONTEXT');
-export const COMPOSER_CONTEXT = Symbol('COMPOSER_CONTEXT');
+export const CRAFTER_CONTEXT = Symbol.for('CRAFTER_CONTEXT');
+export const COMPOSER_CONTEXT = Symbol.for('COMPOSER_CONTEXT');
 
 /**
  * Generates a unique random ID for a node.

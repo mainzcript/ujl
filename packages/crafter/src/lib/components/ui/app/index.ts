@@ -1,4 +1,4 @@
-import { useApp } from './context.svelte.js';
+import { useApp, setApp, setAppRegistry } from './context.svelte.js';
 import Provider from './app-provider.svelte';
 import Sidebar from './app-sidebar.svelte';
 import Panel from './app-panel.svelte';
@@ -15,5 +15,7 @@ export {
 	Header as AppHeader,
 	Logo as AppLogo,
 	SidebarTrigger as AppSidebarTrigger,
-	useApp
+	useApp,
+	setApp,
+	setAppRegistry
 };
