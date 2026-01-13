@@ -1191,7 +1191,7 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 - Apache 2.0 (Patent-Schutz)
 - AGPL-3.0 (Copyleft für SaaS)
 
-**Tendenz:** MIT License (siehe [README.md](../../../README.md#license))
+**Tendenz:** MIT License
 
 ### 9.13.2 Semantic Search mit pgvector
 
@@ -1200,8 +1200,6 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 **Kontext:** Media Library könnte Embeddings für semantische Suche speichern.
 
 **Technologie:** pgvector Extension für PostgreSQL
-
-**Referenz:** [services/media/README.md#semantic-search-todo](../../../services/media/README.md#semantic-search-todo)
 
 ### 9.13.3 Weitere Adapter
 
