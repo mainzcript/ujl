@@ -4,7 +4,6 @@
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-	import { page } from '$app/state';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
 	import { Composer, type AnyModule } from '@ujl-framework/core';
@@ -16,7 +15,9 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 
-	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived.by(() => {
+		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+	});
 
 	// Slot selection uses format: parentId:slotName
 	const isSlotSelected = $derived(() => {

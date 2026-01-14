@@ -30,8 +30,7 @@
 	import { logger } from '$lib/utils/logger.js';
 	import { InlineMediaService, BackendMediaService } from '$lib/services/index.js';
 	import { type CrafterMode, type ViewportSize } from './types.js';
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { isRootNode } from '$lib/utils/ujlc-tree.js';
 
 	// Note: App context is set by the <App> component, we access it via useApp() where needed
 
@@ -76,9 +75,17 @@
 	 */
 	let mode = $state<CrafterMode>('editor');
 
+	/**
+	 * Locally scoped selection state (no URL manipulation).
+	 */
+	let selectedNodeId = $state<string | null>(null);
+
 	function handleModeChange(newMode: string | undefined) {
 		if (newMode === 'editor' || newMode === 'designer') {
 			mode = newMode;
+			if (newMode === 'designer') {
+				setSelectedNodeId(null);
+			}
 		}
 	}
 
@@ -163,18 +170,8 @@
 	}
 
 	function setSelectedNodeId(nodeId: string | null): void {
-		const url = new URL(page.url);
-		if (nodeId) {
-			url.searchParams.set('selected', nodeId);
-		} else {
-			url.searchParams.delete('selected');
-		}
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(url, {
-			replaceState: true,
-			noScroll: true,
-			keepFocus: true
-		});
+		if (nodeId && (mode !== 'editor' || isRootNode(nodeId))) return;
+		selectedNodeId = nodeId;
 	}
 
 	// ============================================================================
@@ -294,6 +291,8 @@
 		getMeta: () => ujlcDocument.ujlc.meta,
 		getRootSlot: () => ujlcDocument.ujlc.root,
 		setSelectedNodeId,
+		getSelectedNodeId: () => selectedNodeId,
+		getMode: () => mode,
 		getExpandedNodeIds: () => expandedNodeIds,
 		setNodeExpanded,
 		expandToNode,
@@ -306,7 +305,7 @@
 
 <App>
 	<!-- Panel-Auto-Open and Close Callback Logic -->
-	<CrafterEffects {mode} {setSelectedNodeId} />
+	<CrafterEffects {mode} {setSelectedNodeId} {selectedNodeId} />
 
 	<AppLogo>
 		<Badge>UJL</Badge>
@@ -331,7 +330,7 @@
 	</AppSidebar>
 
 	<AppCanvas>
-		<div class="h-full overflow-auto">
+		<div class="h-full">
 			<div
 				class="mx-auto min-w-[375px] duration-300"
 				style={viewportSize ? `width: ${viewportSize}px;` : 'width: 100%;'}

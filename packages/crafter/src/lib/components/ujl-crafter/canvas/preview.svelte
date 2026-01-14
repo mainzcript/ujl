@@ -5,7 +5,6 @@
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
 	import '@ujl-framework/adapter-svelte/styles';
 	import { getContext } from 'svelte';
-	import { page } from '$app/state';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -25,7 +24,9 @@
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
-	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived.by(() => {
+		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+	});
 
 	const composer = new Composer();
 
@@ -51,6 +52,7 @@
 	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 
 	function handleModuleClick(moduleId: string) {
+		if (crafterMode !== 'editor' || crafter.getMode() !== 'editor') return;
 		crafter.expandToNode(moduleId);
 		crafter.setSelectedNodeId(moduleId);
 		scrollToNodeInTree(moduleId);
@@ -68,55 +70,42 @@
 		}, 300);
 	}
 
+	let scrollContainerRef: HTMLDivElement;
+
+	function getScrollContainer(): HTMLDivElement | null {
+		return (
+			(document.querySelector('[data-ujl-scroll-container="canvas"]') as HTMLDivElement | null) ??
+			scrollContainerRef
+		);
+	}
+
 	/**
-	 * Check if element is mostly out of view (>60% outside its scroll container)
+	 * Scroll to component in preview; retry if DOM or ref is not ready.
 	 */
-	function isElementMostlyOutOfView(element: Element, container: Element): boolean {
+	function scrollToComponentInPreview(moduleId: string, retries = 3) {
+		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
+		const container = getScrollContainer();
+
+		if (!element || !container) {
+			if (retries > 0) {
+				setTimeout(() => scrollToComponentInPreview(moduleId, retries - 1), 100);
+			}
+			return;
+		}
+
 		const elementRect = element.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
 
-		const visibleTop = Math.max(elementRect.top, containerRect.top);
-		const visibleBottom = Math.min(elementRect.bottom, containerRect.bottom);
-		const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-		const elementHeight = elementRect.height;
+		const targetScroll =
+			container.scrollTop +
+			(elementRect.top - containerRect.top) -
+			containerRect.height / 2 +
+			elementRect.height / 2;
 
-		if (elementHeight === 0) return true;
-
-		const visiblePercentage = (visibleHeight / elementHeight) * 100;
-		return visiblePercentage < 60;
-	}
-
-	let scrollContainerRef: HTMLDivElement;
-
-	/**
-	 * Scroll to component in preview (only if >40% out of view)
-	 */
-	function scrollToComponentInPreview(moduleId: string) {
-		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
-
-		if (!element) {
-			return;
-		}
-
-		if (!scrollContainerRef) {
-			return;
-		}
-
-		if (isElementMostlyOutOfView(element, scrollContainerRef)) {
-			const elementRect = element.getBoundingClientRect();
-			const containerRect = scrollContainerRef.getBoundingClientRect();
-
-			const targetScroll =
-				scrollContainerRef.scrollTop +
-				(elementRect.top - containerRect.top) -
-				containerRect.height / 2 +
-				elementRect.height / 2;
-
-			scrollContainerRef.scrollTo({
-				top: targetScroll,
-				behavior: 'smooth'
-			});
-		}
+		container.scrollTo({
+			top: Math.max(0, targetScroll),
+			behavior: 'smooth'
+		});
 	}
 
 	$effect(() => {
@@ -144,7 +133,7 @@
 
 <div
 	bind:this={scrollContainerRef}
-	class="h-full w-full overflow-y-auto"
+	class="h-full w-full"
 	class:ujl-editor-mode={crafterMode === 'editor'}
 >
 	{#if ast}

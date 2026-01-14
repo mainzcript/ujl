@@ -9,20 +9,19 @@
 -->
 <script lang="ts">
 	import { useApp } from '$lib/components/ui/app';
-	import { page } from '$app/state';
 	import type { CrafterMode } from './types.js';
 
 	let {
 		mode,
-		setSelectedNodeId
+		setSelectedNodeId,
+		selectedNodeId
 	}: {
 		mode: CrafterMode;
 		setSelectedNodeId: (nodeId: string | null) => void;
+		selectedNodeId: string | null;
 	} = $props();
 
 	const app = useApp();
-
-	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
 
 	// Auto-open panel when node is selected (desktop, editor mode)
 	$effect(() => {

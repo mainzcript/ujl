@@ -275,7 +275,11 @@
 										/>
 									</button>
 									<button
-										onclick={() => onNodeClick(node.meta.id)}
+										type="button"
+										onclick={(e) => {
+											e.stopPropagation();
+											onNodeClick(node.meta.id);
+										}}
 										class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 									>
 										<span>{displayName}</span>
@@ -288,6 +292,7 @@
 													variant="ghost"
 													size="icon"
 													class="mr-2 h-6 w-6 opacity-0 group-hover/node-root:opacity-100"
+													onclick={(e) => e.stopPropagation()}
 												>
 													<MoreVerticalIcon class="size-4" />
 												</Button>
@@ -331,7 +336,22 @@
 							: ''} {isDragging ? 'opacity-50' : ''} {showDropInto
 							? 'drop-target'
 							: ''} flex h-full w-full items-center justify-between rounded-md"
-						onclick={() => onNodeClick(node.meta.id)}
+						onclick={(e) => {
+							// Only trigger selection if click is not on dropdown button
+							if (
+								e.target instanceof HTMLElement &&
+								!e.target.closest('button[data-radix-collection-item]') &&
+								!e.target.closest('[role="menuitem"]')
+							) {
+								onNodeClick(node.meta.id);
+							}
+						}}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								onNodeClick(node.meta.id);
+							}
+						}}
 						draggable={!isRootNode}
 						ondragstart={isRootNode ? undefined : (e) => onDragStart(e, node.meta.id)}
 						ondragover={(e) => onDragOver(e, node.meta.id)}
@@ -402,7 +422,11 @@
 									/>
 								</button>
 								<button
-									onclick={() => onNodeClick(node.meta.id)}
+									type="button"
+									onclick={(e) => {
+										e.stopPropagation();
+										onNodeClick(node.meta.id);
+									}}
 									class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 								>
 									<span>{displayName}</span>
@@ -415,6 +439,7 @@
 												variant="ghost"
 												size="icon"
 												class="mr-2 h-6 w-6 opacity-0 group-hover/dropdown:opacity-100"
+												onclick={(e) => e.stopPropagation()}
 											>
 												<MoreVerticalIcon class="size-4" />
 											</Button>
@@ -457,9 +482,29 @@
 				ondragleave={onDragLeave}
 				ondrop={(e) => onDrop(e, node.meta.id)}
 				ondragend={onDragEnd}
+				onclick={(e) => {
+					// Only trigger selection if click is not on dropdown button
+					if (
+						e.target instanceof HTMLElement &&
+						!e.target.closest('button[data-radix-collection-item]') &&
+						!e.target.closest('[role="menuitem"]')
+					) {
+						onNodeClick(node.meta.id);
+					}
+				}}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						onNodeClick(node.meta.id);
+					}
+				}}
 			>
 				<button
-					onclick={() => onNodeClick(node.meta.id)}
+					type="button"
+					onclick={(e) => {
+						e.stopPropagation();
+						onNodeClick(node.meta.id);
+					}}
 					class="h-full flex-1 overflow-hidden text-left text-nowrap text-ellipsis"
 				>
 					<span>{getDisplayName(node)}</span>

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { UJLCSlotObject } from '@ujl-framework/types';
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
@@ -39,7 +37,9 @@
 	// Prevents duplicate execution when keyboard shortcuts trigger clipboard events
 	let isHandlingKeyboardShortcut = $state(false);
 
-	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
+	const selectedNodeId = $derived.by(() => {
+		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+	});
 
 	// Slot selection uses format: parentId:slotName
 	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
@@ -270,15 +270,21 @@
 		showComponentPicker = false;
 	}
 
-	async function handleSlotClick(parentId: string, slotName: string) {
-		const url = new URL(page.url);
-		url.searchParams.set('selected', `${parentId}:${slotName}`);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		await goto(url, { replaceState: true, noScroll: true });
+	function handleSlotClick(parentId: string, slotName: string) {
+		if (crafter.getMode() !== 'editor') return;
+		crafter.setSelectedNodeId(`${parentId}:${slotName}`);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (isEditableElement(event.target)) return;
+
+		if (event.key === 'Escape') {
+			if (selectedNodeId) {
+				event.preventDefault();
+				crafter.setSelectedNodeId(null);
+			}
+			return;
+		}
 
 		// Ctrl+I (Add) should always work, even without selection
 		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {

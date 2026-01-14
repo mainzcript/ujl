@@ -146,9 +146,18 @@ export type CrafterContext = {
 
 	/**
 	 * Set the currently selected node ID
-	 * This triggers navigation and updates the URL
 	 */
 	setSelectedNodeId: (nodeId: string | null) => void;
+
+	/**
+	 * Get the currently selected node ID
+	 */
+	getSelectedNodeId: () => string | null;
+
+	/**
+	 * Get the current crafter mode (editor | designer)
+	 */
+	getMode: () => import('./types.js').CrafterMode;
 
 	/**
 	 * Get the set of expanded node IDs in the navigation tree

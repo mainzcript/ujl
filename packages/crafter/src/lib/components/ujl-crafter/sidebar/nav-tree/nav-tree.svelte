@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import { getContext } from 'svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
 	import { testId } from '$lib/utils/test-attrs.ts';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 
 	let {
 		nodes,
@@ -54,8 +54,13 @@
 		onSlotClick?: (parentId: string, slotName: string) => void;
 	} = $props();
 
-	// Selected node from URL
-	const selectedNodeId = $derived(page.url.searchParams.get('selected'));
+	// Get Crafter Context for selection state
+	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+
+	// Selected node from Context (synchronized with editor.svelte)
+	const selectedNodeId = $derived.by(() => {
+		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+	});
 
 	// Create drag handler with slot move support
 	const dragHandler = $derived(createDragHandler(onNodeMove, onSlotMove));
@@ -72,13 +77,16 @@
 	const virtualRootNode = $derived(createVirtualRootNode(nodes));
 
 	/**
-	 * Handle node click - update URL with selected node ID
+	 * Handle node click - update Context with selected node ID
+	 * This ensures synchronization with the rest of the application
+	 *
+	 * Order: expand first (to make node visible), then select (consistent with preview.svelte)
 	 */
-	async function handleNodeClick(nodeId: string) {
-		const url = new URL(page.url);
-		url.searchParams.set('selected', nodeId);
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		await goto(url, { replaceState: true, noScroll: true });
+	function handleNodeClick(nodeId: string) {
+		if (crafter.getMode() !== 'editor') return;
+		// Expand to node first to ensure it's visible in the tree
+		crafter.expandToNode(nodeId);
+		crafter.setSelectedNodeId(nodeId);
 	}
 </script>
 
