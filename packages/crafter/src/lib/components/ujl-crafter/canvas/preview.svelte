@@ -109,19 +109,13 @@
 	}
 
 	$effect(() => {
-		// Only show selection in editor mode
-		if (crafterMode !== 'editor') {
-			document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
-				el.classList.remove('ujl-selected');
-			});
-			return;
-		}
-
+		// Remove selection from all elements first (cleanup)
 		document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
 			el.classList.remove('ujl-selected');
 		});
 
-		if (selectedNodeId) {
+		// Only apply selection in editor mode
+		if (crafterMode === 'editor' && selectedNodeId) {
 			const element = document.querySelector(`[data-ujl-module-id="${selectedNodeId}"]`);
 			if (element) {
 				element.classList.add('ujl-selected');
@@ -164,6 +158,11 @@
 		outline: 2px solid oklch(var(--primary));
 		outline-offset: 2px;
 		border-radius: var(--radius);
+	}
+
+	/* Explicitly remove outline when not selected to prevent lingering styles */
+	:global(.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected)) {
+		outline: none;
 	}
 
 	:global(
