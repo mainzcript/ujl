@@ -175,7 +175,7 @@
 	Delegate UI rendering to presentational group components.
 	Each group receives tokens directly as props and onChange callbacks for updates.
 -->
-<div class="h-full overflow-y-auto">
+<div class="h-full divide-y divide-border overflow-y-auto">
 	<AmbientColorGroup
 		palette={tokens.color}
 		ambientColorSet={tokens.color.ambient}
