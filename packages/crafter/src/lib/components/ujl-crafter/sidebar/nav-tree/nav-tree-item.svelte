@@ -6,16 +6,18 @@
 		Collapsible,
 		CollapsibleTrigger,
 		CollapsibleContent,
-		SidebarMenuItem,
-		SidebarMenuButton,
-		SidebarMenuSub,
-		SidebarMenuSubItem,
-		SidebarMenuSubButton,
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuTrigger,
 		Button
 	} from '@ujl-framework/ui';
+	import {
+		SidebarMenuItem,
+		SidebarMenuButton,
+		SidebarMenuSub,
+		SidebarMenuSubItem,
+		SidebarMenuSubButton
+	} from '$lib/components/ui/sidebar-menu';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeSlotGroup from './nav-tree-slot-group.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
@@ -246,9 +248,9 @@
 			{/if}
 			<Collapsible open={isExpanded} onOpenChange={isRootNode ? undefined : handleOpenChange}>
 				<CollapsibleTrigger class="group">
-					{#snippet child({ props })}
+					{#snippet child({ props }: { props?: Record<string, unknown> })}
 						<SidebarMenuButton {...props}>
-							{#snippet child({ props: buttonProps })}
+							{#snippet child({ props: buttonProps }: { props?: Record<string, unknown> })}
 								<div
 									role="button"
 									tabindex="0"
@@ -263,7 +265,11 @@
 									ondrop={(e) => onDrop(e, node.meta.id)}
 									ondragend={onDragEnd}
 								>
-									<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
+									<button
+										type="button"
+										{...buttonProps ?? {}}
+										class="{buttonProps?.class || ''} w-auto!"
+									>
 										<ChevronRightIcon
 											class="size-4 transition-transform group-data-[state=open]:rotate-90"
 										/>
@@ -314,13 +320,13 @@
 				></div>
 			{/if}
 			<SidebarMenuButton>
-				{#snippet child({ props })}
+				{#snippet child({ props }: { props?: Record<string, unknown> })}
 					<button
 						type="button"
 						{...props}
 						tabindex="0"
 						data-tree-node-id={node.meta.id}
-						class="group/root {props.class || ''} {isSelected
+						class="group/root {props?.class || ''} {isSelected
 							? 'selected text-primary'
 							: ''} {isDragging ? 'opacity-50' : ''} {showDropInto
 							? 'drop-target'
@@ -371,7 +377,7 @@
 			<CollapsibleTrigger class="group">
 				{#snippet child({ props })}
 					<SidebarMenuButton {...props}>
-						{#snippet child({ props: buttonProps })}
+						{#snippet child({ props: buttonProps }: { props?: Record<string, unknown> })}
 							<div
 								role="button"
 								tabindex="0"
@@ -386,7 +392,11 @@
 								ondrop={(e) => onDrop(e, node.meta.id)}
 								ondragend={onDragEnd}
 							>
-								<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
+								<button
+									type="button"
+									{...buttonProps ?? {}}
+									class="{buttonProps?.class || ''} w-auto!"
+								>
 									<ChevronRightIcon
 										class="size-4 transition-transform group-data-[state=open]:rotate-90"
 									/>

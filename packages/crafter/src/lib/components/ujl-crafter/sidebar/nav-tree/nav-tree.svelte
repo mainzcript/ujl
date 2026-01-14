@@ -1,11 +1,5 @@
 <script lang="ts">
 	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import {
-		SidebarGroup,
-		SidebarGroupLabel,
-		SidebarGroupContent,
-		SidebarMenu
-	} from '@ujl-framework/ui';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NavTreeItem from './nav-tree-item.svelte';
@@ -88,10 +82,14 @@
 	}
 </script>
 
-<SidebarGroup {...testId('nav-tree')}>
-	<SidebarGroupLabel>Document</SidebarGroupLabel>
-	<SidebarGroupContent>
-		<SidebarMenu class="mr-0">
+<div class="relative flex w-full min-w-0 flex-col p-2" {...testId('nav-tree')}>
+	<div
+		class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
+	>
+		Document
+	</div>
+	<div class="w-full text-sm">
+		<ul class="mr-0 flex w-full min-w-0 flex-col gap-1">
 			<NavTreeItem
 				node={virtualRootNode}
 				level={0}
@@ -123,6 +121,6 @@
 				onSlotDragOver={dragHandler.handleSlotDragOver}
 				{onSlotClick}
 			/>
-		</SidebarMenu>
-	</SidebarGroupContent>
-</SidebarGroup>
+		</ul>
+	</div>
+</div>

@@ -1,16 +1,9 @@
 <!--
 	Theme colors group for primary, secondary and accent tokens.
-	Receives UJLTColorSet props and forwards changes via on*Change callbacks to designer.svelte.
+	Receives UJLTColorSet props and forwards changes via on*Change callbacks to designer-panel.svelte.
 -->
 <script lang="ts">
-	import {
-		SidebarGroup,
-		SidebarGroupLabel,
-		SidebarGroupContent,
-		Collapsible,
-		CollapsibleTrigger,
-		CollapsibleContent
-	} from '@ujl-framework/ui';
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
 	import { ColorPaletteInput } from '$lib/components/ui/index.js';
@@ -35,19 +28,19 @@
 </script>
 
 <Collapsible class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Theme Colors
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
+	<div class="relative flex w-full min-w-0 flex-col p-2">
+		<div
+			class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
+		>
+			<CollapsibleTrigger>
+				<ChevronRightIcon
+					class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
+				/>
+				Theme Colors
+			</CollapsibleTrigger>
+		</div>
 		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-8 p-4">
+			<div class="w-full space-y-8 p-4 text-sm">
 				<ColorPaletteInput
 					label="Primary Color"
 					id="primary-color"
@@ -72,7 +65,7 @@
 					flavor="accent"
 					onChange={onAccentChange}
 				/>
-			</SidebarGroupContent>
+			</div>
 		</CollapsibleContent>
-	</SidebarGroup>
+	</div>
 </Collapsible>

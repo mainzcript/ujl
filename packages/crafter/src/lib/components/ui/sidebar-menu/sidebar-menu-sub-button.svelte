@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
 
@@ -23,7 +23,6 @@
 			'data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground',
 			size === 'sm' && 'text-xs',
 			size === 'md' && 'text-sm',
-			'group-data-[collapsible=icon]:hidden',
 			className
 		),
 		'data-slot': 'sidebar-menu-sub-button',

@@ -6,14 +6,16 @@
 		Collapsible,
 		CollapsibleTrigger,
 		CollapsibleContent,
-		SidebarMenuSubItem,
-		SidebarMenuSubButton,
-		SidebarMenuSub,
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuTrigger,
 		Button
 	} from '@ujl-framework/ui';
+	import {
+		SidebarMenuSubItem,
+		SidebarMenuSubButton,
+		SidebarMenuSub
+	} from '$lib/components/ui/sidebar-menu';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { formatSlotName } from '$lib/utils/ujlc-tree.js';
@@ -103,9 +105,9 @@
 <SidebarMenuSubItem {...test('nav-tree-slot-group')}>
 	<Collapsible>
 		<CollapsibleTrigger class="group">
-			{#snippet child({ props })}
+			{#snippet child({ props }: { props?: Record<string, unknown> })}
 				<SidebarMenuSubButton {...props}>
-					{#snippet child({ props: buttonProps })}
+					{#snippet child({ props: buttonProps }: { props?: Record<string, unknown> })}
 						<div
 							role="button"
 							tabindex="0"
@@ -130,7 +132,11 @@
 							ondragend={onDragEnd}
 							{...testId('slot-group-button')}
 						>
-							<button type="button" {...buttonProps} class="{buttonProps.class || ''} w-auto!">
+							<button
+								type="button"
+								{...buttonProps ?? {}}
+								class="{buttonProps?.class || ''} w-auto!"
+							>
 								<ChevronRightIcon
 									class="size-4 transition-transform group-data-[state=open]:rotate-90"
 								/>

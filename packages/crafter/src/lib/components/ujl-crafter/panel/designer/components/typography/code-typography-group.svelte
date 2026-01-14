@@ -1,13 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import {
-		SidebarGroup,
-		SidebarGroupLabel,
-		SidebarGroupContent,
-		Collapsible,
-		CollapsibleTrigger,
-		CollapsibleContent
-	} from '@ujl-framework/ui';
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTTypographyCode } from '@ujl-framework/types';
 	import {
@@ -53,19 +46,19 @@
 </script>
 
 <Collapsible class="group/collapsible">
-	<SidebarGroup>
-		<SidebarGroupLabel>
-			{#snippet child({ props })}
-				<CollapsibleTrigger {...props}>
-					<ChevronRightIcon
-						class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
-					/>
-					Code
-				</CollapsibleTrigger>
-			{/snippet}
-		</SidebarGroupLabel>
+	<div class="relative flex w-full min-w-0 flex-col p-2">
+		<div
+			class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
+		>
+			<CollapsibleTrigger>
+				<ChevronRightIcon
+					class="mr-1 transition-transform group-data-[state=open]/collapsible:rotate-90"
+				/>
+				Code
+			</CollapsibleTrigger>
+		</div>
 		<CollapsibleContent>
-			<SidebarGroupContent class="space-y-8 p-4">
+			<div class="w-full space-y-8 p-4 text-sm">
 				<FontCombobox
 					id="code-font"
 					bind:value={font}
@@ -115,7 +108,7 @@
 					bind:value={weight}
 					onchange={() => handleUpdate('weight', weight)}
 				/>
-			</SidebarGroupContent>
+			</div>
 		</CollapsibleContent>
-	</SidebarGroup>
+	</div>
 </Collapsible>

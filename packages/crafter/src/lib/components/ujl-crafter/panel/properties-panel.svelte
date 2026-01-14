@@ -1,6 +1,6 @@
-<!-- Reusable content for the right sidebar - used in both Sidebar and Sheet -->
+<!-- Properties panel for editing selected module fields -->
 <script lang="ts">
-	import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent, Button } from '@ujl-framework/ui';
+	import { Button } from '@ujl-framework/ui';
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
@@ -167,15 +167,17 @@
 		</div>
 	{:else}
 		<div class="h-full">
-			<SidebarGroup>
-				<SidebarGroupLabel>
+			<div class="relative flex w-full min-w-0 flex-col p-2">
+				<div
+					class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
+				>
 					<span class="text-sm">{getModuleLabel(module())}</span>
-				</SidebarGroupLabel>
-			</SidebarGroup>
+				</div>
+			</div>
 
 			{#if hasEditableFields()}
-				<SidebarGroup>
-					<SidebarGroupContent class="space-y-6 p-2 pt-0">
+				<div class="relative flex w-full min-w-0 flex-col p-2">
+					<div class="w-full space-y-6 p-2 pt-0 text-sm">
 						{#each fieldEntries() as fieldEntry (fieldEntry.key)}
 							<FieldInput
 								fieldName={fieldEntry.key}
@@ -185,17 +187,21 @@
 								nodeId={selectedNodeId}
 							/>
 						{/each}
-					</SidebarGroupContent>
-				</SidebarGroup>
+					</div>
+				</div>
 			{:else}
-				<SidebarGroup>
-					<SidebarGroupLabel>Properties</SidebarGroupLabel>
-					<SidebarGroupContent class="p-4">
+				<div class="relative flex w-full min-w-0 flex-col p-2">
+					<div
+						class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
+					>
+						Properties
+					</div>
+					<div class="w-full p-4 text-sm">
 						<p class="text-xs text-muted-foreground italic">
 							This component type has no editable properties.
 						</p>
-					</SidebarGroupContent>
-				</SidebarGroup>
+					</div>
+				</div>
 			{/if}
 		</div>
 	{/if}

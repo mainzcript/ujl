@@ -34,7 +34,7 @@ export * from './scroll-area/index.js';
 export * from './select/index.js';
 export * from './separator/index.js';
 export * from './sheet/index.js';
-export * from './sidebar/index.js';
+// Sidebar components removed - menu components moved to crafter package
 export * from './skeleton/index.js';
 export * from './slider/index.js';
 export * from './sonner/index.js';
