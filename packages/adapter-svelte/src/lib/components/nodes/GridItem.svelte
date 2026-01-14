@@ -16,7 +16,9 @@
 </script>
 
 <GridItem
-	class="md:col-span-6 xl:col-span-4 {eventCallback ? 'cursor-pointer' : undefined}"
+	class="@xl/ujl-grid:col-span-6 @4xl/ujl-grid:col-span-4 {eventCallback
+		? 'cursor-pointer'
+		: undefined}"
 	data-ujl-module-id={showMetadata ? node.id : undefined}
 	onclick={eventCallback ? handleClick : undefined}
 	role={eventCallback ? 'button' : undefined}
