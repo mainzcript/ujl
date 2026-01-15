@@ -5,20 +5,1022 @@ description: "Wichtige Konzepte, die mehrere Bausteine betreffen"
 
 # Querschnittliche Konzepte
 
-::: info In Ausarbeitung
+Dieses Kapitel beschreibt übergreifende, prinzipielle Regelungen und Lösungsansätze, die in mehreren Teilen des UJL-Systems relevant sind. Diese Konzepte bilden das architektonische Fundament und gewährleisten Konsistenz über alle Packages hinweg.
 
-Dieses Kapitel wird ausgearbeitet, sobald die Architektur weiter ausdifferenziert wird. Erste Konzepte findest du in der [Vision](/about/01-vision).
+## Übersicht der Konzepte
 
-:::
+```mermaid
+graph TB
+    subgraph DomainConcepts["Domain Concepts"]
+        AST["AST-basierte Composition"]
+        ModuleSystem["Modulares System"]
+        TokenSystem["Design Token System"]
+    end
 
-## 8.1 Domain Concepts
+    subgraph DevelopmentConcepts["Development Concepts"]
+        Validation["Schema-basierte Validierung"]
+        ErrorHandling["Fehlerbehandlung"]
+        StateManagement["Zustandsverwaltung"]
+    end
 
-_Dieser Abschnitt wird ausgearbeitet, sobald die Domänenkonzepte definiert sind._
+    subgraph ArchitectureConcepts["Architecture Concepts"]
+        Layering["Schichten-Architektur"]
+        Extensibility["Erweiterbarkeit"]
+        Testing["Testbarkeit"]
+    end
 
-Sieh auch: [Vision & Wertversprechen](/about/01-vision) für erste Einblicke in die Kernkonzepte.
+    subgraph UXConcepts["UX Concepts"]
+        Theming["Theming und Styling"]
+        EventHandling["Event Handling"]
+        Accessibility["Barrierefreiheit"]
+    end
 
-## 8.2 Design Decisions
+    AST --> ModuleSystem
+    ModuleSystem --> TokenSystem
+    Validation --> ErrorHandling
+    Layering --> Extensibility
+    Theming --> EventHandling
+```
 
-_Dieser Abschnitt wird ausgearbeitet, sobald die Design-Entscheidungen dokumentiert sind._
+---
 
-Sieh auch: [Vision & Wertversprechen](/about/01-vision) für erste Einblicke in die Design-Entscheidungen.
+## 8.1 Domain Model
+
+### 8.1.1 UJL Document Formats
+
+Das UJL-Framework definiert zwei zentrale Dokumentformate, die als JSON-Dateien gespeichert werden:
+
+**UJLC (Content Document)** - Beschreibt die Struktur und Inhalte einer Seite:
+
+```typescript
+interface UJLCDocument {
+	ujlc: {
+		meta: UJLCMeta;
+		media: Record<string, UJLCMediaEntry>;
+		root: UJLCModuleObject[];
+	};
+}
+```
+
+**UJLT (Theme Document)** - Definiert das visuelle Erscheinungsbild:
+
+```typescript
+interface UJLTDocument {
+	ujlt: {
+		meta: UJLTMeta;
+		tokens: UJLTTokenSet;
+	};
+}
+```
+
+### 8.1.2 AST-basierte Composition
+
+Das zentrale Architekturprinzip ist die Trennung von Dokumentstruktur (UJLC) und Rendering (AST):
+
+```mermaid
+flowchart LR
+    UJLC["UJLC Document"] --> Composer
+    Composer --> AST["Abstract Syntax Tree"]
+    AST --> AdapterSvelte["Svelte Adapter"]
+    AST --> AdapterWeb["Web Adapter"]
+    AdapterSvelte --> SvelteComponents["Svelte Components"]
+    AdapterWeb --> WebComponents["Web Components"]
+```
+
+**Vorteile:**
+
+- **Entkopplung**: Content-Struktur unabhängig vom Rendering-Framework
+- **Erweiterbarkeit**: Neue Adapter ohne Änderung der Core-Logik
+- **Testbarkeit**: AST-Generierung isoliert testbar
+- **ID-Propagation**: Modul-IDs werden vom UJLC durch den AST bis zum DOM durchgereicht
+
+**AST Node Struktur:**
+
+```typescript
+type UJLAbstractNode = {
+	type: string;
+	id: string;
+	props: Record<string, unknown>;
+};
+```
+
+### 8.1.3 Modulares System
+
+Module sind die Grundbausteine des UJL-Systems. Jedes Modul definiert:
+
+- **Fields**: Eingabefelder mit Validierung und Default-Werten
+- **Slots**: Container für verschachtelte Module
+- **Compose-Methode**: Transformation zu AST-Nodes
+
+```mermaid
+classDiagram
+    class ModuleBase {
+        +name: string
+        +label: string
+        +description: string
+        +category: ComponentCategory
+        +tags: string[]
+        +icon: string
+        +fields: FieldSet
+        +slots: SlotSet
+        +compose(moduleData, composer) UJLAbstractNode
+    }
+
+    class TextModule {
+        +name = text
+        +fields = content RichTextField
+        +slots = empty
+    }
+
+    class ContainerModule {
+        +name = container
+        +fields = empty
+        +slots = body Slot
+    }
+
+    ModuleBase <|-- TextModule
+    ModuleBase <|-- ContainerModule
+```
+
+**Module Registry Pattern:**
+
+```typescript
+// Registrierung
+const composer = new Composer();
+composer.registerModule(new CustomModule());
+
+// Lookup
+const module = composer.getRegistry().getModule("text");
+
+// Composition
+const ast = composer.compose(ujlcDocument);
+```
+
+---
+
+## 8.2 Schema-basierte Validierung
+
+### 8.2.1 Zod als Single Source of Truth
+
+Das UJL-Framework verwendet [Zod](https://zod.dev/) für Schema-Definition und Validierung. Typen werden automatisch aus Schemas inferiert (DRY-Prinzip):
+
+```typescript
+// Schema-Definition
+export const UJLCModuleObjectSchema = z.object({
+	type: z.string(),
+	meta: UJLCModuleMetaSchema,
+	fields: z.record(z.string(), UJLCFieldObjectSchema),
+	slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema))),
+});
+
+// Type-Inference (automatisch)
+export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
+```
+
+**Wichtige Zod-Patterns:**
+
+| Pattern                  | Verwendung                 | Beispiel                 |
+| ------------------------ | -------------------------- | ------------------------ |
+| `z.lazy()`               | Rekursive Strukturen       | Verschachtelte Module    |
+| `z.discriminatedUnion()` | Varianten-Typen            | Inline vs. Backend Media |
+| `.default()`             | Default-Werte              | Optional Fields          |
+| `.safeParse()`           | Nicht-werfende Validierung | CLI-Tools                |
+
+### 8.2.2 Validierungs-API
+
+Das `@ujl-framework/types` Package exportiert zwei Validierungs-Varianten:
+
+**Throwing Validation (für vertrauenswürdige Quellen):**
+
+```typescript
+import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
+
+// Wirft Error bei ungültigem Input
+const validatedDoc = validateUJLCDocument(rawData);
+```
+
+**Safe Validation (für nicht-vertrauenswürdige Quellen):**
+
+```typescript
+import { validateUJLCDocumentSafe } from "@ujl-framework/types";
+
+const result = validateUJLCDocumentSafe(rawData);
+
+if (result.success) {
+	console.log("Valid:", result.data);
+} else {
+	console.error("Invalid:", result.error.issues);
+}
+```
+
+### 8.2.3 Field-Level Validierung
+
+Fields implementieren ein zweistufiges Validierungsmodell:
+
+```mermaid
+flowchart LR
+    Input["Raw Input"] --> Validate{"validate"}
+    Validate -->|"Type Guard"| Fit["fit"]
+    Fit -->|"Constraints"| Output["Valid Value"]
+    Validate -->|"Invalid"| Default["Default Value"]
+```
+
+**Template Method Pattern:**
+
+```typescript
+abstract class FieldBase<ValueT, ConfigT> {
+	// Type Guard - prüft Typ
+	abstract validate(raw: UJLCFieldObject): raw is ValueT;
+
+	// Constraint Application - wendet Regeln an
+	abstract fit(value: ValueT): ValueT;
+
+	// Combined Pipeline
+	parse(raw: UJLCFieldObject): ValueT {
+		if (!this.validate(raw)) {
+			return this.config.default;
+		}
+		return this.fit(raw);
+	}
+}
+```
+
+**Beispiel NumberField:**
+
+```typescript
+class NumberField extends FieldBase<number, NumberFieldConfig> {
+	validate(raw: UJLCFieldObject): raw is number {
+		return typeof raw === "number" && !isNaN(raw);
+	}
+
+	fit(value: number): number {
+		const { min, max } = this.config;
+		if (min !== undefined && value < min) return min;
+		if (max !== undefined && value > max) return max;
+		return value;
+	}
+}
+```
+
+---
+
+## 8.3 Fehlerbehandlung
+
+### 8.3.1 Error-Strategie
+
+Das UJL-Framework verfolgt eine **graceful degradation**-Strategie:
+
+| Kontext       | Strategie   | Verhalten                                               |
+| ------------- | ----------- | ------------------------------------------------------- |
+| Validierung   | Safe Parse  | Rückgabe von Result-Objekten                            |
+| Composition   | Error Nodes | Unbekannte Module werden als Error-Komponente gerendert |
+| Media Loading | Fallback    | Placeholder bei fehlenden Medien                        |
+| API Calls     | Try-Catch   | Benutzerfreundliche Fehlermeldungen                     |
+
+### 8.3.2 Error Node Pattern
+
+Bei unbekannten Modultypen erzeugt der Composer einen Error-Node anstelle eines Absturzes:
+
+```typescript
+// In Composer.composeModule()
+if (!module) {
+	return {
+		type: "error",
+		id: moduleData.meta.id,
+		props: {
+			message: `Unknown module type: ${moduleData.type}`,
+		},
+	};
+}
+```
+
+### 8.3.3 Zod Error Reporting
+
+Validierungsfehler werden mit vollständigem Pfad ausgegeben:
+
+```typescript
+const result = validateUJLCDocumentSafe(data);
+
+if (!result.success) {
+	for (const issue of result.error.issues) {
+		console.error(`${issue.path.join(" → ")}: ${issue.message}`);
+	}
+}
+
+// Ausgabe:
+// ujlc → root → 0 → fields → content: Expected string, received number
+```
+
+---
+
+## 8.4 Zustandsverwaltung (State Management)
+
+### 8.4.1 Svelte 5 Runes
+
+Der Crafter verwendet Svelte 5 Runes für reaktive Zustandsverwaltung:
+
+```typescript
+// Mutable State
+let ujlcDocument = $state<UJLCDocument>(initialDoc);
+let expandedNodeIds = $state<Set<string>>(new Set());
+
+// Derived State (computed)
+const ast = $derived.by(() => composer.compose(ujlcDocument));
+
+// Props (immutable from parent)
+let { tokenSet, mode } = $props<{
+	tokenSet: UJLTTokenSet;
+	mode: "light" | "dark" | "system";
+}>();
+```
+
+### 8.4.2 Unidirectional Data Flow
+
+Das UJL-Framework folgt dem **Flux-Pattern** mit unidirektionalem Datenfluss:
+
+```mermaid
+flowchart TB
+    State["Central State (app.svelte)"] -->|"Props"| Children["Child Components"]
+    Children -->|"Events"| Context["Crafter Context"]
+    Context -->|"Mutations"| State
+
+    subgraph ReadOnly["Read-Only"]
+        Children
+    end
+
+    subgraph WriteOnly["Write-Only"]
+        Context
+    end
+```
+
+**Regeln:**
+
+1. **State-Ownership**: Nur `app.svelte` besitzt den zentralen State
+2. **Props sind Read-Only**: Kinder empfangen Daten als Props
+3. **Mutations über Context**: Änderungen nur über Context-API
+4. **Functional Updates**: Immutable Update-Pattern
+
+### 8.4.3 Crafter Context API
+
+Die Context-API zentralisiert alle State-Mutationen:
+
+```typescript
+interface CrafterContext {
+	// State Updates (Functional)
+	updateRootSlot(fn: (root: UJLCModuleObject[]) => UJLCModuleObject[]): void;
+	updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
+
+	// Selection
+	setSelectedNodeId(nodeId: string | null): void;
+	getSelectedNodeId(): string | null;
+
+	// Tree Operations
+	operations: {
+		copyNode(nodeId: string): void;
+		cutNode(nodeId: string): void;
+		pasteNode(targetId: string, position: "before" | "after" | "into"): void;
+		deleteNode(nodeId: string): void;
+		moveNode(nodeId: string, targetId: string, position: string): void;
+		insertNode(moduleType: string, targetId: string, position: string): void;
+	};
+}
+```
+
+**Functional Update Pattern:**
+
+```typescript
+// Direkte Mutation (verboten)
+// ujlcDocument.ujlc.root.push(newModule);
+
+// Functional Update (empfohlen)
+context.updateRootSlot(root => [...root, newModule]);
+```
+
+---
+
+## 8.5 Theming und Styling
+
+### 8.5.1 Design Token System
+
+Das UJL-Framework verwendet ein Token-basiertes Design-System mit OKLCH-Farben:
+
+```mermaid
+graph TB
+    subgraph TokenCategories["Token Categories"]
+        Colors["Color Tokens (OKLCH-basiert)"]
+        Typography["Typography Tokens (Font, Size, Weight)"]
+        Spacing["Spacing Tokens (rem-basiert)"]
+        Radius["Radius Tokens (Border Radius)"]
+    end
+
+    subgraph ColorFlavors["Color Flavors"]
+        Primary["Primary"]
+        Secondary["Secondary"]
+        Accent["Accent"]
+        Success["Success"]
+        Warning["Warning"]
+        Destructive["Destructive"]
+        Info["Info"]
+        Ambient["Ambient"]
+    end
+
+    Colors --> Primary
+    Colors --> Secondary
+    Colors --> Accent
+    Colors --> Success
+    Colors --> Warning
+    Colors --> Destructive
+    Colors --> Info
+    Colors --> Ambient
+```
+
+### 8.5.2 OKLCH Color System
+
+Farben werden im OKLCH-Farbraum gespeichert für perzeptuelle Uniformität:
+
+```typescript
+type OklchColor = {
+	l: number; // Lightness (0-1)
+	c: number; // Chroma (>=0)
+	h: number; // Hue (0-360)
+};
+```
+
+**Shade-System (11 Abstufungen pro Flavor):**
+
+| Shade   | Lightness | Verwendung            |
+| ------- | --------- | --------------------- |
+| 50      | 97%       | Hintergründe (hell)   |
+| 100-400 | 90-70%    | Helle Akzente         |
+| 500     | 60%       | Basis-Farbe           |
+| 600-900 | 50-25%    | Dunkle Akzente        |
+| 950     | 15%       | Hintergründe (dunkel) |
+
+### 8.5.3 CSS Custom Properties
+
+Tokens werden zur Laufzeit als CSS Custom Properties injiziert:
+
+```typescript
+function generateThemeCSSVariables(tokens: UJLTTokenSet): Record<string, string> {
+	return {
+		// Colors
+		"--primary-500": "oklch(60% 0.15 260)",
+		"--primary-light": "oklch(97% 0.01 260)",
+		"--primary-dark": "oklch(20% 0.05 260)",
+
+		// Typography
+		"--typography-base-font": '"Inter", sans-serif',
+		"--typography-base-size-md": "16px",
+
+		// Spacing and Radius
+		"--spacing": "1rem",
+		"--radius": "0.5rem",
+	};
+}
+```
+
+**Anwendung in Komponenten:**
+
+```css
+.button-primary {
+	background-color: var(--primary-500);
+	color: var(--primary-light-foreground-primary);
+	border-radius: var(--radius);
+	padding: var(--spacing);
+}
+```
+
+### 8.5.4 Dark/Light Mode
+
+Das Theme-System unterstützt drei Modi:
+
+| Mode     | Verhalten                        |
+| -------- | -------------------------------- |
+| `light`  | Helle Varianten (Shade 50-400)   |
+| `dark`   | Dunkle Varianten (Shade 600-950) |
+| `system` | Folgt OS-Präferenz               |
+
+---
+
+## 8.6 Event Handling
+
+### 8.6.1 Event Callback Pattern
+
+Module-Komponenten unterstützen ein einheitliches Event-Callback-Pattern für Editor-Integration:
+
+```typescript
+interface NodeComponentProps {
+	node: UJLAbstractNode;
+	showMetadata?: boolean;
+	eventCallback?: (moduleId: string) => void;
+}
+```
+
+**Factory-Funktion für Click-Handler:**
+
+```typescript
+function createModuleClickHandler(
+	moduleId: string | undefined,
+	eventCallback: ((id: string) => void) | undefined
+): ((event: MouseEvent) => void) | undefined {
+	if (!eventCallback || !moduleId) return undefined;
+
+	return (event: MouseEvent) => {
+		event.preventDefault();
+		event.stopPropagation();
+		eventCallback(moduleId);
+	};
+}
+```
+
+### 8.6.2 Bidirektionale Synchronisation
+
+Der Crafter implementiert bidirektionale Synchronisation zwischen Tree und Preview:
+
+```mermaid
+sequenceDiagram
+    participant Tree as Navigation Tree
+    participant State as Central State
+    participant Preview as Live Preview
+
+    Note over Tree,Preview: Tree zu Preview
+    Tree->>State: setSelectedNodeId(id)
+    State->>Preview: Highlight Module
+    Preview->>Preview: scrollIntoView()
+
+    Note over Tree,Preview: Preview zu Tree
+    Preview->>State: eventCallback(id)
+    State->>Tree: expandToNode(id)
+    Tree->>Tree: scrollIntoView()
+```
+
+### 8.6.3 Event-Propagation Control
+
+Um korrekte Modul-Selektion zu gewährleisten:
+
+```typescript
+function handleClick(event: MouseEvent) {
+	// Verhindert Standard-Aktionen (Links, Buttons)
+	event.preventDefault();
+
+	// Verhindert Bubbling zu Parent-Modulen
+	event.stopPropagation();
+
+	// Callback mit Modul-ID
+	eventCallback(node.id);
+}
+```
+
+---
+
+## 8.7 Testbarkeit
+
+### 8.7.1 Test-Strategie
+
+Das UJL-Framework verfolgt eine mehrschichtige Test-Strategie:
+
+| Ebene       | Framework  | Fokus                      | Coverage-Ziel  |
+| ----------- | ---------- | -------------------------- | -------------- |
+| Unit        | Vitest     | Fields, Modules, Utilities | 80%+           |
+| Integration | Vitest     | Composer, Registry         | 70%+           |
+| E2E         | Playwright | User Workflows             | Critical Paths |
+
+### 8.7.2 Test Utilities
+
+**Mock Data Factories:**
+
+```typescript
+// In tests/mockData.ts
+export function createMockTree(): UJLCModuleObject[] {
+	/* ... */
+}
+export function createMockTokenSet(): UJLTTokenSet {
+	/* ... */
+}
+export function createMockNode(type: string): UJLAbstractNode {
+	/* ... */
+}
+```
+
+**Test Attributes (Conditional):**
+
+```typescript
+// In test-attrs.ts
+export function testId(id: string): Record<string, string> {
+	if (import.meta.env.PUBLIC_TEST_MODE !== "true") return {};
+	return { "data-testid": id };
+}
+```
+
+**Vorteile:**
+
+- Zero Runtime-Overhead in Production
+- Stabile Selektoren für E2E-Tests
+- Kein Aufblähen des DOM ohne Test-Modus
+
+### 8.7.3 Vitest-Konfiguration
+
+```typescript
+// vitest.config.ts (Standard für alle Packages)
+export default defineConfig({
+	test: {
+		include: ["**/*.test.ts"],
+		environment: "node",
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "lcov"],
+		},
+	},
+});
+```
+
+---
+
+## 8.8 Erweiterbarkeit
+
+### 8.8.1 Plugin-Architecture
+
+Das UJL-Framework ist an mehreren Punkten erweiterbar:
+
+```mermaid
+graph TB
+    subgraph ExtensionPoints["Extension Points"]
+        CustomModules["Custom Modules"]
+        CustomFields["Custom Fields"]
+        CustomAdapters["Custom Adapters"]
+        StorageAdapters["Storage Adapters"]
+    end
+
+    subgraph Registration["Registration"]
+        ModuleRegistry["Module Registry"]
+        MediaService["Media Service Interface"]
+        AdapterInterface["Adapter Interface"]
+    end
+
+    CustomModules --> ModuleRegistry
+    CustomFields --> ModuleRegistry
+    CustomAdapters --> AdapterInterface
+    StorageAdapters --> MediaService
+```
+
+### 8.8.2 Custom Module erstellen
+
+```typescript
+// 1. Module-Klasse definieren
+class CustomModule extends ModuleBase {
+	readonly name = "custom";
+	readonly label = "Custom Module";
+	readonly description = "A custom module";
+	readonly category = "content";
+	readonly tags = ["custom"] as const;
+	readonly icon = "..."; // SVG path content
+
+	readonly fields = [{ key: "title", field: new TextField({ label: "Title", default: "" }) }];
+
+	readonly slots = [{ key: "content", slot: new Slot({ label: "Content", max: 10 }) }];
+
+	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+		return {
+			type: "custom",
+			id: moduleData.meta.id,
+			props: {
+				title: this.fields[0].field.parse(moduleData.fields.title),
+				children: moduleData.slots.content.map(child => composer.composeModule(child)),
+			},
+		};
+	}
+}
+
+// 2. Im Composer registrieren
+const composer = new Composer();
+composer.registerModule(new CustomModule());
+```
+
+### 8.8.3 Custom Field erstellen
+
+```typescript
+class EmailField extends FieldBase<string, EmailFieldConfig> {
+	protected readonly defaultConfig = {
+		label: "Email",
+		default: "",
+		placeholder: "name@example.com",
+	};
+
+	validate(raw: UJLCFieldObject): raw is string {
+		return typeof raw === "string";
+	}
+
+	fit(value: string): string {
+		// Normalisierung
+		const trimmed = value.toLowerCase().trim();
+
+		// Validierung (Basic)
+		if (!trimmed.includes("@")) {
+			return this.config.default;
+		}
+
+		return trimmed;
+	}
+
+	getFieldType(): string {
+		return "email";
+	}
+}
+```
+
+### 8.8.4 Media Service erweitern
+
+```typescript
+// Custom Storage Backend
+class S3MediaService implements MediaService {
+	async upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry> {
+		// S3 Upload Logic
+		const key = await this.s3Client.upload(file);
+		return {
+			id: generateId(),
+			storage: "backend",
+			mediaId: key,
+		};
+	}
+
+	async list(): Promise<MediaLibraryEntry[]> {
+		// S3 List Logic
+	}
+
+	// ... weitere Methoden
+}
+```
+
+---
+
+## 8.9 Barrierefreiheit (Accessibility)
+
+### 8.9.1 Semantisches HTML
+
+Module erzeugen semantisch korrektes HTML:
+
+| Modul     | HTML-Element | ARIA-Attribute            |
+| --------- | ------------ | ------------------------- |
+| Text      | p, h1-h6     | -                         |
+| Button    | button, a    | role="button" (wenn Link) |
+| Image     | img          | alt (required)            |
+| Container | section, div | aria-label (optional)     |
+
+### 8.9.2 Farbkontrast
+
+Das OKLCH-System gewährleistet WCAG-konforme Kontraste:
+
+```typescript
+function resolveForegroundColor(
+	background: OklchColor,
+	foreground: "primary" | "secondary" | "muted"
+): OklchColor {
+	// Berechnet kontrastreiches Vordergrund-Farbsystem
+	const contrastRatio = calculateContrastRatio(background, candidate);
+
+	// WCAG AA: 4.5:1 für normalen Text
+	// WCAG AAA: 7:1 für normalen Text
+	if (contrastRatio >= 4.5) return candidate;
+
+	// Fallback zu high-contrast variant
+	return getHighContrastVariant(background);
+}
+```
+
+### 8.9.3 Keyboard Navigation
+
+Der Crafter unterstützt vollständige Keyboard-Navigation:
+
+| Shortcut        | Aktion           |
+| --------------- | ---------------- |
+| Tab / Shift+Tab | Focus-Navigation |
+| Enter / Space   | Aktivierung      |
+| Ctrl+C          | Kopieren         |
+| Ctrl+X          | Ausschneiden     |
+| Ctrl+V          | Einfügen         |
+| Delete          | Löschen          |
+| Ctrl+I          | Modul einfügen   |
+| Arrow Up/Down   | Tree-Navigation  |
+
+---
+
+## 8.10 Media Library Konzept
+
+### 8.10.1 Duale Storage-Strategie
+
+Das Media Library System unterstützt zwei Storage-Modi:
+
+```mermaid
+graph TB
+    subgraph InlineStorage["Inline Storage"]
+        InlineDoc["UJLC Document"]
+        Base64["Base64 Data"]
+        InlineDoc --> Base64
+    end
+
+    subgraph BackendStorage["Backend Storage"]
+        BackendDoc["UJLC Document"]
+        MediaRef["Media Reference"]
+        PayloadCMS["Payload CMS"]
+        BackendDoc --> MediaRef
+        MediaRef --> PayloadCMS
+    end
+```
+
+**Inline Storage:**
+
+```json
+{
+	"ujlc": {
+		"media": {
+			"media-001": {
+				"id": "media-001",
+				"storage": "inline",
+				"data": "data:image/jpeg;base64,/9j/4AAQ..."
+			}
+		}
+	}
+}
+```
+
+**Backend Storage:**
+
+```json
+{
+	"ujlc": {
+		"meta": {
+			"media_library": {
+				"storage": "backend",
+				"endpoint": "http://localhost:3000/api"
+			}
+		},
+		"media": {
+			"media-001": {
+				"id": "media-001",
+				"storage": "backend",
+				"mediaId": "67890abcdef12345"
+			}
+		}
+	}
+}
+```
+
+### 8.10.2 Media Service Interface
+
+```typescript
+interface MediaService {
+	// Connection
+	checkConnection(): Promise<boolean>;
+
+	// CRUD Operations
+	upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry>;
+	get(id: string): Promise<MediaLibraryEntry | null>;
+	list(): Promise<MediaLibraryEntry[]>;
+	delete(id: string): Promise<void>;
+
+	// Configuration
+	getStorageMode(): "inline" | "backend";
+}
+```
+
+### 8.10.3 Responsive Images
+
+Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten:
+
+| Size      | Width  | Format | Verwendung |
+| --------- | ------ | ------ | ---------- |
+| thumbnail | 400px  | WebP   | Previews   |
+| small     | 500px  | WebP   | Mobile     |
+| medium    | 750px  | WebP   | Tablet     |
+| large     | 1000px | WebP   | Desktop    |
+| xlarge    | 1920px | WebP   | Full-width |
+
+---
+
+## 8.11 Rich Text System
+
+### 8.11.1 TipTap/ProseMirror Integration
+
+Das UJL-Framework verwendet TipTap (ProseMirror-Wrapper) für Rich Text:
+
+```typescript
+// Shared Schema (packages/core)
+export const ujlRichTextExtensions = [
+	StarterKit.configure({
+		heading: { levels: [1, 2, 3, 4, 5, 6] },
+		bold: {},
+		italic: {},
+		code: {},
+		blockquote: {},
+		bulletList: {},
+		orderedList: {},
+		listItem: {},
+		hardBreak: {},
+		horizontalRule: {},
+
+		// Disabled (UI-only)
+		dropcursor: false,
+		gapcursor: false,
+	}),
+];
+```
+
+### 8.11.2 WYSIWYG-Garantie
+
+Gleiches Schema in Editor und Serializer garantiert WYSIWYG:
+
+```mermaid
+flowchart LR
+    Editor["TipTap Editor"] -->|"ujlRichTextExtensions"| JSON["ProseMirror JSON"]
+    JSON -->|"prosemirrorToHtml"| HTML["Rendered HTML"]
+
+    subgraph SharedSchema["Shared Schema"]
+        ujlRichTextExtensions
+    end
+```
+
+### 8.11.3 SSR-Safe Serializer
+
+Der HTML-Serializer ist SSR-kompatibel (keine Browser-APIs):
+
+```typescript
+// packages/adapter-svelte
+export function prosemirrorToHtml(doc: ProseMirrorDocument): string {
+	return serializeNodes(doc.content);
+}
+
+function serializeNode(node: ProseMirrorNode): string {
+	switch (node.type) {
+		case "paragraph":
+			return "<p>" + serializeNodes(node.content) + "</p>";
+		case "heading":
+			const level = node.attrs?.level ?? 1;
+			return "<h" + level + ">" + serializeNodes(node.content) + "</h" + level + ">";
+		case "text":
+			return applyMarks(escapeHtml(node.text), node.marks);
+		// ...
+	}
+}
+```
+
+---
+
+## 8.12 Build und Deployment
+
+### 8.12.1 Monorepo-Struktur
+
+Das UJL-Framework ist als pnpm Workspace Monorepo organisiert:
+
+```
+ujl/
+├── packages/
+│   ├── types/           # Foundation Layer
+│   ├── core/            # Core Layer
+│   ├── ui/              # UI Layer
+│   ├── adapter-svelte/  # Adapter Layer
+│   ├── adapter-web/     # Adapter Layer
+│   ├── crafter/         # Application Layer
+│   └── examples/        # Example Documents
+├── apps/
+│   ├── demo/            # Demo Application
+│   └── docs/            # Documentation
+└── services/
+    └── media/           # Payload CMS Backend
+```
+
+### 8.12.2 Dependency Management
+
+Build-Reihenfolge folgt der Dependency-Hierarchie:
+
+```bash
+# Korrekte Reihenfolge (automatisch via pnpm)
+pnpm run build
+
+# Interne Reihenfolge:
+# 1. types - 2. core - 3. ui - 4. adapter-svelte - 5. adapter-web - 6. crafter
+```
+
+### 8.12.3 Versionierung mit Changesets
+
+```bash
+# Feature Branch: Changeset erstellen
+pnpm changeset
+
+# Main Branch: Versionen anwenden
+pnpm version-packages
+
+# Release: Packages veröffentlichen
+pnpm publish -r --access public
+```
+
+---
+
+## Nächste Kapitel
+
+- **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
+- **[Qualitätsanforderungen (Kapitel 10)](./10-quality-requirements)** - Quality Attribute Scenarios
+- **[Risiken und technische Schulden (Kapitel 11)](./11-risks-and-technical-debt)** - Bekannte Risiken und Maßnahmen
+
+---
+
+_Letzte Aktualisierung: 2026-01-15_

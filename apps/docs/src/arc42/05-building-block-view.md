@@ -88,6 +88,7 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 6. **Service Layer**: Backend-Services
 
 **Vorteile:**
+
 - Klare Dependency-Direction (top-down)
 - Testbarkeit durch Schichten-Isolation
 - Austauschbarkeit (z.B. Adapter-Layer)
@@ -97,18 +98,18 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 
 ### Enthaltene Bausteine (Level 1)
 
-| Baustein | Verantwortung | Package-Name |
-|----------|---------------|--------------|
-| **types** | TypeScript-Typen und Zod-Schemas für alle UJL-Dokumente | `@ujl-framework/types` |
-| **core** | Composer, Module Registry, Field System, Media Library | `@ujl-framework/core` |
-| **ui** | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.) | `@ujl-framework/ui` |
-| **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components) | `@ujl-framework/adapter-svelte` |
-| **adapter-web** | Web Components Adapter (AST → Custom Elements) | `@ujl-framework/adapter-web` |
-| **crafter** | Visual Editor (WYSIWYG) für Content und Themes | `@ujl-framework/crafter` |
-| **demo** | Demo-Applikation (zeigt UJL in Aktion) | `@ujl-framework/demo` |
-| **docs** | Dokumentations-Website (VitePress) | `@ujl-framework/docs` |
-| **examples** | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json) | `@ujl-framework/examples` |
-| **media** | Payload CMS Media Management Backend | `services/media` |
+| Baustein           | Verantwortung                                             | Package-Name                    |
+| ------------------ | --------------------------------------------------------- | ------------------------------- |
+| **types**          | TypeScript-Typen und Zod-Schemas für alle UJL-Dokumente   | `@ujl-framework/types`          |
+| **core**           | Composer, Module Registry, Field System, Media Library    | `@ujl-framework/core`           |
+| **ui**             | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.) | `@ujl-framework/ui`             |
+| **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                | `@ujl-framework/adapter-svelte` |
+| **adapter-web**    | Web Components Adapter (AST → Custom Elements)            | `@ujl-framework/adapter-web`    |
+| **crafter**        | Visual Editor (WYSIWYG) für Content und Themes            | `@ujl-framework/crafter`        |
+| **demo**           | Demo-Applikation (zeigt UJL in Aktion)                    | `@ujl-framework/demo`           |
+| **docs**           | Dokumentations-Website (VitePress)                        | `@ujl-framework/docs`           |
+| **examples**       | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json)    | `@ujl-framework/examples`       |
+| **media**          | Payload CMS Media Management Backend                      | `services/media`                |
 
 ---
 
@@ -127,19 +128,19 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 ```typescript
 // UJLC Content Document
 interface UJLCDocument {
-  ujlc: {
-    meta: UJLCMeta;
-    media: Record<string, UJLCMediaEntry>;
-    root: UJLCModuleObject[];
-  };
+	ujlc: {
+		meta: UJLCMeta;
+		media: Record<string, UJLCMediaEntry>;
+		root: UJLCModuleObject[];
+	};
 }
 
 // UJLT Theme Document
 interface UJLTDocument {
-  ujlt: {
-    meta: UJLTMeta;
-    tokens: UJLTTokenSet;
-  };
+	ujlt: {
+		meta: UJLTMeta;
+		tokens: UJLTTokenSet;
+	};
 }
 ```
 
@@ -157,13 +158,14 @@ interface UJLTDocument {
 
 ```typescript
 type UJLAbstractNode = {
-  type: string;        // 'text', 'button', 'container', etc.
-  id: string;          // Unique Module ID (preserved from UJLC)
-  props: Record<string, unknown>;  // Node-specific properties
+	type: string; // 'text', 'button', 'container', etc.
+	id: string; // Unique Module ID (preserved from UJLC)
+	props: Record<string, unknown>; // Node-specific properties
 };
 ```
 
 **Garantien:**
+
 - Jeder Node hat eindeutige ID (wichtig für Editor-Integration)
 - Type-Field ermöglicht Dispatch im Adapter
 - Props sind node-spezifisch (keine generische Struktur)
@@ -180,13 +182,13 @@ type UJLAbstractNode = {
 
 **Wichtigste Operationen:**
 
-| Methode | Endpoint | Funktion |
-|---------|----------|----------|
-| GET | `/api/media` | Liste alle Medien (Pagination, Filtering) |
-| GET | `/api/media/:id` | Einzelnes Medium |
-| POST | `/api/media` | Upload (multipart/form-data) |
-| PATCH | `/api/media/:id` | Metadata-Update |
-| DELETE | `/api/media/:id` | Löschung |
+| Methode | Endpoint         | Funktion                                  |
+| ------- | ---------------- | ----------------------------------------- |
+| GET     | `/api/media`     | Liste alle Medien (Pagination, Filtering) |
+| GET     | `/api/media/:id` | Einzelnes Medium                          |
+| POST    | `/api/media`     | Upload (multipart/form-data)              |
+| PATCH   | `/api/media/:id` | Metadata-Update                           |
+| DELETE  | `/api/media/:id` | Löschung                                  |
 
 **Consumer:** crafter (Media Library Browser/Uploader)
 
@@ -223,22 +225,24 @@ graph TB
 
 #### Enthaltene Elemente
 
-| Datei | Verantwortung | Exports |
-|-------|---------------|---------|
-| `ast.ts` | AST Node Type Definitions | `UJLAbstractNode`, Node-spezifische Types |
-| `ujl-content.ts` | UJLC Zod Schemas & Types | `UJLCDocumentSchema`, `UJLCModuleObjectSchema`, `validateUJLCDocument()` |
-| `ujl-theme.ts` | UJLT Zod Schemas & Types | `UJLTDocumentSchema`, `UJLTTokenSetSchema`, `validateUJLTDocument()` |
-| `media.ts` | Media Library Types | `UJLCMediaEntry`, `UJLCMediaEntryInline`, `UJLCMediaEntryBackend` |
-| `prosemirror.ts` | ProseMirror Types | `ProseMirrorDocument`, `ProseMirrorNode`, `ProseMirrorMark` |
-| `validation.ts` | Validation Utilities | `validateModule()`, `validateSlot()`, `validateTokenSet()` |
-| `cli.ts` | CLI Entry Point | Binary: `ujl-validate` |
+| Datei            | Verantwortung             | Exports                                                                  |
+| ---------------- | ------------------------- | ------------------------------------------------------------------------ |
+| `ast.ts`         | AST Node Type Definitions | `UJLAbstractNode`, Node-spezifische Types                                |
+| `ujl-content.ts` | UJLC Zod Schemas & Types  | `UJLCDocumentSchema`, `UJLCModuleObjectSchema`, `validateUJLCDocument()` |
+| `ujl-theme.ts`   | UJLT Zod Schemas & Types  | `UJLTDocumentSchema`, `UJLTTokenSetSchema`, `validateUJLTDocument()`     |
+| `media.ts`       | Media Library Types       | `UJLCMediaEntry`, `UJLCMediaEntryInline`, `UJLCMediaEntryBackend`        |
+| `prosemirror.ts` | ProseMirror Types         | `ProseMirrorDocument`, `ProseMirrorNode`, `ProseMirrorMark`              |
+| `validation.ts`  | Validation Utilities      | `validateModule()`, `validateSlot()`, `validateTokenSet()`               |
+| `cli.ts`         | CLI Entry Point           | Binary: `ujl-validate`                                                   |
 
 #### Schnittstellen und Abhängigkeiten
 
 **Externe Abhängigkeiten:**
+
 - `zod` 4.2 - Schema Validation & Type Inference
 
 **Consumer:**
+
 - `@ujl-framework/core` (imports all types)
 - `@ujl-framework/adapter-svelte` (imports AST types)
 - `@ujl-framework/adapter-web` (imports AST types)
@@ -252,10 +256,10 @@ graph TB
 ```typescript
 // Schema Definition
 export const UJLCModuleObjectSchema = z.object({
-  type: z.string(),
-  meta: UJLCModuleMetaSchema,
-  fields: z.record(z.string(), UJLCFieldObjectSchema),
-  slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema))),
+	type: z.string(),
+	meta: UJLCModuleMetaSchema,
+	fields: z.record(z.string(), UJLCFieldObjectSchema),
+	slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema))),
 });
 
 // Type automatisch inferiert (DRY)
@@ -266,7 +270,7 @@ export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 
 ```typescript
 // Ermöglicht unbegrenzte Modul-Verschachtelung
-slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema)))
+slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema)));
 ```
 
 **CLI Tool:**
@@ -332,18 +336,18 @@ graph TB
 
 ```typescript
 class Composer {
-  constructor(registry?: ModuleRegistry);
+	constructor(registry?: ModuleRegistry);
 
-  // Hauptmethode: UJLC Document → AST
-  compose(doc: UJLCDocument): UJLAbstractNode;
+	// Hauptmethode: UJLC Document → AST
+	compose(doc: UJLCDocument): UJLAbstractNode;
 
-  // Hilfsmethode: Einzelnes Modul → AST Node
-  composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
+	// Hilfsmethode: Einzelnes Modul → AST Node
+	composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
 
-  // Registry Management
-  registerModule(module: AnyModule): void;
-  unregisterModule(module: AnyModule | string): void;
-  getRegistry(): ModuleRegistry;
+	// Registry Management
+	registerModule(module: AnyModule): void;
+	unregisterModule(module: AnyModule | string): void;
+	getRegistry(): ModuleRegistry;
 }
 ```
 
@@ -382,29 +386,29 @@ UJLAbstractNode (with ID preserved)
 
 ```typescript
 class ModuleRegistry {
-  // Registrierung
-  registerModule(module: ModuleBase): void;
-  unregisterModule(module: AnyModule | string): void;
+	// Registrierung
+	registerModule(module: ModuleBase): void;
+	unregisterModule(module: AnyModule | string): void;
 
-  // Lookup
-  getModule(name: string): AnyModule | undefined;
-  getAllModules(): AnyModule[];
+	// Lookup
+	getModule(name: string): AnyModule | undefined;
+	getAllModules(): AnyModule[];
 
-  // Factory
-  createModuleFromType(type: string, id: string): UJLCModuleObject;
+	// Factory
+	createModuleFromType(type: string, id: string): UJLCModuleObject;
 }
 ```
 
 **Built-in Modules (Default Registry):**
 
-| Modul | Typ | Kategorie | Beschreibung |
-|-------|-----|-----------|--------------|
-| Text | `text` | Content | Text-Darstellung (ProseMirror) |
-| Button | `button` | Interactive | Klickbarer Button mit Link |
-| Container | `container` | Layout | Generischer Layout-Container |
-| Grid | `grid` | Layout | Grid-Layout (mit GridItem Children) |
-| Card | `card` | Content | Content-Card (Titel, Beschreibung, Slot) |
-| Image | `image` | Media | Bild-Darstellung mit Alt-Text |
+| Modul          | Typ              | Kategorie   | Beschreibung                              |
+| -------------- | ---------------- | ----------- | ----------------------------------------- |
+| Text           | `text`           | Content     | Text-Darstellung (ProseMirror)            |
+| Button         | `button`         | Interactive | Klickbarer Button mit Link                |
+| Container      | `container`      | Layout      | Generischer Layout-Container              |
+| Grid           | `grid`           | Layout      | Grid-Layout (mit GridItem Children)       |
+| Card           | `card`           | Content     | Content-Card (Titel, Beschreibung, Slot)  |
+| Image          | `image`          | Media       | Bild-Darstellung mit Alt-Text             |
 | Call-to-Action | `call-to-action` | Interactive | CTA-Block (Headline, Description, Button) |
 
 **Erweiterbarkeit:**
@@ -430,26 +434,26 @@ const composer = new Composer(registry);
 
 ```typescript
 abstract class ModuleBase {
-  // Identifikation
-  abstract readonly name: string;
-  abstract readonly label: string;
-  abstract readonly description: string;
-  abstract readonly category: ComponentCategory;
-  abstract readonly tags: readonly string[];
-  abstract readonly icon: string;  // SVG inner content
+	// Identifikation
+	abstract readonly name: string;
+	abstract readonly label: string;
+	abstract readonly description: string;
+	abstract readonly category: ComponentCategory;
+	abstract readonly tags: readonly string[];
+	abstract readonly icon: string; // SVG inner content
 
-  // Struktur
-  abstract readonly fields: FieldSet;
-  abstract readonly slots: SlotSet;
+	// Struktur
+	abstract readonly fields: FieldSet;
+	abstract readonly slots: SlotSet;
 
-  // Composition
-  abstract compose(
-    moduleData: UJLCModuleObject,
-    composer: Composer
-  ): UJLAbstractNode | Promise<UJLAbstractNode>;
+	// Composition
+	abstract compose(
+		moduleData: UJLCModuleObject,
+		composer: Composer
+	): UJLAbstractNode | Promise<UJLAbstractNode>;
 
-  // Helpers
-  getSvgIcon(): string;  // Wraps icon in <svg> tag
+	// Helpers
+	getSvgIcon(): string; // Wraps icon in <svg> tag
 }
 ```
 
@@ -457,31 +461,34 @@ abstract class ModuleBase {
 
 ```typescript
 class TextModule extends ModuleBase {
-  readonly name = "text";
-  readonly label = "Text";
-  readonly description = "Rich text content with formatting";
-  readonly category = "content";
-  readonly tags = ["text", "content", "rich-text"] as const;
-  readonly icon = '<path d="M4 6h16M4 12h16M4 18h16"/>';
+	readonly name = "text";
+	readonly label = "Text";
+	readonly description = "Rich text content with formatting";
+	readonly category = "content";
+	readonly tags = ["text", "content", "rich-text"] as const;
+	readonly icon = '<path d="M4 6h16M4 12h16M4 18h16"/>';
 
-  readonly fields = [
-    { key: "content", field: new RichTextField({
-      label: "Content",
-      default: { type: "doc", content: [] }
-    }) }
-  ];
+	readonly fields = [
+		{
+			key: "content",
+			field: new RichTextField({
+				label: "Content",
+				default: { type: "doc", content: [] },
+			}),
+		},
+	];
 
-  readonly slots = [];
+	readonly slots = [];
 
-  compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-    return {
-      type: "text",
-      id: moduleData.meta.id,
-      props: {
-        content: moduleData.fields.content as ProseMirrorDocument
-      }
-    };
-  }
+	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+		return {
+			type: "text",
+			id: moduleData.meta.id,
+			props: {
+				content: moduleData.fields.content as ProseMirrorDocument,
+			},
+		};
+	}
 }
 ```
 
@@ -495,58 +502,58 @@ class TextModule extends ModuleBase {
 
 ```typescript
 abstract class FieldBase<ValueT, ConfigT> {
-  protected abstract readonly defaultConfig: ConfigT;
+	protected abstract readonly defaultConfig: ConfigT;
 
-  // Constructor merges user config with defaults
-  constructor(config?: Partial<ConfigT>);
+	// Constructor merges user config with defaults
+	constructor(config?: Partial<ConfigT>);
 
-  // Validation Pipeline
-  abstract validate(raw: UJLCFieldObject): raw is ValueT;
-  abstract fit(value: ValueT): ValueT;
+	// Validation Pipeline
+	abstract validate(raw: UJLCFieldObject): raw is ValueT;
+	abstract fit(value: ValueT): ValueT;
 
-  // Combined: Validate → Fit
-  parse(raw: UJLCFieldObject): ValueT {
-    if (!this.validate(raw)) {
-      throw new Error("Invalid field value");
-    }
-    return this.fit(raw);
-  }
+	// Combined: Validate → Fit
+	parse(raw: UJLCFieldObject): ValueT {
+		if (!this.validate(raw)) {
+			throw new Error("Invalid field value");
+		}
+		return this.fit(raw);
+	}
 
-  // Serialization (für Editor)
-  serialize(value: ValueT): UJLCFieldObject;
+	// Serialization (für Editor)
+	serialize(value: ValueT): UJLCFieldObject;
 
-  // Metadata
-  getFieldType(): string;
+	// Metadata
+	getFieldType(): string;
 }
 ```
 
 **Built-in Field Types:**
 
-| Field | Value Type | Config | Zweck |
-|-------|-----------|--------|-------|
-| `TextField` | `string` | `maxLength`, `default`, `placeholder` | Einzeiliger Text |
-| `RichTextField` | `ProseMirrorDocument` | `default` | Rich Text (TipTap) |
-| `NumberField` | `number` | `min`, `max`, `default` | Numerischer Input |
-| `ImageField` | `UJLImageData \| null` | `default` | Bild-Auswahl (Media Library) |
+| Field           | Value Type             | Config                                | Zweck                        |
+| --------------- | ---------------------- | ------------------------------------- | ---------------------------- |
+| `TextField`     | `string`               | `maxLength`, `default`, `placeholder` | Einzeiliger Text             |
+| `RichTextField` | `ProseMirrorDocument`  | `default`                             | Rich Text (TipTap)           |
+| `NumberField`   | `number`               | `min`, `max`, `default`               | Numerischer Input            |
+| `ImageField`    | `UJLImageData \| null` | `default`                             | Bild-Auswahl (Media Library) |
 
 **Validation vs. Fitting:**
 
 ```typescript
 class NumberField extends FieldBase<number, NumberFieldConfig> {
-  validate(raw: UJLCFieldObject): raw is number {
-    return typeof raw === "number";  // Type Guard
-  }
+	validate(raw: UJLCFieldObject): raw is number {
+		return typeof raw === "number"; // Type Guard
+	}
 
-  fit(value: number): number {
-    // Apply constraints (min, max)
-    if (this.config.min !== undefined && value < this.config.min) {
-      return this.config.min;
-    }
-    if (this.config.max !== undefined && value > this.config.max) {
-      return this.config.max;
-    }
-    return value;
-  }
+	fit(value: number): number {
+		// Apply constraints (min, max)
+		if (this.config.min !== undefined && value < this.config.min) {
+			return this.config.min;
+		}
+		if (this.config.max !== undefined && value > this.config.max) {
+			return this.config.max;
+		}
+		return value;
+	}
 }
 ```
 
@@ -560,23 +567,23 @@ class NumberField extends FieldBase<number, NumberFieldConfig> {
 
 ```typescript
 class MediaLibrary {
-  constructor(
-    initialMedia: Record<string, MediaLibraryEntry>,
-    resolver?: MediaResolver  // Optional: Backend Integration
-  );
+	constructor(
+		initialMedia: Record<string, MediaLibraryEntry>,
+		resolver?: MediaResolver // Optional: Backend Integration
+	);
 
-  // Resolve Media by ID
-  async resolve(id: string): Promise<UJLImageData | null>;
+	// Resolve Media by ID
+	async resolve(id: string): Promise<UJLImageData | null>;
 
-  // Add Media Entry
-  addEntry(entry: MediaLibraryEntry): void;
+	// Add Media Entry
+	addEntry(entry: MediaLibraryEntry): void;
 
-  // Get all entries
-  getAllEntries(): MediaLibraryEntry[];
+	// Get all entries
+	getAllEntries(): MediaLibraryEntry[];
 }
 
 interface MediaResolver {
-  resolve(id: string): Promise<string | null>;  // Returns data URL
+	resolve(id: string): Promise<string | null>; // Returns data URL
 }
 ```
 
@@ -603,23 +610,23 @@ interface MediaResolver {
 ```typescript
 // Exportiert TipTap Extensions Configuration
 export const ujlRichTextExtensions = [
-  StarterKit.configure({
-    // Serializable Extensions
-    heading: { levels: [1, 2, 3, 4, 5, 6] },
-    bold: {},
-    italic: {},
-    code: {},
-    blockquote: {},
-    bulletList: {},
-    orderedList: {},
-    listItem: {},
-    hardBreak: {},
-    horizontalRule: {},
+	StarterKit.configure({
+		// Serializable Extensions
+		heading: { levels: [1, 2, 3, 4, 5, 6] },
+		bold: {},
+		italic: {},
+		code: {},
+		blockquote: {},
+		bulletList: {},
+		orderedList: {},
+		listItem: {},
+		hardBreak: {},
+		horizontalRule: {},
 
-    // UI Extensions disabled (not serializable)
-    dropcursor: false,
-    gapcursor: false,
-  }),
+		// UI Extensions disabled (not serializable)
+		dropcursor: false,
+		gapcursor: false,
+	}),
 ];
 ```
 
@@ -627,15 +634,15 @@ export const ujlRichTextExtensions = [
 
 ```typescript
 // Im Crafter Editor
-import { Editor } from '@tiptap/core';
-import { ujlRichTextExtensions } from '@ujl-framework/core';
+import { Editor } from "@tiptap/core";
+import { ujlRichTextExtensions } from "@ujl-framework/core";
 
 const editor = new Editor({
-  extensions: ujlRichTextExtensions,
+	extensions: ujlRichTextExtensions,
 });
 
 // Im Adapter Serializer
-import { ujlRichTextExtensions } from '@ujl-framework/core';
+import { ujlRichTextExtensions } from "@ujl-framework/core";
 // Gleiche Extensions → WYSIWYG-Garantie
 ```
 
@@ -665,14 +672,14 @@ graph TB
 
 #### Enthaltene Komponenten-Kategorien
 
-| Kategorie | Komponenten | Zweck |
-|-----------|-------------|-------|
-| **Layout** | Container, Grid, GridItem | Layout-Strukturen |
-| **Typography** | Text, Heading, Highlight | Text-Darstellung |
-| **Interactive** | Button, Link | Interaktive Elemente |
-| **Overlay** | Dialog, Drawer, Popover, Sheet, Tooltip | Overlay-Komponenten |
-| **Navigation** | Breadcrumb, Tabs, Accordion | Navigations-Elemente |
-| **Data Display** | Table, Card, Alert, Badge | Daten-Darstellung |
+| Kategorie        | Komponenten                             | Zweck                |
+| ---------------- | --------------------------------------- | -------------------- |
+| **Layout**       | Container, Grid, GridItem               | Layout-Strukturen    |
+| **Typography**   | Text, Heading, Highlight                | Text-Darstellung     |
+| **Interactive**  | Button, Link                            | Interaktive Elemente |
+| **Overlay**      | Dialog, Drawer, Popover, Sheet, Tooltip | Overlay-Komponenten  |
+| **Navigation**   | Breadcrumb, Tabs, Accordion             | Navigations-Elemente |
+| **Data Display** | Table, Card, Alert, Badge               | Daten-Darstellung    |
 
 #### Besondere Merkmale
 
@@ -680,22 +687,22 @@ graph TB
 
 ```typescript
 // tailwind-variants für Type-Safe Variants
-import { tv } from 'tailwind-variants';
+import { tv } from "tailwind-variants";
 
 const button = tv({
-  base: 'inline-flex items-center justify-center rounded-md',
-  variants: {
-    variant: {
-      default: 'bg-primary text-primary-foreground',
-      destructive: 'bg-destructive text-destructive-foreground',
-      outline: 'border border-input bg-background',
-    },
-    size: {
-      default: 'h-10 px-4 py-2',
-      sm: 'h-9 rounded-md px-3',
-      lg: 'h-11 rounded-md px-8',
-    }
-  }
+	base: "inline-flex items-center justify-center rounded-md",
+	variants: {
+		variant: {
+			default: "bg-primary text-primary-foreground",
+			destructive: "bg-destructive text-destructive-foreground",
+			outline: "border border-input bg-background",
+		},
+		size: {
+			default: "h-10 px-4 py-2",
+			sm: "h-9 rounded-md px-3",
+			lg: "h-11 rounded-md px-8",
+		},
+	},
 });
 ```
 
@@ -779,11 +786,11 @@ graph TB
 
 ```typescript
 interface AdapterRootProps {
-  node: UJLAbstractNode;              // AST Root Node
-  tokenSet?: UJLTTokenSet;            // Design Tokens (optional)
-  mode?: 'light' | 'dark' | 'system'; // Theme Mode
-  showMetadata?: boolean;             // Add data-ujl-module-id attributes
-  eventCallback?: (moduleId: string) => void;  // Click-to-select
+	node: UJLAbstractNode; // AST Root Node
+	tokenSet?: UJLTTokenSet; // Design Tokens (optional)
+	mode?: "light" | "dark" | "system"; // Theme Mode
+	showMetadata?: boolean; // Add data-ujl-module-id attributes
+	eventCallback?: (moduleId: string) => void; // Click-to-select
 }
 ```
 
@@ -798,15 +805,15 @@ interface AdapterRootProps {
 
 ```css
 :root {
-  --color-primary-50: oklch(97% 0.01 260);
-  --color-primary-500: oklch(60% 0.15 260);
-  --color-primary-950: oklch(20% 0.05 260);
+	--color-primary-50: oklch(97% 0.01 260);
+	--color-primary-500: oklch(60% 0.15 260);
+	--color-primary-950: oklch(20% 0.05 260);
 
-  --font-base-family: "Inter", sans-serif;
-  --font-base-size-md: 16px;
+	--font-base-family: "Inter", sans-serif;
+	--font-base-size-md: 16px;
 
-  --spacing-md: 16px;
-  --radius-md: 8px;
+	--spacing-md: 16px;
+	--radius-md: 8px;
 }
 ```
 
@@ -868,30 +875,34 @@ export function prosemirrorToHtml(doc: ProseMirrorDocument): string;
 
 ```typescript
 function serializeNode(node: ProseMirrorNode): string {
-  switch (node.type) {
-    case 'paragraph':
-      return `<p>${serializeNodes(node.content)}</p>`;
-    case 'heading':
-      const level = node.attrs?.level ?? 1;
-      return `<h${level}>${serializeNodes(node.content)}</h${level}>`;
-    case 'text':
-      return applyMarks(escapeHtml(node.text), node.marks);
-    case 'hardBreak':
-      return '<br>';
-    // ... weitere Node-Typen
-  }
+	switch (node.type) {
+		case "paragraph":
+			return `<p>${serializeNodes(node.content)}</p>`;
+		case "heading":
+			const level = node.attrs?.level ?? 1;
+			return `<h${level}>${serializeNodes(node.content)}</h${level}>`;
+		case "text":
+			return applyMarks(escapeHtml(node.text), node.marks);
+		case "hardBreak":
+			return "<br>";
+		// ... weitere Node-Typen
+	}
 }
 
 function applyMarks(text: string, marks?: ProseMirrorMark[]): string {
-  if (!marks) return text;
-  return marks.reduce((html, mark) => {
-    switch (mark.type) {
-      case 'bold': return `<strong>${html}</strong>`;
-      case 'italic': return `<em>${html}</em>`;
-      case 'code': return `<code>${html}</code>`;
-      default: return html;
-    }
-  }, text);
+	if (!marks) return text;
+	return marks.reduce((html, mark) => {
+		switch (mark.type) {
+			case "bold":
+				return `<strong>${html}</strong>`;
+			case "italic":
+				return `<em>${html}</em>`;
+			case "code":
+				return `<code>${html}</code>`;
+			default:
+				return html;
+		}
+	}, text);
 }
 ```
 
@@ -912,34 +923,34 @@ function applyMarks(text: string, marks?: ProseMirrorMark[]): string {
 
 ```typescript
 export function svelteAdapter(
-  node: UJLAbstractNode,
-  tokenSet: UJLTTokenSet,
-  options: SvelteAdapterOptions
+	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
+	options: SvelteAdapterOptions
 ): MountedComponent;
 
 type SvelteAdapterOptions = {
-  target: string | HTMLElement;
-  mode?: 'light' | 'dark' | 'system';
-  showMetadata?: boolean;
-  eventCallback?: (moduleId: string) => void;
+	target: string | HTMLElement;
+	mode?: "light" | "dark" | "system";
+	showMetadata?: boolean;
+	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedComponent = {
-  instance: Component;
-  unmount: () => Promise<void>;
+	instance: Component;
+	unmount: () => Promise<void>;
 };
 ```
 
 **Verwendung:**
 
 ```typescript
-import { svelteAdapter } from '@ujl-framework/adapter-svelte';
+import { svelteAdapter } from "@ujl-framework/adapter-svelte";
 
 const mounted = svelteAdapter(ast, tokenSet, {
-  target: '#my-container',
-  mode: 'system',
-  showMetadata: true,
-  eventCallback: (id) => console.log('Clicked:', id)
+	target: "#my-container",
+	mode: "system",
+	showMetadata: true,
+	eventCallback: id => console.log("Clicked:", id),
 });
 
 // Cleanup
@@ -978,16 +989,16 @@ graph TB
 
 ```typescript
 export default defineConfig({
-  build: {
-    lib: {
-      entry: 'src/index.ts',
-      formats: ['es'],  // Nur ESM
-      fileName: 'index',
-    },
-    rollupOptions: {
-      external: [],  // Keine Externals → Svelte wird gebundelt
-    },
-  },
+	build: {
+		lib: {
+			entry: "src/index.ts",
+			formats: ["es"], // Nur ESM
+			fileName: "index",
+		},
+		rollupOptions: {
+			external: [], // Keine Externals → Svelte wird gebundelt
+		},
+	},
 });
 ```
 
@@ -1014,12 +1025,12 @@ export default defineConfig({
 
 ```typescript
 // Correct
-const el = document.createElement('ujl-content') as UJLContentElement;
+const el = document.createElement("ujl-content") as UJLContentElement;
 el.node = astNode;
 el.tokenSet = tokenSet;
 
 // Wrong (Attributes sind Strings)
-el.setAttribute('node', JSON.stringify(astNode));  // Funktioniert nicht
+el.setAttribute("node", JSON.stringify(astNode)); // Funktioniert nicht
 ```
 
 ---
@@ -1030,20 +1041,20 @@ el.setAttribute('node', JSON.stringify(astNode));  // Funktioniert nicht
 
 ```typescript
 export function webAdapter(
-  node: UJLAbstractNode,
-  tokenSet: UJLTTokenSet,
-  options: WebAdapterOptions
+	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
+	options: WebAdapterOptions
 ): MountedElement;
 
 type WebAdapterOptions = {
-  target: string | HTMLElement;
-  showMetadata?: boolean;
-  eventCallback?: (moduleId: string) => void;
+	target: string | HTMLElement;
+	showMetadata?: boolean;
+	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedElement = {
-  element: HTMLElement;
-  unmount: () => void;
+	element: HTMLElement;
+	unmount: () => void;
 };
 ```
 
@@ -1051,28 +1062,27 @@ type MountedElement = {
 
 ```typescript
 export function webAdapter(
-  node: UJLAbstractNode,
-  tokenSet: UJLTTokenSet,
-  options: WebAdapterOptions
+	node: UJLAbstractNode,
+	tokenSet: UJLTTokenSet,
+	options: WebAdapterOptions
 ): MountedElement {
-  const target = typeof options.target === 'string'
-    ? document.querySelector(options.target)
-    : options.target;
+	const target =
+		typeof options.target === "string" ? document.querySelector(options.target) : options.target;
 
-  if (!target) throw new Error('Target not found');
+	if (!target) throw new Error("Target not found");
 
-  const el = document.createElement('ujl-content') as UJLContentElement;
-  el.node = node;
-  el.tokenSet = tokenSet;
-  el.showMetadata = options.showMetadata ?? false;
-  el.eventCallback = options.eventCallback;
+	const el = document.createElement("ujl-content") as UJLContentElement;
+	el.node = node;
+	el.tokenSet = tokenSet;
+	el.showMetadata = options.showMetadata ?? false;
+	el.eventCallback = options.eventCallback;
 
-  target.appendChild(el);
+	target.appendChild(el);
 
-  return {
-    element: el,
-    unmount: () => el.remove()
-  };
+	return {
+		element: el,
+		unmount: () => el.remove(),
+	};
 }
 ```
 
@@ -1160,24 +1170,19 @@ graph TB
 ```typescript
 let ujlcDocument = $state<UJLCDocument>(initialUJLC);
 let ujltDocument = $state<UJLTDocument>(initialUJLT);
-let mode = $state<'editor' | 'designer'>('editor');
+let mode = $state<"editor" | "designer">("editor");
 let expandedNodeIds = $state<Set<string>>(new Set());
 ```
 
 **Context Provider:**
 
 ```typescript
-import { setContext } from 'svelte';
-import { createCrafterContext } from './context';
+import { setContext } from "svelte";
+import { createCrafterContext } from "./context";
 
-const context = createCrafterContext(
-  ujlcDocument,
-  ujltDocument,
-  mode,
-  expandedNodeIds
-);
+const context = createCrafterContext(ujlcDocument, ujltDocument, mode, expandedNodeIds);
 
-setContext('crafter', context);
+setContext("crafter", context);
 ```
 
 ---
@@ -1190,33 +1195,33 @@ setContext('crafter', context);
 
 ```typescript
 interface CrafterContext {
-  // State Accessors
-  getUJLCDocument(): UJLCDocument;
-  getUJLTDocument(): UJLTDocument;
-  getMode(): 'editor' | 'designer';
-  getExpandedNodeIds(): Set<string>;
+	// State Accessors
+	getUJLCDocument(): UJLCDocument;
+	getUJLTDocument(): UJLTDocument;
+	getMode(): "editor" | "designer";
+	getExpandedNodeIds(): Set<string>;
 
-  // State Updates (Functional)
-  updateRootSlot(fn: (root: UJLCModuleObject[]) => UJLCModuleObject[]): void;
-  updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
+	// State Updates (Functional)
+	updateRootSlot(fn: (root: UJLCModuleObject[]) => UJLCModuleObject[]): void;
+	updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
 
-  // Selection
-  setSelectedNodeId(nodeId: string | null): void;
-  getSelectedNodeId(): string | null;
+	// Selection
+	setSelectedNodeId(nodeId: string | null): void;
+	getSelectedNodeId(): string | null;
 
-  // Tree Expansion
-  setNodeExpanded(nodeId: string, expanded: boolean): void;
-  expandToNode(nodeId: string): void;  // Expand all parents
+	// Tree Expansion
+	setNodeExpanded(nodeId: string, expanded: boolean): void;
+	expandToNode(nodeId: string): void; // Expand all parents
 
-  // Operations
-  operations: {
-    copyNode(nodeId: string): void;
-    cutNode(nodeId: string): void;
-    pasteNode(targetId: string, position: 'before' | 'after' | 'into'): void;
-    deleteNode(nodeId: string): void;
-    moveNode(nodeId: string, targetId: string, position: string): void;
-    insertNode(moduleType: string, targetId: string, position: string): void;
-  };
+	// Operations
+	operations: {
+		copyNode(nodeId: string): void;
+		cutNode(nodeId: string): void;
+		pasteNode(targetId: string, position: "before" | "after" | "into"): void;
+		deleteNode(nodeId: string): void;
+		moveNode(nodeId: string, targetId: string, position: string): void;
+		insertNode(moduleType: string, targetId: string, position: string): void;
+	};
 }
 ```
 
@@ -1227,7 +1232,7 @@ interface CrafterContext {
 ujlcDocument.ujlc.root.push(newModule);
 
 // Functional Update (empfohlen)
-context.updateRootSlot((root) => [...root, newModule]);
+context.updateRootSlot(root => [...root, newModule]);
 ```
 
 ---
@@ -1249,13 +1254,13 @@ context.updateRootSlot((root) => [...root, newModule]);
 
 ```typescript
 interface ClipboardManager {
-  copy(nodeId: string): Promise<void>;
-  cut(nodeId: string): Promise<void>;
-  paste(targetId: string, position: string): Promise<void>;
+	copy(nodeId: string): Promise<void>;
+	cut(nodeId: string): Promise<void>;
+	paste(targetId: string, position: string): Promise<void>;
 
-  // Dual-Storage Strategy
-  // 1. Clipboard API (modern browsers)
-  // 2. localStorage Fallback (older browsers)
+	// Dual-Storage Strategy
+	// 1. Clipboard API (modern browsers)
+	// 2. localStorage Fallback (older browsers)
 }
 ```
 
@@ -1277,16 +1282,16 @@ interface ClipboardManager {
 
 ```typescript
 function generateColorPalette(baseColor: OklchColor): ColorPalette {
-  const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+	const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
-  return shades.reduce((palette, shade) => {
-    palette[shade] = {
-      l: calculateLightness(shade),  // Perzeptuell uniform
-      c: baseColor.c * calculateChromaFactor(shade),
-      h: baseColor.h,
-    };
-    return palette;
-  }, {});
+	return shades.reduce((palette, shade) => {
+		palette[shade] = {
+			l: calculateLightness(shade), // Perzeptuell uniform
+			c: baseColor.c * calculateChromaFactor(shade),
+			h: baseColor.h,
+		};
+		return palette;
+	}, {});
 }
 ```
 
@@ -1300,20 +1305,20 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 
 ```typescript
 interface MediaService {
-  // List Media
-  list(): Promise<MediaLibraryEntry[]>;
+	// List Media
+	list(): Promise<MediaLibraryEntry[]>;
 
-  // Upload Media
-  upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry>;
+	// Upload Media
+	upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry>;
 
-  // Update Metadata
-  updateMetadata(id: string, metadata: Partial<MediaMetadata>): Promise<void>;
+	// Update Metadata
+	updateMetadata(id: string, metadata: Partial<MediaMetadata>): Promise<void>;
 
-  // Delete Media
-  delete(id: string): Promise<void>;
+	// Delete Media
+	delete(id: string): Promise<void>;
 
-  // Get Storage Mode
-  getStorageMode(): 'inline' | 'backend';
+	// Get Storage Mode
+	getStorageMode(): "inline" | "backend";
 }
 ```
 
@@ -1333,10 +1338,10 @@ interface MediaService {
 
 ```typescript
 function createMediaService(config: MediaLibraryConfig): MediaService {
-  if (config.storage === 'backend' && config.endpoint) {
-    return new BackendMediaService(config.endpoint, apiKey);
-  }
-  return new InlineMediaService(ujlcDocument);
+	if (config.storage === "backend" && config.endpoint) {
+		return new BackendMediaService(config.endpoint, apiKey);
+	}
+	return new InlineMediaService(ujlcDocument);
 }
 ```
 
@@ -1360,18 +1365,18 @@ demo/
 **main.ts (Auszug):**
 
 ```typescript
-import { webAdapter } from '@ujl-framework/adapter-web';
-import { Composer } from '@ujl-framework/core';
-import showcaseDocument from '@ujl-framework/examples/documents/showcase';
-import defaultTheme from '@ujl-framework/examples/themes/default';
+import { webAdapter } from "@ujl-framework/adapter-web";
+import { Composer } from "@ujl-framework/core";
+import showcaseDocument from "@ujl-framework/examples/documents/showcase";
+import defaultTheme from "@ujl-framework/examples/themes/default";
 
 const composer = new Composer();
 const ast = composer.compose(showcaseDocument);
 const tokenSet = defaultTheme.ujlt.tokens;
 
 webAdapter(ast, tokenSet, {
-  target: '#app',
-  showMetadata: false,
+	target: "#app",
+	showMetadata: false,
 });
 ```
 
@@ -1417,11 +1422,11 @@ examples/
 
 ```typescript
 // Direct Import
-import showcaseDocument from '@ujl-framework/examples/documents/showcase';
-import defaultTheme from '@ujl-framework/examples/themes/default';
+import showcaseDocument from "@ujl-framework/examples/documents/showcase";
+import defaultTheme from "@ujl-framework/examples/themes/default";
 
 // Named Export
-import { showcaseDocument, defaultTheme } from '@ujl-framework/examples';
+import { showcaseDocument, defaultTheme } from "@ujl-framework/examples";
 ```
 
 ---
@@ -1476,54 +1481,52 @@ graph TB
 
 ```typescript
 export const Media: CollectionConfig = {
-  slug: 'media',
-  upload: {
-    staticDir: 'media',  // Upload-Verzeichnis
-    imageSizes: [
-      { name: 'thumbnail', width: 400, height: 300 },
-      { name: 'small', width: 500 },
-      { name: 'medium', width: 750 },
-      { name: 'large', width: 1000 },
-      { name: 'xlarge', width: 1920 },
-    ],
-    formatOptions: {
-      format: 'webp',  // Automatic WebP Conversion
-    },
-    focalPoint: true,   // Smart Cropping
-    crop: true,
-  },
-  fields: [
-    { name: 'title', type: 'text', localized: true, required: true },
-    { name: 'alt', type: 'text', localized: true },
-    { name: 'description', type: 'text', localized: true },
-    { name: 'author', type: 'text' },
-    { name: 'license', type: 'text' },
-    { name: 'sourceLink', type: 'text' },
-    { name: 'tags', type: 'array', fields: [
-      { name: 'tag', type: 'text' }
-    ]},
-  ],
+	slug: "media",
+	upload: {
+		staticDir: "media", // Upload-Verzeichnis
+		imageSizes: [
+			{ name: "thumbnail", width: 400, height: 300 },
+			{ name: "small", width: 500 },
+			{ name: "medium", width: 750 },
+			{ name: "large", width: 1000 },
+			{ name: "xlarge", width: 1920 },
+		],
+		formatOptions: {
+			format: "webp", // Automatic WebP Conversion
+		},
+		focalPoint: true, // Smart Cropping
+		crop: true,
+	},
+	fields: [
+		{ name: "title", type: "text", localized: true, required: true },
+		{ name: "alt", type: "text", localized: true },
+		{ name: "description", type: "text", localized: true },
+		{ name: "author", type: "text" },
+		{ name: "license", type: "text" },
+		{ name: "sourceLink", type: "text" },
+		{ name: "tags", type: "array", fields: [{ name: "tag", type: "text" }] },
+	],
 };
 ```
 
 **REST API:**
 
-| Methode | Endpoint | Funktion |
-|---------|----------|----------|
-| GET | `/api/media` | List (mit Pagination, Filtering, Sorting) |
-| GET | `/api/media/:id` | Get Single |
-| POST | `/api/media` | Upload (multipart/form-data) |
-| PATCH | `/api/media/:id` | Update Metadata |
-| DELETE | `/api/media/:id` | Delete |
+| Methode | Endpoint         | Funktion                                  |
+| ------- | ---------------- | ----------------------------------------- |
+| GET     | `/api/media`     | List (mit Pagination, Filtering, Sorting) |
+| GET     | `/api/media/:id` | Get Single                                |
+| POST    | `/api/media`     | Upload (multipart/form-data)              |
+| PATCH   | `/api/media/:id` | Update Metadata                           |
+| DELETE  | `/api/media/:id` | Delete                                    |
 
 **Authentication:**
 
 ```typescript
 // API Key in User Document
-const response = await fetch('http://localhost:3000/api/media', {
-  headers: {
-    'Authorization': 'users API-Key YOUR_API_KEY'
-  }
+const response = await fetch("http://localhost:3000/api/media", {
+	headers: {
+		Authorization: "users API-Key YOUR_API_KEY",
+	},
 });
 ```
 
@@ -1619,13 +1622,13 @@ pnpm run build
 
 ```json
 {
-  "scripts": {
-    "build": "pnpm run types:build && pnpm run core:build && pnpm run ui:build && pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm run crafter:build && pnpm run demo:build && pnpm run docs:build",
-    "types:build": "pnpm --filter @ujl-framework/types build",
-    "core:build": "pnpm --filter @ujl-framework/core build",
-    "ui:build": "pnpm --filter @ujl-framework/ui build",
-    // ...
-  }
+	"scripts": {
+		"build": "pnpm run types:build && pnpm run core:build && pnpm run ui:build && pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm run crafter:build && pnpm run demo:build && pnpm run docs:build",
+		"types:build": "pnpm --filter @ujl-framework/types build",
+		"core:build": "pnpm --filter @ujl-framework/core build",
+		"ui:build": "pnpm --filter @ujl-framework/ui build"
+		// ...
+	}
 }
 ```
 
@@ -1633,17 +1636,17 @@ pnpm run build
 
 ### Artifact-Typen
 
-| Package | Build Tool | Output | Distribution |
-|---------|-----------|--------|--------------|
-| types | TypeScript | `dist/*.js` + `dist/*.d.ts` | NPM (geplant) |
-| core | TypeScript | `dist/*.js` + `dist/*.d.ts` | NPM (geplant) |
-| ui | SvelteKit | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant) |
-| adapter-svelte | SvelteKit | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant) |
-| adapter-web | Vite | `dist/index.js` (bundled) + `dist/index.d.ts` | NPM (geplant) |
-| crafter | SvelteKit | `dist/**/*` (SvelteKit Package) | NPM (geplant) |
-| demo | Vite | `dist/**/*` (Static Files) | Private |
-| docs | VitePress | `.vitepress/dist/**/*` (Static Site) | GitLab Pages |
-| media | Next.js | Docker Image | Docker Hub (optional) |
+| Package        | Build Tool | Output                                              | Distribution          |
+| -------------- | ---------- | --------------------------------------------------- | --------------------- |
+| types          | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)         |
+| core           | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)         |
+| ui             | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)         |
+| adapter-svelte | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)         |
+| adapter-web    | Vite       | `dist/index.js` (bundled) + `dist/index.d.ts`       | NPM (geplant)         |
+| crafter        | SvelteKit  | `dist/**/*` (SvelteKit Package)                     | NPM (geplant)         |
+| demo           | Vite       | `dist/**/*` (Static Files)                          | Private               |
+| docs           | VitePress  | `.vitepress/dist/**/*` (Static Site)                | GitLab Pages          |
+| media          | Next.js    | Docker Image                                        | Docker Hub (optional) |
 
 ---
 
@@ -1678,12 +1681,12 @@ pnpm publish -r --access public
 
 ```json
 {
-  "fixed": [
-    ["@ujl-framework/*"]  // All packages linked
-  ],
-  "changelog": "@changesets/cli/changelog",
-  "commit": false,
-  "access": "public"
+	"fixed": [
+		["@ujl-framework/*"] // All packages linked
+	],
+	"changelog": "@changesets/cli/changelog",
+	"commit": false,
+	"access": "public"
 }
 ```
 
