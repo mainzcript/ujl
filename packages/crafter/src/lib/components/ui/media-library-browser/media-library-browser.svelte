@@ -29,7 +29,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = crafter.getMediaService();
+	const mediaService = $derived(crafter.mediaService);
 
 	let mediaEntries = $state<Array<{ id: string; dataUrl: string; metadata: MediaMetadata }>>([]);
 	let isLoading = $state(true);

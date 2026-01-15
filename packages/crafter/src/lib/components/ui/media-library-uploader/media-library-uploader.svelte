@@ -13,7 +13,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = crafter.getMediaService();
+	const mediaService = $derived(crafter.mediaService);
 
 	const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
 	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(',');

@@ -38,7 +38,7 @@
 	let isHandlingKeyboardShortcut = $state(false);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
 	});
 
 	// Slot selection uses format: parentId:slotName
@@ -271,7 +271,7 @@
 	}
 
 	function handleSlotClick(parentId: string, slotName: string) {
-		if (crafter.getMode() !== 'editor') return;
+		if (crafter.mode !== 'editor') return;
 		crafter.setSelectedNodeId(`${parentId}:${slotName}`);
 	}
 

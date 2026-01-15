@@ -17,7 +17,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = crafter.getMediaService();
+	const mediaService = $derived(crafter.mediaService);
 
 	let previewUrl = $state<string | null>(null);
 	let isLoadingPreview = $state(false);

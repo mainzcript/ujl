@@ -31,7 +31,7 @@
 		canNodeAcceptPaste
 	} from '$lib/utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import { test, testId } from '$lib/utils/test-attrs.ts';
 
 	let {
@@ -117,7 +117,7 @@
 
 	// Get Crafter Context for expanded state
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const expandedNodeIds = $derived(crafter.getExpandedNodeIds());
+	const expandedNodeIds = $derived(crafter.expandedNodeIds);
 
 	// Root node is always expanded and not collapsible
 	const isExpanded = $derived(isRootNode ? true : expandedNodeIds.has(node.meta.id));

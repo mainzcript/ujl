@@ -25,7 +25,7 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
 	});
 
 	const composer = new Composer();
@@ -36,8 +36,7 @@
 	// Create media resolver from MediaService
 	const mediaResolver = {
 		async resolve(id: string): Promise<string | null> {
-			const mediaService = crafter.getMediaService();
-			const entry = await mediaService.get(id);
+			const entry = await crafter.mediaService.get(id);
 			return entry?.dataUrl ?? null;
 		}
 	};
@@ -52,7 +51,7 @@
 	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 
 	function handleModuleClick(moduleId: string) {
-		if (crafterMode !== 'editor' || crafter.getMode() !== 'editor') return;
+		if (crafterMode !== 'editor' || crafter.mode !== 'editor') return;
 		crafter.expandToNode(moduleId);
 		crafter.setSelectedNodeId(moduleId);
 		scrollToNodeInTree(moduleId);

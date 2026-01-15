@@ -8,7 +8,30 @@ The Crafter uses a reactive architecture based on Svelte 5's runes and context A
 
 ### Single Source of Truth
 
-`app.svelte` holds the central state: `ujlcDocument`, `ujltDocument` (validated on initialization), `mode` ('editor' | 'designer'), and `expandedNodeIds` for tree expansion. All state is managed reactively via Svelte 5 runes.
+The `CrafterStore` (created via `createCrafterStore()` in `stores/crafter-store.svelte.ts`) holds the central state:
+
+- `ujlcDocument`, `ujltDocument` (validated on initialization)
+- `mode` ('editor' | 'designer')
+- `selectedNodeId` for current selection
+- `expandedNodeIds` for tree expansion state
+- `isMediaLibraryViewActive` and `mediaLibraryContext` for media panel
+
+All state is managed reactively via Svelte 5 runes (`$state`, `$derived`) inside a `.svelte.ts` module, enabling full reactivity while keeping logic outside of components.
+
+### Dependency Injection
+
+The store receives its dependencies via factory injection:
+
+```typescript
+const store = createCrafterStore({
+	initialUjlcDocument,
+	initialUjltDocument,
+	composer,
+	createMediaService: mediaServiceFactory
+});
+```
+
+This pattern enables testability and decouples the store from concrete implementations.
 
 ### Bidirectional Tree ↔ Preview Synchronization
 
@@ -17,35 +40,77 @@ The Crafter provides seamless bidirectional synchronization between the navigati
 - **Tree → Preview**: Clicking a node scrolls to the component in the preview (smart scrolling only when needed)
 - **Preview → Tree**: Clicking a component expands parent nodes, selects the component, and scrolls the tree to reveal it
 
-Implementation uses centralized expand state via Svelte 5 `$state` runes and path-finding algorithms. See `context.ts` and `ujlc-tree.ts` for details.
+Implementation uses centralized expand state via the store and path-finding algorithms. See `stores/crafter-store.svelte.ts` and `utils/ujlc-tree.ts` for details.
 
 ### Context API
 
-All mutations go through a central **Crafter Context API** (`context.ts`) using functional updates for atomic, predictable state changes:
+The store is provided to child components via Svelte context:
 
-- **Theme & Content**: `updateTokenSet(fn)`, `updateRootSlot(fn)` - Immutable updates for theme tokens and content structure
-- **Selection**: `setSelectedNodeId(nodeId)` - Updates URL and triggers synchronization
-- **Tree Expansion**: `getExpandedNodeIds()`, `setNodeExpanded()`, `expandToNode()` - Manages tree expansion state
-- **Operations**: `operations.*` - High-level document manipulation (copy, cut, paste, delete, move, insert nodes/slots)
+```typescript
+// In ujl-crafter.svelte
+setContext(CRAFTER_CONTEXT, store);
 
-All operations use immutable utilities and validate inputs. See `context.ts` for complete API documentation.
+// In child components
+const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+```
+
+Child components access state directly via properties (no getter functions):
+
+```typescript
+// Direct property access
+const mode = crafter.mode;
+const selectedNodeId = crafter.selectedNodeId;
+const rootSlot = crafter.rootSlot;
+
+// Functional updates for mutations
+crafter.updateTokenSet((tokens) => ({ ...tokens /* changes */ }));
+crafter.updateRootSlot((slot) => ({ ...slot /* changes */ }));
+
+// High-level operations
+crafter.operations.insertNode(type, targetId, slotName, position);
+crafter.operations.deleteNode(nodeId);
+crafter.operations.moveNode(nodeId, targetId, slotName, position);
+```
+
+All operations use immutable utilities and validate inputs. See `context.ts` for type definitions and `stores/operations.ts` for implementation.
 
 ### Component Structure
 
 Key components:
 
-- **`app.svelte`**: Root component managing state (`ujlcDocument`, `ujltDocument`, `expandedNodeIds`, mode) and providing `CrafterContext`
-- **`sidebar-left.svelte`**: Routes between Editor and Designer modes based on `mode` prop
-- **`designer.svelte`**: Theme editor UI (colors, typography, spacing, radius) using `updateTokenSet()`
+- **`ujl-crafter.svelte`**: Root component creating the store and providing it via context
 - **`editor.svelte`**: Content editor with clipboard, keyboard shortcuts, and component insertion
 - **`nav-tree.svelte`**: Navigation tree with drag & drop, selection via URL parameters
 - **`preview.svelte`**: Visual preview using `Composer` and `AdapterRoot`, handles click-to-select synchronization
+- **`properties-panel.svelte`**: Property editing for selected nodes
+- **`designer-panel.svelte`**: Theme editor UI (colors, typography, spacing, radius)
 
-For implementation details, see component source files in `src/lib/components/`.
+For implementation details, see component source files in `src/lib/components/ujl-crafter/`.
 
 ### Data Flow
 
-Components receive data via props (read-only) and update state through the Context API. State changes trigger reactive updates via Svelte 5 runes, causing props to recompute and UI to re-render.
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CrafterStore                             │
+│  (Single Source of Truth - Svelte 5 Runes)                  │
+│                                                             │
+│  $state: ujlcDocument, ujltDocument, mode, selectedNodeId   │
+│  $derived: rootSlot, tokens, mediaService, operations       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ setContext(CRAFTER_CONTEXT, store)
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Child Components                          │
+│  (Read via direct properties, Write via actions/updates)    │
+│                                                             │
+│  const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT)│
+│  crafter.mode, crafter.selectedNodeId (read)                │
+│  crafter.setSelectedNodeId(), crafter.operations.* (write)  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Components access state via direct property access and update state through setter functions and operations. State changes trigger reactive updates via Svelte 5 runes, causing UI to re-render automatically.
 
 ### Editor Features
 

@@ -148,6 +148,47 @@ export function isDescendant(node: UJLCModuleObject, targetId: string): boolean 
 	return false;
 }
 
+/**
+ * Finds the path from root to target node.
+ * Returns an array of all parent node IDs leading to the target.
+ *
+ * @param nodes - Array of root nodes to search
+ * @param targetId - The node ID to find
+ * @param currentPath - Current path (used for recursion)
+ * @returns Array of parent node IDs, or null if not found
+ *
+ * @example
+ * ```ts
+ * const path = findPathToNode(rootNodes, 'child-node-id');
+ * // Returns: ['parent-id', 'grandparent-id']
+ * ```
+ */
+export function findPathToNode(
+	nodes: UJLCModuleObject[],
+	targetId: string,
+	currentPath: string[] = []
+): string[] | null {
+	for (const node of nodes) {
+		// Check if this is the target node
+		if (node.meta.id === targetId) {
+			return currentPath;
+		}
+
+		// Check children in all slots
+		if (node.slots) {
+			for (const slotContent of Object.values(node.slots)) {
+				const newPath = [...currentPath, node.meta.id];
+				const result = findPathToNode(slotContent, targetId, newPath);
+				if (result !== null) {
+					return result;
+				}
+			}
+		}
+	}
+
+	return null;
+}
+
 // ============================================
 // Virtual Root Node
 // ============================================

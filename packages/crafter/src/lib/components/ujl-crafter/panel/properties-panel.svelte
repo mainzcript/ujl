@@ -16,7 +16,7 @@
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
 	});
 
 	// Slot selection uses format: parentId:slotName
@@ -26,9 +26,7 @@
 
 	const selectedNode = $derived(() => {
 		if (!selectedNodeId || isSlotSelected()) return null;
-
-		const rootSlot = crafter.getRootSlot();
-		return findNodeById(rootSlot, selectedNodeId);
+		return findNodeById(crafter.rootSlot, selectedNodeId);
 	});
 
 	const module = $derived(() => {
@@ -45,8 +43,7 @@
 	});
 
 	const mediaCount = $derived(() => {
-		const media = crafter.getMedia();
-		return Object.keys(media).length;
+		return Object.keys(crafter.media).length;
 	});
 
 	let mediaReloadTrigger = $state(0);
@@ -78,7 +75,7 @@
 </script>
 
 <div class="h-full overflow-y-auto">
-	{#if crafter.isMediaLibraryViewActive()}
+	{#if crafter.isMediaLibraryViewActive}
 		<!-- Media Library View -->
 		<div class="flex h-full flex-col">
 			<!-- Fixed Header with Back Button and Upload -->
@@ -108,11 +105,11 @@
 			<div class="flex-1 overflow-y-auto">
 				{#key mediaReloadTrigger}
 					<MediaLibraryBrowser
-						selectedMediaId={crafter.getMediaLibraryContext()?.currentValue != null
-							? String(crafter.getMediaLibraryContext()?.currentValue)
+						selectedMediaId={crafter.mediaLibraryContext?.currentValue != null
+							? String(crafter.mediaLibraryContext?.currentValue)
 							: null}
 						onSelect={(mediaId: string) => {
-							const context = crafter.getMediaLibraryContext();
+							const context = crafter.mediaLibraryContext;
 							if (context && context.nodeId && context.fieldName) {
 								crafter.operations.updateNodeField(context.nodeId, context.fieldName, mediaId);
 							}

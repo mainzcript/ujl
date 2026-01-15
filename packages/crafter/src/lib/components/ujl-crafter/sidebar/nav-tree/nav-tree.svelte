@@ -5,7 +5,7 @@
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
 	import { testId } from '$lib/utils/test-attrs.ts';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 
 	let {
 		nodes,
@@ -59,7 +59,7 @@
 
 	// Selected node from Context (synchronized with editor.svelte)
 	const selectedNodeId = $derived.by(() => {
-		return crafter.getMode() === 'editor' ? crafter.getSelectedNodeId() : null;
+		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
 	});
 
 	// Create drag handler with slot move support
@@ -83,7 +83,7 @@
 	 * Order: expand first (to make node visible), then select (consistent with preview.svelte)
 	 */
 	function handleNodeClick(nodeId: string) {
-		if (crafter.getMode() !== 'editor') return;
+		if (crafter.mode !== 'editor') return;
 		// Expand to node first to ensure it's visible in the tree
 		crafter.expandToNode(nodeId);
 		crafter.setSelectedNodeId(nodeId);
