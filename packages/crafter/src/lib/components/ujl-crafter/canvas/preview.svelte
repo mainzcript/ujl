@@ -107,6 +107,26 @@
 		});
 	}
 
+	/**
+	 * Apply selection to a module element with retry mechanism.
+	 * This is needed because when a new module is created, the AST update
+	 * is asynchronous, so the element might not be in the DOM yet.
+	 */
+	function applySelection(moduleId: string, retries = 10) {
+		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
+		if (element) {
+			element.classList.add('ujl-selected');
+			scrollToComponentInPreview(moduleId);
+			return true;
+		}
+		if (retries > 0) {
+			setTimeout(() => applySelection(moduleId, retries - 1), 50);
+		} else {
+			logger.warn('Could not find element for selection after retries:', moduleId);
+		}
+		return false;
+	}
+
 	$effect(() => {
 		// Remove selection from all elements first (cleanup)
 		document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
@@ -114,12 +134,10 @@
 		});
 
 		// Only apply selection in editor mode
-		if (crafterMode === 'editor' && selectedNodeId) {
-			const element = document.querySelector(`[data-ujl-module-id="${selectedNodeId}"]`);
-			if (element) {
-				element.classList.add('ujl-selected');
-				scrollToComponentInPreview(selectedNodeId);
-			}
+		if (crafterMode === 'editor' && selectedNodeId && ast) {
+			setTimeout(() => {
+				applySelection(selectedNodeId);
+			}, 0);
 		}
 	});
 </script>
