@@ -1,4 +1,15 @@
 /**
- * Main entry point for the Crafter package.
- * Re-export your entry components here.
+ * @ujl-framework/crafter - Visual Editor for UJL Content
+ *
+ * @module crafter
  */
+
+// Einzige öffentliche API
+export {
+	UJLCrafter,
+	type UJLCrafterOptions,
+	type NotificationType,
+	type NotificationCallback,
+	type DocumentChangeCallback,
+	type ThemeChangeCallback
+} from './components/ujl-crafter/index.js';

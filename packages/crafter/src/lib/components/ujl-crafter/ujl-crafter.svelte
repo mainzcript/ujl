@@ -23,6 +23,7 @@
 	import {
 		createCrafterStore,
 		createMediaServiceFactory,
+		type CrafterStore,
 		type CrafterStoreDeps
 	} from '$lib/stores/index.js';
 
@@ -50,54 +51,71 @@
 	// ============================================
 
 	interface Props {
-		/** Initial content document (optional, defaults to showcase) */
+		/** External store (from UJLCrafter class) */
+		store?: CrafterStore;
+		/** External composer (from UJLCrafter class, only if store is provided) */
+		composer?: Composer;
+		/** Initial content document (optional, defaults to showcase, only if no external store) */
 		initialContent?: UJLCDocument;
-		/** Initial theme document (optional, defaults to default theme) */
+		/** Initial theme document (optional, defaults to default theme, only if no external store) */
 		initialTheme?: UJLTDocument;
 	}
 
-	const { initialContent, initialTheme }: Props = $props();
+	const {
+		store: externalStore,
+		composer: externalComposer,
+		initialContent,
+		initialTheme
+	}: Props = $props();
 
 	// ============================================
 	// STORE CREATION
 	// ============================================
 
-	// Capture initial props in a closure (only used once at component creation)
-	// We intentionally don't react to prop changes - store is created once
-	const { validatedContent, validatedTheme } = (() => {
-		const content = initialContent;
-		const theme = initialTheme;
-		return {
-			validatedContent: validateUJLCDocument(
-				(content ?? showcaseDocument) as unknown as UJLCDocument
-			),
-			validatedTheme: validateUJLTDocument((theme ?? defaultTheme) as unknown as UJLTDocument)
-		};
+	// Store and composer: external (from class) or internal (for direct Svelte usage)
+	const { store, composer } = (() => {
+		if (externalStore) {
+			// External store: use provided store and composer
+			return {
+				store: externalStore,
+				composer: externalComposer ?? new Composer()
+			};
+		} else {
+			// Internal store: create everything new
+			// Capture initial props in a closure - we intentionally don't react to prop changes
+			const { validatedContent, validatedTheme } = (() => {
+				const content = initialContent;
+				const theme = initialTheme;
+				return {
+					validatedContent: validateUJLCDocument(
+						(content ?? showcaseDocument) as unknown as UJLCDocument
+					),
+					validatedTheme: validateUJLTDocument((theme ?? defaultTheme) as unknown as UJLTDocument)
+				};
+			})();
+
+			const composer = new Composer();
+
+			const mediaServiceFactory = createMediaServiceFactory({
+				showToasts: true,
+				onConnectionError: (error, endpoint) => {
+					logger.error('Media backend connection error:', error, endpoint);
+				}
+			});
+
+			const storeDeps: CrafterStoreDeps = {
+				initialUjlcDocument: validatedContent,
+				initialUjltDocument: validatedTheme,
+				composer,
+				createMediaService: mediaServiceFactory
+			};
+
+			const store = createCrafterStore(storeDeps);
+
+			return { store, composer };
+		}
 	})();
 
-	// Create Composer instance
-	const composer = new Composer();
-
-	// Create media service factory with error handling
-	const mediaServiceFactory = createMediaServiceFactory({
-		showToasts: true,
-		onConnectionError: (error, endpoint) => {
-			logger.error('Media backend connection error:', error, endpoint);
-		}
-	});
-
-	// Prepare store dependencies (Dependency Injection)
-	const storeDeps: CrafterStoreDeps = {
-		initialUjlcDocument: validatedContent,
-		initialUjltDocument: validatedTheme,
-		composer,
-		createMediaService: mediaServiceFactory
-	};
-
-	// Create the store (Single Source of Truth)
-	const store = createCrafterStore(storeDeps);
-
-	// Provide store as context (direct API - no legacy adapter)
 	setContext(CRAFTER_CONTEXT, store);
 	setContext(COMPOSER_CONTEXT, composer);
 
