@@ -11,7 +11,7 @@
 		UJLTTypographyCode
 	} from '@ujl-framework/types';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
-	import { updateFlavorByOriginal } from '../../../utils/colors/index.js';
+	import { updateFlavorByOriginal } from '$lib/utils/colors/index.js';
 	import AmbientColorGroup from './designer/components/colors/ambient-color-group.svelte';
 	import ThemeColorsGroup from './designer/components/colors/theme-colors-group.svelte';
 	import NotificationColorsGroup from './designer/components/colors/notification-colors-group.svelte';

@@ -12,6 +12,12 @@ export default defineConfig(({ command }) => {
 		root: isDev ? 'src/dev' : undefined,
 		publicDir: isDev ? '../../static' : 'static',
 
+		resolve: {
+			alias: {
+				$lib: path.resolve(__dirname, 'src/lib')
+			}
+		},
+
 		plugins: [
 			tailwindcss(),
 			svelte({

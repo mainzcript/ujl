@@ -7,7 +7,7 @@
 	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTTypographyLink } from '@ujl-framework/types';
-	import { StyleToggles } from '../../../../../ui/index.js';
+	import { StyleToggles } from '$lib/components/ui/index.js';
 
 	let {
 		typography,

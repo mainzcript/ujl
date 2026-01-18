@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Text } from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../../ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 	import type { MediaLibraryEntry } from '@ujl-framework/types';
 	import ImageIcon from '@lucide/svelte/icons/image';
-	import { logger } from '../../../utils/logger.js';
+	import { logger } from '$lib/utils/logger.js';
 
 	let {
 		value,

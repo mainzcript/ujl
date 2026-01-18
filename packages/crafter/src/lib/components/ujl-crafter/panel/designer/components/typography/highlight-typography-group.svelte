@@ -7,7 +7,7 @@
 	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTTypographyHighlight, UJLTColorPalette } from '@ujl-framework/types';
-	import { FlavorSelect, StyleToggles } from '../../../../../ui/index.js';
+	import { FlavorSelect, StyleToggles } from '$lib/components/ui/index.js';
 
 	let {
 		typography,

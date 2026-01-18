@@ -24,7 +24,7 @@
 		createMediaServiceFactory,
 		type CrafterStore,
 		type CrafterStoreDeps
-	} from '../../stores/index.js';
+	} from '$lib/stores/index.js';
 
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, SHADOW_ROOT_CONTEXT } from './context.js';
 
@@ -38,8 +38,8 @@
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
-	import { downloadJsonFile, readJsonFile } from '../../utils/files.js';
-	import { logger } from '../../utils/logger.js';
+	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.js';
+	import { logger } from '$lib/utils/logger.js';
 
 	// ============================================
 	// PROPS

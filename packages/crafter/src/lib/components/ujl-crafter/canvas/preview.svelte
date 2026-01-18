@@ -16,11 +16,11 @@
 		type CrafterContext,
 		type ShadowRootContext
 	} from '../context.js';
-	import { logger } from '../../../utils/logger.js';
-	import { createScopedSelector } from '../../../utils/scoped-dom.js';
+	import { logger } from '$lib/utils/logger.js';
+	import { createScopedSelector } from '$lib/utils/scoped-dom.js';
 	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
 
-	import type { CrafterMode } from '../../../stores/index.js';
+	import type { CrafterMode } from '$lib/stores/index.js';
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };

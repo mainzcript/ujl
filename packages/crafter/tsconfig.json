@@ -13,7 +13,12 @@
 		"sourceMap": true,
 		"strict": true,
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
-		"types": ["svelte", "node", "vite/client", "vitest/globals"]
+		"types": ["svelte", "node", "vite/client", "vitest/globals"],
+		"baseUrl": ".",
+		"paths": {
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"]
+		}
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]

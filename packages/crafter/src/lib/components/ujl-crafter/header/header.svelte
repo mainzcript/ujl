@@ -15,8 +15,8 @@
 		ToggleGroup,
 		ToggleGroupItem
 	} from '@ujl-framework/ui';
-	import { useApp } from '../../ui/app/index.js';
-	import type { CrafterMode } from '../../../stores/index.js';
+	import { useApp } from '$lib/components/ui/app/index.js';
+	import type { CrafterMode } from '$lib/stores/index.js';
 	import ThreeDotsIcon from '@lucide/svelte/icons/more-vertical';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
 	import ShareIcon from '@lucide/svelte/icons/share';

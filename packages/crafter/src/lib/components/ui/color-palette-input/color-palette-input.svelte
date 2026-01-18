@@ -19,7 +19,7 @@
 		resolveColorFromShades,
 		resolveForegroundColor
 	} from '@ujl-framework/types';
-	import { getBaseHexFromColorSet, formatOklch } from '../../../utils/colors/index.js';
+	import { getBaseHexFromColorSet, formatOklch } from '$lib/utils/colors/index.js';
 
 	type PreviewSample = {
 		lightBg: string;

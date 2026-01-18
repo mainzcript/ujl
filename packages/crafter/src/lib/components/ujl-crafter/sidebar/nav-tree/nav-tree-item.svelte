@@ -17,7 +17,7 @@
 		SidebarMenuSub,
 		SidebarMenuSubItem,
 		SidebarMenuSubButton
-	} from '../../../ui/sidebar-menu/index.js';
+	} from '$lib/components/ui/sidebar-menu/index.js';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeSlotGroup from './nav-tree-slot-group.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
@@ -29,11 +29,11 @@
 		getAllSlotEntries,
 		canAcceptDrop,
 		canNodeAcceptPaste
-	} from '../../../../utils/ujlc-tree.js';
+	} from '$lib/utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
 	import { cn } from '@ujl-framework/ui/utils';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
-	import { test, testId } from '../../../../utils/test-attrs.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { test, testId } from '$lib/utils/test-attrs.js';
 
 	let {
 		node,

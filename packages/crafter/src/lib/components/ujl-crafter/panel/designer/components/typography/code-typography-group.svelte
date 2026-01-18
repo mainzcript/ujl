@@ -7,7 +7,7 @@
 		FontCombobox,
 		NumberSliderWithInput,
 		FontWeightSlider
-	} from '../../../../../ui/index.js';
+	} from '$lib/components/ui/index.js';
 
 	let {
 		typography,

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Button, Text } from '@ujl-framework/ui';
 	import type { MediaMetadata } from '@ujl-framework/types';
-	import { logger } from '../../../utils/logger.js';
+	import { logger } from '$lib/utils/logger.js';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../../ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 	import UploadIcon from '@lucide/svelte/icons/upload';
 
 	let {

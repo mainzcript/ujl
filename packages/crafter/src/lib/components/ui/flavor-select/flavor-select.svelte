@@ -14,7 +14,7 @@
 	} from '@ujl-framework/ui';
 	import type { UJLTTypographyFlavor, UJLTColorPalette } from '@ujl-framework/types';
 	import { typographyFlavors } from '@ujl-framework/types';
-	import { formatOklch } from '../../../utils/colors/index.js';
+	import { formatOklch } from '$lib/utils/colors/index.js';
 
 	let {
 		id,

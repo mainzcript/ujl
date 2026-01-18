@@ -6,13 +6,13 @@ import {
 	createCrafterStore,
 	createMediaServiceFactory,
 	type CrafterStore
-} from '../../stores/index.js';
+} from '$lib/stores/index.js';
 import UJLCrafterSvelte from './ujl-crafter.svelte';
-import { logger } from '../../utils/logger.js';
+import { logger } from '$lib/utils/logger.js';
 
 // Import bundled CSS as string for Shadow DOM injection
 // This is pre-processed by Tailwind CLI before the Vite build
-import bundledStyles from '../../styles/_bundled.css?inline';
+import bundledStyles from '$lib/styles/_bundled.css?inline';
 
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };

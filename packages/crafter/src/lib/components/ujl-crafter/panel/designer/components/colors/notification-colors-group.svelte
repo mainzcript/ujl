@@ -6,7 +6,7 @@
 	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
-	import { ColorPaletteInput } from '../../../../../ui/index.js';
+	import { ColorPaletteInput } from '$lib/components/ui/index.js';
 
 	let {
 		palette,
