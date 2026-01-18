@@ -7,6 +7,7 @@
 		"dev": "pnpm run bundle-styles && vite",
 		"build": "pnpm run bundle-styles && vite build",
 		"bundle-styles": "tailwindcss -i src/lib/styles/bundle.css -o src/lib/styles/_bundled.css --minify",
+		"bundle-styles:watch": "tailwindcss -i src/lib/styles/bundle.css -o src/lib/styles/_bundled.css --watch",
 		"preview": "vite preview",
 		"prepack": "pnpm run build && publint",
 		"check": "svelte-check --tsconfig ./tsconfig.json",

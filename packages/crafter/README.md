@@ -149,6 +149,8 @@ pnpm run check    # Type check
 pnpm run test     # Run tests
 ```
 
+**CSS Hot Reload:** Due to Shadow DOM style injection, Tailwind CSS changes are not automatically detected. Run `pnpm run bundle-styles:watch` in a separate terminal for automatic CSS rebuilds during development.
+
 ## Related
 
 - [UJL Framework README](../../README.md)

@@ -97,7 +97,7 @@
 <div class="flex items-center justify-between py-2">
 	<div class="flex items-center gap-2">
 		<Select type="single" value={mode} onValueChange={handleModeChange}>
-			<SelectTrigger>
+			<SelectTrigger class="w-[150px]">
 				{#if mode === 'editor'}
 					<PencilRulerIcon />
 					<span>Editor</span>
