@@ -107,17 +107,15 @@
 
 /* Hover state for editable modules */
 .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover {
-	outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
-	outline-offset: 2px;
-	border-radius: var(--radius);
+	outline: 2px dashed oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
+	outline-offset: var(--spacing);
 	cursor: pointer;
 }
 
 /* Selected state for editable modules */
 .ujl-editor-mode [data-ujl-module-id].ujl-selected {
 	outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)));
-	outline-offset: 2px;
-	border-radius: var(--radius);
+	outline-offset: var(--spacing);
 }
 
 /* Dark mode: hover state */

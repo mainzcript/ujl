@@ -16,6 +16,7 @@
 		SidebarMenuSubButton,
 		SidebarMenuSub
 	} from '../../../ui/sidebar-menu/index.js';
+	import { cn } from '@ujl-framework/ui/utils';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { formatSlotName } from '../../../../utils/ujlc-tree.js';
@@ -111,11 +112,13 @@
 						<div
 							role="button"
 							tabindex="0"
-							class="group/slot flex w-full items-center justify-between rounded-md {isDropTarget
-								? 'drop-target-slot'
-								: ''} {isDragging ? 'opacity-50' : ''} {isSelected
-								? 'slot-selected text-primary'
-								: ''}"
+							class={cn(
+								'group/slot flex w-full items-center justify-between rounded-md',
+								isDropTarget &&
+									'bg-accent/15 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed',
+								isDragging && 'opacity-50',
+								isSelected && 'bg-foreground/5 text-flavor-foreground-accent'
+							)}
 							draggable="true"
 							ondragstart={(e) => {
 								onSlotDragStart(e, parentNode.meta.id, slotName);
@@ -193,7 +196,7 @@
 							class="px-4 py-2 text-xs text-muted-foreground italic"
 							{...testId('slot-empty-state')}
 						>
-							Empty slot - drop or add components here
+							Empty slot - drop or add modules here
 						</div>
 					</SidebarMenuSubItem>
 				{:else}
@@ -237,20 +240,3 @@
 		</CollapsibleContent>
 	</Collapsible>
 </SidebarMenuSubItem>
-
-<style>
-	.slot-selected {
-		background-color: color-mix(
-			in srgb,
-			oklch(var(--flavor)) 90%,
-			oklch(var(--flavor-foreground)) 10%
-		);
-		color: oklch(var(--primary));
-	}
-
-	.drop-target-slot {
-		background-color: color-mix(in srgb, hsl(var(--primary)) 15%, transparent 85%);
-		outline: 1px dashed oklch(var(--flavor-foreground));
-		outline-offset: -2px;
-	}
-</style>

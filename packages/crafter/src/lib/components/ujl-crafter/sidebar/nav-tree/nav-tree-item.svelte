@@ -31,6 +31,7 @@
 		canNodeAcceptPaste
 	} from '../../../../utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
+	import { cn } from '@ujl-framework/ui/utils';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 	import { test, testId } from '../../../../utils/test-attrs.js';
 
@@ -242,7 +243,7 @@
 		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
 			{#if showDropBefore}
 				<div
-					class="drop-indicator drop-indicator-before"
+					class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
 					{...testId('drop-indicator-before')}
 				></div>
 			{/if}
@@ -255,9 +256,13 @@
 									role="button"
 									tabindex="0"
 									data-tree-node-id={node.meta.id}
-									class="group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md {isSelected
-										? 'node-selected text-primary'
-										: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
+									class={cn(
+										'group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md',
+										isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
+										isDragging && 'opacity-50',
+										showDropInto &&
+											'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+									)}
 									draggable={!isRootNode}
 									ondragstart={isRootNode ? undefined : (e) => onDragStart(e, node.meta.id)}
 									ondragover={(e) => onDragOver(e, node.meta.id)}
@@ -312,7 +317,10 @@
 				</CollapsibleContent>
 			</Collapsible>
 			{#if showDropAfter}
-				<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
+				<div
+					class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+					{...testId('drop-indicator-after')}
+				></div>
 			{/if}
 		</SidebarMenuItem>
 	{:else}
@@ -320,7 +328,7 @@
 		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
 			{#if showDropBefore}
 				<div
-					class="drop-indicator drop-indicator-before"
+					class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
 					{...testId('drop-indicator-before')}
 				></div>
 			{/if}
@@ -331,11 +339,14 @@
 						{...props}
 						tabindex="0"
 						data-tree-node-id={node.meta.id}
-						class="group/root {props?.class || ''} {isSelected
-							? 'selected text-primary'
-							: ''} {isDragging ? 'opacity-50' : ''} {showDropInto
-							? 'drop-target'
-							: ''} flex h-full w-full items-center justify-between rounded-md"
+						class={cn(
+							'group/root flex h-full w-full items-center justify-between rounded-md',
+							props?.class as string,
+							isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
+							isDragging && 'opacity-50',
+							showDropInto &&
+								'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+						)}
 						onclick={(e) => {
 							// Only trigger selection if click is not on dropdown button
 							if (
@@ -383,7 +394,10 @@
 				{/snippet}
 			</SidebarMenuButton>
 			{#if showDropAfter}
-				<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
+				<div
+					class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+					{...testId('drop-indicator-after')}
+				></div>
 			{/if}
 		</SidebarMenuItem>
 	{/if}
@@ -391,7 +405,10 @@
 	<!-- Nested level node with children or empty slots -->
 	<div class="relative">
 		{#if showDropBefore}
-			<div class="drop-indicator drop-indicator-before" {...testId('drop-indicator-before')}></div>
+			<div
+				class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+				{...testId('drop-indicator-before')}
+			></div>
 		{/if}
 		<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
 			<CollapsibleTrigger class="group">
@@ -402,9 +419,13 @@
 								role="button"
 								tabindex="0"
 								data-tree-node-id={node.meta.id}
-								class="group/dropdown flex h-full w-full items-center justify-between rounded-md {isSelected
-									? 'node-selected text-primary'
-									: ''} {isDragging ? 'opacity-50' : ''} {showDropInto ? 'drop-target' : ''}"
+								class={cn(
+									'group/dropdown flex h-full w-full items-center justify-between rounded-md',
+									isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
+									isDragging && 'opacity-50',
+									showDropInto &&
+										'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+								)}
 								draggable="true"
 								ondragstart={(e) => onDragStart(e, node.meta.id)}
 								ondragover={(e) => onDragOver(e, node.meta.id)}
@@ -459,23 +480,33 @@
 			</CollapsibleContent>
 		</Collapsible>
 		{#if showDropAfter}
-			<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
+			<div
+				class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+				{...testId('drop-indicator-after')}
+			></div>
 		{/if}
 	</div>
 {:else}
 	<!-- Nested level node without children (leaf node) -->
 	<div class="relative">
 		{#if showDropBefore}
-			<div class="drop-indicator drop-indicator-before" {...testId('drop-indicator-before')}></div>
+			<div
+				class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+				{...testId('drop-indicator-before')}
+			></div>
 		{/if}
 		<SidebarMenuSubButton class="p-0">
 			<div
 				role="button"
 				tabindex="0"
 				data-tree-node-id={node.meta.id}
-				class="group/node flex h-full w-full items-center justify-between rounded-md ps-2 {showDropInto
-					? 'drop-target'
-					: ''} {isSelected ? 'node-selected text-primary' : ''} {isDragging ? 'opacity-50' : ''}"
+				class={cn(
+					'group/node flex h-full w-full items-center justify-between rounded-md ps-2',
+					showDropInto &&
+						'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed',
+					isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
+					isDragging && 'opacity-50'
+				)}
 				draggable="true"
 				ondragstart={(e) => onDragStart(e, node.meta.id)}
 				ondragover={(e) => onDragOver(e, node.meta.id)}
@@ -530,44 +561,10 @@
 			</div>
 		</SidebarMenuSubButton>
 		{#if showDropAfter}
-			<div class="drop-indicator drop-indicator-after" {...testId('drop-indicator-after')}></div>
+			<div
+				class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
+				{...testId('drop-indicator-after')}
+			></div>
 		{/if}
 	</div>
 {/if}
-
-<style>
-	.node-selected {
-		background-color: color-mix(
-			in srgb,
-			oklch(var(--flavor)) 90%,
-			oklch(var(--flavor-foreground)) 10%
-		);
-		color: oklch(var(--primary));
-	}
-
-	.drop-target {
-		background-color: color-mix(in srgb, hsl(var(--primary)) 20%, transparent 80%);
-		outline: 1px dashed oklch(var(--flavor-foreground));
-		outline-offset: -2px;
-	}
-
-	.drop-indicator {
-		position: absolute;
-		content: '';
-		left: 0;
-		right: 0;
-		height: 3px;
-		background-color: oklch(var(--flavor-foreground));
-		border-radius: 2px;
-		pointer-events: none;
-		z-index: 50;
-	}
-
-	.drop-indicator-before {
-		top: -2px;
-	}
-
-	.drop-indicator-after {
-		bottom: -2px;
-	}
-</style>

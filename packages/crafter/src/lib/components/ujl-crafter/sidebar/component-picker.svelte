@@ -86,10 +86,10 @@
 	}
 </script>
 
-<CommandDialog bind:open title="Add Component" description="Search and select a component to add">
-	<CommandInput placeholder="Search components..." />
+<CommandDialog bind:open title="Add Module" description="Search and select a module to add">
+	<CommandInput placeholder="Search modules..." />
 	<CommandList>
-		<CommandEmpty>No components found.</CommandEmpty>
+		<CommandEmpty>No modules found.</CommandEmpty>
 		{#each sortedCategoryKeys as category, index (category)}
 			{@const categoryModules = groupedModules()[category as ComponentCategory]}
 			{@const typedCategory = category as ComponentCategory}

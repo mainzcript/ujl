@@ -126,9 +126,9 @@
 					<ShareIcon class="size-8 text-muted-foreground" />
 				</div>
 				<div class="space-y-1">
-					<p class="text-sm font-medium">No component selected</p>
+					<p class="text-sm font-medium">No module selected</p>
 					<p class="text-xs text-muted-foreground">
-						Select a component in the tree or preview to edit its properties
+						Select a module in the tree or preview to edit its properties
 					</p>
 				</div>
 			</div>
@@ -142,7 +142,7 @@
 				<div class="space-y-1">
 					<p class="text-sm font-medium">Slot selected</p>
 					<p class="text-xs text-muted-foreground">
-						Slots don't have editable properties. Select a component instead.
+						Slots don't have editable properties. Select a module instead.
 					</p>
 				</div>
 			</div>
@@ -156,9 +156,9 @@
 					<ShareIcon class="size-8 text-destructive" />
 				</div>
 				<div class="space-y-1">
-					<p class="text-sm font-medium text-destructive">Component not found</p>
+					<p class="text-sm font-medium text-destructive">Module not found</p>
 					<p class="text-xs text-muted-foreground">
-						The selected component could not be found in the document tree.
+						The selected module could not be found in the document tree.
 					</p>
 				</div>
 			</div>
@@ -196,7 +196,7 @@
 					</div>
 					<div class="w-full p-4 text-sm">
 						<p class="text-xs text-muted-foreground italic">
-							This component type has no editable properties.
+							This module type has no editable properties.
 						</p>
 					</div>
 				</div>
