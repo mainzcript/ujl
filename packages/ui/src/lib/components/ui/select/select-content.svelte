@@ -19,9 +19,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<SelectPrimitive.Portal {...portalProps}>
+<SelectPrimitive.Portal to={portalTarget} {...portalProps}>
 	<SelectPrimitive.Content
 		bind:ref
 		{sideOffset}

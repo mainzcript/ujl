@@ -8,9 +8,14 @@
 	} from '@ujl-framework/types';
 	import { Composer } from '@ujl-framework/core';
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
-	import '@ujl-framework/adapter-svelte/styles';
+	// Note: Adapter styles are now bundled via Shadow DOM injection (see bundle.css)
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
+	import {
+		CRAFTER_CONTEXT,
+		SHADOW_ROOT_CONTEXT,
+		type CrafterContext,
+		type ShadowRootContext
+	} from '../context.js';
 	import { logger } from '../../../utils/logger.js';
 	import { createScopedSelector } from '../../../utils/scoped-dom.js';
 	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
@@ -46,9 +51,11 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+	const shadowRootContext = getContext<ShadowRootContext | undefined>(SHADOW_ROOT_CONTEXT);
 
 	// Scoped DOM queries - ensures multi-instance isolation
-	const dom = createScopedSelector(crafter.instanceId);
+	// Uses Shadow Root when available for proper Shadow DOM support
+	const dom = createScopedSelector(crafter.instanceId, shadowRootContext?.value);
 
 	const selectedNodeId = $derived.by(() => {
 		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
@@ -240,41 +247,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	/* Only show hover/selection styles in editor mode */
-	/* Use editor theme accent color for selection (radius comes from preview theme) */
-	:global(.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover) {
-		outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
-		outline-offset: 2px;
-		border-radius: var(--radius);
-		cursor: pointer;
-	}
-
-	:global(.ujl-editor-mode [data-ujl-module-id].ujl-selected) {
-		outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)));
-		outline-offset: 2px;
-		border-radius: var(--radius);
-	}
-
-	/* Dark mode support for editor theme selection colors */
-	:global(.dark .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover) {
-		outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)) / 0.7);
-	}
-
-	:global(.dark .ujl-editor-mode [data-ujl-module-id].ujl-selected) {
-		outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)));
-	}
-
-	/* Explicitly remove outline when not selected to prevent lingering styles */
-	:global(.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected)) {
-		outline: none;
-	}
-
-	/* Prevent nested hover styles */
-	:global(
-		.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id]:hover)
-	) {
-		outline: none !important;
-	}
-</style>

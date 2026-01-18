@@ -44,9 +44,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<SheetPrimitive.Portal {...portalProps}>
+<SheetPrimitive.Portal to={portalTarget} {...portalProps}>
 	<SheetOverlay />
 	<SheetPrimitive.Content
 		bind:ref

@@ -17,9 +17,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<HoverCardPrimitive.Portal {...portalProps}>
+<HoverCardPrimitive.Portal to={portalTarget} {...portalProps}>
 	<HoverCardPrimitive.Content
 		bind:ref
 		data-slot="hover-card-content"

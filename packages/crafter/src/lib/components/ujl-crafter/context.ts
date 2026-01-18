@@ -41,6 +41,19 @@ export const CRAFTER_CONTEXT = Symbol.for('ujl:crafter-context');
  */
 export const COMPOSER_CONTEXT = Symbol.for('ujl:composer-context');
 
+/**
+ * Symbol for Shadow Root context access.
+ * Used to provide the Shadow Root reference to child components
+ * for scoped DOM queries within the Shadow DOM.
+ */
+export const SHADOW_ROOT_CONTEXT = Symbol.for('ujl:shadow-root-context');
+
+/**
+ * Context type for Shadow Root access.
+ * Uses a getter to satisfy Svelte 5's reactivity warnings.
+ */
+export type ShadowRootContext = { readonly value: ShadowRoot | undefined };
+
 // ============================================
 // TYPE GUARDS
 // ============================================
@@ -68,6 +81,7 @@ export function isCrafterContext(value: unknown): value is CrafterContext {
 		'selectedNodeId' in value &&
 		'operations' in value &&
 		'rootSlot' in value &&
+		'testMode' in value &&
 		'setSelectedNodeId' in value &&
 		typeof (value as CrafterContext).setSelectedNodeId === 'function'
 	);

@@ -16,7 +16,11 @@
 	 */
 	const DISCLAIMER_STORAGE_KEY = 'ujl-crafter-disclaimer-dismissed';
 	let showDisclaimer = $state(false);
-	let crafterContainer: HTMLDivElement;
+
+	// Container reference (bind:this target)
+	let crafterContainer: HTMLDivElement | undefined = $state();
+
+	// Crafter instance
 	let crafter: UJLCrafter | null = null;
 
 	onMount(() => {
@@ -26,7 +30,7 @@
 			showDisclaimer = true;
 		}
 
-		// Initialize Crafter after container is mounted
+		// Initialize Crafter
 		if (crafterContainer) {
 			crafter = new UJLCrafter({
 				target: crafterContainer
@@ -63,4 +67,4 @@
 	</DialogContent>
 </Dialog>
 
-<div bind:this={crafterContainer} class="h-full w-full"></div>
+<div bind:this={crafterContainer} class="h-screen w-screen"></div>

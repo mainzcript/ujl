@@ -1,11 +1,11 @@
 import { getContext, hasContext, setContext } from 'svelte';
 
-const UJL_THEME_CONTEXT = Symbol('UJL_THEME_CONTEXT');
+const UJL_THEME_CONTEXT = Symbol.for('ujl:theme-context');
 
 /**
  * Context type for UJL theme system.
  * Contains the unique theme ID used for scoping CSS variables, a computed isDark boolean,
- * and a flag indicating whether this theme instance owns the Toaster.
+ * a flag indicating whether this theme instance owns the Toaster, and an optional portal container.
  * Uses a getter function for reactivity (Svelte 5 best practice).
  */
 export type UjlThemeContext = {
@@ -13,6 +13,8 @@ export type UjlThemeContext = {
 	get isDark(): boolean;
 	/** True if this theme instance renders the Toaster (prevents duplicate Toasters in nested themes) */
 	ownsToaster: boolean;
+	/** Container element for portals (Shadow DOM support). When set, overlay components render here instead of document.body */
+	get portalContainer(): HTMLElement | undefined;
 };
 
 /**

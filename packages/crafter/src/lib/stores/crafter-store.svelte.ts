@@ -89,6 +89,8 @@ export interface CrafterStoreDeps {
 	composer: Composer;
 	/** Factory function to create media services */
 	createMediaService: MediaServiceFactory;
+	/** Enable data-testid attributes for E2E testing (default: false) */
+	testMode?: boolean;
 }
 
 // ============================================
@@ -131,7 +133,13 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  * ```
  */
 export function createCrafterStore(deps: CrafterStoreDeps) {
-	const { initialUjlcDocument, initialUjltDocument, composer, createMediaService } = deps;
+	const {
+		initialUjlcDocument,
+		initialUjltDocument,
+		composer,
+		createMediaService,
+		testMode = false
+	} = deps;
 
 	// ============================================
 	// INSTANCE IDENTITY (for DOM scoping)
@@ -321,6 +329,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	return {
 		// Instance Identity
 		instanceId,
+
+		// Configuration (readonly)
+		testMode,
 
 		// State (readonly via getters - encapsulation)
 		get ujlcDocument() {

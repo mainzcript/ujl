@@ -13,6 +13,7 @@
 		mode: modeProp = 'system',
 		class: className = '',
 		children,
+		portalContainer,
 		...restProps
 	}: {
 		tokens?: UJLTTokenSet;
@@ -20,6 +21,8 @@
 		class?: string;
 		children: import('svelte').Snippet;
 		as?: keyof HTMLElementTagNameMap;
+		/** Container element for portals (Shadow DOM support). When set, overlay components render here instead of document.body */
+		portalContainer?: HTMLElement;
 	} & HTMLAttributes<HTMLElement> = $props();
 
 	const cssVars = $derived(tokens ? generateThemeCSSVariables(tokens) : {});
@@ -41,7 +44,10 @@
 		get isDark() {
 			return isDark;
 		},
-		ownsToaster
+		ownsToaster,
+		get portalContainer() {
+			return portalContainer;
+		}
 	});
 
 	const themeCSS = $derived(

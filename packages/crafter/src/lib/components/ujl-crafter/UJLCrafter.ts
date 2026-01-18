@@ -10,6 +10,10 @@ import {
 import UJLCrafterSvelte from './ujl-crafter.svelte';
 import { logger } from '../../utils/logger.js';
 
+// Import bundled CSS as string for Shadow DOM injection
+// This is pre-processed by Tailwind CLI before the Vite build
+import bundledStyles from '../../styles/_bundled.css?inline';
+
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
@@ -55,6 +59,8 @@ export interface UJLCrafterOptions {
 	editorTheme?: UJLTDocument;
 	/** Media library configuration (default: inline storage) */
 	mediaLibrary?: MediaLibraryOptions;
+	/** Enable data-testid attributes for E2E testing (default: false) */
+	testMode?: boolean;
 }
 
 // ============================================
@@ -86,6 +92,7 @@ export interface UJLCrafterOptions {
  */
 export class UJLCrafter {
 	private target: HTMLElement;
+	private shadowRoot: ShadowRoot | null = null;
 	private store: CrafterStore;
 	private composer: Composer;
 	private editorTheme: UJLTDocument;
@@ -132,7 +139,8 @@ export class UJLCrafter {
 				? validateUJLTDocument(options.theme)
 				: this.getDefaultTheme(),
 			composer: this.composer,
-			createMediaService: mediaServiceFactory
+			createMediaService: mediaServiceFactory,
+			testMode: options.testMode ?? false
 		});
 
 		this.mount();
@@ -154,13 +162,22 @@ export class UJLCrafter {
 	}
 
 	private mount(): void {
-		this.target.innerHTML = '';
+		// Create Shadow DOM for style isolation
+		this.shadowRoot = this.target.attachShadow({ mode: 'open' });
+
+		// Inject bundled styles into Shadow DOM
+		const styleElement = document.createElement('style');
+		styleElement.textContent = bundledStyles;
+		this.shadowRoot.appendChild(styleElement);
+
+		// Mount Svelte component into Shadow Root
 		this.component = mount(UJLCrafterSvelte, {
-			target: this.target,
+			target: this.shadowRoot,
 			props: {
 				store: this.store,
 				composer: this.composer,
-				editorTheme: this.editorTheme
+				editorTheme: this.editorTheme,
+				shadowRoot: this.shadowRoot
 			}
 		});
 	}
@@ -269,7 +286,11 @@ export class UJLCrafter {
 			unmount(this.component);
 			this.component = null;
 		}
-		this.target.innerHTML = '';
+		// Clean up Shadow DOM contents
+		if (this.shadowRoot) {
+			this.shadowRoot.innerHTML = '';
+			this.shadowRoot = null;
+		}
 		this.documentChangeCallbacks.clear();
 		this.themeChangeCallbacks.clear();
 		this.notificationCallbacks.clear();

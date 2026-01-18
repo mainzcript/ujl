@@ -17,9 +17,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<DrawerPrimitive.Portal {...portalProps}>
+<DrawerPrimitive.Portal to={portalTarget} {...portalProps}>
 	<DrawerOverlay />
 	<DrawerPrimitive.Content
 		bind:ref

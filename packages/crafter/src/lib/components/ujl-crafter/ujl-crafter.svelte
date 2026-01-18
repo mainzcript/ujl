@@ -26,7 +26,7 @@
 		type CrafterStoreDeps
 	} from '../../stores/index.js';
 
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT } from './context.js';
+	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, SHADOW_ROOT_CONTEXT } from './context.js';
 
 	import Header from './header/header.svelte';
 	import Editor from './sidebar/editor.svelte';
@@ -56,6 +56,8 @@
 		initialTheme?: UJLTDocument;
 		/** Editor theme document (optional, defaults to default theme) - used for Crafter UI styling */
 		editorTheme?: UJLTDocument;
+		/** Shadow Root reference for scoped DOM queries (from UJLCrafter class) */
+		shadowRoot?: ShadowRoot;
 	}
 
 	const {
@@ -63,7 +65,8 @@
 		composer: externalComposer,
 		initialContent,
 		initialTheme,
-		editorTheme
+		editorTheme,
+		shadowRoot
 	}: Props = $props();
 
 	// ============================================
@@ -113,6 +116,20 @@
 
 	setContext(CRAFTER_CONTEXT, store);
 	setContext(COMPOSER_CONTEXT, composer);
+	// Use getter to avoid Svelte warning about capturing initial value
+	setContext(SHADOW_ROOT_CONTEXT, {
+		get value() {
+			return shadowRoot;
+		}
+	});
+
+	// ============================================
+	// PORTAL CONTAINER
+	// ============================================
+
+	// Portal container for overlay components (dropdowns, dialogs, etc.)
+	// This ensures overlays render inside Shadow DOM and inherit styles
+	let portalContainerRef: HTMLDivElement | undefined = $state();
 
 	// ============================================
 	// EDITOR THEME
@@ -196,7 +213,12 @@
 	}
 </script>
 
-<UJLTheme tokens={editorTokenSet} class="h-screen" data-crafter-instance={store.instanceId}>
+<UJLTheme
+	tokens={editorTokenSet}
+	class="h-screen"
+	data-crafter-instance={store.instanceId}
+	portalContainer={portalContainerRef}
+>
 	<App>
 		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects
@@ -251,4 +273,8 @@
 			{/if}
 		</AppPanel>
 	</App>
+
+	<!-- Portal container for overlay components (dropdowns, dialogs, tooltips, etc.) -->
+	<!-- Must be inside UJLTheme to inherit theme styles and CSS variables -->
+	<div bind:this={portalContainerRef} data-ujl-portal-container class="contents"></div>
 </UJLTheme>

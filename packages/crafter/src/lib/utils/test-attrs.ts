@@ -1,8 +1,8 @@
 /**
  * Utility functions for conditional test attributes.
  *
- * Note: Test mode is currently disabled. The test infrastructure will be
- * rebuilt after the framework-agnostic refactoring is complete.
+ * Test mode is controlled via UJLCrafterOptions.testMode and read from the Crafter context.
+ * When enabled, data-testid attributes are rendered for E2E testing.
  *
  * Usage:
  * ```svelte
@@ -11,8 +11,22 @@
  * ```
  */
 
-// Test mode disabled - will be rebuilt with new test infrastructure
-const isTestMode = false;
+import { getContext } from 'svelte';
+import { CRAFTER_CONTEXT, type CrafterContext } from '../components/ujl-crafter/context.js';
+
+/**
+ * Gets the current test mode from the Crafter context.
+ * Returns false if called outside of a Crafter context (e.g., in unit tests).
+ */
+function getTestMode(): boolean {
+	try {
+		const context = getContext<CrafterContext | undefined>(CRAFTER_CONTEXT);
+		return context?.testMode ?? false;
+	} catch {
+		// getContext throws if called outside of component initialization
+		return false;
+	}
+}
 
 /**
  * Returns data-testid attribute only in test mode
@@ -25,7 +39,7 @@ const isTestMode = false;
  * ```
  */
 export function testId(id: string): Record<string, string> {
-	if (!isTestMode) return {};
+	if (!getTestMode()) return {};
 	return { 'data-testid': id };
 }
 
@@ -42,7 +56,7 @@ export function testId(id: string): Record<string, string> {
 export function testAttrs(
 	attrs: Record<string, string | boolean | number>
 ): Record<string, string> {
-	if (!isTestMode) return {};
+	if (!getTestMode()) return {};
 	return Object.fromEntries(
 		Object.entries(attrs).map(([key, value]) => [`data-${key}`, String(value)])
 	);
@@ -63,12 +77,23 @@ export function test(
 	id: string,
 	attrs?: Record<string, string | boolean | number>
 ): Record<string, string> {
-	if (!isTestMode) return {};
+	if (!getTestMode()) return {};
 
 	return {
 		'data-testid': id,
-		...(attrs ? testAttrs(attrs) : {})
+		...(attrs ? testAttrsInternal(attrs) : {})
 	};
+}
+
+/**
+ * Internal helper that doesn't check test mode (used by test() to avoid double-checking)
+ */
+function testAttrsInternal(
+	attrs: Record<string, string | boolean | number>
+): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(attrs).map(([key, value]) => [`data-${key}`, String(value)])
+	);
 }
 
 /**

@@ -11,3 +11,6 @@
 @import '@fontsource-variable/jetbrains-mono';
 
 @import '@ujl-framework/ui/styles';
+
+/* Scan Crafter components for Tailwind classes */
+@source '../lib/**/*.{svelte,js,ts}';
