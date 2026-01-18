@@ -143,13 +143,15 @@ interface UJLCrafterOptions {
 ## Development
 
 ```bash
-pnpm run dev      # Development server
-pnpm run build    # Build
-pnpm run check    # Type check
+pnpm run dev      # Development server (Tailwind CSS + Vite in parallel)
+pnpm run build    # Production build
+pnpm run check    # Type check (TypeScript + Svelte)
+pnpm run lint     # Check formatting and code quality
+pnpm run format   # Auto-fix formatting
 pnpm run test     # Run tests
 ```
 
-**CSS Hot Reload:** Due to Shadow DOM style injection, Tailwind CSS changes are not automatically detected. Run `pnpm run bundle-styles:watch` in a separate terminal for automatic CSS rebuilds during development.
+The `dev` command uses `concurrently` to run Tailwind CSS watch and Vite in parallel.
 
 ## Related
 
