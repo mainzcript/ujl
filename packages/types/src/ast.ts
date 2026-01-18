@@ -2,12 +2,31 @@ import type { UJLImageData } from "./media.js";
 import type { ProseMirrorDocument } from "./prosemirror.js";
 import type { UJLTTokenSet } from "./ujl-theme.js";
 
+/**
+ * Metadata for AST nodes
+ * Contains optional module ID indicating which module a node belongs to
+ */
+export type UJLAbstractNodeMeta = {
+	/**
+	 * Module ID from the UJLC document
+	 * Set for all AST nodes (except root wrapper) to indicate which module they belong to.
+	 */
+	moduleId?: string;
+	/**
+	 * Indicates if this node is the root node of a module (editable).
+	 * Only true for nodes that directly represent a module from the UJLC document.
+	 * Child nodes and layout wrappers have this set to false or undefined.
+	 */
+	isModuleRoot?: boolean;
+};
+
 type UJLAbstractWrapperNode = {
 	type: "wrapper";
 	props: {
 		children?: UJLAbstractNode[];
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractRawHtmlNode = {
@@ -16,6 +35,7 @@ type UJLAbstractRawHtmlNode = {
 		content: string;
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractErrorNode = {
@@ -24,6 +44,7 @@ type UJLAbstractErrorNode = {
 		message: string;
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractContainerNode = {
@@ -32,6 +53,7 @@ type UJLAbstractContainerNode = {
 		children?: UJLAbstractNode[];
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractCardNode = {
@@ -42,6 +64,7 @@ type UJLAbstractCardNode = {
 		children?: UJLAbstractNode[];
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractTextNode = {
@@ -50,6 +73,7 @@ type UJLAbstractTextNode = {
 		content: ProseMirrorDocument;
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractButtonNode = {
@@ -59,6 +83,7 @@ type UJLAbstractButtonNode = {
 		href: string;
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractGridNode = {
@@ -67,6 +92,7 @@ type UJLAbstractGridNode = {
 		children?: UJLAbstractGridItemNode[];
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractGridItemNode = {
@@ -75,6 +101,7 @@ type UJLAbstractGridItemNode = {
 		children?: UJLAbstractNode[];
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractCallToActionModuleNode = {
@@ -88,6 +115,7 @@ type UJLAbstractCallToActionModuleNode = {
 		};
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 type UJLAbstractImageNode = {
@@ -97,6 +125,7 @@ type UJLAbstractImageNode = {
 		alt: string; // From module field
 	};
 	id: string;
+	meta?: UJLAbstractNodeMeta;
 };
 
 /**

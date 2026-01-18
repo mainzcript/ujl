@@ -10,7 +10,6 @@ import {
 import UJLCrafterSvelte from './ujl-crafter.svelte';
 import { logger } from '$lib/utils/logger.js';
 
-// Default documents (same as component)
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
@@ -35,8 +34,10 @@ export interface UJLCrafterOptions {
 	target: string | HTMLElement;
 	/** Initial content document (optional) */
 	document?: UJLCDocument;
-	/** Initial theme document (optional) */
+	/** Initial theme document (optional) - used for preview content */
 	theme?: UJLTDocument;
+	/** Editor theme document (optional) - used for Crafter UI styling */
+	editorTheme?: UJLTDocument;
 }
 
 // ============================================
@@ -70,6 +71,7 @@ export class UJLCrafter {
 	private target: HTMLElement;
 	private store: CrafterStore;
 	private composer: Composer;
+	private editorTheme: UJLTDocument;
 	private component: ReturnType<typeof mount> | null = null;
 	private documentChangeCallbacks = new Set<DocumentChangeCallback>();
 	private themeChangeCallbacks = new Set<ThemeChangeCallback>();
@@ -78,6 +80,10 @@ export class UJLCrafter {
 	constructor(options: UJLCrafterOptions) {
 		this.target = this.resolveTarget(options.target);
 		this.composer = new Composer();
+
+		this.editorTheme = options.editorTheme
+			? validateUJLTDocument(options.editorTheme)
+			: this.getDefaultTheme();
 
 		const mediaServiceFactory = createMediaServiceFactory({
 			showToasts: false,
@@ -122,7 +128,8 @@ export class UJLCrafter {
 			target: this.target,
 			props: {
 				store: this.store,
-				composer: this.composer
+				composer: this.composer,
+				editorTheme: this.editorTheme
 			}
 		});
 	}

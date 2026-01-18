@@ -21,8 +21,7 @@ import AdapterRoot from './components/AdapterRoot.svelte';
  * const mounted = svelteAdapter(ast, tokenSet, {
  *   target: '#container',
  *   mode: 'system',
- *   showMetadata: true,
- *   eventCallback: (moduleId) => console.log('Clicked:', moduleId)
+ *   showMetadata: true
  * });
  * await mounted.unmount();
  * ```
@@ -55,8 +54,7 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 			node,
 			tokenSet,
 			mode: options.mode,
-			showMetadata: options.showMetadata ?? false,
-			eventCallback: options.eventCallback
+			showMetadata: options.showMetadata ?? false
 		}
 	});
 

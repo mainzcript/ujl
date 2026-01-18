@@ -12,14 +12,13 @@
 -->
 <script lang="ts">
 	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '$lib/components/ui/app';
-	import { Badge } from '@ujl-framework/ui';
+	import { Badge, UJLTheme } from '@ujl-framework/ui';
 	import { setContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 	import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
 	import { Composer } from '@ujl-framework/core';
 
-	// Import from stores
 	import {
 		createCrafterStore,
 		createMediaServiceFactory,
@@ -27,10 +26,8 @@
 		type CrafterStoreDeps
 	} from '$lib/stores/index.js';
 
-	// Context keys (unified namespace)
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT } from './context.js';
 
-	// Child components
 	import Header from './header/header.svelte';
 	import Editor from './sidebar/editor.svelte';
 	import Preview from './canvas/preview.svelte';
@@ -38,11 +35,9 @@
 	import DesignerPanel from './panel/designer-panel.svelte';
 	import CrafterEffects from './crafter-effects.svelte';
 
-	// Default documents
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
-	// Utils
 	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.js';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -59,29 +54,29 @@
 		initialContent?: UJLCDocument;
 		/** Initial theme document (optional, defaults to default theme, only if no external store) */
 		initialTheme?: UJLTDocument;
+		/** Editor theme document (optional, defaults to default theme) - used for Crafter UI styling */
+		editorTheme?: UJLTDocument;
 	}
 
 	const {
 		store: externalStore,
 		composer: externalComposer,
 		initialContent,
-		initialTheme
+		initialTheme,
+		editorTheme
 	}: Props = $props();
 
 	// ============================================
 	// STORE CREATION
 	// ============================================
 
-	// Store and composer: external (from class) or internal (for direct Svelte usage)
 	const { store, composer } = (() => {
 		if (externalStore) {
-			// External store: use provided store and composer
 			return {
 				store: externalStore,
 				composer: externalComposer ?? new Composer()
 			};
 		} else {
-			// Internal store: create everything new
 			// Capture initial props in a closure - we intentionally don't react to prop changes
 			const { validatedContent, validatedTheme } = (() => {
 				const content = initialContent;
@@ -118,6 +113,17 @@
 
 	setContext(CRAFTER_CONTEXT, store);
 	setContext(COMPOSER_CONTEXT, composer);
+
+	// ============================================
+	// EDITOR THEME
+	// ============================================
+
+	const editorTokenSet = $derived(
+		(editorTheme
+			? validateUJLTDocument(editorTheme)
+			: validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
+		).ujlt.tokens
+	);
 
 	// ============================================
 	// IMPORT / EXPORT HANDLERS
@@ -190,56 +196,59 @@
 	}
 </script>
 
-<App>
-	<!-- Panel-Auto-Open and Close Callback Logic -->
-	<CrafterEffects
-		mode={store.mode}
-		setSelectedNodeId={store.setSelectedNodeId}
-		selectedNodeId={store.selectedNodeId}
-	/>
-
-	<AppLogo>
-		<Badge>UJL</Badge>
-	</AppLogo>
-
-	<AppHeader>
-		<Header
+<UJLTheme tokens={editorTokenSet} class="h-screen">
+	<App>
+		<!-- Panel-Auto-Open and Close Callback Logic -->
+		<CrafterEffects
 			mode={store.mode}
-			onModeChange={handleModeChange}
-			viewportType={store.viewportType}
-			onViewportTypeChange={handleViewportTypeChange}
-			onSave={handleSave}
-			onImportTheme={handleImportTheme}
-			onImportContent={handleImportContent}
-			onExportTheme={handleExportTheme}
-			onExportContent={handleExportContent}
+			setSelectedNodeId={store.setSelectedNodeId}
+			selectedNodeId={store.selectedNodeId}
 		/>
-	</AppHeader>
 
-	<AppSidebar>
-		<Editor rootSlot={store.rootSlot} />
-	</AppSidebar>
+		<AppLogo>
+			<Badge>UJL</Badge>
+		</AppLogo>
 
-	<AppCanvas>
-		<div class="h-full">
-			<div
-				class="mx-auto min-w-[375px] duration-300"
-				style={store.viewportSize ? `width: ${store.viewportSize}px;` : 'width: 100%;'}
-			>
-				<Preview
-					ujlcDocument={store.ujlcDocument}
-					ujltDocument={store.ujltDocument}
-					crafterMode={store.mode}
-				/>
+		<AppHeader>
+			<Header
+				mode={store.mode}
+				onModeChange={handleModeChange}
+				viewportType={store.viewportType}
+				onViewportTypeChange={handleViewportTypeChange}
+				onSave={handleSave}
+				onImportTheme={handleImportTheme}
+				onImportContent={handleImportContent}
+				onExportTheme={handleExportTheme}
+				onExportContent={handleExportContent}
+			/>
+		</AppHeader>
+
+		<AppSidebar>
+			<Editor rootSlot={store.rootSlot} />
+		</AppSidebar>
+
+		<AppCanvas>
+			<div class="h-full">
+				<div
+					class="mx-auto min-w-[375px] duration-300"
+					style={store.viewportSize ? `width: ${store.viewportSize}px;` : 'width: 100%;'}
+				>
+					<Preview
+						ujlcDocument={store.ujlcDocument}
+						ujltDocument={store.ujltDocument}
+						crafterMode={store.mode}
+						{editorTokenSet}
+					/>
+				</div>
 			</div>
-		</div>
-	</AppCanvas>
+		</AppCanvas>
 
-	<AppPanel>
-		{#if store.mode === 'editor'}
-			<PropertiesPanel />
-		{:else}
-			<DesignerPanel tokens={store.tokens} />
-		{/if}
-	</AppPanel>
-</App>
+		<AppPanel>
+			{#if store.mode === 'editor'}
+				<PropertiesPanel />
+			{:else}
+				<DesignerPanel tokens={store.tokens} />
+			{/if}
+		</AppPanel>
+	</App>
+</UJLTheme>

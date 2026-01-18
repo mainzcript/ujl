@@ -1,25 +1,47 @@
 <!-- Preview that composes the UJLC document and renders it with UJLT tokens via AdapterRoot. -->
 <script lang="ts">
-	import type { UJLCDocument, UJLTDocument, UJLAbstractNode } from '@ujl-framework/types';
+	import type {
+		UJLCDocument,
+		UJLTDocument,
+		UJLAbstractNode,
+		UJLTTokenSet
+	} from '@ujl-framework/types';
 	import { Composer } from '@ujl-framework/core';
 	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
 	import '@ujl-framework/adapter-svelte/styles';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import { logger } from '$lib/utils/logger.js';
+	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
 
 	import type { CrafterMode } from '../types.js';
+
+	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
+		props: { children?: UJLAbstractNode[] };
+	} {
+		return 'children' in node.props;
+	}
+
+	function isEditableModule(
+		node: UJLAbstractNode
+	): node is UJLAbstractNode & { meta: { moduleId: string; isModuleRoot: true } } {
+		if (!('meta' in node)) return false;
+		const meta = node.meta as { moduleId?: string; isModuleRoot?: boolean } | undefined;
+		return meta?.isModuleRoot === true && typeof meta?.moduleId === 'string';
+	}
 
 	let {
 		ujlcDocument,
 		ujltDocument,
 		mode = 'system',
-		crafterMode = 'editor'
+		crafterMode = 'editor',
+		editorTokenSet
 	}: {
 		ujlcDocument: UJLCDocument;
 		ujltDocument: UJLTDocument;
 		mode?: 'light' | 'dark' | 'system';
 		crafterMode?: CrafterMode;
+		editorTokenSet?: UJLTTokenSet;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
@@ -30,10 +52,8 @@
 
 	const composer = new Composer();
 
-	// AST composition with async media resolution
 	let ast = $state<UJLAbstractNode | null>(null);
 
-	// Create media resolver from MediaService
 	const mediaResolver = {
 		async resolve(id: string): Promise<string | null> {
 			const entry = await crafter.mediaService.get(id);
@@ -41,7 +61,6 @@
 		}
 	};
 
-	// Re-compose when document changes
 	$effect(() => {
 		composer.compose(ujlcDocument, mediaResolver).then((composedAst) => {
 			ast = composedAst;
@@ -50,11 +69,69 @@
 
 	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 
-	function handleModuleClick(moduleId: string) {
+	const editorCssVars = $derived(editorTokenSet ? generateThemeCSSVariables(editorTokenSet) : {});
+
+	/**
+	 * Find an editable node in the AST by its moduleId
+	 * @param node - The AST node to search in
+	 * @param targetModuleId - The moduleId to find
+	 * @returns The found editable node or null
+	 */
+	function findEditableNodeByModuleId(
+		node: UJLAbstractNode,
+		targetModuleId: string
+	): (UJLAbstractNode & { meta: { moduleId: string; isModuleRoot: true } }) | null {
+		if (isEditableModule(node) && node.meta.moduleId === targetModuleId) {
+			return node;
+		}
+
+		if (hasChildren(node) && node.props.children) {
+			for (const child of node.props.children) {
+				const found = findEditableNodeByModuleId(child, targetModuleId);
+				if (found) return found;
+			}
+		}
+
+		if (node.type === 'call-to-action' && 'actionButtons' in node.props) {
+			const buttons = node.props.actionButtons;
+			if (buttons.primary) {
+				const found = findEditableNodeByModuleId(buttons.primary, targetModuleId);
+				if (found) return found;
+			}
+			if (buttons.secondary) {
+				const found = findEditableNodeByModuleId(buttons.secondary, targetModuleId);
+				if (found) return found;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Handle click events on the preview container.
+	 * Extracts moduleId from DOM and checks editability in AST.
+	 * Prevents default actions (like link navigation) in editor mode.
+	 */
+	function handlePreviewClick(event: MouseEvent) {
 		if (crafterMode !== 'editor' || crafter.mode !== 'editor') return;
-		crafter.expandToNode(moduleId);
-		crafter.setSelectedNodeId(moduleId);
-		scrollToNodeInTree(moduleId);
+
+		const clickedElement = (event.target as HTMLElement).closest('[data-ujl-module-id]');
+		if (!clickedElement) return;
+
+		// Prevent default actions (link navigation, form submission, etc.) in editor mode
+		event.preventDefault();
+		event.stopPropagation();
+
+		const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+		if (!moduleId || !ast) return;
+
+		// Only editable nodes with isModuleRoot === true are selectable
+		const editableNode = findEditableNodeByModuleId(ast, moduleId);
+		if (!editableNode) return;
+
+		crafter.expandToNode(editableNode.meta.moduleId);
+		crafter.setSelectedNodeId(editableNode.meta.moduleId);
+		scrollToNodeInTree(editableNode.meta.moduleId);
 	}
 
 	function scrollToNodeInTree(nodeId: string) {
@@ -128,12 +205,10 @@
 	}
 
 	$effect(() => {
-		// Remove selection from all elements first (cleanup)
 		document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
 			el.classList.remove('ujl-selected');
 		});
 
-		// Only apply selection in editor mode
 		if (crafterMode === 'editor' && selectedNodeId && ast) {
 			setTimeout(() => {
 				applySelection(selectedNodeId);
@@ -146,15 +221,14 @@
 	bind:this={scrollContainerRef}
 	class="h-full w-full"
 	class:ujl-editor-mode={crafterMode === 'editor'}
+	role={crafterMode === 'editor' ? 'application' : undefined}
+	onclick={handlePreviewClick}
+	style={editorTokenSet && crafterMode === 'editor'
+		? `--editor-accent-light: ${editorCssVars['--accent-light'] ?? 'var(--accent-light)'}; --editor-accent-dark: ${editorCssVars['--accent-dark'] ?? 'var(--accent-dark)'};`
+		: undefined}
 >
 	{#if ast}
-		<AdapterRoot
-			node={ast}
-			{tokenSet}
-			{mode}
-			showMetadata={true}
-			eventCallback={crafterMode === 'editor' ? handleModuleClick : undefined}
-		/>
+		<AdapterRoot node={ast} {tokenSet} {mode} showMetadata={true} />
 	{:else}
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="text-sm text-muted-foreground">Loading preview...</div>
@@ -164,17 +238,27 @@
 
 <style>
 	/* Only show hover/selection styles in editor mode */
-	:global(.ujl-editor-mode [data-ujl-module-id][role='button']:not(.ujl-selected):hover),
-	:global(.ujl-editor-mode button[data-ujl-module-id]:not(.ujl-selected):hover) {
-		outline: 2px solid oklch(var(--primary) / 0.7);
+	/* Use editor theme accent color for selection (radius comes from preview theme) */
+	:global(.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover) {
+		outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
+		outline-offset: 2px;
+		border-radius: var(--radius);
+		cursor: pointer;
+	}
+
+	:global(.ujl-editor-mode [data-ujl-module-id].ujl-selected) {
+		outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)));
 		outline-offset: 2px;
 		border-radius: var(--radius);
 	}
 
-	:global(.ujl-editor-mode [data-ujl-module-id].ujl-selected) {
-		outline: 2px solid oklch(var(--primary));
-		outline-offset: 2px;
-		border-radius: var(--radius);
+	/* Dark mode support for editor theme selection colors */
+	:global(.dark .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover) {
+		outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)) / 0.7);
+	}
+
+	:global(.dark .ujl-editor-mode [data-ujl-module-id].ujl-selected) {
+		outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)));
 	}
 
 	/* Explicitly remove outline when not selected to prevent lingering styles */
@@ -182,23 +266,9 @@
 		outline: none;
 	}
 
+	/* Prevent nested hover styles */
 	:global(
-		.ujl-editor-mode
-			[data-ujl-module-id][role='button']:not(.ujl-selected):has(
-				[data-ujl-module-id][role='button']:hover
-			)
-	),
-	:global(
-		.ujl-editor-mode
-			[data-ujl-module-id][role='button']:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
-	),
-	:global(
-		.ujl-editor-mode
-			button[data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id][role='button']:hover)
-	),
-	:global(
-		.ujl-editor-mode
-			button[data-ujl-module-id]:not(.ujl-selected):has(button[data-ujl-module-id]:hover)
+		.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id]:hover)
 	) {
 		outline: none !important;
 	}

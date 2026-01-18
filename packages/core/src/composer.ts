@@ -2,6 +2,7 @@ import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-frame
 import { MediaLibrary, type MediaResolver } from "./media/index.js";
 import { createDefaultRegistry } from "./modules/default-registry.js";
 import { ModuleRegistry, type AnyModule } from "./modules/index.js";
+import { generateUid } from "./utils.js";
 
 /**
  * Composer class for converting UJL documents to Abstract Syntax Trees
@@ -46,7 +47,11 @@ export class Composer {
 				props: {
 					message: `Unknown module type: ${moduleData.type}`,
 				},
-				id: moduleData.meta.id,
+				id: generateUid(),
+				meta: {
+					moduleId: moduleData.meta.id, // Error node represents a failed module
+					isModuleRoot: true,
+				},
 			};
 		}
 	}
@@ -72,6 +77,7 @@ export class Composer {
 			type: "wrapper",
 			props: { children },
 			id: "__root__",
+			// meta.moduleId NOT set - Root wrapper is not a module
 		};
 	}
 

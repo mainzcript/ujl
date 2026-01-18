@@ -2,6 +2,7 @@ import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { ImageField } from "../../fields/concretes/image-field.js";
 import { TextField } from "../../fields/index.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -69,7 +70,11 @@ export class ImageModule extends ModuleBase {
 				image: imageData, // Resolved from Media ID, null if not found or no ID
 				alt,
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }

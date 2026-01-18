@@ -97,31 +97,41 @@ This package implements the composition layer:
 - **Module Registry**: Manages available modules and provides type-safe access
 - **AST Generation**: Creates abstract nodes with preserved IDs for downstream adapters
 
-### Module ID Propagation
+### Modules vs. AST Nodes
 
-The Composer automatically transfers module IDs from the UJLC document to the AST:
+Understanding the distinction between **Modules** and **AST Nodes** is crucial for working with the UJL Framework.
 
-```typescript
-// In UJLC document
-{
-	type: "text",
-	meta: { id: "text-001" },  // ← ID defined here
-	fields: { content: "Hello" }
-}
+**Modules** are the building blocks defined in `.ujlc.json` documents. They exist at the document level, are created by users or editors (via the Crafter or manually), and are registered in the Module Registry as `ModuleBase` implementations. Examples include `text`, `button`, `card`, `grid`, and `container` modules. These modules represent actual content components that can be edited and manipulated.
 
-// After composition
-{
-	type: "text",
-	id: "text-001",  // ← ID preserved in AST
-	props: { content: "Hello" }
-}
-```
+**AST Nodes**, on the other hand, are created during the composition phase by the Composer. They exist only in the Abstract Syntax Tree, not in the original document. Every AST node (except the root wrapper) has a `meta.moduleId` field that indicates which module it belongs to.
 
-This enables:
+The key semantic distinction is:
+
+- **`node.id`**: A unique, randomly generated identifier for the AST node itself (generated with `generateUid()`)
+- **`meta.moduleId`**: "Zu welchem Modul gehört dieser Node?" (Set for all nodes except root wrapper)
+- **`meta.isModuleRoot`**: "Ist dieser Node das Modul selbst?" (Only `true` for editable module nodes)
+
+When a module is composed, it creates a primary AST node where `meta.isModuleRoot === true`. This node represents the module itself and is editable. However, modules may also generate additional AST nodes for structural purposes (like `grid-item` wrappers or internal buttons). These child nodes also have `meta.moduleId` set to the parent module's ID, but their `isModuleRoot` is `false` or `undefined`, making them non-editable parts of the module's structure.
+
+**Example:**
+
+When a Grid module is composed, the Grid module itself creates a `grid` AST node with:
+
+- A unique `id` (generated with `generateUid()`)
+- `meta.moduleId = "grid-001"` (from the UJLC document)
+- `meta.isModuleRoot = true` (making it editable)
+
+However, the Grid module also automatically creates `grid-item` AST nodes for each child with:
+
+- Unique `id`s (generated with `generateUid()`)
+- `meta.moduleId = "grid-001"` (they belong to the Grid module)
+- `meta.isModuleRoot = false` (making them non-editable, but they still know they belong to the Grid module)
+
+This architecture enables:
 
 - Tracking modules through the composition pipeline
-- Click-to-select in visual editors
-- DOM element identification with `data-ujl-module-id`
+- Click-to-select in visual editors (only editable nodes are selectable)
+- DOM element identification with `data-ujl-module-id` (set on all nodes with `meta.moduleId` when `showMetadata={true}`; editability is checked in the editor layer)
 - Programmatic module manipulation
 
 ## Extensibility

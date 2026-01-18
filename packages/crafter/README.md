@@ -31,8 +31,9 @@ import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 // Initialize the editor
 const crafter = new UJLCrafter({
 	target: '#editor-container',
-	document: myContentDocument, // Optional
-	theme: myThemeDocument // Optional
+	document: myContentDocument, // Optional: Content document for preview
+	theme: myPreviewTheme, // Optional: Theme for preview content
+	editorTheme: myEditorTheme // Optional: Theme for Crafter UI (defaults to default theme)
 });
 
 // Listen for document changes
@@ -109,6 +110,37 @@ Preview Canvas
   - Color palette management
   - Typography configuration
   - Spacing and layout tokens
+
+**Theme Separation:**
+
+The Crafter distinguishes between two independent themes:
+
+- **Editor Theme** (`editorTheme`): Controls the styling of the Crafter UI itself (header, sidebar, panels, selection markers)
+  - Configured via `editorTheme` option in `UJLCrafter` constructor
+  - Defaults to the default theme if not specified
+  - Applied via `UJLTheme` wrapper around the entire editor
+
+- **Preview Theme** (`theme`): Controls the styling of the preview content (the rendered UJL document)
+  - Configured via `theme` option in `UJLCrafter` constructor
+  - Can be edited in Designer Mode
+  - Applied to the preview canvas via `AdapterRoot`
+
+This separation allows you to:
+
+- Use a consistent editor theme across different projects
+- Preview content with different themes without affecting the editor UI
+- Customize the editor appearance to match your brand or preferences
+
+**Example:**
+
+```typescript
+const crafter = new UJLCrafter({
+	target: '#editor',
+	document: myContent,
+	theme: myPreviewTheme, // Theme for the preview content
+	editorTheme: myEditorTheme // Theme for the Crafter UI (optional)
+});
+```
 
 **State Management:**
 
