@@ -1,12 +1,7 @@
 /**
  * Development entry point for UJL Crafter
  *
- * This file sets up the development environment for testing the Crafter.
- * It supports both single and dual instance modes via URL hash.
- *
- * Usage:
- * - Single instance: http://localhost:5173/
- * - Dual instance:   http://localhost:5173/#dual
+ * Mounts the DevApp which initializes a Crafter instance for local development.
  */
 
 import './app.css';
