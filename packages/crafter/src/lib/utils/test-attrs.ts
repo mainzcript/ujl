@@ -1,6 +1,8 @@
 /**
  * Utility functions for conditional test attributes.
- * Test attributes are only included when PUBLIC_TEST_MODE is 'true'.
+ *
+ * Note: Test mode is currently disabled. The test infrastructure will be
+ * rebuilt after the framework-agnostic refactoring is complete.
  *
  * Usage:
  * ```svelte
@@ -9,10 +11,8 @@
  * ```
  */
 
-import { env } from '$env/dynamic/public';
-
-// Check if we're in test mode - defaults to false if not set
-const isTestMode = env.PUBLIC_TEST_MODE === 'true';
+// Test mode disabled - will be rebuilt with new test infrastructure
+const isTestMode = false;
 
 /**
  * Returns data-testid attribute only in test mode

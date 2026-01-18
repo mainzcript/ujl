@@ -1,7 +1,7 @@
 import type { MediaMetadata, MediaLibraryEntry, UJLCMediaLibrary } from '@ujl-framework/types';
 import type { MediaService, UploadResult } from './media-service.js';
 import { generateUid } from '@ujl-framework/core';
-import { compressImage } from '$lib/utils/image-compression.js';
+import { compressImage } from '../utils/image-compression.js';
 
 /**
  * Inline Media Service

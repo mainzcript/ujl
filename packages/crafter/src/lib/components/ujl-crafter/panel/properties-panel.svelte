@@ -7,9 +7,9 @@
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
 	import { Composer, type AnyModule } from '@ujl-framework/core';
-	import { findNodeById } from '$lib/utils/ujlc-tree.ts';
+	import { findNodeById } from '../../../utils/ujlc-tree.js';
 	import { FieldInput, MediaLibraryBrowser } from '../../ui/index.js';
-	import { logger } from '$lib/utils/logger.js';
+	import { logger } from '../../../utils/logger.js';
 	import { MediaLibraryUploader } from '../../ui/media-library-uploader/index.js';
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);

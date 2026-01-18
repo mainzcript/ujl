@@ -23,9 +23,9 @@ import {
 	deepCloneModule,
 	deepCloneModuleWithNewIds,
 	DEFAULT_NODE_ID_LENGTH
-} from '$lib/utils/ujlc-tree.js';
+} from '../utils/ujlc-tree.js';
 import type { Composer } from '@ujl-framework/core';
-import { logger } from '$lib/utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 // ============================================
 // TYPES

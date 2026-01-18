@@ -15,11 +15,11 @@
 		SidebarMenuSubItem,
 		SidebarMenuSubButton,
 		SidebarMenuSub
-	} from '$lib/components/ui/sidebar-menu';
+	} from '../../../ui/sidebar-menu/index.js';
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
-	import { formatSlotName } from '$lib/utils/ujlc-tree.js';
-	import { test, testId } from '$lib/utils/test-attrs.ts';
+	import { formatSlotName } from '../../../../utils/ujlc-tree.js';
+	import { test, testId } from '../../../../utils/test-attrs.js';
 
 	let {
 		parentNode,

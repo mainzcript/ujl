@@ -3,7 +3,7 @@
  */
 
 import type { UJLCModuleObject } from '@ujl-framework/types';
-import { logger } from '$lib/utils/logger.js';
+import { logger } from './logger.js';
 
 /**
  * Clipboard data format for UJL editor

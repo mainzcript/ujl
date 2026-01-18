@@ -12,7 +12,7 @@
 		StyleToggles,
 		NumberSliderWithInput,
 		FontWeightSlider
-	} from '$lib/components/ui/index.js';
+	} from '../../../../../ui/index.js';
 
 	let {
 		typography,

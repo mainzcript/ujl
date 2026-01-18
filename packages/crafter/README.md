@@ -1,6 +1,6 @@
 # @ujl-framework/crafter
 
-**Visual Editor for UJL Content** - A SvelteKit-based visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
+**Visual Editor for UJL Content** - A Svelte 5 visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
 
 The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend media storage.
 
@@ -34,6 +34,19 @@ const crafter = new UJLCrafter({
 	document: myContentDocument, // Optional: Content document for preview
 	theme: myPreviewTheme, // Optional: Theme for preview content
 	editorTheme: myEditorTheme // Optional: Theme for Crafter UI (defaults to default theme)
+	// mediaLibrary defaults to { storage: 'inline' }
+});
+
+// With backend storage (requires both endpoint and apiKey)
+const crafterWithBackend = new UJLCrafter({
+	target: '#editor-container',
+	document: myContentDocument,
+	theme: myPreviewTheme,
+	mediaLibrary: {
+		storage: 'backend',
+		endpoint: 'http://localhost:3000/api',
+		apiKey: 'your-api-key' // Both endpoint and apiKey are required!
+	}
 });
 
 // Listen for document changes
@@ -181,15 +194,6 @@ UJLCrafter (Root)
 - **Typography Groups**: Configure base, heading, link, code, and highlight typography
 - **Live Preview**: See changes reflected immediately in the preview
 
-### Media Library
-
-The Crafter supports two storage modes for media:
-
-- **Inline Storage** (default): Media stored as Base64 in UJLC documents
-- **Backend Storage**: Media stored on Payload CMS with references in documents
-
-For detailed setup instructions, see [MEDIA_LIBRARY_SETUP.md](./MEDIA_LIBRARY_SETUP.md).
-
 ### Viewport Simulation
 
 Preview your content at different viewport sizes:
@@ -204,6 +208,161 @@ Preview your content at different viewport sizes:
 - **Import**: Load `.ujlc.json` or `.ujlt.json` files
 - **Export**: Download current documents as JSON files
 - **Validation**: All imports are validated against Zod schemas
+
+## Media Library
+
+The Crafter supports two storage modes for media assets:
+
+- **Inline Storage** (default): Media stored as Base64 in UJLC documents
+- **Backend Storage**: Media stored on a Payload CMS server
+
+**Important:** Media Library configuration is passed exclusively via `UJLCrafterOptions`. Any `meta.media_library` configuration in the document is ignored.
+
+### Configuration
+
+The `mediaLibrary` option uses a discriminated union type:
+
+| Storage Mode | Required Options     | Description                        |
+| ------------ | -------------------- | ---------------------------------- |
+| `inline`     | None                 | Media stored as Base64 in document |
+| `backend`    | `endpoint`, `apiKey` | Media stored on Payload CMS server |
+
+**For backend storage, both `endpoint` and `apiKey` are required.** The Crafter will throw an error if either is missing.
+
+### Inline Storage (Default)
+
+If no `mediaLibrary` option is provided, the Crafter defaults to inline storage:
+
+```typescript
+const crafter = new UJLCrafter({
+	target: '#editor-container',
+	document: myDocument,
+	theme: myTheme
+});
+```
+
+Media files are stored as Base64-encoded strings directly in the UJLC document. This is convenient for small projects but increases document size.
+
+### Backend Storage
+
+For larger projects, use backend storage with Payload CMS:
+
+```typescript
+const crafter = new UJLCrafter({
+	target: '#editor-container',
+	document: myDocument,
+	theme: myTheme,
+	mediaLibrary: {
+		storage: 'backend',
+		endpoint: 'http://localhost:3000/api',
+		apiKey: import.meta.env.VITE_MEDIA_API_KEY // Get from your environment
+	}
+});
+```
+
+### Backend Storage Setup
+
+**Prerequisites:**
+
+- A running Payload CMS instance with the Media collection configured
+- API access enabled in Payload CMS
+
+**Step 1: Get Your API Key**
+
+1. Open your Payload CMS admin panel
+2. Navigate to **User Settings** > **API Keys**
+3. Create a new API key or copy an existing one
+4. Store the API key securely in your application's environment
+
+**Step 2: Configure the Crafter**
+
+```typescript
+const crafter = new UJLCrafter({
+	target: '#editor-container',
+	document: myDocument,
+	theme: myTheme,
+	mediaLibrary: {
+		storage: 'backend',
+		endpoint: 'http://localhost:3000/api',
+		apiKey: import.meta.env.VITE_MEDIA_API_KEY // Vite
+		// or: process.env.NEXT_PUBLIC_MEDIA_API_KEY // Next.js
+		// or: window.__MEDIA_API_KEY__ // Runtime injection
+	}
+});
+```
+
+### Security Best Practices
+
+**DO:**
+
+- Store API keys in environment variables
+- Use different API keys for development and production
+- Rotate API keys regularly
+- Pass API keys at runtime, not hardcoded
+
+**DON'T:**
+
+- Commit API keys to version control
+- Store API keys in UJLC documents
+- Share API keys in team chats or documentation
+- Use production API keys in development
+- Expose API keys in client-side code (use server-side proxy if needed)
+
+### Media Library Troubleshooting
+
+**"Backend storage requires both endpoint and apiKey" Error**
+
+This error occurs when you set `storage: 'backend'` but don't provide both `endpoint` and `apiKey`:
+
+```typescript
+// Wrong - will throw error
+mediaLibrary: {
+	storage: 'backend',
+	endpoint: 'http://localhost:3000/api'
+	// Missing apiKey!
+}
+
+// Correct
+mediaLibrary: {
+	storage: 'backend',
+	endpoint: 'http://localhost:3000/api',
+	apiKey: 'your-api-key'
+}
+```
+
+**401 Unauthorized Errors**
+
+If media operations fail with 401 errors:
+
+1. Verify the API key is correct
+2. Check that the API key has the required permissions in Payload CMS
+3. Ensure the `endpoint` URL is correct
+
+**Media Not Loading**
+
+If media items don't display:
+
+1. Check the browser console for network errors
+2. Verify the Payload CMS server is running
+3. Ensure the media collection is properly configured in Payload CMS
+
+**Connection Errors**
+
+If you see "Media backend connection error" notifications:
+
+1. Verify the Payload CMS server is running
+2. Check that the endpoint URL is accessible
+3. Look for CORS issues if running on different domains
+
+### Future: Automatic Migration
+
+In a future version, the Crafter will automatically migrate media when loading documents that were created with a different storage configuration:
+
+- Documents with inline media will have their media uploaded to the configured backend
+- Documents referencing a different backend will have their media downloaded and re-uploaded to the configured backend
+- This migration will happen transparently in the background
+
+Until then, media must be manually re-uploaded when changing storage backends.
 
 ## API Reference
 
@@ -242,7 +401,14 @@ interface UJLCrafterOptions {
 	target: string | HTMLElement;
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
+	editorTheme?: UJLTDocument;
+	mediaLibrary?: MediaLibraryOptions;
 }
+
+// Discriminated union - backend requires endpoint AND apiKey
+type MediaLibraryOptions =
+	| { storage: 'inline' }
+	| { storage: 'backend'; endpoint: string; apiKey: string };
 
 type DocumentChangeCallback = (document: UJLCDocument) => void;
 type ThemeChangeCallback = (theme: UJLTDocument) => void;
@@ -379,7 +545,7 @@ src/
 │   │   ├── crafter-store.svelte.ts
 │   │   └── operations.ts
 │   └── utils/               # Utility functions
-├── routes/                  # SvelteKit routes (dev app)
+├── routes/                  # Development routes (will be removed in lib build)
 └── index.ts                # Public API exports
 ```
 
@@ -409,7 +575,8 @@ The Crafter integrates seamlessly with other UJL Framework packages:
 
 ## Related Documentation
 
-- [Media Library Setup Guide](./MEDIA_LIBRARY_SETUP.md) - Configure backend media storage
 - [UJL Framework README](../../README.md) - High-level framework overview
 - [Core Package README](../core/README.md) - Composer and module system
 - [Adapter Svelte README](../adapter-svelte/README.md) - Svelte rendering adapter
+- [Payload CMS API Documentation](https://payloadcms.com/docs/rest-api/overview)
+- [Payload CMS Authentication](https://payloadcms.com/docs/authentication/overview)

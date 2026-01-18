@@ -6,8 +6,8 @@
 	import DeleteIcon from '@lucide/svelte/icons/trash-2';
 	import BackspaceIcon from '@lucide/svelte/icons/delete';
 	import PlusIcon from '@lucide/svelte/icons/plus';
-	import { testId } from '$lib/utils/test-attrs.ts';
-	import { getModifierKey } from '$lib/utils/platform.ts';
+	import { testId } from '../../../utils/test-attrs.js';
+	import { getModifierKey } from '../../../utils/platform.js';
 
 	let {
 		nodeId,

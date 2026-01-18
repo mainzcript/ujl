@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UJLCrafter } from '$lib/components/ujl-crafter';
+	import { UJLCrafter } from '../lib/components/ujl-crafter/index.js';
 	import {
 		Dialog,
 		DialogContent,
@@ -9,7 +9,6 @@
 		Button
 	} from '@ujl-framework/ui';
 	import { onMount, onDestroy } from 'svelte';
-	import { env } from '$env/dynamic/public';
 
 	/**
 	 * Disclaimer dialog state
@@ -21,15 +20,10 @@
 	let crafter: UJLCrafter | null = null;
 
 	onMount(() => {
-		// dont show disclaimer in test mode
-		if (env.PUBLIC_TEST_MODE === 'true') {
-			showDisclaimer = false;
-		} else {
-			// Check if user has dismissed the disclaimer
-			const dismissed = localStorage.getItem(DISCLAIMER_STORAGE_KEY);
-			if (!dismissed) {
-				showDisclaimer = true;
-			}
+		// Check if user has dismissed the disclaimer
+		const dismissed = localStorage.getItem(DISCLAIMER_STORAGE_KEY);
+		if (!dismissed) {
+			showDisclaimer = true;
 		}
 
 		// Initialize Crafter after container is mounted
@@ -69,4 +63,4 @@
 	</DialogContent>
 </Dialog>
 
-<div bind:this={crafterContainer} class="h-screen w-screen"></div>
+<div bind:this={crafterContainer} class="h-full w-full"></div>

@@ -3,8 +3,8 @@
 	import { getContext } from 'svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
-	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
-	import { testId } from '$lib/utils/test-attrs.ts';
+	import { createVirtualRootNode } from '../../../../utils/ujlc-tree.js';
+	import { testId } from '../../../../utils/test-attrs.js';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../../context.js';
 
 	let {

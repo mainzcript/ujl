@@ -21,11 +21,11 @@ import type {
 	UJLTTokenSet,
 	UJLCDocumentMeta
 } from '@ujl-framework/types';
-import type { Composer } from '@ujl-framework/core';
-import { findPathToNode, isRootNode } from '$lib/utils/ujlc-tree.js';
+import { generateUid, type Composer } from '@ujl-framework/core';
+import { findPathToNode, isRootNode } from '../utils/ujlc-tree.js';
 import { createOperations } from './operations.js';
-import { logger } from '$lib/utils/logger.js';
-import type { MediaService } from '$lib/services/media-service.js';
+import { logger } from '../utils/logger.js';
+import type { MediaService } from '../services/media-service.js';
 
 // ============================================
 // TYPES
@@ -132,6 +132,13 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  */
 export function createCrafterStore(deps: CrafterStoreDeps) {
 	const { initialUjlcDocument, initialUjltDocument, composer, createMediaService } = deps;
+
+	// ============================================
+	// INSTANCE IDENTITY (for DOM scoping)
+	// ============================================
+
+	/** Unique instance ID for scoping DOM queries to this Crafter instance */
+	const instanceId = `crafter-${generateUid(8)}`;
 
 	// ============================================
 	// PRIVATE STATE (Single Source of Truth)
@@ -312,6 +319,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	return {
+		// Instance Identity
+		instanceId,
+
 		// State (readonly via getters - encapsulation)
 		get ujlcDocument() {
 			return _ujlcDocument;

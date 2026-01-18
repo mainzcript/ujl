@@ -12,13 +12,13 @@
 		DialogCloseButton
 	} from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../../ujl-crafter/context.js';
 	import type { MediaMetadata, MediaLibraryEntry } from '@ujl-framework/types';
 	import XIcon from '@lucide/svelte/icons/x';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
 	import InfoIcon from '@lucide/svelte/icons/info';
-	import { logger } from '$lib/utils/logger.js';
+	import { logger } from '../../../utils/logger.js';
 
 	let {
 		onSelect,

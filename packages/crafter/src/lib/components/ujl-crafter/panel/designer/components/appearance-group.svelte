@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import { NumberSliderWithInput } from '$lib/components/ui/index.js';
+	import { NumberSliderWithInput } from '../../../../ui/index.js';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	let {

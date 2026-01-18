@@ -1,6 +1,6 @@
 import type { MediaMetadata, MediaLibraryEntry } from '@ujl-framework/types';
 import type { MediaService, UploadResult } from './media-service.js';
-import { logger } from '$lib/utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Payload CMS Media Response

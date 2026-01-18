@@ -8,8 +8,8 @@
 	- Deselecting node when panel is closed (editor mode)
 -->
 <script lang="ts">
-	import { useApp } from '$lib/components/ui/app';
-	import type { CrafterMode } from './types.js';
+	import { useApp } from '../ui/app/index.js';
+	import type { CrafterMode } from '../../stores/index.js';
 
 	let {
 		mode,

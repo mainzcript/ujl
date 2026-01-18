@@ -12,7 +12,7 @@
  * @module context
  */
 
-import type { CrafterStore } from '$lib/stores/index.js';
+import type { CrafterStore } from '../../stores/index.js';
 
 // ============================================
 // CONTEXT TYPE
@@ -112,6 +112,6 @@ export type {
 	CrafterMode,
 	ViewportSize,
 	MediaLibraryContext
-} from '$lib/stores/crafter-store.svelte.js';
+} from '../../stores/crafter-store.svelte.js';
 
-export type { CrafterOperations } from '$lib/stores/operations.js';
+export type { CrafterOperations } from '../../stores/operations.js';

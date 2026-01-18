@@ -11,10 +11,11 @@
 	import '@ujl-framework/adapter-svelte/styles';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
-	import { logger } from '$lib/utils/logger.js';
+	import { logger } from '../../../utils/logger.js';
+	import { createScopedSelector } from '../../../utils/scoped-dom.js';
 	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
 
-	import type { CrafterMode } from '../types.js';
+	import type { CrafterMode } from '../../../stores/index.js';
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -45,6 +46,9 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+
+	// Scoped DOM queries - ensures multi-instance isolation
+	const dom = createScopedSelector(crafter.instanceId);
 
 	const selectedNodeId = $derived.by(() => {
 		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
@@ -137,7 +141,7 @@
 	function scrollToNodeInTree(nodeId: string) {
 		// Timeout allows tree expansion animation to complete before scrolling
 		setTimeout(() => {
-			const treeItem = document.querySelector(`[data-tree-node-id="${nodeId}"]`);
+			const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
 			if (treeItem) {
 				treeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			} else {
@@ -150,7 +154,7 @@
 
 	function getScrollContainer(): HTMLDivElement | null {
 		return (
-			(document.querySelector('[data-ujl-scroll-container="canvas"]') as HTMLDivElement | null) ??
+			dom.querySelector<HTMLDivElement>('[data-ujl-scroll-container="canvas"]') ??
 			scrollContainerRef
 		);
 	}
@@ -159,7 +163,7 @@
 	 * Scroll to component in preview; retry if DOM or ref is not ready.
 	 */
 	function scrollToComponentInPreview(moduleId: string, retries = 3) {
-		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
+		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		const container = getScrollContainer();
 
 		if (!element || !container) {
@@ -190,7 +194,7 @@
 	 * is asynchronous, so the element might not be in the DOM yet.
 	 */
 	function applySelection(moduleId: string, retries = 10) {
-		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
+		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		if (element) {
 			element.classList.add('ujl-selected');
 			scrollToComponentInPreview(moduleId);
@@ -205,7 +209,8 @@
 	}
 
 	$effect(() => {
-		document.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
+		// Remove selection only from elements within this Crafter instance
+		dom.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
 			el.classList.remove('ujl-selected');
 		});
 

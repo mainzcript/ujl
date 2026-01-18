@@ -11,7 +11,7 @@
 	- Context-based API: Child components access store via context
 -->
 <script lang="ts">
-	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '$lib/components/ui/app';
+	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '../ui/app/index.js';
 	import { Badge, UJLTheme } from '@ujl-framework/ui';
 	import { setContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -24,7 +24,7 @@
 		createMediaServiceFactory,
 		type CrafterStore,
 		type CrafterStoreDeps
-	} from '$lib/stores/index.js';
+	} from '../../stores/index.js';
 
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT } from './context.js';
 
@@ -38,8 +38,8 @@
 	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
 
-	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.js';
-	import { logger } from '$lib/utils/logger.js';
+	import { downloadJsonFile, readJsonFile } from '../../utils/files.js';
+	import { logger } from '../../utils/logger.js';
 
 	// ============================================
 	// PROPS
@@ -196,7 +196,7 @@
 	}
 </script>
 
-<UJLTheme tokens={editorTokenSet} class="h-screen">
+<UJLTheme tokens={editorTokenSet} class="h-screen" data-crafter-instance={store.instanceId}>
 	<App>
 		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects

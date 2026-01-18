@@ -3,7 +3,7 @@ import { InlineMediaService } from './inline-media-service.js';
 import type { MediaMetadata, UJLCMediaLibrary } from '@ujl-framework/types';
 
 // Mock the image compression utility
-vi.mock('$lib/utils/image-compression.js', () => ({
+vi.mock('../utils/image-compression.js', () => ({
 	compressImage: vi.fn((file: File) => Promise.resolve(file))
 }));
 

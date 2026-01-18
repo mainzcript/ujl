@@ -16,6 +16,9 @@ export * from './image-compression.js';
 // UJLC tree manipulation utilities
 export * from './ujlc-tree.js';
 
+// Scoped DOM utilities (for multi-instance support)
+export * from './scoped-dom.js';
+
 // Color utilities
 export * from './colors/index.js';
 

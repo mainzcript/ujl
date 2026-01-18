@@ -6,9 +6,9 @@ import {
 	createCrafterStore,
 	createMediaServiceFactory,
 	type CrafterStore
-} from '$lib/stores/index.js';
+} from '../../stores/index.js';
 import UJLCrafterSvelte from './ujl-crafter.svelte';
-import { logger } from '$lib/utils/logger.js';
+import { logger } from '../../utils/logger.js';
 
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
@@ -29,6 +29,21 @@ export type DocumentChangeCallback = (document: UJLCDocument) => void;
 
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
+/**
+ * Configuration options for the media library.
+ * Determines how media assets (images, etc.) are stored and retrieved.
+ *
+ * Two storage modes are available:
+ * - `inline`: Media stored as Base64 in the UJLC document (no additional config needed)
+ * - `backend`: Media stored on a Payload CMS server (requires endpoint and apiKey)
+ *
+ * Note: Document-level media_library configuration is ignored.
+ * Only this options-based configuration is used.
+ */
+export type MediaLibraryOptions =
+	| { storage: 'inline' }
+	| { storage: 'backend'; endpoint: string; apiKey: string };
+
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
 	target: string | HTMLElement;
@@ -38,6 +53,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
+	/** Media library configuration (default: inline storage) */
+	mediaLibrary?: MediaLibraryOptions;
 }
 
 // ============================================
@@ -85,7 +102,21 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
+		// Media library configuration from options (defaults to inline storage)
+		// Note: Document-level media_library configuration is ignored - only options are used
+		const mediaLibrary = options.mediaLibrary ?? { storage: 'inline' as const };
+
+		// Runtime validation for backend storage
+		if (mediaLibrary.storage === 'backend') {
+			if (!mediaLibrary.endpoint || !mediaLibrary.apiKey) {
+				throw new Error('UJLCrafter: Backend storage requires both endpoint and apiKey');
+			}
+		}
+
 		const mediaServiceFactory = createMediaServiceFactory({
+			preferredStorage: mediaLibrary.storage,
+			backendEndpoint: mediaLibrary.storage === 'backend' ? mediaLibrary.endpoint : undefined,
+			backendApiKey: mediaLibrary.storage === 'backend' ? mediaLibrary.apiKey : undefined,
 			showToasts: false,
 			onConnectionError: (error, endpoint) => {
 				logger.error('Media backend connection error:', error, endpoint);

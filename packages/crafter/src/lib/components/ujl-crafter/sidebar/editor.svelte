@@ -11,14 +11,14 @@
 		parseSlotSelection,
 		isRootNode,
 		isModuleObject
-	} from '$lib/utils/ujlc-tree.js';
+	} from '../../../utils/ujlc-tree.js';
 	import {
 		writeToBrowserClipboard,
 		readFromBrowserClipboard,
 		writeToClipboardEvent,
 		readFromClipboardEvent,
 		type UJLClipboardData
-	} from '$lib/utils/clipboard.js';
+	} from '../../../utils/clipboard.js';
 
 	let {
 		rootSlot
