@@ -14,7 +14,9 @@
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
 		"check": "pnpm -r run check",
-		"test": "pnpm -r run test",
+		"test:unit": "pnpm -r --if-present run test:unit",
+		"test:e2e": "pnpm -r --if-present run test:e2e",
+		"test": "pnpm run test:unit && pnpm run test:e2e",
 		"clean": "pnpm -r run clean && rimraf node_modules",
 		"types:build": "pnpm --filter @ujl-framework/types build",
 		"core:build": "pnpm types:build && pnpm --filter @ujl-framework/core build",
@@ -26,7 +28,8 @@
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish",
-		"rtc": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check && pnpm run test"
+		"rtc": "pnpm run rtc:lite && pnpm run test",
+		"rtc:lite": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.8",

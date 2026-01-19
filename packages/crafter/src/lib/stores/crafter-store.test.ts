@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-import { createMockTree, createMockTokenSet } from '../../tests/mockData.js';
+import { createMockTree, createMockTokenSet } from '../../../tests/mockData.js';
 import type { CrafterStoreDeps, MediaServiceFactory } from './crafter-store.svelte.js';
 import type { MediaService } from '../services/media-service.js';
 

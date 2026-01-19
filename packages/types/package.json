@@ -23,10 +23,11 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"validate": "node ./dist/validate.js",
+		"test:unit": "vitest run",
+		"test:unit:watch": "vitest",
+		"test:unit:ui": "vitest --ui",
+		"test:unit:coverage": "vitest run --coverage",
 		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:ui": "vitest --ui",
-		"test:coverage": "vitest run --coverage",
 		"prepare": "pnpm run build"
 	},
 	"devDependencies": {

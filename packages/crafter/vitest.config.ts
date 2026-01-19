@@ -17,7 +17,7 @@ export default defineConfig({
 		setupFiles: ['./vitest.setup.ts'],
 		include: ['src/**/*.test.{js,ts}'],
 		// Exclude E2E tests (handled by Playwright)
-		exclude: ['e2e/**', 'node_modules/**'],
+		exclude: ['tests/e2e/**', 'node_modules/**'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
@@ -27,9 +27,7 @@ export default defineConfig({
 				'**/*.config.*',
 				'**/*.test.ts',
 				'**/mockData.ts',
-				'src/tests/',
-				'src/__tests__/',
-				'e2e/',
+				'tests/',
 				'dist/'
 			]
 		}

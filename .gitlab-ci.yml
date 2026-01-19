@@ -11,6 +11,7 @@ stages:
 variables:
   NODE_VERSION: '22-slim'
   PNPM_VERSION: '10.27.0'
+  PLAYWRIGHT_VERSION: '1.57.0'
 
 # Install dependencies once
 install_deps:
@@ -60,8 +61,8 @@ build_all:
       - '**/node_modules/'
     policy: pull
 
-# Run all tests
-test_all:
+# Run unit tests (Vitest)
+test_unit:
   stage: test
   image: node:${NODE_VERSION}
   dependencies:
@@ -72,7 +73,7 @@ test_all:
     - corepack prepare pnpm@${PNPM_VERSION} --activate
     - pnpm install --offline
   script:
-    - pnpm test
+    - pnpm test:unit
   cache:
     key: dependencies-${CI_COMMIT_REF_SLUG}
     paths:
@@ -80,6 +81,43 @@ test_all:
       - .pnpm-store/
       - '**/node_modules/'
     policy: pull
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - api_failure
+
+# Run E2E tests (Playwright)
+test_e2e:
+  stage: test
+  image: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
+  dependencies:
+    - install_deps
+    - build_all
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm install --offline
+  script:
+    - pnpm test:e2e
+  artifacts:
+    when: always
+    paths:
+      - packages/*/test-results/
+      - packages/*/playwright-report/
+    expire_in: 1 week
+  cache:
+    key: dependencies-${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - .pnpm-store/
+      - '**/node_modules/'
+    policy: pull
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
   retry:
     max: 2
     when:

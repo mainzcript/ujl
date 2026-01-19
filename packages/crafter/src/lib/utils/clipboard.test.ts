@@ -9,7 +9,7 @@ import {
 	readFromClipboardEvent,
 	type UJLClipboardData
 } from './clipboard.js';
-import { createMockNode } from '../../tests/mockData.js';
+import { createMockNode } from '../../../tests/mockData.js';
 
 describe('clipboard', () => {
 	// Mock data

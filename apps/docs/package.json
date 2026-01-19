@@ -10,7 +10,6 @@
 		"preview": "vitepress preview",
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
-		"test": "echo 'No test script needed'",
 		"clean": "rimraf dist .vitepress/cache"
 	},
 	"devDependencies": {

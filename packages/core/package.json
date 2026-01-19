@@ -13,10 +13,11 @@
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
+		"test:unit": "vitest run",
+		"test:unit:watch": "vitest",
+		"test:unit:ui": "vitest --ui",
+		"test:unit:coverage": "vitest run --coverage",
 		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:ui": "vitest --ui",
-		"test:coverage": "vitest run --coverage",
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\""
 	},
 	"dependencies": {

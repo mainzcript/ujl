@@ -14,11 +14,11 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings \"options_missing_custom_element:ignore\" --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"test": "vitest run",
 		"test:unit": "vitest run",
 		"test:unit:watch": "vitest",
+		"test:unit:coverage": "vitest run --coverage",
 		"test:e2e": "playwright test",
-		"test:all": "pnpm run test:unit && pnpm run test:e2e"
+		"test": "vitest run && playwright test"
 	},
 	"files": [
 		"dist",
