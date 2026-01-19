@@ -33,7 +33,6 @@
 	import { getContext } from 'svelte';
 	import { cn } from '@ujl-framework/ui/utils';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
-	import { test, testId } from '$lib/utils/test-attrs.js';
 
 	let {
 		node,
@@ -160,7 +159,7 @@
 {/snippet}
 
 {#snippet slotChildrenContent()}
-	<SidebarMenuSub class="mr-0 pe-0" {...test('sub item', { level })}>
+	<SidebarMenuSub class="mr-0 pe-0" data-crafter="nav-tree-sub" data-level={level}>
 		{#if showSlotsAsGroups}
 			<!-- Multiple slots or no children: show all slots as groups (including empty) -->
 			{#each getAllSlotEntries(node) as [slotName, slotChildren] (slotName)}
@@ -240,11 +239,11 @@
 {#if level === 0}
 	{#if hasChildren(node)}
 		<!-- Root level node with children or empty slots -->
-		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
+		<SidebarMenuItem class="relative" data-crafter="nav-tree-item">
 			{#if showDropBefore}
 				<div
 					class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-					{...testId('drop-indicator-before')}
+					data-crafter="drop-indicator-before"
 				></div>
 			{/if}
 			<Collapsible open={isExpanded} onOpenChange={isRootNode ? undefined : handleOpenChange}>
@@ -272,6 +271,7 @@
 								>
 									<button
 										type="button"
+										data-crafter="tree-chevron"
 										{...buttonProps ?? {}}
 										class="{buttonProps?.class || ''} w-auto!"
 									>
@@ -319,17 +319,17 @@
 			{#if showDropAfter}
 				<div
 					class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-					{...testId('drop-indicator-after')}
+					data-crafter="drop-indicator-after"
 				></div>
 			{/if}
 		</SidebarMenuItem>
 	{:else}
 		<!-- Root level node without children -->
-		<SidebarMenuItem class="relative" {...test('nav-tree-item')}>
+		<SidebarMenuItem class="relative" data-crafter="nav-tree-item">
 			{#if showDropBefore}
 				<div
 					class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-					{...testId('drop-indicator-before')}
+					data-crafter="drop-indicator-before"
 				></div>
 			{/if}
 			<SidebarMenuButton>
@@ -369,7 +369,7 @@
 						ondragleave={onDragLeave}
 						ondrop={(e) => onDrop(e, node.meta.id)}
 						ondragend={onDragEnd}
-						{...testId('nav-tree-item-button')}
+						data-crafter="nav-tree-item-button"
 					>
 						<span class="flex-1 overflow-hidden text-ellipsis">{displayName}</span>
 						<DropdownMenu bind:open={dropdownOpen}>
@@ -396,7 +396,7 @@
 			{#if showDropAfter}
 				<div
 					class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-					{...testId('drop-indicator-after')}
+					data-crafter="drop-indicator-after"
 				></div>
 			{/if}
 		</SidebarMenuItem>
@@ -407,7 +407,7 @@
 		{#if showDropBefore}
 			<div
 				class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-				{...testId('drop-indicator-before')}
+				data-crafter="drop-indicator-before"
 			></div>
 		{/if}
 		<Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
@@ -435,6 +435,7 @@
 							>
 								<button
 									type="button"
+									data-crafter="tree-chevron"
 									{...buttonProps ?? {}}
 									class="{buttonProps?.class || ''} w-auto!"
 								>
@@ -482,7 +483,7 @@
 		{#if showDropAfter}
 			<div
 				class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-				{...testId('drop-indicator-after')}
+				data-crafter="drop-indicator-after"
 			></div>
 		{/if}
 	</div>
@@ -492,7 +493,7 @@
 		{#if showDropBefore}
 			<div
 				class="pointer-events-none absolute inset-x-0 -top-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-				{...testId('drop-indicator-before')}
+				data-crafter="drop-indicator-before"
 			></div>
 		{/if}
 		<SidebarMenuSubButton class="p-0">
@@ -563,7 +564,7 @@
 		{#if showDropAfter}
 			<div
 				class="pointer-events-none absolute inset-x-0 -bottom-0.5 z-50 h-[3px] rounded-sm bg-flavor-foreground"
-				{...testId('drop-indicator-after')}
+				data-crafter="drop-indicator-after"
 			></div>
 		{/if}
 	</div>

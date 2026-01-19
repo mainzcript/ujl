@@ -6,7 +6,6 @@
 	import DeleteIcon from '@lucide/svelte/icons/trash-2';
 	import BackspaceIcon from '@lucide/svelte/icons/delete';
 	import PlusIcon from '@lucide/svelte/icons/plus';
-	import { testId } from '$lib/utils/test-attrs.js';
 	import { getModifierKey } from '$lib/utils/platform.js';
 
 	let {
@@ -51,7 +50,7 @@
 				onClose?.();
 			}}
 			class="justify-start gap-2"
-			{...testId('context-menu-add')}
+			data-crafter="context-menu-add"
 		>
 			<PlusIcon class="size-4" />
 			<span>Add</span>
@@ -73,7 +72,7 @@
 			disabled={!canCut}
 			onclick={() => onCut(nodeId)}
 			class="justify-start gap-2"
-			{...testId('context-menu-cut')}
+			data-crafter="context-menu-cut"
 		>
 			<ScissorsIcon class="size-4" />
 			<span>Cut</span>
@@ -92,7 +91,7 @@
 			disabled={!canCopy}
 			onclick={() => onCopy(nodeId)}
 			class="justify-start gap-2"
-			{...testId('context-menu-copy')}
+			data-crafter="context-menu-copy"
 		>
 			<CopyIcon class="size-4" />
 			<span>Copy</span>
@@ -111,7 +110,7 @@
 			disabled={!canPaste}
 			onclick={() => onPaste(nodeId)}
 			class="justify-start gap-2"
-			{...testId('context-menu-paste')}
+			data-crafter="context-menu-paste"
 		>
 			<ClipboardPasteIcon class="size-4" />
 			<span>Paste</span>
@@ -131,7 +130,7 @@
 			disabled={!canDelete}
 			onclick={() => onDelete(nodeId)}
 			class="justify-start gap-2 text-destructive hover:text-destructive"
-			{...testId('context-menu-delete')}
+			data-crafter="context-menu-delete"
 		>
 			<DeleteIcon class="size-4" />
 			<span>Delete</span>

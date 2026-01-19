@@ -86,8 +86,13 @@
 	}
 </script>
 
-<CommandDialog bind:open title="Add Module" description="Search and select a module to add">
-	<CommandInput placeholder="Search modules..." />
+<CommandDialog
+	bind:open
+	title="Add Module"
+	description="Search and select a module to add"
+	data-crafter="component-picker"
+>
+	<CommandInput placeholder="Search modules..." data-crafter="component-picker-search" />
 	<CommandList>
 		<CommandEmpty>No modules found.</CommandEmpty>
 		{#each sortedCategoryKeys as category, index (category)}

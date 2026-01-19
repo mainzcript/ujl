@@ -20,7 +20,6 @@
 	import EditorToolbar from '../editor-toolbar.svelte';
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { formatSlotName } from '$lib/utils/ujlc-tree.js';
-	import { test, testId } from '$lib/utils/test-attrs.js';
 
 	let {
 		parentNode,
@@ -103,7 +102,7 @@
 	const isSelected = $derived(selectedNodeId === `${parentNode.meta.id}:${slotName}`);
 </script>
 
-<SidebarMenuSubItem {...test('nav-tree-slot-group')}>
+<SidebarMenuSubItem data-crafter="nav-tree-slot-group">
 	<Collapsible>
 		<CollapsibleTrigger class="group">
 			{#snippet child({ props }: { props?: Record<string, unknown> })}
@@ -133,7 +132,7 @@
 								onDrop(e, parentNode.meta.id, slotName);
 							}}
 							ondragend={onDragEnd}
-							{...testId('slot-group-button')}
+							data-crafter="slot-group-button"
 						>
 							<button
 								type="button"
@@ -159,7 +158,7 @@
 											size="icon"
 											class="mr-2 h-6 w-6 opacity-0 group-hover/slot:opacity-100"
 											onclick={(e) => e.stopPropagation()}
-											{...testId('slot-context-menu-trigger')}
+											data-crafter="slot-context-menu-trigger"
 										>
 											<MoreVerticalIcon class="size-4" />
 										</Button>
@@ -194,7 +193,7 @@
 					<SidebarMenuSubItem>
 						<div
 							class="px-4 py-2 text-xs text-muted-foreground italic"
-							{...testId('slot-empty-state')}
+							data-crafter="slot-empty-state"
 						>
 							Empty slot - drop or add modules here
 						</div>

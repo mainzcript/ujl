@@ -97,7 +97,7 @@
 <div class="flex items-center justify-between py-2">
 	<div class="flex items-center gap-2">
 		<Select type="single" value={mode} onValueChange={handleModeChange}>
-			<SelectTrigger class="w-[150px]">
+			<SelectTrigger class="w-[150px]" data-crafter="mode-selector">
 				{#if mode === 'editor'}
 					<PencilRulerIcon />
 					<span>Editor</span>
@@ -125,6 +125,7 @@
 			type="single"
 			value={viewportType}
 			onValueChange={(value) => onViewportTypeChange?.(value)}
+			data-crafter="viewport-toggles"
 		>
 			<ToggleGroupItem value="desktop" title="Desktop View (1024px)">
 				<MonitorIcon />

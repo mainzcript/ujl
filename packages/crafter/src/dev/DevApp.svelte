@@ -8,10 +8,14 @@
 	// Crafter instance
 	let crafter: UJLCrafter | null = null;
 
+	// Check if running in test mode (set by Playwright via environment variable)
+	const isTestMode = import.meta.env.PUBLIC_TEST_MODE === 'true';
+
 	onMount(() => {
 		if (crafterContainer) {
 			crafter = new UJLCrafter({
-				target: crafterContainer
+				target: crafterContainer,
+				testMode: isTestMode
 			});
 		}
 	});

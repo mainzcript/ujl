@@ -4,7 +4,6 @@
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
-	import { testId } from '$lib/utils/test-attrs.js';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 
 	let {
@@ -90,7 +89,7 @@
 	}
 </script>
 
-<div class="relative flex w-full min-w-0 flex-col p-2" {...testId('nav-tree')}>
+<div class="relative flex w-full min-w-0 flex-col p-2" data-crafter="nav-tree">
 	<div
 		class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0"
 	>

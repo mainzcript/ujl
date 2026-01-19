@@ -6,7 +6,6 @@
 // Core utilities
 export * from './logger.js';
 export * from './platform.js';
-export * from './test-attrs.js';
 
 // File and clipboard utilities
 export * from './clipboard.js';
