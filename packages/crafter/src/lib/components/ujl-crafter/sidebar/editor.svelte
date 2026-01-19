@@ -112,21 +112,25 @@
 	});
 
 	/**
-	 * Checks if the event target is an editable element (input, textarea, contenteditable).
-	 * If true, we should not intercept copy/paste events and let the browser handle them.
+	 * Checks if the keyboard event originated from an editable element.
+	 * Uses composedPath() for Shadow DOM compatibility - event.target is
+	 * retargeted to the shadow host when events bubble outside Shadow DOM.
 	 */
-	function isEditableElement(target: EventTarget | null): boolean {
-		if (!target || !(target instanceof HTMLElement)) {
+	function isEditableElement(event: KeyboardEvent | ClipboardEvent): boolean {
+		const path = event.composedPath();
+		const actualTarget = path[0];
+
+		if (!actualTarget || !(actualTarget instanceof HTMLElement)) {
 			return false;
 		}
 
-		const tagName = target.tagName.toLowerCase();
+		const tagName = actualTarget.tagName.toLowerCase();
 
 		if (tagName === 'input' || tagName === 'textarea') {
 			return true;
 		}
 
-		if (target.isContentEditable) {
+		if (actualTarget.isContentEditable) {
 			return true;
 		}
 
@@ -276,7 +280,7 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (isEditableElement(event.target)) return;
+		if (isEditableElement(event)) return;
 
 		if (event.key === 'Escape') {
 			if (selectedNodeId) {
@@ -360,7 +364,7 @@
 	function handleCopyEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
 
-		if (isEditableElement(event.target)) return;
+		if (isEditableElement(event)) return;
 
 		if (!selectedNodeId || selectedSlotInfo) return;
 		if (!canCopy) return;
@@ -376,7 +380,7 @@
 	function handleCutEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
 
-		if (isEditableElement(event.target)) return;
+		if (isEditableElement(event)) return;
 
 		if (!selectedNodeId || selectedSlotInfo) return;
 		if (!canCut) return;
@@ -392,7 +396,7 @@
 	function handlePasteEvent(event: ClipboardEvent) {
 		if (isHandlingKeyboardShortcut) return;
 
-		if (isEditableElement(event.target)) return;
+		if (isEditableElement(event)) return;
 
 		if (!canPaste) return;
 

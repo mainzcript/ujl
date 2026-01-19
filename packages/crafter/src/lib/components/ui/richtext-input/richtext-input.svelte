@@ -88,7 +88,9 @@
 	});
 </script>
 
-<InputGroup class="h-auto">
+<InputGroup
+	class="h-auto focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+>
 	<!-- Toolbar at top -->
 	<InputGroupAddon align="block-start" class="">
 		<InputGroupButton
@@ -131,6 +133,12 @@
 		line-height: 1.5;
 		color: oklch(var(--foreground));
 	}
+
+	/*
+	 * Focus styles for ProseMirror are defined in bundle.css (not here)
+	 * because Svelte component styles don't reliably inject into Shadow DOM.
+	 * See: packages/crafter/src/lib/styles/bundle.css
+	 */
 
 	/* Placeholder styling */
 	.richtext-editor :global(.ProseMirror p.is-editor-empty:first-child::before) {

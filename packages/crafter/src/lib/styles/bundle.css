@@ -137,3 +137,20 @@
 .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id]:hover) {
 	outline: none !important;
 }
+
+/**
+ * RichText editor focus styles.
+ *
+ * Remove default focus styles from ProseMirror editor - focus indication
+ * is handled by the InputGroup container via focus-within.
+ *
+ * Note: These styles must be in bundle.css (not in the Svelte component)
+ * because Svelte component styles don't reliably inject into Shadow DOM.
+ * Related component: packages/crafter/src/lib/components/ui/richtext-input/
+ */
+.richtext-editor .ProseMirror:focus,
+.richtext-editor .ProseMirror:focus-visible,
+.richtext-editor .ProseMirror.ProseMirror-focused {
+	outline: none !important;
+	box-shadow: none !important;
+}
