@@ -1,4 +1,3 @@
-import { mount, unmount } from 'svelte';
 import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
 import { Composer } from '@ujl-framework/core';
@@ -7,12 +6,10 @@ import {
 	createMediaServiceFactory,
 	type CrafterStore
 } from '$lib/stores/index.js';
-import UJLCrafterSvelte from './ujl-crafter.svelte';
 import { logger } from '$lib/utils/logger.js';
 
-// Import bundled CSS as string for Shadow DOM injection
-// This is pre-processed by Tailwind CLI before the Vite build
-import bundledStyles from '$lib/styles/_bundled.css?inline';
+// Import Custom Element to register it (side effect)
+import './ujl-crafter-element.svelte';
 
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
@@ -63,6 +60,16 @@ export interface UJLCrafterOptions {
 	testMode?: boolean;
 }
 
+/**
+ * Interface for the Custom Element's DOM properties.
+ * These are set programmatically after element creation.
+ */
+interface UJLCrafterElement extends HTMLElement {
+	store: CrafterStore;
+	composer: Composer;
+	editorTheme: UJLTDocument;
+}
+
 // ============================================
 // CLASS
 // ============================================
@@ -92,11 +99,10 @@ export interface UJLCrafterOptions {
  */
 export class UJLCrafter {
 	private target: HTMLElement;
-	private shadowRoot: ShadowRoot | null = null;
+	private element: UJLCrafterElement | null = null;
 	private store: CrafterStore;
 	private composer: Composer;
 	private editorTheme: UJLTDocument;
-	private component: ReturnType<typeof mount> | null = null;
 	private documentChangeCallbacks = new Set<DocumentChangeCallback>();
 	private themeChangeCallbacks = new Set<ThemeChangeCallback>();
 	private notificationCallbacks = new Set<NotificationCallback>();
@@ -162,24 +168,16 @@ export class UJLCrafter {
 	}
 
 	private mount(): void {
-		// Create Shadow DOM for style isolation
-		this.shadowRoot = this.target.attachShadow({ mode: 'open' });
+		// Create Custom Element (Shadow DOM is created automatically by Svelte)
+		this.element = document.createElement('ujl-crafter-internal') as UJLCrafterElement;
 
-		// Inject bundled styles into Shadow DOM
-		const styleElement = document.createElement('style');
-		styleElement.textContent = bundledStyles;
-		this.shadowRoot.appendChild(styleElement);
+		// Set props via DOM properties (complex objects work fine)
+		this.element.store = this.store;
+		this.element.composer = this.composer;
+		this.element.editorTheme = this.editorTheme;
 
-		// Mount Svelte component into Shadow Root
-		this.component = mount(UJLCrafterSvelte, {
-			target: this.shadowRoot,
-			props: {
-				store: this.store,
-				composer: this.composer,
-				editorTheme: this.editorTheme,
-				shadowRoot: this.shadowRoot
-			}
-		});
+		// Append to target (this triggers connectedCallback and component mount)
+		this.target.appendChild(this.element);
 	}
 
 	private getDefaultDocument(): UJLCDocument {
@@ -224,6 +222,11 @@ export class UJLCrafter {
 	/** Get the currently selected node ID */
 	getSelectedNodeId(): string | null {
 		return this.store.selectedNodeId;
+	}
+
+	/** Get the Shadow Root of the Custom Element (for advanced use cases) */
+	getShadowRoot(): ShadowRoot | null {
+		return this.element?.shadowRoot ?? null;
 	}
 
 	// ============================================
@@ -282,14 +285,10 @@ export class UJLCrafter {
 
 	/** Destroy the editor and clean up resources */
 	destroy(): void {
-		if (this.component) {
-			unmount(this.component);
-			this.component = null;
-		}
-		// Clean up Shadow DOM contents
-		if (this.shadowRoot) {
-			this.shadowRoot.innerHTML = '';
-			this.shadowRoot = null;
+		if (this.element) {
+			// Remove element (this triggers disconnectedCallback and cleanup)
+			this.element.remove();
+			this.element = null;
 		}
 		this.documentChangeCallbacks.clear();
 		this.themeChangeCallbacks.clear();

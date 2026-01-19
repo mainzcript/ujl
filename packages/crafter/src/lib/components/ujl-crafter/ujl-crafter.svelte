@@ -9,6 +9,9 @@
 	- Dependency Injection: Store receives all dependencies via factory
 	- Unidirectional Data Flow: State flows down, actions flow up
 	- Context-based API: Child components access store via context
+	
+	Note: This component is rendered inside the ujl-crafter-element Custom Element,
+	which handles Shadow DOM creation and style injection.
 -->
 <script lang="ts">
 	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '../ui/app/index.js';
@@ -46,9 +49,9 @@
 	// ============================================
 
 	interface Props {
-		/** External store (from UJLCrafter class) */
+		/** External store (from UJLCrafter class via Custom Element) */
 		store?: CrafterStore;
-		/** External composer (from UJLCrafter class, only if store is provided) */
+		/** External composer (from UJLCrafter class via Custom Element) */
 		composer?: Composer;
 		/** Initial content document (optional, defaults to showcase, only if no external store) */
 		initialContent?: UJLCDocument;
@@ -56,8 +59,8 @@
 		initialTheme?: UJLTDocument;
 		/** Editor theme document (optional, defaults to default theme) - used for Crafter UI styling */
 		editorTheme?: UJLTDocument;
-		/** Shadow Root reference for scoped DOM queries (from UJLCrafter class) */
-		shadowRoot?: ShadowRoot;
+		/** Shadow Root reference for scoped DOM queries (from Custom Element host) */
+		shadowRoot?: ShadowRoot | null;
 	}
 
 	const {

@@ -14,13 +14,14 @@ pnpm add @ujl-framework/crafter
 
 > **Note:** The Crafter is a fully encapsulated bundle with Shadow DOM. All styles are automatically injected - no CSS import required. All dependencies (including the Svelte runtime) are bundled.
 
-**Fonts (optional):**
+**Fonts:**
 
-The Crafter does not bundle fonts. If you want to use specific fonts, import them in your application:
+The Crafter does not bundle fonts. To use the fonts available in Designer Mode, import them in your application (e.g., via [Fontsource](https://fontsource.org/)). A backend-based font service is planned for future versions.
 
 ```typescript
-// Example: Using Fontsource
 import '@fontsource-variable/inter';
+import '@fontsource-variable/open-sans';
+// ... add more as needed
 ```
 
 ## Usage
@@ -152,6 +153,36 @@ pnpm run test     # Run tests
 ```
 
 The `dev` command uses `concurrently` to run Tailwind CSS watch and Vite in parallel.
+
+### Project Structure
+
+```
+src/
+├── lib/
+│   ├── components/
+│   │   ├── ui/                 # Reusable UI components (inputs, pickers, etc.)
+│   │   └── ujl-crafter/        # Main Crafter components
+│   │       ├── canvas/         # Preview canvas
+│   │       ├── header/         # App header with mode switch, viewport controls
+│   │       ├── panel/          # Right panel (properties, designer)
+│   │       ├── sidebar/        # Left sidebar (nav tree, component picker)
+│   │       ├── UJLCrafter.ts   # Public API class
+│   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
+│   │       └── ujl-crafter.svelte          # Main UI component
+│   ├── services/               # Media service implementations
+│   ├── stores/                 # CrafterStore (Svelte 5 runes)
+│   ├── styles/                 # CSS architecture (see below)
+│   └── utils/                  # Helpers (clipboard, colors, DOM utilities)
+└── dev/                        # Development app for local testing
+```
+
+### Styles Architecture
+
+The Crafter uses Shadow DOM for style isolation. Due to a Svelte limitation, component styles defined in `<style>` blocks are injected into `document.head` instead of the Shadow DOM.
+
+**Solution:** Component styles are placed in co-located `.css` files and imported via `bundle.css`. An ESLint rule prevents accidental use of `<style>` blocks.
+
+See [src/lib/styles/README.md](src/lib/styles/README.md) for details.
 
 ## Related
 

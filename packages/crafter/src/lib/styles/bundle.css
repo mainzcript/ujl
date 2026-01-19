@@ -1,156 +1,21 @@
 /**
  * UJL Crafter Styles Bundle
  *
- * This file is the entry point for the bundled CSS that gets injected
- * into the Shadow DOM. It includes:
- * - Base UI styles from @ujl-framework/ui
- * - Compiled adapter-svelte styles (includes Container Query rules for responsive grids)
- * - Shadow DOM compatibility fixes for Tailwind CSS variables
+ * Entry-point for all styles injected into Shadow DOM.
+ * See README.md for architecture documentation.
  *
  * Note: Fonts are NOT included in this bundle.
  * Consumers should import fonts separately based on their needs.
  */
 
+/* External dependencies */
 @import '@ujl-framework/ui/styles';
-
-/* Import compiled adapter styles (includes Container Query rules for responsive grids) */
 @import '@ujl-framework/adapter-svelte/bundle.css';
 
-/* Scan Crafter components for Tailwind classes */
+/* Tailwind source scanning */
 @source '../components/**/*.{svelte,js,ts}';
 
-/**
- * Shadow DOM compatibility hack for Tailwind CSS variables.
- *
- * Tailwind's @supports query in @layer properties evaluates differently in Shadow DOM
- * contexts, causing CSS variables (--tw-*) to not be defined. This explicitly sets
- * all required Tailwind CSS variables to ensure utilities (e.g., drop shadows) work
- * correctly in Shadow DOM.
- */
-@layer properties {
-	:host,
-	*,
-	:before,
-	:after,
-	::backdrop {
-		--tw-translate-x: 0;
-		--tw-translate-y: 0;
-		--tw-translate-z: 0;
-		--tw-rotate-x: initial;
-		--tw-rotate-y: initial;
-		--tw-rotate-z: initial;
-		--tw-skew-x: initial;
-		--tw-skew-y: initial;
-		--tw-scroll-snap-strictness: proximity;
-		--tw-space-y-reverse: 0;
-		--tw-border-style: solid;
-		--tw-leading: initial;
-		--tw-font-weight: initial;
-		--tw-tracking: initial;
-		--tw-shadow: 0 0 #0000;
-		--tw-shadow-color: initial;
-		--tw-shadow-alpha: 100%;
-		--tw-inset-shadow: 0 0 #0000;
-		--tw-inset-shadow-color: initial;
-		--tw-inset-shadow-alpha: 100%;
-		--tw-ring-color: initial;
-		--tw-ring-shadow: 0 0 #0000;
-		--tw-inset-ring-color: initial;
-		--tw-inset-ring-shadow: 0 0 #0000;
-		--tw-ring-inset: initial;
-		--tw-ring-offset-width: 0px;
-		--tw-ring-offset-color: #fff;
-		--tw-ring-offset-shadow: 0 0 #0000;
-		--tw-outline-style: solid;
-		--tw-backdrop-blur: initial;
-		--tw-backdrop-brightness: initial;
-		--tw-backdrop-contrast: initial;
-		--tw-backdrop-grayscale: initial;
-		--tw-backdrop-hue-rotate: initial;
-		--tw-backdrop-invert: initial;
-		--tw-backdrop-opacity: initial;
-		--tw-backdrop-saturate: initial;
-		--tw-backdrop-sepia: initial;
-		--tw-duration: initial;
-		--tw-ease: initial;
-		--tw-content: '';
-		--tw-scale-x: 1;
-		--tw-scale-y: 1;
-		--tw-scale-z: 1;
-		--tw-animation-delay: 0s;
-		--tw-animation-direction: normal;
-		--tw-animation-duration: initial;
-		--tw-animation-fill-mode: none;
-		--tw-animation-iteration-count: 1;
-		--tw-enter-blur: 0;
-		--tw-enter-opacity: 1;
-		--tw-enter-rotate: 0;
-		--tw-enter-scale: 1;
-		--tw-enter-translate-x: 0;
-		--tw-enter-translate-y: 0;
-		--tw-exit-blur: 0;
-		--tw-exit-opacity: 1;
-		--tw-exit-rotate: 0;
-		--tw-exit-scale: 1;
-		--tw-exit-translate-x: 0;
-		--tw-exit-translate-y: 0;
-	}
-}
-
-/**
- * Selection styles for editor mode.
- *
- * These styles provide visual feedback when hovering over and selecting
- * UJL modules in the preview canvas. The accent color comes from the
- * editor theme tokens, with fallback to the preview theme's accent.
- */
-
-/* Hover state for editable modules */
-.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover {
-	outline: 2px dashed oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
-	outline-offset: var(--spacing);
-	cursor: pointer;
-}
-
-/* Selected state for editable modules */
-.ujl-editor-mode [data-ujl-module-id].ujl-selected {
-	outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)));
-	outline-offset: var(--spacing);
-}
-
-/* Dark mode: hover state */
-.dark .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover {
-	outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)) / 0.7);
-}
-
-/* Dark mode: selected state */
-.dark .ujl-editor-mode [data-ujl-module-id].ujl-selected {
-	outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)));
-}
-
-/* Explicitly remove outline when not selected to prevent lingering styles */
-.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected) {
-	outline: none;
-}
-
-/* Prevent nested hover styles - parent should not show hover when child is hovered */
-.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id]:hover) {
-	outline: none !important;
-}
-
-/**
- * RichText editor focus styles.
- *
- * Remove default focus styles from ProseMirror editor - focus indication
- * is handled by the InputGroup container via focus-within.
- *
- * Note: These styles must be in bundle.css (not in the Svelte component)
- * because Svelte component styles don't reliably inject into Shadow DOM.
- * Related component: packages/crafter/src/lib/components/ui/richtext-input/
- */
-.richtext-editor .ProseMirror:focus,
-.richtext-editor .ProseMirror:focus-visible,
-.richtext-editor .ProseMirror.ProseMirror-focused {
-	outline: none !important;
-	box-shadow: none !important;
-}
+/* Internal styles */
+@import './base/tailwind-shadow.css';
+@import './global/editor-mode.css';
+@import './components.css';

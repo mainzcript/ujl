@@ -26,6 +26,11 @@ export default defineConfig(({ command }) => {
 					if (warning.code?.startsWith('a11y-')) {
 						return;
 					}
+					// Suppress customElement warning - we intentionally use per-component method
+					// Only ujl-crafter-element.svelte is a Custom Element, others are normal components
+					if (warning.code === 'options_missing_custom_element') {
+						return;
+					}
 					defaultHandler(warning);
 				}
 			}),
