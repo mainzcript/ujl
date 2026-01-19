@@ -72,6 +72,7 @@ test_unit:
     - corepack enable
     - corepack prepare pnpm@${PNPM_VERSION} --activate
     - pnpm install --prefer-offline --frozen-lockfile
+    - pnpm run build
   script:
     - pnpm test:unit
   cache:
@@ -88,7 +89,6 @@ test_unit:
       - stuck_or_timeout_failure
       - api_failure
 
-# Run E2E tests (Playwright)
 test_e2e:
   stage: test
   image: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
@@ -99,6 +99,7 @@ test_e2e:
     - corepack enable
     - corepack prepare pnpm@${PNPM_VERSION} --activate
     - pnpm install --prefer-offline --frozen-lockfile
+    - pnpm run build
   script:
     - pnpm test:e2e
   artifacts:
