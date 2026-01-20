@@ -315,7 +315,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Stimulus**          | Entwickler:in möchte ein erstes Custom Module erstellen                                                                                               |
 | **Systemreaktion**    | Template-Dateien und Dokumentation leiten an                                                                                                          |
 | **Messbare Antwort**  | - <1 Stunde für erstes funktionierendes Custom Module<br/>- Template-Dateien in `fields/` und `modules/`<br/>- Beispiele in `@ujl-framework/examples` |
-| **Architektur-Bezug** | Template-Dateien, READMEs ([Core README](../../packages/core/README.md))                                                                              |
+| **Architektur-Bezug** | Template-Dateien, READMEs ([Core README](../../../../packages/core/README.md))                                                                        |
 
 **Testbarkeit:** Nutzer-Feedback und Time-to-First-Module-Messungen.
 
