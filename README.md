@@ -34,8 +34,8 @@ ujl/
 │   ├── adapter-svelte/ # Svelte Adapter (Svelte 5)
 │   ├── adapter-web/    # Web Adapter (Custom Elements)
 │   └── examples/       # Example Material and Test Data
-├── services/           # Backend Services (Docker-based)
-│   └── media/          # Payload CMS-based Media Management API
+├── services/
+│   └── library/        # UJL Library – Asset Management API (Payload CMS)
 └── apps/
     ├── demo/           # Demo Application
     └── docs/           # Documentation Website

@@ -1,67 +1,205 @@
-# Payload Blank Template
+# @ujl-framework/library
 
-This template comes configured with the bare minimum to get started on anything you need.
+The **UJL Library** is the asset management backend for the UJL Framework. It provides a self-hosted service for managing images, with planned support for fonts and documents in future releases.
 
-## Quick start
+When you use the [UJL Crafter](../../packages/crafter/README.md) in "backend storage" mode, uploaded images are stored and served through this service instead of being embedded as Base64 in the document. This keeps your `.ujlc.json` files lightweight and enables features like automatic image resizing, WebP conversion, and centralized media management across multiple documents.
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+The Library is built on [Payload CMS 3.0](https://payloadcms.com/) with PostgreSQL as the database. It runs as a Docker container and exposes a REST API that the Crafter (and other UJL applications) can consume.
 
-## Quick Start - local setup
+## Why a Separate Service?
 
-To spin up this template locally, follow these steps:
+The UJL Framework separates content from design – and the Library extends this principle to assets. Instead of coupling media files directly into your content documents, the Library acts as a central repository:
 
-### Clone
+- **Reusability**: Use the same image across multiple documents without duplication
+- **Performance**: Automatic resizing generates optimized variants (thumbnail, small, medium, large, xlarge)
+- **Localization**: Store localized metadata (alt text, descriptions) for each image
+- **Consistency**: All images are converted to WebP format with consistent quality settings
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+## Quick Start
 
-### Development
+### Prerequisites
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+- Docker and Docker Compose
+- Node.js 22+ and pnpm 10+
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+### Setup
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+1. **Copy and configure environment file**
 
-#### Docker (Optional)
+   ```bash
+   cp .env.example .env
+   ```
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+   Open `.env` and set secure values for `PAYLOAD_SECRET` (minimum 32 characters) and `POSTGRES_PASSWORD`. You can generate a secret with:
 
-To do so, follow these steps:
+   ```bash
+   openssl rand -hex 32
+   ```
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+2. **Start the services**
 
-## How it works
+   ```bash
+   docker-compose up
+   ```
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+   On first start, this will install dependencies and initialize the database. Wait until you see "ready" in the logs – this may take a few minutes.
 
-### Collections
+3. **Create your admin user**
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+   Open http://localhost:3000/admin in your browser. Payload will prompt you to create the first user. This user has full access to the admin panel and can manage all content.
 
-- #### Users (Authentication)
+4. **Enable API Key for Crafter integration**
 
-  Users are auth-enabled collections that have access to the admin panel.
+   The Crafter authenticates via API Key. To generate one:
+   
+   - In the admin panel, go to the **Users** collection
+   - Select the user you just created
+   - Check **Enable API Key** and click **Save**
+   - Copy the generated API key – you'll need it when configuring the Crafter
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+## Integration with UJL Crafter
 
-- #### Media
+Once the Library is running, you can configure the Crafter to use it for media storage:
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+```typescript
+import { UJLCrafter } from '@ujl-framework/crafter';
 
-### Docker
+const crafter = new UJLCrafter({
+  target: '#editor-container',
+  document: myDocument,
+  theme: myTheme,
+  mediaLibrary: {
+    storage: 'backend',
+    endpoint: 'http://localhost:3000/api',
+    apiKey: 'your-api-key-here'
+  }
+});
+```
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+When configured this way, images uploaded through the Crafter's media library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+## API Reference
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+The Library exposes a REST API at `http://localhost:3000/api`. All endpoints follow Payload CMS conventions.
 
-## Questions
+### Endpoints
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| GET | `/media` | No | List images with pagination |
+| GET | `/media/:id` | No | Get a single image by ID |
+| POST | `/media` | Yes | Upload a new image |
+| PATCH | `/media/:id` | Yes | Update image metadata |
+| DELETE | `/media/:id` | Yes | Delete an image |
+
+> **Note:** The collection is currently named `media` for compatibility with the existing Crafter implementation. This will be renamed to `images` in a future update.
+
+### Authentication
+
+For write operations (POST, PATCH, DELETE), include the API key in the Authorization header:
+
+```
+Authorization: users API-Key YOUR_API_KEY
+```
+
+### Query Parameters
+
+The GET endpoints support Payload's query syntax:
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `locale` | Return content in a specific language | `?locale=de` |
+| `limit` | Number of results per page (default: 10) | `?limit=50` |
+| `page` | Page number for pagination | `?page=2` |
+| `sort` | Sort by field, prefix with `-` for descending | `?sort=-createdAt` |
+| `where` | Filter results | `?where[alt][exists]=true` |
+
+For the full query syntax, see the [Payload CMS documentation](https://payloadcms.com/docs/queries/overview).
+
+## Localization
+
+The Library supports multilingual content out of the box. Eight languages are pre-configured:
+
+| Code | Language |
+|------|----------|
+| `en` | English (default) |
+| `de` | Deutsch |
+| `fr` | Français |
+| `es` | Español |
+| `it` | Italiano |
+| `nl` | Nederlands |
+| `pl` | Polski |
+| `pt` | Português |
+
+Localized fields (like `alt` text and `description`) can have different values for each language. When querying the API, use the `locale` parameter to get content in a specific language, or `locale=all` to get all translations at once.
+
+To change the default language for the admin panel, set `PAYLOAD_DEFAULT_LOCALE` in your `.env` file.
+
+**Important:** The list of available locales is defined at build time. Adding or removing languages requires code changes and a database migration. The pre-configured languages cover most European use cases – if you need additional languages, you'll need to modify `payload.config.ts`.
+
+## Security & CORS
+
+The Library is designed as a **self-hosted service**. By default, CORS is open (`*`) to allow any frontend application to access the API.
+
+### API Authentication
+
+Write operations (upload, update, delete) require an API key:
+
+```
+Authorization: users API-Key YOUR_API_KEY
+```
+
+Read operations are public by design – the Library serves images that are meant to be displayed on websites.
+
+### Restricting CORS (optional)
+
+If you need to restrict which origins can access the API, set the `CORS_ALLOWED_ORIGINS` environment variable:
+
+```env
+CORS_ALLOWED_ORIGINS=https://crafter.example.com,https://admin.example.com
+```
+
+When not set, all origins are allowed.
+
+## Development
+
+### Running with Docker (recommended)
+
+```bash
+docker-compose up
+```
+
+This starts both the Payload application and PostgreSQL database. The application is available at http://localhost:3000.
+
+### Running locally
+
+If you prefer to run without Docker, you'll need a local PostgreSQL instance:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+```
+
+Make sure your `.env` file has a valid `DATABASE_URL` pointing to your local PostgreSQL.
+
+### Useful commands
+
+```bash
+# Regenerate TypeScript types after schema changes
+pnpm run generate:types
+
+# Run integration and E2E tests
+pnpm test
+
+# Build for production
+pnpm build
+```
+
+## Related Documentation
+
+- [UJL Framework Overview](../../README.md)
+- [UJL Crafter Documentation](../../packages/crafter/README.md)
+- [Payload CMS Documentation](https://payloadcms.com/docs)

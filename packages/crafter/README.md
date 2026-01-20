@@ -103,7 +103,7 @@ The Crafter supports two storage modes: **Inline** (default, Base64 in document)
 | `inline`     | None                 | Media stored as Base64 in document |
 | `backend`    | `endpoint`, `apiKey` | Media stored on Payload CMS server |
 
-For backend storage setup and troubleshooting, see the [Media Service README](../../services/media/README.md).
+For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
 ## API Reference
 
@@ -187,4 +187,4 @@ See [src/lib/styles/README.md](src/lib/styles/README.md) for details.
 ## Related
 
 - [UJL Framework README](../../README.md)
-- [Media Service](../../services/media/README.md)
+- [UJL Library](../../services/library/README.md)
