@@ -30,11 +30,20 @@ The UJL Framework separates content from design – and the Library extends this
    cp .env.example .env
    ```
 
-   Open `.env` and set secure values for `PAYLOAD_SECRET` (minimum 32 characters) and `POSTGRES_PASSWORD`. You can generate a secret with:
+   Open `.env` and configure:
 
-   ```bash
-   openssl rand -hex 32
+   | Variable | Required | Description |
+   |----------|----------|-------------|
+   | `PAYLOAD_SECRET` | Yes | Min. 32 characters. Generate with `openssl rand -hex 32` |
+   | `POSTGRES_PASSWORD` | Yes | Password for PostgreSQL database |
+
+   Example:
+   ```env
+   PAYLOAD_SECRET=your-generated-secret-at-least-32-chars
+   POSTGRES_PASSWORD=mysecretpw
    ```
+
+   > **Note:** The database URL is automatically derived from `POSTGRES_PASSWORD` in `docker-compose.yml` – you don't need to set it manually.
 
 2. **Start the services**
 
@@ -171,7 +180,7 @@ docker-compose up
 
 This starts both the Payload application and PostgreSQL database. The application is available at http://localhost:3000.
 
-### Running locally
+### Running locally (without Docker)
 
 If you prefer to run without Docker, you'll need a local PostgreSQL instance:
 
@@ -183,7 +192,12 @@ pnpm install
 pnpm dev
 ```
 
-Make sure your `.env` file has a valid `DATABASE_URL` pointing to your local PostgreSQL.
+When running without Docker, you must set `DATABASE_URL` manually in your `.env`:
+
+```env
+PAYLOAD_SECRET=your-generated-secret
+DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/library
+```
 
 ### Useful commands
 

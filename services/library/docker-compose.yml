@@ -13,6 +13,9 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      # DATABASE_URL is derived from PostgreSQL credentials
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-library}
 
   postgres:
     image: postgres:16-alpine
