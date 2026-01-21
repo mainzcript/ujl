@@ -8,6 +8,7 @@
 export {
 	UJLCrafter,
 	type UJLCrafterOptions,
+	type ImageLibraryOptions,
 	type NotificationType,
 	type NotificationCallback,
 	type DocumentChangeCallback,

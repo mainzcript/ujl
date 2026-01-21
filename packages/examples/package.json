@@ -3,7 +3,6 @@
 	"version": "0.0.1",
 	"description": "UJL Examples - Example Material and Test Data",
 	"type": "module",
-	"private": true,
 	"files": [
 		"src/"
 	],

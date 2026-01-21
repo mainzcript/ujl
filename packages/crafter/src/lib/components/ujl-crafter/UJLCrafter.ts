@@ -7,9 +7,15 @@ import {
 	type CrafterStore
 } from '$lib/stores/index.js';
 import { logger } from '$lib/utils/logger.js';
+import CrafterElement from './ujl-crafter-element.svelte';
 
-// Import Custom Element to register it (side effect)
-import './ujl-crafter-element.svelte';
+// Register the Custom Element if not already registered
+if (!customElements.get('ujl-crafter-internal')) {
+	customElements.define(
+		'ujl-crafter-internal',
+		CrafterElement as unknown as CustomElementConstructor
+	);
+}
 
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };

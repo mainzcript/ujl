@@ -2,7 +2,6 @@
 	"name": "@ujl-framework/crafter",
 	"version": "0.0.1",
 	"description": "UJL Crafter - Visual Editor for UJL Content",
-	"private": true,
 	"scripts": {
 		"dev": "concurrently -n tw,vite -c blue,green \"pnpm run build:tailwind:watch\" \"vite\"",
 		"build": "pnpm run build:tailwind && vite build",

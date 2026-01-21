@@ -11,9 +11,6 @@
 			"@ujl-framework/adapter-svelte",
 			"@ujl-framework/adapter-web",
 			"@ujl-framework/examples",
-			"@ujl-framework/demo",
-			"@ujl-framework/docs",
-			"@ujl-framework/library",
 			"@ujl-framework/types"
 		]
 	],

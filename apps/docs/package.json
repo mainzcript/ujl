@@ -1,8 +1,7 @@
 {
 	"name": "@ujl-framework/docs",
-	"version": "0.0.1",
-	"description": "UJL Documentation - User and Architecture Documentation",
 	"private": true,
+	"description": "UJL Documentation - User and Architecture Documentation",
 	"type": "module",
 	"scripts": {
 		"dev": "vitepress dev",
