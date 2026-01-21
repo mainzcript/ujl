@@ -32,12 +32,13 @@ The UJL Framework separates content from design – and the Library extends this
 
    Open `.env` and configure:
 
-   | Variable | Required | Description |
-   |----------|----------|-------------|
-   | `PAYLOAD_SECRET` | Yes | Min. 32 characters. Generate with `openssl rand -hex 32` |
-   | `POSTGRES_PASSWORD` | Yes | Password for PostgreSQL database |
+   | Variable            | Required | Description                                              |
+   | ------------------- | -------- | -------------------------------------------------------- |
+   | `PAYLOAD_SECRET`    | Yes      | Min. 32 characters. Generate with `openssl rand -hex 32` |
+   | `POSTGRES_PASSWORD` | Yes      | Password for PostgreSQL database                         |
 
    Example:
+
    ```env
    PAYLOAD_SECRET=your-generated-secret-at-least-32-chars
    POSTGRES_PASSWORD=mysecretpw
@@ -60,7 +61,6 @@ The UJL Framework separates content from design – and the Library extends this
 4. **Enable API Key for Crafter integration**
 
    The Crafter authenticates via API Key. To generate one:
-   
    - In the admin panel, go to the **Users** collection
    - Select the user you just created
    - Check **Enable API Key** and click **Save**
@@ -71,7 +71,7 @@ The UJL Framework separates content from design – and the Library extends this
 Once the Library is running, you can configure the Crafter to use it for media storage:
 
 ```typescript
-import { UJLCrafter } from '@ujl-framework/crafter';
+import { UJLCrafter } from '@ujl-framework/crafter'
 
 const crafter = new UJLCrafter({
   target: '#editor-container',
@@ -80,9 +80,9 @@ const crafter = new UJLCrafter({
   mediaLibrary: {
     storage: 'backend',
     endpoint: 'http://localhost:3000/api',
-    apiKey: 'your-api-key-here'
-  }
-});
+    apiKey: 'your-api-key-here',
+  },
+})
 ```
 
 When configured this way, images uploaded through the Crafter's media library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
@@ -93,13 +93,13 @@ The Library exposes a REST API at `http://localhost:3000/api`. All endpoints fol
 
 ### Endpoints
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| GET | `/media` | No | List images with pagination |
-| GET | `/media/:id` | No | Get a single image by ID |
-| POST | `/media` | Yes | Upload a new image |
-| PATCH | `/media/:id` | Yes | Update image metadata |
-| DELETE | `/media/:id` | Yes | Delete an image |
+| Method | Endpoint     | Auth Required | Description                 |
+| ------ | ------------ | ------------- | --------------------------- |
+| GET    | `/media`     | No            | List images with pagination |
+| GET    | `/media/:id` | No            | Get a single image by ID    |
+| POST   | `/media`     | Yes           | Upload a new image          |
+| PATCH  | `/media/:id` | Yes           | Update image metadata       |
+| DELETE | `/media/:id` | Yes           | Delete an image             |
 
 > **Note:** The collection is currently named `media` for compatibility with the existing Crafter implementation. This will be renamed to `images` in a future update.
 
@@ -115,13 +115,13 @@ Authorization: users API-Key YOUR_API_KEY
 
 The GET endpoints support Payload's query syntax:
 
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `locale` | Return content in a specific language | `?locale=de` |
-| `limit` | Number of results per page (default: 10) | `?limit=50` |
-| `page` | Page number for pagination | `?page=2` |
-| `sort` | Sort by field, prefix with `-` for descending | `?sort=-createdAt` |
-| `where` | Filter results | `?where[alt][exists]=true` |
+| Parameter | Description                                   | Example                    |
+| --------- | --------------------------------------------- | -------------------------- |
+| `locale`  | Return content in a specific language         | `?locale=de`               |
+| `limit`   | Number of results per page (default: 10)      | `?limit=50`                |
+| `page`    | Page number for pagination                    | `?page=2`                  |
+| `sort`    | Sort by field, prefix with `-` for descending | `?sort=-createdAt`         |
+| `where`   | Filter results                                | `?where[alt][exists]=true` |
 
 For the full query syntax, see the [Payload CMS documentation](https://payloadcms.com/docs/queries/overview).
 
@@ -129,16 +129,16 @@ For the full query syntax, see the [Payload CMS documentation](https://payloadcm
 
 The Library supports multilingual content out of the box. Eight languages are pre-configured:
 
-| Code | Language |
-|------|----------|
+| Code | Language          |
+| ---- | ----------------- |
 | `en` | English (default) |
-| `de` | Deutsch |
-| `fr` | Français |
-| `es` | Español |
-| `it` | Italiano |
-| `nl` | Nederlands |
-| `pl` | Polski |
-| `pt` | Português |
+| `de` | Deutsch           |
+| `fr` | Français          |
+| `es` | Español           |
+| `it` | Italiano          |
+| `nl` | Nederlands        |
+| `pl` | Polski            |
+| `pt` | Português         |
 
 Localized fields (like `alt` text and `description`) can have different values for each language. When querying the API, use the `locale` parameter to get content in a specific language, or `locale=all` to get all translations at once.
 
@@ -205,8 +205,9 @@ DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/library
 # Regenerate TypeScript types after schema changes
 pnpm run generate:types
 
-# Run integration and E2E tests
-pnpm test
+# Run integration and E2E tests (requires running database)
+docker-compose up -d
+pnpm run test:local
 
 # Build for production
 pnpm build
