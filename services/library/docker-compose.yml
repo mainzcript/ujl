@@ -1,22 +1,6 @@
+# PostgreSQL database for local development
+# Usage: pnpm run dev (starts automatically) or docker-compose up -d
 services:
-  payload:
-    image: node:22-alpine
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      # DATABASE_URL is derived from PostgreSQL credentials
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}@postgres:5432/${POSTGRES_DB:-library}
-
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -36,4 +20,3 @@ services:
 
 volumes:
   pgdata:
-  node_modules:

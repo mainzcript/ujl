@@ -40,6 +40,8 @@ next-env.d.ts
 
 .env
 
+# uploads (user data, not versioned)
+/uploads
 /media
 
 # Playwright

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
 import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+import { Images } from './collections/Images'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +30,7 @@ export default buildConfig({
     },
   },
   cors,
-  collections: [Users, Media],
+  collections: [Users, Images],
   // Localization: Pre-configured for common European languages
   // Add/remove locales requires migration + rebuild
   localization: {

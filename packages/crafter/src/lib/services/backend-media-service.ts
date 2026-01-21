@@ -3,9 +3,12 @@ import type { MediaService, UploadResult } from './media-service.js';
 import { logger } from '../utils/logger.js';
 
 /**
- * Payload CMS Media Response
+ * Payload CMS Image Response (IPTC-oriented data model)
+ *
+ * Image sizes are inspired by Tailwind CSS breakpoints:
+ * xs (320), sm (640), md (768), lg (1024), xl (1280), xxl (1536), xxxl (1920), max (2560)
  */
-type PayloadMediaDoc = {
+type PayloadImageDoc = {
 	id: string;
 	filename: string;
 	mimeType: string;
@@ -13,26 +16,30 @@ type PayloadMediaDoc = {
 	width: number;
 	height: number;
 	sizes?: {
-		thumbnail?: { url: string; width: number; height: number };
-		small?: { url: string; width: number; height: number };
-		medium?: { url: string; width: number; height: number };
-		large?: { url: string; width: number; height: number };
-		xlarge?: { url: string; width: number; height: number };
+		xs?: { url: string; width: number; height: number };
+		sm?: { url: string; width: number; height: number };
+		md?: { url: string; width: number; height: number };
+		lg?: { url: string; width: number; height: number };
+		xl?: { url: string; width: number; height: number };
+		xxl?: { url: string; width: number; height: number };
+		xxxl?: { url: string; width: number; height: number };
+		max?: { url: string; width: number; height: number };
 	};
 	url: string;
-	title?: string;
 	alt?: string;
 	description?: string;
-	author?: string;
-	license?: string;
-	sourceLink?: string;
-	tags?: Array<{ tag: string; id: string }>;
+	credit?: {
+		creator?: string;
+		creditLine?: string;
+		copyrightNotice?: string;
+		licenseUrl?: string;
+	};
 	createdAt: string;
 	updatedAt: string;
 };
 
 type PayloadListResponse = {
-	docs: PayloadMediaDoc[];
+	docs: PayloadImageDoc[];
 	totalDocs: number;
 	limit: number;
 	totalPages: number;
@@ -53,15 +60,18 @@ type PayloadListResponse = {
 export class BackendMediaService implements MediaService {
 	private endpoint: string;
 	private apiKey?: string;
+	private collectionSlug: string;
 
 	/**
 	 * Create a backend media service
 	 * @param endpoint - Base URL of the API (e.g., http://localhost:3000/api)
 	 * @param apiKey - Optional API key for authentication
+	 * @param collectionSlug - The Payload collection slug (default: 'images')
 	 */
-	constructor(endpoint: string, apiKey?: string) {
+	constructor(endpoint: string, apiKey?: string, collectionSlug: string = 'images') {
 		this.endpoint = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
 		this.apiKey = apiKey;
+		this.collectionSlug = collectionSlug;
 	}
 
 	/**
@@ -70,7 +80,7 @@ export class BackendMediaService implements MediaService {
 	 */
 	async checkConnection(): Promise<{ connected: boolean; error?: string }> {
 		try {
-			const response = await fetch(`${this.endpoint}/media?limit=1`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}?limit=1`, {
 				headers: this.getHeaders()
 			});
 
@@ -110,18 +120,21 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * Convert Payload media doc to MediaLibraryEntry
-	 * @param doc - The Payload CMS media document
+	 * Convert Payload image doc to MediaLibraryEntry
+	 * @param doc - The Payload CMS image document
 	 * @returns MediaLibraryEntry with full URL and metadata
 	 */
-	private payloadToEntry(doc: PayloadMediaDoc): MediaLibraryEntry {
-		// Use the best available size, prefer xlarge
+	private payloadToEntry(doc: PayloadImageDoc): MediaLibraryEntry {
+		// Use the best available size (largest to smallest fallback)
 		const bestSize =
-			doc.sizes?.xlarge ||
-			doc.sizes?.large ||
-			doc.sizes?.medium ||
-			doc.sizes?.small ||
-			doc.sizes?.thumbnail;
+			doc.sizes?.max ||
+			doc.sizes?.xxxl ||
+			doc.sizes?.xxl ||
+			doc.sizes?.xl ||
+			doc.sizes?.lg ||
+			doc.sizes?.md ||
+			doc.sizes?.sm ||
+			doc.sizes?.xs;
 
 		// Extract base URL (remove /api from endpoint)
 		const baseUrl = this.endpoint.replace('/api', '');
@@ -150,15 +163,14 @@ export class BackendMediaService implements MediaService {
 	async upload(file: File, metadata: MediaMetadata): Promise<UploadResult> {
 		const formData = new FormData();
 		formData.append('file', file);
-		formData.append('title', metadata.filename);
 
-		// Add optional metadata if available
+		// Set alt text (required field) - use filename as default
 		if (metadata.filename) {
 			formData.append('alt', metadata.filename);
 		}
 
 		try {
-			const response = await fetch(`${this.endpoint}/media`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}`, {
 				method: 'POST',
 				headers: this.getHeaders(),
 				body: formData
@@ -170,7 +182,7 @@ export class BackendMediaService implements MediaService {
 			}
 
 			const result = await response.json();
-			const doc: PayloadMediaDoc = result.doc;
+			const doc: PayloadImageDoc = result.doc;
 
 			return {
 				mediaId: doc.id,
@@ -189,7 +201,7 @@ export class BackendMediaService implements MediaService {
 	 */
 	async get(mediaId: string): Promise<MediaLibraryEntry | null> {
 		try {
-			const response = await fetch(`${this.endpoint}/media/${mediaId}`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${mediaId}`, {
 				headers: this.getHeaders()
 			});
 
@@ -197,10 +209,10 @@ export class BackendMediaService implements MediaService {
 				if (response.status === 404) {
 					return null;
 				}
-				throw new Error('Failed to fetch media');
+				throw new Error('Failed to fetch image');
 			}
 
-			const doc: PayloadMediaDoc = await response.json();
+			const doc: PayloadImageDoc = await response.json();
 			return this.payloadToEntry(doc);
 		} catch (err) {
 			logger.error('Backend get error:', err);
@@ -214,12 +226,12 @@ export class BackendMediaService implements MediaService {
 	 */
 	async list(): Promise<Array<{ id: string; entry: MediaLibraryEntry }>> {
 		try {
-			const response = await fetch(`${this.endpoint}/media?limit=100`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}?limit=100`, {
 				headers: this.getHeaders()
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to list media');
+				throw new Error('Failed to list images');
 			}
 
 			const result: PayloadListResponse = await response.json();
@@ -240,7 +252,7 @@ export class BackendMediaService implements MediaService {
 	 */
 	async delete(mediaId: string): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.endpoint}/media/${mediaId}`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${mediaId}`, {
 				method: 'DELETE',
 				headers: this.getHeaders()
 			});
@@ -249,7 +261,7 @@ export class BackendMediaService implements MediaService {
 				if (response.status === 404) {
 					return false;
 				}
-				throw new Error('Failed to delete media');
+				throw new Error('Failed to delete image');
 			}
 
 			return true;
