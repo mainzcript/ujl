@@ -34,6 +34,7 @@ graph TB
         TD2["Inline Type Assertions"]
         TD3["Hardcoded Configuration"]
         TD4["Legacy API Patterns"]
+        TD5["API-Key im Frontend"]
     end
 
     style HighRisk fill:#ef4444
@@ -662,6 +663,42 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 ---
 
+### 11.2.9 API-Key-Exposition im Media Service
+
+| Attribut        | Wert              |
+| --------------- | ----------------- |
+| **Schulden-ID** | TD-009            |
+| **Kategorie**   | Sicherheit        |
+| **Aufwand**     | Mittel (2-3 Tage) |
+| **Priorität**   | Hoch              |
+
+**Beschreibung:**
+
+Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client. Dies stellt ein Sicherheitsrisiko dar, da API-Keys im Client-Code oder Netzwerk-Requests sichtbar und somit kompromittierbar sind.
+
+**Potenzielle Auswirkungen:**
+
+- API-Keys können von Dritten abgefangen und missbraucht werden
+- Unbefugter Zugriff auf Media-Service-Ressourcen
+- Mögliche Kostenexplosion bei externen Services (z.B. CDN, Storage)
+- Sicherheitsaudit-Probleme bei Enterprise-Kunden
+
+**Betroffene Pakete:**
+
+- `services/media` - API-Key-Handling
+- `@ujl-framework/crafter` - Media Service Integration
+
+**Behebungsplan:**
+
+1. API-Key ausschließlich serverseitig verwenden
+2. Proxy-Endpoint im Backend für Media-Anfragen implementieren
+3. Token-basierte Authentifizierung für Client-Requests einführen
+4. Kurzzeitige, scope-limitierte Tokens für Upload-Operationen generieren
+
+**Status:** Offen
+
+---
+
 ## 11.3 Risiko-Matrix
 
 | Risiko-ID | Beschreibung                   | Wahrscheinlichkeit | Auswirkung | Priorität | Status         |
@@ -679,16 +716,17 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 ## 11.4 Technical Debt Übersicht
 
-| Schulden-ID | Beschreibung                       | Aufwand | Priorität | Status     |
-| ----------- | ---------------------------------- | ------- | --------- | ---------- |
-| TD-001      | Unvollständige Type Assertions     | Mittel  | Mittel    | Offen      |
-| TD-002      | Hardcoded Configuration Values     | Niedrig | Niedrig   | Offen      |
-| TD-003      | Fehlende Error Boundaries          | Mittel  | Mittel    | Offen      |
-| TD-004      | Inkonsistente Naming Conventions   | Niedrig | Niedrig   | Akzeptiert |
-| TD-005      | Fehlende Internationalisierung     | Hoch    | Niedrig   | Offen      |
-| TD-006      | Unvollständige JSDoc Dokumentation | Mittel  | Mittel    | Offen      |
-| TD-007      | Manuelle CSS Property Generation   | Mittel  | Niedrig   | Offen      |
-| TD-008      | Fehlende Undo/Redo Funktionalität  | Hoch    | Mittel    | Offen      |
+| Schulden-ID | Beschreibung                        | Aufwand | Priorität | Status     |
+| ----------- | ----------------------------------- | ------- | --------- | ---------- |
+| TD-001      | Unvollständige Type Assertions      | Mittel  | Mittel    | Offen      |
+| TD-002      | Hardcoded Configuration Values      | Niedrig | Niedrig   | Offen      |
+| TD-003      | Fehlende Error Boundaries           | Mittel  | Mittel    | Offen      |
+| TD-004      | Inkonsistente Naming Conventions    | Niedrig | Niedrig   | Akzeptiert |
+| TD-005      | Fehlende Internationalisierung      | Hoch    | Niedrig   | Offen      |
+| TD-006      | Unvollständige JSDoc Dokumentation  | Mittel  | Mittel    | Offen      |
+| TD-007      | Manuelle CSS Property Generation    | Mittel  | Niedrig   | Offen      |
+| TD-008      | Fehlende Undo/Redo Funktionalität   | Hoch    | Mittel    | Offen      |
+| TD-009      | API-Key-Exposition im Media Service | Mittel  | Hoch      | Offen      |
 
 ---
 
@@ -705,6 +743,10 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 3. **Error Boundaries implementieren** (TD-003)
    - Graceful Degradation bei Fehlern
+
+4. **API-Key-Exposition beheben** (TD-009)
+   - Proxy-Endpoint implementieren
+   - Token-basierte Client-Authentifizierung einführen
 
 ### Mittelfristig (Phase 2 - Pilotierung)
 
@@ -738,4 +780,4 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 ---
 
-_Letzte Aktualisierung: 2026-01-19_
+_Letzte Aktualisierung: 2026-01-21_

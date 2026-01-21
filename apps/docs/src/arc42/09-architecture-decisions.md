@@ -57,16 +57,16 @@ export const UJLTDocumentSchema = z.object({
 
 **Positiv:**
 
-- ✅ Garantierte Markenkonsistenz
-- ✅ Zentrale Theme-Updates wirken sofort auf alle Dokumente
-- ✅ Vereinfachte Content-Erstellung für Redakteure
-- ✅ Bessere AI-Integration durch strukturierte Daten
+- Garantierte Markenkonsistenz
+- Zentrale Theme-Updates wirken sofort auf alle Dokumente
+- Vereinfachte Content-Erstellung für Redakteure
+- Bessere AI-Integration durch strukturierte Daten
 
 **Negativ:**
 
-- ❌ Weniger Flexibilität für individuelle Design-Anpassungen pro Dokument
-- ❌ Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
-- ❌ Erfordert initiales Setup eines Theme-Systems
+- Weniger Flexibilität für individuelle Design-Anpassungen pro Dokument
+- Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
+- Erfordert initiales Setup eines Theme-Systems
 
 ---
 
@@ -132,16 +132,16 @@ export abstract class FieldBase<ValueT, ConfigT> {
 
 **Positiv:**
 
-- ✅ Einfache Erweiterung durch Drittanbieter
-- ✅ Vollständige Typsicherheit zur Compile-Zeit
-- ✅ Runtime-Validierung durch Zod
-- ✅ Klare Schnittstellen durch abstrakte Klassen
+- Einfache Erweiterung durch Drittanbieter
+- Vollständige Typsicherheit zur Compile-Zeit
+- Runtime-Validierung durch Zod
+- Klare Schnittstellen durch abstrakte Klassen
 
 **Negativ:**
 
-- ❌ Mehr Boilerplate-Code für neue Module
-- ❌ Lernkurve für das Modulsystem
-- ❌ Template-Dateien erforderlich für Konsistenz
+- Mehr Boilerplate-Code für neue Module
+- Lernkurve für das Modulsystem
+- Template-Dateien erforderlich für Konsistenz
 
 **Beispiel-Implementierung:**
 
@@ -230,16 +230,16 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 
 **Positiv:**
 
-- ✅ Flexibilität bei Framework-Wahl
-- ✅ Web Components für universelle Einsetzbarkeit
-- ✅ Automatische Feature-Vererbung (`adapter-web` → `adapter-svelte`)
-- ✅ Einfache Erweiterung um neue Adapter (PDF, ...)
+- Flexibilität bei Framework-Wahl
+- Web Components für universelle Einsetzbarkeit
+- Automatische Feature-Vererbung (`adapter-web` → `adapter-svelte`)
+- Einfache Erweiterung um neue Adapter (PDF, ...)
 
 **Negativ:**
 
-- ❌ Mehrfachimplementierung für jeden Adapter
-- ❌ Unterschiedliche Bundle-Größen je nach Adapter
-- ❌ Adapter müssen synchron gehalten werden
+- Mehrfachimplementierung für jeden Adapter
+- Unterschiedliche Bundle-Größen je nach Adapter
+- Adapter müssen synchron gehalten werden
 
 **Komponenten-Hierarchie:**
 
@@ -360,16 +360,16 @@ export const Media: CollectionConfig = {
 
 **Positiv:**
 
-- ✅ Volle Portabilität mit Inline-Storage
-- ✅ Enterprise-Features mit Backend-Storage
-- ✅ Seamless switching zwischen Modi
-- ✅ Responsive images mit Payload CMS
+- Volle Portabilität mit Inline-Storage
+- Enterprise-Features mit Backend-Storage
+- Seamless switching zwischen Modi
+- Responsive images mit Payload CMS
 
 **Negativ:**
 
-- ❌ Große Dokument-Dateien bei Inline-Storage
-- ❌ Externe Abhängigkeit bei Backend-Storage
-- ❌ Komplexere Setup-Prozedur für Backend
+- Große Dokument-Dateien bei Inline-Storage
+- Externe Abhängigkeit bei Backend-Storage
+- Komplexere Setup-Prozedur für Backend
 
 ---
 
@@ -434,16 +434,16 @@ const UJLCModuleObjectSchema = z.lazy(() =>
 
 **Positiv:**
 
-- ✅ Garantierte Datenintegrität zur Laufzeit
-- ✅ Automatische Type-Synchronisation
-- ✅ Bessere Developer Experience mit IDE-Support
-- ✅ AI-generierte Dokumente können validiert werden
+- Garantierte Datenintegrität zur Laufzeit
+- Automatische Type-Synchronisation
+- Bessere Developer Experience mit IDE-Support
+- AI-generierte Dokumente können validiert werden
 
 **Negativ:**
 
-- ❌ Runtime-Overhead durch Validierung
-- ❌ Bundle-Size durch Zod-Library
-- ❌ Komplexere Schema-Definitionen
+- Runtime-Overhead durch Validierung
+- Bundle-Size durch Zod-Library
+- Komplexere Schema-Definitionen
 
 **CLI Tool für Validierung:**
 
@@ -517,16 +517,16 @@ export const svelteAdapter = (node, tokenSet, options) => {
 
 **Positiv:**
 
-- ✅ Kleinste Bundle-Größe aller großen Frameworks
-- ✅ Bessere Performance durch Compilation
-- ✅ Einfache Custom Elements Generierung
-- ✅ Fine-grained Reactivity mit Runes
+- Kleinste Bundle-Größe aller großen Frameworks
+- Bessere Performance durch Compilation
+- Einfache Custom Elements Generierung
+- Fine-grained Reactivity mit Runes
 
 **Negativ:**
 
-- ❌ Kleinere Community als React
-- ❌ Weniger Drittanbieter-Libraries
-- ❌ Svelte 5 ist noch relativ neu (Runes-System)
+- Kleinere Community als React
+- Weniger Drittanbieter-Libraries
+- Svelte 5 ist noch relativ neu (Runes-System)
 
 **Alternative Frameworks erwogen:**
 
@@ -603,17 +603,17 @@ export const Media: CollectionConfig = {
 
 **Positiv:**
 
-- ✅ Professionelle Media-Verwaltung
-- ✅ Automatische Bild-Optimierung
-- ✅ RESTful API mit Filtering/Sorting
-- ✅ Metadata-Management (Alt-Text, Lizenz, Tags)
-- ✅ Multi-Language Support
+- Professionelle Media-Verwaltung
+- Automatische Bild-Optimierung
+- RESTful API mit Filtering/Sorting
+- Metadata-Management (Alt-Text, Lizenz, Tags)
+- Multi-Language Support
 
 **Negativ:**
 
-- ❌ Externe Service-Abhängigkeit
-- ❌ Setup-Komplexität (Docker, PostgreSQL)
-- ❌ Hosting-Kosten für Backend
+- Externe Service-Abhängigkeit
+- Setup-Komplexität (Docker, PostgreSQL)
+- Hosting-Kosten für Backend
 
 **Docker Setup:**
 
@@ -731,16 +731,16 @@ function serializeNode(node: ProseMirrorNode): string {
 
 **Positiv:**
 
-- ✅ Garantierte WYSIWYG-Konsistenz
-- ✅ Sicherer als HTML-Strings (kein XSS)
-- ✅ Validierbare Struktur mit Zod
-- ✅ Server-Side Rendering möglich
+- Garantierte WYSIWYG-Konsistenz
+- Sicherer als HTML-Strings (kein XSS)
+- Validierbare Struktur mit Zod
+- Server-Side Rendering möglich
 
 **Negativ:**
 
-- ❌ Komplexere Schema-Verwaltung
-- ❌ Größere Bundle-Size durch ProseMirror
-- ❌ Lernkurve für ProseMirror-Konzepte
+- Komplexere Schema-Verwaltung
+- Größere Bundle-Size durch ProseMirror
+- Lernkurve für ProseMirror-Konzepte
 
 **Editor Integration im Crafter:**
 
@@ -845,16 +845,16 @@ export function resolveForegroundColor(
 
 **Positiv:**
 
-- ✅ Bessere Accessibility durch präzise Kontraste
-- ✅ Harmonischere Farbpaletten
-- ✅ Mathematisch korrekte Farb-Interpolation
-- ✅ Native Browser-Support (CSS `oklch()`)
+- Bessere Accessibility durch präzise Kontraste
+- Harmonischere Farbpaletten
+- Mathematisch korrekte Farb-Interpolation
+- Native Browser-Support (CSS `oklch()`)
 
 **Negativ:**
 
-- ❌ Komplexere Berechnungen als HSL
-- ❌ Weniger bekannt als RGB/HSL
-- ❌ Fallback für ältere Browser nötig
+- Komplexere Berechnungen als HSL
+- Weniger bekannt als RGB/HSL
+- Fallback für ältere Browser nötig
 
 **CSS Output:**
 
@@ -959,16 +959,16 @@ git commit -m "Version packages"
 
 **Positiv:**
 
-- ✅ Effizientes Dependency Management
-- ✅ Koordinierte Releases aller Packages
-- ✅ Automatische Changelog-Generierung
-- ✅ Type-Safety über Package-Grenzen
+- Effizientes Dependency Management
+- Koordinierte Releases aller Packages
+- Automatische Changelog-Generierung
+- Type-Safety über Package-Grenzen
 
 **Negativ:**
 
-- ❌ Komplexe Build-Dependency-Chains
-- ❌ Lernkurve für Changesets
-- ❌ Fixed Versioning erhöht Major-Versions schneller
+- Komplexe Build-Dependency-Chains
+- Lernkurve für Changesets
+- Fixed Versioning erhöht Major-Versions schneller
 
 **Build Dependency Chain:**
 
@@ -1114,16 +1114,16 @@ test("can select node by clicking in preview", async ({ page }) => {
 
 **Positiv:**
 
-- ✅ Vollständige User-Flow-Abdeckung
-- ✅ Screenshot-basiertes Debugging
-- ✅ Stabile Selektoren mit `data-testid`
-- ✅ CI/CD Integration
+- Vollständige User-Flow-Abdeckung
+- Screenshot-basiertes Debugging
+- Stabile Selektoren mit `data-testid`
+- CI/CD Integration
 
 **Negativ:**
 
-- ❌ Längere Test-Ausführungszeit als Unit-Tests
-- ❌ Flakiness bei komplexen Interaktionen
-- ❌ Setup-Komplexität
+- Längere Test-Ausführungszeit als Unit-Tests
+- Flakiness bei komplexen Interaktionen
+- Setup-Komplexität
 
 **Getestete User Flows:**
 
@@ -1161,19 +1161,19 @@ test("can select node by clicking in preview", async ({ page }) => {
 
 ## 9.12 Zusammenfassung: Architektur-Trade-offs
 
-| Entscheidung           | Vorteil                     | Nachteil                | Akzeptierter Trade-off                   |
-| ---------------------- | --------------------------- | ----------------------- | ---------------------------------------- |
-| **UJLC/UJLT Trennung** | Brand Compliance garantiert | Weniger Flexibilität    | ✅ Markenkonsistenz wichtiger            |
-| **Module Registry**    | Erweiterbar, typsicher      | Mehr Boilerplate        | ✅ Type Safety rechtfertigt Aufwand      |
-| **Adapter Pattern**    | Framework-agnostisch        | Mehrfachimplementierung | ✅ Flexibilität wichtiger                |
-| **Dual Media Storage** | Portabilität + Enterprise   | Komplexität             | ✅ Beide Use Cases essentiell            |
-| **Zod Validation**     | Runtime Safety              | Performance Overhead    | ✅ Sicherheit wichtiger                  |
-| **Svelte 5**           | Performance, Bundle Size    | Kleinere Community      | ✅ Technische Vorteile überwiegen        |
-| **Payload CMS**        | Feature-reich, TypeScript   | Setup-Komplexität       | ✅ Professionelle Media-Verwaltung nötig |
-| **TipTap/ProseMirror** | Strukturiert, WYSIWYG       | Lernkurve, Bundle Size  | ✅ Strukturierte Daten essentiell        |
-| **OKLCH Farbraum**     | Bessere Accessibility       | Komplexer als HSL       | ✅ Accessibility nicht verhandelbar      |
-| **pnpm + Changesets**  | Koordinierte Releases       | Komplexe Build-Chain    | ✅ Monorepo-Effizienz wichtig            |
-| **Playwright E2E**     | Vollständige Abdeckung      | Längere Test-Zeiten     | ✅ User Flows müssen getestet werden     |
+| Entscheidung           | Vorteil                     | Nachteil                 | Akzeptierter Trade-off                |
+| ---------------------- | --------------------------- | ------------------------ | ------------------------------------- |
+| **UJLC/UJLT Trennung** | Brand Compliance garantiert | Weniger Flexibilität     | Markenkonsistenz wichtiger            |
+| **Module Registry**    | Erweiterbar, typsicher      | Mehr Boilerplate         | Type Safety rechtfertigt Aufwand      |
+| **Adapter Pattern**    | Framework-agnostisch        | Mehrfach-implementierung | Flexibilität wichtiger                |
+| **Dual Media Storage** | Portabilität + Enterprise   | Komplexität              | Beide Use Cases essentiell            |
+| **Zod Validation**     | Runtime Safety              | Performance Overhead     | Sicherheit wichtiger                  |
+| **Svelte 5**           | Performance, Bundle Size    | Kleinere Community       | Technische Vorteile überwiegen        |
+| **Payload CMS**        | Feature-reich, TypeScript   | Setup-Komplexität        | Professionelle Media-Verwaltung nötig |
+| **TipTap/ProseMirror** | Strukturiert, WYSIWYG       | Lernkurve, Bundle Size   | Strukturierte Daten essentiell        |
+| **OKLCH Farbraum**     | Bessere Accessibility       | Komplexer als HSL        | Accessibility nicht verhandelbar      |
+| **pnpm + Changesets**  | Koordinierte Releases       | Komplexe Build-Chain     | Monorepo-Effizienz wichtig            |
+| **Playwright E2E**     | Vollständige Abdeckung      | Längere Test-Zeiten      | User Flows müssen getestet werden     |
 
 ---
 

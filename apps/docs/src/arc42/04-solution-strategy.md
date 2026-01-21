@@ -5,7 +5,7 @@ description: "Lösungsstrategie und Architektur-Konzept von UJL"
 
 # Lösungsstrategie
 
-Dieses Kapitel beschreibt die fundamentalen Lösungsansätze und strategischen Entscheidungen, die der Architektur des UJL Frameworks zugrunde liegen. Es zeigt, wie die definierten Qualitätsziele durch konkrete technologische und architektonische Entscheidungen erreicht werden.
+Dieses Kapitel beschreibt die fundamentalen Lösungsansätze und strategischen Entscheidungen, die der Architektur des UJL Frameworks zugrunde liegen. Gezeigt wird, wie die definierten Qualitätsziele durch konkrete technologische und architektonische Entscheidungen erreicht werden.
 
 ## Überblick: Strategische Positionierung
 
@@ -45,10 +45,10 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 **Konsequenzen:**
 
-- ✅ Redakteur:innen können Design-Regeln technisch nicht brechen
-- ✅ Theme-Updates wirken sofort global auf alle Dokumente
-- ✅ Zentrale Governance ohne manuelle Reviews
-- ❌ Weniger Flexibilität für individuelle Design-Anpassungen
+- Redakteur:innen können Design-Regeln technisch nicht brechen
+- Theme-Updates wirken sofort global auf alle Dokumente
+- Zentrale Governance ohne manuelle Reviews
+- Weniger Flexibilität für individuelle Design-Anpassungen
 
 **Referenz:** Siehe [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)
 
@@ -56,9 +56,9 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 ### Strategie 2: Schema-First mit Runtime-Validierung
 
-**Qualitätsziel:** AI-native Architecture (Priorität 3), Type Safety
+**Qualitätsziel:** AI-ready Architecture (Priorität 3), Type Safety
 
-**Problem:** KI-generierte Inhalte und externe Daten können ungültige Strukturen enthalten. Reine TypeScript-Typen bieten nur Compile-Time-Sicherheit.
+**Problem:** Externe Daten (CMS-Import, Datei-Upload, zukünftig KI-generierte Inhalte) können ungültige Strukturen enthalten. Reine TypeScript-Typen bieten nur Compile-Time-Sicherheit.
 
 **Lösung:** Zod als Single Source of Truth
 
@@ -83,18 +83,18 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 **Vorteile:**
 
 1. **DRY-Prinzip**: Schema-Definition generiert TypeScript-Types
-2. **Runtime Safety**: Validierung bei Datei-Upload, CMS-Import, AI-Generierung
+2. **Runtime Safety**: Validierung bei Datei-Upload, CMS-Import, zukünftig AI-Generierung
 3. **Detaillierte Fehler**: Zod liefert JSON-Path-basierte Fehlermeldungen
 4. **Rekursive Strukturen**: `z.lazy()` ermöglicht unendliche Verschachtelung
-5. **AI-Kompatibilität**: LLMs können gegen Schemas generieren, Output wird validiert
+5. **AI-ready**: Architektur vorbereitet für zukünftige LLM-Integration – Schemas ermöglichen deterministische Validierung von AI-Output
 
 **Konsequenzen:**
 
-- ✅ Garantierte Datenintegrität zur Laufzeit
-- ✅ AI-generierte Dokumente sind deterministisch validierbar
-- ✅ Automatische Type-Synchronisation (Schema → Types)
-- ❌ Runtime-Overhead durch Validierung (~5-10ms pro Dokument)
-- ❌ Größere Bundle-Größe durch Zod (~12KB gzip)
+- Garantierte Datenintegrität zur Laufzeit
+- Architektur ermöglicht zukünftig deterministische Validierung von AI-generierten Dokumenten
+- Automatische Type-Synchronisation (Schema → Types)
+- Runtime-Overhead durch Validierung (~5-10ms pro Dokument)
+- Größere Bundle-Größe durch Zod (~12KB gzip)
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
 
@@ -151,11 +151,11 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 
 **Konsequenzen:**
 
-- ✅ Flexibilität bei Framework-Wahl
-- ✅ Einfache Erweiterung um neue Output-Formate
-- ✅ Module-IDs bleiben erhalten (wichtig für Editor-Integration)
-- ❌ Mehrfachimplementierung für jeden Adapter
-- ❌ Adapter müssen synchron gehalten werden
+- Flexibilität bei Framework-Wahl
+- Einfache Erweiterung um neue Output-Formate
+- Module-IDs bleiben erhalten (wichtig für Editor-Integration)
+- Mehrfachimplementierung für jeden Adapter
+- Adapter müssen synchron gehalten werden
 
 **Referenz:** Siehe [ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering)
 
@@ -252,11 +252,11 @@ composer.registerModule(new CustomModule());
 
 **Konsequenzen:**
 
-- ✅ Einfache Erweiterung durch Drittanbieter
-- ✅ Vollständige Typsicherheit zur Compile-Zeit
-- ✅ Runtime-Validierung durch Zod in Field-Klassen
-- ❌ Mehr Boilerplate-Code für neue Module (~50-100 LOC)
-- ❌ Lernkurve für Modulsystem (Template-Dateien helfen)
+- Einfache Erweiterung durch Drittanbieter
+- Vollständige Typsicherheit zur Compile-Zeit
+- Runtime-Validierung durch Zod in Field-Klassen
+- Mehr Boilerplate-Code für neue Module (~50-100 LOC)
+- Lernkurve für Modulsystem (Template-Dateien helfen)
 
 **Referenz:** Siehe [ADR-002](./09-architecture-decisions#_9-2-adr-002-modulares-plugin-system-mit-registry-pattern)
 
@@ -348,12 +348,12 @@ function resolveForegroundColor(
 
 **Konsequenzen:**
 
-- ✅ Garantierte WCAG AA-Konformität durch automatische Checks
-- ✅ Harmonischere Farbpaletten als mit HSL
-- ✅ Verlässliche Accessibility-Garantien
-- ❌ Komplexere Berechnungen als HSL (Laufzeit-Overhead minimal)
-- ❌ Weniger bekannt → Lernkurve für Designer:innen
-- ❌ Fallback für ältere Browser nötig (RGB-Konvertierung)
+- Garantierte WCAG AA-Konformität durch automatische Checks
+- Harmonischere Farbpaletten als mit HSL
+- Verlässliche Accessibility-Garantien
+- Komplexere Berechnungen als HSL (Laufzeit-Overhead minimal)
+- Weniger bekannt → Lernkurve für Designer:innen
+- Fallback für ältere Browser nötig (RGB-Konvertierung)
 
 **Referenz:** Siehe [ADR-009](./09-architecture-decisions#_9-9-adr-009-oklch-farbraum-für-design-tokens)
 
@@ -361,7 +361,7 @@ function resolveForegroundColor(
 
 ### Strategie 6: Strukturierte Daten statt HTML
 
-**Qualitätsziel:** AI-native Architecture (Priorität 3), Security
+**Qualitätsziel:** AI-ready Architecture (Priorität 3), Security
 
 **Problem:** HTML-Strings sind schwer zu validieren, bergen XSS-Risiken und sind schwer von KI zuverlässig zu generieren. WYSIWYG-Konsistenz zwischen Editor und Output ist nicht garantiert.
 
@@ -434,16 +434,16 @@ function serializeNode(node: ProseMirrorNode): string {
 1. **WYSIWYG-Garantie**: Gleiches Schema in Editor und Renderer
 2. **Type Safety**: ProseMirror-Dokumente validierbar mit Zod
 3. **XSS-Prevention**: Keine Direct HTML-Injection, strukturierte Daten
-4. **AI-Friendly**: JSON-Struktur für LLMs besser generierbar als HTML
+4. **AI-ready**: JSON-Struktur ist für zukünftige LLM-Generierung besser geeignet als HTML
 5. **SSR-Compatible**: Synchrone Serialization ohne Browser-Dependencies
 
 **Konsequenzen:**
 
-- ✅ Garantierte Editor-Output-Konsistenz
-- ✅ Sicherer als HTML-Strings
-- ✅ Validierbare Struktur
-- ❌ Komplexere Schema-Verwaltung (~200 LOC)
-- ❌ Größere Bundle-Size durch ProseMirror (~40KB gzip)
+- Garantierte Editor-Output-Konsistenz
+- Sicherer als HTML-Strings
+- Validierbare Struktur
+- Komplexere Schema-Verwaltung (~200 LOC)
+- Größere Bundle-Size durch ProseMirror (~40KB gzip)
 
 **Referenz:** Siehe [ADR-008](./09-architecture-decisions#_9-8-adr-008-tiptap-prosemirror-für-rich-text-editing)
 
@@ -512,15 +512,15 @@ interface MediaResolver {
 
 **Vorteile:**
 
-- ✅ Vollständige Portabilität (keine externe Abhängigkeit)
-- ✅ Funktioniert offline
-- ✅ Einfaches Setup
+- Vollständige Portabilität (keine externe Abhängigkeit)
+- Funktioniert offline
+- Einfaches Setup
 
 **Nachteile:**
 
-- ❌ Große Dokument-Dateien (Base64)
-- ❌ Keine Responsive Images
-- ❌ Keine Metadaten-Verwaltung
+- Große Dokument-Dateien (Base64)
+- Keine Responsive Images
+- Keine Metadaten-Verwaltung
 
 **Storage Mode 2: Backend (Payload CMS)**
 
@@ -573,23 +573,23 @@ export const Media: CollectionConfig = {
 
 **Vorteile:**
 
-- ✅ Professionelle Media-Verwaltung
-- ✅ Responsive Images (WebP, mehrere Sizes)
-- ✅ Metadaten (Alt-Text, Lizenz, Tags, i18n)
-- ✅ Focal Point für Smart Cropping
+- Professionelle Media-Verwaltung
+- Responsive Images (WebP, mehrere Sizes)
+- Metadaten (Alt-Text, Lizenz, Tags, i18n)
+- Focal Point für Smart Cropping
 
 **Nachteile:**
 
-- ❌ Externe Service-Abhängigkeit
-- ❌ Setup-Komplexität (Docker, PostgreSQL)
-- ❌ Hosting-Kosten
+- Externe Service-Abhängigkeit
+- Setup-Komplexität (Docker, PostgreSQL)
+- Hosting-Kosten
 
 **Konsequenzen:**
 
-- ✅ Flexibilität für unterschiedliche Use Cases
-- ✅ Seamless Switching zwischen Modi (Resolver austauschbar)
-- ✅ Enterprise-Features ohne Vendor Lock-in (Self-Hosted)
-- ❌ Komplexere Architektur durch Abstraktion
+- Flexibilität für unterschiedliche Use Cases
+- Seamless Switching zwischen Modi (Resolver austauschbar)
+- Enterprise-Features ohne Vendor Lock-in (Self-Hosted)
+- Komplexere Architektur durch Abstraktion
 
 **Referenz:** Siehe [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend)
 
@@ -644,8 +644,8 @@ export const Media: CollectionConfig = {
 
 **Trade-off akzeptiert:**
 
-- ❌ Kleinere Community als React → Ausgleich durch gute Dokumentation
-- ❌ Weniger Drittanbieter-Libraries → Ausgleich durch shadcn-svelte, bits-ui
+- Kleinere Community als React → Ausgleich durch gute Dokumentation
+- Weniger Drittanbieter-Libraries → Ausgleich durch shadcn-svelte, bits-ui
 
 **Referenz:** Siehe [ADR-006](./09-architecture-decisions#_9-6-adr-006-svelte-5-als-primäres-ui-framework)
 
@@ -689,8 +689,8 @@ type User = z.infer<typeof UserSchema>;
 
 **Trade-off akzeptiert:**
 
-- ❌ Langsamer als AJV (JSON Schema Validator) → Ausgleich durch Caching
-- ❌ ~12KB Bundle-Größe → Akzeptabel für garantierte Type Safety
+- Langsamer als AJV (JSON Schema Validator) → Ausgleich durch Caching
+- ~12KB Bundle-Größe → Akzeptabel für garantierte Type Safety
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
 
@@ -740,8 +740,8 @@ formatOptions: { format: 'webp' }
 
 **Trade-off akzeptiert:**
 
-- ❌ Externe Service-Abhängigkeit → Ausgleich durch Inline Storage Fallback
-- ❌ Setup-Komplexität (Docker + PostgreSQL) → Ausgleich durch Docker Compose
+- Externe Service-Abhängigkeit → Ausgleich durch Inline Storage Fallback
+- Setup-Komplexität (Docker + PostgreSQL) → Ausgleich durch Docker Compose
 
 **Referenz:** Siehe [ADR-007](./09-architecture-decisions#_9-7-adr-007-payload-cms-für-media-management-backend)
 
@@ -795,8 +795,8 @@ pnpm publish -r --access public
 
 **Trade-off akzeptiert:**
 
-- ❌ Lernkurve für Changesets → Ausgleich durch Templates und Dokumentation
-- ❌ Fixed Versioning erhöht Major-Versions schneller → Akzeptiert für Konsistenz
+- Lernkurve für Changesets → Ausgleich durch Templates und Dokumentation
+- Fixed Versioning erhöht Major-Versions schneller → Akzeptiert für Konsistenz
 
 **Referenz:** Siehe [ADR-010](./09-architecture-decisions#_9-10-adr-010-pnpm-workspaces-changesets-für-monorepo)
 
@@ -806,15 +806,15 @@ pnpm publish -r --access public
 
 Diese Tabelle zeigt, wie strategische Entscheidungen die definierten Qualitätsziele ([Kapitel 1.2](./01-introduction-and-goals#_1-2-quality-goals)) erreichen:
 
-| Qualitätsziel                  | Strategie                                         | Technologie                     | Erfolgsmetrik                                      |
-| ------------------------------ | ------------------------------------------------- | ------------------------------- | -------------------------------------------------- |
-| **Brand-Compliance by Design** | Content-Design-Trennung                           | UJLC/UJLT, Zod, Module Registry | 0 Design-Drift in User Studies                     |
-| **Accessibility Guaranteed**   | OKLCH-Farbraum, Automatische Kontrast-Checks      | OKLCH, colorjs.io               | 100% WCAG AA (4.5:1 Kontrast)                      |
-| **AI-native Architecture**     | Schema-First, Strukturierte Daten                 | Zod, ProseMirror, JSON          | 99%+ AI-Output-Validierungsrate                    |
-| **Erweiterbarkeit**            | Plugin-Architektur, Adapter Pattern               | Module Registry, AST            | <100 LOC für Custom Module, <50 LOC für Adapter    |
-| **Performance**                | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter        |
-| **Developer Experience**       | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage |
-| **Maintainability**            | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)               |
+| Qualitätsziel                  | Strategie                                         | Technologie                     | Erfolgsmetrik                                                         |
+| ------------------------------ | ------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
+| **Brand-Compliance by Design** | Content-Design-Trennung                           | UJLC/UJLT, Zod, Module Registry | 0 Design-Drift in User Studies                                        |
+| **Accessibility Guaranteed**   | OKLCH-Farbraum, Automatische Kontrast-Checks      | OKLCH, colorjs.io               | 100% WCAG AA (4.5:1 Kontrast)                                         |
+| **AI-ready Architecture**      | Schema-First, Strukturierte Daten                 | Zod, ProseMirror, JSON          | Architektur vorbereitet für zukünftige LLM-Integration (nicht im MVP) |
+| **Erweiterbarkeit**            | Plugin-Architektur, Adapter Pattern               | Module Registry, AST            | <100 LOC für Custom Module, <50 LOC für Adapter                       |
+| **Performance**                | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter                           |
+| **Developer Experience**       | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage                    |
+| **Maintainability**            | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)                                  |
 
 ---
 

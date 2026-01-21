@@ -310,11 +310,11 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 #### QS-DX-02: Onboarding-Zeit
 
 | Aspekt               | Beschreibung                                                                                                                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qualitätsziel**    | Developer Experience                                                                                                                                  |
 | **Stimulus**         | Entwickler:in möchte ein erstes Custom Module erstellen                                                                                               |
 | **Systemreaktion**   | Template-Dateien und Dokumentation leiten an                                                                                                          |
-| **Messbare Antwort** | - <1 Stunde für erstes funktionierendes Custom Module<br/>- Template-Dateien in `fields/` und `modules/`<br/>- Beispiele in `@ujl-framework/examples` |     |
+| **Messbare Antwort** | - <1 Stunde für erstes funktionierendes Custom Module<br/>- Template-Dateien in `fields/` und `modules/`<br/>- Beispiele in `@ujl-framework/examples` |
 
 **Testbarkeit:** Nutzer-Feedback und Time-to-First-Module-Messungen.
 
@@ -395,7 +395,7 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 | QS-PERF-03  | Performance      | Rendering-Performance    | <100ms Initial Render         | ✅ Implementiert |
 | QS-DX-01    | Developer Exp.   | Type Safety              | 100% TypeScript Strict        | ✅ Implementiert |
 | QS-DX-02    | Developer Exp.   | Onboarding-Zeit          | <1h für Custom Module         | 🔄 Messbar       |
-| QS-DX-03    | Developer Exp.   | Dokumentationsqualität   | README pro Package            | ✅ Implementiert |
+| QS-DX-03    | Developer Exp.   | Dokumentations-qualität  | README pro Package            | ✅ Implementiert |
 | QS-MAINT-01 | Maintainability  | Test-Abdeckung           | >80% kritische Paths          | 🔄 In Arbeit     |
 | QS-MAINT-02 | Maintainability  | Modulare Struktur        | Keine zirkulären Dependencies | ✅ Implementiert |
 | QS-MAINT-03 | Maintainability  | Versionierung            | Synchrone Versionierung       | ✅ Implementiert |

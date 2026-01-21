@@ -9,17 +9,17 @@ description: "Projektvision, Ziele, Stakeholder und Qualitätsanforderungen von 
 
 **Unified JSON Layout (UJL)** ist ein Open-Source-Framework für visuelles Content-Authoring mit einem zentralen Versprechen:
 
-> **Create and maintain brand-compliant and accessible websites with AI.**
+> **Create and maintain brand-compliant and accessible websites – with an architecture ready for AI.**
 
 UJL trennt Inhalt und Design konsequent auf technischer Ebene: Content wird in `.ujlc.json`-Dokumenten strukturiert, Design-Systeme werden zentral in `.ujlt.json`-Theme-Dateien definiert. Diese strikte Trennung ermöglicht **Brand-Compliance by Design** – Designregeln sind technisch verankert und können nicht versehentlich gebrochen werden. Der **UJL Renderer** führt beide Elemente zusammen und erzeugt daraus einen ContentFrame (HTML/CSS/JS), der konsistent dem Corporate Design entspricht.
 
-Im Unterschied zu klassischen Page Buildern, die auf frei editierbarem HTML/CSS basieren, arbeitet UJL mit strukturierten, validierten JSON-Daten. Dies macht das Framework besonders geeignet für KI-gestützte Content-Erstellung, da Sprachmodelle strukturierte Daten generieren, die automatisch gegen Schemas validiert werden.
+Im Unterschied zu klassischen Page Buildern, die auf frei editierbarem HTML/CSS basieren, arbeitet UJL mit strukturierten, validierten JSON-Daten. Diese Architektur ist bewusst auf zukünftige KI-gestützte Content-Erstellung vorbereitet: Sprachmodelle können strukturierte Daten generieren, die automatisch gegen Schemas validiert werden. Die eigentliche LLM-Integration ist jedoch nicht Teil des MVP.
 
 **Kernprinzipien:**
 
 - **Brand-Compliance by Design**: Designregeln sind architektonisch verankert, nicht optional
 - **Accessibility Guaranteed**: WCAG-Konformität ist in der Modularchitektur fest verankert
-- **AI-native**: JSON-Struktur optimiert für Large Language Models mit Schema-Validierung
+- **AI-ready Architecture**: JSON-Struktur vorbereitet für zukünftige LLM-Integration mit Schema-Validierung (nicht Teil des MVP)
 - **Modular & Extensible**: Vollständig erweiterbar durch Custom Modules und Fields
 - **Framework-Agnostic**: Adapter-Pattern ermöglicht Rendering in beliebigen Frameworks
 
@@ -152,11 +152,11 @@ Im Unterschied zu klassischen Page Buildern, die auf frei editierbarem HTML/CSS 
 
 Die drei wichtigsten Qualitätsziele für UJL, priorisiert nach Bedeutung:
 
-| Priorität | Qualitätsziel                  | Motivation                                                                                                                        | Umsetzung                                                                                        |
-| --------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **1**     | **Brand-Compliance by Design** | Redakteur:innen können Corporate Design nicht brechen. Designregeln sind architektonisch verankert, nicht nur dokumentiert.       | Strikte Trennung UJLC/UJLT, Schema-Validierung, Module Registry, OKLCH-Farbraum                  |
-| **2**     | **Accessibility Guaranteed**   | Barrierefreiheit darf nicht optional sein. WCAG-Konformität muss technisch sichergestellt werden, nicht durch manuelle Reviews.   | Semantische Module, automatische Kontrast-Checks (4.5:1), TipTap-Schema mit korrekten Strukturen |
-| **3**     | **AI-native Architecture**     | KI soll UJL-Dokumente zuverlässig generieren können. Strukturierte Daten mit Schema-Validierung machen AI-Output deterministisch. | JSON-basierte Dokumente, Zod-Validierung, strukturierte Fields, ProseMirror-Dokumente            |
+| Priorität | Qualitätsziel                  | Motivation                                                                                                                                                                       | Umsetzung                                                                                        |
+| --------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **1**     | **Brand-Compliance by Design** | Redakteur:innen können Corporate Design nicht brechen. Designregeln sind architektonisch verankert, nicht nur dokumentiert.                                                      | Strikte Trennung UJLC/UJLT, Schema-Validierung, Module Registry, OKLCH-Farbraum                  |
+| **2**     | **Accessibility Guaranteed**   | Barrierefreiheit darf nicht optional sein. WCAG-Konformität muss technisch sichergestellt werden, nicht durch manuelle Reviews.                                                  | Semantische Module, automatische Kontrast-Checks (4.5:1), TipTap-Schema mit korrekten Strukturen |
+| **3**     | **AI-ready Architecture**      | Architektur vorbereitet für zukünftige LLM-Integration. Strukturierte Daten mit Schema-Validierung ermöglichen deterministischen AI-Output. (Keine aktive AI-Integration im MVP) | JSON-basierte Dokumente, Zod-Validierung, strukturierte Fields, ProseMirror-Dokumente            |
 
 **Weitere Qualitätsziele:**
 
@@ -200,7 +200,7 @@ Detaillierte Anwendungsszenarien und Nutzen-Beschreibungen finden sich in [Use C
 2. **Marketing-Teams** mit hohem Publikationsdruck
 3. **Organisationen** mit Compliance- und Barrierefreiheitsanforderungen
 4. **SaaS-Unternehmen** mit eingebettetem Editor (White-Label)
-5. **KI-gestützte Content-Erstellung** mit Kontrolle
+5. **Zukünftige KI-gestützte Content-Erstellung** (Architektur vorbereitet, nicht im MVP)
 
 ## 1.4 Design Goals
 
@@ -216,7 +216,7 @@ Detaillierte Anwendungsszenarien und Nutzen-Beschreibungen finden sich in [Use C
 
 - Zod Schemas als Single Source of Truth mit Type Inference
 - TypeScript für Compile-Time Safety
-- Runtime Validation bei externen Daten (Datei-Upload, CMS, AI)
+- Runtime Validation bei externen Daten (Datei-Upload, CMS, zukünftig AI)
 
 **DZ3: Immutability & Functional Updates**
 
@@ -259,7 +259,7 @@ Detaillierte Anwendungsszenarien und Nutzen-Beschreibungen finden sich in [Use C
 
 ### 1.4.3 Data Design-Ziele
 
-**DZ9: Human-Readable & AI-Friendly**
+**DZ9: Human-Readable & AI-Ready**
 
 - JSON-Format für UJL-Dokumente
 - Strukturierte ProseMirror-Dokumente für Rich Text
