@@ -1,18 +1,18 @@
-import type { MediaLibraryEntry, MediaMetadata, UJLImageData } from "@ujl-framework/types";
+import type { ImageEntry, ImageMetadata, ImageProvider, ImageSource } from "@ujl-framework/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MediaLibrary, type MediaResolver } from "./library.js";
+import { ImageLibrary } from "./library.js";
 
-describe("MediaLibrary", () => {
+describe("ImageLibrary", () => {
 	describe("Constructor and Initialization", () => {
-		it("should create an empty media library", () => {
-			const library = new MediaLibrary();
+		it("should create an empty image library", () => {
+			const library = new ImageLibrary();
 			expect(library.list()).toEqual([]);
 		});
 
-		it("should initialize with existing media entries", () => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+		it("should initialize with existing image entries", () => {
+			const initialImages: Record<string, ImageEntry> = {
 				"test-id-1": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test1.png",
 						filesize: 1000,
@@ -22,7 +22,7 @@ describe("MediaLibrary", () => {
 					},
 				},
 				"test-id-2": {
-					dataUrl: "data:image/jpeg;base64,def456",
+					src: "data:image/jpeg;base64,def456",
 					metadata: {
 						filename: "test2.jpg",
 						filesize: 2000,
@@ -33,7 +33,7 @@ describe("MediaLibrary", () => {
 				},
 			};
 
-			const library = new MediaLibrary(initialMedia);
+			const library = new ImageLibrary(initialImages);
 			const entries = library.list();
 
 			expect(entries).toHaveLength(2);
@@ -41,28 +41,28 @@ describe("MediaLibrary", () => {
 			expect(entries[1].id).toBe("test-id-2");
 		});
 
-		it("should initialize with a resolver", () => {
-			const mockResolver: MediaResolver = {
-				resolve: vi.fn().mockResolvedValue("data:image/png;base64,resolved"),
+		it("should initialize with a provider", () => {
+			const mockProvider: ImageProvider = {
+				resolve: vi.fn().mockResolvedValue({ src: "data:image/png;base64,resolved" }),
 			};
 
-			const library = new MediaLibrary({}, mockResolver);
+			const library = new ImageLibrary({}, mockProvider);
 			expect(library).toBeDefined();
 		});
 	});
 
 	describe("add", () => {
-		let library: MediaLibrary;
+		let library: ImageLibrary;
 
 		beforeEach(() => {
-			library = new MediaLibrary();
+			library = new ImageLibrary();
 		});
 
-		it("should add a new media entry and return a generated ID", () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/png;base64,abc123",
+		it("should add a new image entry and return a generated ID", () => {
+			const imageSource: ImageSource = {
+				src: "data:image/png;base64,abc123",
 			};
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: "test.png",
 				filesize: 1000,
 				mimeType: "image/png",
@@ -70,18 +70,18 @@ describe("MediaLibrary", () => {
 				height: 100,
 			};
 
-			const id = library.add(imageData, metadata);
+			const id = library.add(imageSource, metadata);
 
 			expect(id).toBeDefined();
 			expect(typeof id).toBe("string");
 			expect(id.length).toBeGreaterThan(0);
 		});
 
-		it("should store the media entry correctly", () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/png;base64,abc123",
+		it("should store the image entry correctly", () => {
+			const imageSource: ImageSource = {
+				src: "data:image/png;base64,abc123",
 			};
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: "test.png",
 				filesize: 1000,
 				mimeType: "image/png",
@@ -89,19 +89,19 @@ describe("MediaLibrary", () => {
 				height: 100,
 			};
 
-			const id = library.add(imageData, metadata);
+			const id = library.add(imageSource, metadata);
 			const entry = library.get(id);
 
 			expect(entry).not.toBeNull();
-			expect(entry?.dataUrl).toBe(imageData.dataUrl);
+			expect(entry?.src).toBe(imageSource.src);
 			expect(entry?.metadata).toEqual(metadata);
 		});
 
 		it("should generate unique IDs for multiple entries", () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/png;base64,abc123",
+			const imageSource: ImageSource = {
+				src: "data:image/png;base64,abc123",
 			};
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: "test.png",
 				filesize: 1000,
 				mimeType: "image/png",
@@ -109,9 +109,9 @@ describe("MediaLibrary", () => {
 				height: 100,
 			};
 
-			const id1 = library.add(imageData, metadata);
-			const id2 = library.add(imageData, metadata);
-			const id3 = library.add(imageData, metadata);
+			const id1 = library.add(imageSource, metadata);
+			const id2 = library.add(imageSource, metadata);
+			const id3 = library.add(imageSource, metadata);
 
 			expect(id1).not.toBe(id2);
 			expect(id2).not.toBe(id3);
@@ -120,12 +120,12 @@ describe("MediaLibrary", () => {
 	});
 
 	describe("get", () => {
-		let library: MediaLibrary;
+		let library: ImageLibrary;
 
 		beforeEach(() => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"test-id": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test.png",
 						filesize: 1000,
@@ -135,14 +135,14 @@ describe("MediaLibrary", () => {
 					},
 				},
 			};
-			library = new MediaLibrary(initialMedia);
+			library = new ImageLibrary(initialImages);
 		});
 
-		it("should retrieve an existing media entry", () => {
+		it("should retrieve an existing image entry", () => {
 			const entry = library.get("test-id");
 
 			expect(entry).not.toBeNull();
-			expect(entry?.dataUrl).toBe("data:image/png;base64,abc123");
+			expect(entry?.src).toBe("data:image/png;base64,abc123");
 			expect(entry?.metadata.filename).toBe("test.png");
 		});
 
@@ -159,14 +159,14 @@ describe("MediaLibrary", () => {
 
 	describe("list", () => {
 		it("should return an empty array for empty library", () => {
-			const library = new MediaLibrary();
+			const library = new ImageLibrary();
 			expect(library.list()).toEqual([]);
 		});
 
-		it("should return all media entries with their IDs", () => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+		it("should return all image entries with their IDs", () => {
+			const initialImages: Record<string, ImageEntry> = {
 				"id-1": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test1.png",
 						filesize: 1000,
@@ -176,7 +176,7 @@ describe("MediaLibrary", () => {
 					},
 				},
 				"id-2": {
-					dataUrl: "data:image/jpeg;base64,def456",
+					src: "data:image/jpeg;base64,def456",
 					metadata: {
 						filename: "test2.jpg",
 						filesize: 2000,
@@ -187,24 +187,24 @@ describe("MediaLibrary", () => {
 				},
 			};
 
-			const library = new MediaLibrary(initialMedia);
+			const library = new ImageLibrary(initialImages);
 			const entries = library.list();
 
 			expect(entries).toHaveLength(2);
 			expect(entries[0]).toHaveProperty("id");
 			expect(entries[0]).toHaveProperty("entry");
-			expect(entries[0].entry).toHaveProperty("dataUrl");
+			expect(entries[0].entry).toHaveProperty("src");
 			expect(entries[0].entry).toHaveProperty("metadata");
 		});
 	});
 
 	describe("remove", () => {
-		let library: MediaLibrary;
+		let library: ImageLibrary;
 
 		beforeEach(() => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"test-id": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test.png",
 						filesize: 1000,
@@ -214,10 +214,10 @@ describe("MediaLibrary", () => {
 					},
 				},
 			};
-			library = new MediaLibrary(initialMedia);
+			library = new ImageLibrary(initialImages);
 		});
 
-		it("should remove an existing media entry and return true", () => {
+		it("should remove an existing image entry and return true", () => {
 			const result = library.remove("test-id");
 
 			expect(result).toBe(true);
@@ -230,10 +230,10 @@ describe("MediaLibrary", () => {
 		});
 
 		it("should not affect other entries when removing one", () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/png;base64,xyz789",
+			const imageSource: ImageSource = {
+				src: "data:image/png;base64,xyz789",
 			};
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: "test2.png",
 				filesize: 2000,
 				mimeType: "image/png",
@@ -241,7 +241,7 @@ describe("MediaLibrary", () => {
 				height: 200,
 			};
 
-			const id2 = library.add(imageData, metadata);
+			const id2 = library.add(imageSource, metadata);
 			library.remove("test-id");
 
 			expect(library.get(id2)).not.toBeNull();
@@ -249,12 +249,12 @@ describe("MediaLibrary", () => {
 	});
 
 	describe("resolve - Inline Storage", () => {
-		let library: MediaLibrary;
+		let library: ImageLibrary;
 
 		beforeEach(() => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"test-id": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test.png",
 						filesize: 1000,
@@ -264,21 +264,21 @@ describe("MediaLibrary", () => {
 					},
 				},
 			};
-			library = new MediaLibrary(initialMedia);
+			library = new ImageLibrary(initialImages);
 		});
 
-		it("should resolve inline media with string ID", async () => {
+		it("should resolve inline image with string ID", async () => {
 			const result = await library.resolve("test-id");
 
 			expect(result).not.toBeNull();
-			expect(result?.dataUrl).toBe("data:image/png;base64,abc123");
+			expect(result?.src).toBe("data:image/png;base64,abc123");
 		});
 
-		it("should resolve inline media with number ID", async () => {
-			const imageData: UJLImageData = {
-				dataUrl: "data:image/png;base64,number123",
+		it("should resolve inline image with number ID", async () => {
+			const imageSource: ImageSource = {
+				src: "data:image/png;base64,number123",
 			};
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: "number-test.png",
 				filesize: 1000,
 				mimeType: "image/png",
@@ -287,56 +287,56 @@ describe("MediaLibrary", () => {
 			};
 
 			// Add with numeric-looking string ID
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"123": {
-					dataUrl: imageData.dataUrl,
+					src: imageSource.src,
 					metadata,
 				},
 			};
-			const lib = new MediaLibrary(initialMedia);
+			const lib = new ImageLibrary(initialImages);
 
 			const result = await lib.resolve(123);
 
 			expect(result).not.toBeNull();
-			expect(result?.dataUrl).toBe("data:image/png;base64,number123");
+			expect(result?.src).toBe("data:image/png;base64,number123");
 		});
 
-		it("should return null for missing media ID", async () => {
+		it("should return null for missing image ID", async () => {
 			const result = await library.resolve("non-existent-id");
 			expect(result).toBeNull();
 		});
 
-		it("should return UJLImageData with only dataUrl property", async () => {
+		it("should return ImageSource with only src property", async () => {
 			const result = await library.resolve("test-id");
 
 			expect(result).not.toBeNull();
-			expect(result).toHaveProperty("dataUrl");
-			expect(Object.keys(result || {})).toEqual(["dataUrl"]);
+			expect(result).toHaveProperty("src");
+			expect(Object.keys(result || {})).toEqual(["src"]);
 		});
 	});
 
-	describe("resolve - Backend Storage with Resolver", () => {
-		it("should fall back to resolver when media not found in inline storage", async () => {
-			const mockResolver: MediaResolver = {
-				resolve: vi.fn().mockResolvedValue("data:image/png;base64,backend-resolved"),
+	describe("resolve - Backend Storage with Provider", () => {
+		it("should fall back to provider when image not found in inline storage", async () => {
+			const mockProvider: ImageProvider = {
+				resolve: vi.fn().mockResolvedValue({ src: "data:image/png;base64,backend-resolved" }),
 			};
 
-			const library = new MediaLibrary({}, mockResolver);
+			const library = new ImageLibrary({}, mockProvider);
 			const result = await library.resolve("backend-id");
 
 			expect(result).not.toBeNull();
-			expect(result?.dataUrl).toBe("data:image/png;base64,backend-resolved");
-			expect(mockResolver.resolve).toHaveBeenCalledWith("backend-id");
+			expect(result?.src).toBe("data:image/png;base64,backend-resolved");
+			expect(mockProvider.resolve).toHaveBeenCalledWith("backend-id");
 		});
 
-		it("should prioritize inline storage over resolver", async () => {
-			const mockResolver: MediaResolver = {
-				resolve: vi.fn().mockResolvedValue("data:image/png;base64,backend-resolved"),
+		it("should prioritize inline storage over provider", async () => {
+			const mockProvider: ImageProvider = {
+				resolve: vi.fn().mockResolvedValue({ src: "data:image/png;base64,backend-resolved" }),
 			};
 
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"shared-id": {
-					dataUrl: "data:image/png;base64,inline-data",
+					src: "data:image/png;base64,inline-data",
 					metadata: {
 						filename: "inline.png",
 						filesize: 1000,
@@ -347,27 +347,27 @@ describe("MediaLibrary", () => {
 				},
 			};
 
-			const library = new MediaLibrary(initialMedia, mockResolver);
+			const library = new ImageLibrary(initialImages, mockProvider);
 			const result = await library.resolve("shared-id");
 
-			expect(result?.dataUrl).toBe("data:image/png;base64,inline-data");
-			expect(mockResolver.resolve).not.toHaveBeenCalled();
+			expect(result?.src).toBe("data:image/png;base64,inline-data");
+			expect(mockProvider.resolve).not.toHaveBeenCalled();
 		});
 
-		it("should return null when resolver returns null", async () => {
-			const mockResolver: MediaResolver = {
+		it("should return null when provider returns null", async () => {
+			const mockProvider: ImageProvider = {
 				resolve: vi.fn().mockResolvedValue(null),
 			};
 
-			const library = new MediaLibrary({}, mockResolver);
+			const library = new ImageLibrary({}, mockProvider);
 			const result = await library.resolve("missing-id");
 
 			expect(result).toBeNull();
-			expect(mockResolver.resolve).toHaveBeenCalledWith("missing-id");
+			expect(mockProvider.resolve).toHaveBeenCalledWith("missing-id");
 		});
 
-		it("should work without a resolver", async () => {
-			const library = new MediaLibrary();
+		it("should work without a provider", async () => {
+			const library = new ImageLibrary();
 			const result = await library.resolve("any-id");
 
 			expect(result).toBeNull();
@@ -376,16 +376,16 @@ describe("MediaLibrary", () => {
 
 	describe("toObject", () => {
 		it("should return an empty object for empty library", () => {
-			const library = new MediaLibrary();
+			const library = new ImageLibrary();
 			const obj = library.toObject();
 
 			expect(obj).toEqual({});
 		});
 
-		it("should return a copy of the media object", () => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+		it("should return a copy of the images object", () => {
+			const initialImages: Record<string, ImageEntry> = {
 				"id-1": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test1.png",
 						filesize: 1000,
@@ -396,23 +396,23 @@ describe("MediaLibrary", () => {
 				},
 			};
 
-			const library = new MediaLibrary(initialMedia);
+			const library = new ImageLibrary(initialImages);
 			const obj = library.toObject();
 
-			expect(obj).toEqual(initialMedia);
-			expect(obj).not.toBe(initialMedia); // Should be a copy
+			expect(obj).toEqual(initialImages);
+			expect(obj).not.toBe(initialImages); // Should be a copy
 		});
 
 		it("should include all added entries", () => {
-			const library = new MediaLibrary();
+			const library = new ImageLibrary();
 
 			const id1 = library.add(
-				{ dataUrl: "data:image/png;base64,abc123" },
+				{ src: "data:image/png;base64,abc123" },
 				{ filename: "test1.png", filesize: 1000, mimeType: "image/png", width: 100, height: 100 }
 			);
 
 			const id2 = library.add(
-				{ dataUrl: "data:image/jpeg;base64,def456" },
+				{ src: "data:image/jpeg;base64,def456" },
 				{ filename: "test2.jpg", filesize: 2000, mimeType: "image/jpeg", width: 200, height: 200 }
 			);
 
@@ -424,9 +424,9 @@ describe("MediaLibrary", () => {
 		});
 
 		it("should reflect removed entries", () => {
-			const initialMedia: Record<string, MediaLibraryEntry> = {
+			const initialImages: Record<string, ImageEntry> = {
 				"id-1": {
-					dataUrl: "data:image/png;base64,abc123",
+					src: "data:image/png;base64,abc123",
 					metadata: {
 						filename: "test1.png",
 						filesize: 1000,
@@ -436,7 +436,7 @@ describe("MediaLibrary", () => {
 					},
 				},
 				"id-2": {
-					dataUrl: "data:image/jpeg;base64,def456",
+					src: "data:image/jpeg;base64,def456",
 					metadata: {
 						filename: "test2.jpg",
 						filesize: 2000,
@@ -447,7 +447,7 @@ describe("MediaLibrary", () => {
 				},
 			};
 
-			const library = new MediaLibrary(initialMedia);
+			const library = new ImageLibrary(initialImages);
 			library.remove("id-1");
 
 			const obj = library.toObject();

@@ -2,7 +2,7 @@
 	import { Text } from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
-	import type { MediaLibraryEntry } from '@ujl-framework/types';
+	import type { ImageEntry } from '@ujl-framework/types';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import { logger } from '$lib/utils/logger.js';
 
@@ -17,7 +17,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = $derived(crafter.mediaService);
+	const imageService = $derived(crafter.imageService);
 
 	let previewUrl = $state<string | null>(null);
 	let isLoadingPreview = $state(false);
@@ -29,15 +29,15 @@
 		}
 
 		// Convert numeric IDs to strings (backend services like Payload return numbers)
-		const mediaId = String(value);
+		const imageId = String(value);
 		isLoadingPreview = true;
-		mediaService
-			.get(mediaId)
-			.then((entry: MediaLibraryEntry | null) => {
-				previewUrl = entry?.dataUrl ?? null;
+		imageService
+			.get(imageId)
+			.then((entry: ImageEntry | null) => {
+				previewUrl = entry?.src ?? null;
 			})
 			.catch((err: unknown) => {
-				logger.error('[MediaPicker] Failed to load media preview:', err);
+				logger.error('[ImagePicker] Failed to load image preview:', err);
 				previewUrl = null;
 			})
 			.finally(() => {
@@ -45,8 +45,8 @@
 			});
 	});
 
-	function openMediaLibrary() {
-		crafter.setMediaLibraryViewActive(true, {
+	function openImageLibrary() {
+		crafter.setImageLibraryViewActive(true, {
 			fieldName: fieldName || '',
 			nodeId: nodeId || '',
 			currentValue: value || null
@@ -64,7 +64,7 @@
 	<button
 		type="button"
 		class="relative h-32 w-full overflow-hidden rounded-md border border-border transition-all hover:border-primary focus:ring-2 focus:ring-ring focus:outline-none"
-		onclick={openMediaLibrary}
+		onclick={openImageLibrary}
 	>
 		<img src={previewUrl} alt="" class="h-full w-full object-cover" />
 	</button>
@@ -72,7 +72,7 @@
 	<button
 		type="button"
 		class="flex w-full cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-8 transition-colors hover:bg-muted/50 focus:ring-2 focus:ring-ring focus:outline-none"
-		onclick={openMediaLibrary}
+		onclick={openImageLibrary}
 	>
 		<ImageIcon class="mb-2 h-12 w-12 text-muted-foreground" />
 		<Text size="sm" intensity="muted" class="text-center">Select an image</Text>

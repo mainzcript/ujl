@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, Text } from '@ujl-framework/ui';
-	import type { MediaMetadata } from '@ujl-framework/types';
+	import type { ImageMetadata } from '@ujl-framework/types';
 	import { logger } from '$lib/utils/logger.js';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
@@ -9,11 +9,11 @@
 	let {
 		onUploadComplete
 	}: {
-		onUploadComplete?: (mediaId: string) => void;
+		onUploadComplete?: (imageId: string) => void;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = $derived(crafter.mediaService);
+	const imageService = $derived(crafter.imageService);
 
 	const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
 	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(',');
@@ -49,7 +49,7 @@
 
 	/**
 	 * Handles file selection from the input element
-	 * Validates file type, extracts metadata, and uploads to media service
+	 * Validates file type, extracts metadata, and uploads to image service
 	 * @param event - The change event from the file input
 	 */
 	async function handleFileSelect(event: Event) {
@@ -75,8 +75,8 @@
 			// Get original dimensions
 			const { width, height } = await getImageDimensions(file);
 
-			// Create metadata for media library
-			const metadata: MediaMetadata = {
+			// Create metadata for image library
+			const metadata: ImageMetadata = {
 				filename: file.name,
 				mimeType: file.type,
 				filesize: file.size,
@@ -84,16 +84,16 @@
 				height
 			};
 
-			// Use MediaService to upload (handles compression and storage)
-			const result = await mediaService.upload(file, metadata);
+			// Use ImageService to upload (handles compression and storage)
+			const result = await imageService.upload(file, metadata);
 
-			logger.info('Media uploaded successfully:', result.mediaId);
+			logger.info('Image uploaded successfully:', result.imageId);
 
 			// Notify parent component
-			onUploadComplete?.(result.mediaId);
+			onUploadComplete?.(result.imageId);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to upload image';
-			logger.error('Media upload error:', err);
+			logger.error('Image upload error:', err);
 		} finally {
 			isCompressing = false;
 			// Reset input to allow selecting the same file again

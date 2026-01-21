@@ -42,8 +42,8 @@
 		return fieldEntries().length > 0;
 	});
 
-	const mediaCount = $derived(() => {
-		return Object.keys(crafter.media).length;
+	const imageCount = $derived(() => {
+		return Object.keys(crafter.images).length;
 	});
 
 	let mediaReloadTrigger = $state(0);
@@ -75,8 +75,8 @@
 </script>
 
 <div class="h-full overflow-y-auto">
-	{#if crafter.isMediaLibraryViewActive}
-		<!-- Media Library View -->
+	{#if crafter.isImageLibraryViewActive}
+		<!-- Image Library View -->
 		<div class="flex h-full flex-col">
 			<!-- Fixed Header with Back Button and Upload -->
 			<div class="sticky top-0 z-10 space-y-3 bg-sidebar p-3">
@@ -86,34 +86,34 @@
 						variant="ghost"
 						size="icon"
 						class="size-8 shrink-0"
-						onclick={() => crafter.setMediaLibraryViewActive(false)}
+						onclick={() => crafter.setImageLibraryViewActive(false)}
 					>
 						<ArrowLeftIcon class="h-4 w-4" />
 					</Button>
 					<div class="flex w-full items-center justify-between">
-						<span class="text-sm font-medium">Media Library</span>
+						<span class="text-sm font-medium">Image Library</span>
 						<span class="text-xs text-muted-foreground">
-							{mediaCount()}
-							{mediaCount() === 1 ? 'item' : 'items'}
+							{imageCount()}
+							{imageCount() === 1 ? 'item' : 'items'}
 						</span>
 					</div>
 				</div>
 				<MediaLibraryUploader onUploadComplete={handleUploadComplete} />
 			</div>
 
-			<!-- Scrollable Media Grid -->
+			<!-- Scrollable Image Grid -->
 			<div class="flex-1 overflow-y-auto">
 				{#key mediaReloadTrigger}
 					<MediaLibraryBrowser
-						selectedMediaId={crafter.mediaLibraryContext?.currentValue != null
-							? String(crafter.mediaLibraryContext?.currentValue)
+						selectedImageId={crafter.imageLibraryContext?.currentValue != null
+							? String(crafter.imageLibraryContext?.currentValue)
 							: null}
-						onSelect={(mediaId: string) => {
-							const context = crafter.mediaLibraryContext;
+						onSelect={(imageId: string) => {
+							const context = crafter.imageLibraryContext;
 							if (context && context.nodeId && context.fieldName) {
-								crafter.operations.updateNodeField(context.nodeId, context.fieldName, mediaId);
+								crafter.operations.updateNodeField(context.nodeId, context.fieldName, imageId);
 							}
-							crafter.setMediaLibraryViewActive(false);
+							crafter.setImageLibraryViewActive(false);
 						}}
 					/>
 				{/key}

@@ -1,8 +1,11 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type SanitizedConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+
+// Type assertion needed due to sharp 0.34.x type mismatch with Payload's SharpDependency
+const sharpInstance = sharp as unknown as SanitizedConfig['sharp']
 
 import { Users } from './collections/Users'
 import { Images } from './collections/Images'
@@ -71,6 +74,6 @@ export default buildConfig({
     push: process.env.NODE_ENV !== 'production',
     migrationDir: './src/migrations',
   }),
-  sharp,
+  sharp: sharpInstance,
   plugins: [],
 })

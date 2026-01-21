@@ -65,15 +65,9 @@
 
 	let ast = $state<UJLAbstractNode | null>(null);
 
-	const mediaResolver = {
-		async resolve(id: string): Promise<string | null> {
-			const entry = await crafter.mediaService.get(id);
-			return entry?.dataUrl ?? null;
-		}
-	};
-
 	$effect(() => {
-		composer.compose(ujlcDocument, mediaResolver).then((composedAst) => {
+		// ImageService implements ImageProvider, so it can be passed directly
+		composer.compose(ujlcDocument, crafter.imageService).then((composedAst) => {
 			ast = composedAst;
 		});
 	});

@@ -13,19 +13,19 @@ export {
 	type CrafterStoreDeps,
 	type CrafterMode,
 	type ViewportSize,
-	type MediaLibraryContext,
-	type MediaLibraryConfig,
-	type UpdateMediaFn,
-	type MediaServiceFactory
+	type ImageLibraryContext,
+	type ImageLibraryConfig,
+	type UpdateImagesFn,
+	type ImageServiceFactory
 } from './crafter-store.svelte.js';
 
 // Operations
 export { createOperations, type CrafterOperations } from './operations.js';
 
-// Media Service Factory
+// Image Service Factory
 export {
-	createMediaServiceFactory,
-	defaultMediaServiceFactory,
-	type MediaServiceFactoryFn,
-	type MediaServiceFactoryOptions
-} from './media-service-factory.js';
+	createImageServiceFactory,
+	defaultImageServiceFactory,
+	type ImageServiceFactoryFn,
+	type ImageServiceFactoryOptions
+} from './image-service-factory.js';

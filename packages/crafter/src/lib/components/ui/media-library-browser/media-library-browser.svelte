@@ -13,7 +13,7 @@
 	} from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
-	import type { MediaMetadata, MediaLibraryEntry } from '@ujl-framework/types';
+	import type { ImageMetadata, ImageEntry } from '@ujl-framework/types';
 	import XIcon from '@lucide/svelte/icons/x';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
@@ -22,77 +22,77 @@
 
 	let {
 		onSelect,
-		selectedMediaId
+		selectedImageId
 	}: {
-		onSelect?: (mediaId: string) => void;
-		selectedMediaId?: string | null;
+		onSelect?: (imageId: string) => void;
+		selectedImageId?: string | null;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const mediaService = $derived(crafter.mediaService);
+	const imageService = $derived(crafter.imageService);
 
-	let mediaEntries = $state<Array<{ id: string; dataUrl: string; metadata: MediaMetadata }>>([]);
+	let imageEntries = $state<Array<{ id: string; src: string; metadata: ImageMetadata }>>([]);
 	let isLoading = $state(true);
 
 	$effect(() => {
-		loadMediaEntries();
+		loadImageEntries();
 	});
 
-	async function loadMediaEntries() {
+	async function loadImageEntries() {
 		isLoading = true;
 		try {
-			const entries = await mediaService.list();
-			mediaEntries = entries.map(({ id, entry }: { id: string; entry: MediaLibraryEntry }) => ({
+			const entries = await imageService.list();
+			imageEntries = entries.map(({ id, entry }: { id: string; entry: ImageEntry }) => ({
 				id,
-				dataUrl: entry.dataUrl,
+				src: entry.src,
 				metadata: entry.metadata
 			}));
 		} catch (err) {
-			logger.error('Failed to load media entries:', err);
+			logger.error('Failed to load image entries:', err);
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	const hasMedia = $derived(mediaEntries.length > 0);
+	const hasImages = $derived(imageEntries.length > 0);
 
 	let showMetadataFor: string | null = $state(null);
-	let mediaToDelete: string | null = $state(null);
+	let imageToDelete: string | null = $state(null);
 	let deleteDialogOpen = $state(false);
 
-	function handleSelect(mediaId: string) {
+	function handleSelect(imageId: string) {
 		if (onSelect) {
-			onSelect(mediaId);
+			onSelect(imageId);
 		}
 	}
 
-	function openDeleteDialog(mediaId: string, event: MouseEvent) {
+	function openDeleteDialog(imageId: string, event: MouseEvent) {
 		event.stopPropagation();
-		mediaToDelete = mediaId;
+		imageToDelete = imageId;
 		deleteDialogOpen = true;
 	}
 
 	async function confirmDelete() {
-		if (!mediaToDelete) return;
+		if (!imageToDelete) return;
 
 		try {
-			const success = await mediaService.delete(mediaToDelete);
+			const success = await imageService.delete(imageToDelete);
 			if (success) {
-				await loadMediaEntries();
+				await loadImageEntries();
 			} else {
-				logger.error('Failed to delete media:', mediaToDelete);
+				logger.error('Failed to delete image:', imageToDelete);
 			}
 		} catch (err) {
-			logger.error('Error deleting media:', err);
+			logger.error('Error deleting image:', err);
 		} finally {
 			deleteDialogOpen = false;
-			mediaToDelete = null;
+			imageToDelete = null;
 		}
 	}
 
-	function toggleMetadata(mediaId: string, event: MouseEvent) {
+	function toggleMetadata(imageId: string, event: MouseEvent) {
 		event.stopPropagation();
-		showMetadataFor = showMetadataFor === mediaId ? null : mediaId;
+		showMetadataFor = showMetadataFor === imageId ? null : imageId;
 	}
 
 	function formatFileSize(bytes: number): string {
@@ -108,16 +108,16 @@
 			class="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-8"
 		>
 			<div class="mb-2 h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-			<Text size="sm" intensity="muted" class="text-center">Loading media library...</Text>
+			<Text size="sm" intensity="muted" class="text-center">Loading image library...</Text>
 		</div>
 	</div>
-{:else if !hasMedia}
+{:else if !hasImages}
 	<div class="p-3">
 		<div
 			class="flex flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-8"
 		>
 			<ImageIcon class="mb-2 h-12 w-12 text-muted-foreground opacity-40" />
-			<Text size="sm" intensity="muted" class="text-center">No media in library</Text>
+			<Text size="sm" intensity="muted" class="text-center">No images in library</Text>
 			<Text size="xs" intensity="muted" class="mt-1 text-center"
 				>Upload an image to get started</Text
 			>
@@ -126,20 +126,16 @@
 {:else}
 	<div class="p-3">
 		<div class="grid grid-cols-2 gap-3">
-			{#each mediaEntries as media (media.id)}
+			{#each imageEntries as image (image.id)}
 				<button
 					type="button"
-					class="group relative aspect-square overflow-hidden rounded-md border-2 transition-all hover:border-primary focus:ring-2 focus:ring-ring focus:outline-none {selectedMediaId ===
-					media.id
+					class="group relative aspect-square overflow-hidden rounded-md border-2 transition-all hover:border-primary focus:ring-2 focus:ring-ring focus:outline-none {selectedImageId ===
+					image.id
 						? 'border-primary ring-2 ring-ring'
 						: 'border-border'}"
-					onclick={() => handleSelect(media.id)}
+					onclick={() => handleSelect(image.id)}
 				>
-					<img
-						src={media.dataUrl}
-						alt={media.metadata.filename}
-						class="h-full w-full object-cover"
-					/>
+					<img src={image.src} alt={image.metadata.filename} class="h-full w-full object-cover" />
 
 					<!-- Overlay with actions -->
 					<div
@@ -151,7 +147,7 @@
 								variant="ghost"
 								size="sm"
 								class="h-6 w-6 bg-black/50 text-white hover:bg-black/70"
-								onclick={(e) => toggleMetadata(media.id, e)}
+								onclick={(e) => toggleMetadata(image.id, e)}
 							>
 								<InfoIcon class="h-3 w-3" />
 							</Button>
@@ -161,7 +157,7 @@
 								variant="ghost"
 								size="sm"
 								class="h-6 w-6 bg-destructive/80 text-white hover:bg-destructive"
-								onclick={(e) => openDeleteDialog(media.id, e)}
+								onclick={(e) => openDeleteDialog(image.id, e)}
 							>
 								<TrashIcon class="h-3 w-3" />
 							</Button>
@@ -169,7 +165,7 @@
 					</div>
 
 					<!-- Selected indicator -->
-					{#if selectedMediaId === media.id}
+					{#if selectedImageId === image.id}
 						<div
 							class="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary"
 						>
@@ -185,7 +181,7 @@
 				</button>
 
 				<!-- Metadata panel -->
-				{#if showMetadataFor === media.id}
+				{#if showMetadataFor === image.id}
 					<div class="col-span-2 space-y-2 rounded-md border border-border bg-muted/50 p-3">
 						<div class="flex items-center justify-between">
 							<Text size="xs" intensity="default">Image Details</Text>
@@ -193,7 +189,7 @@
 								type="button"
 								variant="ghost"
 								size="sm"
-								onclick={(e) => toggleMetadata(media.id, e)}
+								onclick={(e) => toggleMetadata(image.id, e)}
 							>
 								<XIcon class="h-3 w-3" />
 							</Button>
@@ -203,22 +199,22 @@
 							<div class="flex justify-between">
 								<Text size="xs" intensity="muted">Filename:</Text>
 								<Text size="xs" intensity="default" class="max-w-[60%] truncate"
-									>{media.metadata.filename}</Text
+									>{image.metadata.filename}</Text
 								>
 							</div>
 							<div class="flex justify-between">
 								<Text size="xs" intensity="muted">Size:</Text>
-								<Text size="xs" intensity="default">{formatFileSize(media.metadata.filesize)}</Text>
+								<Text size="xs" intensity="default">{formatFileSize(image.metadata.filesize)}</Text>
 							</div>
 							<div class="flex justify-between">
 								<Text size="xs" intensity="muted">Dimensions:</Text>
 								<Text size="xs" intensity="default"
-									>{media.metadata.width} × {media.metadata.height}</Text
+									>{image.metadata.width} × {image.metadata.height}</Text
 								>
 							</div>
 							<div class="flex justify-between">
 								<Text size="xs" intensity="muted">Type:</Text>
-								<Text size="xs" intensity="default">{media.metadata.mimeType}</Text>
+								<Text size="xs" intensity="default">{image.metadata.mimeType}</Text>
 							</div>
 						</div>
 					</div>
@@ -232,20 +228,20 @@
 <Dialog bind:open={deleteDialogOpen}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>Delete Media</DialogTitle>
+			<DialogTitle>Delete Image</DialogTitle>
 			<DialogDescription>
-				Are you sure you want to delete this media? This action cannot be undone.
+				Are you sure you want to delete this image? This action cannot be undone.
 			</DialogDescription>
 		</DialogHeader>
 		<DialogBody>
-			{#if mediaToDelete}
-				{@const media = mediaEntries.find((m) => m.id === mediaToDelete)}
-				{#if media}
+			{#if imageToDelete}
+				{@const image = imageEntries.find((m) => m.id === imageToDelete)}
+				{#if image}
 					<div class="space-y-2">
-						<Text size="sm" intensity="muted">Media: {media.metadata.filename}</Text>
+						<Text size="sm" intensity="muted">Image: {image.metadata.filename}</Text>
 						<img
-							src={media.dataUrl}
-							alt={media.metadata.filename}
+							src={image.src}
+							alt={image.metadata.filename}
 							class="h-32 w-32 rounded-md border border-border object-cover"
 						/>
 					</div>

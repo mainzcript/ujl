@@ -10,9 +10,9 @@ export type { ComponentCategory } from "./modules/index.js";
 export { Composer } from "./composer.js";
 
 /**
- * Re-export media library for managing media entries
+ * Re-export image library for managing image entries
  */
-export { MediaLibrary } from "./media/index.js";
+export { ImageLibrary } from "./image/index.js";
 
 /**
  * Re-export utility functions

@@ -1,5 +1,5 @@
-import type { MediaMetadata, MediaLibraryEntry } from '@ujl-framework/types';
-import type { MediaService, UploadResult } from './media-service.js';
+import type { ImageMetadata, ImageEntry, ImageSource } from '@ujl-framework/types';
+import type { ImageService, UploadResult } from './image-service.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -52,18 +52,18 @@ type PayloadListResponse = {
 };
 
 /**
- * Backend Media Service using Payload CMS
+ * Backend Image Service using Payload CMS
  *
- * Stores media on a backend server via REST API.
+ * Stores images on a backend server via REST API.
  * Compression handled server-side.
  */
-export class BackendMediaService implements MediaService {
+export class BackendImageService implements ImageService {
 	private endpoint: string;
 	private apiKey?: string;
 	private collectionSlug: string;
 
 	/**
-	 * Create a backend media service
+	 * Create a backend image service
 	 * @param endpoint - Base URL of the API (e.g., http://localhost:3000/api)
 	 * @param apiKey - Optional API key for authentication
 	 * @param collectionSlug - The Payload collection slug (default: 'images')
@@ -120,11 +120,11 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * Convert Payload image doc to MediaLibraryEntry
+	 * Convert Payload image doc to ImageEntry
 	 * @param doc - The Payload CMS image document
-	 * @returns MediaLibraryEntry with full URL and metadata
+	 * @returns ImageEntry with full URL and metadata
 	 */
-	private payloadToEntry(doc: PayloadImageDoc): MediaLibraryEntry {
+	private payloadToEntry(doc: PayloadImageDoc): ImageEntry {
 		// Use the best available size (largest to smallest fallback)
 		const bestSize =
 			doc.sizes?.max ||
@@ -139,10 +139,10 @@ export class BackendMediaService implements MediaService {
 		// Extract base URL (remove /api from endpoint)
 		const baseUrl = this.endpoint.replace('/api', '');
 		const relativeUrl = bestSize?.url || doc.url;
-		const dataUrl = `${baseUrl}${relativeUrl}`;
+		const src = `${baseUrl}${relativeUrl}`;
 
 		return {
-			dataUrl,
+			src,
 			metadata: {
 				filename: doc.filename,
 				mimeType: doc.mimeType,
@@ -154,13 +154,13 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * Upload a file to the backend media library
+	 * Upload a file to the backend image library
 	 * @param file - The file to upload
-	 * @param metadata - Media metadata including filename and optional fields
-	 * @returns Upload result with media ID and library entry
+	 * @param metadata - Image metadata including filename and optional fields
+	 * @returns Upload result with image ID and library entry
 	 * @throws Error if upload fails
 	 */
-	async upload(file: File, metadata: MediaMetadata): Promise<UploadResult> {
+	async upload(file: File, metadata: ImageMetadata): Promise<UploadResult> {
 		const formData = new FormData();
 		formData.append('file', file);
 
@@ -185,7 +185,7 @@ export class BackendMediaService implements MediaService {
 			const doc: PayloadImageDoc = result.doc;
 
 			return {
-				mediaId: doc.id,
+				imageId: doc.id,
 				entry: this.payloadToEntry(doc)
 			};
 		} catch (err) {
@@ -195,13 +195,13 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * Retrieve a media entry by ID from the backend
-	 * @param mediaId - The ID of the media to retrieve
-	 * @returns MediaLibraryEntry if found, null otherwise
+	 * Retrieve an image entry by ID from the backend
+	 * @param imageId - The ID of the image to retrieve
+	 * @returns ImageEntry if found, null otherwise
 	 */
-	async get(mediaId: string): Promise<MediaLibraryEntry | null> {
+	async get(imageId: string): Promise<ImageEntry | null> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${mediaId}`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${imageId}`, {
 				headers: this.getHeaders()
 			});
 
@@ -221,10 +221,10 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * List all media entries from the backend
-	 * @returns Array of media entries with their IDs (max 100 items)
+	 * List all image entries from the backend
+	 * @returns Array of image entries with their IDs (max 100 items)
 	 */
-	async list(): Promise<Array<{ id: string; entry: MediaLibraryEntry }>> {
+	async list(): Promise<Array<{ id: string; entry: ImageEntry }>> {
 		try {
 			const response = await fetch(`${this.endpoint}/${this.collectionSlug}?limit=100`, {
 				headers: this.getHeaders()
@@ -246,13 +246,13 @@ export class BackendMediaService implements MediaService {
 	}
 
 	/**
-	 * Delete a media entry from the backend
-	 * @param mediaId - The ID of the media to delete
+	 * Delete an image entry from the backend
+	 * @param imageId - The ID of the image to delete
 	 * @returns true if deleted successfully, false otherwise
 	 */
-	async delete(mediaId: string): Promise<boolean> {
+	async delete(imageId: string): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${mediaId}`, {
+			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${imageId}`, {
 				method: 'DELETE',
 				headers: this.getHeaders()
 			});
@@ -269,5 +269,16 @@ export class BackendMediaService implements MediaService {
 			logger.error('Backend delete error:', err);
 			return false;
 		}
+	}
+
+	/**
+	 * Resolve an image ID to its source URL
+	 * @param id - Image ID
+	 * @returns Image source or null if not found
+	 */
+	async resolve(id: string | number): Promise<ImageSource | null> {
+		const entry = await this.get(String(id));
+		if (!entry) return null;
+		return { src: entry.src };
 	}
 }

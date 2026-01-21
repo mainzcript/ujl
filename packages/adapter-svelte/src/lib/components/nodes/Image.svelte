@@ -10,7 +10,7 @@
 	let { node, showMetadata = false }: Props = $props();
 
 	const hasImage = $derived(node.props.image !== null);
-	const imageUrl = $derived(node.props.image?.dataUrl ?? '');
+	const imageUrl = $derived(node.props.image?.src ?? '');
 	const altText = $derived(node.props.alt || '');
 </script>
 

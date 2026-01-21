@@ -24,7 +24,7 @@
 
 	import {
 		createCrafterStore,
-		createMediaServiceFactory,
+		createImageServiceFactory,
 		type CrafterStore,
 		type CrafterStoreDeps
 	} from '$lib/stores/index.js';
@@ -97,10 +97,10 @@
 
 			const composer = new Composer();
 
-			const mediaServiceFactory = createMediaServiceFactory({
+			const imageServiceFactory = createImageServiceFactory({
 				showToasts: true,
 				onConnectionError: (error, endpoint) => {
-					logger.error('Media backend connection error:', error, endpoint);
+					logger.error('Image backend connection error:', error, endpoint);
 				}
 			});
 
@@ -108,7 +108,7 @@
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				createMediaService: mediaServiceFactory
+				createImageService: imageServiceFactory
 			};
 
 			const store = createCrafterStore(storeDeps);

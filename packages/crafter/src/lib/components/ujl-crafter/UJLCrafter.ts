@@ -3,7 +3,7 @@ import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types
 import { Composer } from '@ujl-framework/core';
 import {
 	createCrafterStore,
-	createMediaServiceFactory,
+	createImageServiceFactory,
 	type CrafterStore
 } from '$lib/stores/index.js';
 import { logger } from '$lib/utils/logger.js';
@@ -31,17 +31,17 @@ export type DocumentChangeCallback = (document: UJLCDocument) => void;
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
 /**
- * Configuration options for the media library.
- * Determines how media assets (images, etc.) are stored and retrieved.
+ * Configuration options for the image library.
+ * Determines how image assets are stored and retrieved.
  *
  * Two storage modes are available:
- * - `inline`: Media stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Media stored on a Payload CMS server (requires endpoint and apiKey)
+ * - `inline`: Images stored as Base64 in the UJLC document (no additional config needed)
+ * - `backend`: Images stored on a Payload CMS server (requires endpoint and apiKey)
  *
- * Note: Document-level media_library configuration is ignored.
+ * Note: Document-level image_library configuration is ignored.
  * Only this options-based configuration is used.
  */
-export type MediaLibraryOptions =
+export type ImageLibraryOptions =
 	| { storage: 'inline' }
 	| { storage: 'backend'; endpoint: string; apiKey: string };
 
@@ -54,8 +54,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
-	/** Media library configuration (default: inline storage) */
-	mediaLibrary?: MediaLibraryOptions;
+	/** Image library configuration (default: inline storage) */
+	imageLibrary?: ImageLibraryOptions;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -115,25 +115,25 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
-		// Media library configuration from options (defaults to inline storage)
-		// Note: Document-level media_library configuration is ignored - only options are used
-		const mediaLibrary = options.mediaLibrary ?? { storage: 'inline' as const };
+		// Image library configuration from options (defaults to inline storage)
+		// Note: Document-level image_library configuration is ignored - only options are used
+		const imageLibrary = options.imageLibrary ?? { storage: 'inline' as const };
 
 		// Runtime validation for backend storage
-		if (mediaLibrary.storage === 'backend') {
-			if (!mediaLibrary.endpoint || !mediaLibrary.apiKey) {
+		if (imageLibrary.storage === 'backend') {
+			if (!imageLibrary.endpoint || !imageLibrary.apiKey) {
 				throw new Error('UJLCrafter: Backend storage requires both endpoint and apiKey');
 			}
 		}
 
-		const mediaServiceFactory = createMediaServiceFactory({
-			preferredStorage: mediaLibrary.storage,
-			backendEndpoint: mediaLibrary.storage === 'backend' ? mediaLibrary.endpoint : undefined,
-			backendApiKey: mediaLibrary.storage === 'backend' ? mediaLibrary.apiKey : undefined,
+		const imageServiceFactory = createImageServiceFactory({
+			preferredStorage: imageLibrary.storage,
+			backendEndpoint: imageLibrary.storage === 'backend' ? imageLibrary.endpoint : undefined,
+			backendApiKey: imageLibrary.storage === 'backend' ? imageLibrary.apiKey : undefined,
 			showToasts: false,
 			onConnectionError: (error, endpoint) => {
-				logger.error('Media backend connection error:', error, endpoint);
-				this.notify('error', 'Media backend connection error', `Failed to connect to ${endpoint}`);
+				logger.error('Image backend connection error:', error, endpoint);
+				this.notify('error', 'Image backend connection error', `Failed to connect to ${endpoint}`);
 			}
 		});
 
@@ -145,7 +145,7 @@ export class UJLCrafter {
 				? validateUJLTDocument(options.theme)
 				: this.getDefaultTheme(),
 			composer: this.composer,
-			createMediaService: mediaServiceFactory,
+			createImageService: imageServiceFactory,
 			testMode: options.testMode ?? false
 		});
 

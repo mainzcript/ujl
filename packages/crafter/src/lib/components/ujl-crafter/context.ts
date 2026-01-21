@@ -125,7 +125,7 @@ export function getCrafterContext(getContextFn: <T>(key: symbol) => T | undefine
 export type {
 	CrafterMode,
 	ViewportSize,
-	MediaLibraryContext
+	ImageLibraryContext
 } from '$lib/stores/crafter-store.svelte.js';
 
 export type { CrafterOperations } from '$lib/stores/operations.js';

@@ -17,7 +17,7 @@ import type {
 	UJLCDocument,
 	UJLTDocument,
 	UJLCSlotObject,
-	UJLCMediaLibrary,
+	UJLCImageLibrary,
 	UJLTTokenSet,
 	UJLCDocumentMeta
 } from '@ujl-framework/types';
@@ -25,7 +25,7 @@ import { generateUid, type Composer } from '@ujl-framework/core';
 import { findPathToNode, isRootNode } from '../utils/ujlc-tree.js';
 import { createOperations } from './operations.js';
 import { logger } from '../utils/logger.js';
-import type { MediaService } from '../services/media-service.js';
+import type { ImageService } from '../services/image-service.js';
 
 // ============================================
 // TYPES
@@ -45,35 +45,35 @@ export type CrafterMode = 'editor' | 'designer';
 export type ViewportSize = 1024 | 768 | 375 | null;
 
 /**
- * Media library context for field editing.
- * Stores which field is currently being edited in the media library.
+ * Image library context for field editing.
+ * Stores which field is currently being edited in the image library.
  */
-export type MediaLibraryContext = {
+export type ImageLibraryContext = {
 	fieldName: string;
 	nodeId: string;
 	currentValue: string | number | null;
 } | null;
 
 /**
- * Media library configuration from document meta.
+ * Image library configuration from document meta.
  */
-export type MediaLibraryConfig = UJLCDocumentMeta['media_library'];
+export type ImageLibraryConfig = UJLCDocumentMeta['image_library'];
 
 /**
- * Function type for immutable media library updates.
+ * Function type for immutable image library updates.
  */
-export type UpdateMediaFn = (fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary) => void;
+export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void;
 
 /**
- * Factory interface for creating media services.
+ * Factory interface for creating image services.
  * Allows dependency injection of different storage implementations.
  */
-export interface MediaServiceFactory {
+export interface ImageServiceFactory {
 	(
-		config: MediaLibraryConfig,
-		getMedia: () => UJLCMediaLibrary,
-		updateMedia: UpdateMediaFn
-	): MediaService;
+		config: ImageLibraryConfig,
+		getImages: () => UJLCImageLibrary,
+		updateImages: UpdateImagesFn
+	): ImageService;
 }
 
 /**
@@ -87,8 +87,8 @@ export interface CrafterStoreDeps {
 	initialUjltDocument: UJLTDocument;
 	/** Composer instance for AST generation and module registry */
 	composer: Composer;
-	/** Factory function to create media services */
-	createMediaService: MediaServiceFactory;
+	/** Factory function to create image services */
+	createImageService: ImageServiceFactory;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -122,7 +122,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  *   initialUjlcDocument: myDocument,
  *   initialUjltDocument: myTheme,
  *   composer: new Composer(),
- *   createMediaService: createMediaServiceFactory()
+ *   createImageService: createImageServiceFactory()
  * });
  *
  * // Read state
@@ -137,7 +137,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		initialUjlcDocument,
 		initialUjltDocument,
 		composer,
-		createMediaService,
+		createImageService,
 		testMode = false
 	} = deps;
 
@@ -158,8 +158,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _selectedNodeId = $state<string | null>(null);
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let _expandedNodeIds = $state<Set<string>>(new Set());
-	let _isMediaLibraryViewActive = $state(false);
-	let _mediaLibraryContext = $state<MediaLibraryContext>(null);
+	let _isImageLibraryViewActive = $state(false);
+	let _imageLibraryContext = $state<ImageLibraryContext>(null);
 	let _viewportType = $state<string | undefined>(undefined);
 
 	// ============================================
@@ -167,7 +167,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
-	const media = $derived(_ujlcDocument.ujlc.media);
+	const images = $derived(_ujlcDocument.ujlc.images);
 	const meta = $derived(_ujlcDocument.ujlc.meta);
 	const tokens = $derived(_ujltDocument.ujlt.tokens);
 
@@ -229,17 +229,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Toggle media library view.
-	 * @param active - Whether to show the media library
+	 * Toggle image library view.
+	 * @param active - Whether to show the image library
 	 * @param context - Optional context for which field is being edited
 	 */
-	function setMediaLibraryViewActive(active: boolean, context?: MediaLibraryContext): void {
-		_isMediaLibraryViewActive = active;
+	function setImageLibraryViewActive(active: boolean, context?: ImageLibraryContext): void {
+		_isImageLibraryViewActive = active;
 		if (context !== undefined) {
-			_mediaLibraryContext = context;
+			_imageLibraryContext = context;
 		}
 		if (!active) {
-			_mediaLibraryContext = null;
+			_imageLibraryContext = null;
 		}
 	}
 
@@ -278,13 +278,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Update media library with immutable function.
-	 * @param fn - Function that receives current media and returns new media
+	 * Update image library with immutable function.
+	 * @param fn - Function that receives current images and returns new images
 	 */
-	function updateMedia(fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary): void {
+	function updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, media: fn(_ujlcDocument.ujlc.media) }
+			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) }
 		};
 	}
 
@@ -312,8 +312,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// SERVICES (Lazy Initialization via $derived.by)
 	// ============================================
 
-	const mediaService = $derived.by(() =>
-		createMediaService(meta.media_library, () => media, updateMedia)
+	const imageService = $derived.by(() =>
+		createImageService(meta.image_library, () => images, updateImages)
 	);
 
 	// ============================================
@@ -349,11 +349,11 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get expandedNodeIds() {
 			return _expandedNodeIds;
 		},
-		get isMediaLibraryViewActive() {
-			return _isMediaLibraryViewActive;
+		get isImageLibraryViewActive() {
+			return _isImageLibraryViewActive;
 		},
-		get mediaLibraryContext() {
-			return _mediaLibraryContext;
+		get imageLibraryContext() {
+			return _imageLibraryContext;
 		},
 		get viewportType() {
 			return _viewportType;
@@ -363,8 +363,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get rootSlot() {
 			return rootSlot;
 		},
-		get media() {
-			return media;
+		get images() {
+			return images;
 		},
 		get meta() {
 			return meta;
@@ -377,8 +377,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		},
 
 		// Services
-		get mediaService() {
-			return mediaService;
+		get imageService() {
+			return imageService;
 		},
 		composer,
 
@@ -387,13 +387,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		setSelectedNodeId,
 		setNodeExpanded,
 		expandToNode,
-		setMediaLibraryViewActive,
+		setImageLibraryViewActive,
 		setViewportType,
 
 		// Functional Updates
 		updateRootSlot,
 		updateTokenSet,
-		updateMedia,
+		updateImages,
 		setUjlcDocument,
 		setUjltDocument,
 

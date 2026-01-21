@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { InlineMediaService } from './inline-media-service.js';
-import type { MediaMetadata, UJLCMediaLibrary } from '@ujl-framework/types';
+import { InlineImageService } from './inline-image-service.js';
+import type { ImageMetadata, UJLCImageLibrary } from '@ujl-framework/types';
 
 // Mock the image compression utility
 vi.mock('../utils/image-compression.js', () => ({
@@ -12,31 +12,31 @@ vi.mock('@ujl-framework/core', () => ({
 	generateUid: vi.fn(() => 'mock-id-123')
 }));
 
-describe('InlineMediaService', () => {
-	let mockMedia: UJLCMediaLibrary;
-	let getMedia: () => UJLCMediaLibrary;
-	let updateMedia: (fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary) => void;
-	let service: InlineMediaService;
+describe('InlineImageService', () => {
+	let mockImages: UJLCImageLibrary;
+	let getImages: () => UJLCImageLibrary;
+	let updateImages: (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void;
+	let service: InlineImageService;
 
 	beforeEach(() => {
-		// Reset mock media
-		mockMedia = {};
+		// Reset mock images
+		mockImages = {};
 
 		// Create getter function
-		getMedia = vi.fn(() => mockMedia);
+		getImages = vi.fn(() => mockImages);
 
-		// Create updater function that modifies mockMedia
-		updateMedia = vi.fn((fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary) => {
-			mockMedia = fn(mockMedia);
+		// Create updater function that modifies mockImages
+		updateImages = vi.fn((fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => {
+			mockImages = fn(mockImages);
 		});
 
 		// Create service instance
-		service = new InlineMediaService(getMedia, updateMedia);
+		service = new InlineImageService(getImages, updateImages);
 	});
 
 	describe('Constructor', () => {
 		it('should create an instance with provided functions', () => {
-			expect(service).toBeInstanceOf(InlineMediaService);
+			expect(service).toBeInstanceOf(InlineImageService);
 		});
 	});
 
@@ -56,7 +56,7 @@ describe('InlineMediaService', () => {
 
 	describe('upload', () => {
 		let mockFile: File;
-		let mockMetadata: MediaMetadata;
+		let mockMetadata: ImageMetadata;
 
 		beforeEach(() => {
 			// Create a mock file
@@ -91,23 +91,23 @@ describe('InlineMediaService', () => {
 		it('should upload and compress an image', async () => {
 			const result = await service.upload(mockFile, mockMetadata);
 
-			expect(result).toHaveProperty('mediaId');
+			expect(result).toHaveProperty('imageId');
 			expect(result).toHaveProperty('entry');
-			expect(result.mediaId).toBe('mock-id-123');
+			expect(result.imageId).toBe('mock-id-123');
 		});
 
 		it('should convert file to Base64 data URL', async () => {
 			const result = await service.upload(mockFile, mockMetadata);
 
-			expect(result.entry.dataUrl).toBe('data:image/png;base64,mock-base64-data');
+			expect(result.entry.src).toBe('data:image/png;base64,mock-base64-data');
 		});
 
-		it('should store entry in media library via updateMedia', async () => {
+		it('should store entry in image library via updateImages', async () => {
 			await service.upload(mockFile, mockMetadata);
 
-			expect(updateMedia).toHaveBeenCalled();
-			expect(mockMedia['mock-id-123']).toBeDefined();
-			expect(mockMedia['mock-id-123'].dataUrl).toBe('data:image/png;base64,mock-base64-data');
+			expect(updateImages).toHaveBeenCalled();
+			expect(mockImages['mock-id-123']).toBeDefined();
+			expect(mockImages['mock-id-123'].src).toBe('data:image/png;base64,mock-base64-data');
 		});
 
 		it('should include metadata with compressed file size', async () => {
@@ -167,10 +167,10 @@ describe('InlineMediaService', () => {
 
 	describe('get', () => {
 		beforeEach(() => {
-			// Populate mock media
-			mockMedia = {
+			// Populate mock images
+			mockImages = {
 				'test-id-1': {
-					dataUrl: 'data:image/png;base64,abc123',
+					src: 'data:image/png;base64,abc123',
 					metadata: {
 						filename: 'test1.png',
 						filesize: 1000,
@@ -180,7 +180,7 @@ describe('InlineMediaService', () => {
 					}
 				},
 				'test-id-2': {
-					dataUrl: 'data:image/jpeg;base64,def456',
+					src: 'data:image/jpeg;base64,def456',
 					metadata: {
 						filename: 'test2.jpg',
 						filesize: 2000,
@@ -192,39 +192,39 @@ describe('InlineMediaService', () => {
 			};
 		});
 
-		it('should retrieve an existing media entry', async () => {
+		it('should retrieve an existing image entry', async () => {
 			const entry = await service.get('test-id-1');
 
 			expect(entry).not.toBeNull();
-			expect(entry?.dataUrl).toBe('data:image/png;base64,abc123');
+			expect(entry?.src).toBe('data:image/png;base64,abc123');
 			expect(entry?.metadata.filename).toBe('test1.png');
 		});
 
-		it('should return null for non-existent media ID', async () => {
+		it('should return null for non-existent image ID', async () => {
 			const entry = await service.get('non-existent-id');
 
 			expect(entry).toBeNull();
 		});
 
-		it('should call getMedia to access current state', async () => {
+		it('should call getImages to access current state', async () => {
 			await service.get('test-id-1');
 
-			expect(getMedia).toHaveBeenCalled();
+			expect(getImages).toHaveBeenCalled();
 		});
 	});
 
 	describe('list', () => {
-		it('should return an empty array for empty media library', async () => {
-			mockMedia = {};
+		it('should return an empty array for empty image library', async () => {
+			mockImages = {};
 			const entries = await service.list();
 
 			expect(entries).toEqual([]);
 		});
 
-		it('should return all media entries with their IDs', async () => {
-			mockMedia = {
+		it('should return all image entries with their IDs', async () => {
+			mockImages = {
 				'id-1': {
-					dataUrl: 'data:image/png;base64,abc123',
+					src: 'data:image/png;base64,abc123',
 					metadata: {
 						filename: 'test1.png',
 						filesize: 1000,
@@ -234,7 +234,7 @@ describe('InlineMediaService', () => {
 					}
 				},
 				'id-2': {
-					dataUrl: 'data:image/jpeg;base64,def456',
+					src: 'data:image/jpeg;base64,def456',
 					metadata: {
 						filename: 'test2.jpg',
 						filesize: 2000,
@@ -250,22 +250,22 @@ describe('InlineMediaService', () => {
 			expect(entries).toHaveLength(2);
 			expect(entries[0]).toHaveProperty('id');
 			expect(entries[0]).toHaveProperty('entry');
-			expect(entries[0].entry).toHaveProperty('dataUrl');
+			expect(entries[0].entry).toHaveProperty('src');
 			expect(entries[0].entry).toHaveProperty('metadata');
 		});
 
-		it('should call getMedia to access current state', async () => {
+		it('should call getImages to access current state', async () => {
 			await service.list();
 
-			expect(getMedia).toHaveBeenCalled();
+			expect(getImages).toHaveBeenCalled();
 		});
 	});
 
 	describe('delete', () => {
 		beforeEach(() => {
-			mockMedia = {
+			mockImages = {
 				'test-id-1': {
-					dataUrl: 'data:image/png;base64,abc123',
+					src: 'data:image/png;base64,abc123',
 					metadata: {
 						filename: 'test1.png',
 						filesize: 1000,
@@ -275,7 +275,7 @@ describe('InlineMediaService', () => {
 					}
 				},
 				'test-id-2': {
-					dataUrl: 'data:image/jpeg;base64,def456',
+					src: 'data:image/jpeg;base64,def456',
 					metadata: {
 						filename: 'test2.jpg',
 						filesize: 2000,
@@ -287,14 +287,14 @@ describe('InlineMediaService', () => {
 			};
 		});
 
-		it('should delete an existing media entry and return true', async () => {
+		it('should delete an existing image entry and return true', async () => {
 			const result = await service.delete('test-id-1');
 
 			expect(result).toBe(true);
-			expect(mockMedia['test-id-1']).toBeUndefined();
+			expect(mockImages['test-id-1']).toBeUndefined();
 		});
 
-		it('should return false for non-existent media ID', async () => {
+		it('should return false for non-existent image ID', async () => {
 			const result = await service.delete('non-existent-id');
 
 			expect(result).toBe(false);
@@ -303,20 +303,70 @@ describe('InlineMediaService', () => {
 		it('should not affect other entries when deleting one', async () => {
 			await service.delete('test-id-1');
 
-			expect(mockMedia['test-id-2']).toBeDefined();
-			expect(mockMedia['test-id-2'].dataUrl).toBe('data:image/jpeg;base64,def456');
+			expect(mockImages['test-id-2']).toBeDefined();
+			expect(mockImages['test-id-2'].src).toBe('data:image/jpeg;base64,def456');
 		});
 
-		it('should call updateMedia to modify state', async () => {
+		it('should call updateImages to modify state', async () => {
 			await service.delete('test-id-1');
 
-			expect(updateMedia).toHaveBeenCalled();
+			expect(updateImages).toHaveBeenCalled();
 		});
 
-		it('should call getMedia to check existence before deletion', async () => {
+		it('should call getImages to check existence before deletion', async () => {
 			await service.delete('test-id-1');
 
-			expect(getMedia).toHaveBeenCalled();
+			expect(getImages).toHaveBeenCalled();
+		});
+	});
+
+	describe('resolve', () => {
+		beforeEach(() => {
+			mockImages = {
+				'test-id-1': {
+					src: 'data:image/png;base64,abc123',
+					metadata: {
+						filename: 'test1.png',
+						filesize: 1000,
+						mimeType: 'image/png',
+						width: 100,
+						height: 100
+					}
+				}
+			};
+		});
+
+		it('should resolve an image ID to ImageSource', async () => {
+			const result = await service.resolve('test-id-1');
+
+			expect(result).not.toBeNull();
+			expect(result?.src).toBe('data:image/png;base64,abc123');
+		});
+
+		it('should return null for non-existent ID', async () => {
+			const result = await service.resolve('non-existent-id');
+
+			expect(result).toBeNull();
+		});
+
+		it('should handle numeric IDs', async () => {
+			mockImages = {
+				'123': {
+					src: 'data:image/png;base64,numeric',
+					metadata: {
+						filename: 'numeric.png',
+						filesize: 1000,
+						mimeType: 'image/png',
+						width: 100,
+						height: 100
+					}
+				}
+			};
+
+			const result = await service.resolve(123);
+
+			expect(result).not.toBeNull();
+			expect(result?.src).toBe('data:image/png;base64,numeric');
 		});
 	});
 
@@ -325,7 +375,7 @@ describe('InlineMediaService', () => {
 			const mockFile1 = new File(['content1'], 'test1.png', { type: 'image/png' });
 			const mockFile2 = new File(['content2'], 'test2.jpg', { type: 'image/jpeg' });
 
-			const metadata1: MediaMetadata = {
+			const metadata1: ImageMetadata = {
 				filename: 'test1.png',
 				filesize: 8,
 				mimeType: 'image/png',
@@ -333,7 +383,7 @@ describe('InlineMediaService', () => {
 				height: 100
 			};
 
-			const metadata2: MediaMetadata = {
+			const metadata2: ImageMetadata = {
 				filename: 'test2.jpg',
 				filesize: 8,
 				mimeType: 'image/jpeg',
@@ -369,14 +419,14 @@ describe('InlineMediaService', () => {
 			const result1 = await service.upload(mockFile1, metadata1);
 			const result2 = await service.upload(mockFile2, metadata2);
 
-			expect(result1.mediaId).toBe('mock-id-1');
-			expect(result2.mediaId).toBe('mock-id-2');
-			expect(Object.keys(mockMedia)).toHaveLength(2);
+			expect(result1.imageId).toBe('mock-id-1');
+			expect(result2.imageId).toBe('mock-id-2');
+			expect(Object.keys(mockImages)).toHaveLength(2);
 		});
 
 		it('should handle upload followed by retrieval', async () => {
 			const mockFile = new File(['test'], 'test.png', { type: 'image/png' });
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: 'test.png',
 				filesize: 4,
 				mimeType: 'image/png',
@@ -402,15 +452,15 @@ describe('InlineMediaService', () => {
 			global.FileReader = MockFileReader as unknown as typeof FileReader;
 
 			const uploadResult = await service.upload(mockFile, metadata);
-			const retrievedEntry = await service.get(uploadResult.mediaId);
+			const retrievedEntry = await service.get(uploadResult.imageId);
 
 			expect(retrievedEntry).not.toBeNull();
-			expect(retrievedEntry?.dataUrl).toBe('data:image/png;base64,test-data');
+			expect(retrievedEntry?.src).toBe('data:image/png;base64,test-data');
 		});
 
 		it('should handle upload, list, and delete operations', async () => {
 			const mockFile = new File(['test'], 'test.png', { type: 'image/png' });
-			const metadata: MediaMetadata = {
+			const metadata: ImageMetadata = {
 				filename: 'test.png',
 				filesize: 4,
 				mimeType: 'image/png',
@@ -443,7 +493,7 @@ describe('InlineMediaService', () => {
 			expect(entries).toHaveLength(1);
 
 			// Delete
-			const deleteResult = await service.delete(uploadResult.mediaId);
+			const deleteResult = await service.delete(uploadResult.imageId);
 			expect(deleteResult).toBe(true);
 
 			// List again
