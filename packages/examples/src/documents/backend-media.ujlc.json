@@ -3,14 +3,7 @@
 		"meta": {
 			"title": "UJL Framework - Brand-Compliance by Design",
 			"description": "You shouldn't have to choose between moving fast and protecting your brand. With UJL, you get both: launch professional websites in minutes instead of weeks, while your brand guidelines stay locked in.",
-			"tags": [
-				"brand-compliance",
-				"accessibility",
-				"ai-native",
-				"marketing",
-				"demo",
-				"ujl"
-			],
+			"tags": ["brand-compliance", "accessibility", "ai-native", "marketing", "demo", "ujl"],
 			"updated_at": "2024-01-15T10:30:00Z",
 			"_version": "0.0.1",
 			"_instance": "example-001",
@@ -36,13 +29,7 @@
 							"meta": {
 								"id": "hero-001",
 								"updated_at": "2025-12-29T17:02:16.993Z",
-								"_embedding": [
-									0.6,
-									0.7,
-									0.8,
-									0.9,
-									1
-								]
+								"_embedding": [0.6, 0.7, 0.8, 0.9, 1]
 							},
 							"fields": {
 								"content": {
@@ -67,13 +54,7 @@
 							"meta": {
 								"id": "grid-features-001",
 								"updated_at": "2024-01-15T10:30:00Z",
-								"_embedding": [
-									1.1,
-									1.2,
-									1.3,
-									1.4,
-									1.5
-								]
+								"_embedding": [1.1, 1.2, 1.3, 1.4, 1.5]
 							},
 							"fields": {},
 							"slots": {
@@ -83,13 +64,7 @@
 										"meta": {
 											"id": "feature-brand-compliance-001",
 											"updated_at": "2025-12-29T17:02:30.832Z",
-											"_embedding": [
-												1.6,
-												1.7,
-												1.8,
-												1.9,
-												2
-											]
+											"_embedding": [1.6, 1.7, 1.8, 1.9, 2]
 										},
 										"fields": {
 											"title": "Guaranteed Brand Compliance",
@@ -117,13 +92,7 @@
 										"meta": {
 											"id": "feature-accessibility-001",
 											"updated_at": "2025-12-29T17:30:10.932Z",
-											"_embedding": [
-												2.1,
-												2.2,
-												2.3,
-												2.4,
-												2.5
-											]
+											"_embedding": [2.1, 2.2, 2.3, 2.4, 2.5]
 										},
 										"fields": {
 											"title": "Accessibility by Design",
@@ -151,13 +120,7 @@
 										"meta": {
 											"id": "feature-ai-safe-001",
 											"updated_at": "2025-12-29T17:30:11.291Z",
-											"_embedding": [
-												2.6,
-												2.7,
-												2.8,
-												2.9,
-												3
-											]
+											"_embedding": [2.6, 2.7, 2.8, 2.9, 3]
 										},
 										"fields": {
 											"title": "AI-Safe",
@@ -214,13 +177,7 @@
 							"meta": {
 								"id": "use-cases-intro-001",
 								"updated_at": "2024-01-15T10:30:00Z",
-								"_embedding": [
-									3.1,
-									3.2,
-									3.3,
-									3.4,
-									3.5
-								]
+								"_embedding": [3.1, 3.2, 3.3, 3.4, 3.5]
 							},
 							"fields": {
 								"content": {
@@ -245,13 +202,7 @@
 							"meta": {
 								"id": "grid-use-cases-001",
 								"updated_at": "2024-01-15T10:30:00Z",
-								"_embedding": [
-									3.6,
-									3.7,
-									3.8,
-									3.9,
-									4
-								]
+								"_embedding": [3.6, 3.7, 3.8, 3.9, 4]
 							},
 							"fields": {},
 							"slots": {
@@ -261,13 +212,7 @@
 										"meta": {
 											"id": "use-case-marketing-001",
 											"updated_at": "2025-12-29T17:03:50.675Z",
-											"_embedding": [
-												4.1,
-												4.2,
-												4.3,
-												4.4,
-												4.5
-											]
+											"_embedding": [4.1, 4.2, 4.3, 4.4, 4.5]
 										},
 										"fields": {
 											"title": "Marketing Agency",
@@ -295,13 +240,7 @@
 										"meta": {
 											"id": "use-case-web-agency-001",
 											"updated_at": "2025-12-29T17:04:02.758Z",
-											"_embedding": [
-												4.6,
-												4.7,
-												4.8,
-												4.9,
-												5
-											]
+											"_embedding": [4.6, 4.7, 4.8, 4.9, 5]
 										},
 										"fields": {
 											"title": "Web Agency",
@@ -329,13 +268,7 @@
 										"meta": {
 											"id": "use-case-saas-001",
 											"updated_at": "2025-12-29T17:04:17.877Z",
-											"_embedding": [
-												5.1,
-												5.2,
-												5.3,
-												5.4,
-												5.5
-											]
+											"_embedding": [5.1, 5.2, 5.3, 5.4, 5.5]
 										},
 										"fields": {
 											"title": "SaaS Company",
@@ -369,13 +302,7 @@
 				"meta": {
 					"id": "cta-container-001",
 					"updated_at": "2024-01-15T10:30:00Z",
-					"_embedding": [
-						6.1,
-						6.2,
-						6.3,
-						6.4,
-						6.5
-					]
+					"_embedding": [6.1, 6.2, 6.3, 6.4, 6.5]
 				},
 				"fields": {},
 				"slots": {
@@ -385,13 +312,7 @@
 							"meta": {
 								"id": "social-impact-001",
 								"updated_at": "2025-12-29T17:05:00.989Z",
-								"_embedding": [
-									5.6,
-									5.7,
-									5.8,
-									5.9,
-									6
-								]
+								"_embedding": [5.6, 5.7, 5.8, 5.9, 6]
 							},
 							"fields": {
 								"content": {
@@ -416,13 +337,7 @@
 							"meta": {
 								"id": "cta-001",
 								"updated_at": "2025-12-29T17:05:54.275Z",
-								"_embedding": [
-									6.6,
-									6.7,
-									6.8,
-									6.9,
-									7
-								]
+								"_embedding": [6.6, 6.7, 6.8, 6.9, 7]
 							},
 							"fields": {
 								"headline": "Ready to move fast without breaking your brand?",
