@@ -26,8 +26,7 @@ import '@fontsource-variable/jetbrains-mono';
 
 import { UJLCrafter, type LibraryOptions } from '@ujl-framework/crafter';
 import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
-import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
+import { showcaseDocument, backendMediaDocument, defaultTheme } from '@ujl-framework/examples';
 
 // ============================================
 // ENVIRONMENT CONFIGURATION
@@ -83,14 +82,31 @@ function getLibraryConfig(): LibraryOptions {
 }
 
 // ============================================
+// DOCUMENT SELECTION
+// ============================================
+
+/**
+ * Select the appropriate example document based on storage mode
+ */
+function getExampleDocument(): UJLCDocument {
+	if (STORAGE_MODE === 'backend') {
+		console.log('[dev-demo] Loading backend-media example document');
+		return backendMediaDocument as unknown as UJLCDocument;
+	}
+	console.log('[dev-demo] Loading showcase example document');
+	return showcaseDocument as unknown as UJLCDocument;
+}
+
+// ============================================
 // CRAFTER INITIALIZATION
 // ============================================
 
 const library = getLibraryConfig();
+const document = getExampleDocument();
 
 const crafter = new UJLCrafter({
 	target: '#app',
-	document: showcaseDocument as unknown as UJLCDocument,
+	document,
 	theme: defaultTheme as unknown as UJLTDocument,
 	library
 });

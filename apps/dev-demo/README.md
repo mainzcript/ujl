@@ -39,7 +39,7 @@ This starts:
 ### Step 2: Create an Admin User
 
 1. Open [http://localhost:3000/admin](http://localhost:3000/admin)
-2. Fill in the registration form (first user becomes admin)
+2. Fill in the registration form (first user becomes admin), you can use any email - it will not be verified.
 3. Click "Create Account"
 
 ### Step 3: Enable API Key
@@ -54,7 +54,7 @@ This starts:
 
 ```bash
 # In apps/dev-demo directory
-cp env.example .env
+cp .env.example .env
 ```
 
 Edit `.env`:
@@ -80,7 +80,7 @@ apps/dev-demo/
 ├── src/
 │   └── main.ts          # Crafter initialization with ENV config
 ├── index.html           # Minimal HTML shell
-├── env.example          # Environment configuration template
+├── .env.example         # Environment configuration template
 ├── .prettierrc          # Prettier configuration
 ├── package.json
 ├── tsconfig.json

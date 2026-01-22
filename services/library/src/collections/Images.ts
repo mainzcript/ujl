@@ -33,7 +33,7 @@ export const Images: CollectionConfig = {
     beforeOperation: [
       async ({ args, req, operation }) => {
         if (operation === 'create' && req.file) {
-          // Set title from original filename (before anonymization)
+          // Store original filename before anonymization
           const originalName = req.file.name.replace(/\.[^/.]+$/, '')
           if (!args.data?.title) {
             args.data = { ...args.data, title: originalName }
@@ -69,11 +69,10 @@ export const Images: CollectionConfig = {
       },
     },
 
-    // Alt text (localized, required for accessibility)
+    // Alt text (localized, optional)
     {
       name: 'alt',
       type: 'text',
-      required: true,
       localized: true,
       admin: {
         description:

@@ -158,18 +158,14 @@ export class BackendImageService implements ImageService {
 	/**
 	 * Upload a file to the backend image library
 	 * @param file - The file to upload
-	 * @param metadata - Image metadata including filename and optional fields
+	 * @param _metadata - Image metadata (currently unused, for interface compatibility)
 	 * @returns Upload result with image ID and library entry
 	 * @throws Error if upload fails
 	 */
-	async upload(file: File, metadata: ImageMetadata): Promise<UploadResult> {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async upload(file: File, _metadata: ImageMetadata): Promise<UploadResult> {
 		const formData = new FormData();
 		formData.append('file', file);
-
-		// Set alt text (required field) - use filename as default
-		if (metadata.filename) {
-			formData.append('alt', metadata.filename);
-		}
 
 		try {
 			const response = await fetch(`${this.apiBase}`, {
