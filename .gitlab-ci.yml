@@ -96,7 +96,7 @@ test_unit:
   stage: test
   image: node:${NODE_VERSION}
   needs:
-    - job: install_deps
+    - job: build_all
       artifacts: false
   script:
     - pnpm install --frozen-lockfile --prefer-offline
@@ -152,7 +152,7 @@ quality_check:
   stage: quality
   image: node:${NODE_VERSION}
   needs:
-    - job: install_deps
+    - job: build_all
       artifacts: false
   script:
     - pnpm install --frozen-lockfile --prefer-offline
