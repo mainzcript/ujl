@@ -38,11 +38,11 @@ export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
 /**
  * Configuration options for the library.
- * Determines how image assets are stored and retrieved.
+ * Determines how library assets are stored and retrieved.
  *
  * Two storage modes are available:
- * - `inline`: Images stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Images stored on a Payload CMS server (requires url and apiKey)
+ * - `inline`: Library stored as Base64 in the UJLC document (no additional config needed)
+ * - `backend`: Library stored on a Payload CMS server (requires url and apiKey)
  *
  * Note: Document-level _library configuration is ignored.
  * Only this options-based configuration is used.

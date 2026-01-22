@@ -2,10 +2,10 @@
 
 Minimal integration demo for the UJL Crafter – a visual editor for UJL documents.
 
-This app demonstrates how to embed the UJL Crafter into a vanilla TypeScript application with two storage modes:
+This app demonstrates how to embed the UJL Crafter into a vanilla TypeScript application with two library storage modes:
 
-- **Inline** (default): Images stored as Base64 directly in the document
-- **Backend**: Images stored on a Payload CMS server (`services/library`)
+- **Inline** (default): Library stored as Base64 directly in the document
+- **Backend**: Library stored on a Payload CMS server (`services/library`)
 
 ## Quick Start (Inline Mode)
 
@@ -17,11 +17,11 @@ pnpm install
 pnpm --filter @ujl-framework/dev-demo dev
 ```
 
-This starts the Crafter at [http://localhost:5174](http://localhost:5174) with inline image storage.
+This starts the Crafter at [http://localhost:5174](http://localhost:5174) with inline library storage.
 
 ## Backend Mode Setup
 
-To use persistent image storage via the Library service, follow these steps:
+To use persistent library storage via the Library service, follow these steps:
 
 ### Step 1: Start the Library Service
 
@@ -60,7 +60,7 @@ cp env.example .env
 Edit `.env`:
 
 ```bash
-VITE_IMAGE_STORAGE=backend
+VITE_LIBRARY_STORAGE=backend
 VITE_BACKEND_URL=http://localhost:3000
 VITE_BACKEND_API_KEY=your-api-key-here  # Paste the key from Step 3
 ```
@@ -92,7 +92,7 @@ apps/dev-demo/
 
 | Variable               | Default  | Description                                      |
 | ---------------------- | -------- | ------------------------------------------------ |
-| `VITE_IMAGE_STORAGE`   | `inline` | Storage mode: `inline` or `backend`              |
+| `VITE_LIBRARY_STORAGE` | `inline` | Library storage mode: `inline` or `backend`      |
 | `VITE_BACKEND_URL`     | –        | Library base URL (e.g., `http://localhost:3000`) |
 | `VITE_BACKEND_API_KEY` | –        | API key for Library authentication               |
 
@@ -111,10 +111,10 @@ window.crafter.getMode(); // Get editor mode ('editor' or 'designer')
 
 ### "Backend mode requires VITE_BACKEND_URL"
 
-You set `VITE_IMAGE_STORAGE=backend` but didn't configure the URL. Either:
+You set `VITE_LIBRARY_STORAGE=backend` but didn't configure the URL. Either:
 
 - Set `VITE_BACKEND_URL` in your `.env` file, or
-- Change `VITE_IMAGE_STORAGE` back to `inline`
+- Change `VITE_LIBRARY_STORAGE` back to `inline`
 
 ### "Image backend connection error"
 

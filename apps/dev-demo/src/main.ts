@@ -2,10 +2,10 @@
  * UJL Dev Demo – Crafter Integration Example
  *
  * This file demonstrates how to integrate the UJL Crafter into a vanilla
- * TypeScript application. It supports two storage modes:
+ * TypeScript application. It supports two library storage modes:
  *
- * 1. Inline (default): Images stored as Base64 in the document
- * 2. Backend: Images stored on a Payload CMS server (services/library)
+ * 1. Inline (default): Library stored as Base64 in the document
+ * 2. Backend: Library stored on a Payload CMS server (services/library)
  *
  * Configuration is done via environment variables (see .env.example).
  */
@@ -34,11 +34,11 @@ import defaultTheme from '@ujl-framework/examples/themes/default' with { type: '
 // ============================================
 
 /**
- * Image storage mode: 'inline' or 'backend'
- * - inline: Images are stored as Base64 directly in the UJLC document
- * - backend: Images are stored on a Payload CMS server
+ * Library storage mode: 'inline' or 'backend'
+ * - inline: Library is stored as Base64 directly in the UJLC document
+ * - backend: Library is stored on a Payload CMS server
  */
-const STORAGE_MODE = import.meta.env.VITE_IMAGE_STORAGE || 'inline';
+const STORAGE_MODE = import.meta.env.VITE_LIBRARY_STORAGE || 'inline';
 
 /**
  * Backend URL (only used when STORAGE_MODE is 'backend')
@@ -78,7 +78,7 @@ function getLibraryConfig(): LibraryOptions {
 		};
 	}
 
-	console.log('[dev-demo] Using inline storage (images embedded in document)');
+	console.log('[dev-demo] Using inline storage (library embedded in document)');
 	return { storage: 'inline' };
 }
 

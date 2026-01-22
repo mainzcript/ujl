@@ -163,7 +163,7 @@ export function createImageServiceFactory(
 }
 
 /**
- * Default image service factory with inline storage.
+ * Default library service factory with inline storage.
  * For backend storage, use createImageServiceFactory with explicit options.
  */
 export const defaultImageServiceFactory = createImageServiceFactory();

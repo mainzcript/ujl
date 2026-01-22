@@ -17,7 +17,7 @@ export type ConnectionStatus = {
 };
 
 /**
- * Service interface for image storage and retrieval
+ * Service interface for library storage and retrieval
  *
  * Extends ImageProvider to allow direct use in Composer.compose().
  *
