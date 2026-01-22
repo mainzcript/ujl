@@ -11,6 +11,20 @@
 		"lint": "prettier --check .",
 		"clean": "rimraf dist .vitepress/cache"
 	},
+	"dependencies": {
+		"@fontsource-variable/inter": "^5.2.8",
+		"@fontsource-variable/jetbrains-mono": "^5.2.8",
+		"@fontsource-variable/merriweather": "^5.2.6",
+		"@fontsource-variable/montserrat": "^5.2.8",
+		"@fontsource-variable/noto-sans": "^5.2.10",
+		"@fontsource-variable/nunito-sans": "^5.2.7",
+		"@fontsource-variable/open-sans": "^5.2.7",
+		"@fontsource-variable/oswald": "^5.2.8",
+		"@fontsource-variable/raleway": "^5.2.8",
+		"@fontsource-variable/roboto": "^5.2.9",
+		"@ujl-framework/crafter": "workspace:*",
+		"@ujl-framework/examples": "workspace:*"
+	},
 	"devDependencies": {
 		"copyfiles": "^2.4.1",
 		"markdown-it-textual-uml": "^0.17.1",

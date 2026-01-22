@@ -22,6 +22,7 @@ export default defineConfig({
 		nav: [
 			{ text: "Über UJL", link: "/about/01-vision" },
 			{ text: "Dokumentation", link: "/docs/01-getting-started" },
+			{ text: "Demo", link: "/demo" },
 			{ text: "Architektur", link: "/arc42/01-introduction-and-goals" },
 		],
 

@@ -36,28 +36,6 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.21.0)
 
-  apps/demo:
-    dependencies:
-      '@ujl-framework/adapter-web':
-        specifier: workspace:*
-        version: link:../../packages/adapter-web
-      '@ujl-framework/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@ujl-framework/examples':
-        specifier: workspace:*
-        version: link:../../packages/examples
-      '@ujl-framework/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.21.0)
-
   apps/dev-demo:
     dependencies:
       '@fontsource-variable/inter':
@@ -111,6 +89,43 @@ importers:
         version: 7.3.1(@types/node@25.0.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.21.0)
 
   apps/docs:
+    dependencies:
+      '@fontsource-variable/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/merriweather':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource-variable/montserrat':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.2.10
+        version: 5.2.10
+      '@fontsource-variable/nunito-sans':
+        specifier: ^5.2.7
+        version: 5.2.7
+      '@fontsource-variable/open-sans':
+        specifier: ^5.2.7
+        version: 5.2.7
+      '@fontsource-variable/oswald':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/raleway':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/roboto':
+        specifier: ^5.2.9
+        version: 5.2.9
+      '@ujl-framework/crafter':
+        specifier: workspace:*
+        version: link:../../packages/crafter
+      '@ujl-framework/examples':
+        specifier: workspace:*
+        version: link:../../packages/examples
     devDependencies:
       copyfiles:
         specifier: ^2.4.1
