@@ -91,13 +91,13 @@ build_all:
   cache:
     <<: *cache_pnpm_pull
 
-# Run unit tests (Vitest) - tests source, doesn't need dist artifacts
+# Run unit tests (Vitest) - needs build artifacts for package exports resolution
 test_unit:
   stage: test
   image: node:${NODE_VERSION}
   needs:
     - job: build_all
-      artifacts: false
+      artifacts: true
   script:
     - pnpm install --frozen-lockfile --prefer-offline
     - pnpm test:unit
@@ -147,13 +147,13 @@ test_e2e:
       - stuck_or_timeout_failure
       - api_failure
 
-# Run quality checks - doesn't need builds, only source
+# Run quality checks - needs build artifacts for workspace package exports resolution
 quality_check:
   stage: quality
   image: node:${NODE_VERSION}
   needs:
     - job: build_all
-      artifacts: false
+      artifacts: true
   script:
     - pnpm install --frozen-lockfile --prefer-offline
     - pnpm run lint
