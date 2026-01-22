@@ -81,9 +81,9 @@ const crafter = new UJLCrafter({
   target: '#editor-container',
   document: myDocument,
   theme: myTheme,
-  mediaLibrary: {
+  library: {
     storage: 'backend',
-    endpoint: 'http://localhost:3000/api',
+    url: 'http://localhost:3000',
     apiKey: 'your-api-key-here',
   },
 })

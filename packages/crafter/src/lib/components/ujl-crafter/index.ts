@@ -5,7 +5,7 @@
  */
 
 // Einzige öffentliche API
-export { UJLCrafter, type UJLCrafterOptions, type ImageLibraryOptions } from './UJLCrafter.js';
+export { UJLCrafter, type UJLCrafterOptions, type LibraryOptions } from './UJLCrafter.js';
 
 // Callback-Types (nur für API-Nutzer relevant)
 export type {

@@ -24,7 +24,7 @@ import '@fontsource-variable/noto-sans';
 import '@fontsource-variable/nunito-sans';
 import '@fontsource-variable/jetbrains-mono';
 
-import { UJLCrafter, type ImageLibraryOptions } from '@ujl-framework/crafter';
+import { UJLCrafter, type LibraryOptions } from '@ujl-framework/crafter';
 import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
@@ -41,10 +41,10 @@ import defaultTheme from '@ujl-framework/examples/themes/default' with { type: '
 const STORAGE_MODE = import.meta.env.VITE_IMAGE_STORAGE || 'inline';
 
 /**
- * Backend endpoint URL (only used when STORAGE_MODE is 'backend')
- * Example: http://localhost:3000/api
+ * Backend URL (only used when STORAGE_MODE is 'backend')
+ * Example: http://localhost:3000
  */
-const BACKEND_ENDPOINT = import.meta.env.VITE_BACKEND_ENDPOINT as string | undefined;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string | undefined;
 
 /**
  * Backend API key for authentication (only used when STORAGE_MODE is 'backend')
@@ -53,15 +53,15 @@ const BACKEND_ENDPOINT = import.meta.env.VITE_BACKEND_ENDPOINT as string | undef
 const BACKEND_API_KEY = import.meta.env.VITE_BACKEND_API_KEY as string | undefined;
 
 // ============================================
-// IMAGE LIBRARY CONFIGURATION
+// LIBRARY CONFIGURATION
 // ============================================
 
-function getImageLibraryConfig(): ImageLibraryOptions {
+function getLibraryConfig(): LibraryOptions {
 	if (STORAGE_MODE === 'backend') {
 		// Validate backend configuration
-		if (!BACKEND_ENDPOINT) {
+		if (!BACKEND_URL) {
 			throw new Error(
-				'Backend mode requires VITE_BACKEND_ENDPOINT. ' + 'Please configure it in your .env file.'
+				'Backend mode requires VITE_BACKEND_URL. ' + 'Please configure it in your .env file.'
 			);
 		}
 		if (!BACKEND_API_KEY) {
@@ -70,10 +70,10 @@ function getImageLibraryConfig(): ImageLibraryOptions {
 			);
 		}
 
-		console.log(`[dev-demo] Using backend storage: ${BACKEND_ENDPOINT}`);
+		console.log(`[dev-demo] Using backend storage: ${BACKEND_URL}`);
 		return {
 			storage: 'backend',
-			endpoint: BACKEND_ENDPOINT,
+			url: BACKEND_URL,
 			apiKey: BACKEND_API_KEY
 		};
 	}
@@ -86,13 +86,13 @@ function getImageLibraryConfig(): ImageLibraryOptions {
 // CRAFTER INITIALIZATION
 // ============================================
 
-const imageLibrary = getImageLibraryConfig();
+const library = getLibraryConfig();
 
 const crafter = new UJLCrafter({
 	target: '#app',
 	document: showcaseDocument as unknown as UJLCDocument,
 	theme: defaultTheme as unknown as UJLTDocument,
-	imageLibrary
+	library
 });
 
 // ============================================

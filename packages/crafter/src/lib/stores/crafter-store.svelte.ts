@@ -55,9 +55,9 @@ export type ImageLibraryContext = {
 } | null;
 
 /**
- * Image library configuration from document meta.
+ * Library configuration from document meta.
  */
-export type ImageLibraryConfig = UJLCDocumentMeta['image_library'];
+export type LibraryConfig = UJLCDocumentMeta['_library'];
 
 /**
  * Function type for immutable image library updates.
@@ -70,7 +70,7 @@ export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary
  */
 export interface ImageServiceFactory {
 	(
-		config: ImageLibraryConfig,
+		config: LibraryConfig,
 		getImages: () => UJLCImageLibrary,
 		updateImages: UpdateImagesFn
 	): ImageService;
@@ -313,7 +313,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	const imageService = $derived.by(() =>
-		createImageService(meta.image_library, () => images, updateImages)
+		createImageService(meta._library, () => images, updateImages)
 	);
 
 	// ============================================

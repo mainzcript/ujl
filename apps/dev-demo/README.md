@@ -61,7 +61,7 @@ Edit `.env`:
 
 ```bash
 VITE_IMAGE_STORAGE=backend
-VITE_BACKEND_ENDPOINT=http://localhost:3000/api
+VITE_BACKEND_URL=http://localhost:3000
 VITE_BACKEND_API_KEY=your-api-key-here  # Paste the key from Step 3
 ```
 
@@ -90,11 +90,11 @@ apps/dev-demo/
 
 ## Configuration
 
-| Variable                | Default  | Description                                         |
-| ----------------------- | -------- | --------------------------------------------------- |
-| `VITE_IMAGE_STORAGE`    | `inline` | Storage mode: `inline` or `backend`                 |
-| `VITE_BACKEND_ENDPOINT` | –        | Library API URL (e.g., `http://localhost:3000/api`) |
-| `VITE_BACKEND_API_KEY`  | –        | API key for Library authentication                  |
+| Variable               | Default  | Description                                      |
+| ---------------------- | -------- | ------------------------------------------------ |
+| `VITE_IMAGE_STORAGE`   | `inline` | Storage mode: `inline` or `backend`              |
+| `VITE_BACKEND_URL`     | –        | Library base URL (e.g., `http://localhost:3000`) |
+| `VITE_BACKEND_API_KEY` | –        | API key for Library authentication               |
 
 ## Debugging
 
@@ -109,11 +109,11 @@ window.crafter.getMode(); // Get editor mode ('editor' or 'designer')
 
 ## Troubleshooting
 
-### "Backend mode requires VITE_BACKEND_ENDPOINT"
+### "Backend mode requires VITE_BACKEND_URL"
 
-You set `VITE_IMAGE_STORAGE=backend` but didn't configure the endpoint. Either:
+You set `VITE_IMAGE_STORAGE=backend` but didn't configure the URL. Either:
 
-- Set `VITE_BACKEND_ENDPOINT` in your `.env` file, or
+- Set `VITE_BACKEND_URL` in your `.env` file, or
 - Change `VITE_IMAGE_STORAGE` back to `inline`
 
 ### "Image backend connection error"

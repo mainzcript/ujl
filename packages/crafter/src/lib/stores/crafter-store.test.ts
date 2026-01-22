@@ -25,7 +25,7 @@ function createMockUjlcDocument(): UJLCDocument {
 				_version: '0.0.1',
 				_instance: 'test-001',
 				_embedding_model_hash: 'test-hash',
-				image_library: { storage: 'inline' }
+				_library: { storage: 'inline' }
 			},
 			images: {},
 			root: createMockTree()

@@ -68,15 +68,15 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
- * Image library storage configuration schema
+ * Library storage configuration schema
  */
-const ImageLibraryStorageConfigSchema = z.discriminatedUnion("storage", [
+const LibraryStorageConfigSchema = z.discriminatedUnion("storage", [
 	z.object({
 		storage: z.literal("inline"),
 	}),
 	z.object({
 		storage: z.literal("backend"),
-		endpoint: z.string().url(),
+		url: z.url(),
 	}),
 ]);
 
@@ -91,7 +91,7 @@ const UJLCDocumentMetaSchema = z.object({
 	_version: z.string(),
 	_instance: z.string(),
 	_embedding_model_hash: z.string(),
-	image_library: ImageLibraryStorageConfigSchema.optional().default({ storage: "inline" }),
+	_library: LibraryStorageConfigSchema.optional().default({ storage: "inline" }),
 });
 
 /**
@@ -120,7 +120,7 @@ export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 export type UJLCSlotObject = z.infer<typeof UJLCSlotObjectSchema>;
 export type UJLCDocumentMeta = z.infer<typeof UJLCDocumentMetaSchema>;
 export type UJLCImageLibrary = Record<string, ImageEntry>;
-export type ImageLibraryStorageConfig = z.infer<typeof ImageLibraryStorageConfigSchema>;
+export type LibraryStorageConfig = z.infer<typeof LibraryStorageConfigSchema>;
 export type UJLCObject = z.infer<typeof UJLCObjectSchema>;
 export type UJLCDocument = z.infer<typeof UJLCDocumentSchema>;
 

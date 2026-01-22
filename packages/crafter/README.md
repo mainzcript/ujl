@@ -51,9 +51,9 @@ const crafter = new UJLCrafter({
 	target: '#editor-container',
 	document: myContentDocument,
 	theme: myPreviewTheme,
-	mediaLibrary: {
+	library: {
 		storage: 'backend',
-		endpoint: 'http://localhost:3000/api',
+		url: 'http://localhost:3000',
 		apiKey: 'your-api-key'
 	}
 });
@@ -96,12 +96,12 @@ In **Editor Mode**, the Crafter provides module tree navigation, click-to-select
 
 ## Media Library
 
-The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.mediaLibrary`.
+The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
 
-| Storage Mode | Required Options     | Description                        |
-| ------------ | -------------------- | ---------------------------------- |
-| `inline`     | None                 | Media stored as Base64 in document |
-| `backend`    | `endpoint`, `apiKey` | Media stored on Payload CMS server |
+| Storage Mode | Required Options | Description                        |
+| ------------ | ---------------- | ---------------------------------- |
+| `inline`     | None             | Media stored as Base64 in document |
+| `backend`    | `url`, `apiKey`  | Media stored on Payload CMS server |
 
 For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
@@ -136,7 +136,7 @@ interface UJLCrafterOptions {
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
-	mediaLibrary?: { storage: 'inline' } | { storage: 'backend'; endpoint: string; apiKey: string };
+	library?: { storage: 'inline' } | { storage: 'backend'; url: string; apiKey: string };
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
 ```

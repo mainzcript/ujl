@@ -14,7 +14,7 @@ export {
 	type CrafterMode,
 	type ViewportSize,
 	type ImageLibraryContext,
-	type ImageLibraryConfig,
+	type LibraryConfig,
 	type UpdateImagesFn,
 	type ImageServiceFactory
 } from './crafter-store.svelte.js';

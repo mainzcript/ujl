@@ -58,20 +58,23 @@ type PayloadListResponse = {
  * Compression handled server-side.
  */
 export class BackendImageService implements ImageService {
-	private endpoint: string;
+	private url: string;
+	private apiBase: string;
 	private apiKey?: string;
 	private collectionSlug: string;
 
 	/**
 	 * Create a backend image service
-	 * @param endpoint - Base URL of the API (e.g., http://localhost:3000/api)
+	 * @param url - Base URL of the API (e.g., http://localhost:3000)
 	 * @param apiKey - Optional API key for authentication
 	 * @param collectionSlug - The Payload collection slug (default: 'images')
 	 */
-	constructor(endpoint: string, apiKey?: string, collectionSlug: string = 'images') {
-		this.endpoint = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+	constructor(url: string, apiKey?: string, collectionSlug: string = 'images') {
+		this.url = url.endsWith('/') ? url.slice(0, -1) : url;
 		this.apiKey = apiKey;
 		this.collectionSlug = collectionSlug;
+		// Automatically append /api/{collectionSlug} for API calls
+		this.apiBase = `${this.url}/api/${this.collectionSlug}`;
 	}
 
 	/**
@@ -80,7 +83,7 @@ export class BackendImageService implements ImageService {
 	 */
 	async checkConnection(): Promise<{ connected: boolean; error?: string }> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}?limit=1`, {
+			const response = await fetch(`${this.apiBase}?limit=1`, {
 				headers: this.getHeaders()
 			});
 
@@ -102,7 +105,7 @@ export class BackendImageService implements ImageService {
 			logger.error('Backend connection error:', err);
 			return {
 				connected: false,
-				error: `Cannot reach backend at ${this.endpoint}. Is the service running?`
+				error: `Cannot reach backend at ${this.url}. Is the service running?`
 			};
 		}
 	}
@@ -136,10 +139,9 @@ export class BackendImageService implements ImageService {
 			doc.sizes?.sm ||
 			doc.sizes?.xs;
 
-		// Extract base URL (remove /api from endpoint)
-		const baseUrl = this.endpoint.replace('/api', '');
+		// Payload returns relative URLs, so we use the base URL directly
 		const relativeUrl = bestSize?.url || doc.url;
-		const src = `${baseUrl}${relativeUrl}`;
+		const src = `${this.url}${relativeUrl}`;
 
 		return {
 			src,
@@ -170,7 +172,7 @@ export class BackendImageService implements ImageService {
 		}
 
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}`, {
+			const response = await fetch(`${this.apiBase}`, {
 				method: 'POST',
 				headers: this.getHeaders(),
 				body: formData
@@ -201,7 +203,7 @@ export class BackendImageService implements ImageService {
 	 */
 	async get(imageId: string): Promise<ImageEntry | null> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${imageId}`, {
+			const response = await fetch(`${this.apiBase}/${imageId}`, {
 				headers: this.getHeaders()
 			});
 
@@ -226,7 +228,7 @@ export class BackendImageService implements ImageService {
 	 */
 	async list(): Promise<Array<{ id: string; entry: ImageEntry }>> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}?limit=100`, {
+			const response = await fetch(`${this.apiBase}?limit=100`, {
 				headers: this.getHeaders()
 			});
 
@@ -252,7 +254,7 @@ export class BackendImageService implements ImageService {
 	 */
 	async delete(imageId: string): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.endpoint}/${this.collectionSlug}/${imageId}`, {
+			const response = await fetch(`${this.apiBase}/${imageId}`, {
 				method: 'DELETE',
 				headers: this.getHeaders()
 			});

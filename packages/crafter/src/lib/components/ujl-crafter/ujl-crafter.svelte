@@ -99,8 +99,8 @@
 
 			const imageServiceFactory = createImageServiceFactory({
 				showToasts: true,
-				onConnectionError: (error, endpoint) => {
-					logger.error('Image backend connection error:', error, endpoint);
+				onConnectionError: (error, url) => {
+					logger.error('Image backend connection error:', error, url);
 				}
 			});
 

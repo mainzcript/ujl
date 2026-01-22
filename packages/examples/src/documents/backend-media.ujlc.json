@@ -8,9 +8,9 @@
 			"_version": "0.0.1",
 			"_instance": "example-001",
 			"_embedding_model_hash": "sha256:abc123def456",
-			"image_library": {
+			"_library": {
 				"storage": "backend",
-				"endpoint": "http://localhost:3000/api"
+				"url": "http://localhost:3000"
 			}
 		},
 		"root": [

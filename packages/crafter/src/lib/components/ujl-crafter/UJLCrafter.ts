@@ -37,19 +37,19 @@ export type DocumentChangeCallback = (document: UJLCDocument) => void;
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
 /**
- * Configuration options for the image library.
+ * Configuration options for the library.
  * Determines how image assets are stored and retrieved.
  *
  * Two storage modes are available:
  * - `inline`: Images stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Images stored on a Payload CMS server (requires endpoint and apiKey)
+ * - `backend`: Images stored on a Payload CMS server (requires url and apiKey)
  *
- * Note: Document-level image_library configuration is ignored.
+ * Note: Document-level _library configuration is ignored.
  * Only this options-based configuration is used.
  */
-export type ImageLibraryOptions =
+export type LibraryOptions =
 	| { storage: 'inline' }
-	| { storage: 'backend'; endpoint: string; apiKey: string };
+	| { storage: 'backend'; url: string; apiKey: string };
 
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
@@ -60,8 +60,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
-	/** Image library configuration (default: inline storage) */
-	imageLibrary?: ImageLibraryOptions;
+	/** Library configuration (default: inline storage) */
+	library?: LibraryOptions;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -121,25 +121,25 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
-		// Image library configuration from options (defaults to inline storage)
-		// Note: Document-level image_library configuration is ignored - only options are used
-		const imageLibrary = options.imageLibrary ?? { storage: 'inline' as const };
+		// Library configuration from options (defaults to inline storage)
+		// Note: Document-level _library configuration is ignored - only options are used
+		const library = options.library ?? { storage: 'inline' as const };
 
 		// Runtime validation for backend storage
-		if (imageLibrary.storage === 'backend') {
-			if (!imageLibrary.endpoint || !imageLibrary.apiKey) {
-				throw new Error('UJLCrafter: Backend storage requires both endpoint and apiKey');
+		if (library.storage === 'backend') {
+			if (!library.url || !library.apiKey) {
+				throw new Error('UJLCrafter: Backend storage requires both url and apiKey');
 			}
 		}
 
 		const imageServiceFactory = createImageServiceFactory({
-			preferredStorage: imageLibrary.storage,
-			backendEndpoint: imageLibrary.storage === 'backend' ? imageLibrary.endpoint : undefined,
-			backendApiKey: imageLibrary.storage === 'backend' ? imageLibrary.apiKey : undefined,
+			preferredStorage: library.storage,
+			backendUrl: library.storage === 'backend' ? library.url : undefined,
+			backendApiKey: library.storage === 'backend' ? library.apiKey : undefined,
 			showToasts: false,
-			onConnectionError: (error, endpoint) => {
-				logger.error('Image backend connection error:', error, endpoint);
-				this.notify('error', 'Image backend connection error', `Failed to connect to ${endpoint}`);
+			onConnectionError: (error, url) => {
+				logger.error('Image backend connection error:', error, url);
+				this.notify('error', 'Image backend connection error', `Failed to connect to ${url}`);
 			}
 		});
 
