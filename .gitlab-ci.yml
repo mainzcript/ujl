@@ -1,6 +1,19 @@
 # GitLab CI/CD Pipeline for UJL Framework
 # Quality checks + GitLab Pages deployment
 
+# Workflow rules: Prevent duplicate pipelines for MRs
+workflow:
+  rules:
+    # Run pipelines for merge requests
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+    # Prevent duplicate branch pipelines when an MR is open for this branch
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+
+    # Run pipelines for branch pushes (e.g., main/develop/feature branches)
+    - if: $CI_COMMIT_BRANCH
+
 stages:
   - install
   - build
@@ -9,79 +22,87 @@ stages:
   - deploy
 
 variables:
-  NODE_VERSION: '22-slim'
-  PNPM_VERSION: '10.28.1'
-  PLAYWRIGHT_VERSION: '1.57.0'
+  # Image pinning for reproducibility (can be extended to digest later)
+  NODE_VERSION: "22-slim"
+  PNPM_VERSION: "10.28.1"
+  PLAYWRIGHT_VERSION: "1.57.0"
 
-# Install dependencies once
+  # pnpm store (must match cache path)
+  PNPM_STORE_PATH: ".pnpm-store"
+
+# Reusable cache definition (deduplicates YAML)
+.cache_pnpm_pull: &cache_pnpm_pull
+  key:
+    files:
+      - pnpm-lock.yaml
+    prefix: dependencies
+  paths:
+    - .pnpm-store/
+  policy: pull
+
+.cache_pnpm_pull_push: &cache_pnpm_pull_push
+  key:
+    files:
+      - pnpm-lock.yaml
+    prefix: dependencies
+  paths:
+    - .pnpm-store/
+  policy: pull-push
+
+# Default configuration for all jobs
+default:
+  interruptible: true
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@${PNPM_VERSION} --activate
+    - pnpm config set store-dir ${PNPM_STORE_PATH}
+
+# Install dependencies once (warms pnpm store)
 install_deps:
   stage: install
   image: node:${NODE_VERSION}
-  before_script:
-    - corepack enable
-    - corepack prepare pnpm@${PNPM_VERSION} --activate
   script:
     - pnpm install --frozen-lockfile
-  artifacts:
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-    expire_in: 1 hour
   cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-      - '**/.svelte-kit/'
-    policy: pull-push
+    <<: *cache_pnpm_pull_push
 
-# Build everything
+# Build everything once
 build_all:
   stage: build
   image: node:${NODE_VERSION}
-  dependencies:
-    - install_deps
-  before_script:
-    - corepack enable
-    - corepack prepare pnpm@${PNPM_VERSION} --activate
+  needs:
+    - job: install_deps
+      artifacts: false
+  variables:
+    # Kubernetes memory limits only for build job (where OOM occurs)
+    KUBERNETES_MEMORY_LIMIT: "4Gi"
+    KUBERNETES_MEMORY_REQUEST: "2Gi"
+    # Node.js memory limit as fallback
+    NODE_OPTIONS: "--max-old-space-size=3072"
   script:
-    - NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
+    - pnpm install --frozen-lockfile --prefer-offline
+    - pnpm run build
   artifacts:
     paths:
       - apps/docs/dist/
       - packages/*/dist/
+      - apps/*/dist/
     expire_in: 1 week
   cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-    policy: pull
+    <<: *cache_pnpm_pull
 
-# Run unit tests (Vitest)
+# Run unit tests (Vitest) - tests source, doesn't need dist artifacts
 test_unit:
   stage: test
   image: node:${NODE_VERSION}
-  dependencies:
-    - install_deps
-    - build_all
-  before_script:
-    - corepack enable
-    - corepack prepare pnpm@${PNPM_VERSION} --activate
-    - pnpm install --prefer-offline --frozen-lockfile
-    - NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
+  needs:
+    - job: install_deps
+      artifacts: false
   script:
+    - pnpm install --frozen-lockfile --prefer-offline
     - pnpm test:unit
   cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-    policy: pull
+    <<: *cache_pnpm_pull
   retry:
     max: 2
     when:
@@ -89,18 +110,19 @@ test_unit:
       - stuck_or_timeout_failure
       - api_failure
 
-# Run E2E tests (Playwright)
+# Run E2E tests (Playwright) - needs build artifacts
 test_e2e:
   stage: test
   image: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
-  dependencies:
-    - install_deps
-    - build_all
+  needs:
+    - job: build_all
+      artifacts: true
+  # Keep explicit before_script for Playwright image robustness
   before_script:
     - corepack enable
     - corepack prepare pnpm@${PNPM_VERSION} --activate
-    - pnpm install --prefer-offline --frozen-lockfile
-    - NODE_OPTIONS="--max-old-space-size=3072" pnpm run build
+    - pnpm config set store-dir ${PNPM_STORE_PATH}
+    - pnpm install --frozen-lockfile --prefer-offline
   script:
     - pnpm test:e2e
   artifacts:
@@ -109,17 +131,15 @@ test_e2e:
       - packages/*/test-results/
       - packages/*/playwright-report/
     expire_in: 1 week
+    reports:
+      junit: packages/*/test-results/junit.xml
   cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-    policy: pull
+    <<: *cache_pnpm_pull
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "develop"
+  timeout: 30m
   retry:
     max: 2
     when:
@@ -127,28 +147,19 @@ test_e2e:
       - stuck_or_timeout_failure
       - api_failure
 
-# Run quality checks
+# Run quality checks - doesn't need builds, only source
 quality_check:
   stage: quality
   image: node:${NODE_VERSION}
-  dependencies:
-    - install_deps
-    - build_all
-  before_script:
-    - corepack enable
-    - corepack prepare pnpm@${PNPM_VERSION} --activate
-    - pnpm install --prefer-offline --frozen-lockfile
+  needs:
+    - job: install_deps
+      artifacts: false
   script:
+    - pnpm install --frozen-lockfile --prefer-offline
     - pnpm run lint
     - pnpm run check
   cache:
-    key: dependencies-${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-      - .pnpm-store/
-      - '**/node_modules/'
-      - '**/.svelte-kit/'
-    policy: pull
+    <<: *cache_pnpm_pull
   retry:
     max: 2
     when:
@@ -160,15 +171,18 @@ quality_check:
 pages:
   stage: deploy
   image: alpine:latest
-  dependencies:
-    - build_all
+  needs:
+    - job: build_all
+      artifacts: true
   script:
     - test -d apps/docs/dist || (echo "Documentation build not found" && exit 1)
     - mkdir -p public
-    - cp -r apps/docs/dist/* public/
+    # Copy including dotfiles, robust across shells
+    - cp -r apps/docs/dist/. public/
   artifacts:
     paths:
       - public
+  resource_group: pages
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "develop"
