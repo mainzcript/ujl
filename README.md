@@ -37,7 +37,6 @@ ujl/
 ├── services/
 │   └── library/        # UJL Library – Asset Management API (Payload CMS)
 └── apps/
-    ├── demo/           # Demo Application
     └── docs/           # Documentation Website
 ```
 
