@@ -4,7 +4,7 @@
  * @module crafter
  */
 
-// Einzige öffentliche API
+// Only public API
 export {
 	UJLCrafter,
 	type UJLCrafterOptions,

@@ -11,13 +11,13 @@
  * @module image-service-factory
  */
 
-// TODO: Automatische Image-Migration implementieren
-// Wenn ein Dokument mit anderer _library Konfiguration geladen wird:
-// 1. Bilder vom Quell-Backend herunterladen (kein API-Key noetig fuer GET)
-// 2. Bilder ins konfigurierte Backend hochladen (mit API-Key)
-// 3. Referenzen im Dokument aktualisieren
-// 4. meta._library auf aktuelle Konfiguration setzen
-// Gilt fuer alle Richtungen: Backend->Backend, Inline->Backend, Backend->Inline
+// TODO: Implement automatic image migration
+// When a document with a different _library configuration is loaded:
+// 1. Download images from source backend (no API key needed for GET)
+// 2. Upload images to configured backend (with API key)
+// 3. Update references in document
+// 4. Set meta._library to current configuration
+// Applies to all directions: Backend->Backend, Inline->Backend, Backend->Inline
 
 import type { UJLCImageLibrary, UJLCDocumentMeta } from '@ujl-framework/types';
 import { BackendImageService } from '../services/backend-image-service.js';
