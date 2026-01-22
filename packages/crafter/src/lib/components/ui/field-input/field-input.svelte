@@ -3,7 +3,7 @@
 	import type { FieldEntry } from '@ujl-framework/core';
 	import type { ProseMirrorDocument } from '@ujl-framework/types';
 	import { ImageField, NumberField } from '@ujl-framework/core';
-	import { MediaPicker } from '../media-picker/index.js';
+	import { ImagePicker } from '../image-picker/index.js';
 	import { RichTextInput } from '../richtext-input/index.js';
 
 	let {
@@ -31,7 +31,7 @@
 
 	// Type guard for ImageField
 	function isImageField(field: typeof fieldEntry.field): field is ImageField {
-		return field.getFieldType() === 'media';
+		return field.getFieldType() === 'image';
 	}
 
 	// Get number field config if applicable
@@ -39,9 +39,9 @@
 		isNumberField(fieldEntry.field) ? fieldEntry.field.config : null
 	);
 
-	// Type guard for media ID (string, number, or null)
+	// Type guard for image ID (string, number, or null)
 	// Backend services may return numeric IDs (e.g., Payload CMS returns numbers)
-	const isMediaId = (val: unknown): val is string | number | null => {
+	const isImageId = (val: unknown): val is string | number | null => {
 		return val === null || typeof val === 'string' || typeof val === 'number';
 	};
 
@@ -125,11 +125,11 @@
 			value={isProseMirrorDocument(value) ? value : undefined}
 			onChange={(newValue) => onChange(newValue)}
 		/>
-	{:else if fieldType === 'media'}
-		{@const mediaValue = isMediaId(value) ? value : null}
+	{:else if fieldType === 'image'}
+		{@const imageValue = isImageId(value) ? value : null}
 		{#if isImageField(fieldEntry.field)}
 			{#key value}
-				<MediaPicker value={mediaValue} {fieldName} {nodeId} />
+				<ImagePicker value={imageValue} {fieldName} {nodeId} />
 			{/key}
 		{/if}
 	{:else}

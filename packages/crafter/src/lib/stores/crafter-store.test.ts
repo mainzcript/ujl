@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
 import { createMockTree, createMockTokenSet } from '../../../tests/mockData.js';
 import type { CrafterStoreDeps, ImageServiceFactory } from './crafter-store.svelte.js';
-import type { ImageService } from '../services/image-service.js';
+import type { ImageService } from '../service-adapters/image-service.js';
 
 // ============================================
 // MOCK DATA

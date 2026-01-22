@@ -2,7 +2,7 @@
 
 **Visual Editor for UJL Content** - A Svelte based visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
 
-The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend media storage.
+The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend image storage.
 
 ---
 
@@ -44,7 +44,7 @@ const crafter = new UJLCrafter({
 crafter.destroy();
 ```
 
-### With Backend Media Storage
+### With Backend Image Storage
 
 ```typescript
 const crafter = new UJLCrafter({
@@ -92,16 +92,16 @@ The Crafter also distinguishes between two independent themes: the **Editor Them
 
 ## Features
 
-In **Editor Mode**, the Crafter provides module tree navigation, click-to-select in the preview, drag & drop reordering, a property panel with type-safe inputs, and a media library for image management. In **Designer Mode**, you can edit design tokens (colors, typography, spacing) with live preview. The editor also includes viewport simulation (Desktop/Tablet/Mobile) and import/export for `.ujlc.json` and `.ujlt.json` files.
+In **Editor Mode**, the Crafter provides module tree navigation, click-to-select in the preview, drag & drop reordering, a property panel with type-safe inputs, and an image library for image management. In **Designer Mode**, you can edit design tokens (colors, typography, spacing) with live preview. The editor also includes viewport simulation (Desktop/Tablet/Mobile) and import/export for `.ujlc.json` and `.ujlt.json` files.
 
-## Media Library
+## Image Library
 
 The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
 
-| Storage Mode | Required Options | Description                        |
-| ------------ | ---------------- | ---------------------------------- |
-| `inline`     | None             | Media stored as Base64 in document |
-| `backend`    | `url`, `apiKey`  | Media stored on Payload CMS server |
+| Storage Mode | Required Options | Description                         |
+| ------------ | ---------------- | ----------------------------------- |
+| `inline`     | None             | Images stored as Base64 in document |
+| `backend`    | `url`, `apiKey`  | Images stored on Payload CMS server |
 
 For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
@@ -169,7 +169,7 @@ src/
 │   │       ├── UJLCrafter.ts   # Public API class
 │   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
 │   │       └── ujl-crafter.svelte          # Main UI component
-│   ├── services/               # Media service implementations
+│   ├── service-adapters/       # Image service adapter implementations
 │   ├── stores/                 # CrafterStore (Svelte 5 runes)
 │   ├── styles/                 # CSS architecture (see below)
 │   └── utils/                  # Helpers (clipboard, colors, DOM utilities)

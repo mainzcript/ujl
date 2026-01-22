@@ -20,9 +20,9 @@
 // Applies to all directions: Backend->Backend, Inline->Backend, Backend->Inline
 
 import type { UJLCImageLibrary, UJLCDocumentMeta } from '@ujl-framework/types';
-import { BackendImageService } from '../services/backend-image-service.js';
-import { InlineImageService } from '../services/inline-image-service.js';
-import type { ImageService } from '../services/image-service.js';
+import { BackendImageService } from '../service-adapters/backend-image-service.js';
+import { InlineImageService } from '../service-adapters/inline-image-service.js';
+import type { ImageService } from '../service-adapters/image-service.js';
 import { logger } from '../utils/logger.js';
 import { toast } from 'svelte-sonner';
 

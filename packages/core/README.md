@@ -295,8 +295,8 @@ Media library configuration is stored in the document metadata at `ujlc.meta.med
         "endpoint": "http://localhost:3000/api"  // Required for backend storage
       }
     },
-    "media": {
-      "media-001": {
+    "images": {
+      "image-001": {
         "id": "media-001",
         "storage": "inline",
         "data": "data:image/jpeg;base64,..."  // For inline storage

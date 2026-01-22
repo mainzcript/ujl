@@ -16,8 +16,8 @@ export class ImageModule extends ModuleBase {
 	public readonly name = "image";
 	public readonly label = "Image";
 	public readonly description = "Display an image with alt text";
-	public readonly category = "media" as const;
-	public readonly tags = ["photo", "picture", "visual", "media"] as const;
+	public readonly category = "image" as const;
+	public readonly tags = ["photo", "picture", "visual", "image"] as const;
 	public readonly icon =
 		'<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>';
 

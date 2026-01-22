@@ -8,9 +8,9 @@
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
 	import { Composer, type AnyModule } from '@ujl-framework/core';
 	import { findNodeById } from '$lib/utils/ujlc-tree.js';
-	import { FieldInput, MediaLibraryBrowser } from '$lib/components/ui/index.js';
+	import { FieldInput, ImageLibraryBrowser } from '$lib/components/ui/index.js';
 	import { logger } from '$lib/utils/logger.js';
-	import { MediaLibraryUploader } from '$lib/components/ui/media-library-uploader/index.js';
+	import { ImageLibraryUploader } from '$lib/components/ui/image-library-uploader/index.js';
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
@@ -46,12 +46,12 @@
 		return Object.keys(crafter.images).length;
 	});
 
-	let mediaReloadTrigger = $state(0);
+	let imageReloadTrigger = $state(0);
 
-	function handleUploadComplete(mediaId: string) {
-		logger.info('Upload complete:', mediaId);
+	function handleUploadComplete(imageId: string) {
+		logger.info('Upload complete:', imageId);
 		// Increment trigger to force browser reload
-		mediaReloadTrigger++;
+		imageReloadTrigger++;
 	}
 
 	function getModuleLabel(module: AnyModule | null | undefined): string {
@@ -98,13 +98,13 @@
 						</span>
 					</div>
 				</div>
-				<MediaLibraryUploader onUploadComplete={handleUploadComplete} />
+				<ImageLibraryUploader onUploadComplete={handleUploadComplete} />
 			</div>
 
 			<!-- Scrollable Image Grid -->
 			<div class="flex-1 overflow-y-auto">
-				{#key mediaReloadTrigger}
-					<MediaLibraryBrowser
+				{#key imageReloadTrigger}
+					<ImageLibraryBrowser
 						selectedImageId={crafter.imageLibraryContext?.currentValue != null
 							? String(crafter.imageLibraryContext?.currentValue)
 							: null}

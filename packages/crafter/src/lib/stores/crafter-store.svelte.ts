@@ -25,7 +25,7 @@ import { generateUid, type Composer } from '@ujl-framework/core';
 import { findPathToNode, isRootNode } from '../utils/ujlc-tree.js';
 import { createOperations } from './operations.js';
 import { logger } from '../utils/logger.js';
-import type { ImageService } from '../services/image-service.js';
+import type { ImageService } from '../service-adapters/image-service.js';
 
 // ============================================
 // TYPES
