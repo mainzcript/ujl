@@ -58,20 +58,6 @@ Weitere Informationen zur Datenverarbeitung finden Sie in dieser Datenschutzerkl
 
 Der Einsatz von GitLab Pages erfolgt zum Zwecke der sicheren, schnellen und zuverlässigen Bereitstellung unseres Online-Angebots (Art. 6 Abs. 1 lit. f DSGVO).
 
-### Vorschau-Anwendung (demo.ujl-framework.org)
-
-Die Vorschau-Anwendung des UJL Crafter wird auf einem Webserver bei Hetzner Online GmbH gehostet.
-
-**Hosting-Provider:**  
-Hetzner Online GmbH  
-Industriestr. 25  
-91710 Gunzenhausen  
-Deutschland
-
-**Wichtig:** Die Vorschau-Anwendung erfasst und speichert **keine personenbezogenen Daten**. Es werden keine Nutzerkonten angelegt, keine Eingaben gespeichert und keine Tracking-Tools verwendet. Die Vorschau dient ausschließlich der Demonstration der Funktionalität des UJL Crafter.
-
-Technische Daten (wie IP-Adressen) können jedoch durch den Hosting-Provider Hetzner in Server-Log-Dateien erfasst werden, wie im Abschnitt "Server-Log-Dateien" beschrieben.
-
 ## 3. Allgemeine Hinweise und Pflichtinformationen
 
 ### Datenschutz

@@ -113,7 +113,6 @@ The following packages are linked and versioned together:
 - `@ujl-framework/ui`
 - `@ujl-framework/adapter-svelte`
 - `@ujl-framework/examples`
-- `@ujl-framework/demo`
 - `@ujl-framework/docs`
 
 ## Development Guidelines

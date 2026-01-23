@@ -22,9 +22,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<DialogPortal {...portalProps}>
+<DialogPortal to={portalTarget} {...portalProps}>
 	<DialogOverlay />
 	<DialogPrimitive.Content
 		bind:ref

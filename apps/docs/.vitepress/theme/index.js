@@ -1,10 +1,15 @@
 import DefaultTheme from "vitepress/theme";
 import "./custom.css";
+import CrafterDemo from "./components/CrafterDemo.vue";
 import { onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useRoute } from "vitepress";
 
 export default {
 	...DefaultTheme,
+	enhanceApp({ app }) {
+		// Register global components
+		app.component("CrafterDemo", CrafterDemo);
+	},
 	setup() {
 		const route = useRoute();
 
@@ -33,6 +38,7 @@ export default {
 
 			document.body.appendChild(lightbox);
 		};
+import CrafterDemo from "./components/CrafterDemo.vue";
 
 		const setupMermaidClickHandlers = () => {
 			document.querySelectorAll(".mermaid").forEach(el => {

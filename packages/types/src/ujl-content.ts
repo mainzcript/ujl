@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { MediaLibraryEntry } from "./media.js";
+import type { ImageEntry } from "./image.js";
 
 /**
  * Raw field value schema
@@ -8,9 +8,9 @@ import type { MediaLibraryEntry } from "./media.js";
 const UJLCFieldObjectSchema = z.unknown();
 
 /**
- * Media metadata schema
+ * Image metadata schema
  */
-const MediaMetadataSchema = z.object({
+const ImageMetadataSchema = z.object({
 	filename: z.string(),
 	mimeType: z.string(),
 	filesize: z.number(),
@@ -19,17 +19,17 @@ const MediaMetadataSchema = z.object({
 });
 
 /**
- * Media library entry schema
+ * Image entry schema
  */
-const MediaLibraryEntrySchema = z.object({
-	dataUrl: z.string(),
-	metadata: MediaMetadataSchema,
+const ImageEntrySchema = z.object({
+	src: z.string(),
+	metadata: ImageMetadataSchema,
 });
 
 /**
- * Media library object schema (record of media entries)
+ * Image library object schema (record of image entries)
  */
-const MediaLibraryObjectSchema = z.record(z.string(), MediaLibraryEntrySchema);
+const ImageLibraryObjectSchema = z.record(z.string(), ImageEntrySchema);
 
 /**
  * Module metadata schema
@@ -68,15 +68,15 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
- * Media library storage configuration schema
+ * Library storage configuration schema
  */
-const MediaLibraryStorageConfigSchema = z.discriminatedUnion("storage", [
+const LibraryStorageConfigSchema = z.discriminatedUnion("storage", [
 	z.object({
 		storage: z.literal("inline"),
 	}),
 	z.object({
 		storage: z.literal("backend"),
-		endpoint: z.string().url(),
+		url: z.url(),
 	}),
 ]);
 
@@ -91,7 +91,7 @@ const UJLCDocumentMetaSchema = z.object({
 	_version: z.string(),
 	_instance: z.string(),
 	_embedding_model_hash: z.string(),
-	media_library: MediaLibraryStorageConfigSchema.optional().default({ storage: "inline" }),
+	_library: LibraryStorageConfigSchema.optional().default({ storage: "inline" }),
 });
 
 /**
@@ -99,7 +99,7 @@ const UJLCDocumentMetaSchema = z.object({
  */
 const UJLCObjectSchema = z.object({
 	meta: UJLCDocumentMetaSchema,
-	media: MediaLibraryObjectSchema.default({}),
+	images: ImageLibraryObjectSchema.default({}),
 	root: UJLCSlotObjectSchema,
 });
 
@@ -119,8 +119,8 @@ export type UJLCModuleMeta = z.infer<typeof UJLCModuleMetaSchema>;
 export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 export type UJLCSlotObject = z.infer<typeof UJLCSlotObjectSchema>;
 export type UJLCDocumentMeta = z.infer<typeof UJLCDocumentMetaSchema>;
-export type UJLCMediaLibrary = Record<string, MediaLibraryEntry>;
-export type MediaLibraryStorageConfig = z.infer<typeof MediaLibraryStorageConfigSchema>;
+export type UJLCImageLibrary = Record<string, ImageEntry>;
+export type LibraryStorageConfig = z.infer<typeof LibraryStorageConfigSchema>;
 export type UJLCObject = z.infer<typeof UJLCObjectSchema>;
 export type UJLCDocument = z.infer<typeof UJLCDocumentSchema>;
 

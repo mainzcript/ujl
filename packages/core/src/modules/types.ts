@@ -5,7 +5,7 @@
 export const COMPONENT_CATEGORIES = [
 	"layout",
 	"content",
-	"media",
+	"image",
 	"interactive",
 	"data",
 	"navigation",

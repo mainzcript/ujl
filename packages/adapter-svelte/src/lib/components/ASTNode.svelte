@@ -25,34 +25,33 @@
 	interface Props {
 		node: UJLAbstractNode;
 		showMetadata?: boolean;
-		eventCallback?: (moduleId: string) => void;
 	}
 
-	let { node, showMetadata = false, eventCallback }: Props = $props();
+	let { node, showMetadata = false }: Props = $props();
 </script>
 
 {#if node.type === NODE_TYPES.CONTAINER}
-	<Container {node} {showMetadata} {eventCallback} />
+	<Container {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.WRAPPER}
-	<Wrapper {node} {showMetadata} {eventCallback} />
+	<Wrapper {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.RAW_HTML}
 	<Raw {node} />
 {:else if node.type === NODE_TYPES.ERROR}
 	<Error {node} />
 {:else if node.type === NODE_TYPES.TEXT}
-	<Text {node} {showMetadata} {eventCallback} />
+	<Text {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.BUTTON}
-	<Button {node} {showMetadata} {eventCallback} />
+	<Button {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.CARD}
-	<Card {node} {showMetadata} {eventCallback} />
+	<Card {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.GRID}
-	<Grid {node} {showMetadata} {eventCallback} />
+	<Grid {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.GRID_ITEM}
-	<GridItem {node} {showMetadata} {eventCallback} />
+	<GridItem {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.CALL_TO_ACTION}
-	<CallToAction {node} {showMetadata} {eventCallback} />
+	<CallToAction {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.IMAGE}
-	<Image {node} {showMetadata} {eventCallback} />
+	<Image {node} {showMetadata} />
 {:else}
 	{@const errorNode: UJLAbstractErrorNode = {
 		type: NODE_TYPES.ERROR,
