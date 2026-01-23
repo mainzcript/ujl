@@ -10,7 +10,7 @@
 	],
 	"packageManager": "pnpm@10.28.1",
 	"scripts": {
-		"build": "pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
+		"build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
 		"check": "pnpm -r run check",
