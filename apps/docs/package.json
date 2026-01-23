@@ -23,13 +23,15 @@
 		"@fontsource-variable/raleway": "^5.2.8",
 		"@fontsource-variable/roboto": "^5.2.9",
 		"@ujl-framework/crafter": "workspace:*",
-		"@ujl-framework/examples": "workspace:*"
+		"@ujl-framework/examples": "workspace:*",
+		"mermaid": "^11.0.0"
 	},
 	"devDependencies": {
 		"copyfiles": "^2.4.1",
 		"prettier": "^3.8.0",
 		"rimraf": "^6.1.2",
 		"vitepress": "2.0.0-alpha.15",
+		"vitepress-plugin-mermaid": "^2.0.17",
 		"vue": "^3.5.27"
 	}
 }

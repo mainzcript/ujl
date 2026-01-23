@@ -1,8 +1,7 @@
 import DefaultTheme from "vitepress/theme";
 import "./custom.css";
 import CrafterDemo from "./components/CrafterDemo.vue";
-import { onMounted, onUnmounted, watch, nextTick } from "vue";
-import { useRoute } from "vitepress";
+import { onMounted, onUnmounted } from "vue";
 
 export default {
 	...DefaultTheme,
@@ -11,65 +10,57 @@ export default {
 		app.component("CrafterDemo", CrafterDemo);
 	},
 	setup() {
-		const route = useRoute();
-
-		const openLightbox = event => {
-			const mermaidEl = event.currentTarget;
+		const openLightbox = mermaidEl => {
 			const svg = mermaidEl.querySelector("svg");
 			if (!svg) return;
 
+			// Close existing lightbox to prevent multiple overlays
+			document.querySelector(".mermaid-lightbox")?.remove();
+
 			const lightbox = document.createElement("div");
 			lightbox.className = "mermaid-lightbox";
+			lightbox.setAttribute("role", "dialog");
+			lightbox.setAttribute("aria-modal", "true");
+			lightbox.setAttribute("aria-label", "Mermaid diagram zoom view");
 			lightbox.innerHTML = `
 				<div class="mermaid-lightbox-content">${svg.outerHTML}</div>
 				<div class="mermaid-lightbox-hint">Klicken oder ESC zum Schließen</div>
 			`;
 
-			const close = () => lightbox.remove();
-			lightbox.addEventListener("click", close);
-
 			const handleKeydown = e => {
-				if (e.key === "Escape") {
-					close();
-					document.removeEventListener("keydown", handleKeydown);
-				}
+				if (e.key === "Escape") close();
 			};
+
+			const close = () => {
+				lightbox.remove();
+				document.removeEventListener("keydown", handleKeydown);
+			};
+
+			lightbox.addEventListener("click", close);
 			document.addEventListener("keydown", handleKeydown);
 
 			document.body.appendChild(lightbox);
 		};
-import CrafterDemo from "./components/CrafterDemo.vue";
 
-		const setupMermaidClickHandlers = () => {
-			document.querySelectorAll(".mermaid").forEach(el => {
-				el.removeEventListener("click", openLightbox);
-				el.addEventListener("click", openLightbox);
-			});
-		};
+		// Event delegation avoids per-diagram listeners and works with async rendering
+		const handleDocumentClick = event => {
+			const target = event.target;
 
-		const renderMermaid = async () => {
-			await nextTick();
-			const mermaid = (await import("mermaid")).default;
-			mermaid.initialize({ startOnLoad: false });
-			await mermaid.run();
-			setupMermaidClickHandlers();
+			// Preserve native link behavior in mermaid diagrams
+			if (target?.closest?.("a")) return;
+
+			const mermaidEl = target?.closest?.(".mermaid");
+			if (!mermaidEl) return;
+
+			openLightbox(mermaidEl);
 		};
 
 		onMounted(() => {
-			renderMermaid();
+			document.addEventListener("click", handleDocumentClick);
 		});
 
 		onUnmounted(() => {
-			document.querySelectorAll(".mermaid").forEach(el => {
-				el.removeEventListener("click", openLightbox);
-			});
+			document.removeEventListener("click", handleDocumentClick);
 		});
-
-		watch(
-			() => route.path,
-			() => {
-				renderMermaid();
-			}
-		);
 	},
 };

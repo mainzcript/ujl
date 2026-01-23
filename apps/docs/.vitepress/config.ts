@@ -1,7 +1,7 @@
-import { defineConfig } from "vitepress";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid({
 	srcDir: "src",
 	outDir: "dist",
 
@@ -83,6 +83,12 @@ export default defineConfig({
 		search: {
 			provider: "local",
 		},
+	},
+
+	// Plugin configuration: mermaid and mermaidPlugin are optional
+	// See https://emersonbottero.github.io/vitepress-plugin-mermaid/guide/getting-started.html
+	mermaidPlugin: {
+		class: "mermaid",
 	},
 
 	vite: {
