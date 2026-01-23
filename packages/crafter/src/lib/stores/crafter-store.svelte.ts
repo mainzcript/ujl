@@ -162,6 +162,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _imageLibraryContext = $state<ImageLibraryContext>(null);
 	let _viewportType = $state<string | undefined>(undefined);
 
+	// Fullscreen state
+	let _isFullscreen = $state(false);
+	let _containerWidth = $state(0);
+	let _containerHeight = $state(0);
+	let _screenWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 0);
+	let _screenHeight = $state(typeof window !== 'undefined' ? window.innerHeight : 0);
+
 	// ============================================
 	// COMPUTED STATE (Derived - Automatic Reactivity)
 	// ============================================
@@ -174,6 +181,23 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	const viewportSize = $derived<ViewportSize>(
 		_viewportType ? (VIEWPORT_SIZES[_viewportType] ?? null) : null
 	);
+
+	/**
+	 * Returns true if the fullscreen button should be shown.
+	 * Shows button when container takes less than 80% of screen area, or when already in fullscreen mode (to allow minimizing).
+	 */
+	const _shouldShowFullscreenButton = $derived.by(() => {
+		if (_isFullscreen) return true;
+
+		if (_screenWidth === 0 || _screenHeight === 0) return false;
+		if (_containerWidth === 0 || _containerHeight === 0) return false;
+
+		const screenArea = _screenWidth * _screenHeight;
+		const containerArea = _containerWidth * _containerHeight;
+		const percentage = (containerArea / screenArea) * 100;
+
+		return percentage < 80;
+	});
 
 	// ============================================
 	// ACTIONS (Command Pattern - Single Responsibility)
@@ -249,6 +273,37 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 */
 	function setViewportType(type: string | undefined): void {
 		_viewportType = type;
+	}
+
+	/**
+	 * Set container dimensions for fullscreen button visibility calculation.
+	 * @param width - Container width in pixels
+	 * @param height - Container height in pixels
+	 */
+	function setContainerSize(width: number, height: number): void {
+		_containerWidth = width;
+		_containerHeight = height;
+	}
+
+	/**
+	 * Set screen dimensions for fullscreen button visibility calculation.
+	 * @param width - Screen width in pixels
+	 * @param height - Screen height in pixels
+	 */
+	function setScreenSize(width: number, height: number): void {
+		_screenWidth = width;
+		_screenHeight = height;
+	}
+
+	/**
+	 * Toggle fullscreen mode.
+	 * Manages document.body overflow to prevent scrolling when in fullscreen.
+	 */
+	function toggleFullscreen(): void {
+		_isFullscreen = !_isFullscreen;
+		if (typeof window !== 'undefined' && document.body) {
+			document.body.style.overflow = _isFullscreen ? 'hidden' : '';
+		}
 	}
 
 	// ============================================
@@ -358,6 +413,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get viewportType() {
 			return _viewportType;
 		},
+		get isFullscreen() {
+			return _isFullscreen;
+		},
 
 		// Computed (readonly via getters)
 		get rootSlot() {
@@ -375,6 +433,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get viewportSize() {
 			return viewportSize;
 		},
+		get shouldShowFullscreenButton() {
+			return _shouldShowFullscreenButton;
+		},
 
 		// Services
 		get imageService() {
@@ -389,6 +450,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		expandToNode,
 		setImageLibraryViewActive,
 		setViewportType,
+		setContainerSize,
+		setScreenSize,
+		toggleFullscreen,
 
 		// Functional Updates
 		updateRootSlot,

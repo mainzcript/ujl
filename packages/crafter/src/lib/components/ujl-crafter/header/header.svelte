@@ -16,6 +16,8 @@
 		ToggleGroupItem
 	} from '@ujl-framework/ui';
 	import { useApp } from '$lib/components/ui/app/index.js';
+	import { getContext } from 'svelte';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
 	import type { CrafterMode } from '$lib/stores/index.js';
 	import ThreeDotsIcon from '@lucide/svelte/icons/more-vertical';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
@@ -26,6 +28,8 @@
 	import TabletIcon from '@lucide/svelte/icons/tablet';
 	import SmartphoneIcon from '@lucide/svelte/icons/smartphone';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
+	import MaximizeIcon from '@lucide/svelte/icons/maximize';
+	import MinimizeIcon from '@lucide/svelte/icons/minimize';
 
 	let {
 		mode,
@@ -50,6 +54,7 @@
 	} = $props();
 
 	const app = useApp();
+	const store = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	let themeFileInput: HTMLInputElement | null = $state(null);
 	let contentFileInput: HTMLInputElement | null = $state(null);
@@ -189,6 +194,20 @@
 				{/if}
 			</DropdownMenuContent>
 		</DropdownMenu>
+		{#if store.shouldShowFullscreenButton}
+			<Button
+				variant="ghost"
+				size="icon"
+				onclick={() => store.toggleFullscreen()}
+				title={store.isFullscreen ? 'Exit fullscreen (ESC)' : 'Enter fullscreen'}
+			>
+				{#if store.isFullscreen}
+					<MinimizeIcon />
+				{:else}
+					<MaximizeIcon />
+				{/if}
+			</Button>
+		{/if}
 		<Button
 			onclick={() => app.togglePanel()}
 			variant={app.isPanelVisible ? 'muted' : 'ghost'}

@@ -200,9 +200,11 @@
 	<!-- Drawer fallback for Panel (mobile) -->
 	<Drawer bind:open={() => app.panelDrawerOpen, (v) => (app.panelDrawerOpen = v)}>
 		<DrawerContent>
-			<div class="mx-auto w-full max-w-sm p-4">
+			<div class="flex h-full max-h-full w-full flex-col items-center overflow-hidden p-4">
 				{#if registry.panel}
-					{@render registry.panel()}
+					<div class="min-h-0 w-full max-w-md flex-1 overflow-y-auto">
+						{@render registry.panel()}
+					</div>
 				{/if}
 			</div>
 		</DrawerContent>

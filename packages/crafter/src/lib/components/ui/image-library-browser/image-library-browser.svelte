@@ -14,10 +14,8 @@
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
 	import type { ImageMetadata, ImageEntry } from '@ujl-framework/types';
-	import XIcon from '@lucide/svelte/icons/x';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
-	import InfoIcon from '@lucide/svelte/icons/info';
 	import { logger } from '$lib/utils/logger.js';
 
 	let {
@@ -56,7 +54,6 @@
 
 	const hasImages = $derived(imageEntries.length > 0);
 
-	let showMetadataFor: string | null = $state(null);
 	let imageToDelete: string | null = $state(null);
 	let deleteDialogOpen = $state(false);
 
@@ -89,17 +86,6 @@
 			imageToDelete = null;
 		}
 	}
-
-	function toggleMetadata(imageId: string, event: MouseEvent) {
-		event.stopPropagation();
-		showMetadataFor = showMetadataFor === imageId ? null : imageId;
-	}
-
-	function formatFileSize(bytes: number): string {
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	}
 </script>
 
 {#if isLoading}
@@ -125,7 +111,7 @@
 	</div>
 {:else}
 	<div class="p-3">
-		<div class="grid grid-cols-2 gap-3">
+		<div class="grid grid-cols-3 gap-3">
 			{#each imageEntries as image (image.id)}
 				<button
 					type="button"
@@ -141,17 +127,7 @@
 					<div
 						class="absolute inset-0 flex items-end bg-linear-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
 					>
-						<div class="flex w-full items-center justify-between p-2">
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								class="h-6 w-6 bg-black/50 text-white hover:bg-black/70"
-								onclick={(e) => toggleMetadata(image.id, e)}
-							>
-								<InfoIcon class="h-3 w-3" />
-							</Button>
-
+						<div class="flex w-full items-center justify-end p-2">
 							<Button
 								type="button"
 								variant="ghost"
@@ -179,46 +155,6 @@
 						</div>
 					{/if}
 				</button>
-
-				<!-- Metadata panel -->
-				{#if showMetadataFor === image.id}
-					<div class="col-span-2 space-y-2 rounded-md border border-border bg-muted/50 p-3">
-						<div class="flex items-center justify-between">
-							<Text size="xs" intensity="default">Image Details</Text>
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								onclick={(e) => toggleMetadata(image.id, e)}
-							>
-								<XIcon class="h-3 w-3" />
-							</Button>
-						</div>
-
-						<div class="space-y-1">
-							<div class="flex justify-between">
-								<Text size="xs" intensity="muted">Filename:</Text>
-								<Text size="xs" intensity="default" class="max-w-[60%] truncate"
-									>{image.metadata.filename}</Text
-								>
-							</div>
-							<div class="flex justify-between">
-								<Text size="xs" intensity="muted">Size:</Text>
-								<Text size="xs" intensity="default">{formatFileSize(image.metadata.filesize)}</Text>
-							</div>
-							<div class="flex justify-between">
-								<Text size="xs" intensity="muted">Dimensions:</Text>
-								<Text size="xs" intensity="default"
-									>{image.metadata.width} × {image.metadata.height}</Text
-								>
-							</div>
-							<div class="flex justify-between">
-								<Text size="xs" intensity="muted">Type:</Text>
-								<Text size="xs" intensity="default">{image.metadata.mimeType}</Text>
-							</div>
-						</div>
-					</div>
-				{/if}
 			{/each}
 		</div>
 	</div>

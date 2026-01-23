@@ -135,6 +135,69 @@
 	let portalContainerRef: HTMLDivElement | undefined = $state();
 
 	// ============================================
+	// FULLSCREEN TRACKING
+	// ============================================
+
+	// Reference to App container for size tracking
+	let appContainerRef: HTMLElement | null = $state(null);
+
+	// ResizeObserver for container size tracking
+	$effect(() => {
+		if (!appContainerRef) return;
+
+		const observer = new ResizeObserver((entries) => {
+			const entry = entries[0];
+			if (entry) {
+				const width = entry.contentRect.width;
+				const height = entry.contentRect.height;
+				store.setContainerSize(width, height);
+			}
+		});
+
+		observer.observe(appContainerRef);
+
+		// Measure initial size on mount
+		store.setContainerSize(appContainerRef.offsetWidth, appContainerRef.offsetHeight);
+
+		return () => {
+			observer.disconnect();
+		};
+	});
+
+	// Window resize listener for screen size tracking
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const handleResize = () => {
+			store.setScreenSize(window.innerWidth, window.innerHeight);
+		};
+
+		handleResize();
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	});
+
+	// ESC key handler to exit fullscreen
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const handleEscape = (event: KeyboardEvent) => {
+			if (event.key === 'Escape' && store.isFullscreen) {
+				store.toggleFullscreen();
+			}
+		};
+
+		window.addEventListener('keydown', handleEscape);
+
+		return () => {
+			window.removeEventListener('keydown', handleEscape);
+		};
+	});
+
+	// ============================================
 	// EDITOR THEME
 	// ============================================
 
@@ -218,11 +281,11 @@
 
 <UJLTheme
 	tokens={editorTokenSet}
-	class="h-screen"
+	class={store.isFullscreen ? 'fixed inset-0 isolate z-9999 h-full w-full' : 'h-full w-full'}
 	data-crafter-instance={store.instanceId}
 	portalContainer={portalContainerRef}
 >
-	<App>
+	<App bind:ref={appContainerRef}>
 		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects
 			mode={store.mode}

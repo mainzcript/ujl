@@ -27,7 +27,6 @@
 	},
 	"devDependencies": {
 		"copyfiles": "^2.4.1",
-		"markdown-it-textual-uml": "^0.17.1",
 		"prettier": "^3.8.0",
 		"rimraf": "^6.1.2",
 		"vitepress": "2.0.0-alpha.15",

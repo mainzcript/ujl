@@ -10,14 +10,12 @@
 		fieldName,
 		fieldEntry,
 		value,
-		onChange,
-		nodeId
+		onChange
 	}: {
 		fieldName: string;
 		fieldEntry: FieldEntry;
 		value: unknown;
 		onChange: (value: unknown) => void;
-		nodeId?: string;
 	} = $props();
 
 	// Get field type and config (using $derived to avoid Svelte state warnings)
@@ -129,7 +127,7 @@
 		{@const imageValue = isImageId(value) ? value : null}
 		{#if isImageField(fieldEntry.field)}
 			{#key value}
-				<ImagePicker value={imageValue} {fieldName} {nodeId} />
+				<ImagePicker value={imageValue} {onChange} />
 			{/key}
 		{/if}
 	{:else}

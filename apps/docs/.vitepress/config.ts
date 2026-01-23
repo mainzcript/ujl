@@ -1,5 +1,4 @@
 import { defineConfig } from "vitepress";
-import markdownItTextualUml from "markdown-it-textual-uml";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -88,11 +87,5 @@ export default defineConfig({
 
 	vite: {
 		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
-	},
-
-	markdown: {
-		config: md => {
-			md.use(markdownItTextualUml);
-		},
 	},
 });

@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { Button, Text } from '@ujl-framework/ui';
+	import { Button } from '@ujl-framework/ui';
 	import type { ImageMetadata } from '@ujl-framework/types';
 	import { logger } from '$lib/utils/logger.js';
 	import { getContext } from 'svelte';
 	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { toast } from 'svelte-sonner';
 	import UploadIcon from '@lucide/svelte/icons/upload';
+	import XIcon from '@lucide/svelte/icons/x';
 
 	let {
-		onUploadComplete
+		onUploadComplete,
+		onClose
 	}: {
 		onUploadComplete?: (imageId: string) => void;
+		onClose?: () => void;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
@@ -20,7 +24,6 @@
 
 	let fileInputRef: HTMLInputElement | null = $state(null);
 	let isCompressing = $state(false);
-	let error: string | null = $state(null);
 
 	/**
 	 * Extracts the width and height dimensions from an image file
@@ -60,11 +63,11 @@
 			return;
 		}
 
-		error = null;
-
 		// Validate file type
 		if (!ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number])) {
-			error = `Unsupported file type: ${file.type}. Please use JPEG, PNG, WebP, or GIF.`;
+			toast.error('Unsupported file type', {
+				description: `Please use JPEG, PNG, WebP, or GIF.`
+			});
 			target.value = '';
 			return;
 		}
@@ -91,9 +94,13 @@
 
 			// Notify parent component
 			onUploadComplete?.(result.imageId);
+			toast.success('Image uploaded successfully');
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to upload image';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
 			logger.error('Image upload error:', err);
+			toast.error('Upload failed', {
+				description: errorMessage
+			});
 		} finally {
 			isCompressing = false;
 			// Reset input to allow selecting the same file again
@@ -112,24 +119,15 @@
 	}
 </script>
 
-<div class="w-full">
-	<!-- Error Message -->
-	{#if error}
-		<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
-			<Text size="sm" intensity="muted" class="text-destructive">
-				{error}
-			</Text>
-		</div>
-	{/if}
-
+<div class="flex w-full items-center gap-2">
 	<!-- Upload Button -->
 	<Button
 		type="button"
-		variant="outline"
+		variant="muted"
 		size="sm"
 		onclick={handleFileInputClick}
 		disabled={isCompressing}
-		class="w-full"
+		class="flex-1"
 	>
 		{#if isCompressing}
 			<div class="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-current"></div>
@@ -139,14 +137,27 @@
 			Upload Image
 		{/if}
 	</Button>
-
-	<!-- Hidden File Input -->
-	<input
-		bind:this={fileInputRef}
-		type="file"
-		accept={ACCEPT_STRING}
-		class="hidden"
-		onchange={handleFileSelect}
-		disabled={isCompressing}
-	/>
+	<!-- Close Button -->
+	{#if onClose}
+		<Button
+			type="button"
+			variant="ghost"
+			size="icon"
+			class="size-8 shrink-0"
+			onclick={onClose}
+			disabled={isCompressing}
+		>
+			<XIcon class="h-4 w-4" />
+		</Button>
+	{/if}
 </div>
+
+<!-- Hidden File Input -->
+<input
+	bind:this={fileInputRef}
+	type="file"
+	accept={ACCEPT_STRING}
+	class="hidden"
+	onchange={handleFileSelect}
+	disabled={isCompressing}
+/>
