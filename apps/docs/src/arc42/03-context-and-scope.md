@@ -5,260 +5,214 @@ description: "Systematische Einordnung von UJL im Vergleich zu anderen Webentwic
 
 # Kontext und Abgrenzung
 
-Dieses Kapitel beschreibt die Einbettung von UJL in sein Umfeld. Es zeigt auf, welche externen Systeme und Akteure mit UJL interagieren, welche technischen Schnittstellen existieren und wo die Grenzen des Systems liegen.
-
 ## 3.1 Business Context
 
-Der Business Context beschreibt die fachlichen Kommunikationsbeziehungen zwischen UJL und externen Akteuren. Er zeigt, welche Rollen mit UJL arbeiten und welche Schnittstellen zu externen Geschäftsprozessen bestehen.
+UJL tauscht mit externen Akteuren und Systemen Inhalte, Themes, Assets und gerenderte Outputs aus. Die fachlichen Kommunikationsbeziehungen stehen im Vordergrund, nicht die technische Implementierung.
 
 ### 3.1.1 Business Context Diagramm
 
 ```mermaid
 graph TB
-    subgraph "UJL Framework"
-        Core[UJL Core<br/>Composer & Module Registry]
-        Crafter[UJL Crafter<br/>Visual Editor]
-        Adapters[UJL Adapters<br/>Svelte/Web Components]
+    subgraph UJL["UJL Framework"]
+        Core["UJL Core<br/>Composer & Module Registry"]
+        Crafter["UJL Crafter<br/>Visual Editor"]
+        Adapters["UJL Adapters<br/>Svelte/Web Components"]
     end
 
-    subgraph "Akteure"
-        Designer[Designer:innen<br/>Design System Definition]
-        Editor[Redakteur:innen<br/>Content Authoring]
-        Developer[Entwickler:innen<br/>Integration & Extension]
+    subgraph Akteure["Akteure"]
+        Designer["Designer:innen<br/>Design System Definition"]
+        Editor["Redakteur:innen<br/>Content Authoring"]
+        Developer["Entwickler:innen<br/>Integration & Extension"]
     end
 
-    subgraph "Externe Systeme"
-        CMS[Content Management<br/>System]
-        MediaAPI[Payload CMS<br/>Media API]
-        Frontend[Frontend<br/>Framework]
-        AI[KI-Systeme<br/>Content Generation]
+    subgraph Externe["Externe Systeme"]
+        CMS["Content Management<br/>System"]
+        LibraryAPI["Library Service<br/>Images API - Payload CMS"]
+        Frontend["Host-Anwendung<br/>Frontend Framework"]
+        AI["KI-Systeme<br/>optional - strukturierte Content-Generierung"]
     end
 
-    Designer -->|definiert .ujlt.json Theme| Crafter
-    Editor -->|erstellt .ujlc.json Content| Crafter
-    Developer -->|entwickelt Custom Modules| Core
-    Developer -->|integriert Adapters| Frontend
+    Designer -->|"definiert .ujlt.json Theme"| Crafter
+    Editor -->|"erstellt .ujlc.json Content"| Crafter
+    Developer -->|"entwickelt Custom Modules"| Core
+    Developer -->|"integriert Adapters"| Frontend
 
-    Crafter -->|speichert Dokumente| CMS
-    Crafter -->|lädt/speichert Media| MediaAPI
-    Core -->|liefert Module Registry| Crafter
-    Adapters -->|rendert AST| Frontend
-    AI -->|generiert strukturierte Daten| Core
+    Crafter -->|"speichert Dokumente"| CMS
+    Crafter -->|"lädt/speichert Images"| LibraryAPI
+    Core -->|"liefert Module Registry"| Crafter
+    Adapters -->|"rendert AST"| Frontend
+    AI -->|"generiert strukturierte Daten UJLC/UJLT"| Core
 ```
 
 ### 3.1.2 Akteure und Kommunikationsbeziehungen
 
-#### **Designer:innen**
+#### Designer:innen
 
-**Rolle:** Definition und Pflege des zentralen Design Systems
+**Ziel/Verantwortung:** Definition und Pflege des Design-Systems (Theme)
 
-**Kommunikation mit UJL:**
+**Interaktionen:**
 
-- Erstellen `.ujlt.json` Theme-Dateien im UJL Crafter (Designer Mode)
-- Definieren Farbpaletten, Typografie, Spacing, Radius
-- Legen Modul-Varianten und zulässige Kombinationen fest
+Designer:innen erstellen und pflegen Theme-Dokumente (`.ujlt.json`) im Crafter (Designer Mode). Dabei definieren sie Markenrelevante Parameter wie Farben, Typografie, Spacing und Radius. Die Wirkung ihrer Änderungen prüfen sie direkt in der Vorschau.
 
-**Fachlicher Input:**
+**Artefakte:**
 
-- Corporate Design Guidelines
-- Accessibility-Anforderungen (WCAG)
-- Brand-Compliance-Regeln
+- Valides Theme-Dokument (`.ujlt.json`)
+- Design-Token-Set für die konsistente Anwendung im gesamten System
 
-**Fachlicher Output:**
+**Mehrwert:** Design-Governance wird technisch durchsetzbar, nicht nur dokumentiert.
 
-- Validiertes Theme-Dokument (`.ujlt.json`)
-- Design-Token-Set für konsistente Anwendung
+#### Redakteur:innen
 
-**Nutzen:**
-Zentrale, technisch durchsetzbare Design-Governance ohne manuelle Review-Prozesse.
+**Ziel/Verantwortung:** Content-Erstellung und -Pflege innerhalb definierter Leitplanken
 
----
+**Interaktionen:**
 
-#### **Redakteur:innen**
+Redakteur:innen erstellen Content-Dokumente (`.ujlc.json`) im Crafter (Editor Mode). Sie kombinieren Module per Drag & Drop und befüllen Felder mit Texten, Bildern und Rich Text.
 
-**Rolle:** Content-Erstellung und -Pflege innerhalb definierter Leitplanken
+**Artefakte:**
 
-**Kommunikation mit UJL:**
+- Valides Content-Dokument (`.ujlc.json`)
+- Inhalte, die durch Theme und Module konsistent gerendert werden
+- ggf. Assets (Bilder, Videos, Audio), die im Library Service oder inline Storage gespeichert werden
 
-- Erstellen `.ujlc.json` Content-Dateien im UJL Crafter (Editor Mode)
-- Kombinieren Module per Drag & Drop
-- Befüllen Felder (Text, Bilder, Rich Text)
-- Nutzen Media Library für Asset-Management
+**Mehrwert:** Autonomes Arbeiten ohne „Design Drift" und mit klarer Vorschau.
 
-**Fachlicher Input:**
+#### Entwickler:innen
 
-- Inhalte (Text, Bilder, Videos)
-- Content-Struktur und -Hierarchie
-- Marken-Kontext
+**Ziel/Verantwortung:** Integration, Erweiterung und technische Anbindung
 
-**Fachlicher Output:**
+**Interaktionen:**
 
-- Validiertes Content-Dokument (`.ujlc.json`)
-- Brand-konforme, barrierefreie Inhalte
+Entwickler:innen entwickeln Custom Modules und Fields in TypeScript und integrieren UJL-Adapter in Host-Anwendungen. Sie binden den Library Service (Payload CMS) oder alternative Backends über definierte Schnittstellen an und implementieren bei Bedarf zusätzliche Adapter für weitere Render-Targets.
 
-**Nutzen:**
-Autonomes Arbeiten ohne Gefahr von Design-Drift oder Accessibility-Verstößen.
+**Artefakte:**
 
----
+- Erweiterte Module, Fields und Adapter
+- Integrierte UJL-Nutzung in Produktivsystemen
 
-#### **Entwickler:innen**
+**Mehrwert:** Klar definierte Extension-Points und keine proprietären Lock-ins.
 
-**Rolle:** Integration, Erweiterung und technische Anbindung von UJL
+#### Externe Systeme
 
-**Kommunikation mit UJL:**
+##### Content Management System (CMS)
 
-- Entwickeln Custom Modules und Fields (TypeScript)
-- Integrieren UJL Adapters in Frontend-Frameworks
-- Binden Media API an Payload CMS oder andere Backends an
-- Implementieren Custom Adapters für spezielle Output-Formate
+**Ziel/Verantwortung:** Speicherung, Workflow und Publishing von Inhalten (außerhalb von UJL)
 
-**Fachlicher Input:**
+**Interaktionen:**
 
-- Technische Requirements
-- Bestehende System-Architektur
-- Custom Business Logic
+Das CMS speichert `.ujlc.json` und `.ujlt.json` als strukturierte Felder oder Assets und liefert diese Dokumente an die Host-Anwendung, die UJL für das Rendering nutzt. Das CMS bleibt zuständig für Metadaten, Workflows, Publishing und Rollenmodelle.
 
-**Fachlicher Output:**
+**Artefakte:**
 
-- Erweiterte Module und Fields
-- Integrierte UJL-Instanzen in Produktivsystemen
-- Custom Adapter-Implementierungen
+- Persistierte UJL-Dokumente (`.ujlc.json`, `.ujlt.json`)
+- Metadaten/Workflow-Status (CMS-intern)
 
-**Nutzen:**
-Klare Extension Points, Framework-Agnostic Architecture, keine Vendor Lock-ins.
+**Mehrwert:** UJL ergänzt das CMS um visuelles Layouting und Governance, ohne CMS-Funktionen zu ersetzen.
 
----
-
-#### **Externe Systeme**
-
-##### **Content Management System (CMS)**
-
-**Beziehung:** UJL ist **kein Ersatz** für ein CMS, sondern ein **visueller Layout-Layer**
-
-**Kommunikation:**
-
-- CMS speichert `.ujlc.json` und `.ujlt.json` Dateien als JSON-Felder
-- CMS liefert Dokumente an Frontend für Rendering
-- CMS verwaltet Metadaten, Workflows, Publishing
-
-**Beispiel-Integration:**
+**Beispiel-Integration (vereinfacht):**
 
 ```typescript
 // CMS liefert UJL-Dokumente
 const ujlcDocument = cms.getField("content").json;
 const ujltDocument = cms.getField("theme").json;
 
-// Frontend rendert mit UJL
-const ast = composer.compose(ujlcDocument);
+// Rendering in der Host-Anwendung
+const ast = await composer.compose(ujlcDocument); // compose ist async
 webAdapter(ast, ujltDocument.ujlt.tokens, { target: "#app" });
 ```
 
----
+##### Library Service (Payload CMS) – Images API
 
-##### **Media API (Payload CMS)**
+**Ziel/Verantwortung:** Zentralisierte Bildverwaltung inkl. Metadaten (optional; alternativ inline Storage)
 
-**Beziehung:** Zentralisierte Asset-Verwaltung mit Metadaten
+**Interaktionen:**
 
-**Kommunikation:**
+Der Crafter listet und löst Images über HTTP auf, ermöglicht den Upload von Bildern und die Pflege von Metadaten (z. B. Alt-Text). Als Alternative bleibt inline Storage (z. B. Data-URLs) möglich.
 
-- UJL Crafter lädt Media-Bibliothek via REST API
-- Upload neuer Medien (multipart/form-data)
-- Abruf von Metadaten und Bildvarianten
-- Unterstützt Inline Storage (Base64) als Alternative
+**Artefakte:**
+
+- Bild-Assets und Metadaten (Library Service)
+- Referenzen/Einträge im UJLC-Dokument (Images)
+
+**Mehrwert:** Zentrale Asset-Verwaltung statt rein lokaler/inline Ablage; erleichtert Wiederverwendung und Pflege.
 
 **API-Endpunkte:**
 
-- `GET /api/media` - Media-Liste mit Filtering
-- `POST /api/media` - Upload mit Metadata
-- `PATCH /api/media/:id` - Metadata-Update
-- `DELETE /api/media/:id` - Löschung
+Der Service bietet `GET /api/images` für öffentliche Bildabfragen, `POST /api/images` für Uploads, `PATCH /api/images/:id` für Metadaten-Updates und `DELETE /api/images/:id` zum Löschen. Write-Operationen erfordern einen API-Key im Header (`Authorization: users API-Key YOUR_API_KEY`), Read-Operationen sind öffentlich zugänglich.
 
-**Authentifizierung:** API-Key via `Authorization: users API-Key <key>`
+##### Frontend / Host-Anwendung
 
----
+**Ziel/Verantwortung:** Auslieferung der Website/App und Einbettung der UJL-Ausgabe
 
-##### **Frontend Framework**
+**Interaktionen:**
 
-**Beziehung:** UJL Adapters integrieren sich in bestehende Frontend-Stacks
+Der Svelte Adapter liefert native Svelte-Komponenten für Svelte-Host-Anwendungen, während der Web Adapter ein framework-agnostisches Custom Element (Web Components) bereitstellt. Beide Adapter konsumieren AST und Token-Set und erzeugen den gleichen fachlichen Output.
 
-**Kommunikation:**
+**Artefakte:**
 
-- Svelte Adapter: Native Svelte 5 Components
-- Web Adapter: Framework-agnostic Custom Elements
-- Beide konsumieren AST und Token Set
+- Gerenderte Inhalte (ContentFrame) als Teil der Host-Anwendung
+- Einbindungskonfiguration (Adapter/Custom Element)
+
+**Mehrwert:** UJL kann in unterschiedliche Frontend-Stacks integriert werden, ohne dass die Host-Anwendung das Dokumentmodell selbst rendern muss.
 
 **Unterstützte Szenarien:**
 
-- SvelteKit Applications
-- React/Vue/Angular via Web Components
-- Static Site Generation (SSG)
-- Server-Side Rendering (SSR)
+UJL unterstützt alle JS-basierten Frontend-Stacks.
 
----
+##### KI-Systeme
 
-##### **KI-Systeme (Future Work, nicht implementiert für den MVP)**
+**Ziel/Verantwortung:** Assistenz bei der Erzeugung strukturierter Inhalte (außerhalb von UJL)
 
-**Beziehung:** AI als Assistent für strukturierte Content-Generierung
+**Interaktionen:**
 
-**Kommunikation:**
+KI-Systeme generieren strukturierte JSON-Daten (UJLC/UJLT) statt freies HTML. Der Output wird gegen Schemas validiert; ungültige Strukturen werden abgelehnt.
 
-- KI generiert strukturierte JSON statt freies HTML
-- Output wird gegen Zod-Schemas validiert
-- Ungültige Strukturen werden abgelehnt
+**Artefakte:**
 
-**Vorteile:**
+- Vorschläge/Generierungen als UJLC/UJLT (oder Teilstrukturen davon)
 
-- Deterministisches Output-Format
-- Keine Prompt-Reeducation bei jedem Request
-- Möglichkeit kleinerer/lokaler Modelle
-- Technische Brand-Compliance Enforcement
-
----
+**Mehrwert:** Strukturierter, validierbarer Output statt unzuverlässiger HTML-Snippets; bessere Anschlussfähigkeit an Governance und Rendering.
 
 ### 3.1.3 Abgrenzung zu ähnlichen Systemen
 
-| System-Typ              | Beispiele           | Unterschied zu UJL                                                              |
-| ----------------------- | ------------------- | ------------------------------------------------------------------------------- |
-| **Page Builder**        | Elementor, Webflow  | UJL trennt Content und Design technisch; Redakteure können Design nicht brechen |
-| **Headless CMS**        | Strapi, Contentful  | UJL ist kein CMS, sondern ein Layout-Layer; ergänzt bestehende CMS              |
-| **Design Systems**      | Storybook, Figma    | UJL enforces Design-Regeln architektonisch, nicht nur dokumentarisch            |
-| **Component Libraries** | shadcn, Material UI | UJL abstrahiert höher (Modul-Ebene), nutzt Component Libraries intern           |
-| **AI Content Tools**    | Copy.ai, Jasper     | UJL strukturiert AI-Output und validiert gegen Schemas                          |
-
----
+| System-Typ                          | Beispiele                   | Unterschied zu UJL                                                                                        |
+| ----------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Page Builder**                    | Webflow, Wix                | UJL trennt Content und Design technisch; Redakteur:innen können Design nicht „frei" brechen.              |
+| **CMS-gebundene Page Builder**      | Elementor, Divi, Gutenberg  | UJL ist CMS-unabhängig und setzt Governance architektonisch durch, nicht nur prozessual.                  |
+| **Headless CMS**                    | Strapi, Contentful          | UJL ist kein CMS, sondern ergänzt CMS um einen Layout-/Governance-Layer.                                  |
+| **Editor-Frameworks**               | GrapesJS, Editor.js, TipTap | UJL bietet integrierte Governance-Logik und Design-System-Durchsetzung, nicht nur technische Bausteine.   |
+| **Proprietäre Visual-Editing-SaaS** | Builder.io                  | UJL ist Open Source, self-hosted und bietet tiefere Governance-Tiefe durch architektonische Durchsetzung. |
+| **Design Systems**                  | Storybook, Figma            | UJL setzt Designregeln im Rendering/Modell technisch durch, statt sie nur zu dokumentieren.               |
+| **Component Libraries**             | shadcn, Material UI         | UJL abstrahiert höher (Modul-/Dokument-Ebene) und kann Component Libraries intern nutzen.                 |
+| **AI Content Tools**                | Copy.ai, Jasper             | UJL strukturiert AI-Output als validierbares Dokumentformat statt als HTML/Text-Schnipsel.                |
 
 ## 3.2 Technical Context
 
-Der Technical Context beschreibt die technischen Schnittstellen und Abhängigkeiten zwischen UJL und seiner Umgebung.
+UJL kommuniziert über `HTTP` mit `REST` APIs und nutzt `JSON` sowie `multipart/form-data` als Formate.
 
 ### 3.2.1 Technical Context Diagramm
 
 ```mermaid
 graph TB
-    subgraph "UJL Framework Packages"
-        Types[types<br/>Zod Schemas & TS Types]
-        Core[core<br/>Composer & Modules]
+    subgraph "UJL Packages / Apps"
+        Types[types<br/>Schemas & TS Types]
+        Core[core<br/>Composer & Registry]
         UI[ui<br/>shadcn-svelte Components]
-        AdapterSvelte[adapter-svelte<br/>Svelte 5 Mount API]
+        AdapterSvelte[adapter-svelte<br/>Svelte Integration]
         AdapterWeb[adapter-web<br/>Web Components]
-        Crafter[crafter<br/>SvelteKit Editor]
+        Crafter[crafter<br/>Editor-App]
     end
 
     subgraph "External Dependencies"
-        Svelte[Svelte 5<br/>Frontend Framework]
-        Zod[Zod 4.x<br/>Schema Validation]
-        TipTap[TipTap 3.x<br/>Rich Text Editor]
-        Tailwind[Tailwind CSS 4.x<br/>Styling]
+        Svelte[Svelte]
+        Zod[Zod]
+        TipTap[TipTap / ProseMirror]
+        Tailwind[Tailwind CSS]
     end
 
-    subgraph "Backend Services"
-        PayloadCMS[Payload CMS 3.x<br/>Media API]
-        PostgreSQL[PostgreSQL<br/>Database]
-    end
-
-    subgraph "Build & Deploy"
-        Vite[Vite 7.x<br/>Build Tool]
-        GitLabCI[GitLab CI/CD<br/>Pipeline]
+    subgraph "Backend"
+        PayloadCMS[Payload CMS<br/>Library Service]
+        PostgreSQL[PostgreSQL]
     end
 
     Types --> Zod
@@ -274,478 +228,148 @@ graph TB
     UI --> Tailwind
     Core --> TipTap
     PayloadCMS --> PostgreSQL
-
-    Crafter --> Vite
-    Types --> GitLabCI
 ```
 
 ### 3.2.2 Technische Schnittstellen
 
-#### **REST API - Payload CMS Media Service**
+#### Integration: UJL Crafter (Visual Editor)
 
-**Protokoll:** HTTP/HTTPS
-**Format:** JSON (Metadata), multipart/form-data (Upload)
-**Authentication:** API-Key via Header
-
-**Wichtigste Endpunkte:**
-
-| Methode | Endpoint         | Funktion          | Request                                 | Response             |
-| ------- | ---------------- | ----------------- | --------------------------------------- | -------------------- |
-| GET     | `/api/media`     | Liste alle Medien | Query-Params (limit, page, where, sort) | Paginated Media List |
-| GET     | `/api/media/:id` | Einzelnes Medium  | Path-Param (id)                         | Media Document       |
-| POST    | `/api/media`     | Upload            | FormData (file, title, alt, ...)        | Created Media        |
-| PATCH   | `/api/media/:id` | Metadata Update   | JSON Body                               | Updated Media        |
-| DELETE  | `/api/media/:id` | Löschung          | Path-Param (id)                         | Success Message      |
-
-**Beispiel Request (Upload):**
-
-```typescript
-const formData = new FormData();
-formData.append("file", fileBlob);
-formData.append("title", "My Image");
-formData.append("alt", "Description");
-
-const response = await fetch("http://localhost:3000/api/media", {
-	method: "POST",
-	headers: {
-		Authorization: "users API-Key abc123...",
-	},
-	body: formData,
-});
-```
-
-**Beispiel Response:**
-
-```json
-{
-  "id": "67890abcdef12345",
-  "title": "My Image",
-  "filename": "image.jpg",
-  "mimeType": "image/jpeg",
-  "width": 3000,
-  "height": 2000,
-  "sizes": {
-    "thumbnail": { "url": "/media/image-400x300.webp", ... },
-    "small": { "url": "/media/image-500x333.webp", ... }
-  },
-  "url": "/media/image.jpg"
-}
-```
-
----
-
-#### **CLI Tool - UJL Validator**
-
-**Binary:** `ujl-validate`
-**Package:** `@ujl-framework/types`
-
-**Funktion:** Validiert `.ujlc.json` und `.ujlt.json` Dateien gegen Zod-Schemas
-
-**Usage:**
+**Installation:**
 
 ```bash
-# Auto-detect file type
-ujl-validate ./my-content.ujlc.json
-
-# Validate theme
-ujl-validate ./my-theme.ujlt.json
+pnpm add @ujl-framework/crafter
 ```
 
-**Output:**
-
-- Validation success/failure
-- Detailed error messages mit Zod error paths
-- Statistics (module count, media count, etc.)
-- Warnings (e.g., contrast issues)
-
----
-
-#### **NPM Package Exports**
-
-##### **@ujl-framework/core**
+**Grundlegende Integration:**
 
 ```typescript
-// Hauptexporte
-import { Composer } from "@ujl-framework/core";
-import { ModuleRegistry } from "@ujl-framework/core";
+import { UJLCrafter } from "@ujl-framework/crafter";
 
-// Module & Fields
-import { TextField, RichTextField, ImageField } from "@ujl-framework/core";
+const crafter = new UJLCrafter({
+	target: "#editor-container",
+	document: myContentDocument, // Optional: Initial UJLC
+	theme: myPreviewTheme, // Optional: Theme für Preview
+	library: { storage: "inline" }, // oder 'backend' mit url + apiKey
+});
 
-// Rich Text Extensions
-import { ujlRichTextExtensions } from "@ujl-framework/core";
+// Event-Handling
+crafter.onDocumentChange(doc => console.log("Changed:", doc));
+crafter.onThemeChange(theme => console.log("Theme:", theme));
 
-// Media Library
-import { MediaLibrary } from "@ujl-framework/core";
+// Cleanup
+crafter.destroy();
 ```
 
-##### **@ujl-framework/adapter-svelte**
+**Besonderheiten:**
+
+Der Crafter ist vollständig gebündelt mit Shadow DOM, sodass keine CSS-Imports erforderlich sind. Fonts müssen separat bereitgestellt werden (z. B. via Fontsource). Der Crafter unterstützt zwei Modi: Editor für Content-Bearbeitung und Designer für Theme-Anpassungen.
+
+#### Integration: Svelte Adapter (Rendering)
+
+**Installation:**
+
+```bash
+pnpm add @ujl-framework/adapter-svelte @ujl-framework/core svelte
+```
+
+**Svelte Component Integration:**
+
+```svelte
+<script lang="ts">
+  import { Composer } from '@ujl-framework/core';
+  import { AdapterRoot } from '@ujl-framework/adapter-svelte';
+  import '@ujl-framework/adapter-svelte/styles';
+
+  const composer = new Composer();
+  const ast = $derived.by(() => composer.compose(ujlcDocument));
+  const tokenSet = $derived(ujltDocument.ujlt.tokens);
+</script>
+
+<AdapterRoot node={ast} {tokenSet} mode="system" />
+```
+
+**Imperative API:**
 
 ```typescript
-// Components
-import { AdapterRoot } from "@ujl-framework/adapter-svelte";
-
-// Imperative API
 import { svelteAdapter } from "@ujl-framework/adapter-svelte";
 
-// Utilities
-import { prosemirrorToHtml, RichText } from "@ujl-framework/adapter-svelte";
+const mounted = svelteAdapter(ast, tokenSet, {
+	target: "#container",
+	showMetadata: true, // für Editor-Features
+});
 
-// Styles (must be imported explicitly)
-import "@ujl-framework/adapter-svelte/styles";
+await mounted.unmount();
 ```
 
-##### **@ujl-framework/adapter-web**
+#### Integration: Web Adapter (Framework-Agnostic)
+
+**Installation:**
+
+```bash
+pnpm add @ujl-framework/adapter-web @ujl-framework/core
+```
+
+**Integration:**
 
 ```typescript
-// Adapter Function
 import { webAdapter } from "@ujl-framework/adapter-web";
+import { Composer } from "@ujl-framework/core";
 
-// Custom Element registriert sich automatisch als <ujl-content>
+const composer = new Composer();
+const ast = composer.compose(ujlcDocument);
+
+const mounted = webAdapter(ast, tokenSet, {
+	target: "#container",
+	showMetadata: true,
+});
+
+mounted.unmount();
 ```
 
-##### **@ujl-framework/types**
+**Besonderheiten:**
 
-```typescript
-// TypeScript Types
-import type {
-	UJLCDocument,
-	UJLTDocument,
-	UJLAbstractNode,
-	UJLTTokenSet,
-} from "@ujl-framework/types";
+Der Web Adapter registriert automatisch das Custom Element `<ujl-content>` und benötigt keine Svelte-Runtime-Dependency. Shadow DOM sorgt für Style-Isolation. Props müssen als Properties gesetzt werden, nicht als HTML-Attributes.
 
-// Validation Functions
-import { validateUJLCDocumentSafe, validateUJLTDocumentSafe } from "@ujl-framework/types";
-```
+#### REST API – Library Service
 
----
+Nur relevant, wenn der Crafter mit `library: { storage: 'backend' }` konfiguriert wird.
 
-#### **File Format Interfaces**
+**Base-URL:** `http://localhost:3000`  
+**Authentifizierung:** `Authorization: users API-Key YOUR_API_KEY`
 
-##### **UJLC Document Format (.ujlc.json)**
+| Methode | Endpoint          | Auth | Zweck                    |
+| ------- | ----------------- | ---- | ------------------------ |
+| GET     | `/api/images`     | Nein | Bilder auflisten/filtern |
+| POST    | `/api/images`     | Ja   | Upload                   |
+| PATCH   | `/api/images/:id` | Ja   | Metadaten ändern         |
+| DELETE  | `/api/images/:id` | Ja   | Bild löschen             |
 
-**Purpose:** Content-Beschreibung in strukturierten Modulen
-
-**Structure:**
-
-```json
-{
-  "ujlc": {
-    "meta": {
-      "title": "Document Title",
-      "description": "...",
-      "_version": "0.0.1",
-      "media_library": {
-        "storage": "inline" | "backend",
-        "endpoint": "http://localhost:3000/api"
-      }
-    },
-    "media": {
-      "media-001": {
-        "id": "media-001",
-        "storage": "inline",
-        "data": "data:image/jpeg;base64,..."
-      }
-    },
-    "root": [
-      {
-        "type": "text",
-        "meta": { "id": "text-001", "updated_at": "..." },
-        "fields": { "content": "Hello World" },
-        "slots": {}
-      }
-    ]
-  }
-}
-```
-
-##### **UJLT Theme Format (.ujlt.json)**
-
-**Purpose:** Design-System-Definition (Farben, Typografie, Spacing)
-
-**Structure:**
-
-```json
-{
-	"ujlt": {
-		"meta": {
-			"title": "Default Theme",
-			"_version": "0.0.1"
-		},
-		"tokens": {
-			"color": {
-				"primary": {
-					"oklch": { "l": 0.5, "c": 0.15, "h": 260 }
-				}
-			},
-			"typography": {
-				"base": {
-					"family": "Inter",
-					"size": { "sm": 14, "md": 16, "lg": 18 }
-				}
-			},
-			"spacing": { "xs": 4, "sm": 8, "md": 16, "lg": 24 },
-			"radius": { "sm": 4, "md": 8, "lg": 12 }
-		}
-	}
-}
-```
-
----
-
-### 3.2.3 Externe Abhängigkeiten
-
-#### **Runtime Dependencies**
-
-| Dependency            | Version | Verwendung                | Criticality |
-| --------------------- | ------- | ------------------------- | ----------- |
-| `svelte`              | 5.46.1  | Frontend Framework (peer) | Critical    |
-| `zod`                 | 4.2.1   | Schema Validation         | Critical    |
-| `@tiptap/starter-kit` | 3.14.0  | Rich Text Editor          | High        |
-| `tailwindcss`         | 4.1.18  | Styling System            | High        |
-| `nanoid`              | 5.1.6   | ID Generation             | Medium      |
-
-#### **DevDependencies**
-
-| Dependency         | Version | Verwendung      |
-| ------------------ | ------- | --------------- |
-| `vite`             | 7.3.0   | Build Tool      |
-| `vitest`           | 4.0.16  | Unit Testing    |
-| `@playwright/test` | 1.57.0  | E2E Testing     |
-| `typescript`       | 5.9.3   | Type Checking   |
-| `prettier`         | 3.7.4   | Code Formatting |
-
-#### **Backend Dependencies (Media Service)**
-
-| Dependency | Version | Verwendung        |
-| ---------- | ------- | ----------------- |
-| `payload`  | 3.x     | Headless CMS      |
-| `postgres` | latest  | Database          |
-| `docker`   | 20.x+   | Container Runtime |
-
----
-
-### 3.2.4 Deployment Context
-
-```mermaid
-graph TB
-    subgraph "Development"
-        Dev[Local Dev Server<br/>pnpm run dev]
-        DevDB[(PostgreSQL<br/>Docker)]
-    end
-
-    subgraph "CI/CD Pipeline"
-        GitLab[GitLab CI]
-        Install[Stage: Install]
-        Build[Stage: Build]
-        Test[Stage: Test]
-        Quality[Stage: Quality]
-        Deploy[Stage: Deploy]
-    end
-
-    subgraph "Production"
-        Pages[GitLab Pages<br/>Static Docs]
-        MediaService[Payload CMS<br/>Docker Container]
-        ProdDB[(PostgreSQL<br/>Managed DB)]
-    end
-
-    Dev --> DevDB
-    GitLab --> Install --> Build --> Test --> Quality --> Deploy
-    Deploy --> Pages
-    MediaService --> ProdDB
-```
-
-**CI/CD Stages:**
-
-1. **install** - Dependency installation mit Cache
-2. **build** - Monorepo-Build (types → core → adapters → demo → docs)
-3. **test** - Vitest Unit Tests für alle Packages
-4. **quality** - ESLint + TypeScript Checks
-5. **deploy** - GitLab Pages (nur main/develop Branch)
-
-**Deployment Artifacts:**
-
-- Static Documentation Site (VitePress) → GitLab Pages
-- NPM Packages (publishable, nicht automatisch deployed)
-- Docker Images für Payload CMS Media Service
-
----
-
-## 3.3 Scope
-
-Dieser Abschnitt definiert die Systemgrenzen von UJL: Was gehört zum System, was explizit nicht?
+## 3.3 Scope (Systemgrenze)
 
 ### 3.3.1 In Scope
 
-**UJL Framework ist verantwortlich für:**
-
-#### **Kern-Funktionalität**
-
-- **Content-Komposition:** AST-Generierung aus `.ujlc.json` Dokumenten
-- **Theme-System:** Token-Management und -Anwendung aus `.ujlt.json`
-- **Module Registry:** Verwaltung verfügbarer Module und Fields
-- **Validation:** Schema-basierte Validierung (Zod) für Dokumente
-- **Media Library:** Abstraktion für Inline- und Backend-Storage
-- **Adapters:** Rendering zu Svelte Components und Web Components
-- **Visual Editor (Crafter):** Drag & Drop Content Authoring
-
-#### **Qualitäts-Garantien**
-
-- **Brand-Compliance Enforcement:** Technische Durchsetzung von Design-Regeln
-- **Accessibility by Default:** WCAG-konforme Modul-Implementierungen
-- **Schema Validation:** Strukturelle Korrektheit durch Zod-Schemas
-- **ID Propagation:** Eindeutige Modul-IDs für Editor-Integration
-
-#### **Developer Experience**
-
-- **Extension APIs:** Custom Modules, Fields, Adapters
-- **TypeScript Support:** Vollständige Type Definitions
-- **CLI Tools:** Validation Command (`ujl-validate`)
-- **Documentation:** Arc42-Architekturdokumentation
-
----
+UJL ist verantwortlich für **Dokumentmodell & Authoring** (Erstellung/Pflege von UJLC/UJLT im Crafter), **Validierung & Komposition** (Schema-Validierung und AST-Generierung aus UJLC mit Theme-Bezug) sowie **Rendering** über Adapter für Svelte und Web Components (Custom Element) zur Ausgabe in Host-Anwendungen. Die **Erweiterbarkeit** durch Custom Modules, Fields und Adapter ist ebenso Teil des Scopes wie die **optionale Anbindung eines Library Service** für Bilder (zusätzlich zu inline Storage).
 
 ### 3.3.2 Out of Scope
 
-**UJL Framework ist explizit NICHT verantwortlich für:**
+UJL ist explizit nicht verantwortlich für **CMS-Kernfunktionen** (Speicherung, Workflows, Rollen/Rechte, Publishing-Prozesse), **Hosting/Plattformbetrieb** (CDN, TLS, Monitoring/Alerting, Betriebs- und Skalierungsverantwortung), **Design-Tool-Integrationen** (Figma/Sketch-Import, „Design-to-Code"-Pipelines) oder **KI-Betrieb** (Hosting/Training von Modellen, Prompt-/Agent-Frameworks).
 
-#### **Content Management**
+### 3.3.3 Beispielhafte Integrations-Szenarien
 
-- ❌ **Content-Speicherung:** Kein eingebautes Datenbank-Backend
-- ❌ **Workflow-Management:** Keine Freigabeprozesse, Versionierung
-- ❌ **User Management:** Keine Benutzerverwaltung, Rollen, Rechte
-- ❌ **Publishing:** Kein Deployment-Mechanismus
-- ❌ **Content-Suche:** Keine Volltextsuche, Taxonomien
-
-**Begründung:** UJL ist ein Layout-Layer, kein CMS. Bestehende CMS-Systeme können UJL-Dokumente als JSON-Felder speichern.
-
----
-
-#### **Design Tooling**
-
-- ❌ **Design-zu-Code:** Kein Import aus Figma/Sketch
-- ❌ **Visual Design Editor:** Kein Farbpicker für Redakteure
-- ❌ **Asset-Optimierung:** Keine automatische Bildkompression (außer in Media Service)
-
-**Begründung:** Design wird von Designer:innen im Theme definiert, nicht von Redakteur:innen.
-
----
-
-#### **Hosting & Infrastructure**
-
-- ❌ **Web Hosting:** Keine eingebaute Hosting-Plattform
-- ❌ **CDN:** Keine Content Delivery
-- ❌ **SSL/TLS:** Keine Zertifikats-Verwaltung
-- ❌ **Monitoring:** Kein APM, Logging, Alerting
-
-**Begründung:** UJL ist framework-agnostic und kann in beliebigen Hosting-Umgebungen deployed werden.
-
----
-
-#### **AI Integration**
-
-- ❌ **LLM Hosting:** Keine eigenen AI-Modelle
-- ❌ **Prompt Engineering:** Keine vordefinierten Prompts
-- ❌ **AI Training:** Keine Model-Finetuning-Funktionalität
-
-**Begründung:** UJL bietet strukturierte Daten für AI, hostet aber keine AI-Services selbst.
-
----
-
-### 3.3.3 Systemgrenzen Diagramm
-
-```mermaid
-graph TB
-    subgraph "IN SCOPE - UJL Framework"
-        Composer[Content Composition<br/>AST Generation]
-        Validation[Schema Validation<br/>Zod Enforcement]
-        Modules[Module Registry<br/>Built-in & Custom]
-        Editor[Visual Editor<br/>Crafter]
-        Adapters[Rendering Adapters<br/>Svelte/Web]
-    end
-
-    subgraph "OUT OF SCOPE - External Systems"
-        CMS[Content Management<br/>Storage, Workflow, Versioning]
-        Hosting[Hosting & CDN<br/>Deployment, SSL, Performance]
-        DesignTools[Design Tools<br/>Figma, Sketch Integration]
-        AIServices[AI Services<br/>LLM Hosting, Training]
-    end
-
-    subgraph "INTEGRATION POINTS"
-        API[REST API<br/>Media Service]
-        Files[File Formats<br/>.ujlc.json, .ujlt.json]
-        Components[Component Library<br/>Svelte/Web Components]
-    end
-
-    Composer --> API
-    Composer --> Files
-    Adapters --> Components
-
-    CMS -.->|stores| Files
-    CMS -.->|delivers| Composer
-    Hosting -.->|hosts| Components
-    DesignTools -.->|exports| Files
-    AIServices -.->|generates| Files
-
-    style Composer fill:#4ade80
-    style Validation fill:#4ade80
-    style Modules fill:#4ade80
-    style Editor fill:#4ade80
-    style Adapters fill:#4ade80
-
-    style CMS fill:#ef4444
-    style Hosting fill:#ef4444
-    style DesignTools fill:#ef4444
-    style AIServices fill:#ef4444
-```
-
----
-
-### 3.3.4 Integrations-Szenarien
-
-#### **Szenario 1: UJL + Headless CMS**
+**Szenario 1: UJL + Headless CMS**
 
 ```
-[CMS Backend] ←→ [JSON Storage] ←→ [UJL Composer] → [Adapter] → [Frontend]
+[CMS] ←→ [UJLC/UJLT als JSON] ←→ [Composer] → [Adapter] → [Host-Frontend]
 ```
 
-**In Scope:**
-
-- Composition & Rendering
-
-**Out of Scope:**
-
-- CMS-Speicherung, API-Layer des CMS
-
----
-
-#### **Szenario 2: UJL + Static Site Generator**
+**Szenario 2: UJL + Static Site Generation**
 
 ```
-[.ujlc.json Files] → [Build Process] → [UJL Composer] → [Adapter] → [Static HTML]
+[.ujlc/.ujlt Dateien] → [Build] → [Composer] → [Adapter] → [Static Output]
 ```
 
-**In Scope:**
-
-- Build-time Composition
-
-**Out of Scope:**
-
-- SSG Framework, Build Orchestration
-
----
-
-#### **Szenario 3: UJL + SaaS White-Label**
+**Szenario 3: UJL als White-Label Editor**
 
 ```
-[SaaS App] → [Embedded Crafter] → [UJL Adapter] → [Preview] → [Customer Frontend]
+[SaaS Host] → [Embedded Crafter] → [Preview/Adapter] → [Customer Frontend]
 ```
-
-**In Scope:**
-
-- Embedded Editor, Validation
-
-**Out of Scope:**
-
-- SaaS User Management, Billing, Deployment
