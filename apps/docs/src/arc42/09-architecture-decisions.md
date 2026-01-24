@@ -11,7 +11,7 @@ Dieses Kapitel dokumentiert die zentralen Architekturentscheidungen des UJL Fram
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -55,24 +55,15 @@ export const UJLTDocumentSchema = z.object({
 
 ### Konsequenzen
 
-**Positiv:**
+**Positiv:** Die strikte Trennung garantiert Markenkonsistenz, da zentrale Theme-Updates sofort auf alle Dokumente wirken. Redakteure profitieren von einer vereinfachten Content-Erstellung, und die strukturierten Daten ermöglichen eine bessere Integration mit AI-Systemen.
 
-- Garantierte Markenkonsistenz
-- Zentrale Theme-Updates wirken sofort auf alle Dokumente
-- Vereinfachte Content-Erstellung für Redakteure
-- Bessere AI-Integration durch strukturierte Daten
-
-**Negativ:**
-
-- Weniger Flexibilität für individuelle Design-Anpassungen pro Dokument
-- Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
-- Erfordert initiales Setup eines Theme-Systems
+**Negativ:** Die Architektur bietet weniger Flexibilität für individuelle Design-Anpassungen pro Dokument und ist komplexer als traditionelles HTML/CSS. Außerdem erfordert sie ein initiales Setup des Theme-Systems.
 
 ## 9.2 ADR-002: Modulares Plugin-System mit Registry Pattern
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -164,7 +155,7 @@ composer.registerModule(new CustomModule());
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -253,7 +244,7 @@ AdapterRoot.svelte                    # Entry Point + Theme Context
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -390,7 +381,7 @@ export const Images: CollectionConfig = {
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -472,7 +463,7 @@ pnpm run validate ./path/to/file.json
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -549,7 +540,7 @@ export const svelteAdapter = (node, tokenSet, options) => {
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -655,7 +646,7 @@ services:
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -780,7 +771,7 @@ function serializeNode(node: ProseMirrorNode): string {
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -885,7 +876,7 @@ export function resolveForegroundColor(
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -1027,7 +1018,7 @@ build:
 
 ### Status
 
-✅ Akzeptiert und umgesetzt
+Akzeptiert und umgesetzt
 
 ### Kontext
 
@@ -1184,7 +1175,7 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 
 ### 9.13.1 Lizenzmodell
 
-**Status:** 🔄 In Diskussion
+**Status:** In Diskussion
 
 **Optionen:**
 

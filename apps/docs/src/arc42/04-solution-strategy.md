@@ -38,17 +38,11 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 **Technische Umsetzung:**
 
-- **UJLC-Dokumente** enthalten ausschließlich strukturierte Content-Daten (Module mit typisierten Fields und Slots)
-- **UJLT-Dokumente** enthalten zentral verwaltete Design-Tokens (Farben im OKLCH-Farbraum, Typografie, Spacing, Radius)
-- **Composer** kombiniert beide zur Laufzeit zu einem Abstract Syntax Tree (AST)
-- **Zod-Schemas** validieren beide Dokumenttypen zur Laufzeit
+Die Trennung erfolgt auf zwei Ebenen: **UJLC-Dokumente** enthalten ausschließlich strukturierte Content-Daten in Form von Modulen mit typisierten Fields und Slots. **UJLT-Dokumente** hingegen enthalten zentral verwaltete Design-Tokens wie Farben (im OKLCH-Farbraum), Typografie, Spacing und Radius. Der **Composer** kombiniert beide zur Laufzeit zu einem Abstract Syntax Tree (AST), während **Zod-Schemas** beide Dokumenttypen validieren.
 
 **Konsequenzen:**
 
-- Redakteur:innen können Design-Regeln technisch nicht brechen
-- Theme-Updates wirken sofort global auf alle Dokumente
-- Zentrale Governance ohne manuelle Reviews
-- Weniger Flexibilität für individuelle Design-Anpassungen
+Diese Architektur führt dazu, dass Redakteur:innen Design-Regeln technisch nicht brechen können und Theme-Updates sofort global auf alle Dokumente wirken. Das ermöglicht zentrale Governance ohne manuelle Reviews, bedeutet aber auch weniger Flexibilität für individuelle Design-Anpassungen pro Dokument.
 
 **Referenz:** Siehe [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)
 
@@ -80,19 +74,11 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 
 **Vorteile:**
 
-1. **DRY-Prinzip**: Schema-Definition generiert TypeScript-Types
-2. **Runtime Safety**: Validierung bei Datei-Upload, CMS-Import, zukünftig AI-Generierung
-3. **Detaillierte Fehler**: Zod liefert JSON-Path-basierte Fehlermeldungen
-4. **Rekursive Strukturen**: `z.lazy()` ermöglicht unendliche Verschachtelung
-5. **Validierbarkeit**: Architektur ermöglicht deterministische Validierung von externen Daten (CMS, Import, zukünftig LLM-Output)
+Zod als Schema-Bibliothek bringt mehrere entscheidende Vorteile: Das **DRY-Prinzip** wird eingehalten, da die Schema-Definition automatisch TypeScript-Types generiert. **Runtime Safety** ist gewährleistet durch Validierung bei Datei-Upload, CMS-Import und zukünftig AI-Generierung. Zod liefert **detaillierte Fehler** mit JSON-Path-basierten Fehlermeldungen, was das Debugging erheblich erleichtert. Durch `z.lazy()` werden **rekursive Strukturen** wie unendliche Modul-Verschachtelung ermöglicht. Insgesamt ermöglicht die Architektur **deterministische Validierung** von externen Daten aus CMS, Import oder zukünftig LLM-Output.
 
 **Konsequenzen:**
 
-- Garantierte Datenintegrität zur Laufzeit
-- Architektur ermöglicht zukünftig deterministische Validierung von AI-generierten Dokumenten
-- Automatische Type-Synchronisation (Schema → Types)
-- Runtime-Overhead durch Validierung (~5-10ms pro Dokument)
-- Größere Bundle-Größe durch Zod (~12KB gzip)
+Die Entscheidung garantiert Datenintegrität zur Laufzeit und ermöglicht automatische Type-Synchronisation zwischen Schema und TypeScript-Types. Als Trade-off entsteht ein Runtime-Overhead durch Validierung (etwa 5–10ms pro Dokument) sowie eine größere Bundle-Größe durch Zod (etwa 12KB gzip).
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
 
@@ -622,16 +608,16 @@ export const Images: CollectionConfig = {
 
 **Alternative Kandidaten:** React, Vue, Solid
 
-**Entscheidungskriterien:**
+**Entscheidungskriterien (Skala 1–5):**
 
-| Kriterium         | Svelte 5   | React 19   | Vue 3    | Solid      |
-| ----------------- | ---------- | ---------- | -------- | ---------- |
-| Bundle-Größe      | ⭐⭐⭐⭐⭐ | ⭐⭐       | ⭐⭐⭐   | ⭐⭐⭐⭐   |
-| Performance       | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Custom Elements   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐ | ⭐⭐⭐     |
-| Developer UX      | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ⭐⭐⭐⭐ | ⭐⭐⭐     |
-| Community         | ⭐⭐⭐     | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐       |
-| Tooling-Ökosystem | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐       |
+| Kriterium         | Svelte 5 | React 19 | Vue 3 | Solid |
+| ----------------- | -------- | -------- | ----- | ----- |
+| Bundle-Größe      | 5        | 2        | 3     | 4     |
+| Performance       | 5        | 3        | 4     | 5     |
+| Custom Elements   | 5        | 3        | 4     | 3     |
+| Developer UX      | 5        | 3        | 4     | 3     |
+| Community         | 3        | 5        | 4     | 2     |
+| Tooling-Ökosystem | 4        | 5        | 4     | 2     |
 
 **Entscheidung:** Svelte 5
 
@@ -654,16 +640,16 @@ export const Images: CollectionConfig = {
 
 **Alternative Kandidaten:** Yup, Joi, AJV (JSON Schema)
 
-**Entscheidungskriterien:**
+**Entscheidungskriterien (Skala 1–5):**
 
-| Kriterium         | Zod        | Yup      | Joi    | AJV        |
-| ----------------- | ---------- | -------- | ------ | ---------- |
-| Type Inference    | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐     | ⭐⭐       |
-| TypeScript-First  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐⭐   | ⭐⭐⭐     |
-| Rekursive Schemas | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐⭐⭐ | ⭐⭐⭐⭐   |
-| Fehlerberichte    | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐       |
-| Bundle-Größe      | ⭐⭐⭐⭐   | ⭐⭐⭐⭐ | ⭐⭐   | ⭐⭐⭐⭐⭐ |
-| DX (Developer UX) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐⭐⭐ | ⭐⭐       |
+| Kriterium         | Zod | Yup | Joi | AJV |
+| ----------------- | --- | --- | --- | --- |
+| Type Inference    | 5   | 3   | 1   | 2   |
+| TypeScript-First  | 5   | 3   | 2   | 3   |
+| Rekursive Schemas | 5   | 3   | 3   | 4   |
+| Fehlerberichte    | 5   | 4   | 3   | 2   |
+| Bundle-Größe      | 4   | 4   | 2   | 5   |
+| DX (Developer UX) | 5   | 3   | 3   | 2   |
 
 **Entscheidung:** Zod
 
@@ -699,16 +685,16 @@ type User = z.infer<typeof UserSchema>;
 
 **Alternative Kandidaten:** Strapi, Custom Backend (Express + Sharp), Supabase Storage
 
-**Entscheidungskriterien:**
+**Entscheidungskriterien (Skala 1–5):**
 
-| Kriterium           | Payload CMS | Strapi     | Custom     | Supabase   |
-| ------------------- | ----------- | ---------- | ---------- | ---------- |
-| TypeScript-First    | ⭐⭐⭐⭐⭐  | ⭐⭐⭐     | ⭐⭐⭐⭐   | ⭐⭐⭐     |
-| Image Processing    | ⭐⭐⭐⭐⭐  | ⭐⭐⭐     | ⭐⭐⭐⭐   | ⭐⭐       |
-| Self-Hosted         | ⭐⭐⭐⭐⭐  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     |
-| Setup-Komplexität   | ⭐⭐⭐⭐    | ⭐⭐⭐     | ⭐⭐       | ⭐⭐⭐⭐⭐ |
-| Metadata-Management | ⭐⭐⭐⭐⭐  | ⭐⭐⭐⭐   | ⭐⭐⭐     | ⭐⭐⭐     |
-| i18n Support        | ⭐⭐⭐⭐⭐  | ⭐⭐⭐⭐   | ⭐⭐       | ⭐⭐       |
+| Kriterium           | Payload CMS | Strapi | Custom | Supabase |
+| ------------------- | ----------- | ------ | ------ | -------- |
+| TypeScript-First    | 5           | 3      | 4      | 3        |
+| Image Processing    | 5           | 3      | 4      | 2        |
+| Self-Hosted         | 5           | 5      | 5      | 3        |
+| Setup-Komplexität   | 4           | 3      | 2      | 5        |
+| Metadata-Management | 5           | 4      | 3      | 3        |
+| i18n Support        | 5           | 4      | 2      | 2        |
 
 **Entscheidung:** Payload CMS
 
@@ -753,15 +739,15 @@ formatOptions: { format: 'webp', options: { quality: 80 } }
 
 **Alternative Kandidaten:** npm Workspaces, Yarn Workspaces, Lerna, Turborepo
 
-**Entscheidungskriterien:**
+**Entscheidungskriterien (Skala 1–5):**
 
-| Kriterium             | pnpm + Changesets | npm Workspaces | Yarn + Lerna | Turborepo  | Nx         |
-| --------------------- | ----------------- | -------------- | ------------ | ---------- | ---------- |
-| Disk Efficiency       | ⭐⭐⭐⭐⭐        | ⭐⭐           | ⭐⭐⭐       | ⭐⭐⭐     | ⭐⭐⭐     |
-| Install Speed         | ⭐⭐⭐⭐⭐        | ⭐⭐⭐         | ⭐⭐⭐⭐     | ⭐⭐⭐⭐   | ⭐⭐⭐     |
-| Versioning Automation | ⭐⭐⭐⭐⭐        | ⭐⭐           | ⭐⭐⭐⭐     | ⭐⭐       | ⭐⭐       |
-| Setup-Komplexität     | ⭐⭐⭐⭐          | ⭐⭐⭐⭐⭐     | ⭐⭐⭐       | ⭐⭐⭐     | ⭐⭐       |
-| Caching               | ⭐⭐⭐⭐          | ⭐⭐⭐         | ⭐⭐⭐       | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Kriterium             | pnpm + Changesets | npm Workspaces | Yarn + Lerna | Turborepo | Nx  |
+| --------------------- | ----------------- | -------------- | ------------ | --------- | --- |
+| Disk Efficiency       | 5                 | 2              | 3            | 3         | 3   |
+| Install Speed         | 5                 | 3              | 4            | 4         | 3   |
+| Versioning Automation | 5                 | 2              | 4            | 2         | 2   |
+| Setup-Komplexität     | 4                 | 5              | 3            | 3         | 2   |
+| Caching               | 4                 | 3              | 3            | 5         | 5   |
 
 **Entscheidung:** pnpm Workspaces + Changesets
 
@@ -828,98 +814,73 @@ Die folgenden Trade-offs wurden bewusst akzeptiert, da die Vorteile die Nachteil
 
 **Trade-off:** Zod + ProseMirror erhöhen Bundle-Größe (~50KB gzip kombiniert)
 
-**Entscheidung:** ✅ Akzeptiert
+**Entscheidung:** Akzeptiert
 
-**Begründung:**
-
-- Runtime Validation ist essentiell für externe Daten (CMS, AI, User-Upload)
-- Strukturierte Rich Text Daten sind architektonisches Qualitätsziel
-- Moderne Browser cachen Bundles effizient
-- Alternative (keine Validation) hätte höheres Sicherheitsrisiko
+**Begründung:** Runtime Validation ist essentiell für externe Daten (CMS, AI, User-Upload). Strukturierte Rich Text Daten sind ein architektonisches Qualitätsziel. Moderne Browser cachen Bundles effizient, und die Alternative (keine Validation) hätte ein höheres Sicherheitsrisiko.
 
 #### 2. Lernkurve vs. Erweiterbarkeit
 
 **Trade-off:** Module Registry Pattern erfordert mehr Boilerplate (~50-100 LOC pro Modul)
 
-**Entscheidung:** ✅ Akzeptiert
+**Entscheidung:** Akzeptiert
 
-**Begründung:**
-
-- Klare Schnittstellen reduzieren langfristig Maintenance-Aufwand
-- Template-Dateien (`_template.ts`) reduzieren initiale Hürde
-- Type Safety rechtfertigt zusätzlichen Code
-- Alternative (freie Modulstruktur) hätte inkonsistente Module-Qualität
+**Begründung:** Klare Schnittstellen reduzieren langfristig den Maintenance-Aufwand. Template-Dateien (`_template.ts`) reduzieren die initiale Hürde, und Type Safety rechtfertigt den zusätzlichen Code. Die Alternative (freie Modulstruktur) hätte inkonsistente Module-Qualität zur Folge.
 
 #### 3. Flexibilität vs. Governance
 
 **Trade-off:** UJLC/UJLT-Trennung verhindert individuelle Design-Anpassungen pro Dokument
 
-**Entscheidung:** ✅ Akzeptiert
+**Entscheidung:** Akzeptiert
 
-**Begründung:**
-
-- Brand-Compliance by Design ist primäres Qualitätsziel (Priorität 1)
-- Zentrale Theme-Verwaltung ist architektonisches Kernelement
-- Alternative (per-document Styling) würde Design-Drift ermöglichen
-- Use Cases mit individuellen Styles können eigene UJLT-Dateien verwenden
+**Begründung:** Brand-Compliance by Design ist das primäre Qualitätsziel (Priorität 1), und zentrale Theme-Verwaltung ist ein architektonisches Kernelement. Die Alternative (per-document Styling) würde Design-Drift ermöglichen. Use Cases mit individuellen Styles können eigene UJLT-Dateien verwenden.
 
 #### 4. Setup-Komplexität vs. Enterprise-Features
 
 **Trade-off:** Payload CMS Media Backend erfordert Docker + PostgreSQL Setup
 
-**Entscheidung:** ✅ Akzeptiert
+**Entscheidung:** Akzeptiert
 
-**Begründung:**
-
-- Enterprise Features (Responsive Images, Metadaten, i18n) sind essentiell für professionelle Nutzung
-- Inline Storage bietet Fallback für einfache Use Cases
-- Docker Compose reduziert Setup-Komplexität
-- Alternative (nur Inline Storage) hätte keine Skalierbarkeit
+**Begründung:** Enterprise Features (Responsive Images, Metadaten, i18n) sind essentiell für professionelle Nutzung. Inline Storage bietet einen Fallback für einfache Use Cases, und Docker Compose reduziert die Setup-Komplexität. Die Alternative (nur Inline Storage) hätte keine Skalierbarkeit.
 
 #### 5. Community-Größe vs. Performance
 
-**Trade-off:** Svelte 5 hat kleinere Community als React
+**Trade-off:** Svelte 5 hat eine kleinere Community als React
 
-**Entscheidung:** ✅ Akzeptiert
+**Entscheidung:** Akzeptiert
 
-**Begründung:**
-
-- Performance und Bundle-Größe sind messbare Qualitätsmetriken
-- Adapter Pattern ermöglicht zukünftige React-Adapter
-- Svelte-Community ist aktiv und wächst (SvelteKit, Svelte 5 Runes)
-- shadcn-svelte, bits-ui liefern professionelle Component-Bibliotheken
+**Begründung:** Performance und Bundle-Größe sind messbare Qualitätsmetriken. Das Adapter Pattern ermöglicht zukünftige React-Adapter, die Svelte-Community ist aktiv und wächst (SvelteKit, Svelte 5 Runes), und shadcn-svelte sowie bits-ui liefern professionelle Component-Bibliotheken.
 
 ### Rejected Alternatives
 
 Die folgenden Alternativen wurden explizit verworfen:
 
-#### 1. ❌ HTML/CSS-basierte Content-Dokumente
+#### 1. HTML/CSS-basierte Content-Dokumente (verworfen)
 
-**Grund:** Redakteur:innen könnten Design-Regeln durch inline-Styles brechen. Keine architektonische Garantie für Brand-Compliance.
+Redakteur:innen könnten Design-Regeln durch inline-Styles brechen. Es gibt keine architektonische Garantie für Brand-Compliance.
 
 **Gewählte Alternative:** Strukturierte JSON-Dokumente (UJLC) mit Zod-Validierung
 
-#### 2. ❌ Styled Components / CSS-in-JS
+#### 2. Styled Components / CSS-in-JS (verworfen)
 
-**Grund:** Runtime-Overhead, größere Bundle-Größe, keine Design-Token-Integration
+Runtime-Overhead, größere Bundle-Größe und keine Design-Token-Integration sprechen gegen diesen Ansatz.
 
 **Gewählte Alternative:** Tailwind CSS mit CSS Custom Properties für Design-Tokens
 
-#### 3. ❌ GraphQL API für Media Backend
+#### 3. GraphQL API für Media Backend (verworfen)
 
-**Grund:** Over-Engineering für Media-Use-Case, RESTful API ausreichend
+GraphQL wäre Over-Engineering für den Media-Use-Case; eine RESTful API ist ausreichend.
 
 **Gewählte Alternative:** Payload CMS mit RESTful API
 
-#### 4. ❌ Lerna für Monorepo-Versionierung
+#### 4. Lerna für Monorepo-Versionierung (verworfen)
 
-**Grund:** Veraltet, Changesets bietet bessere Developer Experience
+Lerna ist veraltet, und Changesets bietet eine bessere Developer Experience.
 
 **Gewählte Alternative:** pnpm Workspaces + Changesets
 
-#### 5. ❌ React als primäres UI Framework
+#### 5. React als primäres UI Framework (verworfen)
 
-**Grund:** Größere Bundle-Größe, Virtual DOM Overhead, keine Compilation
+Größere Bundle-Größe, Virtual DOM Overhead und fehlende Compilation sind die Nachteile.
 
 **Gewählte Alternative:** Svelte 5 mit Compilation und Fine-grained Reactivity
 

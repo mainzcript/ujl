@@ -359,35 +359,35 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 
-| ID          | Qualitätsziel    | Szenario                 | Schlüsselmetrik               | Status           |
-| ----------- | ---------------- | ------------------------ | ----------------------------- | ---------------- |
-| QS-BC-01    | Brand-Compliance | Design-Isolation         | 0 CSS in UJLC                 | ✅ Implementiert |
-| QS-BC-02    | Brand-Compliance | Zentrale Theme-Updates   | <100ms Propagation            | ✅ Implementiert |
-| QS-BC-03    | Brand-Compliance | Schema-Validierung       | <50ms Validierung             | ✅ Implementiert |
-| QS-ACC-01   | Accessibility    | Farbkontrast             | ≥4.5:1 WCAG AA                | ✅ Implementiert |
-| QS-ACC-02   | Accessibility    | Keyboard-Navigation      | 100% Funktionen erreichbar    | ✅ Implementiert |
-| QS-ACC-03   | Accessibility    | Semantisches HTML        | Korrekte HTML-Elemente        | ✅ Implementiert |
-| QS-VAL-01   | Validierbarkeit  | Strukturierte Daten      | JSON-Schema-konform           | ✅ Implementiert |
-| QS-VAL-02   | Validierbarkeit  | Validierbarkeit          | >99% Validierungsrate         | 🔄 Messbar       |
-| QS-VAL-03   | Validierbarkeit  | Deterministische Ausgabe | 100% identischer Output       | ✅ Implementiert |
-| QS-EXT-01   | Erweiterbarkeit  | Custom Module            | <100 LOC                      | ✅ Implementiert |
-| QS-EXT-02   | Erweiterbarkeit  | Custom Adapter           | <200 LOC                      | ✅ Implementiert |
-| QS-EXT-03   | Erweiterbarkeit  | Media Storage            | Interface dokumentiert        | ✅ Implementiert |
-| QS-PERF-01  | Performance      | Bundle-Größe             | <100KB (adapter-web)          | ✅ Implementiert |
-| QS-PERF-02  | Performance      | Crafter-Reaktionszeit    | <200ms bei 200 Modulen        | ✅ Implementiert |
-| QS-PERF-03  | Performance      | Rendering-Performance    | <100ms Initial Render         | ✅ Implementiert |
-| QS-DX-01    | Developer Exp.   | Type Safety              | 100% TypeScript Strict        | ✅ Implementiert |
-| QS-DX-02    | Developer Exp.   | Onboarding-Zeit          | <1h für Custom Module         | 🔄 Messbar       |
-| QS-DX-03    | Developer Exp.   | Dokumentations-qualität  | README pro Package            | ✅ Implementiert |
-| QS-MAINT-01 | Maintainability  | Test-Abdeckung           | >80% kritische Paths          | 🔄 In Arbeit     |
-| QS-MAINT-02 | Maintainability  | Modulare Struktur        | Keine zirkulären Dependencies | ✅ Implementiert |
-| QS-MAINT-03 | Maintainability  | Versionierung            | Synchrone Versionierung       | ✅ Implementiert |
+| ID          | Qualitätsziel    | Szenario                 | Schlüsselmetrik               | Status        |
+| ----------- | ---------------- | ------------------------ | ----------------------------- | ------------- |
+| QS-BC-01    | Brand-Compliance | Design-Isolation         | 0 CSS in UJLC                 | Implementiert |
+| QS-BC-02    | Brand-Compliance | Zentrale Theme-Updates   | <100ms Propagation            | Implementiert |
+| QS-BC-03    | Brand-Compliance | Schema-Validierung       | <50ms Validierung             | Implementiert |
+| QS-ACC-01   | Accessibility    | Farbkontrast             | ≥4.5:1 WCAG AA                | Implementiert |
+| QS-ACC-02   | Accessibility    | Keyboard-Navigation      | 100% Funktionen erreichbar    | Implementiert |
+| QS-ACC-03   | Accessibility    | Semantisches HTML        | Korrekte HTML-Elemente        | Implementiert |
+| QS-VAL-01   | Validierbarkeit  | Strukturierte Daten      | JSON-Schema-konform           | Implementiert |
+| QS-VAL-02   | Validierbarkeit  | Validierbarkeit          | >99% Validierungsrate         | Messbar       |
+| QS-VAL-03   | Validierbarkeit  | Deterministische Ausgabe | 100% identischer Output       | Implementiert |
+| QS-EXT-01   | Erweiterbarkeit  | Custom Module            | <100 LOC                      | Implementiert |
+| QS-EXT-02   | Erweiterbarkeit  | Custom Adapter           | <200 LOC                      | Implementiert |
+| QS-EXT-03   | Erweiterbarkeit  | Media Storage            | Interface dokumentiert        | Implementiert |
+| QS-PERF-01  | Performance      | Bundle-Größe             | <100KB (adapter-web)          | Implementiert |
+| QS-PERF-02  | Performance      | Crafter-Reaktionszeit    | <200ms bei 200 Modulen        | Implementiert |
+| QS-PERF-03  | Performance      | Rendering-Performance    | <100ms Initial Render         | Implementiert |
+| QS-DX-01    | Developer Exp.   | Type Safety              | 100% TypeScript Strict        | Implementiert |
+| QS-DX-02    | Developer Exp.   | Onboarding-Zeit          | <1h für Custom Module         | Messbar       |
+| QS-DX-03    | Developer Exp.   | Dokumentations-qualität  | README pro Package            | Implementiert |
+| QS-MAINT-01 | Maintainability  | Test-Abdeckung           | >80% kritische Paths          | In Arbeit     |
+| QS-MAINT-02 | Maintainability  | Modulare Struktur        | Keine zirkulären Dependencies | Implementiert |
+| QS-MAINT-03 | Maintainability  | Versionierung            | Synchrone Versionierung       | Implementiert |
 
 **Legende:**
 
-- ✅ Implementiert: Szenario ist vollständig umgesetzt und testbar
-- 🔄 Messbar: Szenario ist implementiert, Metriken werden noch erhoben
-- 🔄 In Arbeit: Implementierung läuft
+- **Implementiert**: Szenario ist vollständig umgesetzt und testbar
+- **Messbar**: Szenario ist implementiert, Metriken werden noch erhoben
+- **In Arbeit**: Implementierung läuft
 
 ## 10.4 Qualitätsanforderungen und Architektur-Mapping
 

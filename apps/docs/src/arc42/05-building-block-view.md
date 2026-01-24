@@ -9,9 +9,7 @@ Dieses Kapitel beschreibt die statische Zerlegung des UJL-Systems in Bausteine (
 
 ## Übersicht der Hierarchie-Ebenen
 
-- **Level 1:** Gesamtsystem mit Hauptbausteinen (Packages, Apps, Services)
-- **Level 2:** Interne Struktur ausgewählter Bausteine
-- **Level 3:** Detail-Sicht auf kritische Komponenten
+Die Dokumentation folgt einer hierarchischen Gliederung: **Level 1** zeigt das Gesamtsystem mit seinen Hauptbausteinen (Packages, Apps, Services). **Level 2** beschreibt die interne Struktur ausgewählter Bausteine im Detail. **Level 3** bietet eine Detail-Sicht auf kritische Komponenten wie den Composer oder die Module Registry.
 
 ## 5.1 Whitebox Gesamtsystem (Level 1)
 
