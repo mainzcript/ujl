@@ -729,11 +729,3 @@ tar -czf backup_media_$DATE.tar.gz media/
    - Monitoring (Prometheus/Grafana optional)
 3. **CDN**: Für statische Assets (CSS, Bilder)
 4. **Skalierung**: Horizontal via Container-Orchestrierung (Docker Swarm/Kubernetes) bei Bedarf
-
-## Nächste Kapitel
-
-- **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Architektur-Aspekte
-- **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
-- **[Qualitätsanforderungen (Kapitel 10)](./10-quality-requirements)** - Qualitätsziele und -szenarien
-
-_Letzte Aktualisierung: 2026-01-14_

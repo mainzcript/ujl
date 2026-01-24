@@ -923,13 +923,3 @@ const imageData = $derived.by(async () => {
 | **Media**         | Responsive Image Sizes (thumbnail → xlarge)          |
 | **Compression**   | Client-side Image Compression vor Upload             |
 | **Validation**    | Lazy-Evaluation mit `z.lazy()` für rekursive Schemas |
-
-## Nächste Kapitel
-
-Für weitere Architektur-Details siehe:
-
-- **[Verteilungssicht (Kapitel 7)](./07-deployment-view)** - Deployment-Topologien
-- **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Aspekte
-- **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs
-
-_Letzte Aktualisierung: 2026-01-14_

@@ -407,10 +407,3 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | OKLCH Farbraum (ADR-009)          | QS-ACC-01                              |
 | pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03               |
 | Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                 |
-
-## Nächste Kapitel
-
-- **[Risiken und technische Schulden (Kapitel 11)](./11-risks-and-technical-debt)** - Bekannte Risiken und Maßnahmen
-- **[Glossar (Kapitel 12)](./12-glossary)** - Begriffsdefinitionen
-
-_Letzte Aktualisierung: 2026-01-15_

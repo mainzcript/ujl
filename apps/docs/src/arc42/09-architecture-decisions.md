@@ -1204,5 +1204,3 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 
 - Community-Contributions vs. offiziell maintained?
 - Adapter-API ausreichend dokumentiert?
-
-_Letzte Aktualisierung: 2026-01-10_

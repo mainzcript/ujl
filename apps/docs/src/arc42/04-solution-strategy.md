@@ -1008,5 +1008,3 @@ Für detaillierte Informationen zu einzelnen Architektur-Elementen siehe:
 - **[Verteilungssicht (Kapitel 7)](./07-deployment-view)** - Deployment-Topologien und Infrastruktur
 - **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Architektur-Aspekte
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
-
-_Letzte Aktualisierung: 2026-01-13_

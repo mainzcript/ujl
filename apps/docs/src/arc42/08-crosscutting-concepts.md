@@ -1004,11 +1004,3 @@ pnpm version-packages
 # Release: Packages veröffentlichen
 pnpm publish -r --access public
 ```
-
-## Nächste Kapitel
-
-- **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
-- **[Qualitätsanforderungen (Kapitel 10)](./10-quality-requirements)** - Quality Attribute Scenarios
-- **[Risiken und technische Schulden (Kapitel 11)](./11-risks-and-technical-debt)** - Bekannte Risiken und Maßnahmen
-
-_Letzte Aktualisierung: 2026-01-15_

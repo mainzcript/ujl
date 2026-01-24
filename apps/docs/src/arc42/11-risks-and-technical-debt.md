@@ -730,10 +730,3 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 
 3. **Contributor Guidelines** (R-007)
    - Externe Beiträge ermöglichen
-
-## Nächste Kapitel
-
-- **[Glossar (Kapitel 12)](./12-glossary)** - Begriffsdefinitionen
-- **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - Detaillierte ADRs
-
-_Letzte Aktualisierung: 2026-01-21_
