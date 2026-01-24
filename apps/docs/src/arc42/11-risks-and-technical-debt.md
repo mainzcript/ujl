@@ -5,8 +5,6 @@ description: "Technische Risiken und bekannte technische Schulden im UJL-System"
 
 # Risiken und technische Schulden
 
-Dieses Kapitel dokumentiert die identifizierten technischen Risiken und bekannten technischen Schulden des UJL Frameworks. Die Auflistung dient der Transparenz und ermöglicht eine proaktive Risikominderung.
-
 ## Übersicht
 
 ```mermaid
@@ -250,8 +248,6 @@ Das Design-Token-System verwendet den OKLCH-Farbraum für perzeptuell uniforme F
 
 **Status:** Akzeptiertes Risiko (hohe Browser-Abdeckung)
 
-<!-- TOdo -->
-
 ### 11.1.6 Test Coverage Gaps
 
 | Attribut               | Wert               |
@@ -304,7 +300,7 @@ Die Test-Abdeckung variiert zwischen Paketen. Während `types` und `core` gut ge
 | ---------------------- | ------------------ |
 | **Risiko-ID**          | R-007              |
 | **Kategorie**          | Projekt-Management |
-| **Priorität**          | Mittel             |
+| **Priorität**          | Hoch               |
 | **Wahrscheinlichkeit** | Hoch               |
 | **Auswirkung**         | Hoch               |
 

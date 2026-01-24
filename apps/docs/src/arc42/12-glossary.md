@@ -42,6 +42,15 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **ModuleRegistry**  
   Verwaltet verfügbare Module und ermöglicht die Registrierung neuer Module zur Erweiterung des Systems.
 
+- **FieldSet**  
+  Eine Sammlung typisierter Fields, die ein Modul zur Dateneingabe verwendet. Jedes Field hat einen Namen, Typ und Validierungsregeln.
+
+- **SlotSet**  
+  Eine Sammlung benannter Slots, die verschachtelte Module aufnehmen können. Ermöglicht hierarchische Layouts.
+
+- **TokenSet**  
+  Eine Sammlung von Design-Tokens (Farben, Typografie, Spacing, Radius), die das visuelle Erscheinungsbild steuern. Wird aus `.ujlt.json` geladen.
+
 - **Validator**  
   Sammlung von Validator-Funktionen im Paket `@ujl-framework/types` – überprüft die technische Korrektheit und Kompatibilität von UJL-Dokumenten:
   - **Syntaxprüfung**: Formale Validierung der JSON-Struktur via Zod-Schemas.
@@ -72,20 +81,35 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 
 ## Technische Begriffe
 
-- **AST (Abstract Syntax Tree)**
+- **AST (Abstract Syntax Tree)**  
   Eine baumartige Darstellung der Struktur von UJL-Dokumenten, die für die Verarbeitung und Transformation verwendet wird.
 
-- **API (Application Programming Interface)**
+- **API (Application Programming Interface)**  
   Definiert die Schnittstellen zwischen verschiedenen Komponenten des UJL-Systems und ermöglicht die Integration in externe Anwendungen.
 
-- **JSON (JavaScript Object Notation)**
-  Das Datenformat, in dem UJL-Layouts und -Konfigurationen gespeichert werden. Ermöglicht plattformunabhängige Datenaustausch.
+- **JSON (JavaScript Object Notation)**  
+  Das Datenformat, in dem UJL-Layouts und -Konfigurationen gespeichert werden. Ermöglicht plattformunabhängigen Datenaustausch.
 
-- **TypeScript**
+- **TypeScript**  
   Eine erweiterte Version von JavaScript mit statischer Typisierung, die für die Entwicklung von UJL verwendet wird.
 
-- **Build-Zeit-Kompilierung**
+- **Build-Zeit-Kompilierung**  
   Der Prozess, bei dem Code bereits während der Entwicklung kompiliert wird, um die Laufzeit-Performance zu verbessern.
+
+- **Svelte Runes**  
+  Svelte 5 APIs für Reaktivität (`$state`, `$derived`, `$effect`). Ermöglichen fine-grained reactivity im Crafter und in Adaptern.
+
+- **Shadow DOM**  
+  Browser-Technologie zur Style-Isolation. UJL nutzt Shadow DOM im Web Adapter, um CSS-Konflikte mit Host-Anwendungen zu verhindern.
+
+- **Tree-Shaking**  
+  Build-Optimierung, die ungenutzten Code automatisch entfernt. Reduziert Bundle-Größe durch Eliminierung nicht verwendeter Module und Funktionen.
+
+- **Workspace Protocol**  
+  pnpm-Feature zur Referenzierung von Packages innerhalb eines Monorepos (`workspace:*`, `workspace:^`). Ermöglicht koordinierte Versionierung.
+
+- **Changeset**  
+  Ein Versionierungs-Tool für Monorepos. Koordiniert Package-Versionen, generiert Changelogs automatisch und folgt Semantic Versioning.
 
 ## Design und Styling
 

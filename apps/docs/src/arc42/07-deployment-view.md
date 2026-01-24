@@ -5,8 +5,6 @@ description: "Verteilung der Systemkomponenten auf Infrastruktur und Deployment"
 
 # Verteilungssicht
 
-Dieses Kapitel beschreibt die technische Infrastruktur, auf der das UJL-System ausgeführt wird, sowie die Zuordnung der Software-Bausteine zu den Infrastrukturkomponenten. Es werden verschiedene Deployment-Szenarien dargestellt: von der lokalen Entwicklungsumgebung bis hin zu Produktionsumgebungen.
-
 ## 7.1 Infrastruktur Ebene 1
 
 ### 7.1.1 Übersichtsdiagramm
@@ -559,6 +557,263 @@ const mounted = webAdapter(ast, tokenSet, {
 mounted.unmount();
 ```
 
+### 7.3.5 Szenario: Produktion (Self-Hosted Full Stack)
+
+Dieses Szenario beschreibt eine vollständige Produktions-Deployment-Umgebung mit allen UJL-Komponenten.
+
+```mermaid
+graph TB
+    subgraph "Internet"
+        Users[Users / Browsers]
+    end
+
+    subgraph "Load Balancer / Reverse Proxy"
+        LB[Nginx / Traefik]
+    end
+
+    subgraph "Application Server(s)"
+        subgraph "App Container 1"
+            App1[UJL Crafter<br/>SvelteKit SSR]
+        end
+        subgraph "App Container 2"
+            App2[UJL Crafter<br/>SvelteKit SSR]
+        end
+    end
+
+    subgraph "Media Service"
+        subgraph "Payload Container"
+            Payload[Payload CMS<br/>Port: 3000]
+        end
+        subgraph "Database"
+            PG[(PostgreSQL<br/>Port: 5432)]
+        end
+        subgraph "Storage"
+            Media[(Media Files<br/>Volume)]
+        end
+    end
+
+    subgraph "CDN / Static Assets"
+        CDN[CloudFlare / AWS<br/>Static Assets]
+    end
+
+    subgraph "Monitoring"
+        Prometheus[Prometheus]
+        Grafana[Grafana]
+    end
+
+    subgraph "Backup"
+        BackupService[Automated Backup<br/>Daily Cron]
+        BackupStorage[(Backup Storage<br/>S3 / NFS)]
+    end
+
+    Users --> LB
+    LB --> App1
+    LB --> App2
+    App1 --> Payload
+    App2 --> Payload
+    App1 --> CDN
+    App2 --> CDN
+    Payload --> PG
+    Payload --> Media
+
+    Prometheus -.->|Scrape| App1
+    Prometheus -.->|Scrape| App2
+    Prometheus -.->|Scrape| Payload
+    Grafana --> Prometheus
+
+    BackupService -.->|Backup| PG
+    BackupService -.->|Backup| Media
+    BackupService --> BackupStorage
+
+    style LB fill:#3b82f6
+    style App1 fill:#f59e0b
+    style App2 fill:#f59e0b
+    style Payload fill:#6366f1
+    style PG fill:#10b981
+    style CDN fill:#8b5cf6
+```
+
+**Deployment-Konfiguration:**
+
+| Komponente    | Instanzen | CPU     | Memory | Storage   | Redundanz     |
+| ------------- | --------- | ------- | ------ | --------- | ------------- |
+| Nginx/Traefik | 1-2       | 1 Core  | 512MB  | -         | Optional      |
+| UJL Crafter   | 2+        | 2 Cores | 2GB    | -         | Load Balanced |
+| Payload CMS   | 1-2       | 2 Cores | 4GB    | -         | Aktiv-Passiv  |
+| PostgreSQL    | 1         | 4 Cores | 8GB    | 100GB SSD | Replication   |
+| Media Storage | 1         | -       | -      | 500GB+    | RAID/S3       |
+
+**Container-Orchestrierung (Docker Compose Production):**
+
+```yaml
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    restart: always
+    depends_on:
+      - crafter-1
+      - crafter-2
+
+  crafter-1:
+    image: ghcr.io/ujl-framework/crafter:latest
+    environment:
+      - NODE_ENV=production
+      - PAYLOAD_URL=http://payload:3000
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  crafter-2:
+    image: ghcr.io/ujl-framework/crafter:latest
+    environment:
+      - NODE_ENV=production
+      - PAYLOAD_URL=http://payload:3000
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  payload:
+    image: ghcr.io/ujl-framework/payload-cms:latest
+    environment:
+      - POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/payload
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
+    volumes:
+      - media-data:/app/media
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=payload
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: always
+    ports:
+      - "3001:3000"
+
+volumes:
+  postgres-data:
+  media-data:
+  prometheus-data:
+  grafana-data:
+```
+
+**SSL/TLS-Konfiguration (Nginx):**
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Crafter Routing
+    location / {
+        proxy_pass http://crafter-1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Media Service Routing
+    location /api/ {
+        proxy_pass http://payload:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+**Deployment-Schritte:**
+
+1. **Vorbereitung:**
+
+   ```bash
+   # Secrets generieren
+   openssl rand -base64 32 > .env.secret
+
+   # .env Datei erstellen
+   cat > .env <<EOF
+   POSTGRES_PASSWORD=$(openssl rand -base64 32)
+   PAYLOAD_SECRET=$(cat .env.secret)
+   GRAFANA_PASSWORD=$(openssl rand -base64 32)
+   EOF
+   ```
+
+2. **Initial Deployment:**
+
+   ```bash
+   # Container starten
+   docker-compose -f docker-compose.production.yml up -d
+
+   # Logs prüfen
+   docker-compose logs -f
+   ```
+
+3. **SSL-Zertifikate einrichten:**
+
+   ```bash
+   # Let's Encrypt mit Certbot
+   certbot certonly --webroot -w /var/www/html -d your-domain.com
+   ```
+
+4. **Health Check:**
+   ```bash
+   # Services prüfen
+   curl https://your-domain.com/admin
+   curl https://your-domain.com/api/images?limit=1
+   ```
+
 ## 7.4 Infrastruktur-Anforderungen
 
 ### 7.4.1 Mindestanforderungen
@@ -645,6 +900,279 @@ graph LR
     VitePress --> HTML
 ```
 
+## 7.5 Skalierungsstrategie
+
+### 7.5.1 Horizontale Skalierung
+
+**Application Layer (Crafter):**
+
+UJL Crafter ist als stateless SvelteKit-Anwendung konzipiert und kann horizontal skaliert werden.
+
+```mermaid
+graph LR
+    LB[Load Balancer]
+
+    subgraph "Application Instances"
+        App1[Crafter Instance 1]
+        App2[Crafter Instance 2]
+        AppN[Crafter Instance N]
+    end
+
+    subgraph "Shared Services"
+        Payload[Payload CMS]
+        PG[(PostgreSQL)]
+    end
+
+    LB --> App1
+    LB --> App2
+    LB --> AppN
+
+    App1 --> Payload
+    App2 --> Payload
+    AppN --> Payload
+
+    Payload --> PG
+```
+
+**Skalierungs-Trigger:**
+
+| Metrik            | Schwellwert  | Aktion      |
+| ----------------- | ------------ | ----------- |
+| CPU-Auslastung    | >70% (5 Min) | +1 Instance |
+| Memory-Auslastung | >80% (5 Min) | +1 Instance |
+| Request Rate      | >1000 req/s  | +1 Instance |
+| Response Time     | >500ms (p95) | +1 Instance |
+
+**Kubernetes Auto-Scaling (Beispiel):**
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ujl-crafter
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ujl-crafter
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+**Docker Swarm Auto-Scaling (Beispiel):**
+
+```yaml
+services:
+  crafter:
+    image: ghcr.io/ujl-framework/crafter:latest
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "1"
+          memory: 1G
+```
+
+### 7.5.2 Vertikale Skalierung
+
+**PostgreSQL:**
+
+| Last-Profil                 | CPU      | Memory | Storage | IOPS  |
+| --------------------------- | -------- | ------ | ------- | ----- |
+| Niedrig (<1000 Bilder)      | 2 Cores  | 4GB    | 50GB    | 1000  |
+| Mittel (<10.000 Bilder)     | 4 Cores  | 8GB    | 100GB   | 3000  |
+| Hoch (<100.000 Bilder)      | 8 Cores  | 16GB   | 500GB   | 5000  |
+| Sehr Hoch (>100.000 Bilder) | 16 Cores | 32GB   | 1TB     | 10000 |
+
+**Payload CMS:**
+
+| Concurrent Users | CPU     | Memory | Instances |
+| ---------------- | ------- | ------ | --------- |
+| <10              | 1 Core  | 2GB    | 1         |
+| 10-50            | 2 Cores | 4GB    | 2         |
+| 50-200           | 4 Cores | 8GB    | 3-5       |
+| >200             | 8 Cores | 16GB   | 5+        |
+
+### 7.5.3 Datenbank-Skalierung
+
+**Read Replicas:**
+
+Für lesintensive Workloads können PostgreSQL Read Replicas eingesetzt werden:
+
+```mermaid
+graph TB
+    subgraph "Write Operations"
+        Writer[Primary PostgreSQL]
+    end
+
+    subgraph "Read Operations"
+        Reader1[Read Replica 1]
+        Reader2[Read Replica 2]
+    end
+
+    Writer -.->|Replication| Reader1
+    Writer -.->|Replication| Reader2
+
+    Payload[Payload CMS] -->|Writes| Writer
+    Payload -.->|Reads| Reader1
+    Payload -.->|Reads| Reader2
+```
+
+**Connection Pooling:**
+
+Für hohe Concurrent Connections PgBouncer einsetzen:
+
+```ini
+# pgbouncer.ini
+[databases]
+payload = host=postgres port=5432 dbname=payload
+
+[pgbouncer]
+listen_port = 6432
+listen_addr = *
+auth_type = md5
+pool_mode = transaction
+max_client_conn = 1000
+default_pool_size = 25
+```
+
+### 7.5.4 Media Storage-Skalierung
+
+**Object Storage (S3-kompatibel):**
+
+Für große Media-Bibliotheken Wechsel zu Object Storage:
+
+```typescript
+// Payload Config mit S3
+import { s3Adapter } from "@payloadcms/plugin-cloud-storage/s3";
+
+export default buildConfig({
+	collections: [
+		{
+			slug: "images",
+			upload: {
+				adapter: s3Adapter({
+					config: {
+						endpoint: process.env.S3_ENDPOINT,
+						credentials: {
+							accessKeyId: process.env.S3_ACCESS_KEY,
+							secretAccessKey: process.env.S3_SECRET_KEY,
+						},
+						region: process.env.S3_REGION,
+					},
+					bucket: process.env.S3_BUCKET,
+				}),
+			},
+		},
+	],
+});
+```
+
+**CDN-Integration:**
+
+```nginx
+# Nginx CDN Cache
+location /media/ {
+    proxy_pass http://payload:3000;
+    proxy_cache media_cache;
+    proxy_cache_valid 200 7d;
+    proxy_cache_valid 404 1h;
+    add_header X-Cache-Status $upstream_cache_status;
+}
+```
+
+### 7.5.5 Performance-Optimierungen
+
+**Lazy Loading:**
+
+UJL-Adapter unterstützen Lazy Loading von Modulen:
+
+```typescript
+// Code Splitting in Adapter
+const modules = {
+	container: () => import("./nodes/Container.svelte"),
+	text: () => import("./nodes/Text.svelte"),
+	image: () => import("./nodes/Image.svelte"),
+};
+```
+
+**Bundle Optimization:**
+
+```javascript
+// vite.config.ts
+export default defineConfig({
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ["svelte", "@ujl-framework/core"],
+					adapter: ["@ujl-framework/adapter-svelte"],
+					ui: ["@ujl-framework/ui"],
+				},
+			},
+		},
+	},
+});
+```
+
+**Caching-Strategie:**
+
+| Ressource              | Cache-Dauer | Strategie              |
+| ---------------------- | ----------- | ---------------------- |
+| Static Assets (CSS/JS) | 1 Jahr      | Immutable + Hash       |
+| Media Files (Images)   | 7 Tage      | CDN + ETag             |
+| API Responses          | 5 Minuten   | Stale-While-Revalidate |
+| HTML Pages (SSR)       | 1 Minute    | Edge Cache             |
+
+### 7.5.6 Monitoring für Skalierung
+
+**Key Performance Indicators (KPIs):**
+
+| KPI                   | Zielwert   | Skalierungs-Signal            |
+| --------------------- | ---------- | ----------------------------- |
+| Request Latency (p95) | <200ms     | >300ms → Scale Up             |
+| Throughput            | 1000 req/s | >80% Kapazität → Scale Up     |
+| Error Rate            | <1%        | >2% → Investigate, dann Scale |
+| Database Connections  | <80% Pool  | >90% → Increase Pool/Scale    |
+| Memory Usage          | <75%       | >85% → Scale Up               |
+
+**Grafana Dashboard (Beispiel-Queries):**
+
+```promql
+# Request Rate
+rate(http_requests_total[5m])
+
+# Response Time p95
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+# Container Memory Usage
+container_memory_usage_bytes / container_spec_memory_limit_bytes
+
+# Database Connections
+pg_stat_activity_count / max_connections
+```
+
 ## 7.6 Operations und Monitoring
 
 ### 7.6.1 Logging
@@ -708,7 +1236,146 @@ docker-compose exec -T postgres pg_dump -U postgres payload > backup_db_$DATE.sq
 tar -czf backup_media_$DATE.tar.gz media/
 ```
 
-## 7.7 Zusammenfassung
+### 7.6.4 Metriken und KPIs
+
+**System-Metriken:**
+
+| Metrik              | Zielwert         | Messmethode               | Frequenz       |
+| ------------------- | ---------------- | ------------------------- | -------------- |
+| API Response Time   | <200ms (p95)     | Payload CMS Logs          | Kontinuierlich |
+| Database Query Time | <50ms (p95)      | PostgreSQL Slow Query Log | Kontinuierlich |
+| Container Memory    | <512MB (Payload) | Docker Stats              | Alle 60s       |
+| Container CPU       | <50% (Payload)   | Docker Stats              | Alle 60s       |
+| Disk Usage          | <80%             | df -h                     | Täglich        |
+
+**Anwendungs-Metriken:**
+
+| Metrik                         | Zielwert | Messmethode        | Frequenz  |
+| ------------------------------ | -------- | ------------------ | --------- |
+| Image Upload Success Rate      | >99%     | Payload API Logs   | Stündlich |
+| Media Resolution Success Rate  | >99.9%   | Crafter Error Logs | Stündlich |
+| Schema Validation Success Rate | >95%     | CLI/Core Logs      | Täglich   |
+
+**Empfohlene Monitoring-Tools:**
+
+- **Prometheus + Grafana**: Für Langzeit-Metriken und Dashboards
+- **Loki**: Für Log-Aggregation
+- **cAdvisor**: Für Container-Metriken
+
+### 7.6.5 Alerting-Strategie
+
+**Kritische Alerts (sofortige Reaktion):**
+
+| Alert                    | Bedingung                        | Aktion                            |
+| ------------------------ | -------------------------------- | --------------------------------- |
+| Service Down             | Health Check fehlgeschlagen (3x) | Neustart, Eskalation              |
+| Database Connection Lost | PostgreSQL nicht erreichbar      | Verbindung prüfen, Neustart       |
+| Disk Full                | >90% Disk-Auslastung             | Logs rotieren, Backup archivieren |
+| High Error Rate          | >5% Fehlerrate in 5 Minuten      | Logs prüfen, Rollback erwägen     |
+
+**Warnungen (Überwachung erforderlich):**
+
+| Warning              | Bedingung              | Aktion                |
+| -------------------- | ---------------------- | --------------------- |
+| High Memory Usage    | >80% Memory-Auslastung | Ressourcen überwachen |
+| Slow Queries         | >500ms Query Time      | Query optimieren      |
+| High Upload Failures | >1% Upload-Fehlerrate  | Storage prüfen        |
+
+**Alert-Kanäle (Empfehlung):**
+
+- **Kritisch**: E-Mail, Slack, PagerDuty
+- **Warnung**: E-Mail, Slack
+
+### 7.6.6 Disaster Recovery
+
+**Recovery Time Objective (RTO):** <4 Stunden  
+**Recovery Point Objective (RPO):** <24 Stunden (Daily Backups)
+
+**Disaster Recovery Plan:**
+
+1. **Datenbank-Wiederherstellung:**
+
+```bash
+# Backup einspielen
+docker-compose exec -T postgres psql -U postgres payload < backup_db_YYYYMMDD.sql
+
+# Verbindung testen
+docker-compose exec postgres psql -U postgres -c "\l"
+```
+
+2. **Media Files-Wiederherstellung:**
+
+```bash
+# Backup entpacken
+tar -xzf backup_media_YYYYMMDD.tar.gz -C services/library/media/
+
+# Permissions setzen
+chown -R 1000:1000 services/library/media/
+```
+
+3. **Service-Neustart:**
+
+```bash
+# Container neu starten
+docker-compose down
+docker-compose up -d
+
+# Logs prüfen
+docker-compose logs -f payload
+```
+
+4. **Validierung:**
+
+- Health Checks durchführen
+- Test-Upload durchführen
+- Image Resolution testen
+- Admin-Zugriff prüfen
+
+**Backup-Retention:**
+
+| Backup-Typ      | Aufbewahrung |
+| --------------- | ------------ |
+| Daily Backups   | 7 Tage       |
+| Weekly Backups  | 4 Wochen     |
+| Monthly Backups | 12 Monate    |
+
+### 7.6.7 Rollback-Strategie
+
+**Deployment-Rollback:**
+
+1. **GitLab CI/CD:**
+
+```bash
+# Letzten erfolgreichen Build re-deployen
+# Über GitLab UI: CI/CD → Pipelines → [Letzter erfolgreicher Build] → Retry
+```
+
+2. **Docker-Rollback:**
+
+```bash
+# Zu vorherigem Image wechseln
+docker pull ghcr.io/ujl-framework/payload-cms:previous-tag
+docker-compose down
+docker-compose up -d
+```
+
+3. **Changesets-Rollback:**
+
+```bash
+# Package-Version zurücksetzen
+git revert <commit-hash>
+pnpm install
+pnpm build
+```
+
+**Rollback-Entscheidungskriterien:**
+
+| Kriterium               | Schwellwert                 | Aktion                      |
+| ----------------------- | --------------------------- | --------------------------- |
+| Error Rate              | >10% in 5 Minuten           | Sofortiger Rollback         |
+| Critical Bug            | P1 Sicherheitslücke         | Sofortiger Rollback         |
+| Performance Degradation | >2x Baseline Response Time  | Rollback nach 15 Minuten    |
+| User Reports            | >10 kritische Reports in 1h | Rollback nach Investigation |
 
 ### Deployment-Übersicht
 

@@ -5,8 +5,6 @@ description: "Qualitätsziele und -szenarien für das UJL-System"
 
 # Qualitätsanforderungen
 
-Dieses Kapitel konkretisiert die in [Kapitel 1.2](./01-introduction-and-goals#_1-2-quality-goals) definierten Qualitätsziele durch einen Quality Tree und messbare Quality Scenarios. Die Szenarien dienen als Grundlage für Architekturentscheidungen und Akzeptanztests.
-
 ## 10.1 Quality Tree
 
 Der Quality Tree visualisiert die Hierarchie der Qualitätsziele und ihre Konkretisierungen. Die Nummerierung entspricht den Quality Scenarios in Abschnitt 10.2.
@@ -29,8 +27,15 @@ graph TB
         VAL["Validierbarkeit<br/>& Robustheit"]
     end
 
-    subgraph Weitere["Weitere Ziele"]
+    subgraph Prio4["Priorität 4"]
+        INT["Integrationsfähigkeit"]
+    end
+
+    subgraph Prio5["Priorität 5"]
         EXT["Erweiterbarkeit"]
+    end
+
+    subgraph Weitere["Weitere Ziele"]
         PERF["Performance"]
         DX["Developer<br/>Experience"]
         MAINT["Maintainability"]
@@ -39,6 +44,7 @@ graph TB
     Q --> BC
     Q --> ACC
     Q --> VAL
+    Q --> INT
     Q --> EXT
     Q --> PERF
     Q --> DX
@@ -55,6 +61,10 @@ graph TB
     VAL --> VAL1["QS-VAL-01<br/>Strukturierte Daten"]
     VAL --> VAL2["QS-VAL-02<br/>Validierbarkeit"]
     VAL --> VAL3["QS-VAL-03<br/>Deterministische Ausgabe"]
+
+    INT --> INT1["QS-INT-01<br/>Web Component Integration"]
+    INT --> INT2["QS-INT-02<br/>Style Isolation"]
+    INT --> INT3["QS-INT-03<br/>CMS-Integration"]
 
     EXT --> EXT1["QS-EXT-01<br/>Custom Modules"]
     EXT --> EXT2["QS-EXT-02<br/>Custom Adapters"]
@@ -150,7 +160,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Stimulus**          | Nutzer:in navigiert ausschließlich mit Tastatur durch den Crafter                                                                                                                      |
 | **Systemreaktion**    | Alle interaktiven Elemente sind erreichbar und bedienbar                                                                                                                               |
 | **Messbare Antwort**  | - 100% der Funktionen über Tastatur erreichbar<br/>- Sichtbare Fokuszustände für alle Elemente<br/>- Logische Tab-Reihenfolge<br/>- Shortcuts: Ctrl+C/X/V, Delete, Ctrl+I, Pfeiltasten |
-| **Architektur-Bezug** | Keyboard-First Workflows ([Einführung und Ziele DZ7](./01-introduction-and-goals#_1-4-design-goals))                                                                                   |
+| **Architektur-Bezug** | Keyboard-First Workflows ([Randbedingungen 2.4.1](./02-constraints#_2-4-1-accessibility-anforderungen))                                                                                |
 
 **Testbarkeit:** E2E-Tests mit ausschließlicher Keyboard-Interaktion (`page-setup.test.ts`, `editor.test.ts`).
 
@@ -204,7 +214,45 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Snapshot-Tests für gerenderte Ausgaben.
 
-### 10.2.4 Erweiterbarkeit (EXT)
+### 10.2.4 Integrationsfähigkeit (INT)
+
+#### QS-INT-01: Web Component Integration
+
+| Aspekt                | Beschreibung                                                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Integrationsfähigkeit                                                                                                                                       |
+| **Stimulus**          | Entwickler:in integriert UJL in eine bestehende React/Vue/Angular-Anwendung                                                                                 |
+| **Systemreaktion**    | Web Adapter stellt framework-agnostisches Custom Element bereit                                                                                             |
+| **Messbare Antwort**  | - Custom Element `<ujl-content>` funktioniert in allen modernen Frameworks<br/>- Keine Framework-Konflikte<br/>- Props können als Properties gesetzt werden |
+| **Architektur-Bezug** | Adapter Pattern ([ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering))                                  |
+
+**Testbarkeit:** Integration-Tests mit verschiedenen Frontend-Frameworks.
+
+#### QS-INT-02: Style Isolation
+
+| Aspekt                | Beschreibung                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Integrationsfähigkeit                                                                                                                    |
+| **Stimulus**          | UJL-Content wird in Host-Anwendung mit eigenem CSS eingebettet                                                                           |
+| **Systemreaktion**    | Shadow DOM isoliert UJL-Styles von Host-Styles                                                                                           |
+| **Messbare Antwort**  | - 0 Style-Konflikte mit Host-Anwendung<br/>- UJL-Styles wirken nur innerhalb Shadow DOM<br/>- Host-Styles beeinflussen UJL-Content nicht |
+| **Architektur-Bezug** | Web Components mit Shadow DOM ([Randbedingungen 2.1.2](./02-constraints#_2-1-2-browser-plattform-support))                               |
+
+**Testbarkeit:** E2E-Tests mit simulierten Style-Konflikten.
+
+#### QS-INT-03: CMS-Integration
+
+| Aspekt                | Beschreibung                                                                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Integrationsfähigkeit                                                                                                                   |
+| **Stimulus**          | CMS-System speichert und liefert UJLC/UJLT-Dokumente                                                                                    |
+| **Systemreaktion**    | UJL konsumiert Dokumente über definierte Schnittstelle                                                                                  |
+| **Messbare Antwort**  | - JSON-basierte Schnittstelle dokumentiert<br/>- Schema-Validierung beim Import<br/>- Fehlerbehandlung bei ungültigen Dokumenten        |
+| **Architektur-Bezug** | Schema-First Ansatz ([ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)) |
+
+**Testbarkeit:** Integration-Tests mit Mock-CMS.
+
+### 10.2.5 Erweiterbarkeit (EXT)
 
 #### QS-EXT-01: Custom Module erstellen
 
@@ -359,29 +407,32 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 
-| ID          | Qualitätsziel    | Szenario                 | Schlüsselmetrik               | Status        |
-| ----------- | ---------------- | ------------------------ | ----------------------------- | ------------- |
-| QS-BC-01    | Brand-Compliance | Design-Isolation         | 0 CSS in UJLC                 | Implementiert |
-| QS-BC-02    | Brand-Compliance | Zentrale Theme-Updates   | <100ms Propagation            | Implementiert |
-| QS-BC-03    | Brand-Compliance | Schema-Validierung       | <50ms Validierung             | Implementiert |
-| QS-ACC-01   | Accessibility    | Farbkontrast             | ≥4.5:1 WCAG AA                | Implementiert |
-| QS-ACC-02   | Accessibility    | Keyboard-Navigation      | 100% Funktionen erreichbar    | Implementiert |
-| QS-ACC-03   | Accessibility    | Semantisches HTML        | Korrekte HTML-Elemente        | Implementiert |
-| QS-VAL-01   | Validierbarkeit  | Strukturierte Daten      | JSON-Schema-konform           | Implementiert |
-| QS-VAL-02   | Validierbarkeit  | Validierbarkeit          | >99% Validierungsrate         | Messbar       |
-| QS-VAL-03   | Validierbarkeit  | Deterministische Ausgabe | 100% identischer Output       | Implementiert |
-| QS-EXT-01   | Erweiterbarkeit  | Custom Module            | <100 LOC                      | Implementiert |
-| QS-EXT-02   | Erweiterbarkeit  | Custom Adapter           | <200 LOC                      | Implementiert |
-| QS-EXT-03   | Erweiterbarkeit  | Media Storage            | Interface dokumentiert        | Implementiert |
-| QS-PERF-01  | Performance      | Bundle-Größe             | <100KB (adapter-web)          | Implementiert |
-| QS-PERF-02  | Performance      | Crafter-Reaktionszeit    | <200ms bei 200 Modulen        | Implementiert |
-| QS-PERF-03  | Performance      | Rendering-Performance    | <100ms Initial Render         | Implementiert |
-| QS-DX-01    | Developer Exp.   | Type Safety              | 100% TypeScript Strict        | Implementiert |
-| QS-DX-02    | Developer Exp.   | Onboarding-Zeit          | <1h für Custom Module         | Messbar       |
-| QS-DX-03    | Developer Exp.   | Dokumentations-qualität  | README pro Package            | Implementiert |
-| QS-MAINT-01 | Maintainability  | Test-Abdeckung           | >80% kritische Paths          | In Arbeit     |
-| QS-MAINT-02 | Maintainability  | Modulare Struktur        | Keine zirkulären Dependencies | Implementiert |
-| QS-MAINT-03 | Maintainability  | Versionierung            | Synchrone Versionierung       | Implementiert |
+| ID          | Qualitätsziel         | Szenario                  | Schlüsselmetrik               | Status        |
+| ----------- | --------------------- | ------------------------- | ----------------------------- | ------------- |
+| QS-BC-01    | Brand-Compliance      | Design-Isolation          | 0 CSS in UJLC                 | Implementiert |
+| QS-BC-02    | Brand-Compliance      | Zentrale Theme-Updates    | <100ms Propagation            | Implementiert |
+| QS-BC-03    | Brand-Compliance      | Schema-Validierung        | <50ms Validierung             | Implementiert |
+| QS-ACC-01   | Accessibility         | Farbkontrast              | ≥4.5:1 WCAG AA                | Implementiert |
+| QS-ACC-02   | Accessibility         | Keyboard-Navigation       | 100% Funktionen erreichbar    | Implementiert |
+| QS-ACC-03   | Accessibility         | Semantisches HTML         | Korrekte HTML-Elemente        | Implementiert |
+| QS-VAL-01   | Validierbarkeit       | Strukturierte Daten       | JSON-Schema-konform           | Implementiert |
+| QS-VAL-02   | Validierbarkeit       | Validierbarkeit           | >99% Validierungsrate         | Messbar       |
+| QS-VAL-03   | Validierbarkeit       | Deterministische Ausgabe  | 100% identischer Output       | Implementiert |
+| QS-INT-01   | Integrationsfähigkeit | Web Component Integration | Framework-agnostisch          | Implementiert |
+| QS-INT-02   | Integrationsfähigkeit | Style Isolation           | 0 Style-Konflikte             | Implementiert |
+| QS-INT-03   | Integrationsfähigkeit | CMS-Integration           | JSON-Schnittstelle            | Implementiert |
+| QS-EXT-01   | Erweiterbarkeit       | Custom Module             | <100 LOC                      | Implementiert |
+| QS-EXT-02   | Erweiterbarkeit       | Custom Adapter            | <200 LOC                      | Implementiert |
+| QS-EXT-03   | Erweiterbarkeit       | Media Storage             | Interface dokumentiert        | Implementiert |
+| QS-PERF-01  | Performance           | Bundle-Größe              | <100KB (adapter-web)          | Implementiert |
+| QS-PERF-02  | Performance           | Crafter-Reaktionszeit     | <200ms bei 200 Modulen        | Implementiert |
+| QS-PERF-03  | Performance           | Rendering-Performance     | <100ms Initial Render         | Implementiert |
+| QS-DX-01    | Developer Exp.        | Type Safety               | 100% TypeScript Strict        | Implementiert |
+| QS-DX-02    | Developer Exp.        | Onboarding-Zeit           | <1h für Custom Module         | Messbar       |
+| QS-DX-03    | Developer Exp.        | Dokumentations-qualität   | README pro Package            | Implementiert |
+| QS-MAINT-01 | Maintainability       | Test-Abdeckung            | >80% kritische Paths          | In Arbeit     |
+| QS-MAINT-02 | Maintainability       | Modulare Struktur         | Keine zirkulären Dependencies | Implementiert |
+| QS-MAINT-03 | Maintainability       | Versionierung             | Synchrone Versionierung       | Implementiert |
 
 **Legende:**
 
@@ -393,16 +444,16 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 
 Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien unterstützen:
 
-| Architekturentscheidung           | Unterstützte Szenarien                   |
-| --------------------------------- | ---------------------------------------- |
-| UJLC/UJLT Trennung (ADR-001)      | QS-BC-01, QS-BC-02, QS-BC-03             |
-| Module Registry Pattern (ADR-002) | QS-EXT-01, QS-MAINT-02                   |
-| Adapter Pattern (ADR-003)         | QS-EXT-02, QS-AI-03                      |
-| Dual Media Storage (ADR-004)      | QS-EXT-03                                |
-| Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-VAL-01, QS-VAL-02, QS-DX-01 |
-| Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03       |
-| Payload CMS (ADR-007)             | QS-EXT-03                                |
-| TipTap/ProseMirror (ADR-008)      | QS-VAL-01, QS-VAL-03, QS-ACC-03          |
-| OKLCH Farbraum (ADR-009)          | QS-ACC-01                                |
-| pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03                 |
-| Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                   |
+| Architekturentscheidung           | Unterstützte Szenarien                              |
+| --------------------------------- | --------------------------------------------------- |
+| UJLC/UJLT Trennung (ADR-001)      | QS-BC-01, QS-BC-02, QS-BC-03                        |
+| Module Registry Pattern (ADR-002) | QS-EXT-01, QS-MAINT-02                              |
+| Adapter Pattern (ADR-003)         | QS-EXT-02, QS-INT-01, QS-INT-02                     |
+| Dual Media Storage (ADR-004)      | QS-EXT-03, QS-INT-03                                |
+| Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-VAL-01, QS-VAL-02, QS-DX-01, QS-INT-03 |
+| Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03                  |
+| Payload CMS (ADR-007)             | QS-EXT-03                                           |
+| TipTap/ProseMirror (ADR-008)      | QS-VAL-01, QS-VAL-03, QS-ACC-03                     |
+| OKLCH Farbraum (ADR-009)          | QS-ACC-01                                           |
+| pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03                            |
+| Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                              |

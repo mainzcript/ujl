@@ -5,8 +5,6 @@ description: "Wichtige Konzepte, die mehrere Bausteine betreffen"
 
 # Querschnittliche Konzepte
 
-Dieses Kapitel beschreibt übergreifende, prinzipielle Regelungen und Lösungsansätze, die in mehreren Teilen des UJL-Systems relevant sind. Diese Konzepte bilden das architektonische Fundament und gewährleisten Konsistenz über alle Packages hinweg.
-
 ## Übersicht der Konzepte
 
 ```mermaid
@@ -312,6 +310,148 @@ if (!result.success) {
 
 // Ausgabe:
 // ujlc → root → 0 → fields → content: Expected string, received number
+```
+
+### 8.3.4 Error-Kategorien
+
+UJL unterscheidet zwischen verschiedenen Fehlerkategorien:
+
+| Kategorie            | Schweregrad | Beispiel              | Behandlung                         |
+| -------------------- | ----------- | --------------------- | ---------------------------------- |
+| **Validation Error** | Mittel      | Schema-Verletzung     | Safe Parse, Fehlermeldung          |
+| **Runtime Error**    | Hoch        | Module nicht gefunden | Error Node, Graceful Degradation   |
+| **Network Error**    | Mittel      | API nicht erreichbar  | Retry, Fallback, User Notification |
+| **User Error**       | Niedrig     | Ungültige Eingabe     | Inline-Validierung, Hilfetext      |
+| **System Error**     | Kritisch    | Out of Memory         | Logging, Monitoring Alert          |
+
+**Error-Code-Konvention:**
+
+```typescript
+enum UJLErrorCode {
+	// Validation Errors (1xxx)
+	VALIDATION_SCHEMA = 1001,
+	VALIDATION_TYPE = 1002,
+	VALIDATION_REQUIRED = 1003,
+
+	// Composition Errors (2xxx)
+	COMPOSITION_MODULE_NOT_FOUND = 2001,
+	COMPOSITION_CIRCULAR_DEPENDENCY = 2002,
+	COMPOSITION_INVALID_SLOT = 2003,
+
+	// Media Errors (3xxx)
+	MEDIA_NOT_FOUND = 3001,
+	MEDIA_UPLOAD_FAILED = 3002,
+	MEDIA_INVALID_FORMAT = 3003,
+
+	// System Errors (5xxx)
+	SYSTEM_INTERNAL = 5000,
+	SYSTEM_TIMEOUT = 5001,
+}
+```
+
+### 8.3.5 Error-Recovery-Strategien
+
+**Automatische Recovery:**
+
+```typescript
+// Retry mit Exponential Backoff
+async function fetchWithRetry(url: string, maxRetries = 3) {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			return await fetch(url);
+		} catch (error) {
+			if (i === maxRetries - 1) throw error;
+			await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+		}
+	}
+}
+```
+
+**Fallback-Mechanismen:**
+
+```typescript
+// Image Fallback Chain
+async function resolveImage(id: string): Promise<ImageData> {
+	try {
+		// 1. Try Backend API
+		return await fetchImageFromAPI(id);
+	} catch {
+		try {
+			// 2. Try Local Cache
+			return await getImageFromCache(id);
+		} catch {
+			// 3. Return Placeholder
+			return DEFAULT_PLACEHOLDER;
+		}
+	}
+}
+```
+
+### 8.3.6 Error-Logging-Konventionen
+
+**Log-Struktur:**
+
+```typescript
+interface ErrorLog {
+	timestamp: string;
+	level: "error" | "warn" | "info";
+	code: UJLErrorCode;
+	message: string;
+	context: {
+		component: string;
+		action: string;
+		userId?: string;
+	};
+	stack?: string;
+	metadata?: Record<string, unknown>;
+}
+```
+
+**Logging in verschiedenen Kontexten:**
+
+```typescript
+// Crafter Editor
+console.error("[UJL:Editor]", {
+	code: UJLErrorCode.COMPOSITION_MODULE_NOT_FOUND,
+	message: 'Module "hero" not found in registry',
+	context: { component: "ModulePicker", action: "addModule" },
+});
+
+// Core Composer
+console.error("[UJL:Composer]", {
+	code: UJLErrorCode.VALIDATION_SCHEMA,
+	message: "Invalid UJLC document",
+	context: { component: "Composer", action: "compose" },
+	metadata: { documentId: "abc123" },
+});
+
+// Payload CMS
+console.error("[UJL:Media]", {
+	code: UJLErrorCode.MEDIA_UPLOAD_FAILED,
+	message: "Image upload failed",
+	context: { component: "ImageUpload", action: "upload" },
+	metadata: { fileName: "image.jpg", size: 5242880 },
+});
+```
+
+**Structured Logging (Production):**
+
+```typescript
+import pino from "pino";
+
+const logger = pino({
+	level: process.env.LOG_LEVEL || "info",
+	formatters: {
+		level: label => ({ level: label }),
+	},
+});
+
+logger.error({
+	code: UJLErrorCode.MEDIA_NOT_FOUND,
+	message: "Image not found",
+	context: { component: "MediaResolver", action: "resolve" },
+	imageId: "img_123",
+});
 ```
 
 ## 8.4 Zustandsverwaltung (State Management)
@@ -1006,4 +1146,420 @@ pnpm version-packages
 
 # Release: Packages veröffentlichen
 pnpm publish -r --access public
+```
+
+## 8.13 Logging und Monitoring
+
+### 8.13.1 Logging-Strategie
+
+UJL verwendet strukturiertes Logging über alle Komponenten hinweg:
+
+**Log-Levels:**
+
+| Level     | Verwendung                                 | Beispiel                          |
+| --------- | ------------------------------------------ | --------------------------------- |
+| **error** | Fehler, die Funktionalität beeinträchtigen | Module not found, API failure     |
+| **warn**  | Potenzielle Probleme                       | Deprecated field used, slow query |
+| **info**  | Wichtige Systemereignisse                  | Server started, build completed   |
+| **debug** | Detaillierte Entwicklungsinformationen     | Function calls, state changes     |
+
+**Namenskonvention:**
+
+```typescript
+// Format: [UJL:Package:Component] Message
+console.log("[UJL:Core:Composer] Composing document...");
+console.error("[UJL:Crafter:ModulePicker] Failed to load modules");
+console.warn("[UJL:Types:Validator] Using deprecated field structure");
+```
+
+**Kontext-basiertes Logging:**
+
+```typescript
+interface LogContext {
+	package: string; // 'core', 'crafter', 'adapter-svelte'
+	component: string; // 'Composer', 'ModulePicker'
+	action: string; // 'compose', 'validate', 'upload'
+	userId?: string;
+	documentId?: string;
+}
+
+function log(level: string, message: string, context: LogContext) {
+	const prefix = `[UJL:${context.package}:${context.component}]`;
+	console[level](`${prefix} ${message}`, {
+		action: context.action,
+		...context,
+	});
+}
+```
+
+### 8.13.2 Performance-Monitoring
+
+**Performance-Metriken:**
+
+```typescript
+// Composer Performance
+const start = performance.now();
+const ast = await composer.compose(document);
+const duration = performance.now() - start;
+
+if (duration > 100) {
+	console.warn(`[UJL:Core:Composer] Slow composition: ${duration}ms`, {
+		nodeCount: countNodes(ast),
+		moduleCount: document.ujlc.root.length,
+	});
+}
+```
+
+**Crafter-Metriken:**
+
+| Metrik               | Zielwert | Logging-Trigger |
+| -------------------- | -------- | --------------- |
+| Document Composition | <100ms   | >200ms → warn   |
+| Module Picker Load   | <50ms    | >100ms → warn   |
+| Image Upload         | <2s      | >5s → warn      |
+| Autosave             | <200ms   | >500ms → warn   |
+
+## 8.14 Caching-Strategie
+
+### 8.14.1 Client-Side Caching
+
+**Browser Cache (HTTP):**
+
+```nginx
+# Static Assets (Vite Build)
+location ~* \.(js|css|png|jpg|jpeg|gif|svg|woff|woff2)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+
+# HTML (SSR Pages)
+location ~* \.html$ {
+    expires 5m;
+    add_header Cache-Control "public, must-revalidate";
+}
+```
+
+**Service Worker Cache (Optional):**
+
+```typescript
+// Workbox Strategy
+import { registerRoute } from "workbox-routing";
+import { CacheFirst, NetworkFirst } from "workbox-strategies";
+
+// Static Assets: Cache-First
+registerRoute(
+	({ request }) => request.destination === "script" || request.destination === "style",
+	new CacheFirst({ cacheName: "ujl-static" })
+);
+
+// API Calls: Network-First mit Fallback
+registerRoute(
+	({ url }) => url.pathname.startsWith("/api/"),
+	new NetworkFirst({ cacheName: "ujl-api", networkTimeoutSeconds: 3 })
+);
+```
+
+### 8.14.2 In-Memory Caching
+
+**Module Registry Cache:**
+
+```typescript
+class ModuleRegistry {
+	private cache = new Map<string, Module>();
+
+	getModule(type: string): Module | undefined {
+		// Cache Hit
+		if (this.cache.has(type)) {
+			return this.cache.get(type);
+		}
+
+		// Cache Miss: Load and Cache
+		const module = this.loadModule(type);
+		if (module) {
+			this.cache.set(type, module);
+		}
+		return module;
+	}
+}
+```
+
+**Composer Caching (Optional):**
+
+```typescript
+import LRU from "lru-cache";
+
+const astCache = new LRU<string, ASTNode>({
+	max: 100, // Max 100 Documents
+	maxSize: 50 * 1024 * 1024, // 50MB
+	sizeCalculation: ast => JSON.stringify(ast).length,
+});
+
+async function cachedCompose(document: UJLCDocument): Promise<ASTNode> {
+	const cacheKey = hashDocument(document);
+
+	if (astCache.has(cacheKey)) {
+		return astCache.get(cacheKey)!;
+	}
+
+	const ast = await composer.compose(document);
+	astCache.set(cacheKey, ast);
+	return ast;
+}
+```
+
+### 8.14.3 API-Response Caching
+
+**Media API (Payload CMS):**
+
+```typescript
+// Cache-Control Headers für Images
+app.get("/api/images/:id", async (req, res) => {
+	const image = await Image.findById(req.params.id);
+
+	res.setHeader("Cache-Control", "public, max-age=604800"); // 7 Tage
+	res.setHeader("ETag", image.etag);
+
+	if (req.headers["if-none-match"] === image.etag) {
+		return res.status(304).end();
+	}
+
+	res.json(image);
+});
+```
+
+### 8.14.4 CDN-Caching
+
+**CloudFlare Page Rules (Beispiel):**
+
+```yaml
+# Static Assets
+/assets/*:
+  Cache Level: Cache Everything
+  Edge Cache TTL: 1 month
+  Browser Cache TTL: 1 year
+
+# Media Files
+/media/*:
+  Cache Level: Cache Everything
+  Edge Cache TTL: 1 week
+  Browser Cache TTL: 1 week
+
+# API
+/api/*:
+  Cache Level: Bypass
+```
+
+## 8.15 Security und Authorization
+
+### 8.15.1 Input-Validierung
+
+Alle externen Inputs werden validiert:
+
+```typescript
+// Schema-basierte Validierung
+const result = validateUJLCDocumentSafe(untrustedInput);
+
+if (!result.success) {
+	throw new ValidationError("Invalid document", result.error);
+}
+
+// Zusätzliche Business-Rules
+if (document.ujlc.root.length > 1000) {
+	throw new Error("Document too large (max 1000 modules)");
+}
+```
+
+### 8.15.2 XSS-Prevention
+
+**Rich Text Sanitization:**
+
+```typescript
+import DOMPurify from "isomorphic-dompurify";
+
+function sanitizeHTML(html: string): string {
+	return DOMPurify.sanitize(html, {
+		ALLOWED_TAGS: ["p", "strong", "em", "a", "ul", "ol", "li"],
+		ALLOWED_ATTR: ["href", "title"],
+		ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+	});
+}
+```
+
+**Template Escaping (Svelte):**
+
+```svelte
+<!-- Automatisches Escaping -->
+<p>{userInput}</p>
+
+<!-- Sanitized HTML -->
+<div>{@html sanitize(richText)}</div>
+```
+
+### 8.15.3 CSRF-Protection
+
+**Payload CMS (built-in):**
+
+```typescript
+// CSRF Token automatisch in Forms
+export default buildConfig({
+	csrf: ["http://localhost:3000", "https://your-domain.com"],
+});
+```
+
+**SvelteKit (built-in):**
+
+```typescript
+// CSRF-Protection in Form Actions
+export const actions = {
+	default: async ({ request }) => {
+		// SvelteKit validiert CSRF-Token automatisch
+		const data = await request.formData();
+		// ...
+	},
+};
+```
+
+### 8.15.4 API-Key-Authentifizierung
+
+**Media Service:**
+
+```typescript
+// Middleware für API-Key-Check
+app.use("/api/images", (req, res, next) => {
+	const apiKey = req.headers["x-api-key"];
+
+	if (!apiKey || apiKey !== process.env.API_KEY) {
+		return res.status(401).json({ error: "Unauthorized" });
+	}
+
+	next();
+});
+```
+
+### 8.15.5 Rate Limiting
+
+**Express Rate Limiter:**
+
+```typescript
+import rateLimit from "express-rate-limit";
+
+const uploadLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 Minuten
+	max: 100, // Max 100 Uploads
+	message: "Too many uploads, please try again later",
+});
+
+app.post("/api/images", uploadLimiter, uploadHandler);
+```
+
+### 8.15.6 Secrets Management
+
+**Environment Variables:**
+
+```bash
+# .env (NICHT in Git committen)
+POSTGRES_PASSWORD=$(openssl rand -base64 32)
+PAYLOAD_SECRET=$(openssl rand -base64 32)
+API_KEY=$(openssl rand -base64 32)
+```
+
+**Vault Integration (Production):**
+
+```typescript
+// HashiCorp Vault
+import Vault from "node-vault";
+
+const vault = Vault({
+	endpoint: process.env.VAULT_ADDR,
+	token: process.env.VAULT_TOKEN,
+});
+
+const secrets = await vault.read("secret/data/ujl");
+const dbPassword = secrets.data.data.POSTGRES_PASSWORD;
+```
+
+## 8.16 Internationalisierung (i18n)
+
+### 8.16.1 Content-Mehrsprachigkeit (geplant)
+
+UJL unterstützt mehrsprachige Inhalte auf Document-Ebene:
+
+**UJLC mit i18n-Support:**
+
+```json
+{
+	"ujlc": {
+		"meta": { "version": "1.0.0" },
+		"i18n": {
+			"defaultLocale": "de",
+			"locales": ["de", "en", "fr"]
+		},
+		"root": [
+			{
+				"type": "text",
+				"meta": { "id": "text_1" },
+				"fields": {
+					"content": {
+						"de": "Willkommen",
+						"en": "Welcome",
+						"fr": "Bienvenue"
+					}
+				}
+			}
+		]
+	}
+}
+```
+
+### 8.16.2 UI-Mehrsprachigkeit
+
+**Crafter UI:**
+
+```typescript
+import { addMessages, init, getLocaleFromNavigator } from "svelte-i18n";
+
+// Translations laden
+addMessages("de", {
+	"module.add": "Modul hinzufügen",
+	"module.delete": "Modul löschen",
+});
+
+addMessages("en", {
+	"module.add": "Add Module",
+	"module.delete": "Delete Module",
+});
+
+// Initialisierung
+init({
+	fallbackLocale: "en",
+	initialLocale: getLocaleFromNavigator(),
+});
+```
+
+**Verwendung in Components:**
+
+```svelte
+<script>
+  import { _ } from 'svelte-i18n';
+</script>
+
+<button>{$_('module.add')}</button>
+```
+
+### 8.16.3 Date/Time/Number Formatting
+
+```typescript
+import { format } from "date-fns";
+import { de, enUS, fr } from "date-fns/locale";
+
+const locales = { de, en: enUS, fr };
+
+function formatDate(date: Date, locale: string): string {
+	return format(date, "PPP", { locale: locales[locale] });
+}
+
+// Outputs:
+// de: "24. Januar 2026"
+// en: "January 24, 2026"
+// fr: "24 janvier 2026"
 ```

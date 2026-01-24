@@ -5,8 +5,6 @@ description: "Wichtige Architekturentscheidungen und deren Begründung"
 
 # Architekturentscheidungen
 
-Dieses Kapitel dokumentiert die zentralen Architekturentscheidungen des UJL Frameworks nach dem arc42-Standard. Jede Entscheidung wird mit Kontext, Begründung und Konsequenzen beschrieben.
-
 ## 9.1 ADR-001: Strikte Trennung von Content (UJLC) und Design (UJLT)
 
 ### Status
@@ -1153,7 +1151,129 @@ test("can select node by clicking in preview", async ({ page }) => {
 - **Testing Library**: Nur für Unit-Tests, nicht E2E
 - **Selenium**: Veraltet, Playwright moderner
 
-## 9.12 Zusammenfassung: Architektur-Trade-offs
+## 9.12 ADR-012: GitLab CI/CD für Build-Pipelines
+
+**Status:** Akzeptiert und umgesetzt
+
+**Kontext:**
+
+Für automatisierte Builds, Tests und Deployments benötigt das UJL-Projekt ein CI/CD-System. Das Projekt wird auf GitLab gehostet, und die Entscheidung zwischen GitLab CI, GitHub Actions oder anderen Alternativen muss getroffen werden.
+
+**Entscheidung:**
+
+Wir nutzen **GitLab CI/CD** als Build- und Deployment-System.
+
+**Begründung:**
+
+GitLab CI/CD bietet native Integration mit dem GitLab-Repository und erfüllt alle Anforderungen für das UJL-Projekt. Die .gitlab-ci.yml definiert Pipelines für Build, Test, Lint und Deployment auf GitLab Pages. Die nahtlose Integration mit GitLab-Features (Merge Requests, Issues, Container Registry) vereinfacht den Entwicklungsprozess erheblich.
+
+GitLab CI/CD unterstützt Caching, Artifacts, Matrix-Builds und manuelle Deployment-Gates, was für ein Monorepo mit mehreren Packages ideal ist. Die Self-Hosted Runners ermöglichen zudem volle Kontrolle über die Build-Umgebung.
+
+**Konsequenzen:**
+
+Positive Konsequenzen umfassen die native GitLab-Integration, kostenlose CI/CD-Minuten für öffentliche Repositories, einfache Konfiguration über YAML und integriertes Container Registry. Das Team profitiert von einheitlichem Tooling (GitLab für Code, CI, Issues) und muss keine separate CI/CD-Plattform warten.
+
+Als negative Konsequenzen ergibt sich eine Abhängigkeit von GitLab als Plattform. Migration zu anderen Git-Hostern erfordert Anpassung der CI/CD-Konfiguration. Zudem sind GitLab Runner-spezifische Features nicht auf andere Plattformen übertragbar.
+
+**Alternativen:**
+
+- **GitHub Actions**: Gute Alternative für GitHub-hosted Projects, aber Projekt ist auf GitLab
+- **Jenkins**: Zu komplex für Projekgröße, erfordert eigene Infrastruktur
+- **CircleCI/Travis CI**: Externe Dienste mit zusätzlichen Kosten und Konfigurationsaufwand
+
+## 9.13 ADR-013: VitePress für Dokumentation
+
+**Status:** Akzeptiert und umgesetzt
+
+**Kontext:**
+
+Die UJL-Dokumentation (Arc42, Getting Started, API-Docs) benötigt ein statisches Site-Generator-Tool. Die Dokumentation soll einfach zu schreiben (Markdown), gut durchsuchbar und modern gestylt sein.
+
+**Entscheidung:**
+
+Wir nutzen **VitePress** als Dokumentations-Generator.
+
+**Kontext und Begründung:**
+
+VitePress ist der offizielle Nachfolger von VuePress und bietet optimale Performance durch Vite-basiertes Bundling. Die Markdown-first Syntax ermöglicht einfaches Authoring, während Vue-Components für interaktive Elemente eingebettet werden können. Die out-of-the-box Features (Syntax Highlighting, Dark Mode, Search, Sidebar Navigation) reduzieren Konfigurationsaufwand erheblich.
+
+Da das UJL-Projekt bereits Vite nutzt (Crafter, Adapter), bleibt das Tooling konsistent. VitePress ist speziell für technische Dokumentation optimiert und bietet exzellente Developer Experience mit Hot-Module-Replacement und schnellen Builds. Das finale Build-Output ist statisch und kann auf GitLab Pages gehostet werden.
+
+**Konsequenzen:**
+
+Positive Konsequenzen sind die schnelle Build-Zeit (Vite), moderne Features (Dark Mode, Search out-of-the-box) und einfache Markdown-Syntax für nicht-technische Autoren. Das konsistente Tooling mit dem restlichen Projekt (Vite) und die statische Ausgabe ohne Server-Anforderungen sind weitere Vorteile.
+
+Negative Konsequenzen: VitePress ist Vue-basiert (nicht Svelte, wie der Rest von UJL), was eine zusätzliche Lernkurve für Vue-Syntax bei Custom Components bedeutet. Die Dokumentation ist an VitePress-Versioning gebunden, und Breaking Changes erfordern Migration.
+
+**Alternativen:**
+
+- **Docusaurus**: React-basiert, Feature-reich, aber schwerer als VitePress
+- **MkDocs**: Python-basiert, weniger JavaScript-Integration
+- **Nextra**: Next.js-basiert, gute Alternative, aber React statt Vue
+- **mdBook**: Rust-basiert, minimalistisch, aber weniger Features
+
+## 9.14 ADR-014: Vitest für Unit-Tests
+
+**Status:** Akzeptiert und umgesetzt
+
+**Kontext:**
+
+Für Unit- und Integration-Tests der UJL-Packages (types, core, ui, adapter-svelte) wird ein Test-Framework benötigt. Das Framework sollte TypeScript nativ unterstützen, schnell sein und mit dem Vite-Tooling kompatibel sein.
+
+**Entscheidung:**
+
+Wir nutzen **Vitest** als Test-Framework für Unit- und Integration-Tests.
+
+**Begründung:**
+
+Vitest ist als Vite-native Test-Lösung konzipiert und teilt die Konfiguration mit Vite, was Setup und Wartung vereinfacht. Native TypeScript- und ESM-Unterstützung ohne zusätzliche Transformer macht Tests schneller und reduziert Boilerplate. Die Jest-kompatible API erleichtert Migration und Onboarding für Entwickler mit Jest-Erfahrung.
+
+Vitest bietet Watch Mode mit HMR, parallele Test-Ausführung und integriertes Coverage-Reporting (via c8). Die UI (vitest --ui) ermöglicht visuelle Fehleranalyse, und das Framework ist speziell für Monorepos optimiert. Die Konsistenz mit dem restlichen UJL-Tooling (Vite überall) reduziert Kontext-Switching und Konfigurationsaufwand.
+
+**Konsequenzen:**
+
+Positive Konsequenzen sind die schnelle Ausführung durch Vite-Transformation, native TypeScript/ESM-Unterstützung ohne Babel und einheitliches Tooling im gesamten Projekt (Vite für Build + Tests). Die Jest-kompatible API erleichtert Entwicklern den Einstieg, und integriertes Coverage-Reporting reduziert zusätzliche Dependencies.
+
+Negative Konsequenzen: Vitest ist jünger als Jest und hat ein kleineres Ökosystem. Einige Jest-Plugins sind nicht kompatibel, was in seltenen Fällen Workarounds erfordert.
+
+**Alternativen:**
+
+- **Jest**: Industry-Standard, aber langsamer und erfordert ts-jest Transformer
+- **Mocha + Chai**: Flexibler, aber mehr Boilerplate und keine Vite-Integration
+- **AVA**: Minimalistisch, aber weniger Features als Vitest
+- **uvu**: Sehr schnell, aber minimalistisches API
+
+## 9.15 ADR-015: TypeScript Strict Mode
+
+**Status:** Akzeptiert und umgesetzt
+
+**Kontext:**
+
+TypeScript bietet verschiedene Compiler-Optionen, darunter den `strict` Mode, der mehrere strenge Type-Checking-Optionen aktiviert. Die Entscheidung zwischen relaxed und strict Mode beeinflusst Type Safety, Entwicklungsgeschwindigkeit und Code-Qualität.
+
+**Entscheidung:**
+
+Wir aktivieren **TypeScript Strict Mode** (`"strict": true`) für alle UJL-Packages.
+
+**Begründung:**
+
+Strict Mode aktiviert mehrere Type-Checking-Optionen, die häufige Fehlerquellen eliminieren. Dazu gehören strikte Null-Checks (`strictNullChecks`), die `undefined` und `null` explizit machen, strikte Function-Types (`strictFunctionTypes`), die sicherere Callback-Signaturen erzwingen, sowie `noImplicitAny`, das implizite `any`-Types verbietet.
+
+Durch strikte Checks werden Type-Fehler zur Compile-Zeit statt zur Laufzeit gefangen, was die Code-Robustheit erhöht. Der Refactoring-Prozess wird sicherer, da der Compiler alle Type-Violations meldet. Für ein Framework-Projekt wie UJL, das von Entwicklern integriert wird, ist Type Safety kritisch, um Fehler in Consumer-Code zu vermeiden.
+
+Strict Mode fördert zudem explizite Type-Annotationen, was die Code-Lesbarkeit und IDE-Unterstützung (Auto-Completion, Refactoring) verbessert.
+
+**Konsequenzen:**
+
+Positive Konsequenzen sind die erhöhte Type Safety durch eliminierte implizite `any` und Null-Checks, frühzeitiges Erkennen von Type-Fehlern zur Compile-Zeit statt Laufzeit sowie verbesserte IDE-Unterstützung durch explizite Types. Der Code wird robuster und wartbarer, und externe Entwickler profitieren von besseren Type-Definitionen.
+
+Negative Konsequenzen: Höherer initialer Entwicklungsaufwand durch explizite Type-Annotationen, mehr Boilerplate bei komplexen Types (z.B. Union Types, Generics) und steilere Lernkurve für TypeScript-Anfänger. Bei Legacy-Code-Migration ist mehr Refactoring erforderlich.
+
+**Alternativen:**
+
+- **Relaxed Mode**: Schneller zu schreiben, aber unsicherer
+- **Partial Strict**: Nur einzelne Strict-Optionen aktivieren (Kompromiss, aber inkonsistent)
+- **JavaScript**: Kein Type-Checking, maximale Flexibilität, minimale Sicherheit
 
 | Entscheidung           | Vorteil                     | Nachteil                 | Akzeptierter Trade-off                |
 | ---------------------- | --------------------------- | ------------------------ | ------------------------------------- |

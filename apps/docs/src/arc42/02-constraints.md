@@ -39,6 +39,31 @@ UJL wird als **Open-Source-Projekt** unter MIT-Lizenz entwickelt. Die wichtigste
 
 Wir unterstützen vorerst nur moderne Browser mit ES2022-Features (async/await, Optional Chaining, Nullish Coalescing) ohne Legacy-Support. So können wir eine moderne Gesamtarchitektur bauen und die Entwicklung beschleunigen.
 
+**Mindestversionen:**
+
+| Browser       | Mindestversion | Veröffentlicht |
+| ------------- | -------------- | -------------- |
+| Chrome / Edge | 94+            | September 2021 |
+| Firefox       | 93+            | Oktober 2021   |
+| Safari        | 15.4+          | März 2022      |
+| Opera         | 80+            | September 2021 |
+
+**Unterstützte ES2022-Features:**
+
+- Top-level `await`
+- Class fields (public/private)
+- Static class blocks
+- `#private` fields und methods
+- `at()` method für Arrays
+- `Object.hasOwn()`
+- Error `cause` property
+
+**Nicht unterstützt:**
+
+- Internet Explorer (End-of-Life)
+- Legacy Edge (<79)
+- Ältere Mobile Browser (<2021)
+
 :::
 
 ### 2.1.3 Architektur-Constraints

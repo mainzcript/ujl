@@ -5,8 +5,6 @@ description: "Bausteinsicht und Moduldiagramm des UJL-Systems"
 
 # Bausteinsicht
 
-Dieses Kapitel beschreibt die statische Zerlegung des UJL-Systems in Bausteine (Module, Komponenten, Subsysteme) sowie deren Beziehungen. Die Darstellung folgt einer hierarchischen Gliederung von grob (Level 1) zu fein (Level 2 und 3).
-
 ## Übersicht der Hierarchie-Ebenen
 
 Die Dokumentation folgt einer hierarchischen Gliederung: **Level 1** zeigt das Gesamtsystem mit seinen Hauptbausteinen (Packages, Apps, Services). **Level 2** beschreibt die interne Struktur ausgewählter Bausteine im Detail. **Level 3** bietet eine Detail-Sicht auf kritische Komponenten wie den Composer oder die Module Registry.
@@ -1681,8 +1679,6 @@ cache:
     - .pnpm-store/
     - packages/*/node_modules/
 ```
-
-## 5.10 Zusammenfassung und Ausblick
 
 ### Architektur-Highlights
 

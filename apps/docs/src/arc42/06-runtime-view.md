@@ -5,8 +5,6 @@ description: "Laufzeitszenarien und Interaktionen zwischen Systemkomponenten"
 
 # Laufzeitsicht
 
-Dieses Kapitel beschreibt die dynamischen Aspekte des UJL-Systems anhand von konkreten Laufzeitszenarien. Während die [Bausteinsicht (Kapitel 5)](./05-building-block-view) die statische Struktur dokumentiert, zeigt die Laufzeitsicht, wie die Bausteine zur Laufzeit interagieren.
-
 ## 6.1 Übersicht der Laufzeitszenarien
 
 Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:

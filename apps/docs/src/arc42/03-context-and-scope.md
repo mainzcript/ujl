@@ -281,7 +281,7 @@ pnpm add @ujl-framework/adapter-svelte @ujl-framework/core svelte
   import '@ujl-framework/adapter-svelte/styles';
 
   const composer = new Composer();
-  const ast = $derived.by(() => composer.compose(ujlcDocument));
+  const ast = $derived.by(async () => await composer.compose(ujlcDocument));
   const tokenSet = $derived(ujltDocument.ujlt.tokens);
 </script>
 
@@ -316,7 +316,7 @@ import { webAdapter } from "@ujl-framework/adapter-web";
 import { Composer } from "@ujl-framework/core";
 
 const composer = new Composer();
-const ast = composer.compose(ujlcDocument);
+const ast = await composer.compose(ujlcDocument);
 
 const mounted = webAdapter(ast, tokenSet, {
 	target: "#container",

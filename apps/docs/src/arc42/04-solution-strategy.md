@@ -5,8 +5,6 @@ description: "Lösungsstrategie und Architektur-Konzept von UJL"
 
 # Lösungsstrategie
 
-Dieses Kapitel beschreibt die fundamentalen Lösungsansätze und strategischen Entscheidungen, die der Architektur des UJL Frameworks zugrunde liegen. Gezeigt wird, wie die definierten Qualitätsziele durch konkrete technologische und architektonische Entscheidungen erreicht werden.
-
 ## Überblick: Strategische Positionierung
 
 UJL verfolgt einen **architektonischen Ansatz** zur Lösung des Brand-Compliance-Dilemmas. Anstatt Markenkonsistenz und Barrierefreiheit durch Prozesse, Reviews oder Schulungen zu erzwingen, werden diese Eigenschaften in die technische Architektur eingebettet:
@@ -21,7 +19,7 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 **Problem:** Traditionelle Web-Technologien (HTML/CSS) ermöglichen es Redakteur:innen, Design-Regeln durch inline-Styles oder falsche CSS-Klassen zu brechen.
 
-**Lösung:** Architek turelle Trennung auf Datenebene
+**Lösung:** Architektonische Trennung auf Datenebene
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌──────────────────┐
@@ -922,8 +920,6 @@ Stages:
 4. quality    → pnpm run lint + pnpm run check (ESLint + TypeScript)
 5. deploy     → GitLab Pages (docs only on main/develop)
 ```
-
-## 4.6 Architektur-Prinzipien (Zusammenfassung)
 
 Die folgenden Prinzipien leiten alle architektonischen Entscheidungen:
 
