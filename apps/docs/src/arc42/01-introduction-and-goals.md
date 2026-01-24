@@ -13,7 +13,7 @@ UJL verlagert diese Absicherung in die Technik: Inhalte und Designregeln werden 
 
 - **Inhalte** liegen als strukturierte JSON-Dokumente in `.ujlc.json` vor.
 - **Designregeln** liegen als Theme in `.ujlt.json` vor (z. B. Farben, Typografie, Abstände).
-- Ein **Renderer** führt beides zusammen und erzeugt daraus den Output (ContentFrame, d. h. HTML/CSS/JS).
+- **Adapter** führen beides zusammen und erzeugen daraus den Output (ContentFrame, d. h. HTML/CSS/JS).
 - Der **UJL Crafter** ist ein visueller Editor zur Erstellung und Pflege von Inhalten und Themes.
 
 UJL ist dabei **kein vollständiges CMS** und kein „Free-Form“-Page-Builder, sondern ein **Layout- und Governance-Layer**, der bestehende CMS- und Frontend-Stacks ergänzt.
@@ -38,7 +38,7 @@ Die wichtigsten Qualitätsziele (max. fünf) für UJL, priorisiert nach Architek
 |    1 | **Brand-Compliance by Design**       | Corporate Design soll nicht „aus Versehen“ gebrochen werden können.                            | Trennung von Inhalt (UJLC) und Theme (UJLT); erlaubte Module/Varianten statt freier Formatierung; zentrale Tokens/Theme als Quelle.                                                 |
 |    2 | **Accessibility als Standard**       | Barrierefreiheit darf kein nachgelagerter Prüfschritt sein, sondern Teil des Authorings.       | Semantische Module/Strukturen; editorseitige Leitplanken (z. B. Alternativtexte für Bilder als Teil des Datenmodells); detaillierte Qualitätsszenarien und Nachweise in Kapitel 10. |
 |    3 | **Validierbarkeit & Robustheit**     | Inhalte sollen verlässlich zwischen Systemen übertragbar sein und Fehler früh sichtbar machen. | Schema-first Ansatz (Runtime-Validierung); strukturierte Dokumentformate statt „freiem“ Markup.                                                                                     |
-|    4 | **Integrationsfähigkeit**            | UJL soll bestehende CMS/Frontends ergänzen, nicht ersetzen.                                    | Renderer/Adapter-Konzept; Web-Integration u. a. über Web Components mit Shadow DOM zur Style-Kapselung.                                                                             |
+|    4 | **Integrationsfähigkeit**            | UJL soll bestehende CMS/Frontends ergänzen, nicht ersetzen.                                    | Adapter-Konzept; Web-Integration u. a. über Web Components mit Shadow DOM zur Style-Kapselung.                                                                                      |
 |    5 | **Erweiterbarkeit ohne Core-Brüche** | Teams sollen Module und Render-Ziele erweitern können, ohne das System zu „forken“.            | Registry-/Plugin-Ansatz für Module; Adapter-Schnittstellen für zusätzliche Render-Targets.                                                                                          |
 
 ## 1.3 Stakeholders

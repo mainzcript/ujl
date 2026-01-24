@@ -881,15 +881,18 @@ interface ImageService {
 
 ### 8.10.3 Responsive Images
 
-Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten:
+Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten basierend auf Tailwind-Breakpoints:
 
-| Size      | Width  | Format | Verwendung |
-| --------- | ------ | ------ | ---------- |
-| thumbnail | 400px  | WebP   | Previews   |
-| small     | 500px  | WebP   | Mobile     |
-| medium    | 750px  | WebP   | Tablet     |
-| large     | 1000px | WebP   | Desktop    |
-| xlarge    | 1920px | WebP   | Full-width |
+| Size | Width  | Format | Verwendung      |
+| ---- | ------ | ------ | --------------- |
+| xs   | 320px  | WebP   | Admin Thumbnail |
+| sm   | 640px  | WebP   | Mobile          |
+| md   | 768px  | WebP   | Tablet          |
+| lg   | 1024px | WebP   | Desktop         |
+| xl   | 1280px | WebP   | Large Desktop   |
+| xxl  | 1536px | WebP   | Extra Large     |
+| xxxl | 1920px | WebP   | Full HD         |
+| max  | 2560px | WebP   | 2K/Retina       |
 
 ## 8.11 Rich Text System
 

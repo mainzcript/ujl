@@ -26,7 +26,7 @@ graph TB
     end
 
     subgraph Prio3["Priorität 3"]
-        AI["AI-native<br/>Architecture"]
+        VAL["Validierbarkeit<br/>& Robustheit"]
     end
 
     subgraph Weitere["Weitere Ziele"]
@@ -38,7 +38,7 @@ graph TB
 
     Q --> BC
     Q --> ACC
-    Q --> AI
+    Q --> VAL
     Q --> EXT
     Q --> PERF
     Q --> DX
@@ -52,9 +52,9 @@ graph TB
     ACC --> ACC2["QS-ACC-02<br/>Keyboard-Navigation"]
     ACC --> ACC3["QS-ACC-03<br/>Semantisches HTML"]
 
-    AI --> AI1["QS-AI-01<br/>Strukturierte Daten"]
-    AI --> AI2["QS-AI-02<br/>Validierbarkeit"]
-    AI --> AI3["QS-AI-03<br/>Deterministische Ausgabe"]
+    VAL --> VAL1["QS-VAL-01<br/>Strukturierte Daten"]
+    VAL --> VAL2["QS-VAL-02<br/>Validierbarkeit"]
+    VAL --> VAL3["QS-VAL-03<br/>Deterministische Ausgabe"]
 
     EXT --> EXT1["QS-EXT-01<br/>Custom Modules"]
     EXT --> EXT2["QS-EXT-02<br/>Custom Adapters"]
@@ -75,15 +75,16 @@ graph TB
 
 ### Qualitätsziel-Übersicht
 
-| ID    | Qualitätsziel              | Priorität | Primäre Stakeholder                    | Referenz                                                                                                          |
-| ----- | -------------------------- | --------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| BC    | Brand-Compliance by Design | 1         | Designer:innen, Marketing, Compliance  | [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)             |
-| ACC   | Accessibility Guaranteed   | 2         | Nutzer:innen, Compliance-Beauftragte   | [ADR-009](./09-architecture-decisions#_9-9-adr-009-oklch-farbraum-für-design-tokens)                              |
-| AI    | AI-native Architecture     | 3         | Entwickler:innen, KI-Systeme           | [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference) |
-| EXT   | Erweiterbarkeit            | 4         | Entwickler:innen, Community            | [ADR-002](./09-architecture-decisions#_9-2-adr-002-modulares-plugin-system-mit-registry-pattern)                  |
-| PERF  | Performance                | 5         | Nutzer:innen, Entwickler:innen         | [ADR-006](./09-architecture-decisions#_9-6-adr-006-svelte-5-als-primäres-ui-framework)                            |
-| DX    | Developer Experience       | 6         | Entwickler:innen, Community Developers | [Lösungsstrategie](./04-solution-strategy)                                                                        |
-| MAINT | Maintainability            | 7         | Core Team, DevOps                      | [ADR-010](./09-architecture-decisions#_9-10-adr-010-pnpm-workspaces-changesets-für-monorepo)                      |
+| ID    | Qualitätsziel                    | Priorität | Primäre Stakeholder                    | Referenz                                                                                                          |
+| ----- | -------------------------------- | --------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| BC    | Brand-Compliance by Design       | 1         | Designer:innen, Marketing, Compliance  | [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)             |
+| ACC   | Accessibility als Standard       | 2         | Nutzer:innen, Compliance-Beauftragte   | [ADR-009](./09-architecture-decisions#_9-9-adr-009-oklch-farbraum-für-design-tokens)                              |
+| VAL   | Validierbarkeit & Robustheit     | 3         | Entwickler:innen, KI-Systeme           | [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference) |
+| INT   | Integrationsfähigkeit            | 4         | Entwickler:innen, Integrator:innen     | [ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering)          |
+| EXT   | Erweiterbarkeit ohne Core-Brüche | 5         | Entwickler:innen, Community            | [ADR-002](./09-architecture-decisions#_9-2-adr-002-modulares-plugin-system-mit-registry-pattern)                  |
+| PERF  | Performance                      | -         | Nutzer:innen, Entwickler:innen         | [ADR-006](./09-architecture-decisions#_9-6-adr-006-svelte-5-als-primäres-ui-framework)                            |
+| DX    | Developer Experience             | -         | Entwickler:innen, Community Developers | [Lösungsstrategie](./04-solution-strategy)                                                                        |
+| MAINT | Maintainability                  | -         | Core Team, DevOps                      | [ADR-010](./09-architecture-decisions#_9-10-adr-010-pnpm-workspaces-changesets-für-monorepo)                      |
 
 ## 10.2 Quality Scenarios
 
@@ -127,13 +128,13 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Unit-Tests mit ungültigen Dokumenten prüfen Ablehnungsverhalten und Fehlermeldungen.
 
-### 10.2.2 Accessibility Guaranteed (ACC)
+### 10.2.2 Accessibility als Standard (ACC)
 
 #### QS-ACC-01: Farbkontrast-Garantie
 
 | Aspekt                | Beschreibung                                                                                                                                                           |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | Accessibility Guaranteed                                                                                                                                               |
+| **Qualitätsziel**     | Accessibility als Standard                                                                                                                                             |
 | **Stimulus**          | Designer:in definiert eine Farbpalette im Theme-Editor                                                                                                                 |
 | **Systemreaktion**    | System berechnet automatisch kontrastierende Vordergrundfarben für Text                                                                                                |
 | **Messbare Antwort**  | - Mindestkontrast 4.5:1 für normalen Text (WCAG AA)<br/>- Mindestkontrast 3:1 für große Texte und UI-Elemente<br/>- Automatische Anpassung bei unzureichendem Kontrast |
@@ -145,7 +146,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 | Aspekt                | Beschreibung                                                                                                                                                                           |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | Accessibility Guaranteed                                                                                                                                                               |
+| **Qualitätsziel**     | Accessibility als Standard                                                                                                                                                             |
 | **Stimulus**          | Nutzer:in navigiert ausschließlich mit Tastatur durch den Crafter                                                                                                                      |
 | **Systemreaktion**    | Alle interaktiven Elemente sind erreichbar und bedienbar                                                                                                                               |
 | **Messbare Antwort**  | - 100% der Funktionen über Tastatur erreichbar<br/>- Sichtbare Fokuszustände für alle Elemente<br/>- Logische Tab-Reihenfolge<br/>- Shortcuts: Ctrl+C/X/V, Delete, Ctrl+I, Pfeiltasten |
@@ -157,7 +158,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 | Aspekt                | Beschreibung                                                                                                                                                                         |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Qualitätsziel**     | Accessibility Guaranteed                                                                                                                                                             |
+| **Qualitätsziel**     | Accessibility als Standard                                                                                                                                                           |
 | **Stimulus**          | Module werden zu HTML gerendert                                                                                                                                                      |
 | **Systemreaktion**    | Adapter erzeugen semantisch korrektes HTML mit passenden ARIA-Attributen                                                                                                             |
 | **Messbare Antwort**  | - Korrekte HTML-Elemente (button, nav, article, etc.)<br/>- Alt-Texte für alle Bilder (required im Schema)<br/>- Heading-Hierarchie ohne Sprünge<br/>- Passende ARIA-Rollen wo nötig |
@@ -165,39 +166,37 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Automatisierte HTML-Validierung der gerenderten Ausgabe.
 
-### 10.2.3 AI-native Architecture (AI)
+### 10.2.3 Validierbarkeit & Robustheit (VAL)
 
-#### QS-AI-01: Strukturierte Daten
+#### QS-VAL-01: Strukturierte Daten
 
 | Aspekt                | Beschreibung                                                                                                                 |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | AI-native Architecture                                                                                                       |
-| **Stimulus**          | LLM soll ein UJL-Dokument generieren                                                                                         |
-| **Systemreaktion**    | LLM generiert JSON-Struktur statt HTML/Markdown                                                                              |
+| **Qualitätsziel**     | Validierbarkeit & Robustheit                                                                                                 |
+| **Stimulus**          | System erhält ein UJLC-Dokument (Import, API, AI-generiert)                                                                  |
+| **Systemreaktion**    | Dokument wird gegen Zod-Schema validiert                                                                                     |
 | **Messbare Antwort**  | - Dokumente folgen definiertem Schema<br/>- Keine Interpretation von Styling nötig<br/>- Strukturierte Fields statt Freitext |
 | **Architektur-Bezug** | JSON-basierte Dokumente ([Lösungsstrategie 4.1](./04-solution-strategy#_4-1-kernstrategien-zur-zielerreichung))              |
 
-**Testbarkeit:** LLM-generierte Dokumente werden gegen Zod-Schema validiert.
+**Testbarkeit:** Dokumente werden gegen Zod-Schema validiert.
 
-<!-- TODO: LLM integrationnoch nicht da -->
+#### QS-VAL-02: Validierbarkeit von externen Daten
 
-#### QS-AI-02: Validierbarkeit von AI-Output
+| Aspekt                | Beschreibung                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Validierbarkeit & Robustheit                                                                                                                                                 |
+| **Stimulus**          | System empfängt externes UJLC-Dokument (CMS, Import, AI-generiert)                                                                                                           |
+| **Systemreaktion**    | Automatische Validierung vor dem Rendern                                                                                                                                     |
+| **Messbare Antwort**  | - >99% Validierungsrate bei korrekt strukturierten Dokumenten<br/>- Detaillierte Fehlermeldungen bei ungültigen Strukturen<br/>- Keine ungültigen Dokumente werden gerendert |
+| **Architektur-Bezug** | Runtime Validation ([ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference))                                       |
 
-| Aspekt                | Beschreibung                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Qualitätsziel**     | AI-native Architecture                                                                                                                                             |
-| **Stimulus**          | System empfängt AI-generiertes UJLC-Dokument                                                                                                                       |
-| **Systemreaktion**    | Automatische Validierung vor dem Rendern                                                                                                                           |
-| **Messbare Antwort**  | - >99% Validierungsrate bei korrekt prompteten LLMs<br/>- Detaillierte Fehlermeldungen bei ungültigen Strukturen<br/>- Keine ungültigen Dokumente werden gerendert |
-| **Architektur-Bezug** | Runtime Validation ([ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference))                             |
+**Testbarkeit:** Validierungstests mit synthetisch generierten Dokumenten.
 
-**Testbarkeit:** Validierungstests mit synthetisch generierten AI-Outputs.
-
-#### QS-AI-03: Deterministische Ausgabe
+#### QS-VAL-03: Deterministische Ausgabe
 
 | Aspekt                | Beschreibung                                                                                                               |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | AI-native Architecture                                                                                                     |
+| **Qualitätsziel**     | Validierbarkeit & Robustheit                                                                                               |
 | **Stimulus**          | Gleiches valides UJLC-Dokument wird mehrfach gerendert                                                                     |
 | **Systemreaktion**    | Identische visuelle Ausgabe bei jedem Rendering                                                                            |
 | **Messbare Antwort**  | - 100% identische DOM-Struktur<br/>- Konsistentes Styling über Renderings<br/>- Keine Zufallselemente oder Race Conditions |
@@ -368,9 +367,9 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 | QS-ACC-01   | Accessibility    | Farbkontrast             | ≥4.5:1 WCAG AA                | ✅ Implementiert |
 | QS-ACC-02   | Accessibility    | Keyboard-Navigation      | 100% Funktionen erreichbar    | ✅ Implementiert |
 | QS-ACC-03   | Accessibility    | Semantisches HTML        | Korrekte HTML-Elemente        | ✅ Implementiert |
-| QS-AI-01    | AI-native        | Strukturierte Daten      | JSON-Schema-konform           | ✅ Implementiert |
-| QS-AI-02    | AI-native        | Validierbarkeit          | >99% Validierungsrate         | 🔄 Messbar       |
-| QS-AI-03    | AI-native        | Deterministische Ausgabe | 100% identischer Output       | ✅ Implementiert |
+| QS-VAL-01   | Validierbarkeit  | Strukturierte Daten      | JSON-Schema-konform           | ✅ Implementiert |
+| QS-VAL-02   | Validierbarkeit  | Validierbarkeit          | >99% Validierungsrate         | 🔄 Messbar       |
+| QS-VAL-03   | Validierbarkeit  | Deterministische Ausgabe | 100% identischer Output       | ✅ Implementiert |
 | QS-EXT-01   | Erweiterbarkeit  | Custom Module            | <100 LOC                      | ✅ Implementiert |
 | QS-EXT-02   | Erweiterbarkeit  | Custom Adapter           | <200 LOC                      | ✅ Implementiert |
 | QS-EXT-03   | Erweiterbarkeit  | Media Storage            | Interface dokumentiert        | ✅ Implementiert |
@@ -394,16 +393,16 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 
 Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien unterstützen:
 
-| Architekturentscheidung           | Unterstützte Szenarien                 |
-| --------------------------------- | -------------------------------------- |
-| UJLC/UJLT Trennung (ADR-001)      | QS-BC-01, QS-BC-02, QS-BC-03           |
-| Module Registry Pattern (ADR-002) | QS-EXT-01, QS-MAINT-02                 |
-| Adapter Pattern (ADR-003)         | QS-EXT-02, QS-AI-03                    |
-| Dual Media Storage (ADR-004)      | QS-EXT-03                              |
-| Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-AI-01, QS-AI-02, QS-DX-01 |
-| Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03     |
-| Payload CMS (ADR-007)             | QS-EXT-03                              |
-| TipTap/ProseMirror (ADR-008)      | QS-AI-01, QS-AI-03, QS-ACC-03          |
-| OKLCH Farbraum (ADR-009)          | QS-ACC-01                              |
-| pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03               |
-| Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                 |
+| Architekturentscheidung           | Unterstützte Szenarien                   |
+| --------------------------------- | ---------------------------------------- |
+| UJLC/UJLT Trennung (ADR-001)      | QS-BC-01, QS-BC-02, QS-BC-03             |
+| Module Registry Pattern (ADR-002) | QS-EXT-01, QS-MAINT-02                   |
+| Adapter Pattern (ADR-003)         | QS-EXT-02, QS-AI-03                      |
+| Dual Media Storage (ADR-004)      | QS-EXT-03                                |
+| Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-VAL-01, QS-VAL-02, QS-DX-01 |
+| Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03       |
+| Payload CMS (ADR-007)             | QS-EXT-03                                |
+| TipTap/ProseMirror (ADR-008)      | QS-VAL-01, QS-VAL-03, QS-ACC-03          |
+| OKLCH Farbraum (ADR-009)          | QS-ACC-01                                |
+| pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03                 |
+| Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                   |

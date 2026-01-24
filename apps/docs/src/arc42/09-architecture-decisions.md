@@ -48,9 +48,9 @@ export const UJLTDocumentSchema = z.object({
 ### Begründung
 
 - **Brand-Compliance by Design**: Redakteure können Design-Regeln nicht brechen, da sie keine Design-Informationen bearbeiten
-- **Accessibility Guaranteed**: WCAG-konforme Strukturen sind im Modulsystem architektonisch verankert
+- **Accessibility als Standard**: WCAG-konforme Strukturen sind im Modulsystem architektonisch verankert
 - **Zentrale Theme-Verwaltung**: Ein Theme für alle Dokumente, konsistente CI/CD
-- **AI-native**: Strukturierte JSON-Daten sind optimal für LLMs, die gegen Schemas validiert werden
+- **Validierbarkeit**: Strukturierte JSON-Daten sind optimal für Validierung und zukünftige LLM-Integration
 - **Versionierung**: Content und Design können unabhängig versioniert werden
 
 ### Konsequenzen
@@ -339,22 +339,26 @@ export interface ImageProvider {
 export const Images: CollectionConfig = {
 	slug: "images",
 	upload: {
+		staticDir: "uploads/images",
 		imageSizes: [
-			{ name: "small", width: 500 },
-			{ name: "medium", width: 750 },
-			{ name: "large", width: 1000 },
-			{ name: "xlarge", width: 1920 },
+			// Responsive Sizes (Tailwind-Breakpoints)
+			{ name: "xs", width: 320 },
+			{ name: "sm", width: 640 },
+			{ name: "md", width: 768 },
+			{ name: "lg", width: 1024 },
+			{ name: "xl", width: 1280 },
+			{ name: "xxl", width: 1536 },
+			{ name: "xxxl", width: 1920 },
+			{ name: "max", width: 2560 },
 		],
-		formatOptions: { format: "webp" },
+		formatOptions: { format: "webp", options: { quality: 80 } },
 		focalPoint: true,
 	},
 	fields: [
-		{ name: "title", type: "text", localized: true },
-		{ name: "alt", type: "text", localized: true },
+		{ name: "title", type: "text" },
 		{ name: "description", type: "textarea", localized: true },
-		{ name: "author", type: "text" },
-		{ name: "license", type: "text" },
-		{ name: "tags", type: "array" },
+		{ name: "alt", type: "text", localized: true },
+		{ name: "credit", type: "group", fields: [...] }, // IPTC-Credit
 	],
 };
 ```
@@ -574,22 +578,26 @@ export default buildConfig({
 export const Images: CollectionConfig = {
 	slug: "images",
 	upload: {
+		staticDir: "uploads/images",
 		imageSizes: [
-			{ name: "thumbnail", width: 400, height: 300 },
-			{ name: "small", width: 500, height: null },
-			{ name: "medium", width: 750 },
-			{ name: "large", width: 1000 },
-			{ name: "xlarge", width: 1920 },
+			// Responsive Sizes (Tailwind-Breakpoints)
+			{ name: "xs", width: 320 },
+			{ name: "sm", width: 640 },
+			{ name: "md", width: 768 },
+			{ name: "lg", width: 1024 },
+			{ name: "xl", width: 1280 },
+			{ name: "xxl", width: 1536 },
+			{ name: "xxxl", width: 1920 },
+			{ name: "max", width: 2560 },
 		],
-		formatOptions: { format: "webp" },
+		formatOptions: { format: "webp", options: { quality: 80 } },
 		focalPoint: true,
-		crop: true,
 	},
 	access: {
 		read: () => true, // Public read
-		create: isAuthenticated,
-		update: isAuthenticated,
-		delete: isAuthenticated,
+		create: ({ req: { user } }) => !!user,
+		update: ({ req: { user } }) => !!user,
+		delete: ({ req: { user } }) => !!user,
 	},
 };
 ```

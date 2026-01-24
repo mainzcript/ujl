@@ -54,7 +54,7 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 ### Strategie 2: Schema-First mit Runtime-Validierung
 
-**Qualitätsziel:** AI-ready Architecture (Priorität 3), Type Safety
+**Qualitätsziel:** Validierbarkeit & Robustheit (Priorität 3), Type Safety
 
 **Problem:** Externe Daten (CMS-Import, Datei-Upload, zukünftig KI-generierte Inhalte) können ungültige Strukturen enthalten. Reine TypeScript-Typen bieten nur Compile-Time-Sicherheit.
 
@@ -84,7 +84,7 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 2. **Runtime Safety**: Validierung bei Datei-Upload, CMS-Import, zukünftig AI-Generierung
 3. **Detaillierte Fehler**: Zod liefert JSON-Path-basierte Fehlermeldungen
 4. **Rekursive Strukturen**: `z.lazy()` ermöglicht unendliche Verschachtelung
-5. **AI-ready**: Architektur vorbereitet für zukünftige LLM-Integration – Schemas ermöglichen deterministische Validierung von AI-Output
+5. **Validierbarkeit**: Architektur ermöglicht deterministische Validierung von externen Daten (CMS, Import, zukünftig LLM-Output)
 
 **Konsequenzen:**
 
@@ -256,7 +256,7 @@ composer.registerModule(new CustomModule());
 
 ### Strategie 5: OKLCH-Farbraum für Accessibility
 
-**Qualitätsziel:** Accessibility Guaranteed (Priorität 2)
+**Qualitätsziel:** Accessibility als Standard (Priorität 2)
 
 **Problem:** Traditionelle Farbräume (RGB, HSL) sind nicht perzeptuell uniform. Farb-Shades mit gleichem Helligkeits-Delta sehen unterschiedlich hell aus. Kontrast-Berechnungen sind unzuverlässig.
 
@@ -351,7 +351,7 @@ function resolveForegroundColor(
 
 ### Strategie 6: Strukturierte Daten statt HTML
 
-**Qualitätsziel:** AI-ready Architecture (Priorität 3), Security
+**Qualitätsziel:** Validierbarkeit & Robustheit (Priorität 3), Security
 
 **Problem:** HTML-Strings sind schwer zu validieren, bergen XSS-Risiken und sind schwer von KI zuverlässig zu generieren. WYSIWYG-Konsistenz zwischen Editor und Output ist nicht garantiert.
 
@@ -424,7 +424,7 @@ function serializeNode(node: ProseMirrorNode): string {
 1. **WYSIWYG-Garantie**: Gleiches Schema in Editor und Renderer
 2. **Type Safety**: ProseMirror-Dokumente validierbar mit Zod
 3. **XSS-Prevention**: Keine Direct HTML-Injection, strukturierte Daten
-4. **AI-ready**: JSON-Struktur ist für zukünftige LLM-Generierung besser geeignet als HTML
+4. **Validierbarkeit**: JSON-Struktur ist validierbar und für zukünftige LLM-Generierung besser geeignet als HTML
 5. **SSR-Compatible**: Synchrone Serialization ohne Browser-Dependencies
 
 **Konsequenzen:**
@@ -550,23 +550,26 @@ interface ImageProvider {
 export const Images: CollectionConfig = {
 	slug: "images",
 	upload: {
+		staticDir: "uploads/images",
 		imageSizes: [
-			{ name: "thumbnail", width: 400, height: 300 },
-			{ name: "small", width: 500 },
-			{ name: "medium", width: 750 },
-			{ name: "large", width: 1000 },
-			{ name: "xlarge", width: 1920 },
+			// Responsive Sizes (Tailwind-Breakpoints)
+			{ name: "xs", width: 320 },
+			{ name: "sm", width: 640 },
+			{ name: "md", width: 768 },
+			{ name: "lg", width: 1024 },
+			{ name: "xl", width: 1280 },
+			{ name: "xxl", width: 1536 },
+			{ name: "xxxl", width: 1920 },
+			{ name: "max", width: 2560 },
 		],
-		formatOptions: { format: "webp" }, // Automatic WebP conversion
-		focalPoint: true, // Smart cropping
-		crop: true,
+		formatOptions: { format: "webp", options: { quality: 80 } },
+		focalPoint: true, // Smart cropping via focal point
 	},
 	fields: [
-		{ name: "title", type: "text", localized: true },
+		{ name: "title", type: "text" },
+		{ name: "description", type: "textarea", localized: true },
 		{ name: "alt", type: "text", localized: true },
-		{ name: "author", type: "text" },
-		{ name: "license", type: "text" },
-		{ name: "tags", type: "array" },
+		{ name: "credit", type: "group", fields: [...] }, // IPTC-Credit
 	],
 };
 ```
@@ -720,20 +723,23 @@ type User = z.infer<typeof UserSchema>;
 **Features für UJL:**
 
 ```typescript
-// Automatische Responsive Images
+// Automatische Responsive Images (Tailwind-Breakpoints)
 sizes: {
-  thumbnail: { width: 400, height: 300 },
-  small: { width: 500 },
-  medium: { width: 750 },
-  large: { width: 1000 },
-  xlarge: { width: 1920 }
+  xs: { width: 320 },
+  sm: { width: 640 },
+  md: { width: 768 },
+  lg: { width: 1024 },
+  xl: { width: 1280 },
+  xxl: { width: 1536 },
+  xxxl: { width: 1920 },
+  max: { width: 2560 }
 }
 
 // Focal Point für Smart Cropping
 focalPoint: true  // → focalX, focalY (0-100)
 
-// WebP Conversion
-formatOptions: { format: 'webp' }
+// WebP Conversion mit Qualitätseinstellung
+formatOptions: { format: 'webp', options: { quality: 80 } }
 ```
 
 **Trade-off akzeptiert:**
@@ -802,15 +808,15 @@ pnpm publish -r --access public
 
 Diese Tabelle zeigt, wie strategische Entscheidungen die definierten Qualitätsziele ([Kapitel 1.2](./01-introduction-and-goals#_1-2-quality-goals)) erreichen:
 
-| Qualitätsziel                  | Strategie                                         | Technologie                     | Erfolgsmetrik                                                         |
-| ------------------------------ | ------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
-| **Brand-Compliance by Design** | Content-Design-Trennung                           | UJLC/UJLT, Zod, Module Registry | 0 Design-Drift in User Studies                                        |
-| **Accessibility Guaranteed**   | OKLCH-Farbraum, Automatische Kontrast-Checks      | OKLCH, colorjs.io               | 100% WCAG AA (4.5:1 Kontrast)                                         |
-| **AI-ready Architecture**      | Schema-First, Strukturierte Daten                 | Zod, ProseMirror, JSON          | Architektur vorbereitet für zukünftige LLM-Integration (nicht im MVP) |
-| **Erweiterbarkeit**            | Plugin-Architektur, Adapter Pattern               | Module Registry, AST            | <100 LOC für Custom Module, <50 LOC für Adapter                       |
-| **Performance**                | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter                           |
-| **Developer Experience**       | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage                    |
-| **Maintainability**            | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)                                  |
+| Qualitätsziel                    | Strategie                                         | Technologie                     | Erfolgsmetrik                                                                                   |
+| -------------------------------- | ------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Brand-Compliance by Design**   | Content-Design-Trennung                           | UJLC/UJLT, Zod, Module Registry | 0 Design-Drift in User Studies                                                                  |
+| **Accessibility als Standard**   | OKLCH-Farbraum, Automatische Kontrast-Checks      | OKLCH, colorjs.io               | 100% WCAG AA (4.5:1 Kontrast)                                                                   |
+| **Validierbarkeit & Robustheit** | Schema-First, Strukturierte Daten                 | Zod, ProseMirror, JSON          | Architektur ermöglicht deterministische Validierung externer Daten (CMS, Import, zukünftig LLM) |
+| **Erweiterbarkeit**              | Plugin-Architektur, Adapter Pattern               | Module Registry, AST            | <100 LOC für Custom Module, <50 LOC für Adapter                                                 |
+| **Performance**                  | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter                                                     |
+| **Developer Experience**         | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage                                              |
+| **Maintainability**              | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)                                                            |
 
 ## 4.4 Trade-offs und bewusste Entscheidungen
 

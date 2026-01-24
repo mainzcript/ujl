@@ -213,15 +213,14 @@ graph TB
 
 #### Enthaltene Elemente
 
-| Datei            | Verantwortung             | Exports                                                                  |
-| ---------------- | ------------------------- | ------------------------------------------------------------------------ |
-| `ast.ts`         | AST Node Type Definitions | `UJLAbstractNode`, Node-spezifische Types                                |
-| `ujl-content.ts` | UJLC Zod Schemas & Types  | `UJLCDocumentSchema`, `UJLCModuleObjectSchema`, `validateUJLCDocument()` |
-| `ujl-theme.ts`   | UJLT Zod Schemas & Types  | `UJLTDocumentSchema`, `UJLTTokenSetSchema`, `validateUJLTDocument()`     |
-| `image.ts`       | Image Library Types       | `ImageEntry`, `ImageMetadata`, `ImageSource`, `ImageProvider`            |
-| `prosemirror.ts` | ProseMirror Types         | `ProseMirrorDocument`, `ProseMirrorNode`, `ProseMirrorMark`              |
-| `validation.ts`  | Validation Utilities      | `validateModule()`, `validateSlot()`, `validateTokenSet()`               |
-| `cli.ts`         | CLI Entry Point           | Binary: `ujl-validate`                                                   |
+| Datei            | Verantwortung             | Exports                                                                                       |
+| ---------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `ast.ts`         | AST Node Type Definitions | `UJLAbstractNode`, Node-spezifische Types                                                     |
+| `ujl-content.ts` | UJLC Zod Schemas & Types  | `UJLCDocumentSchema`, `UJLCModuleObject` (Type), `validateUJLCDocument()`, `validateModule()` |
+| `ujl-theme.ts`   | UJLT Zod Schemas & Types  | `UJLTDocumentSchema`, `UJLTTokenSetSchema`, `validateUJLTDocument()`                          |
+| `image.ts`       | Image Library Types       | `ImageEntry`, `ImageMetadata`, `ImageSource`, `ImageProvider`                                 |
+| `prosemirror.ts` | ProseMirror Types         | `ProseMirrorDocument`, `ProseMirrorNode`, `ProseMirrorMark`                                   |
+| `cli.ts`         | CLI Entry Point           | Binary: `ujl-validate`                                                                        |
 
 #### Schnittstellen und Abhängigkeiten
 
@@ -1430,28 +1429,36 @@ graph TB
 export const Images: CollectionConfig = {
 	slug: "images",
 	upload: {
-		staticDir: "images", // Upload-Verzeichnis
+		staticDir: "uploads/images", // Upload-Verzeichnis
+		mimeTypes: ["image/*"],
 		imageSizes: [
-			{ name: "thumbnail", width: 400, height: 300 },
-			{ name: "small", width: 500 },
-			{ name: "medium", width: 750 },
-			{ name: "large", width: 1000 },
-			{ name: "xlarge", width: 1920 },
+			// Responsive Sizes (Tailwind-Breakpoints)
+			{ name: "xs", width: 320, position: "center" },
+			{ name: "sm", width: 640, position: "center" },
+			{ name: "md", width: 768, position: "center" },
+			{ name: "lg", width: 1024, position: "center" },
+			{ name: "xl", width: 1280, position: "center" },
+			{ name: "xxl", width: 1536, position: "center" },
+			{ name: "xxxl", width: 1920, position: "center" },
+			{ name: "max", width: 2560, position: "center" },
 		],
-		formatOptions: {
-			format: "webp", // Automatic WebP Conversion
-		},
-		focalPoint: true, // Smart Cropping
-		crop: true,
+		formatOptions: { format: "webp", options: { quality: 80 } },
+		focalPoint: true, // Smart Cropping via Focal Point
 	},
 	fields: [
-		{ name: "title", type: "text", localized: true, required: true },
+		{ name: "title", type: "text" }, // Interner Name
+		{ name: "description", type: "textarea", localized: true },
 		{ name: "alt", type: "text", localized: true },
-		{ name: "description", type: "text", localized: true },
-		{ name: "author", type: "text" },
-		{ name: "license", type: "text" },
-		{ name: "sourceLink", type: "text" },
-		{ name: "tags", type: "array", fields: [{ name: "tag", type: "text" }] },
+		{
+			name: "credit",
+			type: "group", // IPTC-orientierte Credit-Informationen
+			fields: [
+				{ name: "creator", type: "text" },
+				{ name: "creditLine", type: "text" },
+				{ name: "copyrightNotice", type: "text" },
+				{ name: "licenseUrl", type: "text" },
+			],
+		},
 	],
 };
 ```

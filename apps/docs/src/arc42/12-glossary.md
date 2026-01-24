@@ -11,10 +11,10 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts – mit klarer Trennung von Inhalt und Design.
 
 - **UJL Crafter**  
-  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Integriert standardmäßig den Renderer, kann aber auch mit alternativen Renderern kombiniert werden.
+  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Nutzt Adapter zur Rendering-Integration.
 
-- **UJL Renderer**  
-  Die Render-Engine des UJL-Systems. Verarbeitet `.ujlc.json`- und `.ujlt.json`-Dateien und erzeugt daraus ein vollständiges Frontend (HTML, CSS, JS).
+- **Adapter**  
+  Komponenten, die den Abstract Syntax Tree (AST) in konkrete Ausgabeformate transformieren. UJL bietet Adapter für Svelte (adapter-svelte) und Web Components (adapter-web). Weitere Adapter können implementiert werden.
 
 - **ContentFrame**  
   Das gerenderte Endprodukt eines UJL-Layouts – bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
