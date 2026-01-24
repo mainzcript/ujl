@@ -42,8 +42,6 @@ graph TB
     Theming --> EventHandling
 ```
 
----
-
 ## 8.1 Domain Model
 
 ### 8.1.1 UJL Document Formats
@@ -56,7 +54,7 @@ Das UJL-Framework definiert zwei zentrale Dokumentformate, die als JSON-Dateien 
 interface UJLCDocument {
 	ujlc: {
 		meta: UJLCMeta;
-		media: Record<string, UJLCMediaEntry>;
+		images: Record<string, ImageEntry>;
 		root: UJLCModuleObject[];
 	};
 }
@@ -101,8 +99,17 @@ type UJLAbstractNode = {
 	type: string;
 	id: string;
 	props: Record<string, unknown>;
+	meta?: {
+		moduleId?: string; // Modul-ID aus UJLC-Dokument (für Editor-Integration)
+		isModuleRoot?: boolean; // true = editierbares Modul, false = Layout-Wrapper
+	};
 };
 ```
+
+**Metadaten-Felder:**
+
+- `meta.moduleId`: Referenz zur ursprünglichen Modul-ID im UJLC-Dokument. Wird verwendet für Click-to-Select im Editor und `data-ujl-module-id` Attribute.
+- `meta.isModuleRoot`: Kennzeichnet, ob dieser Node das Root-Element eines editierbaren Moduls ist. Layout-Wrapper und Kinder-Nodes haben `isModuleRoot=false`.
 
 ### 8.1.3 Modulares System
 
@@ -152,11 +159,9 @@ composer.registerModule(new CustomModule());
 // Lookup
 const module = composer.getRegistry().getModule("text");
 
-// Composition
-const ast = composer.compose(ujlcDocument);
+// Composition (async)
+const ast = await composer.compose(ujlcDocument);
 ```
-
----
 
 ## 8.2 Schema-basierte Validierung
 
@@ -182,7 +187,7 @@ export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 | Pattern                  | Verwendung                 | Beispiel                 |
 | ------------------------ | -------------------------- | ------------------------ |
 | `z.lazy()`               | Rekursive Strukturen       | Verschachtelte Module    |
-| `z.discriminatedUnion()` | Varianten-Typen            | Inline vs. Backend Media |
+| `z.discriminatedUnion()` | Varianten-Typen            | Inline vs. Backend Image |
 | `.default()`             | Default-Werte              | Optional Fields          |
 | `.safeParse()`           | Nicht-werfende Validierung | CLI-Tools                |
 
@@ -262,8 +267,6 @@ class NumberField extends FieldBase<number, NumberFieldConfig> {
 }
 ```
 
----
-
 ## 8.3 Fehlerbehandlung
 
 ### 8.3.1 Error-Strategie
@@ -274,7 +277,7 @@ Das UJL-Framework verfolgt eine **graceful degradation**-Strategie:
 | ------------- | ----------- | ------------------------------------------------------- |
 | Validierung   | Safe Parse  | Rückgabe von Result-Objekten                            |
 | Composition   | Error Nodes | Unbekannte Module werden als Error-Komponente gerendert |
-| Media Loading | Fallback    | Placeholder bei fehlenden Medien                        |
+| Image Loading | Fallback    | Placeholder bei fehlenden Bildern                       |
 | API Calls     | Try-Catch   | Benutzerfreundliche Fehlermeldungen                     |
 
 ### 8.3.2 Error Node Pattern
@@ -311,8 +314,6 @@ if (!result.success) {
 // ujlc → root → 0 → fields → content: Expected string, received number
 ```
 
----
-
 ## 8.4 Zustandsverwaltung (State Management)
 
 ### 8.4.1 Svelte 5 Runes
@@ -324,8 +325,8 @@ Der Crafter verwendet Svelte 5 Runes für reaktive Zustandsverwaltung:
 let ujlcDocument = $state<UJLCDocument>(initialDoc);
 let expandedNodeIds = $state<Set<string>>(new Set());
 
-// Derived State (computed)
-const ast = $derived.by(() => composer.compose(ujlcDocument));
+// Derived State (computed, async)
+const ast = $derived.by(async () => await composer.compose(ujlcDocument));
 
 // Props (immutable from parent)
 let { tokenSet, mode } = $props<{
@@ -395,8 +396,6 @@ interface CrafterContext {
 // Functional Update (empfohlen)
 context.updateRootSlot(root => [...root, newModule]);
 ```
-
----
 
 ## 8.5 Theming und Styling
 
@@ -500,8 +499,6 @@ Das Theme-System unterstützt drei Modi:
 | `dark`   | Dunkle Varianten (Shade 600-950) |
 | `system` | Folgt OS-Präferenz               |
 
----
-
 ## 8.6 Event Handling
 
 ### 8.6.1 Event Callback Pattern
@@ -571,8 +568,6 @@ function handleClick(event: MouseEvent) {
 }
 ```
 
----
-
 ## 8.7 Testbarkeit
 
 ### 8.7.1 Test-Strategie
@@ -634,8 +629,6 @@ export default defineConfig({
 });
 ```
 
----
-
 ## 8.8 Erweiterbarkeit
 
 ### 8.8.1 Plugin-Architecture
@@ -653,14 +646,14 @@ graph TB
 
     subgraph Registration["Registration"]
         ModuleRegistry["Module Registry"]
-        MediaService["Media Service Interface"]
+        ImageService["Image Service Interface"]
         AdapterInterface["Adapter Interface"]
     end
 
     CustomModules --> ModuleRegistry
     CustomFields --> ModuleRegistry
     CustomAdapters --> AdapterInterface
-    StorageAdapters --> MediaService
+    StorageAdapters --> ImageService
 ```
 
 ### 8.8.2 Custom Module erstellen
@@ -728,30 +721,28 @@ class EmailField extends FieldBase<string, EmailFieldConfig> {
 }
 ```
 
-### 8.8.4 Media Service erweitern
+### 8.8.4 Image Service erweitern
 
 ```typescript
 // Custom Storage Backend
-class S3MediaService implements MediaService {
-	async upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry> {
+class S3ImageService implements ImageService {
+	async upload(file: File, metadata: ImageMetadata): Promise<ImageEntry> {
 		// S3 Upload Logic
 		const key = await this.s3Client.upload(file);
+		const url = await this.s3Client.getSignedUrl(key);
 		return {
-			id: generateId(),
-			storage: "backend",
-			mediaId: key,
+			src: url,
+			metadata: metadata,
 		};
 	}
 
-	async list(): Promise<MediaLibraryEntry[]> {
+	async list(): Promise<ImageEntry[]> {
 		// S3 List Logic
 	}
 
 	// ... weitere Methoden
 }
 ```
-
----
 
 ## 8.9 Barrierefreiheit (Accessibility)
 
@@ -802,13 +793,11 @@ Der Crafter unterstützt vollständige Keyboard-Navigation:
 | Ctrl+I          | Modul einfügen   |
 | Arrow Up/Down   | Tree-Navigation  |
 
----
-
-## 8.10 Media Library Konzept
+## 8.10 Image Library Konzept
 
 ### 8.10.1 Duale Storage-Strategie
 
-Das Media Library System unterstützt zwei Storage-Modi:
+Das Image Library System unterstützt zwei Storage-Modi:
 
 ```mermaid
 graph TB
@@ -820,10 +809,10 @@ graph TB
 
     subgraph BackendStorage["Backend Storage"]
         BackendDoc["UJLC Document"]
-        MediaRef["Media Reference"]
+        ImageRef["Image Reference"]
         PayloadCMS["Payload CMS"]
-        BackendDoc --> MediaRef
-        MediaRef --> PayloadCMS
+        BackendDoc --> ImageRef
+        ImageRef --> PayloadCMS
     end
 ```
 
@@ -832,11 +821,13 @@ graph TB
 ```json
 {
 	"ujlc": {
-		"media": {
-			"media-001": {
-				"id": "media-001",
-				"storage": "inline",
-				"data": "data:image/jpeg;base64,/9j/4AAQ..."
+		"images": {
+			"image-001": {
+				"src": "data:image/jpeg;base64,/9j/4AAQ...",
+				"metadata": {
+					"alt": "...",
+					"title": "..."
+				}
 			}
 		}
 	}
@@ -849,33 +840,38 @@ graph TB
 {
 	"ujlc": {
 		"meta": {
-			"media_library": {
+			"_library": {
 				"storage": "backend",
-				"endpoint": "http://localhost:3000/api"
+				"url": "http://localhost:3000/api"
 			}
 		},
-		"media": {
-			"media-001": {
-				"id": "media-001",
-				"storage": "backend",
-				"mediaId": "67890abcdef12345"
+		"images": {
+			"img-001": {
+				"src": "http://localhost:3000/api/images/67890abcdef12345",
+				"metadata": {
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
+				}
 			}
 		}
 	}
 }
 ```
 
-### 8.10.2 Media Service Interface
+### 8.10.2 Image Service Interface
 
 ```typescript
-interface MediaService {
+interface ImageService {
 	// Connection
 	checkConnection(): Promise<boolean>;
 
 	// CRUD Operations
-	upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry>;
-	get(id: string): Promise<MediaLibraryEntry | null>;
-	list(): Promise<MediaLibraryEntry[]>;
+	upload(file: File, metadata: ImageMetadata): Promise<ImageEntry>;
+	get(id: string): Promise<ImageEntry | null>;
+	list(): Promise<ImageEntry[]>;
 	delete(id: string): Promise<void>;
 
 	// Configuration
@@ -894,8 +890,6 @@ Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten:
 | medium    | 750px  | WebP   | Tablet     |
 | large     | 1000px | WebP   | Desktop    |
 | xlarge    | 1920px | WebP   | Full-width |
-
----
 
 ## 8.11 Rich Text System
 
@@ -963,8 +957,6 @@ function serializeNode(node: ProseMirrorNode): string {
 }
 ```
 
----
-
 ## 8.12 Build und Deployment
 
 ### 8.12.1 Monorepo-Struktur
@@ -985,7 +977,7 @@ ujl/
 │   ├── demo/            # Demo Application
 │   └── docs/            # Documentation
 └── services/
-    └── media/           # Payload CMS Backend
+    └── library/         # Payload CMS Backend
 ```
 
 ### 8.12.2 Dependency Management
@@ -1013,14 +1005,10 @@ pnpm version-packages
 pnpm publish -r --access public
 ```
 
----
-
 ## Nächste Kapitel
 
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
 - **[Qualitätsanforderungen (Kapitel 10)](./10-quality-requirements)** - Quality Attribute Scenarios
 - **[Risiken und technische Schulden (Kapitel 11)](./11-risks-and-technical-debt)** - Bekannte Risiken und Maßnahmen
-
----
 
 _Letzte Aktualisierung: 2026-01-15_

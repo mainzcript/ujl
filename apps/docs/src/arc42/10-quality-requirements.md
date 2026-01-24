@@ -85,8 +85,6 @@ graph TB
 | DX    | Developer Experience       | 6         | Entwickler:innen, Community Developers | [Lösungsstrategie](./04-solution-strategy)                                                                        |
 | MAINT | Maintainability            | 7         | Core Team, DevOps                      | [ADR-010](./09-architecture-decisions#_9-10-adr-010-pnpm-workspaces-changesets-für-monorepo)                      |
 
----
-
 ## 10.2 Quality Scenarios
 
 Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzeptanzkriterien. Jedes Szenario folgt dem Format: **Stimulus → Systemreaktion → Messbare Antwort**.
@@ -129,8 +127,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Unit-Tests mit ungültigen Dokumenten prüfen Ablehnungsverhalten und Fehlermeldungen.
 
----
-
 ### 10.2.2 Accessibility Guaranteed (ACC)
 
 #### QS-ACC-01: Farbkontrast-Garantie
@@ -168,8 +164,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Architektur-Bezug** | Modulares System ([Querschnittliche Konzepte 8.9](./08-crosscutting-concepts#_8-9-barrierefreiheit-accessibility))                                                                   |
 
 **Testbarkeit:** Automatisierte HTML-Validierung der gerenderten Ausgabe.
-
----
 
 ### 10.2.3 AI-native Architecture (AI)
 
@@ -211,8 +205,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Snapshot-Tests für gerenderte Ausgaben.
 
----
-
 ### 10.2.4 Erweiterbarkeit (EXT)
 
 #### QS-EXT-01: Custom Module erstellen
@@ -250,8 +242,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Architektur-Bezug** | Dual Storage Strategy ([ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend))         |
 
 **Testbarkeit:** Media Service Interface dokumentiert in `@ujl-framework/crafter`.
-
----
 
 ### 10.2.5 Performance (PERF)
 
@@ -291,8 +281,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Rendering-Benchmarks für verschiedene Dokumentgrößen.
 
----
-
 ### 10.2.6 Developer Experience (DX)
 
 #### QS-DX-01: Type Safety
@@ -329,8 +317,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Architektur-Bezug** | VitePress-Dokumentation, Package READMEs                                                                                                                           |
 
 **Testbarkeit:** Dokumentations-Review, Vollständigkeits-Checklist.
-
----
 
 ### 10.2.7 Maintainability (MAINT)
 
@@ -370,8 +356,6 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Changeset-Workflow dokumentiert, CI-Checks für Versionskonsistenz.
 
----
-
 ## 10.3 Qualitätsszenarien-Übersicht
 
 Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
@@ -406,8 +390,6 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 - 🔄 Messbar: Szenario ist implementiert, Metriken werden noch erhoben
 - 🔄 In Arbeit: Implementierung läuft
 
----
-
 ## 10.4 Qualitätsanforderungen und Architektur-Mapping
 
 Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien unterstützen:
@@ -426,13 +408,9 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03               |
 | Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                 |
 
----
-
 ## Nächste Kapitel
 
 - **[Risiken und technische Schulden (Kapitel 11)](./11-risks-and-technical-debt)** - Bekannte Risiken und Maßnahmen
 - **[Glossar (Kapitel 12)](./12-glossary)** - Begriffsdefinitionen
-
----
 
 _Letzte Aktualisierung: 2026-01-15_

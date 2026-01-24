@@ -62,8 +62,6 @@ Die Deployment-Architektur folgt dem Prinzip **"Static-First, Services-When-Need
 | Media Service (Docker) | Abhängig vom Host  | Horizontal (Container) | API-Key Auth, Network Isolation   |
 | NPM Registry           | 99.99% (npm SLA)   | Automatisch            | npm audit, Vulnerability Scanning |
 
----
-
 ## 7.2 Infrastruktur Ebene 2
 
 ### 7.2.1 Entwicklungsumgebung (Local Development)
@@ -123,7 +121,7 @@ graph TB
 
 | Komponente         | Version | Zweck                         |
 | ------------------ | ------- | ----------------------------- |
-| **Node.js**        | 22+     | JavaScript Runtime            |
+| **Node.js**        | 18+     | JavaScript Runtime            |
 | **pnpm**           | 10.26+  | Package Manager (Monorepo)    |
 | **Docker**         | 24+     | Container Runtime             |
 | **Docker Compose** | 2.x     | Multi-Container Orchestration |
@@ -147,10 +145,10 @@ pnpm --filter @ujl-framework/crafter dev     # Crafter: http://localhost:5175
 pnpm --filter @ujl-framework/ui dev          # UI Library: http://localhost:5173
 pnpm --filter @ujl-framework/docs dev        # Docs: http://localhost:5176
 
-# 5. Media Service starten (optional)
-cd services/media
+# 5. Library Service starten (optional)
+cd services/library
 docker-compose up -d
-# Media API: http://localhost:3000
+# Library API: http://localhost:3000
 ```
 
 #### Port-Mapping
@@ -164,8 +162,6 @@ docker-compose up -d
 | Demo               | 4173 | Demo Application (Preview)      |
 | Payload CMS        | 3000 | Media API Backend               |
 | PostgreSQL         | 5432 | Database (internal)             |
-
----
 
 ### 7.2.2 CI/CD Pipeline (GitLab CI)
 
@@ -217,7 +213,7 @@ stages:
   - deploy
 
 variables:
-  NODE_VERSION: "22-slim"
+  NODE_VERSION: "18-slim"
   PNPM_VERSION: "10.26.2"
 ```
 
@@ -260,8 +256,6 @@ pages:
 
 - **main**: Produktions-Dokumentation
 - **develop**: Preview-Dokumentation
-
----
 
 ### 7.2.3 Media Service (Docker)
 
@@ -362,8 +356,6 @@ docker-compose down
 docker-compose down -v
 ```
 
----
-
 ## 7.3 Deployment-Szenarien
 
 ### 7.3.1 Szenario: Lokale Entwicklung
@@ -389,8 +381,8 @@ sequenceDiagram
     Browser-->>ViteDev: Request
     ViteDev-->>Browser: Hot Module Replacement
 
-    opt Media Service needed
-        Dev->>Terminal: cd services/media && docker-compose up -d
+    opt Library Service needed
+        Dev->>Terminal: cd services/library && docker-compose up -d
         Terminal->>Docker: Start containers
         Docker-->>Terminal: payload + postgres running
     end
@@ -406,8 +398,6 @@ sequenceDiagram
 - Alle Packages im Watch-Mode verfügbar
 - Media Service optional (Docker)
 - Kein Build-Schritt erforderlich für Entwicklung
-
----
 
 ### 7.3.2 Szenario: Continuous Integration
 
@@ -447,8 +437,6 @@ sequenceDiagram
 - Branch-spezifisches Caching
 - Automatisches Deployment auf main/develop
 - Retry-Mechanismus für Infrastruktur-Fehler
-
----
 
 ### 7.3.3 Szenario: NPM Package Publishing (geplant)
 
@@ -491,8 +479,6 @@ sequenceDiagram
 | adapter-web    | `@ujl-framework/adapter-web`    | Web Components Adapter            |
 | crafter        | `@ujl-framework/crafter`        | Visual Editor                     |
 | examples       | `@ujl-framework/examples`       | Example Documents & Themes        |
-
----
 
 ### 7.3.4 Szenario: Produktion (Integration in Host-Applikation)
 
@@ -547,7 +533,7 @@ graph TB
   let { data }: { data: PageData } = $props();
 
   const composer = new Composer();
-  const ast = $derived(composer.compose(data.ujlcDocument));
+  const ast = $derived.by(async () => await composer.compose(data.ujlcDocument));
   const tokenSet = $derived(data.ujltDocument.ujlt.tokens);
 </script>
 
@@ -561,7 +547,7 @@ import { webAdapter } from "@ujl-framework/adapter-web";
 import { Composer } from "@ujl-framework/core";
 
 const composer = new Composer();
-const ast = composer.compose(ujlcDocument);
+const ast = await composer.compose(ujlcDocument);
 const tokenSet = ujltDocument.ujlt.tokens;
 
 const mounted = webAdapter(ast, tokenSet, {
@@ -572,8 +558,6 @@ const mounted = webAdapter(ast, tokenSet, {
 // Cleanup on unmount
 mounted.unmount();
 ```
-
----
 
 ## 7.4 Infrastruktur-Anforderungen
 
@@ -602,8 +586,6 @@ mounted.unmount();
 | **PostgreSQL** | Netzwerk-Isolation  | Docker Network (nicht extern exponiert empfohlen) |
 | **Secrets**    | Sichere Speicherung | Environment Variables, nie in Git                 |
 | **HTTPS**      | Verschlüsselung     | Reverse Proxy (nginx/Traefik) in Produktion       |
-
----
 
 ## 7.5 Mapping: Software zu Infrastruktur
 
@@ -663,8 +645,6 @@ graph LR
     VitePress --> HTML
 ```
 
----
-
 ## 7.6 Operations und Monitoring
 
 ### 7.6.1 Logging
@@ -690,11 +670,11 @@ docker-compose logs -f postgres
 
 ### 7.6.2 Health Checks
 
-| Service     | Endpoint                 | Erwartung         |
-| ----------- | ------------------------ | ----------------- |
-| Payload CMS | `GET /admin`             | HTTP 200/302      |
-| Payload API | `GET /api/media?limit=1` | HTTP 200 + JSON   |
-| PostgreSQL  | TCP Port 5432            | Connection Accept |
+| Service     | Endpoint                  | Erwartung         |
+| ----------- | ------------------------- | ----------------- |
+| Payload CMS | `GET /admin`              | HTTP 200/302      |
+| Payload API | `GET /api/images?limit=1` | HTTP 200 + JSON   |
+| PostgreSQL  | TCP Port 5432             | Connection Accept |
 
 **Docker Health Check (empfohlen):**
 
@@ -728,8 +708,6 @@ docker-compose exec -T postgres pg_dump -U postgres payload > backup_db_$DATE.sq
 tar -czf backup_media_$DATE.tar.gz media/
 ```
 
----
-
 ## 7.7 Zusammenfassung
 
 ### Deployment-Übersicht
@@ -752,14 +730,10 @@ tar -czf backup_media_$DATE.tar.gz media/
 3. **CDN**: Für statische Assets (CSS, Bilder)
 4. **Skalierung**: Horizontal via Container-Orchestrierung (Docker Swarm/Kubernetes) bei Bedarf
 
----
-
 ## Nächste Kapitel
 
 - **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Architektur-Aspekte
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
 - **[Qualitätsanforderungen (Kapitel 10)](./10-quality-requirements)** - Qualitätsziele und -szenarien
-
----
 
 _Letzte Aktualisierung: 2026-01-14_

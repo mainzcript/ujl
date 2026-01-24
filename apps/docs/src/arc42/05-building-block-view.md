@@ -13,8 +13,6 @@ Dieses Kapitel beschreibt die statische Zerlegung des UJL-Systems in Bausteine (
 - **Level 2:** Interne Struktur ausgewählter Bausteine
 - **Level 3:** Detail-Sicht auf kritische Komponenten
 
----
-
 ## 5.1 Whitebox Gesamtsystem (Level 1)
 
 ### Übersichtsdiagramm
@@ -46,7 +44,7 @@ graph TB
     end
 
     subgraph "Service Layer"
-        MediaService[media<br/>Payload CMS Backend]
+        ImageService[library<br/>Payload CMS Backend]
     end
 
     Types --> Core
@@ -58,7 +56,7 @@ graph TB
     AdapterSvelte --> Crafter
     UI --> Crafter
     Types --> Crafter
-    Crafter -.->|API Calls| MediaService
+    Crafter -.->|API Calls| ImageService
 
     Core --> Demo
     AdapterWeb --> Demo
@@ -73,7 +71,7 @@ graph TB
     style AdapterSvelte fill:#f59e0b
     style AdapterWeb fill:#f59e0b
     style Crafter fill:#ef4444
-    style MediaService fill:#6366f1
+    style ImageService fill:#6366f1
 ```
 
 ### Begründung der Zerlegung
@@ -94,8 +92,6 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 - Austauschbarkeit (z.B. Adapter-Layer)
 - Monorepo mit pnpm Workspaces ermöglicht koordinierte Releases
 
----
-
 ### Enthaltene Bausteine (Level 1)
 
 | Baustein           | Verantwortung                                             | Package-Name                    |
@@ -106,12 +102,10 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 | **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                | `@ujl-framework/adapter-svelte` |
 | **adapter-web**    | Web Components Adapter (AST → Custom Elements)            | `@ujl-framework/adapter-web`    |
 | **crafter**        | Visual Editor (WYSIWYG) für Content und Themes            | `@ujl-framework/crafter`        |
-| **demo**           | Demo-Applikation (zeigt UJL in Aktion)                    | `@ujl-framework/demo`           |
+| **dev-demo**       | Demo-Applikation (zeigt UJL in Aktion)                    | App (kein npm-Paket)            |
 | **docs**           | Dokumentations-Website (VitePress)                        | `@ujl-framework/docs`           |
 | **examples**       | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json)    | `@ujl-framework/examples`       |
-| **media**          | Payload CMS Media Management Backend                      | `services/media`                |
-
----
+| **library**        | Payload CMS Image Management Backend                      | `services/library`              |
 
 ### Wichtige Schnittstellen (Level 1)
 
@@ -130,7 +124,7 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwort
 interface UJLCDocument {
 	ujlc: {
 		meta: UJLCMeta;
-		media: Record<string, UJLCMediaEntry>;
+		images: Record<string, ImageEntry>;
 		root: UJLCModuleObject[];
 	};
 }
@@ -143,8 +137,6 @@ interface UJLTDocument {
 	};
 }
 ```
-
----
 
 #### Schnittstelle 2: Abstract Syntax Tree (AST)
 
@@ -170,31 +162,27 @@ type UJLAbstractNode = {
 - Type-Field ermöglicht Dispatch im Adapter
 - Props sind node-spezifisch (keine generische Struktur)
 
----
-
 #### Schnittstelle 3: Payload CMS Media API
 
 **Protokoll:** REST (JSON)
 
-**Endpunkt:** `http://localhost:3000/api/media`
+**Endpunkt:** `http://localhost:3000/api/images`
 
 **Authentication:** API-Key via `Authorization: users API-Key <key>`
 
 **Wichtigste Operationen:**
 
-| Methode | Endpoint         | Funktion                                  |
-| ------- | ---------------- | ----------------------------------------- |
-| GET     | `/api/media`     | Liste alle Medien (Pagination, Filtering) |
-| GET     | `/api/media/:id` | Einzelnes Medium                          |
-| POST    | `/api/media`     | Upload (multipart/form-data)              |
-| PATCH   | `/api/media/:id` | Metadata-Update                           |
-| DELETE  | `/api/media/:id` | Löschung                                  |
+| Methode | Endpoint          | Funktion                                  |
+| ------- | ----------------- | ----------------------------------------- |
+| GET     | `/api/images`     | Liste alle Bilder (Pagination, Filtering) |
+| GET     | `/api/images/:id` | Einzelnes Bild                            |
+| POST    | `/api/images`     | Upload (multipart/form-data)              |
+| PATCH   | `/api/images/:id` | Metadata-Update                           |
+| DELETE  | `/api/images/:id` | Löschung                                  |
 
 **Consumer:** crafter (Media Library Browser/Uploader)
 
 **Fallback:** Inline Storage (Base64 in .ujlc.json) wenn Backend nicht verfügbar
-
----
 
 ## 5.2 Foundation Layer (Level 2)
 
@@ -230,7 +218,7 @@ graph TB
 | `ast.ts`         | AST Node Type Definitions | `UJLAbstractNode`, Node-spezifische Types                                |
 | `ujl-content.ts` | UJLC Zod Schemas & Types  | `UJLCDocumentSchema`, `UJLCModuleObjectSchema`, `validateUJLCDocument()` |
 | `ujl-theme.ts`   | UJLT Zod Schemas & Types  | `UJLTDocumentSchema`, `UJLTTokenSetSchema`, `validateUJLTDocument()`     |
-| `media.ts`       | Media Library Types       | `UJLCMediaEntry`, `UJLCMediaEntryInline`, `UJLCMediaEntryBackend`        |
+| `image.ts`       | Image Library Types       | `ImageEntry`, `ImageMetadata`, `ImageSource`, `ImageProvider`            |
 | `prosemirror.ts` | ProseMirror Types         | `ProseMirrorDocument`, `ProseMirrorNode`, `ProseMirrorMark`              |
 | `validation.ts`  | Validation Utilities      | `validateModule()`, `validateSlot()`, `validateTokenSet()`               |
 | `cli.ts`         | CLI Entry Point           | Binary: `ujl-validate`                                                   |
@@ -247,7 +235,7 @@ graph TB
 - `@ujl-framework/adapter-svelte` (imports AST types)
 - `@ujl-framework/adapter-web` (imports AST types)
 - `@ujl-framework/crafter` (imports all types)
-- `@ujl-framework/demo` (imports document types)
+- `apps/dev-demo` (imports document types)
 
 #### Besondere Merkmale
 
@@ -282,8 +270,6 @@ ujl-validate ./my-content.ujlc.json
 # Output: Validation success/failure + Statistics
 ```
 
----
-
 ## 5.3 Core Layer (Level 2)
 
 ### 5.3.1 Baustein: core
@@ -309,8 +295,8 @@ graph TB
             FieldConcretes[field-concretes/<br/>Built-in Field Implementations]
         end
 
-        subgraph "Media System"
-            MediaLibrary[media/library.ts<br/>Media Management]
+        subgraph "Image System"
+            ImageLibrary[image/library.ts<br/>Image Management]
         end
 
         subgraph "Rich Text System"
@@ -319,7 +305,7 @@ graph TB
     end
 
     Composer --> ModuleRegistry
-    Composer --> MediaLibrary
+    Composer --> ImageLibrary
     ModuleRegistry --> ModuleBase
     DefaultRegistry --> ModuleConcretes
     ModuleConcretes --> ModuleBase
@@ -338,16 +324,19 @@ graph TB
 class Composer {
 	constructor(registry?: ModuleRegistry);
 
-	// Hauptmethode: UJLC Document → AST
-	compose(doc: UJLCDocument): UJLAbstractNode;
+	// Hauptmethode: UJLC Document → AST (async wegen Bildauflösung)
+	async compose(doc: UJLCDocument, imageProvider?: ImageProvider): Promise<UJLAbstractNode>;
 
-	// Hilfsmethode: Einzelnes Modul → AST Node
-	composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
+	// Hilfsmethode: Einzelnes Modul → AST Node (async)
+	async composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode>;
 
 	// Registry Management
 	registerModule(module: AnyModule): void;
 	unregisterModule(module: AnyModule | string): void;
 	getRegistry(): ModuleRegistry;
+
+	// Image Library Access
+	getImageLibrary(): ImageLibrary | null; // Gibt Image Library zurück (oder null, wenn nicht initialisiert)
 }
 ```
 
@@ -375,8 +364,6 @@ UJLAbstractNode (with ID preserved)
 - Rekursive Composition für verschachtelte Module (Slots)
 - Media Resolver Integration (optional)
 - Error Handling: Unbekannte Modultypen → Error Node
-
----
 
 #### 5.3.1.2 Komponent: Module Registry
 
@@ -423,8 +410,6 @@ const registry = new ModuleRegistry();
 registry.registerModule(new CustomModule());
 const composer = new Composer(registry);
 ```
-
----
 
 #### 5.3.1.3 Komponent: Module Base Class
 
@@ -492,8 +477,6 @@ class TextModule extends ModuleBase {
 }
 ```
 
----
-
 #### 5.3.1.4 Komponent: Field Base Class
 
 **Verantwortung:** Abstrakte Basisklasse für Field-Typen (Validation & Fitting)
@@ -557,8 +540,6 @@ class NumberField extends FieldBase<number, NumberFieldConfig> {
 }
 ```
 
----
-
 #### 5.3.1.5 Komponent: Media Library
 
 **Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
@@ -566,24 +547,24 @@ class NumberField extends FieldBase<number, NumberFieldConfig> {
 **Schnittstelle:**
 
 ```typescript
-class MediaLibrary {
+class ImageLibrary {
 	constructor(
-		initialMedia: Record<string, MediaLibraryEntry>,
-		resolver?: MediaResolver // Optional: Backend Integration
+		initialImages: Record<string, ImageEntry>,
+		provider?: ImageProvider // Optional: Backend Integration
 	);
 
 	// Resolve Media by ID
 	async resolve(id: string): Promise<UJLImageData | null>;
 
 	// Add Media Entry
-	addEntry(entry: MediaLibraryEntry): void;
+	addEntry(entry: ImageEntry): void;
 
 	// Get all entries
-	getAllEntries(): MediaLibraryEntry[];
+	getAllEntries(): ImageEntry[];
 }
 
-interface MediaResolver {
-	resolve(id: string): Promise<string | null>; // Returns data URL
+interface ImageProvider {
+	resolve(id: string | number): Promise<ImageSource | null>; // Returns image source
 }
 ```
 
@@ -595,11 +576,9 @@ interface MediaResolver {
    - Vollständige Portabilität
 
 2. **Backend Storage (Payload CMS):**
-   - Media-Referenz in `.ujlc.json` (nur `mediaId`)
-   - Resolver lädt Media von API
+   - Image-Referenz in `.ujlc.json` (nur `imageId`)
+   - Resolver lädt Images von API
    - Features: Responsive Images, Metadaten, Versionierung
-
----
 
 #### 5.3.1.6 Komponent: TipTap Schema
 
@@ -645,8 +624,6 @@ const editor = new Editor({
 import { ujlRichTextExtensions } from "@ujl-framework/core";
 // Gleiche Extensions → WYSIWYG-Garantie
 ```
-
----
 
 ## 5.4 UI Layer (Level 2)
 
@@ -728,8 +705,6 @@ import { mode } from 'mode-watcher';
 
 - `@ujl-framework/adapter-svelte` (verwendet alle UI-Komponenten)
 - `@ujl-framework/crafter` (verwendet UI-Komponenten für Editor-UI)
-
----
 
 ## 5.5 Adapter Layer (Level 2)
 
@@ -817,8 +792,6 @@ interface AdapterRootProps {
 }
 ```
 
----
-
 #### 5.5.1.2 Komponent: ASTNode (Recursive Router)
 
 **Verantwortung:** Dispatcht AST Node zu entsprechendem Svelte Component
@@ -858,8 +831,6 @@ interface AdapterRootProps {
 ```
 
 **Wichtig:** Rekursive Selbstreferenz mit `<svelte:self>` für verschachtelte Nodes
-
----
 
 #### 5.5.1.3 Komponent: prosemirror-serializer
 
@@ -913,8 +884,6 @@ function applyMarks(text: string, marks?: ProseMirrorMark[]): string {
 - XSS-Prevention (HTML Escaping)
 - WYSIWYG-Garantie (gleiche Extensions wie Editor)
 
----
-
 #### 5.5.1.4 Komponent: Imperative Adapter
 
 **Verantwortung:** Programmatische Component Mounting (für nicht-Svelte-Kontexte)
@@ -956,8 +925,6 @@ const mounted = svelteAdapter(ast, tokenSet, {
 // Cleanup
 await mounted.unmount();
 ```
-
----
 
 ### 5.5.2 Baustein: adapter-web
 
@@ -1033,8 +1000,6 @@ el.tokenSet = tokenSet;
 el.setAttribute("node", JSON.stringify(astNode)); // Funktioniert nicht
 ```
 
----
-
 #### Komponent: webAdapter Function
 
 **Schnittstelle:**
@@ -1086,8 +1051,6 @@ export function webAdapter(
 }
 ```
 
----
-
 ## 5.6 Application Layer (Level 2)
 
 ### 5.6.1 Baustein: crafter
@@ -1123,14 +1086,14 @@ graph TB
         end
 
         subgraph "Services"
-            MediaService[media-service.ts<br/>Abstract Interface]
-            InlineMedia[inline-media-service.ts<br/>Inline Storage]
-            BackendMedia[backend-media-service.ts<br/>Payload CMS Integration]
+            ImageService[image-service.ts<br/>Abstract Interface]
+            InlineImage[inline-image-service.ts<br/>Inline Storage]
+            BackendImage[backend-image-service.ts<br/>Payload CMS Integration]
         end
 
         subgraph "Components"
             NavTree[nav-tree.svelte<br/>Tree View + Drag & Drop]
-            MediaPicker[media-picker.svelte<br/>Media Selection Dialog]
+            ImagePicker[image-picker.svelte<br/>Image Selection Dialog]
             ComponentPicker[component-picker.svelte<br/>Module Insertion]
         end
     end
@@ -1154,11 +1117,11 @@ graph TB
     NavTree --> Context
     Preview --> Context
 
-    MediaPicker --> MediaService
-    MediaService --> InlineMedia
-    MediaService --> BackendMedia
+    ImagePicker --> ImageService
+    ImageService --> InlineImage
+    ImageService --> BackendImage
 
-    BackendMedia -.->|API Calls| PayloadCMS[(Payload CMS<br/>Media Service)]
+    BackendImage -.->|API Calls| PayloadCMS[(Payload CMS<br/>Image Service)]
 ```
 
 #### 5.6.1.1 Komponent: app.svelte (State Management)
@@ -1184,8 +1147,6 @@ const context = createCrafterContext(ujlcDocument, ujltDocument, mode, expandedN
 
 setContext("crafter", context);
 ```
-
----
 
 #### 5.6.1.2 Komponent: Crafter Context API
 
@@ -1235,8 +1196,6 @@ ujlcDocument.ujlc.root.push(newModule);
 context.updateRootSlot(root => [...root, newModule]);
 ```
 
----
-
 #### 5.6.1.3 Komponent: Editor Mode
 
 **Verantwortung:** Content-Editing mit Drag & Drop, Clipboard, Keyboard Shortcuts
@@ -1263,8 +1222,6 @@ interface ClipboardManager {
 	// 2. localStorage Fallback (older browsers)
 }
 ```
-
----
 
 #### 5.6.1.4 Komponent: Designer Mode
 
@@ -1295,8 +1252,6 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 }
 ```
 
----
-
 #### 5.6.1.5 Komponent: Media Service
 
 **Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
@@ -1304,17 +1259,17 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 **Interface:**
 
 ```typescript
-interface MediaService {
-	// List Media
-	list(): Promise<MediaLibraryEntry[]>;
+interface ImageService {
+	// List Images
+	list(): Promise<ImageEntry[]>;
 
-	// Upload Media
-	upload(file: File, metadata: MediaMetadata): Promise<MediaLibraryEntry>;
+	// Upload Image
+	upload(file: File, metadata: ImageMetadata): Promise<ImageEntry>;
 
 	// Update Metadata
-	updateMetadata(id: string, metadata: Partial<MediaMetadata>): Promise<void>;
+	updateMetadata(id: string, metadata: Partial<ImageMetadata>): Promise<void>;
 
-	// Delete Media
+	// Delete Image
 	delete(id: string): Promise<void>;
 
 	// Get Storage Mode
@@ -1324,12 +1279,12 @@ interface MediaService {
 
 **Implementierungen:**
 
-1. **InlineMediaService:**
+1. **InlineImageService:**
    - Base64-Encoding via FileReader
-   - Storage in UJLC Document (ujlc.media)
+   - Storage in UJLC Document (ujlc.images)
    - Compression via compressorjs
 
-2. **BackendMediaService:**
+2. **BackendImageService:**
    - Payload CMS API Integration
    - multipart/form-data Upload
    - API-Key Authentication
@@ -1337,15 +1292,13 @@ interface MediaService {
 **Service Factory:**
 
 ```typescript
-function createMediaService(config: MediaLibraryConfig): MediaService {
-	if (config.storage === "backend" && config.endpoint) {
-		return new BackendMediaService(config.endpoint, apiKey);
+function createImageService(config: ImageLibraryConfig): ImageService {
+	if (config.storage === "backend" && config.url) {
+		return new BackendImageService(config.url, apiKey);
 	}
-	return new InlineMediaService(ujlcDocument);
+	return new InlineImageService(ujlcDocument);
 }
 ```
-
----
 
 ### 5.6.2 Baustein: demo
 
@@ -1371,7 +1324,7 @@ import showcaseDocument from "@ujl-framework/examples/documents/showcase";
 import defaultTheme from "@ujl-framework/examples/themes/default";
 
 const composer = new Composer();
-const ast = composer.compose(showcaseDocument);
+const ast = await composer.compose(showcaseDocument);
 const tokenSet = defaultTheme.ujlt.tokens;
 
 webAdapter(ast, tokenSet, {
@@ -1379,8 +1332,6 @@ webAdapter(ast, tokenSet, {
 	showMetadata: false,
 });
 ```
-
----
 
 ### 5.6.3 Baustein: docs
 
@@ -1398,8 +1349,6 @@ docs/
 ```
 
 **Technologie:** VitePress 2.0 (Vue-based Static Site Generator)
-
----
 
 ### 5.6.4 Baustein: examples
 
@@ -1429,8 +1378,6 @@ import defaultTheme from "@ujl-framework/examples/themes/default";
 import { showcaseDocument, defaultTheme } from "@ujl-framework/examples";
 ```
 
----
-
 ## 5.7 Service Layer (Level 2)
 
 ### 5.7.1 Baustein: media (Payload CMS)
@@ -1446,7 +1393,7 @@ graph TB
         PayloadCMS[Payload CMS 3.x]
 
         subgraph "Collections"
-            MediaCollection[Media Collection<br/>Images with Metadata]
+            ImagesCollection[Images Collection<br/>Images with Metadata]
             UsersCollection[Users Collection<br/>API Key Management]
         end
 
@@ -1465,25 +1412,25 @@ graph TB
     end
 
     NextApp --> PayloadCMS
-    PayloadCMS --> MediaCollection
+    PayloadCMS --> ImagesCollection
     PayloadCMS --> UsersCollection
     PayloadCMS --> PostgreSQL
 
-    MediaCollection --> Sharp
+    ImagesCollection --> Sharp
     Sharp --> LocalStorage
 
     Crafter -.->|REST API| NextApp
 ```
 
-#### Komponent: Media Collection
+#### Komponent: Images Collection
 
 **Schema:**
 
 ```typescript
-export const Media: CollectionConfig = {
-	slug: "media",
+export const Images: CollectionConfig = {
+	slug: "images",
 	upload: {
-		staticDir: "media", // Upload-Verzeichnis
+		staticDir: "images", // Upload-Verzeichnis
 		imageSizes: [
 			{ name: "thumbnail", width: 400, height: 300 },
 			{ name: "small", width: 500 },
@@ -1511,26 +1458,24 @@ export const Media: CollectionConfig = {
 
 **REST API:**
 
-| Methode | Endpoint         | Funktion                                  |
-| ------- | ---------------- | ----------------------------------------- |
-| GET     | `/api/media`     | List (mit Pagination, Filtering, Sorting) |
-| GET     | `/api/media/:id` | Get Single                                |
-| POST    | `/api/media`     | Upload (multipart/form-data)              |
-| PATCH   | `/api/media/:id` | Update Metadata                           |
-| DELETE  | `/api/media/:id` | Delete                                    |
+| Methode | Endpoint          | Funktion                                  |
+| ------- | ----------------- | ----------------------------------------- |
+| GET     | `/api/images`     | List (mit Pagination, Filtering, Sorting) |
+| GET     | `/api/images/:id` | Get Single                                |
+| POST    | `/api/images`     | Upload (multipart/form-data)              |
+| PATCH   | `/api/images/:id` | Update Metadata                           |
+| DELETE  | `/api/images/:id` | Delete                                    |
 
 **Authentication:**
 
 ```typescript
 // API Key in User Document
-const response = await fetch("http://localhost:3000/api/media", {
+const response = await fetch("http://localhost:3000/api/images", {
 	headers: {
 		Authorization: "users API-Key YOUR_API_KEY",
 	},
 });
 ```
-
----
 
 #### Deployment: Docker Compose
 
@@ -1566,8 +1511,6 @@ docker-compose up -d
 # View logs
 docker-compose logs -f payload
 ```
-
----
 
 ## 5.8 Deployment- und Build-Struktur
 
@@ -1632,8 +1575,6 @@ pnpm run build
 }
 ```
 
----
-
 ### Artifact-Typen
 
 | Package        | Build Tool | Output                                              | Distribution          |
@@ -1647,8 +1588,6 @@ pnpm run build
 | demo           | Vite       | `dist/**/*` (Static Files)                          | Private               |
 | docs           | VitePress  | `.vitepress/dist/**/*` (Static Site)                | GitLab Pages          |
 | media          | Next.js    | Docker Image                                        | Docker Hub (optional) |
-
----
 
 ## 5.9 Querschnittliche Aspekte
 
@@ -1690,8 +1629,6 @@ pnpm publish -r --access public
 }
 ```
 
----
-
 ### 5.9.2 Testing-Strategie
 
 **Unit Tests (Vitest):**
@@ -1719,8 +1656,6 @@ import { testId } from './test-attrs';
 // → Generates: data-testid="submit-button" (nur im Test-Modus)
 ```
 
----
-
 ### 5.9.3 CI/CD Pipeline (GitLab CI)
 
 **Stages:**
@@ -1741,8 +1676,6 @@ cache:
     - .pnpm-store/
     - packages/*/node_modules/
 ```
-
----
 
 ## 5.10 Zusammenfassung und Ausblick
 
@@ -1768,8 +1701,6 @@ cache:
 - **Theme Marketplace**: Community Themes (UJLT-Dateien)
 - **Module Marketplace**: Community Module (NPM Packages)
 
----
-
 ## Nächste Kapitel
 
 Für detaillierte Informationen zu weiteren Architektur-Aspekten siehe:
@@ -1778,7 +1709,5 @@ Für detaillierte Informationen zu weiteren Architektur-Aspekten siehe:
 - **[Verteilungssicht (Kapitel 7)](./07-deployment-view)** - Deployment-Topologien und Infrastruktur
 - **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Architektur-Aspekte
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
-
----
 
 _Letzte Aktualisierung: 2026-01-14_

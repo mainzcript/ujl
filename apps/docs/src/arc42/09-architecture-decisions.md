@@ -32,7 +32,7 @@ UJL implementiert eine strikte Trennung auf höherer Abstraktionsebene:
 export const UJLCDocumentSchema = z.object({
 	ujlc: z.object({
 		meta: UJLCMetaSchema,
-		media: z.record(z.string(), UJLCMediaEntrySchema),
+		images: z.record(z.string(), ImageEntrySchema),
 		root: z.array(z.lazy(() => UJLCModuleObjectSchema)),
 	}),
 });
@@ -67,8 +67,6 @@ export const UJLTDocumentSchema = z.object({
 - Weniger Flexibilität für individuelle Design-Anpassungen pro Dokument
 - Komplexere Architektur im Vergleich zu traditionellem HTML/CSS
 - Erfordert initiales Setup eines Theme-Systems
-
----
 
 ## 9.2 ADR-002: Modulares Plugin-System mit Registry Pattern
 
@@ -162,8 +160,6 @@ class CustomModule extends ModuleBase {
 composer.registerModule(new CustomModule());
 ```
 
----
-
 ## 9.3 ADR-003: Adapter Pattern für Framework-Agnostisches Rendering
 
 ### Status
@@ -253,8 +249,6 @@ AdapterRoot.svelte                    # Entry Point + Theme Context
       └─ ... (weitere Module)
 ```
 
----
-
 ## 9.4 ADR-004: Dual Media Storage Strategy (Inline vs. Backend)
 
 ### Status
@@ -273,15 +267,15 @@ Verschiedene Anwendungsfälle erfordern unterschiedliche Media-Strategien:
 Implementierung einer **Dual Storage Strategy** mit Resolver Pattern:
 
 ```typescript
-// packages/core/src/media/library.ts
-export class MediaLibrary {
-	constructor(initialMedia: Record<string, MediaLibraryEntry>, resolver?: MediaResolver);
+// packages/core/src/image/library.ts
+export class ImageLibrary {
+	constructor(initialImages: Record<string, ImageEntry>, provider?: ImageProvider);
 
 	async resolve(id: string | number): Promise<UJLImageData | null>;
 }
 
-export interface MediaResolver {
-	resolve(id: string): Promise<string | null>; // Returns data URL
+export interface ImageProvider {
+	resolve(id: string | number): Promise<ImageSource | null>; // Returns image source
 }
 ```
 
@@ -293,13 +287,18 @@ export interface MediaResolver {
 {
 	"ujlc": {
 		"meta": {
-			"media_library": { "storage": "inline" }
+			"_library": { "storage": "inline" }
 		},
-		"media": {
-			"media-001": {
-				"id": "media-001",
-				"storage": "inline",
-				"data": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+		"images": {
+			"img-001": {
+				"src": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+				"metadata": {
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
+				}
 			}
 		}
 	}
@@ -312,9 +311,21 @@ export interface MediaResolver {
 {
 	"ujlc": {
 		"meta": {
-			"media_library": {
+			"_library": {
 				"storage": "backend",
-				"endpoint": "http://localhost:3000/api"
+				"url": "http://localhost:3000/api"
+			}
+		},
+		"images": {
+			"img-001": {
+				"src": "http://localhost:3000/api/images/67890abcdef12345",
+				"metadata": {
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
+				}
 			}
 		}
 	}
@@ -324,9 +335,9 @@ export interface MediaResolver {
 **Payload CMS Integration:**
 
 ```typescript
-// services/media/src/collections/Media.ts
-export const Media: CollectionConfig = {
-	slug: "media",
+// services/library/src/collections/Images.ts
+export const Images: CollectionConfig = {
+	slug: "images",
 	upload: {
 		imageSizes: [
 			{ name: "small", width: 500 },
@@ -370,8 +381,6 @@ export const Media: CollectionConfig = {
 - Große Dokument-Dateien bei Inline-Storage
 - Externe Abhängigkeit bei Backend-Storage
 - Komplexere Setup-Prozedur für Backend
-
----
 
 ## 9.5 ADR-005: Zod-basierte Runtime Validation mit TypeScript Type Inference
 
@@ -455,8 +464,6 @@ pnpm run validate ./path/to/file.json
 # Detaillierte Fehlerberichte bei Validierung
 ```
 
----
-
 ## 9.6 ADR-006: Svelte 5 als primäres UI-Framework
 
 ### Status
@@ -492,7 +499,7 @@ export const svelteAdapter = (node, tokenSet, options) => {
   let ujlcDocument = $state(initialDocument);
   let ujltDocument = $state(initialTheme);
 
-  const ast = $derived.by(() => composer.compose(ujlcDocument));
+  const ast = $derived.by(async () => await composer.compose(ujlcDocument));
   const tokenSet = $derived(ujltDocument.ujlt.tokens);
 </script>
 ```
@@ -534,8 +541,6 @@ export const svelteAdapter = (node, tokenSet, options) => {
 - **Vue**: Gute Alternative, aber größerer Runtime
 - **Solid**: Exzellente Performance, aber kleinere Community
 
----
-
 ## 9.7 ADR-007: Payload CMS für Media Management Backend
 
 ### Status
@@ -551,7 +556,7 @@ Backend-Storage für Media Library erfordert ein Content Management System mit B
 **Payload CMS 3.69** als Backend-Service:
 
 ```typescript
-// services/media/src/payload.config.ts
+// services/library/src/payload.config.ts
 export default buildConfig({
 	collections: [Users, Media],
 	admin: { user: Users.slug },
@@ -562,12 +567,12 @@ export default buildConfig({
 });
 ```
 
-**Media Collection mit Image Processing:**
+**Images Collection mit Image Processing:**
 
 ```typescript
-// services/media/src/collections/Media.ts
-export const Media: CollectionConfig = {
-	slug: "media",
+// services/library/src/collections/Images.ts
+export const Images: CollectionConfig = {
+	slug: "images",
 	upload: {
 		imageSizes: [
 			{ name: "thumbnail", width: 400, height: 300 },
@@ -618,7 +623,7 @@ export const Media: CollectionConfig = {
 **Docker Setup:**
 
 ```yaml
-# services/media/docker-compose.yml
+# services/library/docker-compose.yml
 services:
   postgres:
     image: postgres:17-alpine
@@ -637,8 +642,6 @@ services:
 
 - **Strapi**: Ähnlich, aber schwächeres TypeScript-Support
 - **Custom Backend**: Zu viel Entwicklungsaufwand
-
----
 
 ## 9.8 ADR-008: TipTap/ProseMirror für Rich Text Editing
 
@@ -765,8 +768,6 @@ function serializeNode(node: ProseMirrorNode): string {
 - **Lexical**: Modern, aber weniger ausgereift
 - **ContentEditable**: Zu low-level, Cross-Browser-Probleme
 
----
-
 ## 9.9 ADR-009: OKLCH Farbraum für Design Tokens
 
 ### Status
@@ -871,8 +872,6 @@ export function resolveForegroundColor(
 - **HSL**: Nicht perzeptuell uniform
 - **RGB**: Keine intuitive Helligkeits-Kontrolle
 - **LCH**: Ähnlich OKLCH, aber weniger akkurat
-
----
 
 ## 9.10 ADR-010: pnpm Workspaces + Changesets für Monorepo
 
@@ -1016,8 +1015,6 @@ build:
 - **Turborepo**: Zusätzliche Komplexität, pnpm ausreichend
 - **Nx**: Overkill für aktuellen Scope
 
----
-
 ## 9.11 ADR-011: Playwright für E2E Testing des Crafters
 
 ### Status
@@ -1157,8 +1154,6 @@ test("can select node by clicking in preview", async ({ page }) => {
 - **Testing Library**: Nur für Unit-Tests, nicht E2E
 - **Selenium**: Veraltet, Playwright moderner
 
----
-
 ## 9.12 Zusammenfassung: Architektur-Trade-offs
 
 | Entscheidung           | Vorteil                     | Nachteil                 | Akzeptierter Trade-off                |
@@ -1174,8 +1169,6 @@ test("can select node by clicking in preview", async ({ page }) => {
 | **OKLCH Farbraum**     | Bessere Accessibility       | Komplexer als HSL        | Accessibility nicht verhandelbar      |
 | **pnpm + Changesets**  | Koordinierte Releases       | Komplexe Build-Chain     | Monorepo-Effizienz wichtig            |
 | **Playwright E2E**     | Vollständige Abdeckung      | Längere Test-Zeiten      | User Flows müssen getestet werden     |
-
----
 
 ## 9.13 Offene Architekturentscheidungen
 
@@ -1211,7 +1204,5 @@ Folgende Entscheidungen sind noch nicht final getroffen:
 
 - Community-Contributions vs. offiziell maintained?
 - Adapter-API ausreichend dokumentiert?
-
----
 
 _Letzte Aktualisierung: 2026-01-10_

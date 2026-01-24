@@ -4,8 +4,6 @@
 
 This package provides runtime validation for both theme and content files using Zod schemas. It also includes all TypeScript type definitions for the UJL Framework, ensuring type safety across the entire ecosystem.
 
----
-
 ## Installation
 
 ```bash
@@ -63,48 +61,47 @@ const validatedSlot = validateSlot(slotData);
 
 ### Features
 
-- **Auto-detection** - Automatically detects document type from JSON structure (checks for `ujlt` or `ujlc` root property)
-- **Rich output** - Detailed statistics and validation warnings
-- **Type-safe** - Generated TypeScript types from Zod schemas
-- **Smart checks** - Validates color contrasts, unique IDs, nesting depth
-- **CLI Tool** - Standalone `ujl-validate` command for CI/CD integration
+Das Validierungs-System erkennt automatisch den Dokumenttyp aus der JSON-Struktur (`ujlt` oder `ujlc` Root-Property) und liefert detaillierte Statistiken und Warnungen. TypeScript-Typen werden aus Zod-Schemas generiert, was vollständige Type-Safety gewährleistet. Intelligente Checks validieren Farbkontraste, ID-Eindeutigkeit und Verschachtelungstiefe. Das CLI-Tool `ujl-validate` ermöglicht die Integration in CI/CD-Pipelines.
 
-## Media Library Types
+## Library Types
 
-This package includes comprehensive type definitions for the media library system:
+This package includes comprehensive type definitions for the library system. Currently, only image types are defined, with additional media types planned for future releases.
 
-### Media Entry Types
+### Image Entry Types
 
 ```typescript
-// Inline storage - media embedded as Base64
-type UJLCMediaEntryInline = {
-	id: string;
-	storage: "inline";
-	data: string; // Base64-encoded data URL
+// Image entry with URL and metadata
+type ImageEntry = {
+	src: string; // Image URL (HTTP or Base64 Data-URL)
+	metadata: ImageMetadata; // Technical metadata about the image
 };
 
-// Backend storage - media stored on Payload CMS
-type UJLCMediaEntryBackend = {
-	id: string;
-	storage: "backend";
-	mediaId: string; // Reference to Payload CMS media document
+// Image metadata
+type ImageMetadata = {
+	filename: string;
+	mimeType: string;
+	filesize: number;
+	width: number;
+	height: number;
 };
 
-// Union type for all media entries
-type UJLCMediaEntry = UJLCMediaEntryInline | UJLCMediaEntryBackend;
+// Image source for AST rendering
+type ImageSource = {
+	src: string; // Image URL (HTTP or Base64 Data-URL)
+};
 ```
 
-### Media Library Configuration
+### Image Library Configuration
 
-The `UJLCMeta` type includes optional media library configuration:
+The `UJLCMeta` type includes optional image library configuration:
 
 ```typescript
 type UJLCMeta = {
 	title: string;
 	// ... other meta fields
-	media_library?: {
+	_library?: {
 		storage: "inline" | "backend";
-		endpoint?: string; // Required for backend storage
+		url?: string; // Required for backend storage
 	};
 };
 ```
@@ -115,20 +112,20 @@ The `UJLImageData` type is used by the ImageField:
 
 ```typescript
 type UJLImageData = {
-	mediaId: string; // References entry in ujlc.media
+	imageId: string | number; // References entry in ujlc.images
 	alt: string;
 };
 ```
 
 ### UJLC Document Structure
 
-Media entries are stored in the document at `ujlc.media`:
+Image entries are stored in the document at `ujlc.images`:
 
 ```typescript
 type UJLCDocument = {
 	ujlc: {
 		meta: UJLCMeta;
-		media: Record<string, UJLCMediaEntry>; // Media library entries
+		images: Record<string, ImageEntry>; // Library entries (currently images)
 		root: UJLCModuleObject[];
 	};
 };

@@ -52,8 +52,6 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 **Referenz:** Siehe [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)
 
----
-
 ### Strategie 2: Schema-First mit Runtime-Validierung
 
 **Qualitätsziel:** AI-ready Architecture (Priorität 3), Type Safety
@@ -97,8 +95,6 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 - Größere Bundle-Größe durch Zod (~12KB gzip)
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
-
----
 
 ### Strategie 3: Abstract Syntax Tree (AST) als Zwischen-Repräsentation
 
@@ -158,8 +154,6 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 - Adapter müssen synchron gehalten werden
 
 **Referenz:** Siehe [ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering)
-
----
 
 ### Strategie 4: Plugin-Architektur mit Module Registry
 
@@ -260,8 +254,6 @@ composer.registerModule(new CustomModule());
 
 **Referenz:** Siehe [ADR-002](./09-architecture-decisions#_9-2-adr-002-modulares-plugin-system-mit-registry-pattern)
 
----
-
 ### Strategie 5: OKLCH-Farbraum für Accessibility
 
 **Qualitätsziel:** Accessibility Guaranteed (Priorität 2)
@@ -357,8 +349,6 @@ function resolveForegroundColor(
 
 **Referenz:** Siehe [ADR-009](./09-architecture-decisions#_9-9-adr-009-oklch-farbraum-für-design-tokens)
 
----
-
 ### Strategie 6: Strukturierte Daten statt HTML
 
 **Qualitätsziel:** AI-ready Architecture (Priorität 3), Security
@@ -447,8 +437,6 @@ function serializeNode(node: ProseMirrorNode): string {
 
 **Referenz:** Siehe [ADR-008](./09-architecture-decisions#_9-8-adr-008-tiptap-prosemirror-für-rich-text-editing)
 
----
-
 ### Strategie 7: Dual Storage Strategy für Medien
 
 **Qualitätsziel:** Portabilität, Enterprise-Tauglichkeit
@@ -461,33 +449,35 @@ function serializeNode(node: ProseMirrorNode): string {
 **Lösung:** Abstrahierte Media Library mit Resolver Pattern
 
 ```typescript
-// Media Library mit Resolver
-class MediaLibrary {
+// Image Library mit Provider
+class ImageLibrary {
 	constructor(
-		initialMedia: Record<string, MediaLibraryEntry>,
-		resolver?: MediaResolver // Optional: Externe Media-Quelle
+		initialImages: Record<string, ImageEntry>,
+		provider?: ImageProvider // Optional: Externe Image-Quelle
 	);
 
 	async resolve(id: string): Promise<UJLImageData | null> {
 		// 1. Check local cache
-		const local = this.media[id];
-		if (local?.storage === "inline") {
-			return { mediaId: id, dataUrl: local.data, alt: local.alt };
+		const local = this.images[id];
+		if (local) {
+			return { imageId: id, src: local.src, alt: local.metadata.alt || "" };
 		}
 
-		// 2. Use resolver for backend storage
-		if (this.resolver && local?.storage === "backend") {
-			const dataUrl = await this.resolver.resolve(local.mediaId);
-			return { mediaId: id, dataUrl, alt: local.alt };
+		// 2. Use provider for backend storage
+		if (this.provider) {
+			const imageSource = await this.provider.resolve(id);
+			if (imageSource) {
+				return { imageId: id, src: imageSource.src, alt: "" };
+			}
 		}
 
 		return null;
 	}
 }
 
-// Resolver Interface
-interface MediaResolver {
-	resolve(id: string): Promise<string | null>; // Returns data URL
+// Provider Interface
+interface ImageProvider {
+	resolve(id: string | number): Promise<ImageSource | null>; // Returns image source
 }
 ```
 
@@ -497,13 +487,18 @@ interface MediaResolver {
 {
 	"ujlc": {
 		"meta": {
-			"media_library": { "storage": "inline" }
+			"_library": { "storage": "inline" }
 		},
-		"media": {
-			"media-001": {
-				"id": "media-001",
-				"storage": "inline",
-				"data": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+		"images": {
+			"img-001": {
+				"src": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+				"metadata": {
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
+				}
 			}
 		}
 	}
@@ -528,27 +523,32 @@ interface MediaResolver {
 {
 	"ujlc": {
 		"meta": {
-			"media_library": {
+			"_library": {
 				"storage": "backend",
-				"endpoint": "http://localhost:3000/api"
+				"url": "http://localhost:3000/api"
 			}
 		},
-		"media": {
-			"media-001": {
-				"id": "media-001",
-				"storage": "backend",
-				"mediaId": "67890abcdef12345" // Reference to Payload CMS
+		"images": {
+			"img-001": {
+				"src": "http://localhost:3000/api/images/67890abcdef12345",
+				"metadata": {
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
+				}
 			}
 		}
 	}
 }
 ```
 
-**Payload CMS Media Collection:**
+**Payload CMS Images Collection:**
 
 ```typescript
-export const Media: CollectionConfig = {
-	slug: "media",
+export const Images: CollectionConfig = {
+	slug: "images",
 	upload: {
 		imageSizes: [
 			{ name: "thumbnail", width: 400, height: 300 },
@@ -592,8 +592,6 @@ export const Media: CollectionConfig = {
 - Komplexere Architektur durch Abstraktion
 
 **Referenz:** Siehe [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend)
-
----
 
 ## 4.2 Technologie-Entscheidungen
 
@@ -800,8 +798,6 @@ pnpm publish -r --access public
 
 **Referenz:** Siehe [ADR-010](./09-architecture-decisions#_9-10-adr-010-pnpm-workspaces-changesets-für-monorepo)
 
----
-
 ## 4.3 Qualitätsziel-Strategie-Mapping
 
 Diese Tabelle zeigt, wie strategische Entscheidungen die definierten Qualitätsziele ([Kapitel 1.2](./01-introduction-and-goals#_1-2-quality-goals)) erreichen:
@@ -815,8 +811,6 @@ Diese Tabelle zeigt, wie strategische Entscheidungen die definierten Qualitätsz
 | **Performance**                | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter                           |
 | **Developer Experience**       | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage                    |
 | **Maintainability**            | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)                                  |
-
----
 
 ## 4.4 Trade-offs und bewusste Entscheidungen
 
@@ -889,8 +883,6 @@ Die folgenden Trade-offs wurden bewusst akzeptiert, da die Vorteile die Nachteil
 - Svelte-Community ist aktiv und wächst (SvelteKit, Svelte 5 Runes)
 - shadcn-svelte, bits-ui liefern professionelle Component-Bibliotheken
 
----
-
 ### Rejected Alternatives
 
 Die folgenden Alternativen wurden explizit verworfen:
@@ -924,8 +916,6 @@ Die folgenden Alternativen wurden explizit verworfen:
 **Grund:** Größere Bundle-Größe, Virtual DOM Overhead, keine Compilation
 
 **Gewählte Alternative:** Svelte 5 mit Compilation und Fine-grained Reactivity
-
----
 
 ## 4.5 Implementierungsstrategie
 
@@ -965,8 +955,6 @@ Stages:
 4. quality    → pnpm run lint + pnpm run check (ESLint + TypeScript)
 5. deploy     → GitLab Pages (docs only on main/develop)
 ```
-
----
 
 ## 4.6 Architektur-Prinzipien (Zusammenfassung)
 
@@ -1011,8 +999,6 @@ Die folgenden Prinzipien leiten alle architektonischen Entscheidungen:
    - ProseMirror-Dokumente verhindern XSS
    - API Keys über Environment Variables
 
----
-
 ## Nächste Schritte
 
 Für detaillierte Informationen zu einzelnen Architektur-Elementen siehe:
@@ -1022,7 +1008,5 @@ Für detaillierte Informationen zu einzelnen Architektur-Elementen siehe:
 - **[Verteilungssicht (Kapitel 7)](./07-deployment-view)** - Deployment-Topologien und Infrastruktur
 - **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Architektur-Aspekte
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs mit Kontext und Konsequenzen
-
----
 
 _Letzte Aktualisierung: 2026-01-13_

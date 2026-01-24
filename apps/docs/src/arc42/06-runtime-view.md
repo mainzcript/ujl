@@ -19,8 +19,6 @@ Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
 | **6.5 Media Upload**         | Medien hochladen und referenzieren    | `crafter`, `media`                  |
 | **6.6 Validation Flow**      | Dokumente validieren                  | `types`                             |
 
----
-
 ## 6.2 Document Composition
 
 ### Übersicht
@@ -35,15 +33,15 @@ sequenceDiagram
     participant Composer as Composer
     participant Registry as ModuleRegistry
     participant Module as Module
-    participant MediaLib as MediaLibrary
+    participant ImageLib as ImageLibrary
 
-    Client->>Composer: compose(ujlcDocument, mediaResolver?)
+    Client->>Composer: compose(ujlcDocument, imageProvider?)
     activate Composer
 
-    Composer->>MediaLib: new MediaLibrary(doc.ujlc.media, resolver)
-    activate MediaLib
-    MediaLib-->>Composer: mediaLibrary
-    deactivate MediaLib
+    Composer->>ImageLib: new ImageLibrary(doc.ujlc.images, provider)
+    activate ImageLib
+    ImageLib-->>Composer: imageLibrary
+    deactivate ImageLib
 
     loop Für jedes Modul in doc.ujlc.root
         Composer->>Composer: composeModule(moduleData)
@@ -55,9 +53,9 @@ sequenceDiagram
             Composer->>Module: compose(moduleData, composer)
             activate Module
 
-            opt Falls Modul Media-Felder hat
-                Module->>MediaLib: resolve(mediaId)
-                MediaLib-->>Module: UJLImageData | null
+            opt Falls Modul Image-Felder hat
+                Module->>ImageLib: resolve(imageId)
+                ImageLib-->>Module: UJLImageData | null
             end
 
             opt Falls Modul Slots hat
@@ -81,9 +79,9 @@ sequenceDiagram
 
 ### Ablaufbeschreibung
 
-1. **Initialisierung**: Der Consumer ruft `Composer.compose(ujlcDocument)` auf
-2. **Media Library Setup**: Die MediaLibrary wird mit den eingebetteten Medien und optionalem Backend-Resolver initialisiert
-3. **Root-Iteration**: Für jedes Modul im `root`-Array wird `composeModule()` aufgerufen
+1. **Initialisierung**: Der Consumer ruft `await Composer.compose(ujlcDocument, imageProvider?)` auf (async)
+2. **Image Library Setup**: Die ImageLibrary wird mit den eingebetteten Bildern und optionalem Backend-Provider initialisiert
+3. **Root-Iteration**: Für jedes Modul im `root`-Array wird `await composeModule()` aufgerufen (async)
 4. **Module Lookup**: Die Registry liefert das passende Modul für den `type`
 5. **Module Composition**: Das Modul transformiert seine Daten in einen AST-Node
 6. **Rekursion**: Für verschachtelte Module (Slots) erfolgt ein rekursiver Aufruf
@@ -93,10 +91,10 @@ sequenceDiagram
 
 | Komponente       | Verantwortung                                          |
 | ---------------- | ------------------------------------------------------ |
-| `Composer`       | Orchestriert die Composition, verwaltet MediaLibrary   |
+| `Composer`       | Orchestriert die Composition, verwaltet ImageLibrary   |
 | `ModuleRegistry` | Hält alle registrierten Module, Type → Module Lookup   |
 | `ModuleBase`     | Definiert `compose()`-Schnittstelle für Module         |
-| `MediaLibrary`   | Löst Media-IDs zu Bild-Daten auf (Inline oder Backend) |
+| `ImageLibrary`   | Löst Image-IDs zu Bild-Daten auf (Inline oder Backend) |
 
 ### Datenstrukturen
 
@@ -106,7 +104,7 @@ sequenceDiagram
 {
   ujlc: {
     meta: { title: "...", _version: "..." },
-    media: { "media-001": { dataUrl: "data:image/..." } },
+    images: { "image-001": { src: "data:image/...", metadata: {...} } },
     root: [
       {
         type: "text",
@@ -144,8 +142,6 @@ sequenceDiagram
 | Unbekannter Modultyp | Error-Node wird erzeugt: `{ type: "error", props: { message: "Unknown module type: xyz" } }` |
 | Media nicht gefunden | `null` wird zurückgegeben, Modul entscheidet über Fallback                                   |
 | Ungültige Felder     | Modul-interne Validation mit Field-System                                                    |
-
----
 
 ## 6.3 Adapter Rendering
 
@@ -281,7 +277,11 @@ Das Theme-System generiert CSS Custom Properties aus dem `UJLTTokenSet`:
 
 ### Event-Handling (Editor-Modus)
 
-Wenn `eventCallback` und `showMetadata` gesetzt sind:
+::: warning Adapter-Unterstützung
+Die `eventCallback`-Funktion ist aktuell nur in `adapter-web` vollständig implementiert. Für `adapter-svelte` ist die Unterstützung geplant, aber noch nicht umgesetzt.
+:::
+
+Wenn `eventCallback` und `showMetadata` gesetzt sind (nur `adapter-web`):
 
 ```typescript
 // In Node Component
@@ -299,8 +299,6 @@ function handleClick(event: MouseEvent) {
 - `data-ujl-module-id` Attribute werden gesetzt
 - Click-Events propagieren die Module-ID
 - Default-Aktionen werden verhindert (z.B. Button-Clicks)
-
----
 
 ## 6.4 Crafter Editor Flow
 
@@ -381,7 +379,7 @@ let selectedNodeId = $state<string | null>(null);
 ```typescript
 // In Preview-Komponente
 const composer = new Composer();
-const ast = $derived.by(() => composer.compose(ujlcDocument));
+const ast = $derived.by(async () => await composer.compose(ujlcDocument));
 ```
 
 ### Context Operations
@@ -465,8 +463,6 @@ sequenceDiagram
     deactivate Editor
 ```
 
----
-
 ## 6.5 Media Upload Flow
 
 ### Übersicht
@@ -476,13 +472,17 @@ Das UJL-Framework unterstützt zwei Media-Storage-Modi:
 - **Inline**: Base64-encoded in UJLC-Dokument
 - **Backend**: Payload CMS API
 
+::: info Crafter Konfiguration
+Der Crafter verwendet **App-Options** zur Bestimmung des Storage-Modus (`preferredStorage`, `backendUrl`, `backendApiKey`), nicht die Dokument-Konfiguration (`meta._library`). Die Dokument-Config dient nur als Metadaten-Information, wird aber vom Crafter ignoriert. Die tatsächliche Storage-Entscheidung erfolgt über die Crafter-Initialisierung.
+:::
+
 ### Sequenzdiagramm: Inline Upload
 
 ```mermaid
 sequenceDiagram
     participant User as User
-    participant Picker as MediaPicker
-    participant Service as InlineMediaService
+    participant Picker as ImagePicker
+    participant Service as InlineImageService
     participant Compress as Compressor
     participant Context as CrafterContext
 
@@ -503,16 +503,16 @@ sequenceDiagram
     Note over Service: Async Base64 encoding
 
     Service->>Service: generateUid()
-    Service->>Context: updateMedia((media) => ({...media, [id]: entry}))
+    Service->>Context: updateImages((images) => ({...images, [id]: entry}))
 
-    Service-->>Picker: { mediaId, entry }
+    Service-->>Picker: { imageId, entry }
     deactivate Service
 
     activate Picker
-    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {mediaId, alt})
+    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {imageId, alt})
     deactivate Picker
 
-    Note over Context: Document updated with media reference
+    Note over Context: Document updated with image reference
 ```
 
 ### Sequenzdiagramm: Backend Upload
@@ -520,8 +520,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant User as User
-    participant Picker as MediaPicker
-    participant Service as BackendMediaService
+    participant Picker as ImagePicker
+    participant Service as BackendImageService
     participant API as Payload CMS API
     participant Context as CrafterContext
 
@@ -532,7 +532,7 @@ sequenceDiagram
 
     activate Service
     Service->>Service: Create FormData
-    Service->>API: POST /api/media (multipart/form-data)
+    Service->>API: POST /api/images (multipart/form-data)
     Note over Service,API: Authorization: users API-Key {key}
 
     activate API
@@ -543,15 +543,15 @@ sequenceDiagram
     API-->>Service: PayloadMediaDoc
     deactivate API
 
-    Service->>Service: Transform to MediaLibraryEntry
+    Service->>Service: Transform to ImageEntry
     Note over Service: Select best image size (xlarge > large > ...)
     Service->>Service: Construct full URL
 
-    Service-->>Picker: { mediaId, entry }
+    Service-->>Picker: { imageId, entry }
     deactivate Service
 
     activate Picker
-    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {mediaId, alt})
+    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {imageId, alt})
     deactivate Picker
 ```
 
@@ -564,11 +564,18 @@ Die Konfiguration wird im UJLC-Dokument gespeichert:
 {
   ujlc: {
     meta: {
-      media_library: { storage: "inline" }
+      _library: { storage: "inline" }
     },
-    media: {
-      "media-001": {
-        dataUrl: "data:image/jpeg;base64,..."
+    images: {
+      "img-001": {
+        src: "data:image/jpeg;base64,...",
+        metadata: {
+          filename: "example.jpg",
+          mimeType: "image/jpeg",
+          filesize: 45678,
+          width: 1920,
+          height: 1080
+        }
       }
     }
   }
@@ -578,15 +585,21 @@ Die Konfiguration wird im UJLC-Dokument gespeichert:
 {
   ujlc: {
     meta: {
-      media_library: {
+      _library: {
         storage: "backend",
-        endpoint: "http://localhost:3000/api"
+        url: "http://localhost:3000/api"
       }
     },
-    media: {
-      "media-001": {
-        // Reference only, data on server
-        mediaId: "67890abcdef12345"
+    images: {
+      "img-001": {
+        src: "http://localhost:3000/api/images/67890abcdef12345",
+        metadata: {
+          filename: "example.jpg",
+          mimeType: "image/jpeg",
+          filesize: 45678,
+          width: 1920,
+          height: 1080
+        }
       }
     }
   }
@@ -598,33 +611,31 @@ Die Konfiguration wird im UJLC-Dokument gespeichert:
 ```mermaid
 sequenceDiagram
     participant Module as Image Module
-    participant Library as MediaLibrary
-    participant Resolver as MediaResolver
+    participant Library as ImageLibrary
+    participant Provider as ImageProvider
     participant Backend as Payload CMS
 
-    Module->>Library: resolve(mediaId)
+    Module->>Library: resolve(imageId)
     activate Library
 
     Library->>Library: Check inline storage
 
     alt Found in inline storage
-        Library-->>Module: { dataUrl: "data:..." }
-    else Not found & resolver exists
-        Library->>Resolver: resolve(mediaId)
-        activate Resolver
-        Resolver->>Backend: GET /api/media/{mediaId}
-        Backend-->>Resolver: Media data
-        Resolver-->>Library: URL
-        deactivate Resolver
-        Library-->>Module: { dataUrl: URL }
+        Library-->>Module: { src: "data:..." }
+    else Not found & provider exists
+        Library->>Provider: resolve(imageId)
+        activate Provider
+        Provider->>Backend: GET /api/images/{imageId}
+        Backend-->>Provider: Image data
+        Provider-->>Library: ImageSource
+        deactivate Provider
+        Library-->>Module: { src: URL }
     else Not found anywhere
         Library-->>Module: null
     end
 
     deactivate Library
 ```
-
----
 
 ## 6.6 Validation Flow
 
@@ -711,13 +722,13 @@ graph TD
         UJLCDoc[UJLCDocumentSchema]
         UJLCObj[UJLCObjectSchema]
         UJLCMeta[UJLCDocumentMetaSchema]
-        UJLCMedia[MediaLibraryObjectSchema]
+        UJLCImages[ImageLibraryObjectSchema]
         UJLCSlot[UJLCSlotObjectSchema]
         UJLCModule[UJLCModuleObjectSchema]
 
         UJLCDoc --> UJLCObj
         UJLCObj --> UJLCMeta
-        UJLCObj --> UJLCMedia
+        UJLCObj --> UJLCImages
         UJLCObj --> UJLCSlot
         UJLCSlot --> UJLCModule
         UJLCModule -->|recursive via z.lazy| UJLCModule
@@ -790,8 +801,6 @@ Error 2:
    Code: invalid_literal
    Location: ujlc.root.1.fields.content
 ```
-
----
 
 ## 6.7 Cross-Flow Interaktionen
 
@@ -883,7 +892,7 @@ Der Crafter nutzt Svelte 5 Runes für effiziente reaktive Updates:
 let ujlcDocument = $state<UJLCDocument>(initial);
 
 // Derived (automatisch re-computed bei Änderungen)
-const ast = $derived.by(() => composer.compose(ujlcDocument));
+const ast = $derived.by(async () => await composer.compose(ujlcDocument));
 
 // Effect (Side-effects bei Änderungen)
 $effect(() => {
@@ -899,8 +908,8 @@ Media wird nur bei Bedarf geladen:
 ```typescript
 // Im Image-Modul
 const imageData = $derived.by(async () => {
-	if (node.props.image?.mediaId) {
-		return await mediaLibrary.resolve(node.props.image.mediaId);
+	if (node.props.image?.imageId) {
+		return await imageLibrary.resolve(node.props.image.imageId);
 	}
 	return null;
 });
@@ -915,8 +924,6 @@ const imageData = $derived.by(async () => {
 | **Compression**   | Client-side Image Compression vor Upload             |
 | **Validation**    | Lazy-Evaluation mit `z.lazy()` für rekursive Schemas |
 
----
-
 ## Nächste Kapitel
 
 Für weitere Architektur-Details siehe:
@@ -924,7 +931,5 @@ Für weitere Architektur-Details siehe:
 - **[Verteilungssicht (Kapitel 7)](./07-deployment-view)** - Deployment-Topologien
 - **[Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts)** - Übergreifende Aspekte
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - ADRs
-
----
 
 _Letzte Aktualisierung: 2026-01-14_

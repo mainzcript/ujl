@@ -43,8 +43,6 @@ graph TB
     style TechDebt fill:#6366f1
 ```
 
----
-
 ## 11.1 Technische Risiken
 
 ### 11.1.1 Svelte 5 Runes - Ecosystem Maturity
@@ -82,8 +80,6 @@ Das UJL Framework basiert auf Svelte 5 mit dem neuen Runes-System (`$state`, `$d
 4. **Fallback-Dokumentation**: Dokumentation der Migration von Svelte 4 zu 5
 
 **Status:** Aktiv überwacht
-
----
 
 ### 11.1.2 Monorepo Build-Komplexität
 
@@ -130,8 +126,6 @@ types → core → ui → adapter-svelte → adapter-web → crafter/demo
 
 **Status:** Mitigiert durch Build-Scripts
 
----
-
 ### 11.1.3 Bundle Size Management
 
 | Attribut               | Wert        |
@@ -176,8 +170,6 @@ Das `@ujl-framework/adapter-web` Paket bundelt Svelte und alle Abhängigkeiten i
 
 **Status:** Überwacht, Optimierung geplant
 
----
-
 ### 11.1.4 Payload CMS Backend-Abhängigkeit
 
 | Attribut               | Wert                 |
@@ -201,8 +193,8 @@ Der Backend-Storage-Modus der Media Library nutzt Payload CMS 3.x als Backend-Se
 
 **Betroffene Pakete:**
 
-- `services/media` - Direkte Payload-Integration
-- `@ujl-framework/crafter` - Backend Media Service Implementation
+- `services/library` - Direkte Payload-Integration
+- `@ujl-framework/crafter` - Backend Image Service Implementation
 
 **Mitigationsmaßnahmen:**
 
@@ -212,8 +204,6 @@ Der Backend-Storage-Modus der Media Library nutzt Payload CMS 3.x als Backend-Se
 4. **Alternative Dokumentation**: Hinweise auf S3-kompatible Storage-Adapter
 
 **Status:** Akzeptiertes Risiko (Inline-Storage als Fallback)
-
----
 
 ### 11.1.5 OKLCH Browser-Kompatibilität
 
@@ -259,8 +249,6 @@ Das Design-Token-System verwendet den OKLCH-Farbraum für perzeptuell uniforme F
 4. **Progressive Enhancement**: Core-Funktionalität auch ohne OKLCH nutzbar
 
 **Status:** Akzeptiertes Risiko (hohe Browser-Abdeckung)
-
----
 
 <!-- TOdo -->
 
@@ -310,8 +298,6 @@ Die Test-Abdeckung variiert zwischen Paketen. Während `types` und `core` gut ge
 
 **Status:** Aktiv in Bearbeitung
 
----
-
 ### 11.1.7 Single-Maintainer-Risiko
 
 | Attribut               | Wert               |
@@ -341,8 +327,6 @@ Als Masterprojekt wird UJL primär von zwei Personen entwickelt. Dies schafft ei
 4. **Contributor Guidelines**: Vorbereitung für externe Beiträge
 
 **Status:** Akzeptiertes Risiko (Masterarbeit-Kontext)
-
----
 
 ### 11.1.8 ProseMirror/TipTap Komplexität
 
@@ -378,8 +362,6 @@ Das Rich-Text-System basiert auf TipTap/ProseMirror, einem leistungsstarken aber
 4. **Dokumentation**: Schema-Dokumentation in `@ujl-framework/core` README
 
 **Status:** Mitigiert durch klare Abstraktion
-
----
 
 ## 11.2 Technische Schulden
 
@@ -419,8 +401,6 @@ const content = this.fields[0].field.parse(moduleData.fields.content);
 
 **Status:** Offen
 
----
-
 ### 11.2.2 Hardcoded Configuration Values
 
 | Attribut        | Wert               |
@@ -437,7 +417,7 @@ Einige Konfigurationswerte sind direkt im Code hardcoded, anstatt über Umgebung
 **Beispiele:**
 
 ```typescript
-// In services/media
+// In services/library
 const DEFAULT_IMAGE_SIZES = [400, 500, 750, 1000, 1920]; // Hardcoded
 
 // In packages/crafter
@@ -446,7 +426,7 @@ const MAX_TREE_DEPTH = 10; // Hardcoded
 
 **Betroffene Pakete:**
 
-- `services/media` - Image Size Konfiguration
+- `services/library` - Image Size Konfiguration
 - `@ujl-framework/crafter` - Editor-Limits
 - `@ujl-framework/core` - Default Field Constraints
 
@@ -457,8 +437,6 @@ const MAX_TREE_DEPTH = 10; // Hardcoded
 3. Dokumentation der Konfigurationsoptionen
 
 **Status:** Offen
-
----
 
 ### 11.2.3 Fehlende Error Boundaries
 
@@ -491,8 +469,6 @@ Der Crafter-Editor hat keine systematischen Error Boundaries. Ein Fehler in eine
 3. Error Logging und Reporting Integration
 
 **Status:** Offen
-
----
 
 ### 11.2.4 Inkonsistente Naming Conventions
 
@@ -533,8 +509,6 @@ packages/adapter-svelte/src/lib/components/
 
 **Status:** Akzeptiert (unterschiedliche Konventionen pro Layer)
 
----
-
 ### 11.2.5 Fehlende Internationalisierung (i18n)
 
 | Attribut        | Wert           |
@@ -569,8 +543,6 @@ Der Crafter-Editor und die UI-Texte sind aktuell nur auf Deutsch/Englisch verfü
 
 **Status:** Offen (Post-MVP)
 
----
-
 ### 11.2.6 Unvollständige JSDoc Dokumentation
 
 | Attribut        | Wert            |
@@ -598,8 +570,6 @@ Nicht alle öffentlichen APIs haben vollständige JSDoc-Kommentare. Dies erschwe
 
 **Status:** Offen
 
----
-
 ### 11.2.7 Manuelle CSS Custom Property Generation
 
 | Attribut        | Wert              |
@@ -626,8 +596,6 @@ Die Generierung von CSS Custom Properties aus TokenSet erfolgt manuell in mehrer
 3. Tests für CSS Variable Generation
 
 **Status:** Offen
-
----
 
 ### 11.2.8 Fehlende Undo/Redo Funktionalität im Crafter
 
@@ -661,8 +629,6 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 **Status:** Offen (Phase 2 Roadmap)
 
----
-
 ### 11.2.9 API-Key-Exposition im Media Service
 
 | Attribut        | Wert              |
@@ -685,8 +651,8 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 
 **Betroffene Pakete:**
 
-- `services/media` - API-Key-Handling
-- `@ujl-framework/crafter` - Media Service Integration
+- `services/library` - API-Key-Handling
+- `@ujl-framework/crafter` - Image Service Integration
 
 **Behebungsplan:**
 
@@ -696,8 +662,6 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 4. Kurzzeitige, scope-limitierte Tokens für Upload-Operationen generieren
 
 **Status:** Offen
-
----
 
 ## 11.3 Risiko-Matrix
 
@@ -712,8 +676,6 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 | R-007     | Single-Maintainer-Risiko       | Hoch               | Hoch       | Mittel    | Akzeptiert     |
 | R-008     | ProseMirror/TipTap Komplexität | Niedrig            | Mittel     | Niedrig   | Mitigiert      |
 
----
-
 ## 11.4 Technical Debt Übersicht
 
 | Schulden-ID | Beschreibung                        | Aufwand | Priorität | Status     |
@@ -727,8 +689,6 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 | TD-007      | Manuelle CSS Property Generation    | Mittel  | Niedrig   | Offen      |
 | TD-008      | Fehlende Undo/Redo Funktionalität   | Hoch    | Mittel    | Offen      |
 | TD-009      | API-Key-Exposition im Media Service | Mittel  | Hoch      | Offen      |
-
----
 
 ## 11.5 Maßnahmenplan
 
@@ -771,13 +731,9 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 3. **Contributor Guidelines** (R-007)
    - Externe Beiträge ermöglichen
 
----
-
 ## Nächste Kapitel
 
 - **[Glossar (Kapitel 12)](./12-glossary)** - Begriffsdefinitionen
 - **[Architekturentscheidungen (Kapitel 9)](./09-architecture-decisions)** - Detaillierte ADRs
-
----
 
 _Letzte Aktualisierung: 2026-01-21_

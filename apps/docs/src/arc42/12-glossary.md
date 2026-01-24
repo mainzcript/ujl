@@ -43,9 +43,10 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Verwaltet verfügbare Module und ermöglicht die Registrierung neuer Module zur Erweiterung des Systems.
 
 - **Validator**  
-  Teil des Renderprozesses – überprüft die technische Korrektheit und Kompatibilität von `.ujlc.json`-Layouts:
-  - **Syntaxprüfung**: Formale Validierung der JSON-Struktur.
-  - **Kompatibilitätsprüfung**: Sicherstellung, dass die Layout-Datei mit der eingesetzten UJL-Version harmoniert.
+  Sammlung von Validator-Funktionen im Paket `@ujl-framework/types` – überprüft die technische Korrektheit und Kompatibilität von UJL-Dokumenten:
+  - **Syntaxprüfung**: Formale Validierung der JSON-Struktur via Zod-Schemas.
+  - **Kompatibilitätsprüfung**: Sicherstellung, dass Dokumente mit der eingesetzten UJL-Version harmonieren.
+  - **Hauptfunktionen**: `validateUJLCDocumentSafe()`, `validateUJLTDocumentSafe()`, `validateModule()`, `validateSlot()`
 
 ## Rollen und Nutzung
 
