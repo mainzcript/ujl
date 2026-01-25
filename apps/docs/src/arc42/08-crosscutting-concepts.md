@@ -355,7 +355,7 @@ enum UJLErrorCode {
 	COMPOSITION_CIRCULAR_DEPENDENCY = 2002,
 	COMPOSITION_INVALID_SLOT = 2003,
 
-	// Media Errors (3xxx)
+	// Image Errors (3xxx)
 	MEDIA_NOT_FOUND = 3001,
 	MEDIA_UPLOAD_FAILED = 3002,
 	MEDIA_INVALID_FORMAT = 3003,
@@ -443,7 +443,7 @@ console.error("[UJL:Composer]", {
 });
 
 // Payload CMS
-console.error("[UJL:Media]", {
+console.error("[UJL:Image]", {
 	code: UJLErrorCode.MEDIA_UPLOAD_FAILED,
 	message: "Image upload failed",
 	context: { component: "ImageUpload", action: "upload" },
@@ -1051,6 +1051,13 @@ Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten bas
 | xxxl | 1920px | WebP   | Full HD         |
 | max  | 2560px | WebP   | 2K/Retina       |
 
+### 8.10.4 Migration zwischen Storage-Modi
+
+Der Crafter ist pro Umgebung auf einen Storage-Modus konfiguriert (`inline` oder `backend`). Wenn ein Dokument in einem anderen Modus vorliegt, migriert der Crafter es beim Laden auf den konfigurierten Modus und schreibt das Dokument entsprechend um.
+
+- Dokument ist `backend`, Crafter ist `inline`: Bilder werden aus dem Library Service geladen, komprimiert und in `ujlc.images` eingebettet; `ujlc.meta._library` wird auf Inline umgestellt.
+- Dokument ist `inline`, Crafter ist `backend`: eingebettete Bilder werden in den Library Service hochgeladen; `ujlc.images` wird auf Backend-Referenzen umgeschrieben und `ujlc.meta._library` wird gesetzt.
+
 ## 8.11 Rich Text System
 
 ### 8.11.1 TipTap/ProseMirror Integration
@@ -1137,13 +1144,11 @@ Drei Hauptszenarien sind dokumentiert:
 
 1. **Local Development**: Vite Dev Server mit HMR
 2. **CI/CD Pipeline**: GitLab CI mit Multi-Stage-Build
-3. **Production**: Docker Compose (Crafter + Media Service)
+3. **Production**: Docker Compose (Crafter + Library Service)
 
 Details siehe [Deployment-View (Kapitel 7)](./07-deployment-view).
 
-### 8.12 Logging und Monitoring (Architektur-Aspekte)
-
-### 8.12.1 Monorepo-Struktur
+### 8.12.3 Monorepo-Struktur
 
 Das UJL-Framework ist als pnpm Workspace Monorepo organisiert:
 
@@ -1158,13 +1163,13 @@ ujl/
 │   ├── crafter/         # Application Layer
 │   └── examples/        # Example Documents
 ├── apps/
-│   ├── demo/            # Demo Application
+│   ├── dev-demo/        # Demo Application
 │   └── docs/            # Documentation
 └── services/
     └── library/         # Payload CMS Backend
 ```
 
-### 8.12.2 Dependency Management
+### 8.12.4 Dependency Management
 
 Build-Reihenfolge folgt der Dependency-Hierarchie:
 
@@ -1176,7 +1181,7 @@ pnpm run build
 # 1. types - 2. core - 3. ui - 4. adapter-svelte - 5. adapter-web - 6. crafter
 ```
 
-### 8.12.3 Versionierung mit Changesets
+### 8.12.5 Versionierung mit Changesets
 
 ```bash
 # Feature Branch: Changeset erstellen
@@ -1195,7 +1200,7 @@ Die folgenden Abschnitte behandeln operative Aspekte, die für den Betrieb relev
 
 ### 8.13.1 Logging-Strategie (Architektur-Aspekt)
 
-**Architektur-Entscheidung:** UJL nutzt strukturiertes, context-basiertes Logging mit standardisierten Log-Levels (`error`, `warn`, `info`, `debug`). Context-Tags wie `[Composer]`, `[Crafter]`, `[MediaService]` ermöglichen Filterung und Nachvollziehbarkeit.
+**Architektur-Entscheidung:** UJL nutzt strukturiertes, context-basiertes Logging mit standardisierten Log-Levels (`error`, `warn`, `info`, `debug`). Context-Tags wie `[Composer]`, `[Crafter]`, `[LibraryService]` ermöglichen Filterung und Nachvollziehbarkeit.
 
 **Performance-Monitoring:** Composer-Composition-Zeit und Crafter-Render-Zeit werden getrackt. Zielwert für Composition: <100ms (warn bei >200ms).
 
@@ -1207,8 +1212,8 @@ Konkrete Implementierung (Pino, Winston, etc.) ist deployment-abhängig.
 
 1. **Client-Side**: Browser-Cache (HTTP) + Service Worker (Workbox, falls eingesetzt)
 2. **In-Memory**: Module Registry Cache, Composer AST-Cache (LRU, falls eingesetzt)
-3. **API-Level**: ETag-basierte Cache-Control Headers für Media-API
-4. **CDN-Level**: CloudFlare/CDN für Static Assets und Media Files
+3. **API-Level**: ETag-basierte Cache-Control Headers für Image API
+4. **CDN-Level**: CloudFlare/CDN für Static Assets und Image Files
 
 **Ziel:** Reduktion von Netzwerk-Requests und schnellere Wiederverwendung bereits geladener Ressourcen.
 
@@ -1219,11 +1224,11 @@ Konkrete Implementierung (Pino, Winston, etc.) ist deployment-abhängig.
 1. **Input-Validierung**: Zod-Schema-Validierung für alle externen Inputs (UJLC/UJLT)
 2. **XSS-Prevention**: DOMPurify für Rich-Text-Sanitization, Svelte automatisches Escaping
 3. **CSRF-Protection**: Built-in in Payload CMS und SvelteKit
-4. **API-Authentifizierung**: API-Key-basiert für Media Service (mittelfristig OAuth geplant)
+4. **API-Authentifizierung**: API-Key-basiert für Library Service (mittelfristig OAuth geplant)
 5. **Rate Limiting**: Express-Rate-Limiter für Upload-Endpunkte
 6. **Secrets Management**: Environment Variables (Development), HashiCorp Vault (Production)
 
-**Referenz:** Siehe [Risiken TD-009](./11-risks-and-technical-debt#_11-2-9-api-key-exposition-im-media-service) für bekannte Security-Schulden.
+**Referenz:** Siehe [Risiken TD-009](./11-risks-and-technical-debt#_11-2-9-api-key-exposition-im-library-service) für bekannte Security-Schulden.
 
 ### 8.13.4 Internationalisierung (i18n) - Status: Geplant
 

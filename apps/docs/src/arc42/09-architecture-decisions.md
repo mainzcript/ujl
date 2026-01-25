@@ -17,9 +17,9 @@ Damit das Framework erweiterbar bleibt, ohne den Core zu destabilisieren, setzt 
 
 Um die Core-Logik unabhängig vom jeweiligen UI-Framework zu halten, rendert UJL nicht direkt, sondern erzeugt zunächst einen AST, der anschließend über Adapter in unterschiedliche Targets übersetzt wird (z. B. Svelte-Komponenten oder Web Components). Dadurch bleibt die fachliche Composition stabil, während neue Adapter ohne Core-Änderungen hinzukommen können. Gleichzeitig entstehen Implementierungsaufwand pro Target, unterschiedliche Bundle-Größen und die Notwendigkeit, Adapter-Versionen synchron zu halten.
 
-## 9.4 ADR-004: Dual Media Storage Strategy (Inline vs. Backend)
+## 9.4 ADR-004: Dual Image Storage Strategy (Inline vs. Backend)
 
-Für Medien unterstützt UJL zwei Betriebsarten, die sich an unterschiedlichen Use Cases orientieren: Inline-Storage (portabel, da Assets im Dokument eingebettet sind) und Backend-Storage (skalierbar, da Assets über einen Provider/Resolver aus einer Library bezogen werden). So funktionieren Standalone-Dokumente ebenso wie Enterprise-Workflows mit Metadaten und Versionierung. Je nach Modus fällt entweder Dateigröße (Inline) oder Infrastruktur- und Betriebs-Komplexität (Backend) stärker ins Gewicht.
+Für Bilder unterstützt UJL zwei Storage-Modi, die sich an unterschiedlichen Use Cases orientieren: Inline Storage (portabel, da Bilder im Dokument eingebettet sind) und Backend Storage (skalierbar, da Bilder über einen Provider/Resolver aus dem Library Service bezogen werden). So funktionieren Standalone-Dokumente ebenso wie Workflows mit Metadaten und Versionierung. Je nach Modus fällt entweder Dateigröße (Inline) oder Infrastruktur- und Betriebs-Komplexität (Backend) stärker ins Gewicht.
 
 ## 9.5 ADR-005: Zod-basierte Runtime Validation mit TypeScript Type Inference
 
@@ -29,9 +29,9 @@ Da UJL-Dokumente häufig aus externen Quellen stammen (Datei, CMS, AI), reicht C
 
 Für Crafter (Editor) und den primären Rendering-Adapter setzt UJL auf Svelte 5, weil es mit kompiliertem Output, feingranularer Reaktivität (Runes) und einer einfachen Lifecycle-API gute Performance und geringe Bundle-Größe bei hoher Entwicklerproduktivität verbindet. Die Wahl erleichtert außerdem Web-Component-Exports über Custom Elements. Gleichzeitig sind Ökosystem und Community kleiner als bei React/Vue, und Svelte 5 ist als Technologie vergleichsweise jung.
 
-## 9.7 ADR-007: Payload CMS für Media Management Backend
+## 9.7 ADR-007: Payload CMS für den Library Service
 
-Für die Media Library nutzt UJL Payload CMS als Headless-Backend, um Upload, Metadatenpflege (z. B. Alt-Text, Credits, i18n) und eine API out-of-the-box zu erhalten und gleichzeitig TypeScript-first zu bleiben. In Kombination mit PostgreSQL und integrierter Bildverarbeitung (z. B. responsive Größen und moderne Formate) entsteht ein professioneller Asset-Workflow. Der Trade-off sind zusätzliche Infrastruktur, Setup-Aufwand und laufende Betriebs- bzw. Hosting-Kosten.
+Für die Image Library nutzt UJL Payload CMS im Library Service als Headless-Backend, um Upload, Metadatenpflege (z. B. Alt-Text, Credits, i18n) und eine API out of the box zu erhalten und gleichzeitig TypeScript-first zu bleiben. In Kombination mit PostgreSQL und integrierter Bildverarbeitung (z. B. responsive Größen und moderne Formate) entsteht ein professioneller Asset-Workflow. Der Trade-off sind zusätzliche Infrastruktur, Setup-Aufwand und laufende Betriebs- bzw. Hosting-Kosten.
 
 ## 9.8 ADR-008: TipTap/ProseMirror für Rich Text Editing
 
@@ -71,7 +71,7 @@ Es ist noch offen, welches Lizenzmodell langfristig genutzt wird; aktuell wird z
 
 ### 9.13.2 Semantic Search mit pgvector
 
-Für die Media Library ist eine semantische Suche geplant, bei der Embeddings gespeichert und abgefragt werden; als technische Option steht pgvector als PostgreSQL-Extension im Raum, ist aber noch nicht entschieden und priorisiert.
+Für die Image Library ist eine semantische Suche geplant, bei der Embeddings gespeichert und abgefragt werden; als technische Option steht pgvector als PostgreSQL-Extension im Raum, ist aber noch nicht entschieden und priorisiert.
 
 ### 9.13.3 Weitere Adapter
 

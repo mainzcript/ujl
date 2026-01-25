@@ -14,7 +14,7 @@ Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
 | **6.2 Document Composition** | UJL-Dokument zu AST transformieren    | `core`, `types`                     |
 | **6.3 Adapter Rendering**    | AST zu UI-Komponenten rendern         | `adapter-svelte`, `ui`              |
 | **6.4 Crafter Editor Flow**  | Dokument-Bearbeitung im Visual Editor | `crafter`, `core`, `adapter-svelte` |
-| **6.5 Media Upload**         | Medien hochladen und referenzieren    | `crafter`, `media`                  |
+| **6.5 Image Upload**         | Bilder hochladen und referenzieren    | `crafter`, `library`                |
 | **6.6 Validation Flow**      | Dokumente validieren                  | `types`                             |
 
 ## 6.2 Document Composition
@@ -140,7 +140,7 @@ sequenceDiagram
 | Fehler               | Behandlung                                                                                   |
 | -------------------- | -------------------------------------------------------------------------------------------- |
 | Unbekannter Modultyp | Error-Node wird erzeugt: `{ type: "error", props: { message: "Unknown module type: xyz" } }` |
-| Media nicht gefunden | `null` wird zurückgegeben, Modul entscheidet über Fallback                                   |
+| Bild nicht gefunden  | `null` wird zurückgegeben, Modul entscheidet über Fallback                                   |
 | Ungültige Felder     | Modul-interne Validation mit Field-System                                                    |
 
 ### 6.2.1 Vertiefung: Grid-Composition (1:N Modul→Node Transformation)
@@ -677,18 +677,23 @@ sequenceDiagram
     deactivate Editor
 ```
 
-## 6.5 Media Upload Flow
+## 6.5 Image Upload Flow
 
 ### Übersicht
 
-Das UJL-Framework unterstützt zwei Media-Storage-Modi:
+Das UJL-Framework unterstützt zwei Storage-Modi für Bilder:
 
 - **Inline**: Base64-encoded in UJLC-Dokument
-- **Backend**: Payload CMS API
+- **Backend**: Library Service (Payload CMS) via Image API
 
 ::: info Crafter Konfiguration
-Der Crafter verwendet **App-Options** zur Bestimmung des Storage-Modus (`preferredStorage`, `backendUrl`, `backendApiKey`), nicht die Dokument-Konfiguration (`meta._library`). Die Dokument-Config dient nur als Metadaten-Information, wird aber vom Crafter ignoriert. Die tatsächliche Storage-Entscheidung erfolgt über die Crafter-Initialisierung.
-:::
+Der Crafter wird über eine Library-Konfiguration initialisiert (`library.storage` sowie bei Backend `library.url` und `library.apiKey`). Diese Konfiguration definiert den Ziel-Storage-Modus der aktuellen Umgebung.
+
+Beim Öffnen eines Dokuments prüft der Crafter `ujlc.meta._library` (falls vorhanden) und migriert das Dokument in den konfigurierten Modus, wenn es nicht passt:
+
+- Dokument ist `backend`, Crafter ist `inline`: Bilder über die Image API laden, komprimieren, in `ujlc.images` einbetten und die Dokument-Metadaten entsprechend umstellen.
+- Dokument ist `inline`, Crafter ist `backend`: eingebettete Bilder hochladen, Referenzen umschreiben und `ujlc.meta._library` auf das Backend setzen.
+  :::
 
 ### Sequenzdiagramm: Inline Upload
 
@@ -736,7 +741,7 @@ sequenceDiagram
     participant User as User
     participant Picker as ImagePicker
     participant Service as BackendImageService
-    participant API as Payload CMS API
+    participant API as Library Service Image API
     participant Context as CrafterContext
 
     User->>Picker: Datei auswählen
@@ -754,7 +759,7 @@ sequenceDiagram
     Note over API: Generate sizes: thumbnail, small, medium, large, xlarge
     API->>API: Store in filesystem
     API->>API: Save metadata to PostgreSQL
-    API-->>Service: PayloadMediaDoc
+    API-->>Service: PayloadImageDoc
     deactivate API
 
     Service->>Service: Transform to ImageEntry
@@ -820,7 +825,7 @@ Die Konfiguration wird im UJLC-Dokument gespeichert:
 }
 ```
 
-### Media Resolution im Adapter
+### Image Resolution im Adapter
 
 ```mermaid
 sequenceDiagram
@@ -1058,7 +1063,7 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     subgraph Input["UJLC Document (JSON)"]
-        Doc["ujlc: meta, media, root"]
+        Doc["ujlc: meta, images, root"]
     end
 
     subgraph Validation["Validation (Zod)"]
@@ -1067,7 +1072,7 @@ flowchart TD
 
     subgraph Composition["Composition (Core)"]
         Comp["Composer.compose()"]
-        CompDetails["Module Registry Lookup<br/>Media Resolution<br/>Recursive Slot Processing"]
+        CompDetails["Module Registry Lookup<br/>Image Resolution<br/>Recursive Slot Processing"]
     end
 
     subgraph AST["AST (Abstract Syntax Tree)"]
@@ -1115,9 +1120,9 @@ $effect(() => {
 });
 ```
 
-### Lazy Media Loading
+### Lazy Image Loading
 
-Media wird nur bei Bedarf geladen:
+Bilder werden nur bei Bedarf geladen:
 
 ```typescript
 // Im Image-Modul
@@ -1134,6 +1139,6 @@ const imageData = $derived.by(async () => {
 | Bereich           | Optimierung                                          |
 | ----------------- | ---------------------------------------------------- |
 | **AST-Rendering** | `{#each}` mit `key` für effizientes DOM-Diffing      |
-| **Media**         | Responsive Image Sizes (thumbnail → xlarge)          |
+| **Images**        | Responsive Image Sizes (thumbnail → xlarge)          |
 | **Compression**   | Client-side Image Compression vor Upload             |
 | **Validation**    | Lazy-Evaluation mit `z.lazy()` für rekursive Schemas |

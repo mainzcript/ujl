@@ -27,10 +27,10 @@ A central concept of UJL is the strict separation of content and design. Unlike 
 ```
 ujl/
 ├── packages/
-│   ├── core/           # Schemas, Validator, Renderer, Media Library System
+│   ├── core/           # Schemas, Validator, Renderer, Image Library System
 │   ├── types/          # TypeScript types and Zod schemas
 │   ├── ui/             # Shadcn-svelte UI Components
-│   ├── crafter/        # Visual UJL Editor with Media Library Integration
+│   ├── crafter/        # Visual UJL Editor with Image Library Integration
 │   ├── adapter-svelte/ # Svelte Adapter (Svelte 5)
 │   ├── adapter-web/    # Web Adapter (Custom Elements)
 │   └── examples/       # Example Material and Test Data

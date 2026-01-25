@@ -31,7 +31,7 @@ UJL richtet sich an Teams, die Inhalte visuell erstellen wollen, aber technische
 
 ## 1.2 Quality Goals
 
-Die wichtigsten Qualitätsziele (max. fünf) für UJL, priorisiert nach Architektur-Relevanz:
+Die wichtigsten Qualitätsziele für UJL, priorisiert nach Architektur-Relevanz:
 
 | Prio | Qualitätsziel                        | Motivation                                                                                     | Umsetzung in der Architektur                                                                                                                                                        |
 | ---: | ------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

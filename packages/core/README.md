@@ -265,12 +265,12 @@ Fields support optional UI metadata in their config:
 
 ### Library System
 
-The core package provides a flexible library system that supports both inline and backend storage modes. Currently, only images are supported, with plans for additional media types in future releases.
+The core package provides a flexible library system that supports both inline and backend storage modes. Currently, only images are supported, with plans for additional asset types in future releases.
 
 **Storage Modes:**
 
-- **Inline Storage** - Media stored as Base64-encoded data within UJLC documents
-- **Backend Storage** - Media stored on a Payload CMS server with references in documents
+- **Inline Storage** - Images stored as Base64-encoded data within UJLC documents
+- **Backend Storage** - Images stored on a Payload CMS server with references in documents
 
 **Library Configuration:**
 
@@ -282,7 +282,7 @@ Library configuration is stored in the document metadata at `ujlc.meta._library`
     "meta": {
       "_library": {
         "storage": "inline" | "backend",
-        "url": "http://localhost:3000/api"  // Required for backend storage
+        "url": "http://localhost:3000"  // Required for backend storage
       }
     },
     "images": {

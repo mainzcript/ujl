@@ -100,7 +100,7 @@ Das UJL Framework ist als pnpm Workspace Monorepo mit mehr als 10 Paketen organi
 **Build-Dependency-Chain:**
 
 ```
-types → core → ui → adapter-svelte → adapter-web → crafter/demo
+types → core → ui → adapter-svelte → adapter-web → crafter/dev-demo
                 ↘ examples ↗
 ```
 
@@ -184,7 +184,7 @@ Das `@ujl-framework/adapter-web` Paket bundelt Svelte und alle Abhängigkeiten i
 
 **Beschreibung:**
 
-Der Backend-Storage-Modus der Media Library nutzt Payload CMS 3.x als Backend-Service. Dies schafft eine externe Abhängigkeit für Enterprise-Features wie responsive Images, Metadaten-Verwaltung und Lokalisierung.
+Der Backend-Storage-Modus der Image Library nutzt den Library Service (Payload CMS) als Backend. Dies schafft eine externe Abhängigkeit für Enterprise-Features wie responsive Images, Metadaten-Verwaltung und Lokalisierung.
 
 **Potenzielle Auswirkungen:**
 
@@ -201,7 +201,7 @@ Der Backend-Storage-Modus der Media Library nutzt Payload CMS 3.x als Backend-Se
 **Mitigationsmaßnahmen:**
 
 1. **Inline-Storage als Default**: Backend-Storage ist opt-in, nicht erforderlich
-2. **Media Service Interface**: Abstrakte Schnittstelle ermöglicht Alternative Backends
+2. **Image Service Interface**: Abstrakte Schnittstelle ermöglicht Alternative Backends
 3. **Version-Pinning**: Explizite Payload-Version in `package.json`
 4. **Alternative Dokumentation**: Hinweise auf S3-kompatible Storage-Adapter
 
@@ -629,7 +629,7 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 **Status:** Offen (Phase 2 Roadmap)
 
-### 11.2.9 API-Key-Exposition im Media Service
+### 11.2.9 API-Key-Exposition im Library Service
 
 | Attribut        | Wert              |
 | --------------- | ----------------- |
@@ -640,12 +640,12 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 **Beschreibung:**
 
-Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client. Dies stellt ein Sicherheitsrisiko dar, da API-Keys im Client-Code oder Netzwerk-Requests sichtbar und somit kompromittierbar sind.
+Der Library Service überträgt den API-Key direkt an das Frontend bzw. den Client. Dies stellt ein Sicherheitsrisiko dar, da API-Keys im Client-Code oder Netzwerk-Requests sichtbar und somit kompromittierbar sind.
 
 **Potenzielle Auswirkungen:**
 
 - API-Keys können von Dritten abgefangen und missbraucht werden
-- Unbefugter Zugriff auf Media-Service-Ressourcen
+- Unbefugter Zugriff auf Ressourcen des Library Service
 - Mögliche Kostenexplosion bei externen Services (z.B. CDN, Storage)
 - Sicherheitsaudit-Probleme bei Enterprise-Kunden
 
@@ -657,7 +657,7 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 **Behebungsplan:**
 
 1. API-Key ausschließlich serverseitig verwenden
-2. Proxy-Endpoint im Backend für Media-Anfragen implementieren
+2. Proxy-Endpoint im Backend für Image-Anfragen implementieren
 3. Token-basierte Authentifizierung für Client-Requests einführen
 4. Kurzzeitige, scope-limitierte Tokens für Upload-Operationen generieren
 
@@ -817,17 +817,17 @@ Die Crafter-Klasse (exportiert aus `@ujl-framework/crafter`) unterstützt aktuel
 
 ## 11.4 Technical Debt Übersicht
 
-| Schulden-ID | Beschreibung                        | Aufwand | Priorität | Status     |
-| ----------- | ----------------------------------- | ------- | --------- | ---------- |
-| TD-001      | Unvollständige Type Assertions      | Mittel  | Mittel    | Offen      |
-| TD-002      | Hardcoded Configuration Values      | Niedrig | Niedrig   | Offen      |
-| TD-003      | Fehlende Error Boundaries           | Mittel  | Mittel    | Offen      |
-| TD-004      | Inkonsistente Naming Conventions    | Niedrig | Niedrig   | Akzeptiert |
-| TD-005      | Fehlende Internationalisierung      | Hoch    | Niedrig   | Offen      |
-| TD-006      | Unvollständige JSDoc Dokumentation  | Mittel  | Mittel    | Offen      |
-| TD-007      | Manuelle CSS Property Generation    | Mittel  | Niedrig   | Offen      |
-| TD-008      | Fehlende Undo/Redo Funktionalität   | Hoch    | Mittel    | Offen      |
-| TD-009      | API-Key-Exposition im Media Service | Mittel  | Hoch      | Offen      |
+| Schulden-ID | Beschreibung                          | Aufwand | Priorität | Status     |
+| ----------- | ------------------------------------- | ------- | --------- | ---------- |
+| TD-001      | Unvollständige Type Assertions        | Mittel  | Mittel    | Offen      |
+| TD-002      | Hardcoded Configuration Values        | Niedrig | Niedrig   | Offen      |
+| TD-003      | Fehlende Error Boundaries             | Mittel  | Mittel    | Offen      |
+| TD-004      | Inkonsistente Naming Conventions      | Niedrig | Niedrig   | Akzeptiert |
+| TD-005      | Fehlende Internationalisierung        | Hoch    | Niedrig   | Offen      |
+| TD-006      | Unvollständige JSDoc Dokumentation    | Mittel  | Mittel    | Offen      |
+| TD-007      | Manuelle CSS Property Generation      | Mittel  | Niedrig   | Offen      |
+| TD-008      | Fehlende Undo/Redo Funktionalität     | Hoch    | Mittel    | Offen      |
+| TD-009      | API-Key-Exposition im Library Service | Mittel  | Hoch      | Offen      |
 
 ## 11.5 Maßnahmenplan
 

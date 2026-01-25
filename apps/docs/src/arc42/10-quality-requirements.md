@@ -68,7 +68,7 @@ graph TB
 
     EXT --> EXT1["QS-EXT-01<br/>Custom Modules"]
     EXT --> EXT2["QS-EXT-02<br/>Custom Adapters"]
-    EXT --> EXT3["QS-EXT-03<br/>Media Storage"]
+    EXT --> EXT3["QS-EXT-03<br/>Image Storage"]
 
     PERF --> PERF1["QS-PERF-01<br/>Bundle-Größe"]
     PERF --> PERF2["QS-PERF-02<br/>Crafter-Reaktionszeit"]
@@ -278,17 +278,17 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Adapter-Svelte und Adapter-Web als Referenzimplementierungen.
 
-#### QS-EXT-03: Media Storage erweiterbar
+#### QS-EXT-03: Image Storage erweiterbar
 
 | Aspekt                | Beschreibung                                                                                                                      |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **Qualitätsziel**     | Erweiterbarkeit                                                                                                                   |
 | **Stimulus**          | Organisation möchte eigenen Storage-Backend verwenden (z.B. S3, Azure Blob)                                                       |
-| **Systemreaktion**    | Media Service Interface ermöglicht neue Storage-Implementierungen                                                                 |
+| **Systemreaktion**    | Image Service Interface ermöglicht neue Storage-Implementierungen                                                                 |
 | **Messbare Antwort**  | - Definiertes Interface für Storage-Backends<br/>- Inline und Backend Storage als Referenz<br/>- Seamless switching zwischen Modi |
-| **Architektur-Bezug** | Dual Storage Strategy ([ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend))         |
+| **Architektur-Bezug** | Dual Storage Strategy ([ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-image-storage-strategy-inline-vs-backend))         |
 
-**Testbarkeit:** Media Service Interface dokumentiert in `@ujl-framework/crafter`.
+**Testbarkeit:** Image Service Interface dokumentiert in `@ujl-framework/crafter`.
 
 ### 10.2.5 Performance (PERF)
 
@@ -423,7 +423,7 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 | QS-INT-03   | Integrationsfähigkeit | CMS-Integration           | JSON-Schnittstelle            | Implementiert |
 | QS-EXT-01   | Erweiterbarkeit       | Custom Module             | <100 LOC                      | Implementiert |
 | QS-EXT-02   | Erweiterbarkeit       | Custom Adapter            | <200 LOC                      | Implementiert |
-| QS-EXT-03   | Erweiterbarkeit       | Media Storage             | Interface dokumentiert        | Implementiert |
+| QS-EXT-03   | Erweiterbarkeit       | Image Storage             | Interface dokumentiert        | Implementiert |
 | QS-PERF-01  | Performance           | Bundle-Größe              | <100KB (adapter-web)          | Implementiert |
 | QS-PERF-02  | Performance           | Crafter-Reaktionszeit     | <200ms bei 200 Modulen        | Implementiert |
 | QS-PERF-03  | Performance           | Rendering-Performance     | <100ms Initial Render         | Implementiert |
@@ -449,7 +449,7 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | UJLC/UJLT Trennung (ADR-001)      | QS-BC-01, QS-BC-02, QS-BC-03                        |
 | Module Registry Pattern (ADR-002) | QS-EXT-01, QS-MAINT-02                              |
 | Adapter Pattern (ADR-003)         | QS-EXT-02, QS-INT-01, QS-INT-02                     |
-| Dual Media Storage (ADR-004)      | QS-EXT-03, QS-INT-03                                |
+| Dual Image Storage (ADR-004)      | QS-EXT-03, QS-INT-03                                |
 | Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-VAL-01, QS-VAL-02, QS-DX-01, QS-INT-03 |
 | Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03                  |
 | Payload CMS (ADR-007)             | QS-EXT-03                                           |

@@ -65,7 +65,7 @@ Das Validierungs-System erkennt automatisch den Dokumenttyp aus der JSON-Struktu
 
 ## Library Types
 
-This package includes comprehensive type definitions for the library system. Currently, only image types are defined, with additional media types planned for future releases.
+This package includes comprehensive type definitions for the library system. Currently, only image types are defined, with additional asset types planned for future releases.
 
 ### Image Entry Types
 

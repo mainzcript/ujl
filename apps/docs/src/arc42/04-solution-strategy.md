@@ -478,16 +478,16 @@ function serializeNode(node: ProseMirrorNode): string {
 
 **Referenz:** Siehe [ADR-008](./09-architecture-decisions#_9-8-adr-008-tiptap-prosemirror-für-rich-text-editing)
 
-### Strategie 7: Dual Storage Strategy für Medien
+### Strategie 7: Dual Storage Strategy für Bilder
 
 **Qualitätsziel:** Portabilität, Enterprise-Tauglichkeit
 
-**Problem:** Unterschiedliche Anwendungsfälle erfordern unterschiedliche Media-Strategien:
+**Problem:** Unterschiedliche Anwendungsfälle erfordern unterschiedliche Storage-Strategien:
 
 - **Standalone-Dokumente**: Sollen portabel sein ohne externe Abhängigkeiten
-- **Enterprise CMS**: Media-Verwaltung mit Metadaten, Responsive Images, Versionierung
+- **Enterprise CMS**: Bildverwaltung mit Metadaten, Responsive Images, Versionierung
 
-**Lösung:** Abstrahierte Media Library mit Resolver Pattern
+**Lösung:** Abstrahierte Image Library mit Resolver Pattern
 
 ```typescript
 // Image Library mit Provider
@@ -617,7 +617,7 @@ export const Images: CollectionConfig = {
 
 **Vorteile:**
 
-- Professionelle Media-Verwaltung
+- Professionelle Bildverwaltung
 - Responsive Images (WebP, mehrere Sizes)
 - Metadaten (Alt-Text, Lizenz, Tags, i18n)
 - Focal Point für Smart Cropping
@@ -635,7 +635,7 @@ export const Images: CollectionConfig = {
 - Enterprise-Features ohne Vendor Lock-in (Self-Hosted)
 - Komplexere Architektur durch Abstraktion
 
-**Referenz:** Siehe [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend)
+**Referenz:** Siehe [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-image-storage-strategy-inline-vs-backend)
 
 ## 4.2 Technologie-Entscheidungen
 
@@ -649,8 +649,8 @@ export const Images: CollectionConfig = {
 | **Styling**            | Tailwind CSS 4               | Utility-First, Tree-Shaking, Design-Token-Integration via CSS Custom Properties            |
 | **Rich Text**          | TipTap 3 (ProseMirror)       | Strukturierte JSON-Dokumente, WYSIWYG-Konsistenz, SSR-Safe Serialization                   |
 | **Color System**       | OKLCH (colorjs.io)           | Perzeptuell uniforme Paletten, präzise Kontrast-Berechnungen, WCAG-Konformität             |
-| **Media Backend**      | Payload CMS 3                | TypeScript-First, RESTful API, Image Processing (WebP, Focal Point), Self-Hosted           |
-| **Database**           | PostgreSQL 17                | Relational DB für Media Metadata, pgvector-ready für zukünftige Semantic Search            |
+| **Library Service**    | Payload CMS 3                | TypeScript-First, RESTful API, Image Processing (WebP, Focal Point), Self-Hosted           |
+| **Database**           | PostgreSQL 17                | Relational DB für Asset-Metadaten, pgvector-ready für zukünftige Semantic Search           |
 | **Build Tool**         | Vite 7                       | Schnelles HMR, optimierte Production Builds, ESM-Native, SvelteKit-Integration             |
 | **Monorepo**           | pnpm Workspaces + Changesets | Effiziente Disk-Space-Nutzung, koordinierte Versionierung, Semantic Versioning Automation  |
 | **Testing**            | Vitest 4 + Playwright 1.57   | Unit Tests (Jest-API), E2E Tests (Cross-Browser), Test Attributes ohne Production Overhead |
@@ -736,7 +736,7 @@ type User = z.infer<typeof UserSchema>;
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
 
-#### 3. Payload CMS für Media Backend
+#### 3. Payload CMS für den Library Service
 
 **Alternative Kandidaten:** Strapi, Custom Backend (Express + Sharp), Supabase Storage
 
@@ -788,7 +788,7 @@ formatOptions: { format: 'webp', options: { quality: 80 } }
 - Externe Service-Abhängigkeit → Ausgleich durch Inline Storage Fallback
 - Setup-Komplexität (Docker + PostgreSQL) → Ausgleich durch Docker Compose
 
-**Referenz:** Siehe [ADR-007](./09-architecture-decisions#_9-7-adr-007-payload-cms-für-media-management-backend)
+**Referenz:** Siehe [ADR-007](./09-architecture-decisions#_9-7-adr-007-payload-cms-für-den-library-service)
 
 #### 4. pnpm + Changesets für Monorepo
 
@@ -891,7 +891,7 @@ Die folgenden Trade-offs wurden akzeptiert, da die Vorteile die Nachteile überw
 
 #### 4. Setup-Komplexität vs. Enterprise-Features
 
-**Trade-off:** Payload CMS Media Backend erfordert Docker + PostgreSQL Setup
+**Trade-off:** Der Library Service (Payload CMS) erfordert Docker und PostgreSQL Setup
 
 **Entscheidung:** Akzeptiert
 
@@ -921,9 +921,9 @@ Runtime-Overhead, größere Bundle-Größe und keine Design-Token-Integration sp
 
 **Gewählte Alternative:** Tailwind CSS mit CSS Custom Properties für Design-Tokens
 
-#### 3. GraphQL API für Media Backend (verworfen)
+#### 3. GraphQL API für den Library Service (verworfen)
 
-GraphQL wäre Over-Engineering für den Media-Use-Case; eine RESTful API ist ausreichend.
+GraphQL wäre Over-Engineering für diesen Use Case; eine REST-API ist ausreichend.
 
 **Gewählte Alternative:** Payload CMS mit RESTful API
 
@@ -959,13 +959,13 @@ Größere Bundle-Größe, Virtual DOM Overhead und fehlende Compilation sind die
 
 - **Published to NPM** (geplant): `@ujl-framework/types`, `@ujl-framework/core`, `@ujl-framework/ui`, `@ujl-framework/adapter-svelte`, `@ujl-framework/adapter-web`, `@ujl-framework/crafter`
 - **Private**: `@ujl-framework/examples`
-- **Self-Hosted Service**: `@ujl-framework/media` (Docker Compose)
+- **Self-Hosted Service**: `@ujl-framework/library` (Docker Compose)
 
 **Crafter Deployment:**
 
 - **Option 1:** SvelteKit SSR auf Vercel, Netlify, Node.js-Server
 - **Option 2:** Static Export (`adapter-static`) für S3, GitHub Pages
-- **Option 3:** Docker Container (Crafter + Media Service)
+- **Option 3:** Docker Container (Crafter + Library Service)
 
 **CI/CD Pipeline:**
 
@@ -1012,7 +1012,7 @@ Die folgenden Prinzipien leiten alle architektonischen Entscheidungen:
 7. **Performance by Default**
    - Svelte 5 Compilation (keine Runtime-Overhead)
    - Tree-Shaking (ungenutzte Module entfernt)
-   - Lazy Loading (Media Library, Dynamic Imports)
+   - Lazy Loading (Image Library, Dynamic Imports)
 
 8. **Security by Design**
    - Zod Validation verhindert ungültige Daten

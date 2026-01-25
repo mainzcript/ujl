@@ -32,12 +32,12 @@ graph TB
         AdapterWeb[adapter-web<br/>Web Components]
     end
 
-    subgraph "Application Layer"
-        Crafter[crafter<br/>Visual Editor]
-        Demo[demo<br/>Demo Application]
-        Docs[docs<br/>Documentation]
-        Examples[examples<br/>Example Documents]
-    end
+	    subgraph "Application Layer"
+	        Crafter[crafter<br/>Visual Editor]
+	        DevDemo[dev-demo<br/>Demo Application]
+	        Docs[docs<br/>Documentation]
+	        Examples[examples<br/>Example Documents]
+	    end
 
     subgraph "Service Layer"
         ImageService[library<br/>Payload CMS Backend]
@@ -54,10 +54,10 @@ graph TB
     Types --> Crafter
     Crafter -.->|API Calls| ImageService
 
-    Core --> Demo
-    AdapterWeb --> Demo
-    Examples --> Demo
-    Types --> Demo
+	    Core --> DevDemo
+	    AdapterWeb --> DevDemo
+	    Examples --> DevDemo
+	    Types --> DevDemo
 
     Examples --> Types
 
@@ -76,7 +76,7 @@ Die Architektur folgt dem **Layered Architecture Pattern** mit definierten Veran
 
 Der **UI Layer** (`ui`) stellt wiederverwendbare UI-Komponenten bereit, die sowohl im Editor als auch in den Adaptern genutzt werden. Im **Adapter Layer** (`adapter-svelte`, `adapter-web`) erfolgt die framework-spezifische Transformation des AST in konkrete UI-Technologien wie Svelte Components oder Web Components. Diese Trennung ermöglicht es, neue Rendering-Targets hinzuzufügen, ohne die Core-Logik anzufassen.
 
-Der **Application Layer** (`crafter`, `dev-demo`, `docs`) bündelt die End-User-Anwendungen, die die darunterliegenden Schichten orchestrieren. Als separater **Service Layer** existiert `library` (Payload CMS), der bei Bedarf als Backend für Media-Management dient, aber keine Abhängigkeit für die Core-Funktionalität darstellt.
+Der **Application Layer** (`crafter`, `dev-demo`, `docs`) bündelt die End-User-Anwendungen, die die darunterliegenden Schichten orchestrieren. Als separater **Service Layer** existiert `library` (Payload CMS), der bei Bedarf als Backend für Asset-Management dient, aber keine Abhängigkeit für die Core-Funktionalität darstellt.
 
 Diese Schichtung bringt mehrere Vorteile: Dependencies zeigen ausschließlich nach unten (top-down), was zirkuläre Abhängigkeiten verhindert. Jede Schicht ist isoliert testbar, und wichtige Komponenten wie Adapter lassen sich austauschen, ohne höhere Schichten zu beeinflussen. Die Umsetzung als Monorepo mit pnpm Workspaces ermöglicht koordinierte Releases über alle Packages hinweg.
 
@@ -87,7 +87,7 @@ Diese Schichtung bringt mehrere Vorteile: Dependencies zeigen ausschließlich na
 | Baustein           | Verantwortung                                                 | NPM-Package                     |
 | ------------------ | ------------------------------------------------------------- | ------------------------------- |
 | **types**          | TypeScript-Typen, Zod-Schemas und Validator für UJL-Dokumente | `@ujl-framework/types`          |
-| **core**           | Composer, Module Registry, Field System, Media Library        | `@ujl-framework/core`           |
+| **core**           | Composer, Module Registry, Field System, Image Library        | `@ujl-framework/core`           |
 | **ui**             | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.)     | `@ujl-framework/ui`             |
 | **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                    | `@ujl-framework/adapter-svelte` |
 | **adapter-web**    | Web Components Adapter (AST → Custom Elements)                | `@ujl-framework/adapter-web`    |
@@ -133,9 +133,9 @@ type UJLAbstractNode = {
 };
 ```
 
-#### Schnittstelle 3: Payload CMS Media API
+#### Schnittstelle 3: Library Service Image API (Payload CMS)
 
-Die **Media API** des `library`-Service (Payload CMS) ist eine REST-Schnittstelle für Backend-basiertes Media-Management. Sie kommuniziert über JSON und ist über eine **konfigurierbare Base-URL** erreichbar (typischerweise `http://localhost:3000` in Development, produktionsspezifisch in Production). Die Authentifizierung erfolgt per API-Key im `Authorization`-Header.
+Die **Image API** des **Library Service** (`services/library`, Payload CMS) ist eine REST-Schnittstelle für backendgestützte Bildverwaltung. Sie kommuniziert über JSON und ist über eine **konfigurierbare Base-URL** erreichbar (typischerweise `http://localhost:3000` in Development, produktionsspezifisch in Production). Die Authentifizierung erfolgt per API-Key im `Authorization`-Header.
 
 | Methode | Endpoint          | Funktion                                  |
 | ------- | ----------------- | ----------------------------------------- |
@@ -145,13 +145,13 @@ Die **Media API** des `library`-Service (Payload CMS) ist eine REST-Schnittstell
 | PATCH   | `/api/images/:id` | Metadata-Update                           |
 | DELETE  | `/api/images/:id` | Löschung                                  |
 
-Die API wird von zwei primären Consumern genutzt: Der **Crafter-Editor** verwendet sie für Write-Operationen (Upload, Media Library Browser, Metadaten-Updates). **ContentFrames** (gerenderte UJL-Dokumente) nutzen die Read-Endpunkte (`GET /api/images/:id`), um Bilder beim Rendering abzurufen, wenn UJLC-Dokumente Backend-Referenzen statt Inline-Base64 enthalten. Die API wird im Backend-Storage-Modus genutzt; alternativ kann **Inline Storage** konfiguriert werden (Base64-kodierte Bilder direkt in `.ujlc.json`), was Portabilität ohne Backend-Abhängigkeit ermöglicht.
+Die API wird von zwei primären Consumern genutzt: Der **Crafter-Editor** verwendet sie für Write-Operationen (Upload, Image Library Browser, Metadaten-Updates). **ContentFrames** (gerenderte UJL-Dokumente) nutzen die Read-Endpunkte (`GET /api/images/:id`), um Bilder beim Rendering abzurufen, wenn UJLC-Dokumente Backend-Referenzen statt Inline-Base64 enthalten. Die API wird im Backend-Storage-Modus genutzt; alternativ kann **Inline Storage** konfiguriert werden (Base64-kodierte Bilder direkt in `.ujlc.json`), was Portabilität ohne Backend-Abhängigkeit ermöglicht.
 
 #### Schnittstelle 4: Crafter Integration API
 
 Der **Crafter** ist als NPM-Package (`@ujl-framework/crafter`) in Host-Applikationen integrierbar und bietet eine programmatische API für Konfiguration und Steuerung. Host-Anwendungen (z.B. Custom CMSe, Redaktionstools) können den visuellen Editor einbetten und auf Document-Events reagieren.
 
-Die Integration erfolgt über eine **Mount-API**, die den Crafter in ein DOM-Element rendert. Die Host-Anwendung konfiguriert verfügbare Module, Themes und Media-Provider über ein Config-Objekt. Der Crafter exponiert **Event-Handler** für Document-Änderungen (`onDocumentChange`, `onSave`), was bidirektionale Synchronisation mit externen Systemen ermöglicht. Bei Bedarf kann eine **Custom Module Registry** bereitgestellt werden, um projektspezifische Module zu registrieren.
+Die Integration erfolgt über eine **Mount-API**, die den Crafter in ein DOM-Element rendert. Die Host-Anwendung konfiguriert verfügbare Module, Themes und die Library-Integration über ein Config-Objekt. Der Crafter exponiert **Event-Handler** für Document-Änderungen (`onDocumentChange`, `onSave`), was bidirektionale Synchronisation mit externen Systemen ermöglicht. Bei Bedarf kann eine **Custom Module Registry** bereitgestellt werden, um projektspezifische Module zu registrieren.
 
 Die Host-Anwendung steuert das Verhalten über Config-Parameter: `initialDocument` (Start-UJLC), `theme` (aktives UJLT-Theme), `mediaProvider` (Backend vs. Inline), `moduleRegistry` (verfügbare Module) und `readonly` (Editor-Modus). Dies ermöglicht Szenarien wie "Read-Only-Preview", "Custom-Module-Integration" oder "Multi-Tenant-Editing".
 
@@ -182,7 +182,7 @@ graph TB
         AST[ast.ts<br/>AST Node Types]
         UJLC[ujl-content.ts<br/>UJLC Schemas & Types]
         UJLT[ujl-theme.ts<br/>UJLT Schemas & Types]
-        Media[media.ts<br/>Media Types]
+        Image[image.ts<br/>Image Types]
         Prosemirror[prosemirror.ts<br/>Rich Text Types]
         Validation[validation.ts<br/>Validation Functions]
         CLI[cli.ts<br/>ujl-validate CLI]
@@ -191,7 +191,7 @@ graph TB
     CLI --> Validation
     Validation --> UJLC
     Validation --> UJLT
-    UJLC --> Media
+    UJLC --> Image
     UJLC --> Prosemirror
 ```
 
@@ -224,7 +224,7 @@ Das Package exportiert außerdem ein **CLI-Tool** (`ujl-validate`), das UJLC- un
 
 ### 5.3.1 Baustein: core
 
-Das `core`-Package ist das Herzstück des UJL-Systems und enthält die Kernlogik: Den **Composer**, der UJLC-Dokumente in Abstract Syntax Trees transformiert, die **Module Registry** für die Verwaltung verfügbarer Module, das **Field System** für typisierte Datenvalidierung und die **Media Library** für flexible Media-Storage-Strategien.
+Das `core`-Package ist das Herzstück des UJL-Systems und enthält die Kernlogik: Den **Composer**, der UJLC-Dokumente in Abstract Syntax Trees transformiert, die **Module Registry** für die Verwaltung verfügbarer Module, das **Field System** für typisierte Datenvalidierung und die **Image Library** für flexible Image-Storage-Strategien.
 
 #### Whitebox: core
 
@@ -266,9 +266,9 @@ graph TB
 
 #### 5.3.1.1 Komponent: Composer
 
-Der **Composer** orchestriert die Transformation von UJLC-Dokumenten in Abstract Syntax Trees. Er koordiniert die rekursive Composition über die Module Registry, löst Media-Referenzen auf und garantiert, dass jedes Modul korrekt in AST-Nodes transformiert wird.
+Der **Composer** orchestriert die Transformation von UJLC-Dokumenten in Abstract Syntax Trees. Er koordiniert die rekursive Composition über die Module Registry, löst Image-Referenzen auf und garantiert, dass jedes Modul korrekt in AST-Nodes transformiert wird.
 
-Der Composer wird standardmäßig mit einer **Default-Registry** initialisiert, die alle Built-in-Module enthält (Button, Container, Grid, Card, Text, Call-to-Action, Image). Alternativ kann eine **Custom Registry** übergeben werden, um Built-in-Module zu ersetzen oder zu erweitern. Die Hauptmethode `compose()` transformiert ein vollständiges UJLC-Dokument in einen AST-Root-Node und ist asynchron, da Media-Referenzen aufgelöst werden müssen. Die Hilfsmethode `composeModule()` transformiert einzelne Module und wird rekursiv für verschachtelte Module (Slots) aufgerufen.
+Der Composer wird standardmäßig mit einer **Default-Registry** initialisiert, die alle Built-in-Module enthält (Button, Container, Grid, Card, Text, Call-to-Action, Image). Alternativ kann eine **Custom Registry** übergeben werden, um Built-in-Module zu ersetzen oder zu erweitern. Die Hauptmethode `compose()` transformiert ein vollständiges UJLC-Dokument in einen AST-Root-Node und ist asynchron, da Image-Referenzen aufgelöst werden müssen. Die Hilfsmethode `composeModule()` transformiert einzelne Module und wird rekursiv für verschachtelte Module (Slots) aufgerufen.
 
 Der Composer ermöglicht **dynamische Registry-Verwaltung** über `registerModule()` und `unregisterModule()`, was zur Laufzeit Custom-Module hinzufügen oder entfernen erlaubt.
 
@@ -292,7 +292,7 @@ module.compose(moduleData, composer)  ← Recursive Call
 UJLAbstractNode (with ID preserved)
 ```
 
-Der Composer garantiert **ID-Propagation** über zwei getrennte Identifier: `node.id` wird für jeden AST-Node neu generiert (`generateUid()`), um eindeutige Rendering-Identity zu garantieren. Die ursprüngliche Modul-ID aus `moduleData.meta.id` wird in `meta.moduleId` übernommen, was durchgängiges Tracking von UJLC-Dokument bis zum gerenderten DOM ermöglicht. Die **rekursive Composition** für verschachtelte Module (Slots) erfolgt über `composeModule()`-Aufrufe innerhalb der Module-Logik selbst, wobei der Composer als Koordinator fungiert. Bei Bedarf integriert der Composer einen **Media Resolver** (ImageLibrary), der Backend-Referenzen in tatsächliche Image-URLs auflöst. Das **Error Handling** ist robust: Unbekannte Modultypen führen nicht zum Absturz, sondern erzeugen Error-Nodes, die im UI als Platzhalter mit Fehlermeldung gerendert werden können.
+Der Composer garantiert **ID-Propagation** über zwei getrennte Identifier: `node.id` wird für jeden AST-Node neu generiert (`generateUid()`), um eindeutige Rendering-Identity zu garantieren. Die ursprüngliche Modul-ID aus `moduleData.meta.id` wird in `meta.moduleId` übernommen, was durchgängiges Tracking von UJLC-Dokument bis zum gerenderten DOM ermöglicht. Die **rekursive Composition** für verschachtelte Module (Slots) erfolgt über `composeModule()`-Aufrufe innerhalb der Module-Logik selbst, wobei der Composer als Koordinator fungiert. Bei Bedarf integriert der Composer einen **Image Resolver** (ImageLibrary), der Backend-Referenzen in tatsächliche Image-URLs auflöst. Das **Error Handling** ist robust: Unbekannte Modultypen führen nicht zum Absturz, sondern erzeugen Error-Nodes, die im UI als Platzhalter mit Fehlermeldung gerendert werden können.
 
 #### 5.3.1.2 Komponent: Module Registry
 
@@ -322,7 +322,7 @@ class ModuleRegistry {
 | Container      | `container`      | Layout      | Generischer Layout-Container              |
 | Grid           | `grid`           | Layout      | Grid-Layout (mit GridItem Children)       |
 | Card           | `card`           | Content     | Content-Card (Titel, Beschreibung, Slot)  |
-| Image          | `image`          | Media       | Bild-Darstellung mit Alt-Text             |
+| Image          | `image`          | Content     | Bild-Darstellung mit Alt-Text             |
 | Call-to-Action | `call-to-action` | Interactive | CTA-Block (Headline, Description, Button) |
 
 **Erweiterbarkeit:**
@@ -455,12 +455,12 @@ Die folgenden Komponenten sind für die Architektur relevant, werden aber kurz g
 - **Built-in Types:** TextField, RichTextField, NumberField, ImageField
 - **Status:** Validator-Registry-Integration fehlt noch ([TD-011](./11-risks-and-technical-debt#_11-2-11-validator-registry-integration-fehlt))
 
-**Media Library:**
+**Image Library:**
 
-- **Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
+- **Verantwortung:** Abstraktion für Bild-Storage (Inline oder Backend)
 - **Dual Storage:** Inline (Base64 in `.ujlc.json`) oder Backend (Payload CMS via `ImageProvider`)
 - **API:** `async resolve(id: string): Promise<UJLImageData | null>`
-- **Referenz:** [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend)
+- **Referenz:** [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-image-storage-strategy-inline-vs-backend)
 
 **TipTap Schema:**
 
@@ -927,9 +927,9 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 }
 ```
 
-#### 5.6.1.5 Komponent: Media Service
+#### 5.6.1.5 Komponent: Image Service
 
-Der **Media Service** abstrahiert die Media-Storage-Strategie und ermöglicht sowohl Inline-Speicherung (Base64 in UJLC) als auch Backend-Speicherung (Payload CMS). Die Implementierung wird über eine Factory basierend auf der Konfiguration gewählt.
+Der **Image Service** abstrahiert die Storage-Strategie für Bilder und ermöglicht sowohl Inline-Speicherung (Base64 in UJLC) als auch Backend-Speicherung (Library Service, Payload CMS). Die Implementierung wird über eine Factory basierend auf der Konfiguration gewählt.
 
 ```typescript
 interface ImageService {
@@ -963,34 +963,30 @@ function createImageService(config: ImageLibraryConfig): ImageService {
 }
 ```
 
-### 5.6.2 Baustein: demo
+Beim Öffnen eines Dokuments migriert der Crafter es bei Bedarf auf den konfigurierten Storage-Modus. Wenn ein Dokument z. B. im Backend-Modus vorliegt, aber der Crafter auf Inline konfiguriert ist, werden die Bilder aus dem Library Service geladen, komprimiert, eingebettet und das Dokument anschließend auf Inline umgestellt (und umgekehrt).
 
-Die **Demo-App** demonstriert die UJL-Integration mit dem Web Adapter und zeigt, wie UJL-Dokumente in einer standalone HTML-Anwendung gerendert werden.
+### 5.6.2 Baustein: dev-demo
+
+Die **dev-demo** ist eine kleine Vite-Anwendung, die die Einbettung des **UJL Crafters** in eine Host-App zeigt. Sie eignet sich als schlanker Einstieg für Evaluierung und Debugging.
 
 ```
-demo/
+apps/dev-demo/
 ├── src/
-│   ├── main.ts           # Entry Point
-│   ├── index.html        # HTML Template
-│   └── styles.css        # Global Styles
+│   └── main.ts           # Entry Point (Crafter Integration)
 └── vite.config.ts        # Vite Configuration
 ```
 
 **main.ts (Auszug):**
 
 ```typescript
-import { webAdapter } from "@ujl-framework/adapter-web";
-import { Composer } from "@ujl-framework/core";
-import showcaseDocument from "@ujl-framework/examples/documents/showcase";
-import defaultTheme from "@ujl-framework/examples/themes/default";
+import { UJLCrafter } from "@ujl-framework/crafter";
+import { showcaseDocument, defaultTheme } from "@ujl-framework/examples";
 
-const composer = new Composer();
-const ast = await composer.compose(showcaseDocument);
-const tokenSet = defaultTheme.ujlt.tokens;
-
-webAdapter(ast, tokenSet, {
+new UJLCrafter({
 	target: "#app",
-	showMetadata: false,
+	document: showcaseDocument,
+	theme: defaultTheme,
+	library: { storage: "inline" },
 });
 ```
 
@@ -999,7 +995,7 @@ webAdapter(ast, tokenSet, {
 Die **Dokumentations-Website** wird mit **VitePress 2.0** (Vue-basierter Static Site Generator) erstellt und enthält die Arc42-Architekturdokumentation sowie User Documentation.
 
 ```
-docs/
+apps/docs/
 ├── src/
 │   ├── arc42/            # Architecture Documentation (this file)
 │   ├── docs/             # User Documentation
@@ -1039,7 +1035,7 @@ import { showcaseDocument, defaultTheme } from "@ujl-framework/examples";
 
 ### 5.7.1 Baustein: library (Payload CMS)
 
-Das **Library-Service** ist ein Backend für Media Management, basierend auf **Payload CMS**. Es wird bei Bedarf genutzt und bietet Upload, Metadaten-Verwaltung, responsive Image-Generierung und eine REST-API für den Crafter und ContentFrames.
+Der **Library Service** ist ein Backend für Asset-Management auf Basis von **Payload CMS**. Er wird bei Bedarf genutzt und bietet Upload, Metadaten-Verwaltung, responsive Image-Generierung und eine REST-API für den Crafter und ContentFrames.
 
 #### Whitebox: library Service
 
@@ -1153,7 +1149,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URI=postgres://postgres:password@postgres:5432/ujl-media
+      - DATABASE_URI=postgres://postgres:password@postgres:5432/library
       - PAYLOAD_SECRET=${PAYLOAD_SECRET}
     depends_on:
       - postgres
@@ -1161,7 +1157,7 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
-      - POSTGRES_DB=ujl-media
+      - POSTGRES_DB=library
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -1189,7 +1185,7 @@ graph TB
     AdapterSvelte[4. adapter-svelte]
     AdapterWeb[5. adapter-web]
     Crafter[6. crafter]
-    Demo[7. demo]
+    DevDemo[7. dev-demo]
     Docs[8. docs]
     Examples[examples]
 
@@ -1203,10 +1199,10 @@ graph TB
     UI --> Crafter
     AdapterSvelte --> Crafter
 
-    Types --> Demo
-    Core --> Demo
-    AdapterWeb --> Demo
-    Examples --> Demo
+    Types --> DevDemo
+    Core --> DevDemo
+    AdapterWeb --> DevDemo
+    Examples --> DevDemo
 
     Types --> Examples
 
@@ -1216,7 +1212,7 @@ graph TB
     style AdapterSvelte fill:#f59e0b
     style AdapterWeb fill:#f59e0b
     style Crafter fill:#ef4444
-    style Demo fill:#6366f1
+    style DevDemo fill:#6366f1
     style Docs fill:#6366f1
 ```
 
@@ -1231,11 +1227,12 @@ pnpm run build
 ```json
 {
 	"scripts": {
-		"build": "pnpm run types:build && pnpm run core:build && pnpm run ui:build && pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm run crafter:build && pnpm run demo:build && pnpm run docs:build",
+		"build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
+		"adapter-svelte:build": "pnpm run ui:build && pnpm --filter @ujl-framework/adapter-svelte build",
+		"ui:build": "pnpm run core:build && pnpm --filter @ujl-framework/ui build",
+		"core:build": "pnpm run types:build && pnpm --filter @ujl-framework/core build",
 		"types:build": "pnpm --filter @ujl-framework/types build",
-		"core:build": "pnpm --filter @ujl-framework/core build",
-		"ui:build": "pnpm --filter @ujl-framework/ui build"
-		// ...
+		"docs:build": "pnpm --filter @ujl-framework/docs build"
 	}
 }
 ```
@@ -1250,9 +1247,9 @@ pnpm run build
 | adapter-svelte | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)           |
 | adapter-web    | Vite       | `dist/index.js` (bundled) + `dist/index.d.ts`       | NPM (geplant)           |
 | crafter        | SvelteKit  | `dist/**/*` (SvelteKit Package)                     | NPM (geplant)           |
-| demo           | Vite       | `dist/**/*` (Static Files)                          | Private                 |
+| dev-demo       | Vite       | `dist/**/*` (Static Files)                          | Private                 |
 | docs           | VitePress  | `.vitepress/dist/**/*` (Static Site)                | GitLab Pages            |
-| media          | Next.js    | Docker Image                                        | Docker Hub (bei Bedarf) |
+| library        | Next.js    | Docker Image                                        | Docker Hub (bei Bedarf) |
 
 ## 5.9 Querschnittliche Aspekte
 
@@ -1271,7 +1268,7 @@ Die Versionierung nutzt **Changesets** mit **Fixed Versioning**: Alle Packages w
 **E2E Tests (Playwright):**
 
 - crafter (Visual Editor Workflows)
-- media (API Integration Tests)
+- library (API Integration Tests)
 - Test Pattern: `e2e/**/*.test.ts`
 
 **Test Attributes (Conditional):**

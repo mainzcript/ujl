@@ -40,8 +40,6 @@ function loadImage(file: File): Promise<HTMLImageElement> {
  * 4. Scale down stepwise to 800x800 (640K pixels)
  * 5. Aggressively reduce both dimensions and quality simultaneously until <= 200KB
  *
- * Temporary MVP solution. @see Migration Guide - Media Library Integration (Issue)
- *
  * @param file - The image file to compress
  * @returns A promise resolving to the compressed File
  */

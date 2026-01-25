@@ -19,8 +19,17 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **UJL Crafter**  
   Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Nutzt Adapter zur Rendering-Integration.
 
+- **dev-demo**  
+  Kleine Demo-Anwendung (`apps/dev-demo`) zur Evaluierung und zum Debugging der Crafter-Integration, inklusive Umschalten zwischen Inline- und Backend-Storage.
+
 - **Adapter**  
   Komponenten, die den Abstract Syntax Tree (AST) in konkrete Ausgabeformate transformieren. UJL bietet Adapter für Svelte (adapter-svelte) und Web Components (adapter-web). Weitere Adapter können implementiert werden.
+
+- **UJLAdapter**  
+  Abstraktes Adapter-Interface (in `@ujl-framework/types`), das die Transformation eines AST in ein konkretes Render-Target beschreibt.
+
+- **AdapterRoot**  
+  Root-Komponente aus `@ujl-framework/adapter-svelte`, die AST und TokenSet zusammenführt und das Rendering der Svelte-Komponenten initialisiert.
 
 - **ContentFrame**  
   Das gerenderte Endprodukt eines UJL-Layouts, bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
@@ -32,15 +41,21 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
   Konkrete Instanz eines UJLT-Theme-Dokuments: beschreibt Designparameter als Tokens und enthält keine Content-Daten.
 
 - **Library Service (`services/library`)**  
-  Backend-Service für Media Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
+  Backend-Service für Asset-Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
 
 ## Architektur und Module
 
 - **Module**  
   Wiederverwendbare Bausteine mit Fields (Daten) und Slots (Inhaltsbereiche). Module können verschachtelt organisiert und kombiniert werden.
 
+- **ModuleBase**  
+  Basisklasse bzw. Vertrag für Module, inklusive Metadaten (`name`, `label`, `category`), Definition von Fields/Slots und der `compose()`-Transformation.
+
 - **Fields**  
   Typsichere Datencontainer mit Validierung, Parsing und Fitting-Logik. Beispiele: TextField, NumberField, ImageField.
+
+- **FieldBase**  
+  Basisklasse bzw. Vertrag für Fields, inklusive `validate()` (Prüfung/Fehlermeldungen) und `fit()` (Normalisierung und Fallbacks).
 
 - **Slots**  
   Verschachtelte Inhaltsbereiche, die andere Module enthalten können. Ermöglichen die modulare Komposition von Layouts.
@@ -51,8 +66,17 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **ModuleRegistry**  
   Verwaltet verfügbare Module und ermöglicht die Registrierung neuer Module zur Erweiterung des Systems.
 
-- **Image Library / Media Library**  
+- **Image Library**  
   Abstraktion im Core, die Image-IDs zu konkreten Bilddaten auflöst. Unterstützt Inline Storage (Data-URLs/Base64 im UJLC) und Backend Storage über einen Provider.
+
+- **Image Service**  
+  Crafter-Komponente, die Bildoperationen (Upload, List, Metadaten) kapselt. Je nach Storage-Modus nutzt sie Inline Storage oder den Library Service und migriert Dokumente beim Laden auf den konfigurierten Modus.
+
+- **Storage-Modus (Images)**  
+  Konfiguration für die Speicherung von Bildern: `inline` (eingebettet im UJLC) oder `backend` (Referenzen über den Library Service).
+
+- **Migration (Storage-Modus)**  
+  Automatisches Umschreiben eines UJLC-Dokuments zwischen `inline` und `backend`, wenn Dokument-Modus und Crafter-Konfiguration nicht zusammenpassen.
 
 - **ImageProvider**  
   Schnittstelle, über die die Image Library Bilder aus externen Quellen (z. B. Library Service) auflösen kann.
@@ -74,7 +98,7 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
   - **CLI**: Das Binary `ujl-validate` validiert UJLC- und UJLT-Dokumente über die Kommandozeile.
 
 - **Mount-API**  
-  Programmierschnittstelle, um den Crafter in eine Host-Anwendung in ein DOM-Element einzubetten und per Config (z. B. Module, Theme, Media-Provider) zu initialisieren.
+  Programmierschnittstelle, um den Crafter in eine Host-Anwendung in ein DOM-Element einzubetten und per Config (z. B. Module, Theme, Library-Optionen) zu initialisieren.
 
 - **CrafterContext / Operations API**  
   Interne (editor-zentrierte) Context-API im Crafter für Mutationen am Dokument, z. B. `operations.updateNodeField()`, `operations.moveNode()`, `operations.copyNode()` und `operations.pasteNode()`.
@@ -113,7 +137,7 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
   Definiert die Schnittstellen zwischen verschiedenen Komponenten des UJL-Systems und ermöglicht die Integration in externe Anwendungen.
 
 - **CMS (Content Management System) / Headless CMS**  
-  Systeme zur Verwaltung von Inhalten. UJL ist kein CMS, kann aber mit (Headless) CMS kombiniert werden; der Library Service nutzt Payload CMS für Media-Management.
+  Systeme zur Verwaltung von Inhalten. UJL ist kein CMS, kann aber mit (Headless) CMS kombiniert werden; der Library Service nutzt Payload CMS für Asset-Management.
 
 - **JSON (JavaScript Object Notation)**  
   Das Datenformat, in dem UJL-Layouts und -Konfigurationen gespeichert werden. Ermöglicht plattformunabhängigen Datenaustausch.

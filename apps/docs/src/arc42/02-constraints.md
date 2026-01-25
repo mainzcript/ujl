@@ -92,7 +92,7 @@ Verschiedene Adapter können das gleiche AST in unterschiedliche Ausgabeformate 
 | **Gitflow**              | Feature-Branches → develop → main      | `main` (releases), `develop` (aktiv), `feat/*`, `fix/*`  |
 | **Protected Branches**   | main, develop (keine direkten Commits) | Merge nur via Merge Requests mit Reviews                 |
 | **Conventional Commits** | Commit Messages mit Präfix             | `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:` |
-| **Branch Naming**        | Lowercase mit Bindestrichen            | `feat/module-registry`, `fix/media-validation`           |
+| **Branch Naming**        | Lowercase mit Bindestrichen            | `feat/module-registry`, `fix/image-validation`           |
 
 ### 2.2.3 Release-Management
 
@@ -248,12 +248,12 @@ Die angegebenen Performance-Zielwerte sind aktuell **grobe Richtlinien**. Die en
 
 ### 2.6.2 Datenschutz
 
-| Anforderung          | Umsetzung in UJL                                           |
-| -------------------- | ---------------------------------------------------------- |
-| **Datenminimierung** | Keine Analytics/Tracking im Crafter                        |
-| **Transparenz**      | Open Source (vollständige Einsicht in Code)                |
-| **Portabilität**     | Export/Import von UJL-Dokumenten (JSON)                    |
-| **Selbst-Hosting**   | Docker Compose für Media Service, keine Cloud-Abhängigkeit |
+| Anforderung          | Umsetzung in UJL                                             |
+| -------------------- | ------------------------------------------------------------ |
+| **Datenminimierung** | Keine Analytics/Tracking im Crafter                          |
+| **Transparenz**      | Open Source (vollständige Einsicht in Code)                  |
+| **Portabilität**     | Export/Import von UJL-Dokumenten (JSON)                      |
+| **Selbst-Hosting**   | Docker Compose für Library Service, keine Cloud-Abhängigkeit |
 
 ::: info DSGVO
 

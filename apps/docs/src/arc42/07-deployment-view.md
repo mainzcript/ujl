@@ -21,7 +21,7 @@ graph TB
 
     subgraph "Hosting Layer"
         Pages[GitLab Pages<br/>Static Hosting]
-        MediaServer[Media Server<br/>Docker Host]
+        LibraryServer[Library Service Host<br/>Docker Host]
     end
 
     subgraph "External Services"
@@ -31,12 +31,12 @@ graph TB
     Dev -->|git push| GitLab
     GitLab -->|deploy docs| Pages
     GitLab -->|publish packages| NPM
-    Dev -->|docker-compose up| MediaServer
+    Dev -->|docker-compose up| LibraryServer
 
     style Dev fill:#3b82f6
     style GitLab fill:#f59e0b
     style Pages fill:#10b981
-    style MediaServer fill:#6366f1
+    style LibraryServer fill:#6366f1
     style NPM fill:#8b5cf6
 ```
 
@@ -44,21 +44,21 @@ graph TB
 
 Die Deployment-Architektur folgt dem Prinzip **"Static-First, Services-When-Needed"**:
 
-| Aspekt            | Entscheidung               | Begründung                                    |
-| ----------------- | -------------------------- | --------------------------------------------- |
-| **Core-Packages** | NPM Distribution           | Wiederverwendbarkeit, einfache Integration    |
-| **Crafter**       | NPM Package (SvelteKit)    | Einbettbar in bestehende Projekte             |
-| **Documentation** | Static Site (GitLab Pages) | Kosteneffizient, schnell, einfach zu deployen |
-| **Media Service** | Docker Container           | Isoliert, portabel, skalierbar                |
-| **Demo App**      | Static Build               | Showcase ohne Serverkosten                    |
+| Aspekt              | Entscheidung               | Begründung                                    |
+| ------------------- | -------------------------- | --------------------------------------------- |
+| **Core-Packages**   | NPM Distribution           | Wiederverwendbarkeit, einfache Integration    |
+| **Crafter**         | NPM Package (SvelteKit)    | Einbettbar in bestehende Projekte             |
+| **Documentation**   | Static Site (GitLab Pages) | Kosteneffizient, schnell, einfach zu deployen |
+| **Library Service** | Docker Container           | Isoliert, portabel, skalierbar                |
+| **dev-demo**        | Static Build               | Showcase ohne Serverkosten                    |
 
 ### 7.1.3 Qualitäts- und Leistungsmerkmale
 
-| Infrastruktur-Element  | Verfügbarkeit      | Skalierbarkeit         | Sicherheit                        |
-| ---------------------- | ------------------ | ---------------------- | --------------------------------- |
-| GitLab Pages           | 99.9% (GitLab SLA) | Automatisch (CDN)      | HTTPS, DDoS-Schutz                |
-| Media Service (Docker) | Abhängig vom Host  | Horizontal (Container) | API-Key Auth, Network Isolation   |
-| NPM Registry           | 99.99% (npm SLA)   | Automatisch            | npm audit, Vulnerability Scanning |
+| Infrastruktur-Element    | Verfügbarkeit      | Skalierbarkeit         | Sicherheit                        |
+| ------------------------ | ------------------ | ---------------------- | --------------------------------- |
+| GitLab Pages             | 99.9% (GitLab SLA) | Automatisch (CDN)      | HTTPS, DDoS-Schutz                |
+| Library Service (Docker) | Abhängig vom Host  | Horizontal (Container) | API-Key Auth, Network Isolation   |
+| NPM Registry             | 99.99% (npm SLA)   | Automatisch            | npm audit, Vulnerability Scanning |
 
 ## 7.2 Infrastruktur Ebene 2
 
@@ -77,13 +77,13 @@ graph TB
                 AdapterSvelte[adapter-svelte<br/>Port: 5174]
                 AdapterWeb[adapter-web<br/>Port: -]
                 Crafter[crafter<br/>Port: 5175]
-                Demo[demo<br/>Port: 4173]
+                DevDemo[dev-demo<br/>Port: 4173]
                 Docs[docs<br/>Port: 5176]
             end
         end
 
         subgraph "Docker Environment"
-            subgraph "Media Stack"
+            subgraph "Library Stack"
                 Payload[Payload CMS<br/>Port: 3000]
                 Postgres[(PostgreSQL<br/>Port: 5432)]
             end
@@ -98,16 +98,16 @@ graph TB
     PNPM --> AdapterSvelte
     PNPM --> AdapterWeb
     PNPM --> Crafter
-    PNPM --> Demo
+    PNPM --> DevDemo
     PNPM --> Docs
 
     Payload --> Postgres
 
     Browser --> UI
     Browser --> Crafter
-    Browser --> Demo
+    Browser --> DevDemo
     Browser --> Docs
-    Crafter -.->|API Calls| Payload
+    Crafter -.->|Image API| Payload
 
     style PNPM fill:#f59e0b
     style Browser fill:#3b82f6
@@ -157,8 +157,8 @@ docker-compose up -d
 | adapter-svelte Dev | 5174 | Svelte Adapter Playground       |
 | Crafter Dev        | 5175 | Visual Editor                   |
 | Docs Dev           | 5176 | VitePress Documentation         |
-| Demo               | 4173 | Demo Application (Preview)      |
-| Payload CMS        | 3000 | Media API Backend               |
+| dev-demo           | 4173 | Demo Application (Preview)      |
+| Payload CMS        | 3000 | Image API Backend               |
 | PostgreSQL         | 5432 | Database (internal)             |
 
 ### 7.2.2 CI/CD Pipeline (GitLab CI)
@@ -255,7 +255,7 @@ pages:
 - **main**: Produktions-Dokumentation
 - **develop**: Preview-Dokumentation
 
-### 7.2.3 Media Service (Docker)
+### 7.2.3 Library Service (Docker)
 
 ```mermaid
 graph TB
@@ -269,7 +269,7 @@ graph TB
             PGData[(pgdata<br/>PostgreSQL Data)]
             NodeModules[(node_modules<br/>Dependencies)]
             AppVolume[(. mounted<br/>Application Code)]
-            MediaFiles[(media/<br/>Uploaded Files)]
+            Uploads[(uploads/<br/>Uploaded Files)]
         end
     end
 
@@ -281,7 +281,7 @@ graph TB
     PostgresContainer --> PGData
     PayloadContainer --> NodeModules
     PayloadContainer --> AppVolume
-    PayloadContainer --> MediaFiles
+    PayloadContainer --> Uploads
 
     Client -->|3000| PayloadContainer
 
@@ -318,7 +318,7 @@ postgres:
   environment:
     POSTGRES_USER: ${POSTGRES_USER:-postgres}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    POSTGRES_DB: ${POSTGRES_DB:-payload}
+    POSTGRES_DB: ${POSTGRES_DB:-library}
   volumes:
     - pgdata:/var/lib/postgresql/data
   ports:
@@ -327,13 +327,13 @@ postgres:
 
 #### Environment-Variablen
 
-| Variable            | Beschreibung                 | Beispiel                                               |
-| ------------------- | ---------------------------- | ------------------------------------------------------ |
-| `DATABASE_URI`      | PostgreSQL Connection String | `postgres://postgres:password@postgres:5432/ujl-media` |
-| `PAYLOAD_SECRET`    | JWT Secret (min. 32 Zeichen) | `your-super-secret-key-min-32-chars`                   |
-| `POSTGRES_USER`     | DB Benutzer                  | `postgres`                                             |
-| `POSTGRES_PASSWORD` | DB Passwort                  | `secure-password`                                      |
-| `POSTGRES_DB`       | Datenbankname                | `payload`                                              |
+| Variable            | Beschreibung                 | Beispiel                                             |
+| ------------------- | ---------------------------- | ---------------------------------------------------- |
+| `DATABASE_URI`      | PostgreSQL Connection String | `postgres://postgres:password@postgres:5432/library` |
+| `PAYLOAD_SECRET`    | JWT Secret (min. 32 Zeichen) | `your-super-secret-key-min-32-chars`                 |
+| `POSTGRES_USER`     | DB Benutzer                  | `postgres`                                           |
+| `POSTGRES_PASSWORD` | DB Passwort                  | `secure-password`                                    |
+| `POSTGRES_DB`       | Datenbankname                | `library`                                            |
 
 #### Startup-Befehle
 
@@ -394,7 +394,7 @@ sequenceDiagram
 
 - Hot Module Replacement (HMR) für schnelle Entwicklung
 - Alle Packages im Watch-Mode verfügbar
-- Media Service (bei Bedarf, Docker)
+- Library Service (bei Bedarf, Docker)
 - Kein Build-Schritt erforderlich für Entwicklung
 
 ### 7.3.2 Szenario: Continuous Integration
@@ -452,10 +452,10 @@ graph TB
         end
     end
 
-    subgraph "UJL Media Service (bei Bedarf)"
-        MediaAPI[Payload CMS<br/>Port: 3000]
-        MediaDB[(PostgreSQL)]
-        MediaFiles[(Media Files)]
+    subgraph "UJL Library Service (bei Bedarf)"
+        LibraryAPI[Payload CMS<br/>Port: 3000]
+        LibraryDB[(PostgreSQL)]
+        Uploads[(Uploads)]
     end
 
     subgraph "CDN"
@@ -465,14 +465,14 @@ graph TB
     App --> UJLPackages
     App --> API
     API --> DB
-    App -.->|Media API| MediaAPI
-    MediaAPI --> MediaDB
-    MediaAPI --> MediaFiles
+    App -.->|Image API| LibraryAPI
+    LibraryAPI --> LibraryDB
+    LibraryAPI --> Uploads
     App --> StaticAssets
 
     style App fill:#3b82f6
     style UJLPackages fill:#f59e0b
-    style MediaAPI fill:#6366f1
+    style LibraryAPI fill:#6366f1
 ```
 
 **Integrations-Beispiel (SvelteKit):**
@@ -527,22 +527,22 @@ Für zusätzliche Deployment-Szenarien (NPM Package Publishing, Self-Hosted Full
 | ------------------------- | ----------------- | ---- | -------- | ------------- |
 | **Entwicklung**           | 2 Cores           | 8 GB | 10 GB    | Lokal         |
 | **CI Runner**             | 2 Cores           | 4 GB | 5 GB     | GitLab SaaS   |
-| **Media Service**         | 1 Core            | 2 GB | 10 GB+   | Port 3000     |
+| **Library Service**       | 1 Core            | 2 GB | 10 GB+   | Port 3000     |
 | **Produktion (Frontend)** | Abhängig von Host | -    | -        | CDN empfohlen |
 
 ### 7.4.2 Empfohlene Konfiguration
 
-| Umgebung          | CPU      | RAM   | Speicher   | Zusätzlich        |
-| ----------------- | -------- | ----- | ---------- | ----------------- |
-| **Entwicklung**   | 4+ Cores | 16 GB | SSD 20 GB+ | Docker Desktop    |
-| **CI Runner**     | 4 Cores  | 8 GB  | 10 GB      | Caching aktiviert |
-| **Media Service** | 2 Cores  | 4 GB  | 50 GB+ SSD | Backup-Strategie  |
+| Umgebung            | CPU      | RAM   | Speicher   | Zusätzlich        |
+| ------------------- | -------- | ----- | ---------- | ----------------- |
+| **Entwicklung**     | 4+ Cores | 16 GB | SSD 20 GB+ | Docker Desktop    |
+| **CI Runner**       | 4 Cores  | 8 GB  | 10 GB      | Caching aktiviert |
+| **Library Service** | 2 Cores  | 4 GB  | 50 GB+ SSD | Backup-Strategie  |
 
 ### 7.4.3 Sicherheitsanforderungen
 
 | Komponente     | Anforderung         | Implementierung                                   |
 | -------------- | ------------------- | ------------------------------------------------- |
-| **Media API**  | Authentication      | API-Key via `Authorization: users API-Key <key>`  |
+| **Image API**  | Authentication      | API-Key via `Authorization: users API-Key <key>`  |
 | **PostgreSQL** | Netzwerk-Isolation  | Docker Network (nicht extern exponiert empfohlen) |
 | **Secrets**    | Sichere Speicherung | Environment Variables, nie in Git                 |
 | **HTTPS**      | Verschlüsselung     | Reverse Proxy (nginx/Traefik) in Produktion       |
@@ -561,8 +561,8 @@ Für zusätzliche Deployment-Szenarien (NPM Package Publishing, Self-Hosted Full
 | `@ujl-framework/crafter`        | SvelteKit Package                 | NPM Registry          |
 | `@ujl-framework/examples`       | JSON Files                        | NPM Registry          |
 | `docs`                          | Static HTML/CSS/JS                | GitLab Pages          |
-| `demo`                          | Static HTML/CSS/JS                | (Private)             |
-| `media`                         | Docker Image                      | Docker Host           |
+| `dev-demo`                      | Static HTML/CSS/JS                | (Private)             |
+| `library`                       | Docker Image                      | Docker Host           |
 
 ### 7.7.2 Build-Artefakte
 
@@ -762,11 +762,11 @@ max_client_conn = 1000
 default_pool_size = 25
 ```
 
-### 7.7.4 Media Storage-Skalierung
+### 7.7.4 Library Storage-Skalierung
 
 **Object Storage (S3-kompatibel):**
 
-Für große Media-Bibliotheken Wechsel zu Object Storage:
+Für große Asset-Bibliotheken Wechsel zu Object Storage:
 
 ```typescript
 // Payload Config mit S3
@@ -798,9 +798,9 @@ export default buildConfig({
 
 ```nginx
 # Nginx CDN Cache
-location /media/ {
+location /uploads/ {
     proxy_pass http://payload:3000;
-    proxy_cache media_cache;
+    proxy_cache uploads_cache;
     proxy_cache_valid 200 7d;
     proxy_cache_valid 404 1h;
     add_header X-Cache-Status $upstream_cache_status;
@@ -846,7 +846,7 @@ export default defineConfig({
 | Ressource              | Cache-Dauer | Strategie              |
 | ---------------------- | ----------- | ---------------------- |
 | Static Assets (CSS/JS) | 1 Jahr      | Immutable + Hash       |
-| Media Files (Images)   | 7 Tage      | CDN + ETag             |
+| Uploads (Images)       | 7 Tage      | CDN + ETag             |
 | API Responses          | 5 Minuten   | Stale-While-Revalidate |
 | HTML Pages (SSR)       | 1 Minute    | Edge Cache             |
 
@@ -920,13 +920,13 @@ healthcheck:
   start_period: 60s
 ```
 
-### 7.6.3 Backup-Strategie (Media Service)
+### 7.6.3 Backup-Strategie (Library Service)
 
-| Komponente  | Backup-Methode          | Frequenz     |
-| ----------- | ----------------------- | ------------ |
-| PostgreSQL  | `pg_dump`               | Täglich      |
-| Media Files | Volume Backup           | Täglich      |
-| .env        | Secure Storage (extern) | Bei Änderung |
+| Komponente | Backup-Methode          | Frequenz     |
+| ---------- | ----------------------- | ------------ |
+| PostgreSQL | `pg_dump`               | Täglich      |
+| Uploads    | Volume Backup           | Täglich      |
+| .env       | Secure Storage (extern) | Bei Änderung |
 
 **Backup-Script (Beispiel):**
 
@@ -935,10 +935,10 @@ healthcheck:
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # Database Backup
-docker-compose exec -T postgres pg_dump -U postgres payload > backup_db_$DATE.sql
+docker-compose exec -T postgres pg_dump -U postgres library > backup_db_$DATE.sql
 
-# Media Files Backup
-tar -czf backup_media_$DATE.tar.gz media/
+# Uploads Backup
+tar -czf backup_uploads_$DATE.tar.gz uploads/
 ```
 
 ### 7.6.4 Metriken und KPIs
@@ -958,7 +958,7 @@ tar -czf backup_media_$DATE.tar.gz media/
 | Metrik                         | Zielwert | Messmethode        | Frequenz  |
 | ------------------------------ | -------- | ------------------ | --------- |
 | Image Upload Success Rate      | >99%     | Payload API Logs   | Stündlich |
-| Media Resolution Success Rate  | >99.9%   | Crafter Error Logs | Stündlich |
+| Image Resolution Success Rate  | >99.9%   | Crafter Error Logs | Stündlich |
 | Schema Validation Success Rate | >95%     | CLI/Core Logs      | Täglich   |
 
 **Empfohlene Monitoring-Tools:**
@@ -1002,20 +1002,20 @@ tar -czf backup_media_$DATE.tar.gz media/
 
 ```bash
 # Backup einspielen
-docker-compose exec -T postgres psql -U postgres payload < backup_db_YYYYMMDD.sql
+docker-compose exec -T postgres psql -U postgres library < backup_db_YYYYMMDD.sql
 
 # Verbindung testen
 docker-compose exec postgres psql -U postgres -c "\l"
 ```
 
-2. **Media Files-Wiederherstellung:**
+2. **Uploads-Wiederherstellung:**
 
 ```bash
 # Backup entpacken
-tar -xzf backup_media_YYYYMMDD.tar.gz -C services/library/media/
+tar -xzf backup_uploads_YYYYMMDD.tar.gz -C services/library/uploads/
 
 # Permissions setzen
-chown -R 1000:1000 services/library/media/
+chown -R 1000:1000 services/library/uploads/
 ```
 
 3. **Service-Neustart:**
@@ -1084,19 +1084,19 @@ pnpm build
 
 ### Deployment-Übersicht
 
-| Aspekt            | Aktueller Stand             | Ziel                |
-| ----------------- | --------------------------- | ------------------- |
-| **Dokumentation** | GitLab Pages (main/develop) | Stabil              |
-| **Packages**      | Lokal / Monorepo            | NPM Registry        |
-| **Media Service** | Docker Compose (Lokal)      | Produktions-Hosting |
-| **Demo**          | Static Build (Lokal)        | Demo-Server         |
+| Aspekt              | Aktueller Stand             | Ziel                |
+| ------------------- | --------------------------- | ------------------- |
+| **Dokumentation**   | GitLab Pages (main/develop) | Stabil              |
+| **Packages**        | Lokal / Monorepo            | NPM Registry        |
+| **Library Service** | Docker Compose (Lokal)      | Produktions-Hosting |
+| **dev-demo**        | Static Build (Lokal)        | Demo-Server         |
 
 ### Empfehlungen für Produktions-Deployment
 
 1. **Frontend-Packages**: Über NPM in Host-Applikation integrieren
-2. **Media Service**: Dedizierter Docker Host mit:
+2. **Library Service**: Dedizierter Docker Host mit:
    - Reverse Proxy (nginx/Traefik) für HTTPS
-   - Persistent Volumes für PostgreSQL und Media
+   - Persistent Volumes für PostgreSQL und Uploads
    - Automatisierte Backups
    - Monitoring (Prometheus/Grafana, falls eingesetzt)
 3. **CDN**: Für statische Assets (CSS, Bilder)
@@ -1171,7 +1171,7 @@ graph TB
         end
     end
 
-    subgraph "Media Service"
+    subgraph "Library Service"
         subgraph "Payload Container"
             Payload[Payload CMS<br/>Port: 3000]
         end
@@ -1179,7 +1179,7 @@ graph TB
             PG[(PostgreSQL<br/>Port: 5432)]
         end
         subgraph "Storage"
-            Media[(Media Files<br/>Volume)]
+            Uploads[(Uploads<br/>Volume)]
         end
     end
 
@@ -1205,7 +1205,7 @@ graph TB
     App1 --> CDN
     App2 --> CDN
     Payload --> PG
-    Payload --> Media
+    Payload --> Uploads
 
     Prometheus -.->|Scrape| App1
     Prometheus -.->|Scrape| App2
@@ -1213,7 +1213,7 @@ graph TB
     Grafana --> Prometheus
 
     BackupService -.->|Backup| PG
-    BackupService -.->|Backup| Media
+    BackupService -.->|Backup| Uploads
     BackupService --> BackupStorage
 
     style LB fill:#3b82f6
@@ -1232,7 +1232,7 @@ graph TB
 | UJL Crafter   | 2+        | 2 Cores | 2GB    | -         | Load Balanced |
 | Payload CMS   | 1-2       | 2 Cores | 4GB    | -         | Aktiv-Passiv  |
 | PostgreSQL    | 1         | 4 Cores | 8GB    | 100GB SSD | Replication   |
-| Media Storage | 1         | -       | -      | 500GB+    | RAID/S3       |
+| Uploads       | 1         | -       | -      | 500GB+    | RAID/S3       |
 
 **Container-Orchestrierung (Docker Compose Production):**
 
@@ -1283,7 +1283,7 @@ services:
       - POSTGRES_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/payload
       - PAYLOAD_SECRET=${PAYLOAD_SECRET}
     volumes:
-      - media-data:/app/media
+      - uploads-data:/app/uploads
     restart: always
     deploy:
       resources:
@@ -1330,7 +1330,7 @@ services:
 
 volumes:
   postgres-data:
-  media-data:
+  uploads-data:
   prometheus-data:
   grafana-data:
 ```
@@ -1356,7 +1356,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Media Service Routing
+    # Library Service Routing
     location /api/ {
         proxy_pass http://payload:3000;
         proxy_set_header Host $host;
