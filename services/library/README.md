@@ -2,13 +2,13 @@
 
 The **UJL Library** is the asset management backend for the UJL Framework. It provides a self-hosted service for managing images, with planned support for fonts and documents in future releases.
 
-When you use the [UJL Crafter](../../packages/crafter/README.md) in "backend storage" mode, uploaded images are stored and served through this service instead of being embedded as Base64 in the document. This keeps your `.ujlc.json` files lightweight and enables features like automatic image resizing, WebP conversion, and centralized media management across multiple documents.
+When you use the [UJL Crafter](../../packages/crafter/README.md) in "backend storage" mode, uploaded images are stored and served through this service instead of being embedded as Base64 in the document. This keeps your `.ujlc.json` files lightweight and enables features like automatic image resizing, WebP conversion, and centralized image management across multiple documents.
 
 The Library is built on [Payload CMS 3.0](https://payloadcms.com/) with PostgreSQL as the database. It exposes a REST API that the Crafter (and other UJL applications) can consume.
 
 ## Why a Separate Service?
 
-The UJL Framework separates content from design – and the Library extends this principle to assets. Instead of coupling media files directly into your content documents, the Library acts as a central repository:
+The UJL Framework separates content from design, and the Library extends this principle to assets. Instead of coupling image files directly into your content documents, the Library acts as a central repository:
 
 - **Reusability**: Use the same image across multiple documents without duplication
 - **Performance**: Automatic resizing generates optimized variants (xs, sm, md, lg, xl, xxl, xxxl, max)
@@ -72,7 +72,7 @@ The UJL Framework separates content from design – and the Library extends this
 
 ## Integration with UJL Crafter
 
-Once the Library is running, you can configure the Crafter to use it for media storage:
+Once the Library is running, you can configure the Crafter to use it for backend image storage:
 
 ```typescript
 import { UJLCrafter } from '@ujl-framework/crafter'
@@ -89,7 +89,7 @@ const crafter = new UJLCrafter({
 })
 ```
 
-When configured this way, images uploaded through the Crafter's media library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
+When configured this way, images uploaded through the Crafter's image library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
 
 ## API Reference
 

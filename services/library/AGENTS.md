@@ -52,7 +52,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Images],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET,
   typescript: {
@@ -131,7 +131,7 @@ slugField({ fieldToUse: 'title' })
 {
   name: 'featuredImage',
   type: 'upload',
-  relationTo: 'media',
+  relationTo: 'images',
   admin: {
     condition: (data) => data.featured === true,
   },

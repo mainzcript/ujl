@@ -25,7 +25,7 @@ export { createOperations, type CrafterOperations } from './operations.js';
 // Image Service Factory
 export {
 	createImageServiceFactory,
-	defaultImageServiceFactory,
+	getDefaultImageServiceFactory,
 	type ImageServiceFactoryFn,
 	type ImageServiceFactoryOptions
 } from './image-service-factory.js';

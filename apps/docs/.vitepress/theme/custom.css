@@ -10,3 +10,64 @@
 	--vp-c-brand-1: oklch(65% 0.245 262.881);
 	--vp-c-brand-2: oklch(54.6% 0.245 262.881);
 }
+
+/* Mermaid Chart Zoom/Lightbox */
+.mermaid {
+	cursor: zoom-in;
+	transition: opacity 0.2s ease;
+}
+
+.mermaid:hover {
+	opacity: 0.85;
+}
+
+.mermaid-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	background: rgba(0, 0, 0, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: zoom-out;
+	padding: 2rem;
+	animation: mermaid-fade-in 0.2s ease;
+}
+
+@keyframes mermaid-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.mermaid-lightbox-content {
+	width: 90vw;
+	height: 90vh;
+	overflow: auto;
+	background: var(--vp-c-bg);
+	border-radius: 8px;
+	padding: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.mermaid-lightbox-content svg {
+	min-width: 100%;
+	width: auto !important;
+	height: auto !important;
+	max-height: 90vh;
+}
+
+.mermaid-lightbox-hint {
+	position: fixed;
+	bottom: 1.5rem;
+	left: 50%;
+	transform: translateX(-50%);
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.875rem;
+	pointer-events: none;
+}

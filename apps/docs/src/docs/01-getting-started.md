@@ -5,9 +5,11 @@ description: "Anwender-Dokumentation für UJL"
 
 # Dokumentation
 
-## UJL Entwickler-Anleitung
+::: warning Entwicklungsstand
 
-> ⚠️ Diese Anleitung beschreibt den aktuellen Entwicklungsstand des Projekts. Das Projekt befindet sich noch im Aufbau und ist nicht bereit für die Integration in Produktionsumgebungen. Diese Anleitung ist für alle gedacht, die den Crafter bereits im "Baustellen-Zustand" erkunden möchten.
+Das UJL-Framework befindet sich im aktiven Aufbau. Die Rendering-Pipeline ist weitgehend stabil, der Crafter ist jedoch noch nicht produktionsreif. Diese Anleitung richtet sich an Entwickler:innen, die das Framework bereits jetzt erkunden möchten.
+
+:::
 
 ## Projekt-Übersicht
 
@@ -21,11 +23,11 @@ ujl/
 │   ├── ui/            # UI-Komponenten (shadcn-svelte)
 │   ├── adapter-svelte/  # Svelte-Adapter für UJL-Rendering
 │   ├── adapter-web/   # Web Components Adapter
-│   ├── crafter/       # 🚧 Visual Editor (Work in Progress)
+│   ├── crafter/       # Visual Editor
 │   └── examples/      # Beispiel-UJL-Dateien
 │
 ├── apps/              # Anwendungen
-│   ├── dev-demo/      # Dev Demo – Crafter Integration Demo
+│   ├── dev-demo/      # Dev Demo: Crafter Integration Demo
 │   └── docs/          # Dokumentations-Website
 │
 └── services/          # Backend-Services
@@ -41,15 +43,14 @@ ujl/
 
 ### Zwei Hauptwerkzeuge
 
-1. **Rendering Pipeline** (fast produktionsreif)
+1. **Rendering Pipeline**
    - Rendert UJL-Dateien zu HTML/CSS/JS
    - Validiert Syntax und Kompatibilität
    - Verwendbar über `adapter-svelte` oder `adapter-web`
 
-2. **Crafter** (in Entwicklung) 🚧
+2. **Crafter**
    - Visueller Editor für Content und Design
    - Zwei Modi: Editor (Content) & Designer (Theme)
-   - Noch nicht für produktiven Einsatz bereit
 
 ## Schnellstart
 
@@ -84,12 +85,6 @@ Der Crafter startet dann auf `http://localhost:5173` (oder einem anderen Port, f
 - Interaktive UI zum Bearbeiten von UJL-Content und -Themes
 - Live-Preview der Änderungen
 
-**Wichtig zu wissen:**
-
-- Der Crafter ist noch nicht fertig entwickelt
-- Viele Features sind noch im Aufbau
-- Nutze ihn nur zum Experimentieren und Verstehen der Architektur
-
 ### Die Dev-Demo starten
 
 Die **Dev-Demo** (`apps/dev-demo`) ist eine minimale Integration-Demo für den UJL Crafter. Sie zeigt, wie der Crafter in eine Vanilla TypeScript-Anwendung eingebunden wird und unterstützt zwei Library-Speichermodi:
@@ -99,7 +94,7 @@ Die **Dev-Demo** (`apps/dev-demo`) ist eine minimale Integration-Demo für den U
 
 #### Schnellstart (Inline-Modus)
 
-Der einfachste Weg, die Demo zu starten – keine zusätzliche Konfiguration nötig:
+Der einfachste Weg, die Demo zu starten, ohne zusätzliche Konfiguration:
 
 ```bash
 # Aus dem Projekt-Root:
@@ -161,8 +156,6 @@ Jetzt werden hochgeladene Bilder im Library-Service gespeichert.
 - Möglichkeit, zwischen Inline- und Backend-Speicherung zu wechseln
 - Perfekt für Evaluierung und Integrationstests
 
-**Hinweis:** Die Dev-Demo ist primär für Entwickler und Gutachter gedacht, um das Framework in einer echten Anwendung zu evaluieren.
-
 ## Build-Prozess
 
 Das Monorepo hat Build-Abhängigkeiten, die beachtet werden müssen:
@@ -181,21 +174,3 @@ pnpm --filter @ujl-framework/adapter-web build   # 5. Web Adapter
 pnpm --filter @ujl-framework/crafter build       # 6. Crafter
 pnpm --filter @ujl-framework/docs build          # 7. Dokumentation
 ```
-
-## Experimentieren mit UJL
-
-### Neue UJL-Beispieldatei erstellen
-
-Um eigene UJL-Dateien zu testen:
-
-1. Erstelle eine `.ujlc.json` in `packages/examples/src/documents/`
-2. Definiere Struktur mit `type`, `fields`, und `slots`
-3. Exportiere sie in `packages/examples/src/index.ts`
-4. Nutze sie in der Dev-Demo oder im Crafter zum Testen
-
-## Wichtige Hinweise
-
-### 🚧 Aktueller Stand des Crafters
-
-- Der Crafter ist **noch lange nicht produktionsreif**
-- Viele Features sind in Arbeit oder noch Platzhalter
