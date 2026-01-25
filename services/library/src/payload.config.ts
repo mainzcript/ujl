@@ -71,7 +71,6 @@ export default buildConfig({
     push: process.env.NODE_ENV !== 'production',
     migrationDir: './src/migrations',
   }),
-  // @ts-expect-error - sharp 0.34.x types are incompatible with Payload's SharpDependency
   sharp,
   plugins: [],
 })
