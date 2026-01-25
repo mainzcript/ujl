@@ -10,6 +10,12 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **Unified JSON Layout (UJL)**  
   Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts – mit klarer Trennung von Inhalt und Design.
 
+- **UJLC (UJL Content Document)**  
+  Das Content-Dokumentformat von UJL (`.ujlc.json`). Enthält Metadaten (`meta`), eine optionale Image-Bibliothek (`images`) sowie die Modulstruktur (`root`).
+
+- **UJLT (UJL Theme Document)**  
+  Das Theme-Dokumentformat von UJL (`.ujlt.json`). Enthält Metadaten (`meta`) und Design-Tokens (`tokens`) für Farben, Typografie, Spacing und Radius.
+
 - **UJL Crafter**  
   Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Nutzt Adapter zur Rendering-Integration.
 
@@ -19,11 +25,14 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **ContentFrame**  
   Das gerenderte Endprodukt eines UJL-Layouts – bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
 
-- **UJL-Datei (`.ujlc.json`)**  
-  JSON-Datei zur Definition von Inhalten und deren Anordnung in einem Layout. Grundlage für das modulare Rendering mit UJL.
+- **UJLC-Dokument (`.ujlc.json`)**  
+  Konkrete Instanz eines UJLC-Content-Dokuments: beschreibt Inhalt und Struktur über Module/Fields/Slots, enthält aber keine Design-Informationen.
 
-- **Design-Konfigurationsdatei (`.ujlt.json`)**  
-  JSON-Datei zur zentralen Steuerung von Farben, Schriften, Abständen und weiteren Designparametern. Bindet sich an das Corporate Design.
+- **UJLT-Dokument (`.ujlt.json`)**  
+  Konkrete Instanz eines UJLT-Theme-Dokuments: beschreibt zentrale Designparameter als Tokens und enthält keine Content-Daten.
+
+- **Library Service (`services/library`)**  
+  Optionaler Backend-Service für Media Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
 
 ## Architektur und Module
 
@@ -42,6 +51,12 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **ModuleRegistry**  
   Verwaltet verfügbare Module und ermöglicht die Registrierung neuer Module zur Erweiterung des Systems.
 
+- **Image Library / Media Library**  
+  Abstraktion im Core, die Image-IDs zu konkreten Bilddaten auflöst. Unterstützt Inline Storage (Data-URLs/Base64 im UJLC) und Backend Storage über einen Provider.
+
+- **ImageProvider**  
+  Schnittstelle, über die die Image Library Bilder aus externen Quellen (z. B. Library Service) auflösen kann.
+
 - **FieldSet**  
   Eine Sammlung typisierter Fields, die ein Modul zur Dateneingabe verwendet. Jedes Field hat einen Namen, Typ und Validierungsregeln.
 
@@ -56,6 +71,13 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   - **Syntaxprüfung**: Formale Validierung der JSON-Struktur via Zod-Schemas.
   - **Kompatibilitätsprüfung**: Sicherstellung, dass Dokumente mit der eingesetzten UJL-Version harmonieren.
   - **Hauptfunktionen**: `validateUJLCDocumentSafe()`, `validateUJLTDocumentSafe()`, `validateModule()`, `validateSlot()`
+  - **CLI**: Das Binary `ujl-validate` validiert UJLC- und UJLT-Dokumente über die Kommandozeile.
+
+- **Mount-API**  
+  Programmierschnittstelle, um den Crafter in eine Host-Anwendung in ein DOM-Element einzubetten und per Config (z. B. Module, Theme, Media-Provider) zu initialisieren.
+
+- **CrafterContext / Operations API**  
+  Interne (editor-zentrierte) Context-API im Crafter für Mutationen am Dokument, z. B. `operations.updateNodeField()`, `operations.moveNode()`, `operations.copyNode()` und `operations.pasteNode()`.
 
 ## Rollen und Nutzung
 
@@ -84,8 +106,14 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **AST (Abstract Syntax Tree)**  
   Eine baumartige Darstellung der Struktur von UJL-Dokumenten, die für die Verarbeitung und Transformation verwendet wird.
 
+- **ADR (Architecture Decision Record)**  
+  Dokumentierte Architekturentscheidung inklusive Begründung und Konsequenzen (siehe Kapitel 9).
+
 - **API (Application Programming Interface)**  
   Definiert die Schnittstellen zwischen verschiedenen Komponenten des UJL-Systems und ermöglicht die Integration in externe Anwendungen.
+
+- **CMS (Content Management System) / Headless CMS**  
+  Systeme zur Verwaltung von Inhalten. UJL ist kein CMS, kann aber mit (Headless) CMS kombiniert werden; der Library Service nutzt Payload CMS für Media-Management.
 
 - **JSON (JavaScript Object Notation)**  
   Das Datenformat, in dem UJL-Layouts und -Konfigurationen gespeichert werden. Ermöglicht plattformunabhängigen Datenaustausch.
@@ -93,17 +121,50 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **TypeScript**  
   Eine erweiterte Version von JavaScript mit statischer Typisierung, die für die Entwicklung von UJL verwendet wird.
 
+- **Zod**  
+  TypeScript-first Schema- und Validierungsbibliothek. In UJL dienen Zod-Schemas als Grundlage für Runtime-Validierung und Type Inference.
+
+- **CLI (Command Line Interface)**  
+  Kommandozeilen-Schnittstelle; in UJL z. B. für Validierung (CLI-Validator im `types`-Package).
+
 - **Build-Zeit-Kompilierung**  
   Der Prozess, bei dem Code bereits während der Entwicklung kompiliert wird, um die Laufzeit-Performance zu verbessern.
 
 - **Svelte Runes**  
   Svelte 5 APIs für Reaktivität (`$state`, `$derived`, `$effect`). Ermöglichen fine-grained reactivity im Crafter und in Adaptern.
 
+- **SSR (Server-Side Rendering)**  
+  Rendering auf dem Server statt im Browser. UJL strebt SSR-sichere Verarbeitung an (z. B. synchrone Serialisierung für Rich Text).
+
 - **Shadow DOM**  
   Browser-Technologie zur Style-Isolation. UJL nutzt Shadow DOM im Web Adapter, um CSS-Konflikte mit Host-Anwendungen zu verhindern.
 
+- **REST**  
+  Architekturstil für Web-APIs, häufig über HTTP/JSON. Der Library Service stellt eine REST-API bereit.
+
+- **XSS (Cross-Site Scripting)**  
+  Sicherheitsklasse, bei der ungefilterte Inhalte Skripte einschleusen können; UJL setzt auf strukturierte Datenmodelle und defensives Rendering, um Risiken zu reduzieren.
+
+- **WYSIWYG**  
+  „What You See Is What You Get“: Bearbeitung mit direkter visueller Vorschau (z. B. im Crafter).
+
+- **E2E (End-to-End)**  
+  Tests, die vollständige User-Flows in einem echten Browser prüfen (z. B. mit Playwright).
+
+- **WCAG (Web Content Accessibility Guidelines)**  
+  Standardisierte Richtlinien für Barrierefreiheit im Web; UJL orientiert sich an WCAG 2.2.
+
+- **ARIA (Accessible Rich Internet Applications)**  
+  Spezifikation für zusätzliche Accessibility-Semantik (z. B. Rollen/Attribute) in Web-UIs.
+
 - **Tree-Shaking**  
   Build-Optimierung, die ungenutzten Code automatisch entfernt. Reduziert Bundle-Größe durch Eliminierung nicht verwendeter Module und Funktionen.
+
+- **NPM Registry / NPM**  
+  Verteilungskanal für JavaScript-Packages; UJL-Packages sind zur Veröffentlichung als NPM-Packages vorgesehen.
+
+- **pnpm**  
+  Package Manager, der in UJL für das Monorepo (Workspaces) und reproduzierbare Installationen eingesetzt wird.
 
 - **Workspace Protocol**  
   pnpm-Feature zur Referenzierung von Packages innerhalb eines Monorepos (`workspace:*`, `workspace:^`). Ermöglicht koordinierte Versionierung.
@@ -111,10 +172,22 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 - **Changeset**  
   Ein Versionierungs-Tool für Monorepos. Koordiniert Package-Versionen, generiert Changelogs automatisch und folgt Semantic Versioning.
 
+- **VitePress**  
+  Static-Site-Generator (Vite-basiert), mit dem die Dokumentations-Website (`apps/docs`) erstellt wird.
+
 ## Design und Styling
 
 - **Theme**
   Eine Sammlung von Designregeln, die das visuelle Erscheinungsbild von UJL-Layouts definieren.
+
+- **Design Tokens**  
+  Benannte Designwerte (z. B. Farben, Typografie, Abstände), die zentral im Theme gepflegt und von Adaptern ins konkrete Styling übersetzt werden.
+
+- **OKLCH**  
+  Perzeptueller Farbraum (Lightness/Chroma/Hue), der für konsistentere Paletten und verlässlichere Kontraststeuerung genutzt werden kann.
+
+- **Tailwind CSS**  
+  Utility-first CSS-Framework, das in UJL für schnelles, konsistentes Styling (u. a. basierend auf Tokens/CSS-Variablen) eingesetzt wird.
 
 - **CSS-in-JS**
   Ein Ansatz, bei dem CSS-Stile direkt in JavaScript/TypeScript definiert werden, um die Komponentenmodularität zu verbessern.
