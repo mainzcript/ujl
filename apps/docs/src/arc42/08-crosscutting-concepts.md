@@ -786,6 +786,12 @@ export default defineConfig({
 });
 ```
 
+### 8.7.4 Agentic Coding als DX-Anforderung
+
+Ein Teil der täglichen Entwicklung wird zunehmend von Tools übernommen, die Code ändern, statt dass Menschen jede Zeile selbst schreiben. Damit solche Änderungen zuverlässig in das Projekt passen, braucht es zwei Dinge: stabile Leitplanken im Repository und verlässliche Qualitätsprüfungen.
+
+UJL nutzt dafür explizite Anweisungen für Agenten (z.B. `AGENTS.md` in relevanten Verzeichnissen) sowie eine Dokumentstruktur mit stabilen Begriffen und Verweisen. Die technische Absicherung passiert über wiederholbare Builds, Linting und Tests in CI, damit automatisierte Änderungen schnell Rückmeldung bekommen und nicht stillschweigend die Architekturregeln unterlaufen.
+
 ## 8.8 Erweiterbarkeit
 
 ### 8.8.1 Plugin-Architecture

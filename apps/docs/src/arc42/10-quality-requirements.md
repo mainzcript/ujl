@@ -365,6 +365,18 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 **Testbarkeit:** Dokumentations-Review, Vollständigkeits-Checklist.
 
+#### QS-DX-04: Agentic Workflow
+
+| Aspekt                | Beschreibung                                                                                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Developer Experience                                                                                                                                                                                                                |
+| **Stimulus**          | KI-gestütztes Tool erstellt eine Änderung (Refactor, Fix, neue Funktion)                                                                                                                                                            |
+| **Systemreaktion**    | Das Repository liefert ausreichenden Kontext und schnelle Rückmeldung, damit Änderungen projektverträglich bleiben                                                                                                                  |
+| **Messbare Antwort**  | - `AGENTS.md`-Anweisungen in relevanten Verzeichnissen<br/>- stabile Begriffe und Verweise in der Doku<br/>- CI prüft Build, Linting und Tests für jede Änderung                                                                    |
+| **Architektur-Bezug** | `AGENTS.md` im Repository, arc42-Dokumentation, CI/CD Pipeline (siehe [Lösungsstrategie 4.5](./04-solution-strategy#_4-5-implementierungsstrategie) und [Constraints 2.4.3](./02-constraints#_2-4-3-maintainability-anforderungen)) |
+
+**Testbarkeit:** Review der Agent-Instructions, CI-Status für PRs, stichprobenartige Reproduktion von Änderungen in einem frischen Checkout.
+
 ### 10.2.7 Maintainability (MAINT)
 
 #### QS-MAINT-01: Test-Abdeckung
@@ -430,6 +442,7 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 | QS-DX-01    | Developer Exp.        | Type Safety               | 100% TypeScript Strict        | Implementiert |
 | QS-DX-02    | Developer Exp.        | Onboarding-Zeit           | <1h für Custom Module         | Messbar       |
 | QS-DX-03    | Developer Exp.        | Dokumentations-qualität   | README pro Package            | Implementiert |
+| QS-DX-04    | Developer Exp.        | Agentic Workflow          | CI + Agent Instructions       | Implementiert |
 | QS-MAINT-01 | Maintainability       | Test-Abdeckung            | >80% wichtige Pfade           | In Arbeit     |
 | QS-MAINT-02 | Maintainability       | Modulare Struktur         | Keine zirkulären Dependencies | Implementiert |
 | QS-MAINT-03 | Maintainability       | Versionierung             | Synchrone Versionierung       | Implementiert |
@@ -457,3 +470,4 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | OKLCH Farbraum (ADR-009)          | QS-ACC-01                                           |
 | pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03                            |
 | Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                              |
+| `AGENTS.md` / Agent Instructions  | QS-DX-04                                            |

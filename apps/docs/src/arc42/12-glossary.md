@@ -41,7 +41,15 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
   Konkrete Instanz eines UJLT-Theme-Dokuments: beschreibt Designparameter als Tokens und enthält keine Content-Daten.
 
 - **Library Service (`services/library`)**  
-  Backend-Service für Asset-Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
+  Backend-Service für Asset-Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Payload stellt REST und GraphQL bereit; im UJL-Frontend wird derzeit die REST-API genutzt, z.B. für den Backend-Storage-Modus.
+
+## Entwicklung & Zusammenarbeit
+
+- **Agentic Coding**  
+  Entwicklungsstil, bei dem Tools (KI/Agenten) Codeänderungen ausführen und Menschen vor allem Ziele, Constraints und Reviews steuern. Damit das in einem Projekt funktioniert, müssen Qualitätsprüfungen, Konventionen und Projektwissen so dokumentiert sein, dass Änderungen nachvollziehbar und testbar bleiben.
+
+- **`AGENTS.md`**  
+  Datei mit Arbeitsanweisungen für KI-Tools im Repository. Sie beschreibt Regeln, Kontext und Konventionen für den jeweiligen Verzeichnisbaum und unterstützt dabei, Änderungen konsistent und projektverträglich zu halten.
 
 ## Architektur und Module
 

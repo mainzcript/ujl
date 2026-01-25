@@ -45,11 +45,11 @@ Die wichtigsten Qualitätsziele für UJL, priorisiert nach Architektur-Relevanz:
 
 ### Primäre Stakeholder
 
-| Rolle                                   | Erwartungen an UJL                                                                                | Nutzen                                                                     |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Redakteur:innen**                     | Inhalte schnell erstellen und ändern, ohne Design- oder Accessibility-Regeln verletzen zu können. | Visueller Editor mit kombinierbaren Modulen, ohne Design-Drift.            |
-| **Designer:innen**                      | Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.              | Theme als Quelle; globale Wirkung statt Einzelseiten-Fixing.               |
-| **Entwickler:innen / Integrator:innen** | Definierte Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme.    | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit. |
+| Rolle                                   | Erwartungen an UJL                                                                                                                                                                                                      | Nutzen                                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Redakteur:innen**                     | Inhalte schnell erstellen und ändern, ohne Design- oder Accessibility-Regeln verletzen zu können.                                                                                                                       | Visueller Editor mit kombinierbaren Modulen, ohne Design-Drift.                                                                          |
+| **Designer:innen**                      | Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.                                                                                                                                    | Theme als Quelle; globale Wirkung statt Einzelseiten-Fixing.                                                                             |
+| **Entwickler:innen / Integrator:innen** | Definierte Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme. Außerdem: ein Projekt-Setup, das Änderungen durch KI-gestützte Tools (Agentic Coding) praktikabel und überprüfbar macht. | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit sowie dokumentierte Leitplanken für automatisierte Änderungen. |
 
 ### Sekundäre Stakeholder
 
