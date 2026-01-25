@@ -33,6 +33,8 @@ Für Crafter (Editor) und den primären Rendering-Adapter setzt UJL auf Svelte 5
 
 Für die Image Library nutzt UJL Payload CMS im Library Service als Headless-Backend, um Upload, Metadatenpflege (z. B. Alt-Text, Credits, i18n) und eine API out of the box zu erhalten und gleichzeitig TypeScript-first zu bleiben. In Kombination mit PostgreSQL und integrierter Bildverarbeitung (z. B. responsive Größen und moderne Formate) entsteht ein professioneller Asset-Workflow. Der Trade-off sind zusätzliche Infrastruktur, Setup-Aufwand und laufende Betriebs- bzw. Hosting-Kosten.
 
+Payload bietet in der Enterprise-Version auch KI-Funktionen wie AI Search und Auto-Embedding. Diese Mechanismen sind für UJL aber kein Fundament: UJL speichert Embeddings an den Grenzen seines eigenen Dokumentmodells (UJLC-Module und Medien) und will Embedding-Erzeugung als austauschbaren Baustein behandeln. Selbst wenn Payload-Features genutzt würden, bliebe eine eigene Pipeline nötig, weil UJL nicht Payloads internes Content-Modell embedden möchte, sondern UJL-Module und Medien in einem gemeinsamen Vektorraum vergleichen will.
+
 ## 9.8 ADR-008: TipTap/ProseMirror für Rich Text Editing
 
 Für Rich-Text-Editing verwendet UJL TipTap/ProseMirror, um Inhalte als strukturierte, serialisierbare JSON-Dokumente (statt HTML-Strings) zu erfassen und zu validieren. Das ermöglicht ein gemeinsames Schema zwischen Editor und Renderer, ist SSR-tauglich und reduziert Sicherheitsrisiken (z. B. XSS). Die Kehrseite sind zusätzliche Komplexität, größere Bundle-Size und eine Lernkurve rund um ProseMirror-Konzepte.
@@ -71,7 +73,13 @@ Es ist noch offen, welches Lizenzmodell langfristig genutzt wird; aktuell wird z
 
 ### 9.13.2 Semantic Search mit pgvector
 
-Für die Image Library ist eine semantische Suche geplant, bei der Embeddings gespeichert und abgefragt werden; als technische Option steht pgvector als PostgreSQL-Extension im Raum, ist aber noch nicht entschieden und priorisiert.
+Für die Image Library ist eine semantische Suche geplant, bei der Embeddings gespeichert und abgefragt werden. Payload liefert REST und GraphQL, aber eine Embedding-Erzeugung ist heute noch nicht Teil des Systems: UJL ist an dieser Stelle vorbereitet (Embedding-Felder in UJLC), die Pipeline und der Betrieb sind offen.
+
+Als Zielbild ist ein multimodales Embedding-Modell denkbar, das sowohl Dokument-Module als auch Medien (z.B. Bilder aus dem Library Service) in denselben Vektorraum projiziert. Damit wären Suchen und Zuordnungen über Kosinusähnlichkeit möglich. Wo genau die Generierung läuft (z.B. als Backend-Funktion im Umfeld des Library Service) und wie API-Keys zu einem externen KI-Anbieter verwaltet werden, ist noch nicht festgelegt.
+
+Auch wenn Payload (Enterprise) Auto-Embedding und AI Search anbietet, würde UJL diese Fähigkeiten nicht 1:1 übernehmen: Die Embedding-Grenze liegt bei UJLC und bei Medienobjekten, nicht bei Payload-Collections. Deshalb bleibt die Embedding-Pipeline als UJL-eigener Baustein zu betrachten.
+
+Als Storage-Option steht pgvector als PostgreSQL-Extension im Raum, ist aber noch nicht entschieden und priorisiert.
 
 ### 9.13.3 Weitere Adapter
 

@@ -86,6 +86,16 @@ interface UJLTDocument {
 }
 ```
 
+### 8.1.1.1 Embedding-Felder (AI-ready)
+
+UJLC ist so aufgebaut, dass Module zusätzlich zu ihren fachlichen Daten auch maschinenlesbare Signale tragen können. Dafür existieren im Dokument Metadaten, die Embeddings referenzieren, ohne dass UJL heute bereits eine Embedding-Pipeline mitliefert.
+
+In der Praxis sind zwei Felder vorgesehen: Im Dokument-Meta identifiziert `_embedding_model_hash` das verwendete Embedding-Modell, und jedes Modul trägt in `meta._embedding` ein numerisches Vektor-Embedding (oft anfangs leer). Diese Struktur erlaubt später Use Cases wie semantische Suche, das Erkennen von betroffenen Modulen über Kosinusähnlichkeit und einen Editing-Workflow, der Änderungen gezielt auf Teilbäume begrenzt.
+
+Der Hash ist dabei mehr als nur ein Modellname: In self-hosted Umgebungen kann jede Instanz eine eigene Embedding-Konfiguration nutzen. `_embedding_model_hash` fasst deshalb die Identität der Instanz (z.B. Domain) und den Modellnamen in einem stabilen Fingerprint zusammen. Wenn sich diese Konfiguration ändert oder ein Dokument in einer anderen Instanz weiterverarbeitet wird, sind Embeddings nicht mehr vergleichbar und müssen neu berechnet werden, damit innerhalb einer Instanz alle Dokumente und Medien im selben Vektorraum liegen.
+
+Als frühes Experiment wurde die Additivität von Embeddings getestet: Für kleine Änderungen ließ sich die Repräsentation eines Elternmoduls näherungsweise aus den Embeddings der Kindmodule rekonstruieren (Addition und anschließende Normierung). Das ist kein Beweis für ein allgemeines Verfahren; es ist ein Indiz, dass inkrementelle Updates in einem späteren KI-gestützten Editing-Workflow die Rechen- und Tokenkosten senken könnten. Additive Komposition ist in der Embedding-Literatur kein exotischer Sonderfall. Sie taucht als Vektor-Arithmetik bei Wortembeddings auf (z.B. Analogie-Aufgaben) und wird auch als starke Baseline genutzt, um größere Texte zu repräsentieren (gewichtetes Mitteln von Wortvektoren). Gleichzeitig hängt die „Trennschärfe“ solcher zusammengesetzten Vektoren stark vom gewählten Embedding-Modell ab; bei multimodalen Modellen wie CLIP ist Kompositionalität ein bekanntes Problemfeld und wird aktiv erforscht.
+
 ### 8.1.2 AST-basierte Composition
 
 Das Architekturprinzip ist die Trennung von Dokumentstruktur (UJLC) und Rendering (AST):

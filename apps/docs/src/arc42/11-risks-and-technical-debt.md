@@ -710,12 +710,15 @@ Entwickler, die eigene Custom Modules erstellen möchten, haben aktuell keine Te
 
 Das Field-System bietet `validate()` und `fit()` Methoden, aber der Validator im `types`-Package ist noch nicht an die Module Registry angebunden. Aktuell erfolgt nur Schema-Validierung (Zod), aber keine Registry-basierte Validierung (z.B. "Ist Modul-Type `xyz` registriert?").
 
+Zusätzlich existieren im UJLC-Datenmodell bereits Felder für Embeddings (z.B. `meta._embedding`, `_embedding_model_hash`), sie werden aber derzeit nicht automatisch erzeugt oder konsistent aktualisiert. Ohne Registry-Validierung und ohne verlässliche Update-Strategie bleiben embedding-basierte Workflows schwer überprüfbar.
+
 **Potenzielle Auswirkungen:**
 
 - Kein fundiertes Feedback für LLM-generierte Dokumente
 - Validierung ignoriert Custom Modules
 - Validator kann nicht prüfen, ob verwendete Module existieren
 - KI-Integration weniger robust
+- Embedding-basierte Funktionen (z.B. semantische Suche oder gezielte Editor-Hinweise) sind schwer reproduzierbar, solange Embeddings nicht konsistent geprüft und aktualisiert werden
 
 **Betroffene Pakete:**
 

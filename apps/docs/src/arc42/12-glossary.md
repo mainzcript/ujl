@@ -128,7 +128,7 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
 ## Erweiterung & Zukunft
 
 - **LLM-Readiness** / **KI-bereit**
-  UJL wird so strukturiert, dass Sprachmodelle (z. B. GPT, Mistral) Inhalte und Layouts verstehen, erzeugen oder verändern können.
+  UJL ist so strukturiert, dass Sprachmodelle Inhalte und Layouts verstehen, erzeugen oder verändern können. Das ist eine Vorbereitungsmaßnahme (z.B. validierbare Dokumentformate, stabile Schnittstellen, geplante Embedding-Felder) und bedeutet nicht, dass heute bereits ein KI-Service oder ein Modell im System integriert ist.
 
 - **Mehrsprachigkeit**  
   Unterstützung sprachspezifischer Inhalte direkt im `.ujlc.json`. Anbindung an Übersetzungs-APIs ist vorgesehen.
@@ -149,6 +149,15 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
 
 - **JSON (JavaScript Object Notation)**  
   Das Datenformat, in dem UJL-Layouts und -Konfigurationen gespeichert werden. Ermöglicht plattformunabhängigen Datenaustausch.
+
+- **Embedding**  
+  Numerischer Vektor, der Inhalte semantisch repräsentiert. In UJL ist dafür im UJLC-Datenmodell Platz vorgesehen (z.B. `meta._embedding` pro Modul und `_embedding_model_hash` auf Dokumentebene), auch wenn die Erzeugung und Aktualisierung heute noch nicht als integrierte Funktion umgesetzt ist.
+
+- **`_embedding_model_hash`**  
+  Fingerprint der Embedding-Konfiguration eines Dokuments. Er dient dazu zu erkennen, ob Embeddings mit einer anderen Instanz- oder Modellkonfiguration erzeugt wurden (z.B. self-hosted mit abweichender Domain/Modell). Wenn der Hash nicht passt, müssen Embeddings neu berechnet werden, weil Vergleiche nur sinnvoll sind, wenn alle Vektoren innerhalb einer Instanz aus demselben Modell stammen.
+
+- **Kosinusähnlichkeit**  
+  Ähnlichkeitsmaß für Vektoren, das häufig bei Embeddings verwendet wird. Damit lassen sich z.B. semantisch ähnliche Module oder Medien identifizieren, wenn sie in denselben Vektorraum eingebettet sind.
 
 - **TypeScript**  
   Eine erweiterte Version von JavaScript mit statischer Typisierung, die für die Entwicklung von UJL verwendet wird.

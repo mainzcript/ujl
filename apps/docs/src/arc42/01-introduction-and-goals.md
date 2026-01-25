@@ -9,6 +9,8 @@ description: "Vision, Ziele, Stakeholder und wichtigste Qualitätsziele von UJL"
 
 UJL verlagert diese Absicherung in die Technik: Inhalte und Designregeln werden so beschrieben, dass das System nur zulässige Ergebnisse erzeugen kann.
 
+UJL ist außerdem **AI-ready**, aber aktuell **ohne integrierte KI-Services**: Es gibt keine eingebauten Modelle, kein Prompting und kein automatisches „AI Editing“ im Produkt. Stattdessen schafft UJL die Voraussetzungen, damit sich KI-Funktionen später sinnvoll ergänzen lassen (strukturierte Formate, Runtime-Validierung, vorgesehene Embedding-Felder). Wichtig ist die Abgrenzung: AI-ready beschreibt die Vorbereitung für zukünftige Produktfunktionen, nicht eine bereits vorhandene KI-Integration.
+
 **Kernidee (vereinfacht):**
 
 - **Inhalte** liegen als strukturierte JSON-Dokumente in `.ujlc.json` vor.
@@ -45,11 +47,11 @@ Die wichtigsten Qualitätsziele für UJL, priorisiert nach Architektur-Relevanz:
 
 ### Primäre Stakeholder
 
-| Rolle                                   | Erwartungen an UJL                                                                                                                                                                                                      | Nutzen                                                                                                                                   |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Redakteur:innen**                     | Inhalte schnell erstellen und ändern, ohne Design- oder Accessibility-Regeln verletzen zu können.                                                                                                                       | Visueller Editor mit kombinierbaren Modulen, ohne Design-Drift.                                                                          |
-| **Designer:innen**                      | Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.                                                                                                                                    | Theme als Quelle; globale Wirkung statt Einzelseiten-Fixing.                                                                             |
-| **Entwickler:innen / Integrator:innen** | Definierte Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme. Außerdem: ein Projekt-Setup, das Änderungen durch KI-gestützte Tools (Agentic Coding) praktikabel und überprüfbar macht. | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit sowie dokumentierte Leitplanken für automatisierte Änderungen. |
+| Rolle                                   | Erwartungen an UJL                                                                                                                                                                                                  | Nutzen                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Redakteur:innen**                     | Inhalte schnell erstellen und ändern, ohne Design- oder Accessibility-Regeln verletzen zu können.                                                                                                                   | Visueller Editor mit kombinierbaren Modulen, ohne Design-Drift.                                                                          |
+| **Designer:innen**                      | Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.                                                                                                                                | Theme als Quelle; globale Wirkung statt Einzelseiten-Fixing.                                                                             |
+| **Entwickler:innen / Integrator:innen** | Definierte Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme. Außerdem: ein Projekt-Setup, das Agentic Coding bei der Entwicklung am Repository praktikabel und überprüfbar macht. | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit sowie dokumentierte Leitplanken für automatisierte Änderungen. |
 
 ### Sekundäre Stakeholder
 

@@ -167,6 +167,8 @@ UJL unterstützt alle JS-basierten Frontend-Stacks.
 
 KI-Systeme generieren strukturierte JSON-Daten (UJLC/UJLT) statt freies HTML. Der Output wird gegen Schemas validiert; ungültige Strukturen werden abgelehnt.
 
+UJL selbst enthält derzeit keine integrierten KI-Services. Die Rolle der KI liegt außerhalb des Systems (z.B. als Redaktionsassistenz oder Import-Pipeline) und interagiert über die dokumentierten Datenformate und Schnittstellen.
+
 **Artefakte:**
 
 - Vorschläge/Generierungen als UJLC/UJLT (oder Teilstrukturen davon)
