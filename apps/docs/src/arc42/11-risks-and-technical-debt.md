@@ -5,45 +5,38 @@ description: "Technische Risiken und bekannte technische Schulden im UJL-System"
 
 # Risiken und technische Schulden
 
-UJL trägt typische Risiken eines jungen, modularen Toolchains: Abhängigkeiten und Build-Ketten im Monorepo, die Reife von Svelte-5-Ökosystem und eine wachsende Oberfläche an Paketen, die zusammen passen müssen. Die technische Schuldenliste sammelt konkrete, nachvollziehbare Punkte, die sich auf Stabilität, Sicherheit, Performance, Testbarkeit und Wartbarkeit auswirken können.
+UJL ist ein junges Framework, das auf modernen Technologieentscheidungen wie Svelte 5, Runes, pnpm Workspaces und dem OKLCH-Farbraum basiert. Diese Entscheidungen bringen technische und organisatorische Risiken mit sich. Durch die Priorisierung der Kernarchitektur und des Content-/Design-Separationsansatzes entstehen technische Schulden. Features wie Undo/Redo, vollständige Internationalisierung oder Bundle-Optimierung wurden zunächst zurückgestellt.
 
-```mermaid
-graph TB
-    subgraph HighRisk["Hohe Priorität"]
-        R1["Svelte 5 Ecosystem Maturity"]
-        R2["Monorepo Build Complexity"]
-        R3["Bundle Size Management"]
-    end
+## Risiko-Übersicht
 
-    subgraph MediumRisk["Mittlere Priorität"]
-        R4["Payload CMS Dependency"]
-        R5["Browser Compatibility OKLCH"]
-        R6["Test Coverage Gaps"]
-    end
+| Risiko-ID | Titel                              | Kategorie            | Priorität | Wahrscheinlichkeit | Auswirkung | Status         |
+| --------- | ---------------------------------- | -------------------- | --------- | ------------------ | ---------- | -------------- |
+| R-001     | Svelte 5 Runes Ecosystem Maturity  | Technologie          | Hoch      | Mittel             | Hoch       | Überwacht      |
+| R-002     | Monorepo Build-Komplexität         | Build-System         | Hoch      | Hoch               | Mittel     | Mitigiert      |
+| R-003     | Bundle Size Management             | Performance          | Hoch      | Mittel             | Hoch       | Überwacht      |
+| R-007     | Small-Team-Risiko (1-3 Entwickler) | Organisation         | Mittel    | Hoch               | Hoch       | Akzeptiert     |
+| R-006     | Test Coverage Gaps                 | Qualität             | Mittel    | Mittel             | Mittel     | In Bearbeitung |
+| R-004     | Payload CMS Backend-Abhängigkeit   | Externe Abhängigkeit | Mittel    | Niedrig            | Mittel     | Akzeptiert     |
+| R-005     | OKLCH Browser-Kompatibilität       | Browser-Support      | Mittel    | Niedrig            | Mittel     | Akzeptiert     |
+| R-008     | ProseMirror/TipTap Komplexität     | Technologie          | Niedrig   | Niedrig            | Mittel     | Mitigiert      |
 
-    subgraph LowRisk["Niedrige Priorität"]
-        R7["Documentation Completeness"]
-        R8["Performance Optimization"]
-        R9["Accessibility Audit"]
-    end
+## Tech-Debt-Übersicht
 
-    subgraph TechDebt["Technische Schulden"]
-        TD1["Fehlende Unit Tests"]
-        TD2["Inline Type Assertions"]
-        TD3["Hardcoded Configuration"]
-        TD4["Legacy API Patterns"]
-        TD5["API-Key im Frontend"]
-        TD6["Testing-Utilities fehlen"]
-        TD7["Validator-Registry fehlt"]
-        TD8["Theme-Umschaltung fehlt"]
-        TD9["Crafter-Registry-API fehlt"]
-    end
-
-    style HighRisk fill:#ef4444
-    style MediumRisk fill:#f59e0b
-    style LowRisk fill:#22c55e
-    style TechDebt fill:#6366f1
-```
+| Schulden-ID | Titel                                         | Kategorie          | Priorität | Aufwand | Status     |
+| ----------- | --------------------------------------------- | ------------------ | --------- | ------- | ---------- |
+| TD-009      | API-Key-Exposition im Library Service         | Sicherheit         | Hoch      | Mittel  | Offen      |
+| TD-013      | Crafter-Registry-API für Custom Modules fehlt | Erweiterbarkeit    | Hoch      | Mittel  | Offen      |
+| TD-001      | Unvollständige Type Assertions                | Code-Qualität      | Mittel    | Mittel  | Offen      |
+| TD-003      | Fehlende Error Boundaries                     | Fehlerbehandlung   | Mittel    | Mittel  | Offen      |
+| TD-006      | Unvollständige JSDoc Dokumentation            | Dokumentation      | Mittel    | Mittel  | Offen      |
+| TD-008      | Fehlende Undo/Redo Funktionalität             | Feature-Lücke      | Mittel    | Hoch    | Offen      |
+| TD-010      | Testing-Utilities für Custom Modules fehlen   | Entwickler-API     | Mittel    | Mittel  | Offen      |
+| TD-011      | Validator-Registry-Integration fehlt          | KI-Integration     | Mittel    | Mittel  | Offen      |
+| TD-002      | Hardcoded Configuration Values                | Konfigurierbarkeit | Niedrig   | Niedrig | Offen      |
+| TD-004      | Inkonsistente Naming Conventions              | Code-Konsistenz    | Niedrig   | Niedrig | Akzeptiert |
+| TD-005      | Fehlende Internationalisierung (i18n)         | Feature-Lücke      | Niedrig   | Hoch    | Offen      |
+| TD-007      | Manuelle CSS Custom Property Generation       | Code-Duplizierung  | Niedrig   | Mittel  | Offen      |
+| TD-012      | Manuelle Theme-Umschaltung im Crafter fehlt   | Usability          | Niedrig   | Niedrig | Offen      |
 
 ## 11.1 Technische Risiken
 
@@ -59,27 +52,19 @@ graph TB
 
 **Beschreibung:**
 
-Das UJL Framework basiert auf Svelte 5 mit dem neuen Runes-System (`$state`, `$derived`, `$props`). Svelte 5 wurde im Oktober 2024 veröffentlicht und ist damit noch relativ neu. Das Ecosystem (Libraries, Tools, Community-Wissen) ist noch nicht vollständig ausgereift.
+Das UJL Framework basiert auf Svelte 5 mit dem neuen Runes-System (`$state`, `$derived`, `$props`). Svelte 5 wurde im Oktober 2024 veröffentlicht und ist damit noch relativ neu. Das Ecosystem aus Libraries, Tools und Community-Wissen ist noch nicht vollständig ausgereift, was zu Unsicherheiten bei der langfristigen Stabilität führt.
 
 **Potenzielle Auswirkungen:**
 
-- Breaking Changes in Minor-Releases von Svelte
-- Inkompatibilitäten mit Drittanbieter-Libraries, die noch Svelte 4 Patterns nutzen
-- Begrenzte Community-Ressourcen für Troubleshooting
-- Migration existierender Svelte 4 Code-Beispiele nicht direkt übertragbar
+Breaking Changes könnten bereits in Minor-Releases von Svelte auftreten, da das Runes-System noch aktiv weiterentwickelt wird. Inkompatibilitäten mit Drittanbieter-Libraries sind wahrscheinlich, da viele noch auf Svelte 4 Patterns basieren und nicht mit Runes kompatibel sind. Die Community-Ressourcen für Troubleshooting sind begrenzt, da weniger Entwickler Erfahrung mit dem neuen System haben. Die Migration existierender Svelte 4 Code-Beispiele aus Tutorials oder Foren ist nicht direkt übertragbar, was den Lernaufwand erhöht.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/adapter-svelte` - Verwendet Svelte 5 Runes für Reaktivität
-- `@ujl-framework/crafter` - Intensive Nutzung von `$state`, `$derived`, `$props`
-- `@ujl-framework/ui` - Svelte 5 Komponenten mit Runes
+Das Risiko betrifft primär `@ujl-framework/adapter-svelte`, das Svelte 5 Runes für Reaktivität verwendet, `@ujl-framework/crafter` mit intensiver Nutzung von `$state`, `$derived` und `$props` sowie `@ujl-framework/ui` mit Svelte 5 Komponenten die auf Runes basieren.
 
 **Mitigationsmaßnahmen:**
 
-1. **Pinning von Svelte-Versionen**: Explizite Versionierung in `package.json` ohne Caret (`^`)
-2. **Changelog-Monitoring**: Regelmäßige Überprüfung von Svelte Release Notes
-3. **Abstraktionsschicht**: Context API als Puffer zwischen Svelte-Interna und Business-Logik
-4. **Fallback-Dokumentation**: Dokumentation der Migration von Svelte 4 zu 5
+Svelte-Versionen werden explizit ohne Caret in der `package.json` gepinnt, um unerwartete Breaking Changes zu vermeiden. Ein regelmäßiges Changelog-Monitoring stellt sicher, dass Svelte Release Notes vor Updates geprüft werden. Die Context API dient als Abstraktionsschicht und Puffer zwischen Svelte-Interna und Business-Logik. Eine Fallback-Dokumentation zur Migration von Svelte 4 zu 5 hilft bei zukünftigen Anpassungen.
 
 **Status:** Aktiv überwacht
 
@@ -99,32 +84,27 @@ Das UJL Framework ist als pnpm Workspace Monorepo mit mehr als 10 Paketen organi
 
 **Build-Dependency-Chain:**
 
-```
-types → core → ui → adapter-svelte → adapter-web → crafter/dev-demo
-                ↘ examples ↗
+```mermaid
+graph LR
+    types --> core
+    core --> ui
+    ui --> adapter-svelte
+    adapter-svelte --> adapter-web
+    adapter-svelte --> crafter
+    crafter --> dev-demo
 ```
 
 **Potenzielle Auswirkungen:**
 
-- Längere CI/CD-Zeiten durch sequenziellen Build
-- Komplexes Debugging bei Fehlern in der Dependency-Chain
-- Workspace-Protocol (`workspace:*`) erfordert korrektes Linking
-- Changeset-Versionierung kann bei Fehlkonfiguration inkonsistente Versionen erzeugen
+Längere CI/CD-Zeiten entstehen durch den sequenziellen Build-Prozess, da Pakete nacheinander gebaut werden müssen. Debugging wird komplex, wenn Fehler in der Dependency-Chain auftreten und sich auf nachgelagerte Pakete auswirken. Das Workspace-Protocol (`workspace:*`) erfordert korrektes Linking zwischen den Paketen, was bei Fehlkonfiguration zu Problemen führt. Die Changeset-Versionierung kann bei falscher Konfiguration inkonsistente Versionen über Pakete hinweg erzeugen.
 
 **Betroffene Pakete:**
 
-- Alle Pakete im Monorepo
-- Besonders wichtig: `@ujl-framework/types` als Foundation-Layer
+Alle Pakete im Monorepo sind von diesem Risiko betroffen. Besonders kritisch ist `@ujl-framework/types` als Foundation-Layer, da Fehler hier alle abhängigen Pakete blockieren.
 
 **Mitigationsmaßnahmen:**
 
-1. **Strikte Build-Reihenfolge**: Explizite Sequenz in Root `package.json`
-   ```json
-   "build": "pnpm run types:build && pnpm run core:build && ..."
-   ```
-2. **Fixed Versioning**: Alle Pakete werden synchron versioniert (Changesets `fixed` Array)
-3. **CI/CD Caching**: Aggressive Caching-Strategie für `node_modules` und `.pnpm-store`
-4. **Lockfile-Validierung**: `pnpm install --frozen-lockfile` in CI
+Eine strikte Build-Reihenfolge wird durch explizite Sequenzen in der Root `package.json` sichergestellt. Fixed Versioning sorgt dafür, dass alle Pakete synchron versioniert werden durch das Changesets `fixed` Array. Aggressive Caching-Strategien für `node_modules` und `.pnpm-store` beschleunigen CI/CD-Durchläufe. Die Lockfile-Validierung mit `pnpm install --frozen-lockfile` in CI verhindert unerwartete Dependency-Updates.
 
 **Status:** Mitigiert durch Build-Scripts
 
@@ -152,23 +132,15 @@ Das `@ujl-framework/adapter-web` Paket bundelt Svelte und alle Abhängigkeiten i
 
 **Potenzielle Auswirkungen:**
 
-- Längere Ladezeiten bei Erstaufruf
-- Negative Auswirkungen auf Core Web Vitals (LCP, FID)
-- Einschränkungen für Mobile-First-Anwendungen
-- Erhöhter Bandbreitenverbrauch
+Längere Ladezeiten beim Erstaufruf beeinträchtigen die User Experience, insbesondere bei langsamen Verbindungen. Core Web Vitals wie Largest Contentful Paint (LCP) und First Input Delay (FID) werden negativ beeinflusst, was SEO-Rankings verschlechtert. Mobile-First-Anwendungen sind besonders betroffen durch große Bundle-Größen bei limitierten Datenvolumen. Der erhöhte Bandbreitenverbrauch belastet sowohl Nutzer als auch Hosting-Infrastruktur.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/adapter-web` - Hohe Priorität (bundled Svelte)
-- `@ujl-framework/ui` - Mittelmäßig (Tailwind CSS)
+`@ujl-framework/adapter-web` hat hohe Priorität, da es die komplette Svelte Runtime bundelt. `@ujl-framework/ui` ist mittelmäßig betroffen durch Tailwind CSS Styles.
 
 **Mitigationsmaßnahmen:**
 
-1. **Tree-Shaking**: Sicherstellen, dass nur genutzte Module gebundelt werden
-2. **Code-Splitting**: Lazy Loading von Module-Komponenten (zukünftig)
-3. **CSS Purging**: Tailwind CSS Purging für Production-Builds
-4. **Bundle-Analyse**: Regelmäßige Analyse mit `rollup-plugin-visualizer`
-5. **CDN-Empfehlung**: Dokumentation für CDN-basiertes Laden
+Tree-Shaking stellt sicher, dass nur tatsächlich genutzte Module gebundelt werden. Code-Splitting für Module-Komponenten mit Lazy Loading wird zukünftig die initiale Bundle-Größe reduzieren. Tailwind CSS Purging entfernt ungenutzte Styles in Production-Builds automatisch. Regelmäßige Bundle-Analysen mit `rollup-plugin-visualizer` identifizieren Optimierungspotenziale. Die Dokumentation empfiehlt CDN-basiertes Laden für optimale Caching-Strategien.
 
 **Status:** Überwacht, Optimierung geplant
 
@@ -188,22 +160,15 @@ Der Backend-Storage-Modus der Image Library nutzt den Library Service (Payload C
 
 **Potenzielle Auswirkungen:**
 
-- Breaking Changes in Payload CMS Major-Releases
-- Lizenzänderungen bei Payload (aktuell MIT)
-- Performance-Abhängigkeit von Payload-API
-- Komplexeres Setup für End-User (Docker, PostgreSQL)
+Breaking Changes in Payload CMS Major-Releases könnten umfangreiche Anpassungen im Library Service erfordern. Lizenzänderungen bei Payload würden die Nutzbarkeit für kommerzielle Projekte beeinflussen, auch wenn die aktuelle MIT-Lizenz liberal ist. Die Performance-Abhängigkeit von der Payload-API bedeutet, dass Latenzen oder Ausfälle direkt spürbar sind. Das komplexere Setup mit Docker und PostgreSQL erhöht die Einstiegshürde für End-User.
 
 **Betroffene Pakete:**
 
-- `services/library` - Direkte Payload-Integration
-- `@ujl-framework/crafter` - Backend Image Service Implementation
+Der `services/library` Service integriert Payload CMS direkt und ist vollständig davon abhängig. `@ujl-framework/crafter` implementiert den Backend Image Service und nutzt die Library Service API.
 
 **Mitigationsmaßnahmen:**
 
-1. **Inline-Storage als Default**: Backend-Storage ist opt-in, nicht erforderlich
-2. **Image Service Interface**: Abstrakte Schnittstelle ermöglicht Alternative Backends
-3. **Version-Pinning**: Explizite Payload-Version in `package.json`
-4. **Alternative Dokumentation**: Hinweise auf S3-kompatible Storage-Adapter
+Inline-Storage dient als Default-Option, wodurch Backend-Storage opt-in und nicht zwingend erforderlich ist. Ein abstraktes Image Service Interface ermöglicht die Integration alternativer Backends wie S3-kompatible Storage-Lösungen. Version-Pinning fixiert die Payload-Version explizit in der `package.json`, um unerwartete Breaking Changes zu vermeiden. Die Dokumentation weist auf alternative Storage-Adapter hin und bietet Migrationspfade.
 
 **Status:** Akzeptiertes Risiko (Inline-Storage als Fallback)
 
@@ -233,22 +198,15 @@ Das Design-Token-System verwendet den OKLCH-Farbraum für perzeptuell uniforme F
 
 **Potenzielle Auswirkungen:**
 
-- Farben werden in älteren Browsern nicht korrekt dargestellt
-- Fallback zu transparenten oder schwarzen Farben
-- Inkonsistente UI-Darstellung für ~9% der Nutzer
+Farben werden in älteren Browsern nicht korrekt dargestellt und fallen auf transparente oder schwarze Werte zurück. Dies führt zu inkonsistenter UI-Darstellung für ungefähr 9% der Nutzer, die ältere Browser-Versionen verwenden. Die Brand-Identität und visuelle Konsistenz leiden unter diesen Darstellungsfehlern.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/adapter-svelte` - CSS Variable Injection
-- `@ujl-framework/ui` - Tailwind CSS Konfiguration
-- `@ujl-framework/crafter` - Theme Designer
+`@ujl-framework/adapter-svelte` injiziert CSS Variables mit OKLCH-Werten. `@ujl-framework/ui` nutzt diese Werte in der Tailwind CSS Konfiguration. `@ujl-framework/crafter` bietet den Theme Designer an, der OKLCH-Farben generiert.
 
 **Mitigationsmaßnahmen:**
 
-1. **CSS Fallbacks**: Bereitstellung von HEX/RGB-Fallbacks via `@supports`
-2. **PostCSS Plugin**: Automatische Fallback-Generierung (zukünftig)
-3. **Dokumentation**: Browser-Anforderungen in der Dokumentation
-4. **Progressive Enhancement**: Core-Funktionalität auch ohne OKLCH nutzbar
+CSS Fallbacks stellen HEX/RGB-Alternativen via `@supports` Queries bereit. Ein PostCSS Plugin soll zukünftig automatisch Fallbacks generieren. Die Dokumentation weist explizit auf Browser-Anforderungen hin. Progressive Enhancement sorgt dafür, dass Core-Funktionalität auch ohne OKLCH-Support nutzbar bleibt.
 
 **Status:** Akzeptiertes Risiko (hohe Browser-Abdeckung)
 
@@ -279,26 +237,19 @@ Die Test-Abdeckung variiert zwischen Paketen. Während `types` und `core` gut ge
 
 **Potenzielle Auswirkungen:**
 
-- Unentdeckte Regressionen bei Änderungen
-- Höherer manueller Test-Aufwand
-- Reduziertes Vertrauen bei Refactoring
+Unentdeckte Regressionen treten bei Code-Änderungen häufiger auf, da automatisierte Tests fehlen. Der manuelle Test-Aufwand steigt dadurch erheblich und verzögert Release-Zyklen. Reduziertes Vertrauen bei Refactoring führt dazu, dass technische Schulden sich akkumulieren, weil Entwickler zögern größere Umstrukturierungen vorzunehmen.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/ui` - Svelte Component Tests fehlen teilweise
-- `@ujl-framework/adapter-svelte` - Serializer-Tests unvollständig
-- `@ujl-framework/crafter` - Complex State Management ungetestet
+`@ujl-framework/ui` fehlen teilweise Tests für Svelte Components. `@ujl-framework/adapter-svelte` hat unvollständige Serializer-Tests. `@ujl-framework/crafter` lässt komplexes State Management weitgehend ungetestet.
 
 **Mitigationsmaßnahmen:**
 
-1. **Coverage-Ziele**: Mindestens 70% für wichtige Pfade
-2. **E2E als Fallback**: Playwright-Tests für Crafter-Workflows
-3. **Test-Driven Development**: Neue Features mit Tests entwickeln
-4. **CI-Integration**: Coverage-Reporting in GitLab CI
+Coverage-Ziele von mindestens 70% für wichtige Code-Pfade werden angestrebt. Playwright E2E-Tests dienen als Fallback für Crafter-Workflows und kritische User-Journeys. Test-Driven Development wird für neue Features etabliert, um Coverage schrittweise zu erhöhen. CI-Integration mit Coverage-Reporting in GitLab CI macht Fortschritte transparent.
 
 **Status:** Aktiv in Bearbeitung
 
-### 11.1.7 Single-Maintainer-Risiko
+### 11.1.7 Small-Team-Risiko (1-3 Entwickler)
 
 | Attribut               | Wert               |
 | ---------------------- | ------------------ |
@@ -310,21 +261,15 @@ Die Test-Abdeckung variiert zwischen Paketen. Während `types` und `core` gut ge
 
 **Beschreibung:**
 
-Als Masterprojekt wird UJL primär von zwei Personen entwickelt. Dies schafft ein "Bus-Faktor"-Risiko und limitiert die Entwicklungsgeschwindigkeit.
+Als Masterprojekt wird UJL primär von einem kleinen Team von 1-3 Entwicklern entwickelt. Dies schafft ein "Bus-Faktor"-Risiko und limitiert die Entwicklungsgeschwindigkeit.
 
 **Potenzielle Auswirkungen:**
 
-- Verzögerungen bei Feature-Entwicklung
-- Engpässe bei Issue-Bearbeitung
-- Wissenskonzentration ohne Redundanz
-- Risiko bei Ausfall des Maintainers
+Verzögerungen bei der Feature-Entwicklung entstehen durch begrenzte Entwicklungskapazität. Engpässe bei der Issue-Bearbeitung führen zu längeren Response-Zeiten für Bug-Reports und Feature-Requests. Wissenskonzentration ohne Redundanz bedeutet, dass kritisches Know-how nur bei wenigen Personen liegt. Das Risiko bei Ausfall eines Teammitglieds ist hoch, da das Projekt stark von individuellen Beiträgen abhängt.
 
 **Mitigationsmaßnahmen:**
 
-1. **Umfassende Dokumentation**: arc42, README-Dateien, Inline-Kommentare
-2. **Nachvollziehbare Architektur**: Entscheidungen (ADRs)
-3. **Open-Source-Vorbereitung**: Community-Aufbau nach Phase 3 (siehe [Roadmap](/about/04-roadmap))
-4. **Contributor Guidelines**: Vorbereitung für externe Beiträge
+Umfassende Dokumentation in Form von arc42-Architektur, README-Dateien und Inline-Kommentaren reduziert die Wissensbarriere. Nachvollziehbare Architekturentscheidungen durch ADRs machen Design-Rationale transparent. Open-Source-Vorbereitung bereitet Community-Aufbau nach Phase 3 vor (siehe Roadmap). Contributor Guidelines werden vorbereitet, um externe Beiträge zu ermöglichen und die Abhängigkeit vom Kern-Team zu reduzieren.
 
 **Status:** Akzeptiertes Risiko (Masterarbeit-Kontext)
 
@@ -344,22 +289,15 @@ Das Rich-Text-System basiert auf TipTap/ProseMirror, einem leistungsstarken aber
 
 **Potenzielle Auswirkungen:**
 
-- Schwierige Erweiterung des Rich-Text-Schemas
-- Komplexes Debugging von Editor-Problemen
-- Synchronisations-Probleme zwischen Editor und Serializer
+Die Erweiterung des Rich-Text-Schemas ist schwierig, da ProseMirror eine steile Lernkurve hat. Debugging von Editor-Problemen wird komplex durch die verschachtelte Architektur von ProseMirror und TipTap. Synchronisations-Probleme zwischen Editor-State und Serializer können zu Datenverlust oder inkonsistenten Darstellungen führen.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/core` - TipTap Schema Definition
-- `@ujl-framework/adapter-svelte` - ProseMirror Serializer
-- `@ujl-framework/crafter` - Rich Text Editor Component
+`@ujl-framework/core` definiert das TipTap Schema mit `ujlRichTextExtensions`. `@ujl-framework/adapter-svelte` implementiert den ProseMirror Serializer für SSR. `@ujl-framework/crafter` integriert die Rich Text Editor Component in die Crafter-Oberfläche.
 
 **Mitigationsmaßnahmen:**
 
-1. **Shared Schema**: `ujlRichTextExtensions` als Single Source of Truth
-2. **Eingeschränkter Feature-Set**: Nur serialisierbare Extensions aktiviert
-3. **SSR-Safe Serializer**: Custom Serializer ohne Browser-Abhängigkeit
-4. **Dokumentation**: Schema-Dokumentation in `@ujl-framework/core` README
+Ein Shared Schema mit `ujlRichTextExtensions` als Single Source of Truth verhindert Schema-Divergenz. Ein eingeschränkter Feature-Set aktiviert nur serialisierbare Extensions, um Kompatibilität zu garantieren. Der SSR-Safe Serializer ist ein Custom-Serializer ohne Browser-Abhängigkeit für Node.js-Umgebungen. Schema-Dokumentation im `@ujl-framework/core` README erklärt Extension-Struktur und Erweiterungsmöglichkeiten.
 
 **Status:** Mitigiert durch Abstraktion
 
@@ -390,14 +328,11 @@ const content = this.fields[0].field.parse(moduleData.fields.content);
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/core` - Einige Module-Implementierungen
-- `@ujl-framework/crafter` - Context-Operationen
+Das Problem betrifft primär `@ujl-framework/core` in einigen Module-Implementierungen sowie `@ujl-framework/crafter` bei Context-Operationen.
 
 **Behebungsplan:**
 
-1. Audit aller `as` Assertions im Codebase
-2. Ersetzung durch Type Guards oder Zod-Validierung
-3. Hinzufügen von Unit-Tests für Edge Cases
+Zunächst wird ein vollständiger Audit aller `as` Assertions im Codebase durchgeführt. Anschließend erfolgt die Ersetzung durch Type Guards oder Zod-Validierung. Abschließend werden Unit-Tests für Edge Cases hinzugefügt, um die Robustheit der Typprüfung zu gewährleisten.
 
 **Status:** Offen
 
@@ -426,15 +361,11 @@ const MAX_TREE_DEPTH = 10; // Hardcoded
 
 **Betroffene Pakete:**
 
-- `services/library` - Image Size Konfiguration
-- `@ujl-framework/crafter` - Editor-Limits
-- `@ujl-framework/core` - Default Field Constraints
+Das Problem zeigt sich in `services/library` bei der Image Size Konfiguration, in `@ujl-framework/crafter` bei Editor-Limits sowie in `@ujl-framework/core` bei Default Field Constraints.
 
 **Behebungsplan:**
 
-1. Identifikation aller hardcoded Values
-2. Extraktion in Konfigurationsobjekte
-3. Dokumentation der Konfigurationsoptionen
+Zunächst erfolgt die Identifikation aller hardcoded Values im Codebase. Diese werden anschließend in zentrale Konfigurationsobjekte extrahiert. Abschließend werden die Konfigurationsoptionen umfassend dokumentiert, um Entwicklern die Anpassung zu erleichtern.
 
 **Status:** Offen
 
@@ -453,20 +384,15 @@ Der Crafter-Editor hat keine systematischen Error Boundaries. Ein Fehler in eine
 
 **Potenzielle Auswirkungen:**
 
-- Datenverlust bei Absturz während der Bearbeitung
-- Schlechte User Experience bei Fehlern
-- Schwieriges Debugging ohne Fehlerisolierung
+Datenverlust bei Absturz während der Bearbeitung ist möglich, da keine isolierte Fehlerbehandlung existiert. Die User Experience leidet erheblich, wenn Fehler die gesamte Anwendung unbrauchbar machen. Das Debugging wird ohne Fehlerisolierung unnötig komplex, da die Fehlerquelle schwer zu lokalisieren ist.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/crafter` - Editor-Komponenten
-- `@ujl-framework/adapter-svelte` - Rendering-Pipeline
+Das Risiko betrifft primär `@ujl-framework/crafter` in den Editor-Komponenten sowie `@ujl-framework/adapter-svelte` in der Rendering-Pipeline.
 
 **Behebungsplan:**
 
-1. Implementation von Svelte Error Boundaries (via `$effect` und `try-catch`)
-2. Fallback-UI für fehlerhafte Komponenten
-3. Error Logging und Reporting Integration
+Zunächst werden Svelte Error Boundaries via `$effect` und `try-catch` implementiert. Anschließend wird eine Fallback-UI für fehlerhafte Komponenten entwickelt, die dem Nutzer eine graceful Degradation ermöglicht. Abschließend erfolgt die Integration von Error Logging und Reporting, um Fehler systematisch zu erfassen und analysieren zu können.
 
 **Status:** Offen
 
@@ -499,13 +425,11 @@ packages/adapter-svelte/src/lib/components/
 
 **Betroffene Pakete:**
 
-- Alle Pakete mit Svelte-Komponenten
+Alle Pakete mit Svelte-Komponenten sind von dieser Inkonsistenz betroffen.
 
 **Behebungsplan:**
 
-1. Definition eines einheitlichen Naming-Standards
-2. Refactoring mit IDE-Support (rename refactoring)
-3. Dokumentation der Conventions
+Zunächst wird ein einheitlicher Naming-Standard definiert, der für alle Pakete gilt. Anschließend erfolgt das Refactoring mit IDE-Support durch rename refactoring, um bestehende Dateien umzubenennen. Abschließend werden die etablierten Conventions dokumentiert, um zukünftige Inkonsistenzen zu vermeiden.
 
 **Status:** Akzeptiert (unterschiedliche Konventionen pro Layer)
 
@@ -524,22 +448,15 @@ Der Crafter-Editor und die UI-Texte sind aktuell nur auf Deutsch/Englisch verfü
 
 **Betroffene Bereiche:**
 
-- Crafter UI-Labels und Fehlermeldungen
-- Modul-Labels und Descriptions
-- Validierungsfehlermeldungen
-- Dokumentation
+Die Limitierung betrifft Crafter UI-Labels und Fehlermeldungen, Modul-Labels und Descriptions sowie Validierungsfehlermeldungen. Auch die Dokumentation ist derzeit nur in begrenzten Sprachen verfügbar.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/crafter` - Editor UI
-- `@ujl-framework/core` - Modul-Metadaten
-- `@ujl-framework/types` - Validierungsmeldungen
+Das Problem zeigt sich in `@ujl-framework/crafter` bei der Editor UI, in `@ujl-framework/core` bei Modul-Metadaten sowie in `@ujl-framework/types` bei Validierungsmeldungen.
 
 **Behebungsplan:**
 
-1. Evaluation von i18n-Libraries (svelte-i18n, paraglide)
-2. Extraktion aller UI-Strings in Sprachdateien
-3. Implementierung von Sprachauswahl im Crafter
+Zunächst werden verschiedene i18n-Libraries wie svelte-i18n und paraglide evaluiert. Anschließend erfolgt die Extraktion aller UI-Strings in zentrale Sprachdateien. Abschließend wird eine Sprachauswahl im Crafter implementiert, die es Nutzern ermöglicht, ihre bevorzugte Sprache zu wählen.
 
 **Status:** Offen (Post-MVP)
 
@@ -558,15 +475,11 @@ Nicht alle öffentlichen APIs haben vollständige JSDoc-Kommentare. Dies erschwe
 
 **Betroffene Bereiche:**
 
-- Einige Funktionen in `@ujl-framework/core`
-- Svelte-Komponenten Props
-- Utility-Funktionen
+Die Lücken zeigen sich bei einigen Funktionen in `@ujl-framework/core`, bei Svelte-Komponenten Props sowie bei diversen Utility-Funktionen.
 
 **Behebungsplan:**
 
-1. Audit aller öffentlichen Exports
-2. Hinzufügen von JSDoc mit `@param`, `@returns`, `@example`
-3. Integration von TypeDoc für API-Dokumentation
+Zunächst wird ein vollständiger Audit aller öffentlichen Exports durchgeführt. Anschließend erfolgt das Hinzufügen von JSDoc-Kommentaren mit `@param`, `@returns` und `@example` Annotationen. Abschließend wird TypeDoc für die automatische Generierung der API-Dokumentation integriert, um eine konsistente und wartbare Dokumentation zu gewährleisten.
 
 **Status:** Offen
 
@@ -585,15 +498,11 @@ Die Generierung von CSS Custom Properties aus TokenSet erfolgt manuell in mehrer
 
 **Betroffene Stellen:**
 
-- `AdapterRoot.svelte` - Token Injection
-- `preview.svelte` - Theme Preview
-- CSS Variable Definitions in Tailwind Config
+Die Code-Duplizierung zeigt sich in `AdapterRoot.svelte` bei der Token Injection, in `preview.svelte` für die Theme Preview sowie in den CSS Variable Definitions in der Tailwind Config.
 
 **Behebungsplan:**
 
-1. Erstellung einer `generateCSSVariables(tokenSet)` Utility
-2. Migration aller Stellen zur Nutzung dieser Utility
-3. Tests für CSS Variable Generation
+Zunächst wird eine zentrale `generateCSSVariables(tokenSet)` Utility erstellt, die die Logik kapselt. Anschließend erfolgt die Migration aller betroffenen Stellen zur Nutzung dieser gemeinsamen Utility. Abschließend werden umfassende Tests für die CSS Variable Generation implementiert, um die Korrektheit sicherzustellen.
 
 **Status:** Offen
 
@@ -612,20 +521,15 @@ Der Crafter-Editor unterstützt keine Undo/Redo-Funktionalität für Dokumentän
 
 **Potenzielle Auswirkungen:**
 
-- Datenverlust bei versehentlichen Änderungen
-- Frustration bei Nutzern
-- Eingeschränkte Usability für produktive Arbeit
+Datenverlust bei versehentlichen Änderungen ist ein erhebliches Risiko, da Nutzer keine Möglichkeit haben, fehlerhafte Operationen rückgängig zu machen. Dies führt zu Frustration bei den Nutzern und beeinträchtigt die Usability erheblich. Für produktive Arbeit ist die fehlende Undo/Redo-Funktionalität eine kritische Einschränkung.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/crafter` - State Management
+Das Problem betrifft primär `@ujl-framework/crafter` im Bereich des State Managements.
 
 **Behebungsplan:**
 
-1. Implementation eines Command-Patterns für State-Änderungen
-2. History-Stack für Undo/Redo
-3. Keyboard Shortcuts (Ctrl+Z, Ctrl+Y)
-4. UI-Feedback für Undo/Redo-Status
+Zunächst wird ein Command-Pattern für State-Änderungen implementiert, das alle Operationen als rückgängig machbare Commands modelliert. Anschließend wird ein History-Stack für Undo/Redo aufgebaut, der die Command-Historie verwaltet. Danach werden Keyboard Shortcuts für Ctrl+Z und Ctrl+Y integriert, um eine vertraute Bedienung zu ermöglichen. Abschließend wird UI-Feedback für den Undo/Redo-Status hinzugefügt, damit Nutzer den aktuellen Zustand der Historie nachvollziehen können.
 
 **Status:** Offen (Phase 2 Roadmap)
 
@@ -644,33 +548,26 @@ Der Library Service überträgt den API-Key direkt an das Frontend bzw. den Clie
 
 **Potenzielle Auswirkungen:**
 
-- API-Keys können von Dritten abgefangen und missbraucht werden
-- Unbefugter Zugriff auf Ressourcen des Library Service
-- Mögliche Kostenexplosion bei externen Services (z.B. CDN, Storage)
-- Sicherheitsaudit-Probleme bei Enterprise-Kunden
+API-Keys können von Dritten abgefangen und missbraucht werden, was zu unbefugtem Zugriff auf Ressourcen des Library Service führt. Eine mögliche Kostenexplosion bei externen Services wie CDN oder Storage ist die Folge. Zusätzlich entstehen Sicherheitsaudit-Probleme bei Enterprise-Kunden, die strenge Sicherheitsanforderungen haben.
 
 **Betroffene Pakete:**
 
-- `services/library` - API-Key-Handling
-- `@ujl-framework/crafter` - Image Service Integration
+Das Problem betrifft `services/library` beim API-Key-Handling sowie `@ujl-framework/crafter` bei der Image Service Integration.
 
 **Behebungsplan:**
 
-1. API-Key ausschließlich serverseitig verwenden
-2. Proxy-Endpoint im Backend für Image-Anfragen implementieren
-3. Token-basierte Authentifizierung für Client-Requests einführen
-4. Kurzzeitige, scope-limitierte Tokens für Upload-Operationen generieren
+Zunächst wird der API-Key ausschließlich serverseitig verwendet, um die Exposition im Client zu vermeiden. Anschließend wird ein Proxy-Endpoint im Backend für Image-Anfragen implementiert, der als sicherer Vermittler fungiert. Danach wird eine Token-basierte Authentifizierung für Client-Requests eingeführt, die sichere und nachvollziehbare Zugriffe ermöglicht. Abschließend werden kurzzeitige, scope-limitierte Tokens für Upload-Operationen generiert, um das Risiko bei kompromittierten Tokens zu minimieren.
 
 **Status:** Offen
 
 ### 11.2.10 Testing-Utilities für Custom Modules
 
-|| Attribut | Wert |
-|| --------------- | -------------- |
-|| **Schulden-ID** | TD-010 |
-|| **Kategorie** | Entwickler-API |
-|| **Aufwand** | Mittel (3 Tage) |
-|| **Priorität** | Mittel |
+| Attribut        | Wert            |
+| --------------- | --------------- |
+| **Schulden-ID** | TD-010          |
+| **Kategorie**   | Entwickler-API  |
+| **Aufwand**     | Mittel (3 Tage) |
+| **Priorität**   | Mittel          |
 
 **Beschreibung:**
 
@@ -678,33 +575,26 @@ Entwickler, die eigene Custom Modules erstellen möchten, haben aktuell keine Te
 
 **Potenzielle Auswirkungen:**
 
-- Höhere Einstiegshürde für externe Entwickler
-- Inkonsistente Modul-Qualität
-- Schwierige Fehlersuche bei Custom Modules
-- Fehlende Best-Practice-Dokumentation
+Die höhere Einstiegshürde für externe Entwickler erschwert die Adoption des Frameworks erheblich. Inkonsistente Modul-Qualität ist die Folge fehlender Standards und Testing-Unterstützung. Die Fehlersuche bei Custom Modules wird ohne geeignete Test-Tools unnötig komplex. Fehlende Best-Practice-Dokumentation führt dazu, dass Entwickler eigene, möglicherweise suboptimale Lösungen entwickeln.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/core` - Fehlende Test-Utilities
-- `@ujl-framework/docs` - Fehlende Developer-Guide-Sektion
+Das Problem zeigt sich in `@ujl-framework/core` durch fehlende Test-Utilities sowie in `@ujl-framework/docs` durch eine fehlende Developer-Guide-Sektion.
 
 **Behebungsplan:**
 
-1. Test-Utilities entwickeln: `createTestComposer()`, `mockImageLibrary()`, etc.
-2. Beispiel-Tests für Custom Modules in Dokumentation
-3. Template-Dateien mit integrierten Test-Cases
-4. Developer Guide: "Testing Custom Modules" Sektion
+Zunächst werden Test-Utilities wie `createTestComposer()` und `mockImageLibrary()` entwickelt, die das Testen von Custom Modules vereinfachen. Anschließend werden Beispiel-Tests für Custom Modules in die Dokumentation integriert, die als Referenz dienen. Danach werden Template-Dateien mit integrierten Test-Cases bereitgestellt, die Entwicklern einen schnellen Einstieg ermöglichen. Abschließend wird eine Developer Guide Sektion "Testing Custom Modules" erstellt, die Best Practices und Patterns vermittelt.
 
 **Status:** Offen (abhängig von Crafter-Registry-API, siehe TD-013)
 
 ### 11.2.11 Validator-Registry-Integration fehlt
 
-|| Attribut | Wert |
-|| --------------- | ----------------- |
-|| **Schulden-ID** | TD-011 |
-|| **Kategorie** | KI-Integration |
-|| **Aufwand** | Mittel (2-3 Tage) |
-|| **Priorität** | Mittel |
+| Attribut        | Wert              |
+| --------------- | ----------------- |
+| **Schulden-ID** | TD-011            |
+| **Kategorie**   | KI-Integration    |
+| **Aufwand**     | Mittel (2-3 Tage) |
+| **Priorität**   | Mittel            |
 
 **Beschreibung:**
 
@@ -714,37 +604,26 @@ Zusätzlich existieren im UJLC-Datenmodell bereits Felder für Embeddings (z.B. 
 
 **Potenzielle Auswirkungen:**
 
-- Kein fundiertes Feedback für LLM-generierte Dokumente
-- Validierung ignoriert Custom Modules
-- Validator kann nicht prüfen, ob verwendete Module existieren
-- KI-Integration weniger robust
-- Embedding-basierte Funktionen (z.B. semantische Suche oder gezielte Editor-Hinweise) sind schwer reproduzierbar, solange Embeddings nicht konsistent geprüft und aktualisiert werden
+Kein fundiertes Feedback für LLM-generierte Dokumente ist möglich, da die Validierung Custom Modules ignoriert. Der Validator kann nicht prüfen, ob verwendete Module tatsächlich existieren, was zu Runtime-Fehlern führen kann. Die KI-Integration wird dadurch weniger robust und fehleranfällig. Embedding-basierte Funktionen wie semantische Suche oder gezielte Editor-Hinweise sind schwer reproduzierbar, solange Embeddings nicht konsistent geprüft und aktualisiert werden.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/types` - Validator-Implementierung
-- `@ujl-framework/core` - Module Registry
+Das Problem betrifft `@ujl-framework/types` bei der Validator-Implementierung sowie `@ujl-framework/core` bei der Module Registry.
 
 **Behebungsplan:**
 
-1. Validator-Schnittstelle erweitern: `validate(document, registry?)`
-2. Registry-basierte Checks implementieren:
-   - Modul-Type existiert?
-   - Fields/Slots entsprechen Modul-Definition?
-   - Slot-Inhalte sind valide für Slot-Constraints?
-3. Detaillierte Fehlermeldungen für KI-Feedback
-4. Integration in CLI-Tool (`ujl-validate`)
+Zunächst wird die Validator-Schnittstelle um einen optionalen Registry-Parameter erweitert: `validate(document, registry?)`. Anschließend werden Registry-basierte Checks implementiert, die prüfen, ob Modul-Types existieren, ob Fields/Slots den Modul-Definitionen entsprechen und ob Slot-Inhalte valide für die definierten Slot-Constraints sind. Danach werden detaillierte Fehlermeldungen für KI-Feedback entwickelt, die präzise Hinweise zur Problembehebung geben. Abschließend erfolgt die Integration in das CLI-Tool `ujl-validate`, um die Validierung auch außerhalb des Editors nutzbar zu machen.
 
 **Status:** Offen (mittelfristig geplant für LLM-Integration)
 
 ### 11.2.12 Manuelle Theme-Umschaltung im Crafter fehlt
 
-|| Attribut | Wert |
-|| --------------- | ---------------- |
-|| **Schulden-ID** | TD-012 |
-|| **Kategorie** | Usability |
-|| **Aufwand** | Niedrig (1 Tag) |
-|| **Priorität** | Niedrig |
+| Attribut        | Wert            |
+| --------------- | --------------- |
+| **Schulden-ID** | TD-012          |
+| **Kategorie**   | Usability       |
+| **Aufwand**     | Niedrig (1 Tag) |
+| **Priorität**   | Niedrig         |
 
 **Beschreibung:**
 
@@ -752,32 +631,26 @@ Der Crafter erkennt automatisch den System-Theme-Modus (Light/Dark via `prefers-
 
 **Potenzielle Auswirkungen:**
 
-- Eingeschränkte Testmöglichkeiten für Designer
-- Nutzer können Theme nicht unabhängig vom System-Setting wählen
-- Schlechtere User Experience
+Eingeschränkte Testmöglichkeiten für Designer erschweren die Theme-Entwicklung, da beide Modi nicht einfach verglichen werden können. Nutzer können das Theme nicht unabhängig vom System-Setting wählen, was die Flexibilität einschränkt. Dies führt insgesamt zu einer schlechteren User Experience.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/crafter` - Theme-Mode-Switching UI
-- `@ujl-framework/adapter-svelte` - Theme-Mode-Propagierung
+Das Problem betrifft `@ujl-framework/crafter` bei der Theme-Mode-Switching UI sowie `@ujl-framework/adapter-svelte` bei der Theme-Mode-Propagierung.
 
 **Behebungsplan:**
 
-1. UI-Toggle für Theme-Mode im Crafter-Header hinzufügen
-2. localStorage-basiertes Persistence für User-Präferenz
-3. Manuelle Umschaltung überschreibt System-Setting
-4. Visual Feedback (z.B. Sonne/Mond-Icon)
+Zunächst wird ein UI-Toggle für den Theme-Mode im Crafter-Header hinzugefügt, der eine intuitive Umschaltung ermöglicht. Anschließend wird localStorage-basiertes Persistence für die User-Präferenz implementiert, damit die Auswahl über Sessions hinweg erhalten bleibt. Danach wird sichergestellt, dass die manuelle Umschaltung das System-Setting überschreibt. Abschließend wird visuelles Feedback durch Icons wie Sonne und Mond hinzugefügt, um den aktuellen Modus klar zu kommunizieren.
 
 **Status:** Offen (Nice-to-Have für Phase 2)
 
 ### 11.2.13 Crafter-Registry-API für Entwickler fehlt
 
-|| Attribut | Wert |
-|| --------------- | ----------------- |
-|| **Schulden-ID** | TD-013 |
-|| **Kategorie** | Erweiterbarkeit |
-|| **Aufwand** | Mittel (3-4 Tage) |
-|| **Priorität** | Hoch |
+| Attribut        | Wert              |
+| --------------- | ----------------- |
+| **Schulden-ID** | TD-013            |
+| **Kategorie**   | Erweiterbarkeit   |
+| **Aufwand**     | Mittel (3-4 Tage) |
+| **Priorität**   | Hoch              |
 
 **Beschreibung:**
 
@@ -785,102 +658,61 @@ Die Crafter-Klasse (exportiert aus `@ujl-framework/crafter`) unterstützt aktuel
 
 **Potenzielle Auswirkungen:**
 
-- Entwickler können Custom Modules nicht im Crafter nutzen
-- Multi-Tenancy-Szenarien (verschiedene Modulsets pro Kunde) nicht möglich
-- Eingeschränkte Erweiterbarkeit
-- White-Label-Szenarien schwierig umzusetzen
+Entwickler können Custom Modules nicht im Crafter nutzen, was die Erweiterbarkeit stark einschränkt. Multi-Tenancy-Szenarien mit verschiedenen Modulsets pro Kunde sind nicht realisierbar. Die eingeschränkte Erweiterbarkeit behindert die Anpassung an spezifische Use Cases. White-Label-Szenarien sind schwierig umzusetzen, da keine kundenspezifischen Module integriert werden können.
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/crafter` - Registry-Integration
-- `@ujl-framework/core` - Module Registry
+Das Problem betrifft `@ujl-framework/crafter` bei der Registry-Integration sowie `@ujl-framework/core` bei der Module Registry.
 
 **Behebungsplan:**
 
-1. Crafter-Konstruktor erweitern: `new Crafter({ registry?: ModuleRegistry })`
-2. Component-Picker zeigt registrierte Module aus übergebener Registry
-3. Fallback auf Default Registry wenn keine übergeben
-4. Property Inspector nutzt Registry für Field-Rendering
-5. Dokumentation: "Custom Modules im Crafter" Guide
+Zunächst wird der Crafter-Konstruktor um einen optionalen Registry-Parameter erweitert: `new Crafter({ registry?: ModuleRegistry })`. Anschließend wird der Component-Picker angepasst, sodass er registrierte Module aus der übergebenen Registry anzeigt. Danach wird ein Fallback auf die Default Registry implementiert, wenn keine explizite Registry übergeben wird. Der Property Inspector wird so erweitert, dass er die Registry für Field-Rendering nutzt. Abschließend wird ein umfassender Dokumentations-Guide "Custom Modules im Crafter" erstellt, der Entwicklern die Integration eigener Module erklärt.
 
 **Status:** Offen (mittelfristig geplant, hohe Priorität)
 
 ## 11.3 Risiko-Matrix
 
-| Risiko-ID | Beschreibung                   | Wahrscheinlichkeit | Auswirkung | Priorität | Status         |
-| --------- | ------------------------------ | ------------------ | ---------- | --------- | -------------- |
-| R-001     | Svelte 5 Ecosystem Maturity    | Mittel             | Hoch       | Hoch      | Überwacht      |
-| R-002     | Monorepo Build-Komplexität     | Hoch               | Mittel     | Hoch      | Mitigiert      |
-| R-003     | Bundle Size Management         | Mittel             | Hoch       | Hoch      | Überwacht      |
-| R-004     | Payload CMS Abhängigkeit       | Niedrig            | Mittel     | Mittel    | Akzeptiert     |
-| R-005     | OKLCH Browser-Kompatibilität   | Niedrig            | Mittel     | Mittel    | Akzeptiert     |
-| R-006     | Test Coverage Gaps             | Mittel             | Mittel     | Mittel    | In Bearbeitung |
-| R-007     | Single-Maintainer-Risiko       | Hoch               | Hoch       | Mittel    | Akzeptiert     |
-| R-008     | ProseMirror/TipTap Komplexität | Niedrig            | Mittel     | Niedrig   | Mitigiert      |
+| Risiko-ID | Beschreibung                       | Wahrscheinlichkeit | Auswirkung | Priorität | Status         |
+| --------- | ---------------------------------- | ------------------ | ---------- | --------- | -------------- |
+| R-001     | Svelte 5 Ecosystem Maturity        | Mittel             | Hoch       | Hoch      | Überwacht      |
+| R-002     | Monorepo Build-Komplexität         | Hoch               | Mittel     | Hoch      | Mitigiert      |
+| R-003     | Bundle Size Management             | Mittel             | Hoch       | Hoch      | Überwacht      |
+| R-004     | Payload CMS Abhängigkeit           | Niedrig            | Mittel     | Mittel    | Akzeptiert     |
+| R-005     | OKLCH Browser-Kompatibilität       | Niedrig            | Mittel     | Mittel    | Akzeptiert     |
+| R-006     | Test Coverage Gaps                 | Mittel             | Mittel     | Mittel    | In Bearbeitung |
+| R-007     | Small-Team-Risiko (1-3 Entwickler) | Hoch               | Hoch       | Mittel    | Akzeptiert     |
+| R-008     | ProseMirror/TipTap Komplexität     | Niedrig            | Mittel     | Niedrig   | Mitigiert      |
 
 ## 11.4 Technical Debt Übersicht
 
-| Schulden-ID | Beschreibung                          | Aufwand | Priorität | Status     |
-| ----------- | ------------------------------------- | ------- | --------- | ---------- |
-| TD-001      | Unvollständige Type Assertions        | Mittel  | Mittel    | Offen      |
-| TD-002      | Hardcoded Configuration Values        | Niedrig | Niedrig   | Offen      |
-| TD-003      | Fehlende Error Boundaries             | Mittel  | Mittel    | Offen      |
-| TD-004      | Inkonsistente Naming Conventions      | Niedrig | Niedrig   | Akzeptiert |
-| TD-005      | Fehlende Internationalisierung        | Hoch    | Niedrig   | Offen      |
-| TD-006      | Unvollständige JSDoc Dokumentation    | Mittel  | Mittel    | Offen      |
-| TD-007      | Manuelle CSS Property Generation      | Mittel  | Niedrig   | Offen      |
-| TD-008      | Fehlende Undo/Redo Funktionalität     | Hoch    | Mittel    | Offen      |
-| TD-009      | API-Key-Exposition im Library Service | Mittel  | Hoch      | Offen      |
+| Schulden-ID | Beschreibung                                | Aufwand | Priorität | Status     |
+| ----------- | ------------------------------------------- | ------- | --------- | ---------- |
+| TD-009      | API-Key-Exposition im Library Service       | Mittel  | Hoch      | Offen      |
+| TD-013      | Crafter-Registry-API für Custom Modules     | Mittel  | Hoch      | Offen      |
+| TD-001      | Unvollständige Type Assertions              | Mittel  | Mittel    | Offen      |
+| TD-003      | Fehlende Error Boundaries                   | Mittel  | Mittel    | Offen      |
+| TD-006      | Unvollständige JSDoc Dokumentation          | Mittel  | Mittel    | Offen      |
+| TD-008      | Fehlende Undo/Redo Funktionalität           | Hoch    | Mittel    | Offen      |
+| TD-010      | Testing-Utilities für Custom Modules        | Mittel  | Mittel    | Offen      |
+| TD-011      | Validator-Registry-Integration fehlt        | Mittel  | Mittel    | Offen      |
+| TD-002      | Hardcoded Configuration Values              | Niedrig | Niedrig   | Offen      |
+| TD-004      | Inkonsistente Naming Conventions            | Niedrig | Niedrig   | Akzeptiert |
+| TD-005      | Fehlende Internationalisierung (i18n)       | Hoch    | Niedrig   | Offen      |
+| TD-007      | Manuelle CSS Custom Property Generation     | Mittel  | Niedrig   | Offen      |
+| TD-012      | Manuelle Theme-Umschaltung im Crafter fehlt | Niedrig | Niedrig   | Offen      |
 
 ## 11.5 Maßnahmenplan
 
+Der Maßnahmenplan strukturiert die Behebung von Risiken und technischen Schulden in drei zeitliche Phasen, die sich am aktuellen Entwicklungsstand und den verfügbaren Ressourcen orientieren. Die Priorisierung berücksichtigt sowohl die technische Dringlichkeit als auch die strategische Bedeutung für die Weiterentwicklung des Frameworks.
+
 ### Kurzfristig (Phase 1 - MVP Stabilisierung)
 
-1. **Test Coverage erhöhen** (R-006)
-   - Unit Tests für wichtige Core-Funktionen
-   - E2E Tests für Crafter-Workflows ausbauen
-
-2. **Type Assertions refactoren** (TD-001)
-   - Audit und Migration zu Type Guards
-
-3. **Error Boundaries implementieren** (TD-003)
-   - Graceful Degradation bei Fehlern
-
-4. **API-Key-Exposition beheben** (TD-009)
-   - Proxy-Endpoint implementieren
-   - Token-basierte Client-Authentifizierung einführen
-
-5. **Crafter-Registry-API implementieren** (TD-013)
-   - Registry-Parameter im Crafter-Konstruktor
-   - Custom Modules im Component Picker anzeigen
+In der ersten Phase liegt der Fokus auf Stabilität, Sicherheit und Grundfunktionalität. Die Test Coverage wird erhöht (R-006) durch Unit Tests für wichtige Core-Funktionen und den Ausbau der E2E Tests für Crafter-Workflows. Type Assertions werden refaktoriert (TD-001) durch ein systematisches Audit und die Migration zu Type Guards. Error Boundaries werden implementiert (TD-003) um Graceful Degradation bei Fehlern zu ermöglichen. Die API-Key-Exposition wird behoben (TD-009) durch die Implementierung eines Proxy-Endpoints und die Einführung token-basierter Client-Authentifizierung. Die Crafter-Registry-API wird implementiert (TD-013) mit einem Registry-Parameter im Crafter-Konstruktor und der Anzeige von Custom Modules im Component Picker.
 
 ### Mittelfristig (Phase 2 - Pilotierung)
 
-1. **Bundle Size optimieren** (R-003)
-   - Code-Splitting evaluieren
-   - Tree-Shaking verbessern
-
-2. **Undo/Redo implementieren** (TD-008)
-   - Command Pattern für State Management
-
-3. **JSDoc vervollständigen** (TD-006)
-   - API-Dokumentation generieren
-
-4. **Validator-Registry-Integration** (TD-011)
-   - Registry-basierte Validierung für LLM-Feedback
-   - CLI-Tool erweitern
-
-5. **Testing-Utilities für Custom Modules** (TD-010)
-   - Test-Helper entwickeln
-   - Developer Guide erstellen
+Die zweite Phase konzentriert sich auf Performance, Entwickler-Experience und Erweiterbarkeit. Die Bundle Size wird optimiert (R-003) durch Evaluation von Code-Splitting und Verbesserung des Tree-Shakings. Undo/Redo-Funktionalität wird implementiert (TD-008) basierend auf einem Command Pattern für State Management. Die JSDoc-Dokumentation wird vervollständigt (TD-006) und API-Dokumentation automatisch generiert. Die Validator-Registry-Integration erfolgt (TD-011) mit registry-basierter Validierung für LLM-Feedback und Erweiterung des CLI-Tools. Testing-Utilities für Custom Modules werden entwickelt (TD-010) inklusive Test-Helper und Developer Guide.
 
 ### Langfristig (Phase 3+ - Community)
 
-1. **i18n-System einführen** (TD-005)
-   - Mehrsprachige UI-Unterstützung
-
-2. **CSS Property Generation bündeln** (TD-007)
-   - Utility-Library erstellen
-
-3. **Contributor Guidelines** (R-007)
-   - Externe Beiträge ermöglichen
+Die dritte Phase bereitet das Framework für Community-Nutzung und internationale Verbreitung vor. Ein i18n-System wird eingeführt (TD-005) für mehrsprachige UI-Unterstützung. Die CSS Property Generation wird gebündelt (TD-007) in einer dedizierten Utility-Library. Contributor Guidelines werden erstellt (R-007) um externe Beiträge zu ermöglichen und das Small-Team-Risiko durch Community-Engagement zu mitigieren.

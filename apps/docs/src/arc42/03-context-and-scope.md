@@ -111,7 +111,7 @@ Das CMS speichert `.ujlc.json` und `.ujlt.json` als strukturierte Felder oder As
 
 **Mehrwert:** UJL ergänzt das CMS um visuelles Layouting und Governance, ohne CMS-Funktionen zu ersetzen.
 
-**Beispiel-Integration (vereinfacht):**
+**Beispiel-Integration:**
 
 ```typescript
 // CMS liefert UJL-Dokumente

@@ -11,7 +11,7 @@ UJL verlagert diese Absicherung in die Technik: Inhalte und Designregeln werden 
 
 UJL ist außerdem **AI-ready**, aber aktuell **ohne integrierte KI-Services**: Es gibt keine eingebauten Modelle, kein Prompting und kein automatisches „AI Editing“ im Produkt. Stattdessen schafft UJL die Voraussetzungen, damit sich KI-Funktionen später sinnvoll ergänzen lassen (strukturierte Formate, Runtime-Validierung, vorgesehene Embedding-Felder). Wichtig ist die Abgrenzung: AI-ready beschreibt die Vorbereitung für zukünftige Produktfunktionen, nicht eine bereits vorhandene KI-Integration.
 
-**Kernidee (vereinfacht):**
+**Kernidee:**
 
 - **Inhalte** liegen als strukturierte JSON-Dokumente in `.ujlc.json` vor.
 - **Designregeln** liegen als Theme in `.ujlt.json` vor (z. B. Farben, Typografie, Abstände).

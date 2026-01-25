@@ -37,7 +37,7 @@ UJL ist ein Open-Source-Projekt (MIT) und wird von festen Randbedingungen geprä
 
 ::: warning Evergreen Browser Support
 
-Wir unterstützen vorerst nur moderne Browser mit ES2022-Features (async/await sowie `?.` und `??`) ohne Legacy-Support. So können wir eine moderne Gesamtarchitektur bauen und die Entwicklung beschleunigen.
+Wir unterstützen vorerst nur moderne Browser mit ES2022-Features ohne Legacy-Support. So können wir eine moderne Gesamtarchitektur bauen und die Entwicklung beschleunigen.
 
 :::
 
