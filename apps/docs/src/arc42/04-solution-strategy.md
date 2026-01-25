@@ -566,7 +566,7 @@ interface ImageProvider {
 		"meta": {
 			"_library": {
 				"storage": "backend",
-				"url": "http://localhost:3000/api"
+				"url": "http://localhost:3000"
 			}
 		},
 		"images": {

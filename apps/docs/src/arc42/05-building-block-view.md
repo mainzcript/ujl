@@ -119,19 +119,23 @@ UJLC-Dokumente enthalten Metadaten (`meta`), eine Image-Bibliothek (`images`) un
 
 Der **Abstract Syntax Tree** ist die Datenstruktur zwischen Core- und Adapter-Layer. Er wird vom **Composer** (im `core`-Package) produziert und von den Adapter-Packages (`adapter-svelte`, `adapter-web`) konsumiert. Der AST abstrahiert die UJLC-Modulstruktur in eine flache, rendering-optimierte Form, die unabhängig vom finalen UI-Framework ist.
 
-Die AST-Node-Struktur garantiert drei wichtige Eigenschaften: Jeder Node besitzt eine **eindeutige ID**, die aus dem UJLC-Dokument übernommen wird, wichtig für Editor-Integration und Modul-Tracking. Das **`type`-Feld** ermöglicht Dispatch-Logik in Adaptern (z.B. `type: "button"` → `<Button>`-Component). Die **`props` sind node-spezifisch** und folgen keinem generischen Schema, was Flexibilität für unterschiedliche Module ermöglicht.
+Die AST-Node-Struktur garantiert drei wichtige Eigenschaften: Jeder Node besitzt eine **eindeutige Node-ID** für Rendering und Identity. Für Editor-Integration und Modul-Tracking wird die ursprüngliche Modul-ID aus dem UJLC-Dokument in `meta.moduleId` übernommen. Das **`type`-Feld** ermöglicht Dispatch-Logik in Adaptern (z.B. `type: "button"` → `<Button>`-Component). Die **`props` sind node-spezifisch** und folgen keinem generischen Schema, was Flexibilität für unterschiedliche Module ermöglicht.
 
 ```typescript
 type UJLAbstractNode = {
 	type: string; // 'text', 'button', 'container', etc.
-	id: string; // Unique Module ID (preserved from UJLC)
+	id: string; // Unique Node ID (generated during composition)
+	meta?: {
+		moduleId?: string; // Original Module ID from UJLC (for tracking)
+		isModuleRoot?: boolean; // Whether this node is an editable module root
+	};
 	props: Record<string, unknown>; // Node-specific properties
 };
 ```
 
 #### Schnittstelle 3: Payload CMS Media API
 
-Die **Media API** des `library`-Service (Payload CMS) ist eine REST-Schnittstelle für Backend-basiertes Media-Management. Sie kommuniziert über JSON und ist über eine **konfigurierbare Base-URL** erreichbar (typischerweise `http://localhost:3000/api` in Development, produktionsspezifisch in Production). Die Authentifizierung erfolgt per API-Key im `Authorization`-Header.
+Die **Media API** des `library`-Service (Payload CMS) ist eine REST-Schnittstelle für Backend-basiertes Media-Management. Sie kommuniziert über JSON und ist über eine **konfigurierbare Base-URL** erreichbar (typischerweise `http://localhost:3000` in Development, produktionsspezifisch in Production). Die Authentifizierung erfolgt per API-Key im `Authorization`-Header.
 
 | Methode | Endpoint          | Funktion                                  |
 | ------- | ----------------- | ----------------------------------------- |

@@ -79,7 +79,7 @@ sequenceDiagram
 
 ### Ablaufbeschreibung
 
-1. **Initialisierung**: Der Consumer ruft `await Composer.compose(ujlcDocument, imageProvider?)` auf (async)
+1. **Initialisierung**: Der Consumer initialisiert einen `Composer` und ruft `await composer.compose(ujlcDocument, imageProvider?)` auf (async)
 2. **Image Library Setup**: Die ImageLibrary wird mit den eingebetteten Bildern und einem Backend-Provider initialisiert (falls genutzt)
 3. **Root-Iteration**: Für jedes Modul im `root`-Array wird `await composeModule()` aufgerufen (async)
 4. **Module Lookup**: Die Registry liefert das passende Modul für den `type`
@@ -801,7 +801,7 @@ Die Konfiguration wird im UJLC-Dokument gespeichert:
     meta: {
       _library: {
         storage: "backend",
-        url: "http://localhost:3000/api"
+        url: "http://localhost:3000"
       }
     },
     images: {

@@ -176,7 +176,7 @@ graph LR
     subgraph "Artifacts"
         Deps[node_modules/]
         Dist[packages/*/dist/]
-        DocsOutput[apps/docs/dist/]
+        DocsOutput[.vitepress/dist/]
         Public[public/]
     end
 
