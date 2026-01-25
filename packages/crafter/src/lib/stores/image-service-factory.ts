@@ -165,5 +165,12 @@ export function createImageServiceFactory(
 /**
  * Default library service factory with inline storage.
  * For backend storage, use createImageServiceFactory with explicit options.
+ *
+ * This is a function instead of a constant to avoid top-level side effects
+ * (importing svelte-sonner at module initialization time).
+ *
+ * @returns A factory function configured for inline storage
  */
-export const defaultImageServiceFactory = createImageServiceFactory();
+export function getDefaultImageServiceFactory(): ImageServiceFactoryFn {
+	return createImageServiceFactory();
+}
