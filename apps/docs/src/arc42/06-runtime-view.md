@@ -21,9 +21,9 @@ Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
 
 ### Übersicht
 
-Die Composition ist der zentrale Transformationsschritt: Ein UJLC-Dokument (JSON) wird in einen Abstract Syntax Tree (AST) umgewandelt, der von Adaptern gerendert werden kann.
+Die Composition ist der Transformationsschritt: Ein UJLC-Dokument (JSON) wird in einen Abstract Syntax Tree (AST) umgewandelt, der von Adaptern gerendert werden kann.
 
-Ein fundamentales Architektur-Prinzip dabei ist die **1:N-Beziehung zwischen Modulen und AST-Nodes**: Ein Modul im UJLC-Dokument kann mehrere AST-Nodes erzeugen. Dies wird besonders relevant bei Layout-Modulen wie Grid, die strukturelle Wrapper-Nodes (z.B. `grid-item`) generieren. Diese Wrapper sind Render-Primitive für Adapter, aber nicht eigenständig editierbar – nur das Modul selbst ist editierbar.
+Ein fundamentales Architektur-Prinzip dabei ist die **1:N-Beziehung zwischen Modulen und AST-Nodes**: Ein Modul im UJLC-Dokument kann mehrere AST-Nodes erzeugen. Dies wird besonders relevant bei Layout-Modulen wie Grid, die strukturelle Wrapper-Nodes (z. B. `grid-item`) generieren. Diese Wrapper sind Render-Primitive für Adapter, aber nicht eigenständig editierbar, nur das Modul selbst ist editierbar.
 
 ### Sequenzdiagramm
 
@@ -80,7 +80,7 @@ sequenceDiagram
 ### Ablaufbeschreibung
 
 1. **Initialisierung**: Der Consumer ruft `await Composer.compose(ujlcDocument, imageProvider?)` auf (async)
-2. **Image Library Setup**: Die ImageLibrary wird mit den eingebetteten Bildern und optionalem Backend-Provider initialisiert
+2. **Image Library Setup**: Die ImageLibrary wird mit den eingebetteten Bildern und einem Backend-Provider initialisiert (falls genutzt)
 3. **Root-Iteration**: Für jedes Modul im `root`-Array wird `await composeModule()` aufgerufen (async)
 4. **Module Lookup**: Die Registry liefert das passende Modul für den `type`
 5. **Module Composition**: Das Modul transformiert seine Daten in einen AST-Node
@@ -442,7 +442,7 @@ sequenceDiagram
 4. **Theme Application**: Design Tokens werden als CSS Custom Properties injiziert
 5. **AST Routing**: `ASTNode` routet basierend auf `node.type` zur entsprechenden Komponente
 6. **Rekursives Rendering**: Für Kind-Nodes erfolgt ein rekursiver `<ASTNode>`-Aufruf
-7. **Event Binding**: Optional werden Click-Handler für Editor-Integration registriert
+7. **Event Binding**: Bei Bedarf werden Click-Handler für Editor-Integration registriert
 
 ### Komponenten-Hierarchie
 
@@ -518,7 +518,7 @@ function handleClick(event: MouseEvent) {
 
 ### Übersicht
 
-Der Crafter ist der Visual Editor für UJL-Dokumente. Er nutzt Svelte 5 Runes für reaktives State-Management und eine zentrale Context-API für Mutationen.
+Der Crafter ist der Visual Editor für UJL-Dokumente. Er nutzt Svelte 5 Runes für reaktives State-Management und eine Context-API für Mutationen.
 
 ### Hauptszenario: Modul bearbeiten
 
@@ -578,7 +578,7 @@ sequenceDiagram
 
 ### State-Management
 
-**Zentrale State-Variablen (app.svelte):**
+**State-Variablen (app.svelte):**
 
 ```typescript
 let ujlcDocument = $state<UJLCDocument>(initialUJLC);

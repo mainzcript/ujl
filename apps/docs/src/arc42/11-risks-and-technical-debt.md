@@ -95,7 +95,7 @@ Das UJL Framework basiert auf Svelte 5 mit dem neuen Runes-System (`$state`, `$d
 
 **Beschreibung:**
 
-Das UJL Framework ist als pnpm Workspace Monorepo mit 10+ Paketen organisiert. Die Build-Reihenfolge ist kritisch, da Pakete voneinander abhängen. Ein fehlerhafter Build eines Foundation-Pakets (z.B. `types`) führt zu Kaskadenfehlern in allen abhängigen Paketen.
+Das UJL Framework ist als pnpm Workspace Monorepo mit mehr als 10 Paketen organisiert. Die Build-Reihenfolge ist entscheidend, da Pakete voneinander abhängen. Ein fehlerhafter Build eines Foundation-Pakets (z. B. `types`) führt zu Kaskadenfehlern in allen abhängigen Paketen.
 
 **Build-Dependency-Chain:**
 
@@ -114,7 +114,7 @@ types → core → ui → adapter-svelte → adapter-web → crafter/demo
 **Betroffene Pakete:**
 
 - Alle Pakete im Monorepo
-- Besonders kritisch: `@ujl-framework/types` als Foundation-Layer
+- Besonders wichtig: `@ujl-framework/types` als Foundation-Layer
 
 **Mitigationsmaßnahmen:**
 
@@ -159,7 +159,7 @@ Das `@ujl-framework/adapter-web` Paket bundelt Svelte und alle Abhängigkeiten i
 
 **Betroffene Pakete:**
 
-- `@ujl-framework/adapter-web` - Kritisch (bundled Svelte)
+- `@ujl-framework/adapter-web` - Hohe Priorität (bundled Svelte)
 - `@ujl-framework/ui` - Mittelmäßig (Tailwind CSS)
 
 **Mitigationsmaßnahmen:**
@@ -247,7 +247,7 @@ Das Design-Token-System verwendet den OKLCH-Farbraum für perzeptuell uniforme F
 
 1. **CSS Fallbacks**: Bereitstellung von HEX/RGB-Fallbacks via `@supports`
 2. **PostCSS Plugin**: Automatische Fallback-Generierung (zukünftig)
-3. **Dokumentation**: Klare Browser-Anforderungen in der Dokumentation
+3. **Dokumentation**: Browser-Anforderungen in der Dokumentation
 4. **Progressive Enhancement**: Core-Funktionalität auch ohne OKLCH nutzbar
 
 **Status:** Akzeptiertes Risiko (hohe Browser-Abdeckung)
@@ -291,7 +291,7 @@ Die Test-Abdeckung variiert zwischen Paketen. Während `types` und `core` gut ge
 
 **Mitigationsmaßnahmen:**
 
-1. **Coverage-Ziele**: Mindestens 70% für kritische Pfade
+1. **Coverage-Ziele**: Mindestens 70% für wichtige Pfade
 2. **E2E als Fallback**: Playwright-Tests für Crafter-Workflows
 3. **Test-Driven Development**: Neue Features mit Tests entwickeln
 4. **CI-Integration**: Coverage-Reporting in GitLab CI
@@ -322,7 +322,7 @@ Als Masterprojekt wird UJL primär von zwei Personen entwickelt. Dies schafft ei
 **Mitigationsmaßnahmen:**
 
 1. **Umfassende Dokumentation**: arc42, README-Dateien, Inline-Kommentare
-2. **Klare Architektur**: Nachvollziehbare Entscheidungen (ADRs)
+2. **Nachvollziehbare Architektur**: Entscheidungen (ADRs)
 3. **Open-Source-Vorbereitung**: Community-Aufbau nach Phase 3 (siehe [Roadmap](/about/04-roadmap))
 4. **Contributor Guidelines**: Vorbereitung für externe Beiträge
 
@@ -361,7 +361,7 @@ Das Rich-Text-System basiert auf TipTap/ProseMirror, einem leistungsstarken aber
 3. **SSR-Safe Serializer**: Custom Serializer ohne Browser-Abhängigkeit
 4. **Dokumentation**: Schema-Dokumentation in `@ujl-framework/core` README
 
-**Status:** Mitigiert durch klare Abstraktion
+**Status:** Mitigiert durch Abstraktion
 
 ## 11.2 Technische Schulden
 
@@ -581,7 +581,7 @@ Nicht alle öffentlichen APIs haben vollständige JSDoc-Kommentare. Dies erschwe
 
 **Beschreibung:**
 
-Die Generierung von CSS Custom Properties aus TokenSet erfolgt manuell in mehreren Komponenten. Eine zentralisierte Utility fehlt.
+Die Generierung von CSS Custom Properties aus TokenSet erfolgt manuell in mehreren Komponenten. Eine gemeinsame Utility fehlt.
 
 **Betroffene Stellen:**
 
@@ -591,7 +591,7 @@ Die Generierung von CSS Custom Properties aus TokenSet erfolgt manuell in mehrer
 
 **Behebungsplan:**
 
-1. Erstellung einer zentralen `generateCSSVariables(tokenSet)` Utility
+1. Erstellung einer `generateCSSVariables(tokenSet)` Utility
 2. Migration aller Stellen zur Nutzung dieser Utility
 3. Tests für CSS Variable Generation
 
@@ -834,7 +834,7 @@ Die Crafter-Klasse (exportiert aus `@ujl-framework/crafter`) unterstützt aktuel
 ### Kurzfristig (Phase 1 - MVP Stabilisierung)
 
 1. **Test Coverage erhöhen** (R-006)
-   - Unit Tests für kritische Core-Funktionen
+   - Unit Tests für wichtige Core-Funktionen
    - E2E Tests für Crafter-Workflows ausbauen
 
 2. **Type Assertions refactoren** (TD-001)
@@ -876,7 +876,7 @@ Die Crafter-Klasse (exportiert aus `@ujl-framework/crafter`) unterstützt aktuel
 1. **i18n-System einführen** (TD-005)
    - Mehrsprachige UI-Unterstützung
 
-2. **CSS Property Generation zentralisieren** (TD-007)
+2. **CSS Property Generation bündeln** (TD-007)
    - Utility-Library erstellen
 
 3. **Contributor Guidelines** (R-007)

@@ -27,7 +27,7 @@ ujl/
 │   └── examples/      # Beispiel-UJL-Dateien
 │
 ├── apps/              # Anwendungen
-│   ├── dev-demo/      # Dev Demo – Crafter Integration Demo
+│   ├── dev-demo/      # Dev Demo: Crafter Integration Demo
 │   └── docs/          # Dokumentations-Website
 │
 └── services/          # Backend-Services
@@ -94,7 +94,7 @@ Die **Dev-Demo** (`apps/dev-demo`) ist eine minimale Integration-Demo für den U
 
 #### Schnellstart (Inline-Modus)
 
-Der einfachste Weg, die Demo zu starten – keine zusätzliche Konfiguration nötig:
+Der einfachste Weg, die Demo zu starten, ohne zusätzliche Konfiguration:
 
 ```bash
 # Aus dem Projekt-Root:
@@ -174,16 +174,3 @@ pnpm --filter @ujl-framework/adapter-web build   # 5. Web Adapter
 pnpm --filter @ujl-framework/crafter build       # 6. Crafter
 pnpm --filter @ujl-framework/docs build          # 7. Dokumentation
 ```
-
-## Experimentieren mit UJL
-
-### Neue UJL-Beispieldatei erstellen
-
-Um eigene UJL-Dateien zu testen:
-
-1. Erstelle eine `.ujlc.json` in `packages/examples/src/documents/`
-2. Definiere Struktur mit `type`, `fields`, und `slots`
-3. Exportiere sie in `packages/examples/src/index.ts`
-4. Nutze sie in der Dev-Demo oder im Crafter zum Testen
-
-## Wichtige Hinweise

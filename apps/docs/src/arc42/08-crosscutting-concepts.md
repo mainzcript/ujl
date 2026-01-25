@@ -61,7 +61,7 @@ graph TB
 
 ### 8.1.1 UJL Document Formats
 
-Das UJL-Framework definiert zwei zentrale Dokumentformate, die als JSON-Dateien gespeichert werden:
+Das UJL-Framework definiert zwei Dokumentformate, die als JSON-Dateien gespeichert werden:
 
 **UJLC (Content Document)** - Beschreibt die Struktur und Inhalte einer Seite:
 
@@ -88,7 +88,7 @@ interface UJLTDocument {
 
 ### 8.1.2 AST-basierte Composition
 
-Das zentrale Architekturprinzip ist die Trennung von Dokumentstruktur (UJLC) und Rendering (AST):
+Das Architekturprinzip ist die Trennung von Dokumentstruktur (UJLC) und Rendering (AST):
 
 ```mermaid
 flowchart LR
@@ -203,7 +203,7 @@ export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 | ------------------------ | -------------------------- | ------------------------ |
 | `z.lazy()`               | Rekursive Strukturen       | Verschachtelte Module    |
 | `z.discriminatedUnion()` | Varianten-Typen            | Inline vs. Backend Image |
-| `.default()`             | Default-Werte              | Optional Fields          |
+| `.default()`             | Default-Werte              | Fields ohne Pflichtwert  |
 | `.safeParse()`           | Nicht-werfende Validierung | CLI-Tools                |
 
 ### 8.2.2 Validierungs-API
@@ -339,7 +339,7 @@ UJL unterscheidet zwischen verschiedenen Fehlerkategorien:
 | **Runtime Error**    | Hoch        | Module nicht gefunden | Error Node, Graceful Degradation   |
 | **Network Error**    | Mittel      | API nicht erreichbar  | Retry, Fallback, User Notification |
 | **User Error**       | Niedrig     | Ungültige Eingabe     | Inline-Validierung, Hilfetext      |
-| **System Error**     | Kritisch    | Out of Memory         | Logging, Monitoring Alert          |
+| **System Error**     | Hoch        | Out of Memory         | Logging, Monitoring Alert          |
 
 **Error-Code-Konvention:**
 
@@ -513,14 +513,14 @@ flowchart TB
 
 **Regeln:**
 
-1. **State-Ownership**: Nur `app.svelte` besitzt den zentralen State
+1. **State-Ownership**: Nur `app.svelte` besitzt den globalen State
 2. **Props sind Read-Only**: Kinder empfangen Daten als Props
 3. **Mutations über Context**: Änderungen nur über Context-API
 4. **Functional Updates**: Immutable Update-Pattern
 
 ### 8.4.3 Crafter Context API
 
-Die Context-API zentralisiert alle State-Mutationen:
+Die Context-API bündelt alle State-Mutationen:
 
 ```typescript
 interface CrafterContext {
@@ -907,12 +907,12 @@ class S3ImageService implements ImageService {
 
 Module erzeugen semantisch korrektes HTML:
 
-| Modul     | HTML-Element | ARIA-Attribute            |
-| --------- | ------------ | ------------------------- |
-| Text      | p, h1-h6     | -                         |
-| Button    | button, a    | role="button" (wenn Link) |
-| Image     | img          | alt (required)            |
-| Container | section, div | aria-label (optional)     |
+| Modul     | HTML-Element | ARIA-Attribute             |
+| --------- | ------------ | -------------------------- |
+| Text      | p, h1-h6     | -                          |
+| Button    | button, a    | role="button" (wenn Link)  |
+| Image     | img          | alt (required)             |
+| Container | section, div | aria-label (falls gesetzt) |
 
 ### 8.9.2 Farbkontrast
 
@@ -1119,7 +1119,7 @@ function serializeNode(node: ProseMirrorNode): string {
 
 ## 8.12 Operational Concerns (Überblick)
 
-Die folgenden operativen Aspekte sind für den Betrieb von UJL relevant, werden aber bewusst kurz gehalten, da sie eher zu Operations als zu Architektur gehören.
+Die folgenden operativen Aspekte sind für den Betrieb von UJL relevant, werden aber kurz gehalten, da sie eher zu Operations als zu Architektur gehören.
 
 ### 8.12.1 Build-Strategie
 
@@ -1191,7 +1191,7 @@ pnpm publish -r --access public
 
 ## 8.13 Operational Concerns (kompakt)
 
-Die folgenden Abschnitte behandeln operative Aspekte, die für den Betrieb relevant sind, aber bewusst kurz gehalten werden, da sie eher zu Operations als zu Architektur gehören.
+Die folgenden Abschnitte behandeln operative Aspekte, die für den Betrieb relevant sind, aber kurz gehalten werden, da sie eher zu Operations als zu Architektur gehören.
 
 ### 8.13.1 Logging-Strategie (Architektur-Aspekt)
 
@@ -1205,8 +1205,8 @@ Konkrete Implementierung (Pino, Winston, etc.) ist deployment-abhängig.
 
 **Architektur-Entscheidung:** UJL nutzt Multi-Level-Caching:
 
-1. **Client-Side**: Browser-Cache (HTTP) + Optional Service Worker (Workbox)
-2. **In-Memory**: Module Registry Cache, Optional Composer AST-Cache (LRU)
+1. **Client-Side**: Browser-Cache (HTTP) + Service Worker (Workbox, falls eingesetzt)
+2. **In-Memory**: Module Registry Cache, Composer AST-Cache (LRU, falls eingesetzt)
 3. **API-Level**: ETag-basierte Cache-Control Headers für Media-API
 4. **CDN-Level**: CloudFlare/CDN für Static Assets und Media Files
 

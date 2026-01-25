@@ -29,7 +29,7 @@ graph TB
         CMS["Content Management<br/>System"]
         LibraryAPI["Library Service<br/>Images API - Payload CMS"]
         Frontend["Host-Anwendung<br/>Frontend Framework"]
-        AI["KI-Systeme<br/>optional - strukturierte Content-Generierung"]
+        AI["KI-Systeme<br/>bei Bedarf: strukturierte Content-Generierung"]
     end
 
     Designer -->|"definiert .ujlt.json Theme"| Crafter
@@ -75,7 +75,7 @@ Redakteur:innen erstellen Content-Dokumente (`.ujlc.json`) im Crafter (Editor Mo
 - Inhalte, die durch Theme und Module konsistent gerendert werden
 - ggf. Assets (Bilder, Videos, Audio), die im Library Service oder inline Storage gespeichert werden
 
-**Mehrwert:** Autonomes Arbeiten ohne „Design Drift" und mit klarer Vorschau.
+**Mehrwert:** Autonomes Arbeiten ohne „Design Drift" und mit direkter Vorschau.
 
 #### Entwickler:innen
 
@@ -90,7 +90,7 @@ Entwickler:innen entwickeln Custom Modules und Fields in TypeScript und integrie
 - Erweiterte Module, Fields und Adapter
 - Integrierte UJL-Nutzung in Produktivsystemen
 
-**Mehrwert:** Klar definierte Extension-Points und keine proprietären Lock-ins.
+**Mehrwert:** Definierte Extension-Points und keine proprietären Lock-ins.
 
 #### Externe Systeme
 
@@ -121,9 +121,9 @@ const ast = await composer.compose(ujlcDocument); // compose ist async
 webAdapter(ast, ujltDocument.ujlt.tokens, { target: "#app" });
 ```
 
-##### Library Service (Payload CMS) – Images API
+##### Library Service (Payload CMS): Images API
 
-**Ziel/Verantwortung:** Zentralisierte Bildverwaltung inkl. Metadaten (optional; alternativ inline Storage)
+**Ziel/Verantwortung:** Bildverwaltung inkl. Metadaten (bei Bedarf; alternativ inline Storage)
 
 **Interaktionen:**
 
@@ -134,7 +134,7 @@ Der Crafter listet und löst Images über HTTP auf, ermöglicht den Upload von B
 - Bild-Assets und Metadaten (Library Service)
 - Referenzen/Einträge im UJLC-Dokument (Images)
 
-**Mehrwert:** Zentrale Asset-Verwaltung statt rein lokaler/inline Ablage; erleichtert Wiederverwendung und Pflege.
+**Mehrwert:** Asset-Verwaltung statt rein lokaler/inline Ablage; erleichtert Wiederverwendung und Pflege.
 
 **API-Endpunkte:**
 
@@ -247,8 +247,8 @@ import { UJLCrafter } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
 	target: "#editor-container",
-	document: myContentDocument, // Optional: Initial UJLC
-	theme: myPreviewTheme, // Optional: Theme für Preview
+	document: myContentDocument, // Initial UJLC (falls gesetzt)
+	theme: myPreviewTheme, // Theme für Preview (falls gesetzt)
 	library: { storage: "inline" }, // oder 'backend' mit url + apiKey
 });
 
@@ -330,7 +330,7 @@ mounted.unmount();
 
 Der Web Adapter registriert automatisch das Custom Element `<ujl-content>` und benötigt keine Svelte-Runtime-Dependency. Shadow DOM sorgt für Style-Isolation. Props müssen als Properties gesetzt werden, nicht als HTML-Attributes.
 
-#### REST API – Library Service
+#### REST API: Library Service
 
 Nur relevant, wenn der Crafter mit `library: { storage: 'backend' }` konfiguriert wird.
 
@@ -348,7 +348,7 @@ Nur relevant, wenn der Crafter mit `library: { storage: 'backend' }` konfigurier
 
 ### 3.3.1 In Scope
 
-UJL ist verantwortlich für **Dokumentmodell & Authoring** (Erstellung/Pflege von UJLC/UJLT im Crafter), **Validierung & Komposition** (Schema-Validierung und AST-Generierung aus UJLC mit Theme-Bezug) sowie **Rendering** über Adapter für Svelte und Web Components (Custom Element) zur Ausgabe in Host-Anwendungen. Die **Erweiterbarkeit** durch Custom Modules, Fields und Adapter ist ebenso Teil des Scopes wie die **optionale Anbindung eines Library Service** für Bilder (zusätzlich zu inline Storage).
+UJL ist verantwortlich für **Dokumentmodell & Authoring** (Erstellung/Pflege von UJLC/UJLT im Crafter), **Validierung & Komposition** (Schema-Validierung und AST-Generierung aus UJLC mit Theme-Bezug) sowie **Rendering** über Adapter für Svelte und Web Components (Custom Element) zur Ausgabe in Host-Anwendungen. Die **Erweiterbarkeit** durch Custom Modules, Fields und Adapter ist ebenso Teil des Scopes wie die Anbindung eines Library Service für Bilder bei Bedarf (zusätzlich zu inline Storage).
 
 ### 3.3.2 Out of Scope
 

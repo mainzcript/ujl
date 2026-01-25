@@ -1,6 +1,6 @@
 ---
 title: "Glossar"
-description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Fields bis UJL-Theme-Datei"
+description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Fields bis zur UJL-Theme-Datei"
 ---
 
 # Glossar
@@ -8,31 +8,31 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
 ## UJL-spezifische Begriffe
 
 - **Unified JSON Layout (UJL)**  
-  Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts – mit klarer Trennung von Inhalt und Design.
+  Ein JSON-basiertes, modulares Open-Source-Framework zur strukturierten Gestaltung und Bearbeitung von Weblayouts, mit Trennung von Inhalt und Design.
 
 - **UJLC (UJL Content Document)**  
-  Das Content-Dokumentformat von UJL (`.ujlc.json`). Enthält Metadaten (`meta`), eine optionale Image-Bibliothek (`images`) sowie die Modulstruktur (`root`).
+  Das Content-Dokumentformat von UJL (`.ujlc.json`). Enthält Metadaten (`meta`), eine Image-Bibliothek (`images`) sowie die Modulstruktur (`root`).
 
 - **UJLT (UJL Theme Document)**  
   Das Theme-Dokumentformat von UJL (`.ujlt.json`). Enthält Metadaten (`meta`) und Design-Tokens (`tokens`) für Farben, Typografie, Spacing und Radius.
 
 - **UJL Crafter**  
-  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine zentrale Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Nutzt Adapter zur Rendering-Integration.
+  Der visuelle Editor von UJL zur Bearbeitung von `.ujlc.json`- und `.ujlt.json`-Dateien. Bietet eine Oberfläche für Entwickler:innen, Designer:innen und Redakteur:innen. Nutzt Adapter zur Rendering-Integration.
 
 - **Adapter**  
   Komponenten, die den Abstract Syntax Tree (AST) in konkrete Ausgabeformate transformieren. UJL bietet Adapter für Svelte (adapter-svelte) und Web Components (adapter-web). Weitere Adapter können implementiert werden.
 
 - **ContentFrame**  
-  Das gerenderte Endprodukt eines UJL-Layouts – bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
+  Das gerenderte Endprodukt eines UJL-Layouts, bereit zur Anzeige im Browser oder zur Weiterverwendung im Zielsystem.
 
 - **UJLC-Dokument (`.ujlc.json`)**  
   Konkrete Instanz eines UJLC-Content-Dokuments: beschreibt Inhalt und Struktur über Module/Fields/Slots, enthält aber keine Design-Informationen.
 
 - **UJLT-Dokument (`.ujlt.json`)**  
-  Konkrete Instanz eines UJLT-Theme-Dokuments: beschreibt zentrale Designparameter als Tokens und enthält keine Content-Daten.
+  Konkrete Instanz eines UJLT-Theme-Dokuments: beschreibt Designparameter als Tokens und enthält keine Content-Daten.
 
 - **Library Service (`services/library`)**  
-  Optionaler Backend-Service für Media Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
+  Backend-Service für Media Management (Uploads, Metadaten, responsive Images) auf Basis von Payload CMS und PostgreSQL. Stellt eine REST-API bereit, die Crafter und ContentFrames im Backend-Storage-Modus nutzen können.
 
 ## Architektur und Module
 
@@ -67,7 +67,7 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Eine Sammlung von Design-Tokens (Farben, Typografie, Spacing, Radius), die das visuelle Erscheinungsbild steuern. Wird aus `.ujlt.json` geladen.
 
 - **Validator**  
-  Sammlung von Validator-Funktionen im Paket `@ujl-framework/types` – überprüft die technische Korrektheit und Kompatibilität von UJL-Dokumenten:
+  Sammlung von Validator-Funktionen im Paket `@ujl-framework/types`, prüft die technische Korrektheit und Kompatibilität von UJL-Dokumenten:
   - **Syntaxprüfung**: Formale Validierung der JSON-Struktur via Zod-Schemas.
   - **Kompatibilitätsprüfung**: Sicherstellung, dass Dokumente mit der eingesetzten UJL-Version harmonieren.
   - **Hauptfunktionen**: `validateUJLCDocumentSafe()`, `validateUJLTDocumentSafe()`, `validateModule()`, `validateSlot()`
@@ -85,13 +85,13 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Integrieren UJL in bestehende Systeme, erstellen eigene Module und konfigurieren die Ausgabe-Logik.
 
 - **Designer:innen**  
-  Pflegen zentrale Designregeln in der `.ujlt.json`-Datei und sorgen für ein konsistentes Erscheinungsbild.
+  Pflegen Designregeln in der `.ujlt.json`-Datei und sorgen für ein konsistentes Erscheinungsbild.
 
 - **Redakteur:innen**  
   Bearbeiten Inhalte visuell im Crafter. Nutzen vordefinierte Module und Layouts, ohne in Code eingreifen zu müssen.
 
 - **Konsument:innen**  
-  Sehen das Endergebnis: eine klar strukturierte, responsive und designkonforme Darstellung – unabhängig vom Gerät.
+  Sehen das Endergebnis: eine strukturierte, responsive und designkonforme Darstellung, unabhängig vom Gerät.
 
 ## Erweiterung & Zukunft
 
@@ -181,7 +181,7 @@ description: "Zentrale Begriffe und Konzepte rund um UJL - von Modulen und Field
   Eine Sammlung von Designregeln, die das visuelle Erscheinungsbild von UJL-Layouts definieren.
 
 - **Design Tokens**  
-  Benannte Designwerte (z. B. Farben, Typografie, Abstände), die zentral im Theme gepflegt und von Adaptern ins konkrete Styling übersetzt werden.
+  Benannte Designwerte (z. B. Farben, Typografie, Abstände), die im Theme gepflegt und von Adaptern ins konkrete Styling übersetzt werden.
 
 - **OKLCH**  
   Perzeptueller Farbraum (Lightness/Chroma/Hue), der für konsistentere Paletten und verlässlichere Kontraststeuerung genutzt werden kann.

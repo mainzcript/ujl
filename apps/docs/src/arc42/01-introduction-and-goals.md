@@ -5,7 +5,7 @@ description: "Vision, Ziele, Stakeholder und wichtigste Qualitätsziele von UJL"
 
 # Einführung und Ziele
 
-**Unified JSON Layout (UJL)** ist ein Open-Source-Framework für visuelles Content-Authoring. Es löst das _Brand-Compliance-Dilemma_: Teams möchten Inhalte schnell und eigenständig pflegen, müssen aber gleichzeitig **Corporate Design** und **Barrierefreiheit** zuverlässig einhalten. In vielen Projekten wird das heute über Prozesse abgesichert (Reviews, Freigaben, Schulungen) – mit hohem Aufwand und trotzdem wiederkehrenden Fehlern.
+**Unified JSON Layout (UJL)** ist ein Open-Source-Framework für visuelles Content-Authoring. Es löst das _Brand-Compliance-Dilemma_: Teams möchten Inhalte schnell und eigenständig pflegen, müssen aber gleichzeitig **Corporate Design** und **Barrierefreiheit** zuverlässig einhalten. In vielen Projekten wird das heute über Prozesse abgesichert (Reviews, Freigaben, Schulungen), mit hohem Aufwand und trotzdem wiederkehrenden Fehlern.
 
 UJL verlagert diese Absicherung in die Technik: Inhalte und Designregeln werden so beschrieben, dass das System nur zulässige Ergebnisse erzeugen kann.
 
@@ -25,7 +25,7 @@ UJL richtet sich an Teams, die Inhalte visuell erstellen wollen, aber technische
 **Anforderungen auf Systemebene:**
 
 - **Visuelles Authoring:** Redakteur:innen setzen Seiten/Layouts aus vordefinierten Modulen zusammen (WYSIWYG), ohne freie HTML/CSS-Formatierung.
-- **Zentrale Gestaltung:** Designer:innen pflegen markenrelevante Parameter (z. B. Farben, Typografie, Spacing) zentral im Theme; Änderungen wirken konsistent auf alle Inhalte.
+- **Gestaltung im Theme:** Designer:innen pflegen markenrelevante Parameter (z. B. Farben, Typografie, Spacing) im Theme; Änderungen wirken konsistent auf alle Inhalte.
 - **Maschinenlesbarkeit & Validierung:** Content und Theme sind strukturiert und validierbar (Schema-first), damit Import/Export und Systemintegration robust funktionieren.
 - **Integrationsfähigkeit:** UJL wird als modulare Package-Landschaft bereitgestellt und kann in unterschiedliche Umgebungen eingebettet werden (z. B. als Web-Component-Integration mit Style-Isolation).
 
@@ -35,7 +35,7 @@ Die wichtigsten Qualitätsziele (max. fünf) für UJL, priorisiert nach Architek
 
 | Prio | Qualitätsziel                        | Motivation                                                                                     | Umsetzung in der Architektur                                                                                                                                                        |
 | ---: | ------------------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    1 | **Brand-Compliance by Design**       | Corporate Design soll nicht „aus Versehen“ gebrochen werden können.                            | Trennung von Inhalt (UJLC) und Theme (UJLT); erlaubte Module/Varianten statt freier Formatierung; zentrale Tokens/Theme als Quelle.                                                 |
+|    1 | **Brand-Compliance by Design**       | Corporate Design soll nicht „aus Versehen“ gebrochen werden können.                            | Trennung von Inhalt (UJLC) und Theme (UJLT); erlaubte Module/Varianten statt freier Formatierung; Tokens/Theme als Quelle.                                                          |
 |    2 | **Accessibility als Standard**       | Barrierefreiheit darf kein nachgelagerter Prüfschritt sein, sondern Teil des Authorings.       | Semantische Module/Strukturen; editorseitige Leitplanken (z. B. Alternativtexte für Bilder als Teil des Datenmodells); detaillierte Qualitätsszenarien und Nachweise in Kapitel 10. |
 |    3 | **Validierbarkeit & Robustheit**     | Inhalte sollen verlässlich zwischen Systemen übertragbar sein und Fehler früh sichtbar machen. | Schema-first Ansatz (Runtime-Validierung); strukturierte Dokumentformate statt „freiem“ Markup.                                                                                     |
 |    4 | **Integrationsfähigkeit**            | UJL soll bestehende CMS/Frontends ergänzen, nicht ersetzen.                                    | Adapter-Konzept; Web-Integration u. a. über Web Components mit Shadow DOM zur Style-Kapselung.                                                                                      |
@@ -48,22 +48,22 @@ Die wichtigsten Qualitätsziele (max. fünf) für UJL, priorisiert nach Architek
 | Rolle                                   | Erwartungen an UJL                                                                                | Nutzen                                                                     |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | **Redakteur:innen**                     | Inhalte schnell erstellen und ändern, ohne Design- oder Accessibility-Regeln verletzen zu können. | Visueller Editor mit kombinierbaren Modulen, ohne Design-Drift.            |
-| **Designer:innen**                      | Zentrale Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.     | Theme als zentrale Quelle; globale Wirkung statt Einzelseiten-Fixing.      |
-| **Entwickler:innen / Integrator:innen** | Klare Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme.         | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit. |
+| **Designer:innen**                      | Steuerung von Designregeln; Änderungen sollen konsistent und nachvollziehbar wirken.              | Theme als Quelle; globale Wirkung statt Einzelseiten-Fixing.               |
+| **Entwickler:innen / Integrator:innen** | Definierte Schnittstellen, Validierbarkeit, Erweiterbarkeit; Einbettung in bestehende Systeme.    | Schema-Validierung, Adapter-Konzept, Open-Source-Core zur Auditierbarkeit. |
 
 ### Sekundäre Stakeholder
 
 | Rolle                                         | Erwartungen                                                                     | Nutzen                                                                                      |
 | --------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| **Marketing-Teams**                           | Schnelle Kampagnen- und Landingpage-Produktion ohne wiederholte Design-Reviews. | Tempo + Stabilität durch Module und zentrale Regeln.                                        |
+| **Marketing-Teams**                           | Schnelle Kampagnen- und Landingpage-Produktion ohne wiederholte Design-Reviews. | Tempo + Stabilität durch Module und Theme-Regeln.                                           |
 | **Web-Agenturen**                             | Langfristig wartbare Kundenprojekte; weniger Support durch „Design Drift“.      | Governance ist systemisch abgesichert; Redaktionsarbeit skaliert besser.                    |
 | **SaaS-Anbieter**                             | Editor als integrierbare Komponente (White-Label), ohne proprietäre Lock-ins.   | Einbettbarer Authoring-Layer, strukturierte Daten, Validierung.                             |
 | **Compliance-/Accessibility-Verantwortliche** | Nachvollziehbare, reproduzierbare Barrierefreiheit statt punktueller Audits.    | Technische Leitplanken + strukturierter Output erleichtern Nachweise und reduzieren Risiko. |
 
 ### Technische Stakeholder
 
-| Rolle                           | Erwartungen                                                           | Nutzen                                                                                              |
-| ------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Core-Team**                   | Wartbarkeit, klare Modularisierung, stabile Paket-/Release-Strategie. | Trennscharfe Pakete und Schnittstellen; Doku als Arbeitsgrundlage.                                  |
-| **Community Developers**        | Eigene Module/Adapter sollen möglich sein, ohne Interna zu hacken.    | Erweiterungspunkte über Registry/Adapter; Open Source.                                              |
-| **DevOps / Platform Engineers** | Self-Hosting und CI/CD-Integration ohne unnötige Spezialfälle.        | Optionale Backend-Services (z. B. `services/library`), klare Konfiguration über Umgebungsvariablen. |
+| Rolle                           | Erwartungen                                                        | Nutzen                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Core-Team**                   | Wartbarkeit, Modularisierung, stabile Paket-/Release-Strategie.    | Trennscharfe Pakete und Schnittstellen; Doku als Arbeitsgrundlage.                             |
+| **Community Developers**        | Eigene Module/Adapter sollen möglich sein, ohne Interna zu hacken. | Erweiterungspunkte über Registry/Adapter; Open Source.                                         |
+| **DevOps / Platform Engineers** | Self-Hosting und CI/CD-Integration ohne unnötige Spezialfälle.     | Backend-Services bei Bedarf (z. B. `services/library`), Konfiguration über Umgebungsvariablen. |

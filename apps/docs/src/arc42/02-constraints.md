@@ -7,7 +7,7 @@ description: "Technische, organisatorische und konventionelle Constraints des UJ
 
 UJL wird als **Open-Source-Projekt** unter MIT-Lizenz entwickelt. Die wichtigsten Randbedingungen, die Architekturentscheidungen prägen:
 
-**Qualität und Compliance:** Das Framework richtet sich nach **WCAG 2.2** für Barrierefreiheit und berücksichtigt rechtliche Anforderungen wie den European Accessibility Act und die **DSGVO** für Datenschutz. Performance ist für die Editor-Usability zentral.
+**Qualität und Compliance:** Das Framework richtet sich nach **WCAG 2.2** für Barrierefreiheit und berücksichtigt rechtliche Anforderungen wie den European Accessibility Act und die **DSGVO** für Datenschutz. Performance ist für die Editor-Usability wichtig.
 
 **Technologie und Architektur:** UJL basiert auf einem Svelte-basierten TypeScript-Stack und trennt strikt zwischen Inhalt und Design. Die Architektur ermöglicht flexibles Rendering über verschiedene Adapter.
 
@@ -17,15 +17,15 @@ UJL wird als **Open-Source-Projekt** unter MIT-Lizenz entwickelt. Die wichtigste
 
 ### 2.1.1 Technologie-Stack
 
-| Constraint             | Beschreibung                                                                                              | Auswirkung                                                                                                                                                                                                                                                       |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sprache & Typisierung  | [TypeScript](https://www.typescriptlang.org/) (strict) + ES Modules                                       | Durchgängige Typisierung und konsistente Schnittstellen über Packages hinweg                                                                                                                                                                                     |
-| UI-Framework           | [Svelte](https://svelte.dev/)                                                                             | Eleganteste Entwicklungslösung für das Team; ermöglicht framework-agnostische Integration über Web Components. Wichtig für breite Nutzbarkeit, unabhängig vom Framework der Anwender.                                                                            |
-| UI-Bausteine & Styling | [shadcn-svelte](https://www.shadcn-svelte.com/) + [Tailwind CSS](https://tailwindcss.com/)                | Konsistentes UI-Grundgerüst, schnelle UI-Iteration, Utility-first Styling                                                                                                                                                                                        |
-| Schema-Validierung     | [Zod](https://zod.dev/)                                                                                   | Runtime-Validierung + Type Inference (Schema-first Datenmodell)                                                                                                                                                                                                  |
-| Build & Bundling       | [Vite](https://vitejs.dev/)                                                                               | Bewährtes Tooling für moderne Web-Pakete und Libraries                                                                                                                                                                                                           |
-| Repository-Setup       | Monorepo mit [pnpm](https://pnpm.io/) Workspaces + [Changesets](https://github.com/changesets/changesets) | Industriestandard für koordinierte Package-Entwicklung und Releases                                                                                                                                                                                              |
-| Library Service        | [Payload CMS](https://payloadcms.com/) + [PostgreSQL](https://www.postgresql.org/)                        | Payload CMS ist einfach zu bedienen und ermöglicht schnelle Backend-Konfiguration mit moderner API-Architektur – wichtig für ein Frontend-lastiges Team. PostgreSQL als performante Datenbank mit Vektordatenbank-Funktionalität für geplante semantische Suche. |
+| Constraint             | Beschreibung                                                                                              | Auswirkung                                                                                                                                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sprache & Typisierung  | [TypeScript](https://www.typescriptlang.org/) (strict) + ES Modules                                       | Durchgängige Typisierung und konsistente Schnittstellen über Packages hinweg                                                                                                                                                                                                 |
+| UI-Framework           | [Svelte](https://svelte.dev/)                                                                             | Eleganteste Entwicklungslösung für das Team; ermöglicht framework-agnostische Integration über Web Components. Wichtig für breite Nutzbarkeit, unabhängig vom Framework der Anwender.                                                                                        |
+| UI-Bausteine & Styling | [shadcn-svelte](https://www.shadcn-svelte.com/) + [Tailwind CSS](https://tailwindcss.com/)                | Konsistentes UI-Grundgerüst, schnelle UI-Iteration, Utility-first Styling                                                                                                                                                                                                    |
+| Schema-Validierung     | [Zod](https://zod.dev/)                                                                                   | Runtime-Validierung + Type Inference (Schema-first Datenmodell)                                                                                                                                                                                                              |
+| Build & Bundling       | [Vite](https://vitejs.dev/)                                                                               | Bewährtes Tooling für moderne Web-Pakete und Libraries                                                                                                                                                                                                                       |
+| Repository-Setup       | Monorepo mit [pnpm](https://pnpm.io/) Workspaces + [Changesets](https://github.com/changesets/changesets) | Industriestandard für koordinierte Package-Entwicklung und Releases                                                                                                                                                                                                          |
+| Library Service        | [Payload CMS](https://payloadcms.com/) + [PostgreSQL](https://www.postgresql.org/)                        | Payload CMS ist einfach zu bedienen und ermöglicht schnelle Backend-Konfiguration mit moderner API-Architektur, was für ein Frontend-lastiges Team wichtig ist. PostgreSQL ist eine performante Datenbank mit Vektordatenbank-Funktionalität für geplante semantische Suche. |
 
 ### 2.1.2 Browser- & Plattform-Support
 
@@ -35,34 +35,9 @@ UJL wird als **Open-Source-Projekt** unter MIT-Lizenz entwickelt. Die wichtigste
 | Shadow DOM           | Web-Component-Ausgabe nutzt Shadow DOM zur Style-Isolation      | Verhindert CSS-Konflikte mit Host-Anwendungen            |
 | Lokales Self-Hosting | Library Service kann per Docker/Docker Compose betrieben werden | Niedrige Einstiegshürde für Entwicklung und Self-Hosting |
 
-::: warning Hinweis
+::: warning Evergreen Browser Support
 
-Wir unterstützen vorerst nur moderne Browser mit ES2022-Features (async/await, Optional Chaining, Nullish Coalescing) ohne Legacy-Support. So können wir eine moderne Gesamtarchitektur bauen und die Entwicklung beschleunigen.
-
-**Mindestversionen:**
-
-| Browser       | Mindestversion | Veröffentlicht |
-| ------------- | -------------- | -------------- |
-| Chrome / Edge | 94+            | September 2021 |
-| Firefox       | 93+            | Oktober 2021   |
-| Safari        | 15.4+          | März 2022      |
-| Opera         | 80+            | September 2021 |
-
-**Unterstützte ES2022-Features:**
-
-- Top-level `await`
-- Class fields (public/private)
-- Static class blocks
-- `#private` fields und methods
-- `at()` method für Arrays
-- `Object.hasOwn()`
-- Error `cause` property
-
-**Nicht unterstützt:**
-
-- Internet Explorer (End-of-Life)
-- Legacy Edge (<79)
-- Ältere Mobile Browser (<2021)
+Wir unterstützen vorerst nur moderne Browser mit ES2022-Features (async/await sowie `?.` und `??`) ohne Legacy-Support. So können wir eine moderne Gesamtarchitektur bauen und die Entwicklung beschleunigen.
 
 :::
 
@@ -74,13 +49,13 @@ Redakteur:innen erstellen Inhalte im **Crafter** und Designer:innen konfiguriere
 
 :::
 
-| Constraint             | Beschreibung                                                                          | Auswirkung                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Trennung Content/Theme | Inhalt (`.ujlc.json`) und Design (`.ujlt.json`) sind getrennte Artefakte              | Architektur erzwingt „Brand-Compliance by Design“                  |
-| AST als Zwischenformat | Komposition erzeugt ein AST als Transferformat zwischen Dokumenten und Rendering      | Rendering-Ziele bleiben austauschbar (Adapter-Pattern)             |
-| Asynchrone Komposition | Komposition/„compose“ ist asynchron (z. B. wegen Auflösung externer Daten wie Bilder) | Schnittstellen und Aufrufer müssen Async unterstützen              |
-| Adapter-Pattern        | Rendering in unterschiedliche Targets über Adapter                                    | Erleichtert Integration in verschiedene Stacks                     |
-| Library Service        | Separates Backend für Assets                                                          | Austauschbar über klar definierte Schnittstellen; Betrieb optional |
+| Constraint             | Beschreibung                                                                          | Auswirkung                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Trennung Content/Theme | Inhalt (`.ujlc.json`) und Design (`.ujlt.json`) sind getrennte Artefakte              | Architektur erzwingt „Brand-Compliance by Design“               |
+| AST als Zwischenformat | Komposition erzeugt ein AST als Transferformat zwischen Dokumenten und Rendering      | Rendering-Ziele bleiben austauschbar (Adapter-Pattern)          |
+| Asynchrone Komposition | Komposition/„compose“ ist asynchron (z. B. wegen Auflösung externer Daten wie Bilder) | Schnittstellen und Aufrufer müssen Async unterstützen           |
+| Adapter-Pattern        | Rendering in unterschiedliche Targets über Adapter                                    | Erleichtert Integration in verschiedene Stacks                  |
+| Library Service        | Separates Backend für Assets                                                          | Austauschbar über definierte Schnittstellen; Betrieb bei Bedarf |
 
 ::: info Abstract Syntax Tree (AST)
 
@@ -94,11 +69,11 @@ Verschiedene Adapter können das gleiche AST in unterschiedliche Ausgabeformate 
 
 ### 2.1.4 Sicherheits-Constraints
 
-| Constraint                      | Beschreibung                                                                                                         | Auswirkung                                                                                          |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Secrets im Client               | Keine privilegierten Secrets im Frontend; serverseitige Vermittlung (BFF / Backend-for-Frontend) und Least-Privilege | Erhöhte Sicherheit durch zentrale Authentifizierung, reduziertes Risiko bei Client-Kompromittierung |
-| Schreibzugriffe Library Service | Schreiboperationen sind zu schützen (Authentifizierung/Autorisierung)                                                | Klar getrennte Rechte (read vs. write), rotierbare Tokens, auditable Zugriffe                       |
-| Eingabedaten                    | Externe Daten (Import/CMS/Uploads) müssen validiert werden                                                           | Konsequente Schema-Validierung und defensives Rendering (XSS-/Injection-Vermeidung)                 |
+| Constraint                      | Beschreibung                                                                                                         | Auswirkung                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Secrets im Client               | Keine privilegierten Secrets im Frontend; serverseitige Vermittlung (BFF / Backend-for-Frontend) und Least-Privilege | Erhöhte Sicherheit durch Authentifizierung, reduziertes Risiko bei Client-Kompromittierung |
+| Schreibzugriffe Library Service | Schreiboperationen sind zu schützen (Authentifizierung/Autorisierung)                                                | Getrennte Rechte (read vs. write), rotierbare Tokens, auditable Zugriffe                   |
+| Eingabedaten                    | Externe Daten (Import/CMS/Uploads) müssen validiert werden                                                           | Konsequente Schema-Validierung und defensives Rendering (XSS-/Injection-Vermeidung)        |
 
 ## 2.2 Organisatorische Constraints
 
@@ -244,7 +219,7 @@ Die angegebenen Performance-Zielwerte sind aktuell **grobe Richtlinien**. Die en
 | Anforderung                | Beschreibung                              | Umsetzung                                             |
 | -------------------------- | ----------------------------------------- | ----------------------------------------------------- |
 | **Type Coverage**          | 100% TypeScript (keine `.js` Files)       | Strict Mode, keine `any` ohne Begründung              |
-| **Test Coverage**          | Kritische Paths getestet                  | Vitest Unit Tests, Playwright E2E Tests               |
+| **Test Coverage**          | Wichtige Pfade getestet                   | Vitest Unit Tests, Playwright E2E Tests               |
 | **Code Duplication**       | DRY-Prinzip befolgen                      | Shared Utilities, abstrakte Base-Klassen              |
 | **Documentation Coverage** | READMEs für alle Public Packages          | Markdown-READMEs + arc42 Docs                         |
 | **Agentic Coding**         | Repository ist für AI-Agenten optimiert   | `AGENTS.md`, `.cursor/rules/`, strukturierte Kontexte |
@@ -252,10 +227,10 @@ Die angegebenen Performance-Zielwerte sind aktuell **grobe Richtlinien**. Die en
 
 ## 2.5 Externe Abhängigkeiten
 
-### 2.5.1 Kritische Dependencies
+### 2.5.1 Wichtige Dependencies
 
 - Svelte (UI/Editor), Zod (Schema), Tailwind + shadcn-svelte (UI), Vite (Build), pnpm/Changesets (Monorepo/Release).
-- Optionaler Betrieb: Payload CMS + PostgreSQL für den Library Service.
+- Betrieb bei Bedarf: Payload CMS + PostgreSQL für den Library Service.
 
 ### 2.5.2 Build-Tool-Dependencies
 

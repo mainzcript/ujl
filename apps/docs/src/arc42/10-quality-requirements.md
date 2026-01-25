@@ -369,25 +369,25 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 
 #### QS-MAINT-01: Test-Abdeckung
 
-| Aspekt                | Beschreibung                                                                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | Maintainability                                                                                                                             |
-| **Stimulus**          | Codeänderung wird durchgeführt                                                                                                              |
-| **Systemreaktion**    | Automatisierte Tests erkennen Regressionen                                                                                                  |
-| **Messbare Antwort**  | - >80% Line Coverage für kritische Paths (Core, Validation)<br/>- E2E-Tests für alle User Flows<br/>- CI-Pipeline bricht bei Testfehlern ab |
-| **Architektur-Bezug** | Vitest + Playwright ([ADR-011](./09-architecture-decisions#_9-11-adr-011-playwright-für-e2e-testing-des-crafters))                          |
+| Aspekt                | Beschreibung                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Qualitätsziel**     | Maintainability                                                                                                                            |
+| **Stimulus**          | Codeänderung wird durchgeführt                                                                                                             |
+| **Systemreaktion**    | Automatisierte Tests erkennen Regressionen                                                                                                 |
+| **Messbare Antwort**  | - >80% Line Coverage für wichtige Pfade (Core, Validation)<br/>- E2E-Tests für alle User Flows<br/>- CI-Pipeline bricht bei Testfehlern ab |
+| **Architektur-Bezug** | Vitest + Playwright ([ADR-011](./09-architecture-decisions#_9-11-adr-011-playwright-für-e2e-testing-des-crafters))                         |
 
 **Testbarkeit:** Coverage-Reports in CI-Pipeline.
 
 #### QS-MAINT-02: Modulare Struktur
 
-| Aspekt                | Beschreibung                                                                                                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Qualitätsziel**     | Maintainability                                                                                                                                                               |
-| **Stimulus**          | Bug-Fix oder Feature-Entwicklung                                                                                                                                              |
-| **Systemreaktion**    | Änderungen sind auf einzelne Packages beschränkt                                                                                                                              |
-| **Messbare Antwort**  | - Klare Package-Grenzen (types → core → ui → adapters → crafter)<br/>- Keine zirkulären Dependencies<br/>- Änderungen in einem Package erfordern selten Änderungen in anderen |
-| **Architektur-Bezug** | Monorepo-Struktur ([Baustein-Sicht](./05-building-block-view))                                                                                                                |
+| Aspekt                | Beschreibung                                                                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qualitätsziel**     | Maintainability                                                                                                                                                                    |
+| **Stimulus**          | Bug-Fix oder Feature-Entwicklung                                                                                                                                                   |
+| **Systemreaktion**    | Änderungen sind auf einzelne Packages beschränkt                                                                                                                                   |
+| **Messbare Antwort**  | - Definierte Package-Grenzen (types → core → ui → adapters → crafter)<br/>- Keine zirkulären Dependencies<br/>- Änderungen in einem Package erfordern selten Änderungen in anderen |
+| **Architektur-Bezug** | Monorepo-Struktur ([Baustein-Sicht](./05-building-block-view))                                                                                                                     |
 
 **Testbarkeit:** Dependency-Graph-Analyse, Changeset-Tracking.
 
@@ -430,7 +430,7 @@ Die folgende Tabelle fasst alle Quality Scenarios mit ihren Metriken zusammen:
 | QS-DX-01    | Developer Exp.        | Type Safety               | 100% TypeScript Strict        | Implementiert |
 | QS-DX-02    | Developer Exp.        | Onboarding-Zeit           | <1h für Custom Module         | Messbar       |
 | QS-DX-03    | Developer Exp.        | Dokumentations-qualität   | README pro Package            | Implementiert |
-| QS-MAINT-01 | Maintainability       | Test-Abdeckung            | >80% kritische Paths          | In Arbeit     |
+| QS-MAINT-01 | Maintainability       | Test-Abdeckung            | >80% wichtige Pfade           | In Arbeit     |
 | QS-MAINT-02 | Maintainability       | Modulare Struktur         | Keine zirkulären Dependencies | Implementiert |
 | QS-MAINT-03 | Maintainability       | Versionierung             | Synchrone Versionierung       | Implementiert |
 

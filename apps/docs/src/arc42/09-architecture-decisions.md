@@ -7,11 +7,11 @@ description: "Wichtige Architekturentscheidungen und deren Begründung"
 
 ## 9.1 ADR-001: Strikte Trennung von Content (UJLC) und Design (UJLT)
 
-Um Brand-Compliance und Accessibility nicht nur als Guidelines, sondern architektonisch zu erzwingen, trennt UJL Content und Design strikt in zwei Dokumenttypen. UJLC (`.ujlc.json`) enthält ausschließlich strukturierte Inhalte (Module, Felder, Slots) und UJLT (`.ujlt.json`) ausschließlich zentral verwaltete Design-Tokens (z. B. Farben, Typografie, Spacing), die ein Composer zur Laufzeit in einen AST zusammenführt. Das sorgt für konsistente CI und schnelle Theme-Updates, reduziert aber Flexibilität für per-Dokument-Design und erhöht den initialen Setup- und Lernaufwand.
+Um Brand-Compliance und Accessibility nicht nur als Guidelines, sondern architektonisch zu erzwingen, trennt UJL Content und Design strikt in zwei Dokumenttypen. UJLC (`.ujlc.json`) enthält ausschließlich strukturierte Inhalte (Module, Felder, Slots) und UJLT (`.ujlt.json`) Design-Tokens (z. B. Farben, Typografie, Spacing), die im Theme gepflegt werden und die ein Composer zur Laufzeit in einen AST zusammenführt. Das sorgt für konsistente CI und schnelle Theme-Updates, reduziert aber Flexibilität für per-Dokument-Design und erhöht den initialen Setup- und Lernaufwand.
 
 ## 9.2 ADR-002: Modulares Plugin-System mit Registry Pattern
 
-Damit das Framework erweiterbar bleibt, ohne den Core zu destabilisieren, setzt UJL auf ein Registry-basiertes Plugin-Modell, in dem Module als klar definierte Einheiten registriert und beim Composing über ihren Typ aufgelöst werden. Fields kapseln Validierung und Normalisierung (z. B. via Zod und TypeScript-Typing), sodass Drittanbieter-Module konsistent integrierbar bleiben und Daten zur Laufzeit abgesichert sind. Der Preis dafür sind mehr Boilerplate, Template-Bedarf und eine spürbare Lernkurve für das Modulsystem.
+Damit das Framework erweiterbar bleibt, ohne den Core zu destabilisieren, setzt UJL auf ein Registry-basiertes Plugin-Modell, in dem Module als definierte Einheiten registriert und beim Composing über ihren Typ aufgelöst werden. Fields kapseln Validierung und Normalisierung (z. B. via Zod und TypeScript-Typing), sodass Drittanbieter-Module konsistent integrierbar bleiben und Daten zur Laufzeit abgesichert sind. Der Preis dafür sind mehr Boilerplate, Template-Bedarf und eine spürbare Lernkurve für das Modulsystem.
 
 ## 9.3 ADR-003: Adapter Pattern für Framework-Agnostisches Rendering
 
@@ -19,7 +19,7 @@ Um die Core-Logik unabhängig vom jeweiligen UI-Framework zu halten, rendert UJL
 
 ## 9.4 ADR-004: Dual Media Storage Strategy (Inline vs. Backend)
 
-Für Medien unterstützt UJL zwei Betriebsarten, die sich an unterschiedlichen Use Cases orientieren: Inline-Storage (portabel, da Assets im Dokument eingebettet sind) und Backend-Storage (skalierbar, da Assets über einen Provider/Resolver aus einer zentralen Library bezogen werden). So funktionieren Standalone-Dokumente ebenso wie Enterprise-Workflows mit Metadaten und Versionierung. Je nach Modus fällt entweder Dateigröße (Inline) oder Infrastruktur- und Betriebs-Komplexität (Backend) stärker ins Gewicht.
+Für Medien unterstützt UJL zwei Betriebsarten, die sich an unterschiedlichen Use Cases orientieren: Inline-Storage (portabel, da Assets im Dokument eingebettet sind) und Backend-Storage (skalierbar, da Assets über einen Provider/Resolver aus einer Library bezogen werden). So funktionieren Standalone-Dokumente ebenso wie Enterprise-Workflows mit Metadaten und Versionierung. Je nach Modus fällt entweder Dateigröße (Inline) oder Infrastruktur- und Betriebs-Komplexität (Backend) stärker ins Gewicht.
 
 ## 9.5 ADR-005: Zod-basierte Runtime Validation mit TypeScript Type Inference
 
@@ -27,11 +27,11 @@ Da UJL-Dokumente häufig aus externen Quellen stammen (Datei, CMS, AI), reicht C
 
 ## 9.6 ADR-006: Svelte 5 als primäres UI-Framework
 
-Für Crafter (Editor) und den primären Rendering-Adapter setzt UJL auf Svelte 5, weil es mit kompiliertem Output, feingranularer Reaktivität (Runes) und einer klaren Lifecycle-API gute Performance und geringe Bundle-Größe bei hoher Entwicklerproduktivität verbindet. Die Wahl erleichtert außerdem Web-Component-Exports über Custom Elements. Gleichzeitig sind Ökosystem und Community kleiner als bei React/Vue, und Svelte 5 ist als Technologie vergleichsweise jung.
+Für Crafter (Editor) und den primären Rendering-Adapter setzt UJL auf Svelte 5, weil es mit kompiliertem Output, feingranularer Reaktivität (Runes) und einer einfachen Lifecycle-API gute Performance und geringe Bundle-Größe bei hoher Entwicklerproduktivität verbindet. Die Wahl erleichtert außerdem Web-Component-Exports über Custom Elements. Gleichzeitig sind Ökosystem und Community kleiner als bei React/Vue, und Svelte 5 ist als Technologie vergleichsweise jung.
 
 ## 9.7 ADR-007: Payload CMS für Media Management Backend
 
-Für die zentrale Media Library nutzt UJL Payload CMS als Headless-Backend, um Upload, Metadatenpflege (z. B. Alt-Text, Credits, i18n) und eine API out-of-the-box zu erhalten und gleichzeitig TypeScript-first zu bleiben. In Kombination mit PostgreSQL und integrierter Bildverarbeitung (z. B. responsive Größen und moderne Formate) entsteht ein professioneller Asset-Workflow. Der Trade-off sind zusätzliche Infrastruktur, Setup-Aufwand und laufende Betriebs- bzw. Hosting-Kosten.
+Für die Media Library nutzt UJL Payload CMS als Headless-Backend, um Upload, Metadatenpflege (z. B. Alt-Text, Credits, i18n) und eine API out-of-the-box zu erhalten und gleichzeitig TypeScript-first zu bleiben. In Kombination mit PostgreSQL und integrierter Bildverarbeitung (z. B. responsive Größen und moderne Formate) entsteht ein professioneller Asset-Workflow. Der Trade-off sind zusätzliche Infrastruktur, Setup-Aufwand und laufende Betriebs- bzw. Hosting-Kosten.
 
 ## 9.8 ADR-008: TipTap/ProseMirror für Rich Text Editing
 
@@ -53,13 +53,13 @@ Da der Crafter viele Interaktionen umfasst, die Unit-Tests nicht realistisch abb
 
 Die folgenden Tool-Entscheidungen sind für die Entwicklungs-Infrastruktur relevant, haben aber geringeren architektonischen Einfluss als die Kern-ADRs.
 
-**ADR-012: GitLab CI/CD** – UJL nutzt GitLab CI/CD für automatisierte Builds, Tests und Deployments (z. B. GitLab Pages), weil die Integration in Repository-Workflows (Merge Requests, Issues, Registry) den Prozess konsistent hält; Alternativen wie GitHub Actions oder Jenkins wurden zugunsten einer einheitlichen Toolchain verworfen.
+**ADR-012: GitLab CI/CD**: UJL nutzt GitLab CI/CD für automatisierte Builds, Tests und Deployments (z. B. GitLab Pages), weil die Integration in Repository-Workflows (Merge Requests, Issues, Registry) den Prozess konsistent hält; Alternativen wie GitHub Actions oder Jenkins wurden zugunsten einer einheitlichen Toolchain verworfen.
 
-**ADR-013: VitePress für Dokumentation** – Die Arc42-Dokumentation wird mit VitePress erstellt, da die Vite-basierte Performance, Markdown-first Ansatz und Standardfeatures wie Search/Sidebar den Dokumentations-Workflow vereinfachen und ein statisches Build-Output sauber auslieferbar ist.
+**ADR-013: VitePress für Dokumentation**: Die Arc42-Dokumentation wird mit VitePress erstellt, da die Vite-basierte Performance, Markdown-first Ansatz und Standardfeatures wie Search/Sidebar den Dokumentations-Workflow vereinfachen und ein statisches Build-Output sauber auslieferbar ist.
 
-**ADR-014: Vitest für Unit-Tests** – Für Unit-Tests setzt UJL auf Vitest, weil es Vite-nativ ist, Konfigurationen mit dem Build-Tooling teilen kann und durch die Jest-kompatible API einen schnellen Einstieg ermöglicht; zudem funktioniert TypeScript/ESM ohne zusätzliche Transformer in der Regel performanter.
+**ADR-014: Vitest für Unit-Tests**: Für Unit-Tests setzt UJL auf Vitest, weil es Vite-nativ ist, Konfigurationen mit dem Build-Tooling teilen kann und durch die Jest-kompatible API einen schnellen Einstieg ermöglicht; zudem funktioniert TypeScript/ESM ohne zusätzliche Transformer in der Regel performanter.
 
-**ADR-015: TypeScript Strict Mode** – In allen Packages ist TypeScript Strict Mode aktiviert (`"strict": true`), um Fehler früh zu erkennen (u. a. durch Null-Checks und strengere Typregeln) und die Stabilität eines Frameworks auch für Consumer-Code zu erhöhen.
+**ADR-015: TypeScript Strict Mode**: In allen Packages ist TypeScript Strict Mode aktiviert (`"strict": true`), um Fehler früh zu erkennen (u. a. durch Null-Checks und strengere Typregeln) und die Stabilität eines Frameworks auch für Consumer-Code zu erhöhen.
 
 ## 9.13 Offene Architekturentscheidungen
 

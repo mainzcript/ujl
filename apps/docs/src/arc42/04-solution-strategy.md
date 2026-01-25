@@ -36,11 +36,11 @@ Diese Strategie unterscheidet UJL fundamental von klassischen Page Buildern, die
 
 **Technische Umsetzung:**
 
-Die Trennung erfolgt auf zwei Ebenen: **UJLC-Dokumente** enthalten ausschließlich strukturierte Content-Daten in Form von Modulen mit typisierten Fields und Slots. **UJLT-Dokumente** hingegen enthalten zentral verwaltete Design-Tokens wie Farben (im OKLCH-Farbraum), Typografie, Spacing und Radius. Der **Composer** kombiniert beide zur Laufzeit zu einem Abstract Syntax Tree (AST), während **Zod-Schemas** beide Dokumenttypen validieren.
+Die Trennung erfolgt auf zwei Ebenen: **UJLC-Dokumente** enthalten ausschließlich strukturierte Content-Daten in Form von Modulen mit typisierten Fields und Slots. **UJLT-Dokumente** enthalten Design-Tokens wie Farben (im OKLCH-Farbraum), Typografie, Spacing und Radius, die im Theme gepflegt werden. Der **Composer** kombiniert beide zur Laufzeit zu einem Abstract Syntax Tree (AST), während **Zod-Schemas** beide Dokumenttypen validieren.
 
 **Konsequenzen:**
 
-Diese Architektur führt dazu, dass Redakteur:innen Design-Regeln technisch nicht brechen können und Theme-Updates sofort global auf alle Dokumente wirken. Das ermöglicht zentrale Governance ohne manuelle Reviews, bedeutet aber auch weniger Flexibilität für individuelle Design-Anpassungen pro Dokument.
+Diese Architektur führt dazu, dass Redakteur:innen Design-Regeln technisch nicht brechen können und Theme-Updates sofort global auf alle Dokumente wirken. Das ermöglicht Governance ohne manuelle Reviews, bedeutet aber auch weniger Flexibilität für individuelle Design-Anpassungen pro Dokument.
 
 **Referenz:** Siehe [ADR-001](./09-architecture-decisions#_9-1-adr-001-strikte-trennung-von-content-ujlc-und-design-ujlt)
 
@@ -76,7 +76,7 @@ Zod als Schema-Bibliothek bringt mehrere entscheidende Vorteile: Das **DRY-Prinz
 
 **Konsequenzen:**
 
-Die Entscheidung garantiert Datenintegrität zur Laufzeit und ermöglicht automatische Type-Synchronisation zwischen Schema und TypeScript-Types. Als Trade-off entsteht ein Runtime-Overhead durch Validierung (etwa 5–10ms pro Dokument) sowie eine größere Bundle-Größe durch Zod (etwa 12KB gzip).
+Die Entscheidung garantiert Datenintegrität zur Laufzeit und ermöglicht automatische Type-Synchronisation zwischen Schema und TypeScript-Types. Als Trade-off entsteht ein Runtime-Overhead durch Validierung (etwa 5 bis 10 ms pro Dokument) sowie eine größere Bundle-Größe durch Zod (etwa 12 KB gzip).
 
 **Referenz:** Siehe [ADR-005](./09-architecture-decisions#_9-5-adr-005-zod-basierte-runtime-validation-mit-typescript-type-inference)
 
@@ -124,7 +124,7 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 
 **Fundamentales Architektur-Prinzip: Module-zu-Node-Transformation (1:N)**
 
-Ein Modul im UJLC-Dokument entspricht **nicht zwingend einem einzelnen AST-Node**. Die Beziehung ist **1:N** – ein Modul kann mehrere AST-Nodes erzeugen. Dies ermöglicht komplexe Layouts ohne zusätzliche Module-Ebene.
+Ein Modul im UJLC-Dokument entspricht **nicht zwingend einem einzelnen AST-Node**. Die Beziehung ist **1:N**: Ein Modul kann mehrere AST-Nodes erzeugen. Dies ermöglicht komplexe Layouts ohne zusätzliche Module-Ebene.
 
 **Beispiel: Grid-Modul erzeugt 5 AST-Nodes**
 
@@ -219,7 +219,7 @@ abstract class ModuleBase {
 	): UJLAbstractNode | Promise<UJLAbstractNode>;
 }
 
-// Zentrale Registry
+// Registry
 class ModuleRegistry {
 	registerModule(module: ModuleBase): void;
 	getModule(name: string): AnyModule | undefined;
@@ -485,7 +485,7 @@ function serializeNode(node: ProseMirrorNode): string {
 **Problem:** Unterschiedliche Anwendungsfälle erfordern unterschiedliche Media-Strategien:
 
 - **Standalone-Dokumente**: Sollen portabel sein ohne externe Abhängigkeiten
-- **Enterprise CMS**: Zentrale Media-Verwaltung mit Metadaten, Responsive Images, Versionierung
+- **Enterprise CMS**: Media-Verwaltung mit Metadaten, Responsive Images, Versionierung
 
 **Lösung:** Abstrahierte Media Library mit Resolver Pattern
 
@@ -494,7 +494,7 @@ function serializeNode(node: ProseMirrorNode): string {
 class ImageLibrary {
 	constructor(
 		initialImages: Record<string, ImageEntry>,
-		provider?: ImageProvider // Optional: Externe Image-Quelle
+		provider?: ImageProvider // Externe Image-Quelle (falls vorhanden)
 	);
 
 	async resolve(id: string): Promise<UJLImageData | null> {
@@ -663,7 +663,7 @@ export const Images: CollectionConfig = {
 
 **Alternative Kandidaten:** React, Vue, Solid
 
-**Entscheidungskriterien (Skala 1–5):**
+**Entscheidungskriterien (Skala 1 bis 5):**
 
 | Kriterium         | Svelte 5 | React 19 | Vue 3 | Solid |
 | ----------------- | -------- | -------- | ----- | ----- |
@@ -695,7 +695,7 @@ export const Images: CollectionConfig = {
 
 **Alternative Kandidaten:** Yup, Joi, AJV (JSON Schema)
 
-**Entscheidungskriterien (Skala 1–5):**
+**Entscheidungskriterien (Skala 1 bis 5):**
 
 | Kriterium         | Zod | Yup | Joi | AJV |
 | ----------------- | --- | --- | --- | --- |
@@ -740,7 +740,7 @@ type User = z.infer<typeof UserSchema>;
 
 **Alternative Kandidaten:** Strapi, Custom Backend (Express + Sharp), Supabase Storage
 
-**Entscheidungskriterien (Skala 1–5):**
+**Entscheidungskriterien (Skala 1 bis 5):**
 
 | Kriterium           | Payload CMS | Strapi | Custom | Supabase |
 | ------------------- | ----------- | ------ | ------ | -------- |
@@ -794,7 +794,7 @@ formatOptions: { format: 'webp', options: { quality: 80 } }
 
 **Alternative Kandidaten:** npm Workspaces, Yarn Workspaces, Lerna, Turborepo
 
-**Entscheidungskriterien (Skala 1–5):**
+**Entscheidungskriterien (Skala 1 bis 5):**
 
 | Kriterium             | pnpm + Changesets | npm Workspaces | Yarn + Lerna | Turborepo | Nx  |
 | --------------------- | ----------------- | -------------- | ------------ | --------- | --- |
@@ -857,13 +857,13 @@ Diese Tabelle zeigt, wie strategische Entscheidungen die definierten Qualitätsz
 | **Erweiterbarkeit**              | Plugin-Architektur, Adapter Pattern               | Module Registry, AST            | <100 LOC für Custom Module, <50 LOC für Adapter                                                 |
 | **Performance**                  | Svelte 5 Compilation, Tree-Shaking                | Svelte 5, Vite                  | <100KB Bundle (adapter-web), <200ms Crafter                                                     |
 | **Developer Experience**         | TypeScript Strict, Type Inference, Templates      | TypeScript, Zod, pnpm           | <1h Onboarding (Custom Module), 100% Type Coverage                                              |
-| **Maintainability**              | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (kritische Paths)                                                            |
+| **Maintainability**              | Monorepo, Automated Testing, Coordinated Releases | pnpm, Changesets, Vitest        | 80%+ Test Coverage (wichtige Pfade)                                                             |
 
-## 4.4 Trade-offs und bewusste Entscheidungen
+## 4.4 Trade-offs und Entscheidungen
 
 ### Accepted Trade-offs
 
-Die folgenden Trade-offs wurden bewusst akzeptiert, da die Vorteile die Nachteile überwiegen:
+Die folgenden Trade-offs wurden akzeptiert, da die Vorteile die Nachteile überwiegen:
 
 #### 1. Bundle-Größe vs. Runtime Safety
 
@@ -879,7 +879,7 @@ Die folgenden Trade-offs wurden bewusst akzeptiert, da die Vorteile die Nachteil
 
 **Entscheidung:** Akzeptiert
 
-**Begründung:** Klare Schnittstellen reduzieren langfristig den Maintenance-Aufwand. Template-Dateien (`_template.ts`) reduzieren die initiale Hürde, und Type Safety rechtfertigt den zusätzlichen Code. Die Alternative (freie Modulstruktur) hätte inkonsistente Module-Qualität zur Folge.
+**Begründung:** Definierte Schnittstellen reduzieren langfristig den Maintenance-Aufwand. Template-Dateien (`_template.ts`) reduzieren die initiale Hürde, und Type Safety rechtfertigt den zusätzlichen Code. Die Alternative (freie Modulstruktur) hätte inkonsistente Module-Qualität zur Folge.
 
 #### 3. Flexibilität vs. Governance
 
@@ -887,7 +887,7 @@ Die folgenden Trade-offs wurden bewusst akzeptiert, da die Vorteile die Nachteil
 
 **Entscheidung:** Akzeptiert
 
-**Begründung:** Brand-Compliance by Design ist das primäre Qualitätsziel (Priorität 1), und zentrale Theme-Verwaltung ist ein architektonisches Kernelement. Die Alternative (per-document Styling) würde Design-Drift ermöglichen. Use Cases mit individuellen Styles können eigene UJLT-Dateien verwenden.
+**Begründung:** Brand-Compliance by Design ist das primäre Qualitätsziel (Priorität 1), und Theme-Verwaltung ist ein architektonisches Kernelement. Die Alternative (per-document Styling) würde Design-Drift ermöglichen. Use Cases mit individuellen Styles können eigene UJLT-Dateien verwenden.
 
 #### 4. Setup-Komplexität vs. Enterprise-Features
 

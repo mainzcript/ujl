@@ -143,7 +143,7 @@ pnpm --filter @ujl-framework/crafter dev     # Crafter: http://localhost:5175
 pnpm --filter @ujl-framework/ui dev          # UI Library: http://localhost:5173
 pnpm --filter @ujl-framework/docs dev        # Docs: http://localhost:5176
 
-# 5. Library Service starten (optional)
+# 5. Library Service starten (bei Bedarf)
 cd services/library
 docker-compose up -d
 # Library API: http://localhost:3000
@@ -394,7 +394,7 @@ sequenceDiagram
 
 - Hot Module Replacement (HMR) für schnelle Entwicklung
 - Alle Packages im Watch-Mode verfügbar
-- Media Service optional (Docker)
+- Media Service (bei Bedarf, Docker)
 - Kein Build-Schritt erforderlich für Entwicklung
 
 ### 7.3.2 Szenario: Continuous Integration
@@ -452,7 +452,7 @@ graph TB
         end
     end
 
-    subgraph "UJL Media Service (optional)"
+    subgraph "UJL Media Service (bei Bedarf)"
         MediaAPI[Payload CMS<br/>Port: 3000]
         MediaDB[(PostgreSQL)]
         MediaFiles[(Media Files)]
@@ -969,7 +969,7 @@ tar -czf backup_media_$DATE.tar.gz media/
 
 ### 7.6.5 Alerting-Strategie
 
-**Kritische Alerts (sofortige Reaktion):**
+**Alerts mit hoher Priorität (sofortige Reaktion):**
 
 | Alert                    | Bedingung                        | Aktion                            |
 | ------------------------ | -------------------------------- | --------------------------------- |
@@ -988,7 +988,7 @@ tar -czf backup_media_$DATE.tar.gz media/
 
 **Alert-Kanäle (Empfehlung):**
 
-- **Kritisch**: E-Mail, Slack, PagerDuty
+- **Hohe Priorität**: E-Mail, Slack, PagerDuty
 - **Warnung**: E-Mail, Slack
 
 ### 7.6.6 Disaster Recovery
@@ -1075,12 +1075,12 @@ pnpm build
 
 **Rollback-Entscheidungskriterien:**
 
-| Kriterium               | Schwellwert                 | Aktion                      |
-| ----------------------- | --------------------------- | --------------------------- |
-| Error Rate              | >10% in 5 Minuten           | Sofortiger Rollback         |
-| Critical Bug            | P1 Sicherheitslücke         | Sofortiger Rollback         |
-| Performance Degradation | >2x Baseline Response Time  | Rollback nach 15 Minuten    |
-| User Reports            | >10 kritische Reports in 1h | Rollback nach Investigation |
+| Kriterium               | Schwellwert                           | Aktion                      |
+| ----------------------- | ------------------------------------- | --------------------------- |
+| Error Rate              | >10% in 5 Minuten                     | Sofortiger Rollback         |
+| Critical Bug            | P1 Sicherheitslücke                   | Sofortiger Rollback         |
+| Performance Degradation | >2x Baseline Response Time            | Rollback nach 15 Minuten    |
+| User Reports            | >10 Reports mit hoher Priorität in 1h | Rollback nach Investigation |
 
 ### Deployment-Übersicht
 
@@ -1098,13 +1098,13 @@ pnpm build
    - Reverse Proxy (nginx/Traefik) für HTTPS
    - Persistent Volumes für PostgreSQL und Media
    - Automatisierte Backups
-   - Monitoring (Prometheus/Grafana optional)
+   - Monitoring (Prometheus/Grafana, falls eingesetzt)
 3. **CDN**: Für statische Assets (CSS, Bilder)
 4. **Skalierung**: Horizontal via Container-Orchestrierung (Docker Swarm/Kubernetes) bei Bedarf
 
 ## 7.8 Appendix: Weitere Deployment-Szenarien
 
-Die folgenden Deployment-Szenarien sind für spezifische Use Cases relevant, werden aber als optional betrachtet.
+Die folgenden Deployment-Szenarien sind für spezifische Use Cases relevant, werden aber nur bei Bedarf eingesetzt.
 
 ### 7.8.1 Szenario: NPM Package Publishing (geplant)
 
@@ -1228,7 +1228,7 @@ graph TB
 
 | Komponente    | Instanzen | CPU     | Memory | Storage   | Redundanz     |
 | ------------- | --------- | ------- | ------ | --------- | ------------- |
-| Nginx/Traefik | 1-2       | 1 Core  | 512MB  | -         | Optional      |
+| Nginx/Traefik | 1-2       | 1 Core  | 512MB  | -         | Bei Bedarf    |
 | UJL Crafter   | 2+        | 2 Cores | 2GB    | -         | Load Balanced |
 | Payload CMS   | 1-2       | 2 Cores | 4GB    | -         | Aktiv-Passiv  |
 | PostgreSQL    | 1         | 4 Cores | 8GB    | 100GB SSD | Replication   |

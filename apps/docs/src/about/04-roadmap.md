@@ -11,9 +11,9 @@ UJL befindet sich bereits in aktiver Entwicklung. Ein stabiler technischer Kern,
 
 Diese Roadmap beschreibt die nächsten Entwicklungsschritte auf dem Weg von einem technisch belastbaren Kern hin zu einem marktreifen, offen nutzbaren System.
 
-Zeitliche Angaben werden bewusst **nicht als fixe Fristen**, sondern als **Abfolge von Entwicklungszuständen** formuliert. Der tatsächliche Fortschritt hängt maßgeblich von verfügbaren Ressourcen und Finanzierung ab.
+Zeitliche Angaben werden **nicht als fixe Fristen**, sondern als **Abfolge von Entwicklungszuständen** formuliert. Der tatsächliche Fortschritt hängt maßgeblich von verfügbaren Ressourcen und Finanzierung ab.
 
-## Phase 1 – Stabilisierung & Vervollständigung des MVP
+## Phase 1: Stabilisierung & Vervollständigung des MVP
 
 **Ziel:**  
 Ein technisch stabiles, konsistent nutzbares Produkt, das sich für reale Pilotprojekte eignet.
@@ -31,12 +31,12 @@ In dieser Phase liegt der Fokus auf der **Absicherung und Vervollständigung** d
 **Ergebnis dieser Phase:**  
 UJL kann in abgeschlossenen Projekten eingesetzt werden, Inhalte lassen sich stabil erstellen, speichern und rendern. Der Editor ist für Redakteur:innen nutzbar, ohne dass grundlegende Funktionen fehlen.
 
-## Phase 2 – Pilotierung in realen Projekten
+## Phase 2: Pilotierung in realen Projekten
 
 **Ziel:**  
 Validierung von UJL unter realen Produktionsbedingungen.
 
-Nach der technischen Stabilisierung folgt bewusst eine Phase, in der UJL **gezielt in echten Projekten eingesetzt** wird. Diese Pilotierungen dienen nicht primär der Skalierung, sondern der Validierung von Architektur, Bedienbarkeit und Erweiterbarkeit.
+Nach der technischen Stabilisierung folgt eine Phase, in der UJL **gezielt in echten Projekten eingesetzt** wird. Diese Pilotierungen dienen nicht primär der Skalierung, sondern der Validierung von Architektur, Bedienbarkeit und Erweiterbarkeit.
 
 Der Fokus liegt dabei auf Partnern mit realen Anforderungen, insbesondere aus dem Agentur- und Projektumfeld.
 
@@ -51,7 +51,7 @@ Der Fokus liegt dabei auf Partnern mit realen Anforderungen, insbesondere aus de
 **Ergebnis dieser Phase:**  
 UJL ist nicht nur technisch funktionsfähig, sondern **praxisvalidiert**. Typische Fehlerquellen, UX-Probleme und Integrationsfragen sind identifiziert und adressiert.
 
-## Phase 3 – Öffnung & Community-Readiness
+## Phase 3: Öffnung & Community-Readiness
 
 **Ziel:**  
 Vorbereitung auf öffentliche Nutzung und externe Beiträge.
@@ -61,7 +61,7 @@ Auf Basis der Pilotierung wird UJL für eine breitere Nutzung geöffnet. Diese P
 **Schwerpunkte dieser Phase:**
 
 - Öffentliche Bereitstellung des Open-Source-Repositories
-- Klare Contributor-Guidelines und Projektstruktur
+- Contributor-Guidelines und Projektstruktur
 - Ausbau der Dokumentation (Getting Started, Architekturüberblick)
 - Etablierung erster Community-Kanäle
 - Technische Vorbereitung für externe Erweiterungen
@@ -69,7 +69,7 @@ Auf Basis der Pilotierung wird UJL für eine breitere Nutzung geöffnet. Diese P
 **Ergebnis dieser Phase:**  
 UJL ist offen nutzbar, nachvollziehbar dokumentiert und strukturell so aufgestellt, dass externe Beiträge möglich und sinnvoll sind.
 
-## Phase 4 – Erweiterbarkeit & Integrationen
+## Phase 4: Erweiterbarkeit & Integrationen
 
 **Ziel:**  
 UJL als erweiterbares System etablieren.
@@ -86,7 +86,7 @@ In dieser Phase wird der Fokus auf **Erweiterbarkeit und Integration** gelegt. U
 **Ergebnis dieser Phase:**  
 UJL lässt sich konsistent erweitern und in bestehende Stacks integrieren, ohne den Core zu verändern. Das System ist anschlussfähig für unterschiedliche Nutzungsszenarien.
 
-## Phase 5 – Weiterführende Funktionen & Perspektive
+## Phase 5: Weiterführende Funktionen & Perspektive
 
 **Ziel:**  
 Schrittweise Weiterentwicklung auf Basis realer Nutzung.
@@ -96,6 +96,6 @@ Alle weiterführenden Funktionen werden **nicht vorab fest versprochen**, sonder
 - weitergehende KI-Unterstützung im Authoring-Prozess
 - Versionierung und Änderungsverfolgung
 - kollaborative Funktionen
-- optionale Hosting- oder Service-Angebote
+- Hosting- oder Service-Angebote
 
-Diese Aspekte werden bewusst **nachgelagert betrachtet**, um die Stabilität und Offenheit des Kerns nicht zu gefährden.
+Diese Aspekte werden **später betrachtet**, um die Stabilität und Offenheit des Kerns nicht zu gefährden.
