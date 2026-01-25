@@ -436,48 +436,6 @@ sequenceDiagram
 - Automatisches Deployment auf main/develop
 - Retry-Mechanismus für Infrastruktur-Fehler
 
-### 7.3.3 Szenario: NPM Package Publishing (geplant)
-
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant Changesets as Changesets CLI
-    participant Git as Git
-    participant CI as GitLab CI
-    participant NPM as NPM Registry
-
-    Dev->>Changesets: pnpm changeset
-    Changesets->>Dev: Select packages, enter changelog
-    Dev->>Git: Commit .changeset/xyz.md
-
-    Dev->>Git: git push origin develop
-
-    Note over CI: On develop branch merge
-
-    CI->>Changesets: pnpm version-packages
-    Changesets->>CI: Update package.json versions
-    Changesets->>CI: Generate CHANGELOG.md
-
-    CI->>Git: Commit version bump
-
-    Note over CI: Manual trigger for publish
-
-    CI->>NPM: pnpm publish -r --access public
-    NPM-->>CI: Packages published
-```
-
-**Geplante Package-Struktur:**
-
-| Package        | NPM Name                        | Beschreibung                      |
-| -------------- | ------------------------------- | --------------------------------- |
-| types          | `@ujl-framework/types`          | TypeScript Types & Zod Schemas    |
-| core           | `@ujl-framework/core`           | Composer, Module Registry, Fields |
-| ui             | `@ujl-framework/ui`             | shadcn-svelte Components          |
-| adapter-svelte | `@ujl-framework/adapter-svelte` | Svelte 5 Adapter                  |
-| adapter-web    | `@ujl-framework/adapter-web`    | Web Components Adapter            |
-| crafter        | `@ujl-framework/crafter`        | Visual Editor                     |
-| examples       | `@ujl-framework/examples`       | Example Documents & Themes        |
-
 ### 7.3.4 Szenario: Produktion (Integration in Host-Applikation)
 
 ```mermaid
@@ -557,7 +515,640 @@ const mounted = webAdapter(ast, tokenSet, {
 mounted.unmount();
 ```
 
-### 7.3.5 Szenario: Produktion (Self-Hosted Full Stack)
+::: info Weitere Deployment-Szenarien
+Für zusätzliche Deployment-Szenarien (NPM Package Publishing, Self-Hosted Full Stack) siehe [Appendix 7.8](#_7-8-appendix-weitere-deployment-szenarien).
+:::
+
+## 7.4 Infrastruktur-Anforderungen
+
+### 7.4.1 Mindestanforderungen
+
+| Umgebung                  | CPU               | RAM  | Speicher | Netzwerk      |
+| ------------------------- | ----------------- | ---- | -------- | ------------- |
+| **Entwicklung**           | 2 Cores           | 8 GB | 10 GB    | Lokal         |
+| **CI Runner**             | 2 Cores           | 4 GB | 5 GB     | GitLab SaaS   |
+| **Media Service**         | 1 Core            | 2 GB | 10 GB+   | Port 3000     |
+| **Produktion (Frontend)** | Abhängig von Host | -    | -        | CDN empfohlen |
+
+### 7.4.2 Empfohlene Konfiguration
+
+| Umgebung          | CPU      | RAM   | Speicher   | Zusätzlich        |
+| ----------------- | -------- | ----- | ---------- | ----------------- |
+| **Entwicklung**   | 4+ Cores | 16 GB | SSD 20 GB+ | Docker Desktop    |
+| **CI Runner**     | 4 Cores  | 8 GB  | 10 GB      | Caching aktiviert |
+| **Media Service** | 2 Cores  | 4 GB  | 50 GB+ SSD | Backup-Strategie  |
+
+### 7.4.3 Sicherheitsanforderungen
+
+| Komponente     | Anforderung         | Implementierung                                   |
+| -------------- | ------------------- | ------------------------------------------------- |
+| **Media API**  | Authentication      | API-Key via `Authorization: users API-Key <key>`  |
+| **PostgreSQL** | Netzwerk-Isolation  | Docker Network (nicht extern exponiert empfohlen) |
+| **Secrets**    | Sichere Speicherung | Environment Variables, nie in Git                 |
+| **HTTPS**      | Verschlüsselung     | Reverse Proxy (nginx/Traefik) in Produktion       |
+
+## 7.5 Mapping: Software zu Infrastruktur
+
+### 7.7.1 Zuordnungstabelle
+
+| Software-Baustein               | Deployment-Artefakt               | Infrastruktur-Element |
+| ------------------------------- | --------------------------------- | --------------------- |
+| `@ujl-framework/types`          | `dist/*.js`, `dist/*.d.ts`        | NPM Registry          |
+| `@ujl-framework/core`           | `dist/*.js`, `dist/*.d.ts`        | NPM Registry          |
+| `@ujl-framework/ui`             | `dist/*.js`, `dist/*.svelte`, CSS | NPM Registry          |
+| `@ujl-framework/adapter-svelte` | `dist/*.js`, `dist/*.svelte`, CSS | NPM Registry          |
+| `@ujl-framework/adapter-web`    | `dist/index.js` (bundled)         | NPM Registry          |
+| `@ujl-framework/crafter`        | SvelteKit Package                 | NPM Registry          |
+| `@ujl-framework/examples`       | JSON Files                        | NPM Registry          |
+| `docs`                          | Static HTML/CSS/JS                | GitLab Pages          |
+| `demo`                          | Static HTML/CSS/JS                | (Private)             |
+| `media`                         | Docker Image                      | Docker Host           |
+
+### 7.7.2 Build-Artefakte
+
+```mermaid
+graph LR
+    subgraph "Source"
+        TS[TypeScript]
+        Svelte[Svelte 5]
+        CSS[CSS/Tailwind]
+        MD[Markdown]
+    end
+
+    subgraph "Build Tools"
+        TSC[tsc]
+        SvelteKit[SvelteKit]
+        Vite[Vite]
+        VitePress[VitePress]
+    end
+
+    subgraph "Output"
+        JS[JavaScript ESM]
+        DTS[Type Declarations]
+        SvelteComp[Svelte Components]
+        CSSBundle[CSS Bundle]
+        HTML[Static HTML]
+    end
+
+    TS --> TSC
+    TSC --> JS
+    TSC --> DTS
+
+    Svelte --> SvelteKit
+    SvelteKit --> SvelteComp
+    SvelteKit --> JS
+
+    CSS --> Vite
+    Vite --> CSSBundle
+
+    MD --> VitePress
+    VitePress --> HTML
+```
+
+## 7.7 Skalierungsstrategie
+
+### 7.7.1 Horizontale Skalierung
+
+**Application Layer (Crafter):**
+
+UJL Crafter ist als stateless SvelteKit-Anwendung konzipiert und kann horizontal skaliert werden.
+
+```mermaid
+graph LR
+    LB[Load Balancer]
+
+    subgraph "Application Instances"
+        App1[Crafter Instance 1]
+        App2[Crafter Instance 2]
+        AppN[Crafter Instance N]
+    end
+
+    subgraph "Shared Services"
+        Payload[Payload CMS]
+        PG[(PostgreSQL)]
+    end
+
+    LB --> App1
+    LB --> App2
+    LB --> AppN
+
+    App1 --> Payload
+    App2 --> Payload
+    AppN --> Payload
+
+    Payload --> PG
+```
+
+**Skalierungs-Trigger:**
+
+| Metrik            | Schwellwert  | Aktion      |
+| ----------------- | ------------ | ----------- |
+| CPU-Auslastung    | >70% (5 Min) | +1 Instance |
+| Memory-Auslastung | >80% (5 Min) | +1 Instance |
+| Request Rate      | >1000 req/s  | +1 Instance |
+| Response Time     | >500ms (p95) | +1 Instance |
+
+**Kubernetes Auto-Scaling (Beispiel):**
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ujl-crafter
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ujl-crafter
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+**Docker Swarm Auto-Scaling (Beispiel):**
+
+```yaml
+services:
+  crafter:
+    image: ghcr.io/ujl-framework/crafter:latest
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "1"
+          memory: 1G
+```
+
+### 7.7.2 Vertikale Skalierung
+
+**PostgreSQL:**
+
+| Last-Profil                 | CPU      | Memory | Storage | IOPS  |
+| --------------------------- | -------- | ------ | ------- | ----- |
+| Niedrig (<1000 Bilder)      | 2 Cores  | 4GB    | 50GB    | 1000  |
+| Mittel (<10.000 Bilder)     | 4 Cores  | 8GB    | 100GB   | 3000  |
+| Hoch (<100.000 Bilder)      | 8 Cores  | 16GB   | 500GB   | 5000  |
+| Sehr Hoch (>100.000 Bilder) | 16 Cores | 32GB   | 1TB     | 10000 |
+
+**Payload CMS:**
+
+| Concurrent Users | CPU     | Memory | Instances |
+| ---------------- | ------- | ------ | --------- |
+| <10              | 1 Core  | 2GB    | 1         |
+| 10-50            | 2 Cores | 4GB    | 2         |
+| 50-200           | 4 Cores | 8GB    | 3-5       |
+| >200             | 8 Cores | 16GB   | 5+        |
+
+### 7.7.3 Datenbank-Skalierung
+
+**Read Replicas:**
+
+Für lesintensive Workloads können PostgreSQL Read Replicas eingesetzt werden:
+
+```mermaid
+graph TB
+    subgraph "Write Operations"
+        Writer[Primary PostgreSQL]
+    end
+
+    subgraph "Read Operations"
+        Reader1[Read Replica 1]
+        Reader2[Read Replica 2]
+    end
+
+    Writer -.->|Replication| Reader1
+    Writer -.->|Replication| Reader2
+
+    Payload[Payload CMS] -->|Writes| Writer
+    Payload -.->|Reads| Reader1
+    Payload -.->|Reads| Reader2
+```
+
+**Connection Pooling:**
+
+Für hohe Concurrent Connections PgBouncer einsetzen:
+
+```ini
+# pgbouncer.ini
+[databases]
+payload = host=postgres port=5432 dbname=payload
+
+[pgbouncer]
+listen_port = 6432
+listen_addr = *
+auth_type = md5
+pool_mode = transaction
+max_client_conn = 1000
+default_pool_size = 25
+```
+
+### 7.7.4 Media Storage-Skalierung
+
+**Object Storage (S3-kompatibel):**
+
+Für große Media-Bibliotheken Wechsel zu Object Storage:
+
+```typescript
+// Payload Config mit S3
+import { s3Adapter } from "@payloadcms/plugin-cloud-storage/s3";
+
+export default buildConfig({
+	collections: [
+		{
+			slug: "images",
+			upload: {
+				adapter: s3Adapter({
+					config: {
+						endpoint: process.env.S3_ENDPOINT,
+						credentials: {
+							accessKeyId: process.env.S3_ACCESS_KEY,
+							secretAccessKey: process.env.S3_SECRET_KEY,
+						},
+						region: process.env.S3_REGION,
+					},
+					bucket: process.env.S3_BUCKET,
+				}),
+			},
+		},
+	],
+});
+```
+
+**CDN-Integration:**
+
+```nginx
+# Nginx CDN Cache
+location /media/ {
+    proxy_pass http://payload:3000;
+    proxy_cache media_cache;
+    proxy_cache_valid 200 7d;
+    proxy_cache_valid 404 1h;
+    add_header X-Cache-Status $upstream_cache_status;
+}
+```
+
+### 7.7.5 Performance-Optimierungen
+
+**Lazy Loading:**
+
+UJL-Adapter unterstützen Lazy Loading von Modulen:
+
+```typescript
+// Code Splitting in Adapter
+const modules = {
+	container: () => import("./nodes/Container.svelte"),
+	text: () => import("./nodes/Text.svelte"),
+	image: () => import("./nodes/Image.svelte"),
+};
+```
+
+**Bundle Optimization:**
+
+```javascript
+// vite.config.ts
+export default defineConfig({
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ["svelte", "@ujl-framework/core"],
+					adapter: ["@ujl-framework/adapter-svelte"],
+					ui: ["@ujl-framework/ui"],
+				},
+			},
+		},
+	},
+});
+```
+
+**Caching-Strategie:**
+
+| Ressource              | Cache-Dauer | Strategie              |
+| ---------------------- | ----------- | ---------------------- |
+| Static Assets (CSS/JS) | 1 Jahr      | Immutable + Hash       |
+| Media Files (Images)   | 7 Tage      | CDN + ETag             |
+| API Responses          | 5 Minuten   | Stale-While-Revalidate |
+| HTML Pages (SSR)       | 1 Minute    | Edge Cache             |
+
+### 7.7.6 Monitoring für Skalierung
+
+**Key Performance Indicators (KPIs):**
+
+| KPI                   | Zielwert   | Skalierungs-Signal            |
+| --------------------- | ---------- | ----------------------------- |
+| Request Latency (p95) | <200ms     | >300ms → Scale Up             |
+| Throughput            | 1000 req/s | >80% Kapazität → Scale Up     |
+| Error Rate            | <1%        | >2% → Investigate, dann Scale |
+| Database Connections  | <80% Pool  | >90% → Increase Pool/Scale    |
+| Memory Usage          | <75%       | >85% → Scale Up               |
+
+**Grafana Dashboard (Beispiel-Queries):**
+
+```promql
+# Request Rate
+rate(http_requests_total[5m])
+
+# Response Time p95
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+# Container Memory Usage
+container_memory_usage_bytes / container_spec_memory_limit_bytes
+
+# Database Connections
+pg_stat_activity_count / max_connections
+```
+
+## 7.6 Operations und Monitoring
+
+### 7.6.1 Logging
+
+| Komponente      | Log-Ziel              | Log-Level       |
+| --------------- | --------------------- | --------------- |
+| Vite Dev Server | Console               | info/warn/error |
+| SvelteKit       | Console               | info/warn/error |
+| Payload CMS     | Console + Docker Logs | info/warn/error |
+| PostgreSQL      | Docker Logs           | warn/error      |
+| GitLab CI       | Job Logs              | Alle            |
+
+**Log-Zugriff:**
+
+```bash
+# Docker Logs
+docker-compose logs -f payload
+docker-compose logs -f postgres
+
+# GitLab CI Logs
+# Über GitLab UI: CI/CD → Pipelines → Jobs
+```
+
+### 7.6.2 Health Checks
+
+| Service     | Endpoint                  | Erwartung         |
+| ----------- | ------------------------- | ----------------- |
+| Payload CMS | `GET /admin`              | HTTP 200/302      |
+| Payload API | `GET /api/images?limit=1` | HTTP 200 + JSON   |
+| PostgreSQL  | TCP Port 5432             | Connection Accept |
+
+**Docker Health Check (empfohlen):**
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3000/admin"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+```
+
+### 7.6.3 Backup-Strategie (Media Service)
+
+| Komponente  | Backup-Methode          | Frequenz     |
+| ----------- | ----------------------- | ------------ |
+| PostgreSQL  | `pg_dump`               | Täglich      |
+| Media Files | Volume Backup           | Täglich      |
+| .env        | Secure Storage (extern) | Bei Änderung |
+
+**Backup-Script (Beispiel):**
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Database Backup
+docker-compose exec -T postgres pg_dump -U postgres payload > backup_db_$DATE.sql
+
+# Media Files Backup
+tar -czf backup_media_$DATE.tar.gz media/
+```
+
+### 7.6.4 Metriken und KPIs
+
+**System-Metriken:**
+
+| Metrik              | Zielwert         | Messmethode               | Frequenz       |
+| ------------------- | ---------------- | ------------------------- | -------------- |
+| API Response Time   | <200ms (p95)     | Payload CMS Logs          | Kontinuierlich |
+| Database Query Time | <50ms (p95)      | PostgreSQL Slow Query Log | Kontinuierlich |
+| Container Memory    | <512MB (Payload) | Docker Stats              | Alle 60s       |
+| Container CPU       | <50% (Payload)   | Docker Stats              | Alle 60s       |
+| Disk Usage          | <80%             | df -h                     | Täglich        |
+
+**Anwendungs-Metriken:**
+
+| Metrik                         | Zielwert | Messmethode        | Frequenz  |
+| ------------------------------ | -------- | ------------------ | --------- |
+| Image Upload Success Rate      | >99%     | Payload API Logs   | Stündlich |
+| Media Resolution Success Rate  | >99.9%   | Crafter Error Logs | Stündlich |
+| Schema Validation Success Rate | >95%     | CLI/Core Logs      | Täglich   |
+
+**Empfohlene Monitoring-Tools:**
+
+- **Prometheus + Grafana**: Für Langzeit-Metriken und Dashboards
+- **Loki**: Für Log-Aggregation
+- **cAdvisor**: Für Container-Metriken
+
+### 7.6.5 Alerting-Strategie
+
+**Kritische Alerts (sofortige Reaktion):**
+
+| Alert                    | Bedingung                        | Aktion                            |
+| ------------------------ | -------------------------------- | --------------------------------- |
+| Service Down             | Health Check fehlgeschlagen (3x) | Neustart, Eskalation              |
+| Database Connection Lost | PostgreSQL nicht erreichbar      | Verbindung prüfen, Neustart       |
+| Disk Full                | >90% Disk-Auslastung             | Logs rotieren, Backup archivieren |
+| High Error Rate          | >5% Fehlerrate in 5 Minuten      | Logs prüfen, Rollback erwägen     |
+
+**Warnungen (Überwachung erforderlich):**
+
+| Warning              | Bedingung              | Aktion                |
+| -------------------- | ---------------------- | --------------------- |
+| High Memory Usage    | >80% Memory-Auslastung | Ressourcen überwachen |
+| Slow Queries         | >500ms Query Time      | Query optimieren      |
+| High Upload Failures | >1% Upload-Fehlerrate  | Storage prüfen        |
+
+**Alert-Kanäle (Empfehlung):**
+
+- **Kritisch**: E-Mail, Slack, PagerDuty
+- **Warnung**: E-Mail, Slack
+
+### 7.6.6 Disaster Recovery
+
+**Recovery Time Objective (RTO):** <4 Stunden  
+**Recovery Point Objective (RPO):** <24 Stunden (Daily Backups)
+
+**Disaster Recovery Plan:**
+
+1. **Datenbank-Wiederherstellung:**
+
+```bash
+# Backup einspielen
+docker-compose exec -T postgres psql -U postgres payload < backup_db_YYYYMMDD.sql
+
+# Verbindung testen
+docker-compose exec postgres psql -U postgres -c "\l"
+```
+
+2. **Media Files-Wiederherstellung:**
+
+```bash
+# Backup entpacken
+tar -xzf backup_media_YYYYMMDD.tar.gz -C services/library/media/
+
+# Permissions setzen
+chown -R 1000:1000 services/library/media/
+```
+
+3. **Service-Neustart:**
+
+```bash
+# Container neu starten
+docker-compose down
+docker-compose up -d
+
+# Logs prüfen
+docker-compose logs -f payload
+```
+
+4. **Validierung:**
+
+- Health Checks durchführen
+- Test-Upload durchführen
+- Image Resolution testen
+- Admin-Zugriff prüfen
+
+**Backup-Retention:**
+
+| Backup-Typ      | Aufbewahrung |
+| --------------- | ------------ |
+| Daily Backups   | 7 Tage       |
+| Weekly Backups  | 4 Wochen     |
+| Monthly Backups | 12 Monate    |
+
+### 7.6.7 Rollback-Strategie
+
+**Deployment-Rollback:**
+
+1. **GitLab CI/CD:**
+
+```bash
+# Letzten erfolgreichen Build re-deployen
+# Über GitLab UI: CI/CD → Pipelines → [Letzter erfolgreicher Build] → Retry
+```
+
+2. **Docker-Rollback:**
+
+```bash
+# Zu vorherigem Image wechseln
+docker pull ghcr.io/ujl-framework/payload-cms:previous-tag
+docker-compose down
+docker-compose up -d
+```
+
+3. **Changesets-Rollback:**
+
+```bash
+# Package-Version zurücksetzen
+git revert <commit-hash>
+pnpm install
+pnpm build
+```
+
+**Rollback-Entscheidungskriterien:**
+
+| Kriterium               | Schwellwert                 | Aktion                      |
+| ----------------------- | --------------------------- | --------------------------- |
+| Error Rate              | >10% in 5 Minuten           | Sofortiger Rollback         |
+| Critical Bug            | P1 Sicherheitslücke         | Sofortiger Rollback         |
+| Performance Degradation | >2x Baseline Response Time  | Rollback nach 15 Minuten    |
+| User Reports            | >10 kritische Reports in 1h | Rollback nach Investigation |
+
+### Deployment-Übersicht
+
+| Aspekt            | Aktueller Stand             | Ziel                |
+| ----------------- | --------------------------- | ------------------- |
+| **Dokumentation** | GitLab Pages (main/develop) | Stabil              |
+| **Packages**      | Lokal / Monorepo            | NPM Registry        |
+| **Media Service** | Docker Compose (Lokal)      | Produktions-Hosting |
+| **Demo**          | Static Build (Lokal)        | Demo-Server         |
+
+### Empfehlungen für Produktions-Deployment
+
+1. **Frontend-Packages**: Über NPM in Host-Applikation integrieren
+2. **Media Service**: Dedizierter Docker Host mit:
+   - Reverse Proxy (nginx/Traefik) für HTTPS
+   - Persistent Volumes für PostgreSQL und Media
+   - Automatisierte Backups
+   - Monitoring (Prometheus/Grafana optional)
+3. **CDN**: Für statische Assets (CSS, Bilder)
+4. **Skalierung**: Horizontal via Container-Orchestrierung (Docker Swarm/Kubernetes) bei Bedarf
+
+## 7.8 Appendix: Weitere Deployment-Szenarien
+
+Die folgenden Deployment-Szenarien sind für spezifische Use Cases relevant, werden aber als optional betrachtet.
+
+### 7.8.1 Szenario: NPM Package Publishing (geplant)
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Changesets as Changesets CLI
+    participant Git as Git
+    participant CI as GitLab CI
+    participant NPM as NPM Registry
+
+    Dev->>Changesets: pnpm changeset
+    Changesets->>Dev: Select packages, enter changelog
+    Dev->>Git: Commit .changeset/xyz.md
+
+    Dev->>Git: git push origin develop
+
+    Note over CI: On develop branch merge
+
+    CI->>Changesets: pnpm version-packages
+    Changesets->>CI: Update package.json versions
+    Changesets->>CI: Generate CHANGELOG.md
+
+    CI->>Git: Commit version bump
+
+    Note over CI: Manual trigger for publish
+
+    CI->>NPM: pnpm publish -r --access public
+    NPM-->>CI: Packages published
+```
+
+**Geplante Package-Struktur:**
+
+| Package        | NPM Name                        | Beschreibung                      |
+| -------------- | ------------------------------- | --------------------------------- |
+| types          | `@ujl-framework/types`          | TypeScript Types & Zod Schemas    |
+| core           | `@ujl-framework/core`           | Composer, Module Registry, Fields |
+| ui             | `@ujl-framework/ui`             | shadcn-svelte Components          |
+| adapter-svelte | `@ujl-framework/adapter-svelte` | Svelte 5 Adapter                  |
+| adapter-web    | `@ujl-framework/adapter-web`    | Web Components Adapter            |
+| crafter        | `@ujl-framework/crafter`        | Visual Editor                     |
+| examples       | `@ujl-framework/examples`       | Example Documents & Themes        |
+
+### 7.8.2 Szenario: Produktion (Self-Hosted Full Stack)
 
 Dieses Szenario beschreibt eine vollständige Produktions-Deployment-Umgebung mit allen UJL-Komponenten.
 
@@ -813,586 +1404,3 @@ server {
    curl https://your-domain.com/admin
    curl https://your-domain.com/api/images?limit=1
    ```
-
-## 7.4 Infrastruktur-Anforderungen
-
-### 7.4.1 Mindestanforderungen
-
-| Umgebung                  | CPU               | RAM  | Speicher | Netzwerk      |
-| ------------------------- | ----------------- | ---- | -------- | ------------- |
-| **Entwicklung**           | 2 Cores           | 8 GB | 10 GB    | Lokal         |
-| **CI Runner**             | 2 Cores           | 4 GB | 5 GB     | GitLab SaaS   |
-| **Media Service**         | 1 Core            | 2 GB | 10 GB+   | Port 3000     |
-| **Produktion (Frontend)** | Abhängig von Host | -    | -        | CDN empfohlen |
-
-### 7.4.2 Empfohlene Konfiguration
-
-| Umgebung          | CPU      | RAM   | Speicher   | Zusätzlich        |
-| ----------------- | -------- | ----- | ---------- | ----------------- |
-| **Entwicklung**   | 4+ Cores | 16 GB | SSD 20 GB+ | Docker Desktop    |
-| **CI Runner**     | 4 Cores  | 8 GB  | 10 GB      | Caching aktiviert |
-| **Media Service** | 2 Cores  | 4 GB  | 50 GB+ SSD | Backup-Strategie  |
-
-### 7.4.3 Sicherheitsanforderungen
-
-| Komponente     | Anforderung         | Implementierung                                   |
-| -------------- | ------------------- | ------------------------------------------------- |
-| **Media API**  | Authentication      | API-Key via `Authorization: users API-Key <key>`  |
-| **PostgreSQL** | Netzwerk-Isolation  | Docker Network (nicht extern exponiert empfohlen) |
-| **Secrets**    | Sichere Speicherung | Environment Variables, nie in Git                 |
-| **HTTPS**      | Verschlüsselung     | Reverse Proxy (nginx/Traefik) in Produktion       |
-
-## 7.5 Mapping: Software zu Infrastruktur
-
-### 7.5.1 Zuordnungstabelle
-
-| Software-Baustein               | Deployment-Artefakt               | Infrastruktur-Element |
-| ------------------------------- | --------------------------------- | --------------------- |
-| `@ujl-framework/types`          | `dist/*.js`, `dist/*.d.ts`        | NPM Registry          |
-| `@ujl-framework/core`           | `dist/*.js`, `dist/*.d.ts`        | NPM Registry          |
-| `@ujl-framework/ui`             | `dist/*.js`, `dist/*.svelte`, CSS | NPM Registry          |
-| `@ujl-framework/adapter-svelte` | `dist/*.js`, `dist/*.svelte`, CSS | NPM Registry          |
-| `@ujl-framework/adapter-web`    | `dist/index.js` (bundled)         | NPM Registry          |
-| `@ujl-framework/crafter`        | SvelteKit Package                 | NPM Registry          |
-| `@ujl-framework/examples`       | JSON Files                        | NPM Registry          |
-| `docs`                          | Static HTML/CSS/JS                | GitLab Pages          |
-| `demo`                          | Static HTML/CSS/JS                | (Private)             |
-| `media`                         | Docker Image                      | Docker Host           |
-
-### 7.5.2 Build-Artefakte
-
-```mermaid
-graph LR
-    subgraph "Source"
-        TS[TypeScript]
-        Svelte[Svelte 5]
-        CSS[CSS/Tailwind]
-        MD[Markdown]
-    end
-
-    subgraph "Build Tools"
-        TSC[tsc]
-        SvelteKit[SvelteKit]
-        Vite[Vite]
-        VitePress[VitePress]
-    end
-
-    subgraph "Output"
-        JS[JavaScript ESM]
-        DTS[Type Declarations]
-        SvelteComp[Svelte Components]
-        CSSBundle[CSS Bundle]
-        HTML[Static HTML]
-    end
-
-    TS --> TSC
-    TSC --> JS
-    TSC --> DTS
-
-    Svelte --> SvelteKit
-    SvelteKit --> SvelteComp
-    SvelteKit --> JS
-
-    CSS --> Vite
-    Vite --> CSSBundle
-
-    MD --> VitePress
-    VitePress --> HTML
-```
-
-## 7.5 Skalierungsstrategie
-
-### 7.5.1 Horizontale Skalierung
-
-**Application Layer (Crafter):**
-
-UJL Crafter ist als stateless SvelteKit-Anwendung konzipiert und kann horizontal skaliert werden.
-
-```mermaid
-graph LR
-    LB[Load Balancer]
-
-    subgraph "Application Instances"
-        App1[Crafter Instance 1]
-        App2[Crafter Instance 2]
-        AppN[Crafter Instance N]
-    end
-
-    subgraph "Shared Services"
-        Payload[Payload CMS]
-        PG[(PostgreSQL)]
-    end
-
-    LB --> App1
-    LB --> App2
-    LB --> AppN
-
-    App1 --> Payload
-    App2 --> Payload
-    AppN --> Payload
-
-    Payload --> PG
-```
-
-**Skalierungs-Trigger:**
-
-| Metrik            | Schwellwert  | Aktion      |
-| ----------------- | ------------ | ----------- |
-| CPU-Auslastung    | >70% (5 Min) | +1 Instance |
-| Memory-Auslastung | >80% (5 Min) | +1 Instance |
-| Request Rate      | >1000 req/s  | +1 Instance |
-| Response Time     | >500ms (p95) | +1 Instance |
-
-**Kubernetes Auto-Scaling (Beispiel):**
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: ujl-crafter
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: ujl-crafter
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
-```
-
-**Docker Swarm Auto-Scaling (Beispiel):**
-
-```yaml
-services:
-  crafter:
-    image: ghcr.io/ujl-framework/crafter:latest
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2G
-        reservations:
-          cpus: "1"
-          memory: 1G
-```
-
-### 7.5.2 Vertikale Skalierung
-
-**PostgreSQL:**
-
-| Last-Profil                 | CPU      | Memory | Storage | IOPS  |
-| --------------------------- | -------- | ------ | ------- | ----- |
-| Niedrig (<1000 Bilder)      | 2 Cores  | 4GB    | 50GB    | 1000  |
-| Mittel (<10.000 Bilder)     | 4 Cores  | 8GB    | 100GB   | 3000  |
-| Hoch (<100.000 Bilder)      | 8 Cores  | 16GB   | 500GB   | 5000  |
-| Sehr Hoch (>100.000 Bilder) | 16 Cores | 32GB   | 1TB     | 10000 |
-
-**Payload CMS:**
-
-| Concurrent Users | CPU     | Memory | Instances |
-| ---------------- | ------- | ------ | --------- |
-| <10              | 1 Core  | 2GB    | 1         |
-| 10-50            | 2 Cores | 4GB    | 2         |
-| 50-200           | 4 Cores | 8GB    | 3-5       |
-| >200             | 8 Cores | 16GB   | 5+        |
-
-### 7.5.3 Datenbank-Skalierung
-
-**Read Replicas:**
-
-Für lesintensive Workloads können PostgreSQL Read Replicas eingesetzt werden:
-
-```mermaid
-graph TB
-    subgraph "Write Operations"
-        Writer[Primary PostgreSQL]
-    end
-
-    subgraph "Read Operations"
-        Reader1[Read Replica 1]
-        Reader2[Read Replica 2]
-    end
-
-    Writer -.->|Replication| Reader1
-    Writer -.->|Replication| Reader2
-
-    Payload[Payload CMS] -->|Writes| Writer
-    Payload -.->|Reads| Reader1
-    Payload -.->|Reads| Reader2
-```
-
-**Connection Pooling:**
-
-Für hohe Concurrent Connections PgBouncer einsetzen:
-
-```ini
-# pgbouncer.ini
-[databases]
-payload = host=postgres port=5432 dbname=payload
-
-[pgbouncer]
-listen_port = 6432
-listen_addr = *
-auth_type = md5
-pool_mode = transaction
-max_client_conn = 1000
-default_pool_size = 25
-```
-
-### 7.5.4 Media Storage-Skalierung
-
-**Object Storage (S3-kompatibel):**
-
-Für große Media-Bibliotheken Wechsel zu Object Storage:
-
-```typescript
-// Payload Config mit S3
-import { s3Adapter } from "@payloadcms/plugin-cloud-storage/s3";
-
-export default buildConfig({
-	collections: [
-		{
-			slug: "images",
-			upload: {
-				adapter: s3Adapter({
-					config: {
-						endpoint: process.env.S3_ENDPOINT,
-						credentials: {
-							accessKeyId: process.env.S3_ACCESS_KEY,
-							secretAccessKey: process.env.S3_SECRET_KEY,
-						},
-						region: process.env.S3_REGION,
-					},
-					bucket: process.env.S3_BUCKET,
-				}),
-			},
-		},
-	],
-});
-```
-
-**CDN-Integration:**
-
-```nginx
-# Nginx CDN Cache
-location /media/ {
-    proxy_pass http://payload:3000;
-    proxy_cache media_cache;
-    proxy_cache_valid 200 7d;
-    proxy_cache_valid 404 1h;
-    add_header X-Cache-Status $upstream_cache_status;
-}
-```
-
-### 7.5.5 Performance-Optimierungen
-
-**Lazy Loading:**
-
-UJL-Adapter unterstützen Lazy Loading von Modulen:
-
-```typescript
-// Code Splitting in Adapter
-const modules = {
-	container: () => import("./nodes/Container.svelte"),
-	text: () => import("./nodes/Text.svelte"),
-	image: () => import("./nodes/Image.svelte"),
-};
-```
-
-**Bundle Optimization:**
-
-```javascript
-// vite.config.ts
-export default defineConfig({
-	build: {
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					vendor: ["svelte", "@ujl-framework/core"],
-					adapter: ["@ujl-framework/adapter-svelte"],
-					ui: ["@ujl-framework/ui"],
-				},
-			},
-		},
-	},
-});
-```
-
-**Caching-Strategie:**
-
-| Ressource              | Cache-Dauer | Strategie              |
-| ---------------------- | ----------- | ---------------------- |
-| Static Assets (CSS/JS) | 1 Jahr      | Immutable + Hash       |
-| Media Files (Images)   | 7 Tage      | CDN + ETag             |
-| API Responses          | 5 Minuten   | Stale-While-Revalidate |
-| HTML Pages (SSR)       | 1 Minute    | Edge Cache             |
-
-### 7.5.6 Monitoring für Skalierung
-
-**Key Performance Indicators (KPIs):**
-
-| KPI                   | Zielwert   | Skalierungs-Signal            |
-| --------------------- | ---------- | ----------------------------- |
-| Request Latency (p95) | <200ms     | >300ms → Scale Up             |
-| Throughput            | 1000 req/s | >80% Kapazität → Scale Up     |
-| Error Rate            | <1%        | >2% → Investigate, dann Scale |
-| Database Connections  | <80% Pool  | >90% → Increase Pool/Scale    |
-| Memory Usage          | <75%       | >85% → Scale Up               |
-
-**Grafana Dashboard (Beispiel-Queries):**
-
-```promql
-# Request Rate
-rate(http_requests_total[5m])
-
-# Response Time p95
-histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
-
-# Container Memory Usage
-container_memory_usage_bytes / container_spec_memory_limit_bytes
-
-# Database Connections
-pg_stat_activity_count / max_connections
-```
-
-## 7.6 Operations und Monitoring
-
-### 7.6.1 Logging
-
-| Komponente      | Log-Ziel              | Log-Level       |
-| --------------- | --------------------- | --------------- |
-| Vite Dev Server | Console               | info/warn/error |
-| SvelteKit       | Console               | info/warn/error |
-| Payload CMS     | Console + Docker Logs | info/warn/error |
-| PostgreSQL      | Docker Logs           | warn/error      |
-| GitLab CI       | Job Logs              | Alle            |
-
-**Log-Zugriff:**
-
-```bash
-# Docker Logs
-docker-compose logs -f payload
-docker-compose logs -f postgres
-
-# GitLab CI Logs
-# Über GitLab UI: CI/CD → Pipelines → Jobs
-```
-
-### 7.6.2 Health Checks
-
-| Service     | Endpoint                  | Erwartung         |
-| ----------- | ------------------------- | ----------------- |
-| Payload CMS | `GET /admin`              | HTTP 200/302      |
-| Payload API | `GET /api/images?limit=1` | HTTP 200 + JSON   |
-| PostgreSQL  | TCP Port 5432             | Connection Accept |
-
-**Docker Health Check (empfohlen):**
-
-```yaml
-healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:3000/admin"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-  start_period: 60s
-```
-
-### 7.6.3 Backup-Strategie (Media Service)
-
-| Komponente  | Backup-Methode          | Frequenz     |
-| ----------- | ----------------------- | ------------ |
-| PostgreSQL  | `pg_dump`               | Täglich      |
-| Media Files | Volume Backup           | Täglich      |
-| .env        | Secure Storage (extern) | Bei Änderung |
-
-**Backup-Script (Beispiel):**
-
-```bash
-#!/bin/bash
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# Database Backup
-docker-compose exec -T postgres pg_dump -U postgres payload > backup_db_$DATE.sql
-
-# Media Files Backup
-tar -czf backup_media_$DATE.tar.gz media/
-```
-
-### 7.6.4 Metriken und KPIs
-
-**System-Metriken:**
-
-| Metrik              | Zielwert         | Messmethode               | Frequenz       |
-| ------------------- | ---------------- | ------------------------- | -------------- |
-| API Response Time   | <200ms (p95)     | Payload CMS Logs          | Kontinuierlich |
-| Database Query Time | <50ms (p95)      | PostgreSQL Slow Query Log | Kontinuierlich |
-| Container Memory    | <512MB (Payload) | Docker Stats              | Alle 60s       |
-| Container CPU       | <50% (Payload)   | Docker Stats              | Alle 60s       |
-| Disk Usage          | <80%             | df -h                     | Täglich        |
-
-**Anwendungs-Metriken:**
-
-| Metrik                         | Zielwert | Messmethode        | Frequenz  |
-| ------------------------------ | -------- | ------------------ | --------- |
-| Image Upload Success Rate      | >99%     | Payload API Logs   | Stündlich |
-| Media Resolution Success Rate  | >99.9%   | Crafter Error Logs | Stündlich |
-| Schema Validation Success Rate | >95%     | CLI/Core Logs      | Täglich   |
-
-**Empfohlene Monitoring-Tools:**
-
-- **Prometheus + Grafana**: Für Langzeit-Metriken und Dashboards
-- **Loki**: Für Log-Aggregation
-- **cAdvisor**: Für Container-Metriken
-
-### 7.6.5 Alerting-Strategie
-
-**Kritische Alerts (sofortige Reaktion):**
-
-| Alert                    | Bedingung                        | Aktion                            |
-| ------------------------ | -------------------------------- | --------------------------------- |
-| Service Down             | Health Check fehlgeschlagen (3x) | Neustart, Eskalation              |
-| Database Connection Lost | PostgreSQL nicht erreichbar      | Verbindung prüfen, Neustart       |
-| Disk Full                | >90% Disk-Auslastung             | Logs rotieren, Backup archivieren |
-| High Error Rate          | >5% Fehlerrate in 5 Minuten      | Logs prüfen, Rollback erwägen     |
-
-**Warnungen (Überwachung erforderlich):**
-
-| Warning              | Bedingung              | Aktion                |
-| -------------------- | ---------------------- | --------------------- |
-| High Memory Usage    | >80% Memory-Auslastung | Ressourcen überwachen |
-| Slow Queries         | >500ms Query Time      | Query optimieren      |
-| High Upload Failures | >1% Upload-Fehlerrate  | Storage prüfen        |
-
-**Alert-Kanäle (Empfehlung):**
-
-- **Kritisch**: E-Mail, Slack, PagerDuty
-- **Warnung**: E-Mail, Slack
-
-### 7.6.6 Disaster Recovery
-
-**Recovery Time Objective (RTO):** <4 Stunden  
-**Recovery Point Objective (RPO):** <24 Stunden (Daily Backups)
-
-**Disaster Recovery Plan:**
-
-1. **Datenbank-Wiederherstellung:**
-
-```bash
-# Backup einspielen
-docker-compose exec -T postgres psql -U postgres payload < backup_db_YYYYMMDD.sql
-
-# Verbindung testen
-docker-compose exec postgres psql -U postgres -c "\l"
-```
-
-2. **Media Files-Wiederherstellung:**
-
-```bash
-# Backup entpacken
-tar -xzf backup_media_YYYYMMDD.tar.gz -C services/library/media/
-
-# Permissions setzen
-chown -R 1000:1000 services/library/media/
-```
-
-3. **Service-Neustart:**
-
-```bash
-# Container neu starten
-docker-compose down
-docker-compose up -d
-
-# Logs prüfen
-docker-compose logs -f payload
-```
-
-4. **Validierung:**
-
-- Health Checks durchführen
-- Test-Upload durchführen
-- Image Resolution testen
-- Admin-Zugriff prüfen
-
-**Backup-Retention:**
-
-| Backup-Typ      | Aufbewahrung |
-| --------------- | ------------ |
-| Daily Backups   | 7 Tage       |
-| Weekly Backups  | 4 Wochen     |
-| Monthly Backups | 12 Monate    |
-
-### 7.6.7 Rollback-Strategie
-
-**Deployment-Rollback:**
-
-1. **GitLab CI/CD:**
-
-```bash
-# Letzten erfolgreichen Build re-deployen
-# Über GitLab UI: CI/CD → Pipelines → [Letzter erfolgreicher Build] → Retry
-```
-
-2. **Docker-Rollback:**
-
-```bash
-# Zu vorherigem Image wechseln
-docker pull ghcr.io/ujl-framework/payload-cms:previous-tag
-docker-compose down
-docker-compose up -d
-```
-
-3. **Changesets-Rollback:**
-
-```bash
-# Package-Version zurücksetzen
-git revert <commit-hash>
-pnpm install
-pnpm build
-```
-
-**Rollback-Entscheidungskriterien:**
-
-| Kriterium               | Schwellwert                 | Aktion                      |
-| ----------------------- | --------------------------- | --------------------------- |
-| Error Rate              | >10% in 5 Minuten           | Sofortiger Rollback         |
-| Critical Bug            | P1 Sicherheitslücke         | Sofortiger Rollback         |
-| Performance Degradation | >2x Baseline Response Time  | Rollback nach 15 Minuten    |
-| User Reports            | >10 kritische Reports in 1h | Rollback nach Investigation |
-
-### Deployment-Übersicht
-
-| Aspekt            | Aktueller Stand             | Ziel                |
-| ----------------- | --------------------------- | ------------------- |
-| **Dokumentation** | GitLab Pages (main/develop) | Stabil              |
-| **Packages**      | Lokal / Monorepo            | NPM Registry        |
-| **Media Service** | Docker Compose (Lokal)      | Produktions-Hosting |
-| **Demo**          | Static Build (Lokal)        | Demo-Server         |
-
-### Empfehlungen für Produktions-Deployment
-
-1. **Frontend-Packages**: Über NPM in Host-Applikation integrieren
-2. **Media Service**: Dedizierter Docker Host mit:
-   - Reverse Proxy (nginx/Traefik) für HTTPS
-   - Persistent Volumes für PostgreSQL und Media
-   - Automatisierte Backups
-   - Monitoring (Prometheus/Grafana optional)
-3. **CDN**: Für statische Assets (CSS, Bilder)
-4. **Skalierung**: Horizontal via Container-Orchestrierung (Docker Swarm/Kubernetes) bei Bedarf

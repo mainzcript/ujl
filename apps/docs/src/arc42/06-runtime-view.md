@@ -23,6 +23,8 @@ Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
 
 Die Composition ist der zentrale Transformationsschritt: Ein UJLC-Dokument (JSON) wird in einen Abstract Syntax Tree (AST) umgewandelt, der von Adaptern gerendert werden kann.
 
+Ein fundamentales Architektur-Prinzip dabei ist die **1:N-Beziehung zwischen Modulen und AST-Nodes**: Ein Modul im UJLC-Dokument kann mehrere AST-Nodes erzeugen. Dies wird besonders relevant bei Layout-Modulen wie Grid, die strukturelle Wrapper-Nodes (z.B. `grid-item`) generieren. Diese Wrapper sind Render-Primitive für Adapter, aber nicht eigenständig editierbar – nur das Modul selbst ist editierbar.
+
 ### Sequenzdiagramm
 
 ```mermaid
@@ -140,6 +142,220 @@ sequenceDiagram
 | Unbekannter Modultyp | Error-Node wird erzeugt: `{ type: "error", props: { message: "Unknown module type: xyz" } }` |
 | Media nicht gefunden | `null` wird zurückgegeben, Modul entscheidet über Fallback                                   |
 | Ungültige Felder     | Modul-interne Validation mit Field-System                                                    |
+
+### 6.2.1 Vertiefung: Grid-Composition (1:N Modul→Node Transformation)
+
+Dieses Szenario zeigt konkret, wie ein einzelnes Grid-Modul mehrere AST-Nodes erzeugt und welche Rolle strukturelle Wrapper spielen.
+
+#### Sequenzdiagramm: Grid-Composition
+
+```mermaid
+sequenceDiagram
+    participant Composer as Composer
+    participant Registry as ModuleRegistry
+    participant GridModule as Grid Module
+    participant TextModule as Text Module
+    participant ButtonModule as Button Module
+
+    Note over Composer: compose(ujlcDocument)
+    Composer->>Composer: Loop über root-Modules
+
+    activate Composer
+    Composer->>Registry: getModule("grid")
+    Registry-->>Composer: GridModule
+
+    Composer->>GridModule: compose(gridModuleData, composer)
+    activate GridModule
+
+    Note over GridModule: Grid-Modul erzeugt 1 Grid-Node<br/>+ 2 Grid-Item-Wrapper
+
+    GridModule->>GridModule: Erstelle Grid-Node<br/>id: generateUid()<br/>meta: { moduleId: "grid-001", isModuleRoot: true }
+
+    loop Für jedes Kind in slots.items
+        GridModule->>GridModule: Erstelle Grid-Item-Wrapper<br/>id: generateUid()<br/>meta: { moduleId: "grid-001", isModuleRoot: false }
+
+        alt Kind 1: Text-Modul
+            GridModule->>Composer: composeModule(textModuleData)
+            activate Composer
+            Composer->>Registry: getModule("text")
+            Registry-->>Composer: TextModule
+            Composer->>TextModule: compose(textModuleData, composer)
+            activate TextModule
+            TextModule->>TextModule: Erstelle Text-Node<br/>id: generateUid()<br/>meta: { moduleId: "text-001", isModuleRoot: true }
+            TextModule-->>Composer: Text-Node
+            deactivate TextModule
+            Composer-->>GridModule: Text-Node
+            deactivate Composer
+            GridModule->>GridModule: Text-Node als Child von Grid-Item-Wrapper hinzufügen
+        else Kind 2: Button-Modul
+            GridModule->>Composer: composeModule(buttonModuleData)
+            activate Composer
+            Composer->>Registry: getModule("button")
+            Registry-->>Composer: ButtonModule
+            Composer->>ButtonModule: compose(buttonModuleData, composer)
+            activate ButtonModule
+            ButtonModule->>ButtonModule: Erstelle Button-Node<br/>id: generateUid()<br/>meta: { moduleId: "button-001", isModuleRoot: true }
+            ButtonModule-->>Composer: Button-Node
+            deactivate ButtonModule
+            Composer-->>GridModule: Button-Node
+            deactivate Composer
+            GridModule->>GridModule: Button-Node als Child von Grid-Item-Wrapper hinzufügen
+        end
+    end
+
+    GridModule->>GridModule: Füge alle Grid-Item-Wrapper<br/>als children zum Grid-Node hinzu
+    GridModule-->>Composer: Grid-Node (mit 2 Grid-Items)
+    deactivate GridModule
+
+    Composer-->>Composer: AST-Root-Wrapper mit Grid-Node
+    deactivate Composer
+```
+
+#### Datenstrukturen: Grid-Modul Transformation
+
+**Input: UJLC Grid-Modul (1 Modul)**
+
+```json
+{
+	"type": "grid",
+	"meta": { "id": "grid-001", "updated_at": "2026-01-24T10:00:00Z" },
+	"fields": {
+		"columns": 2,
+		"gap": "md"
+	},
+	"slots": {
+		"items": [
+			{
+				"type": "text",
+				"meta": { "id": "text-001" },
+				"fields": {
+					"content": {
+						"type": "doc",
+						"content": [
+							{ "type": "paragraph", "content": [{ "type": "text", "text": "Spalte 1" }] }
+						]
+					}
+				},
+				"slots": {}
+			},
+			{
+				"type": "button",
+				"meta": { "id": "button-001" },
+				"fields": { "label": "Klick mich", "href": "/example" },
+				"slots": {}
+			}
+		]
+	}
+}
+```
+
+**Output: AST (5 Nodes: 1 Grid + 2 Grid-Items + 2 Children)**
+
+```typescript
+{
+  type: "grid",
+  id: "ast-node-001",  // Generierte AST-Node-ID
+  meta: {
+    moduleId: "grid-001",  // Referenz zum ursprünglichen Modul
+    isModuleRoot: true     // Dieser Node ist das editierbare Modul
+  },
+  props: {
+    columns: 2,
+    gap: "md",
+    children: [
+      // Grid-Item 1 (struktureller Wrapper, nicht editierbar)
+      {
+        type: "grid-item",
+        id: "ast-node-002",
+        meta: {
+          moduleId: "grid-001",      // Gehört zum Grid-Modul
+          isModuleRoot: false        // Nicht editierbar (struktureller Wrapper)
+        },
+        props: {
+          children: [
+            // Text-Modul (editierbar)
+            {
+              type: "text",
+              id: "ast-node-003",
+              meta: {
+                moduleId: "text-001",  // Eigenes Modul
+                isModuleRoot: true     // Editierbar
+              },
+              props: {
+                content: { type: "doc", content: [...] }
+              }
+            }
+          ]
+        }
+      },
+      // Grid-Item 2 (struktureller Wrapper, nicht editierbar)
+      {
+        type: "grid-item",
+        id: "ast-node-004",
+        meta: {
+          moduleId: "grid-001",
+          isModuleRoot: false
+        },
+        props: {
+          children: [
+            // Button-Modul (editierbar)
+            {
+              type: "button",
+              id: "ast-node-005",
+              meta: {
+                moduleId: "button-001",
+                isModuleRoot: true
+              },
+              props: {
+                label: "Klick mich",
+                href: "/example"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+#### Semantische Bedeutung der Metadaten
+
+| Metadaten-Feld      | Bedeutung                                                 | Verwendung                                  |
+| ------------------- | --------------------------------------------------------- | ------------------------------------------- |
+| `node.id`           | Unique AST-Node-ID (generiert mit `generateUid()`)        | Eindeutiges Rendering-Identity              |
+| `meta.moduleId`     | "Zu welchem Modul gehört dieser Node?"                    | Editor-Integration, Modul-Tracking          |
+| `meta.isModuleRoot` | "Ist dieser Node das Modul selbst?" (`true` = editierbar) | Selektierbarkeit im Editor, Click-to-Select |
+
+**Wichtig:** Nur Nodes mit `meta.isModuleRoot === true` sind in visuellen Editoren anklickbar und editierbar. Strukturelle Wrapper wie `grid-item` sind Implementierungsdetails des Adapters.
+
+#### Konsequenzen für Adapter
+
+**Rendering:**
+
+- Alle 5 Nodes werden gerendert (Grid + 2 Grid-Items + 2 Children)
+- Grid-Items sind CSS-Grid-Children, die das Layout strukturieren
+
+**Editor-Integration (mit `showMetadata={true}`):**
+
+- Nur 3 Nodes sind editierbar: Grid (`grid-001`), Text (`text-001`), Button (`button-001`)
+- Grid-Items werden übersprungen (nicht anklickbar)
+- Click-to-Select leitet nur bei `isModuleRoot === true` zur Selektion weiter
+
+**DOM-Attribute (bei `showMetadata={true}`):**
+
+```html
+<div class="grid" data-ujl-module-id="grid-001">
+	<div class="grid-item" data-ujl-module-id="grid-001">
+		<div class="text" data-ujl-module-id="text-001">Spalte 1</div>
+	</div>
+	<div class="grid-item" data-ujl-module-id="grid-001">
+		<button data-ujl-module-id="button-001">Klick mich</button>
+	</div>
+</div>
+```
+
+Beide Grid-Items tragen `data-ujl-module-id="grid-001"`, weil sie zum Grid-Modul gehören, aber nur das Grid selbst ist editierbar (Root-Node).
 
 ## 6.3 Adapter Rendering
 

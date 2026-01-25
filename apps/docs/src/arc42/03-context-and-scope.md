@@ -334,7 +334,7 @@ Der Web Adapter registriert automatisch das Custom Element `<ujl-content>` und b
 
 Nur relevant, wenn der Crafter mit `library: { storage: 'backend' }` konfiguriert wird.
 
-**Base-URL:** `http://localhost:3000`  
+**Base-URL:** Konfigurierbar (Default: `http://localhost:3000` in Development)  
 **Authentifizierung:** `Authorization: users API-Key YOUR_API_KEY`
 
 | Methode | Endpoint          | Auth | Zweck                    |

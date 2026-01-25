@@ -5,9 +5,9 @@ description: "Bausteinsicht und Moduldiagramm des UJL-Systems"
 
 # Bausteinsicht
 
-## Übersicht der Hierarchie-Ebenen
+## Übersicht der Struktur
 
-Die Dokumentation folgt einer hierarchischen Gliederung: **Level 1** zeigt das Gesamtsystem mit seinen Hauptbausteinen (Packages, Apps, Services). **Level 2** beschreibt die interne Struktur ausgewählter Bausteine im Detail. **Level 3** bietet eine Detail-Sicht auf kritische Komponenten wie den Composer oder die Module Registry.
+Die Dokumentation folgt einer hierarchischen Gliederung: **Abschnitt 5.1** zeigt das Gesamtsystem mit allen Hauptbausteinen (Packages, Apps, Services) und deren Schnittstellen. Die **Abschnitte 5.2-5.7** vertiefen ausgewählte Bausteine und zeigen deren interne Struktur im Detail. Für kritische Komponenten wie den Composer, die Module Registry oder den Crafter werden zusätzliche Detailsichten bereitgestellt.
 
 ## 5.1 Whitebox Gesamtsystem (Level 1)
 
@@ -72,77 +72,54 @@ graph TB
 
 ### Begründung der Zerlegung
 
-Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwortlichkeiten:
+Die Architektur folgt dem **Layered Architecture Pattern** mit klaren Verantwortlichkeiten und strikter Dependency-Direction. Am Fundament liegt der **Foundation Layer** (`types`), der als Single Source of Truth alle TypeScript-Typen und Zod-Schemas definiert. Darauf baut der **Core Layer** auf (`core`), der die zentrale Geschäftslogik enthält – insbesondere den Composer und die Module Registry, die UJLC-Dokumente in einen Abstract Syntax Tree transformieren.
 
-1. **Foundation Layer**: Gemeinsame Typen und Validierung (single source of truth)
-2. **Core Layer**: Geschäftslogik (Composition, Module Registry)
-3. **UI Layer**: Wiederverwendbare UI-Komponenten
-4. **Adapter Layer**: Framework-spezifisches Rendering
-5. **Application Layer**: End-user Applications
-6. **Service Layer**: Backend-Services
+Der **UI Layer** (`ui`) stellt wiederverwendbare UI-Komponenten bereit, die sowohl im Editor als auch in den Adaptern genutzt werden. Im **Adapter Layer** (`adapter-svelte`, `adapter-web`) erfolgt die framework-spezifische Transformation des AST in konkrete UI-Technologien – Svelte Components oder Web Components. Diese klare Trennung ermöglicht es, neue Rendering-Targets hinzuzufügen, ohne die Core-Logik anzufassen.
 
-**Vorteile:**
+Der **Application Layer** (`crafter`, `dev-demo`, `docs`) bündelt die End-User-Anwendungen, die die darunterliegenden Schichten orchestrieren. Als separater **Service Layer** existiert `library` (Payload CMS), der optional als Backend für Media-Management dient, aber keine Abhängigkeit für die Core-Funktionalität darstellt.
 
-- Klare Dependency-Direction (top-down)
-- Testbarkeit durch Schichten-Isolation
-- Austauschbarkeit (z.B. Adapter-Layer)
-- Monorepo mit pnpm Workspaces ermöglicht koordinierte Releases
+Diese Schichtung bringt mehrere Vorteile: Dependencies zeigen ausschließlich nach unten (top-down), was zirkuläre Abhängigkeiten verhindert. Jede Schicht ist isoliert testbar, und kritische Komponenten wie Adapter lassen sich austauschen, ohne höhere Schichten zu beeinflussen. Die Umsetzung als Monorepo mit pnpm Workspaces ermöglicht koordinierte Releases über alle Packages hinweg.
 
-### Enthaltene Bausteine (Level 1)
+### Enthaltene Bausteine
 
-| Baustein           | Verantwortung                                             | Package-Name                    |
-| ------------------ | --------------------------------------------------------- | ------------------------------- |
-| **types**          | TypeScript-Typen und Zod-Schemas für alle UJL-Dokumente   | `@ujl-framework/types`          |
-| **core**           | Composer, Module Registry, Field System, Media Library    | `@ujl-framework/core`           |
-| **ui**             | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.) | `@ujl-framework/ui`             |
-| **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                | `@ujl-framework/adapter-svelte` |
-| **adapter-web**    | Web Components Adapter (AST → Custom Elements)            | `@ujl-framework/adapter-web`    |
-| **crafter**        | Visual Editor (WYSIWYG) für Content und Themes            | `@ujl-framework/crafter`        |
-| **dev-demo**       | Demo-Applikation (zeigt UJL in Aktion)                    | App (kein npm-Paket)            |
-| **docs**           | Dokumentations-Website (VitePress)                        | `@ujl-framework/docs`           |
-| **examples**       | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json)    | `@ujl-framework/examples`       |
-| **library**        | Payload CMS Image Management Backend                      | `services/library`              |
+#### NPM Packages
 
-### Wichtige Schnittstellen (Level 1)
+| Baustein           | Verantwortung                                                 | NPM-Package                     |
+| ------------------ | ------------------------------------------------------------- | ------------------------------- |
+| **types**          | TypeScript-Typen, Zod-Schemas und Validator für UJL-Dokumente | `@ujl-framework/types`          |
+| **core**           | Composer, Module Registry, Field System, Media Library        | `@ujl-framework/core`           |
+| **ui**             | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.)     | `@ujl-framework/ui`             |
+| **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                    | `@ujl-framework/adapter-svelte` |
+| **adapter-web**    | Web Components Adapter (AST → Custom Elements)                | `@ujl-framework/adapter-web`    |
+| **crafter**        | Visual Editor (WYSIWYG) für Content und Themes                | `@ujl-framework/crafter`        |
+| **examples**       | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json)        | `@ujl-framework/examples`       |
+
+#### Services
+
+| Baustein    | Verantwortung                        | Pfad               |
+| ----------- | ------------------------------------ | ------------------ |
+| **library** | Payload CMS Image Management Backend | `services/library` |
+
+#### Apps
+
+| Baustein     | Verantwortung                          | Pfad            |
+| ------------ | -------------------------------------- | --------------- |
+| **dev-demo** | Demo-Applikation (zeigt UJL in Aktion) | `apps/dev-demo` |
+| **docs**     | Dokumentations-Website (VitePress)     | `apps/docs`     |
+
+### Wichtige Schnittstellen
 
 #### Schnittstelle 1: UJL Document Formats
 
-**Format:** JSON (.ujlc.json, .ujlt.json)
+Die primäre Schnittstelle des UJL-Systems sind **JSON-basierte Dokumentformate** (`.ujlc.json` für Content, `.ujlt.json` für Themes). Diese Dokumente werden von verschiedenen Producern erzeugt: Der visuelle **Crafter-Editor** für interaktive Bearbeitung, **KI-Systeme** für automatische Content-Generierung, oder **manuelle Editoren** für direkte JSON-Manipulation. Als Consumer fungieren das `types`-Package (für Validierung) und der **Composer** im `core`-Package, der UJLC-Dokumente in einen Abstract Syntax Tree transformiert.
 
-**Producer:** Crafter, AI-Systeme, manuelle Editoren
-
-**Consumer:** core (Composer), types (Validation)
-
-**Struktur:**
-
-```typescript
-// UJLC Content Document
-interface UJLCDocument {
-	ujlc: {
-		meta: UJLCMeta;
-		images: Record<string, ImageEntry>;
-		root: UJLCModuleObject[];
-	};
-}
-
-// UJLT Theme Document
-interface UJLTDocument {
-	ujlt: {
-		meta: UJLTMeta;
-		tokens: UJLTTokenSet;
-	};
-}
-```
+UJLC-Dokumente enthalten Metadaten (`meta`), eine Image-Bibliothek (`images`) und eine Wurzelstruktur aus Modulen (`root`). UJLT-Dokumente definieren Metadaten und Design-Tokens (`tokens`). Die vollständigen TypeScript-Typen und Zod-Schemas sind im `types`-Package definiert (siehe [Abschnitt 5.2.1](#_5-2-1-baustein-types)).
 
 #### Schnittstelle 2: Abstract Syntax Tree (AST)
 
-**Format:** TypeScript Type (UJLAbstractNode)
+Der **Abstract Syntax Tree** ist die zentrale Datenstruktur zwischen Core- und Adapter-Layer. Er wird vom **Composer** (im `core`-Package) produziert und von den Adapter-Packages (`adapter-svelte`, `adapter-web`) konsumiert. Der AST abstrahiert die UJLC-Modulstruktur in eine flache, rendering-optimierte Form, die unabhängig vom finalen UI-Framework ist.
 
-**Producer:** core (Composer)
-
-**Consumer:** adapter-svelte, adapter-web
-
-**Struktur:**
+Die AST-Node-Struktur garantiert drei kritische Eigenschaften: Jeder Node besitzt eine **eindeutige ID**, die aus dem UJLC-Dokument übernommen wird – essentiell für Editor-Integration und Modul-Tracking. Das **`type`-Feld** ermöglicht Dispatch-Logik in Adaptern (z.B. `type: "button"` → `<Button>`-Component). Die **`props` sind node-spezifisch** und folgen keinem generischen Schema, was maximale Flexibilität für unterschiedliche Module garantiert.
 
 ```typescript
 type UJLAbstractNode = {
@@ -152,21 +129,9 @@ type UJLAbstractNode = {
 };
 ```
 
-**Garantien:**
-
-- Jeder Node hat eindeutige ID (wichtig für Editor-Integration)
-- Type-Field ermöglicht Dispatch im Adapter
-- Props sind node-spezifisch (keine generische Struktur)
-
 #### Schnittstelle 3: Payload CMS Media API
 
-**Protokoll:** REST (JSON)
-
-**Endpunkt:** `http://localhost:3000/api/images`
-
-**Authentication:** API-Key via `Authorization: users API-Key <key>`
-
-**Wichtigste Operationen:**
+Die **Media API** des `library`-Service (Payload CMS) ist eine REST-Schnittstelle für Backend-basiertes Media-Management. Sie kommuniziert über JSON und ist über eine **konfigurierbare Base-URL** erreichbar (typischerweise `http://localhost:3000/api` in Development, produktionsspezifisch in Production). Die Authentifizierung erfolgt per API-Key im `Authorization`-Header.
 
 | Methode | Endpoint          | Funktion                                  |
 | ------- | ----------------- | ----------------------------------------- |
@@ -176,17 +141,36 @@ type UJLAbstractNode = {
 | PATCH   | `/api/images/:id` | Metadata-Update                           |
 | DELETE  | `/api/images/:id` | Löschung                                  |
 
-**Consumer:** crafter (Media Library Browser/Uploader)
+Die API wird von zwei primären Consumern genutzt: Der **Crafter-Editor** verwendet sie für Write-Operationen (Upload, Media Library Browser, Metadaten-Updates). **ContentFrames** (gerenderte UJL-Dokumente) nutzen die Read-Endpunkte (`GET /api/images/:id`), um Bilder beim Rendering abzurufen, wenn UJLC-Dokumente Backend-Referenzen statt Inline-Base64 enthalten. Die API ist **optional** – alternativ kann **Inline Storage** konfiguriert werden (Base64-kodierte Bilder direkt in `.ujlc.json`), was vollständige Portabilität ohne Backend-Abhängigkeit ermöglicht.
 
-**Fallback:** Inline Storage (Base64 in .ujlc.json) wenn Backend nicht verfügbar
+#### Schnittstelle 4: Crafter Integration API
+
+Der **Crafter** ist als NPM-Package (`@ujl-framework/crafter`) in Host-Applikationen integrierbar und bietet eine programmatische API für Konfiguration und Steuerung. Host-Anwendungen (z.B. Custom CMSe, Redaktionstools) können den visuellen Editor einbetten und auf Document-Events reagieren.
+
+Die Integration erfolgt über eine **Mount-API**, die den Crafter in ein DOM-Element rendert. Die Host-Anwendung konfiguriert verfügbare Module, Themes und Media-Provider über ein Config-Objekt. Der Crafter exponiert **Event-Handler** für Document-Änderungen (`onDocumentChange`, `onSave`), was bidirektionale Synchronisation mit externen Systemen ermöglicht. Optional kann eine **Custom Module Registry** bereitgestellt werden, um projektspezifische Module zu registrieren.
+
+Die Host-Anwendung steuert das Verhalten über Config-Parameter: `initialDocument` (Start-UJLC), `theme` (aktives UJLT-Theme), `mediaProvider` (Backend vs. Inline), `moduleRegistry` (verfügbare Module) und `readonly` (Editor-Modus). Dies ermöglicht Szenarien wie "Read-Only-Preview", "Custom-Module-Integration" oder "Multi-Tenant-Editing".
+
+**Consumer:** Custom CMSe, Redaktionstools, Headless CMS Plugins (z.B. Strapi, Contentful Extensions)
+
+#### Schnittstelle 5: Adapter Integration APIs
+
+Die **Adapter-Packages** (`adapter-svelte`, `adapter-web`) bieten programmatische APIs für die Integration von UJL-Rendering in Host-Applikationen. Beide Adapter folgen dem gleichen `UJLAdapter`-Interface (definiert in `@ujl-framework/types`) und transformieren AST-Nodes in framework-spezifische UI-Komponenten.
+
+- `@ujl-framework/adapter-svelte` konvertiert AST-Nodes in Svelte 5 Components und nutzt die `mount()`-API für imperatives Rendering. Die Host-Anwendung übergibt AST-Node, Token-Set und Konfigurationsoptionen (`target`, `mode`, `showMetadata`). Der Adapter gibt ein `MountedComponent` zurück mit `instance` (Svelte Component) und `unmount()`-Methode für Cleanup.
+- `@ujl-framework/adapter-web` erzeugt Custom Elements (`<ujl-content>`) für framework-agnostisches Rendering. Der Adapter kompiliert Svelte-Komponenten zur Build-Zeit in ein standalone Web Component, sodass keine Svelte-Runtime-Dependency benötigt wird. Shadow DOM sorgt für Style-Isolation. Zusätzlich zu den Svelte-Adapter-Optionen unterstützt der Web Adapter einen `eventCallback` für Click-to-Select-Editor-Integration.
+
+Beide Adapter akzeptieren `target` (DOM-Element oder CSS-Selector), `mode` (Theme-Modus: 'light', 'dark', 'system') und `showMetadata` (für Editor-Integration via `data-ujl-module-id`-Attribute). Die Typen sind in den jeweiligen Adapter-Packages definiert (`SvelteAdapterOptions`, `WebAdapterOptions`) und erweitern das generische `UJLAdapter`-Interface aus `@ujl-framework/types`.
+
+**Consumer:** Svelte/SvelteKit-Anwendungen (adapter-svelte), Framework-agnostische Web-Apps (adapter-web), Static Site Generators, React/Vue-Apps via Web Components
 
 ## 5.2 Foundation Layer (Level 2)
 
 ### 5.2.1 Baustein: types
 
-**Zweck:** Single Source of Truth für alle Typen und Validierungslogik
+Das `types`-Package bildet das Fundament der gesamten UJL-Architektur. Es definiert nicht nur die TypeScript-Typen für UJLC- und UJLT-Dokumente, sondern enthält auch die **zentrale Validierungslogik** über Zod-Schemas und einen eigenständigen **CLI-Validator** (`ujl-validate`). Diese Doppelrolle – Runtime-Validierung und statische Typsicherheit – macht `types` zur kritischsten Komponente für Datenintegrität im gesamten System
 
-#### Whitebox: types (Level 2)
+#### Whitebox: types
 
 ```mermaid
 graph TB
@@ -220,58 +204,25 @@ graph TB
 
 #### Schnittstellen und Abhängigkeiten
 
-**Externe Abhängigkeiten:**
+Das `types`-Package hat bewusst minimale externe Abhängigkeiten: Es nutzt ausschließlich **Zod 4.2** für Schema-Validierung und Type Inference. Dieser Fokus garantiert, dass die Foundation Layer leichtgewichtig und stabil bleibt.
 
-- `zod` 4.2 - Schema Validation & Type Inference
-
-**Consumer:**
-
-- `@ujl-framework/core` (imports all types)
-- `@ujl-framework/adapter-svelte` (imports AST types)
-- `@ujl-framework/adapter-web` (imports AST types)
-- `@ujl-framework/crafter` (imports all types)
-- `apps/dev-demo` (imports document types)
+Als Single Source of Truth wird `types` von nahezu allen anderen Packages konsumiert: `@ujl-framework/core` importiert sämtliche Typen für Composer und Module Registry. Die Adapter-Packages (`adapter-svelte`, `adapter-web`) benötigen die AST-Node-Definitionen für korrektes Rendering. Der `crafter` importiert alle Typen für Editor-Funktionalität, während Demo-Apps die Document-Types für Beispiel-Content verwenden. Diese zentrale Rolle macht Änderungen an `types` besonders kritisch – jede Breaking Change betrifft die gesamte Architektur
 
 #### Besondere Merkmale
 
-**Zod Type Inference:**
+Das `types`-Package nutzt **Zod Type Inference**, um TypeScript-Typen automatisch aus Schema-Definitionen abzuleiten. Dies folgt dem DRY-Prinzip (Don't Repeat Yourself): Jedes Schema wie `UJLCModuleObjectSchema` generiert automatisch einen korrespondierenden TypeScript-Typ via `z.infer<typeof Schema>`. Dadurch existiert nur eine einzige Definition, die sowohl Runtime-Validierung als auch statische Typsicherheit bereitstellt.
 
-```typescript
-// Schema Definition
-export const UJLCModuleObjectSchema = z.object({
-	type: z.string(),
-	meta: UJLCModuleMetaSchema,
-	fields: z.record(z.string(), UJLCFieldObjectSchema),
-	slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema))),
-});
+Eine technische Besonderheit ist die Unterstützung **rekursiver Strukturen** über `z.lazy()`. Da UJL-Module unbegrenzt verschachtelt werden können (ein Grid-Modul kann weitere Grid-Module enthalten), müssen die Zod-Schemas zirkuläre Referenzen auflösen. Die `z.lazy()`-Funktion ermöglicht dies, indem sie die Schema-Evaluierung bis zur tatsächlichen Nutzung verzögert.
 
-// Type automatisch inferiert (DRY)
-export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
-```
-
-**Rekursive Schemas mit `z.lazy()`:**
-
-```typescript
-// Ermöglicht unbegrenzte Modul-Verschachtelung
-slots: z.record(z.string(), z.array(z.lazy(() => UJLCModuleObjectSchema)));
-```
-
-**CLI Tool:**
-
-```bash
-# Auto-detect document type
-ujl-validate ./my-content.ujlc.json
-
-# Output: Validation success/failure + Statistics
-```
+Das Package exportiert außerdem ein **CLI-Tool** (`ujl-validate`), das UJLC- und UJLT-Dokumente validiert. Das Tool erkennt automatisch den Dokumenttyp anhand der JSON-Struktur und gibt detailliertes Feedback inklusive Statistiken (Anzahl Module, verwendete Types, Fehlerpositionen) aus. Dies ist besonders nützlich für CI/CD-Pipelines oder manuelle Content-Qualitätsprüfungen.
 
 ## 5.3 Core Layer (Level 2)
 
 ### 5.3.1 Baustein: core
 
-**Zweck:** Herzstück des UJL-Systems - Composition, Module Registry, Field System
+Das `core`-Package ist das Herzstück des UJL-Systems und enthält die zentrale Geschäftslogik: Den **Composer**, der UJLC-Dokumente in Abstract Syntax Trees transformiert, die **Module Registry** für die Verwaltung verfügbarer Module, das **Field System** für typisierte Datenvalidierung und die **Media Library** für flexible Media-Storage-Strategien.
 
-#### Whitebox: core (Level 2)
+#### Whitebox: core
 
 ```mermaid
 graph TB
@@ -311,29 +262,13 @@ graph TB
 
 #### 5.3.1.1 Komponent: Composer
 
-**Verantwortung:** Orchestriert Composition von UJL-Dokumenten zu AST
+Der **Composer** orchestriert die Transformation von UJLC-Dokumenten in Abstract Syntax Trees. Er koordiniert die rekursive Composition über die Module Registry, löst Media-Referenzen auf und garantiert, dass jedes Modul korrekt in AST-Nodes transformiert wird.
 
-**Schnittstelle:**
+Der Composer wird standardmäßig mit einer **Default-Registry** initialisiert, die alle Built-in-Module enthält (Button, Container, Grid, Card, Text, Call-to-Action, Image). Alternativ kann eine **Custom Registry** übergeben werden, um Built-in-Module zu ersetzen oder zu erweitern. Die Hauptmethode `compose()` transformiert ein vollständiges UJLC-Dokument in einen AST-Root-Node und ist asynchron, da Media-Referenzen aufgelöst werden müssen. Die Hilfsmethode `composeModule()` transformiert einzelne Module und wird rekursiv für verschachtelte Module (Slots) aufgerufen.
 
-```typescript
-class Composer {
-	constructor(registry?: ModuleRegistry);
+Der Composer ermöglicht **dynamische Registry-Verwaltung** über `registerModule()` und `unregisterModule()`, was zur Laufzeit Custom-Module hinzufügen oder entfernen erlaubt.
 
-	// Hauptmethode: UJLC Document → AST (async wegen Bildauflösung)
-	async compose(doc: UJLCDocument, imageProvider?: ImageProvider): Promise<UJLAbstractNode>;
-
-	// Hilfsmethode: Einzelnes Modul → AST Node (async)
-	async composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode>;
-
-	// Registry Management
-	registerModule(module: AnyModule): void;
-	unregisterModule(module: AnyModule | string): void;
-	getRegistry(): ModuleRegistry;
-
-	// Image Library Access
-	getImageLibrary(): ImageLibrary | null; // Gibt Image Library zurück (oder null, wenn nicht initialisiert)
-}
-```
+Der Crafter erstellt aktuell intern einen neuen Composer mit Default-Registry (`new Composer()`), exponiert diesen aber nicht über seine API. Entwickler, die `@ujl-framework/crafter` installieren, haben aktuell **keine Möglichkeit**, Custom-Module zu registrieren. Die Crafter-API wird in Zukunft erweitert, z.B. durch eine `modules`-Option in `UJLCrafterOptions` oder eine exponierte `registerModule()`-Methode. Dies ermöglicht Custom-Module-Integration ohne Core-Änderungen.
 
 **Ablauf:**
 
@@ -353,18 +288,11 @@ module.compose(moduleData, composer)  ← Recursive Call
 UJLAbstractNode (with ID preserved)
 ```
 
-**Wichtige Eigenschaften:**
-
-- ID Propagation: `moduleData.meta.id` → `node.id`
-- Rekursive Composition für verschachtelte Module (Slots)
-- Media Resolver Integration (optional)
-- Error Handling: Unbekannte Modultypen → Error Node
+Der Composer garantiert **ID-Propagation** über zwei getrennte Identifier: `node.id` wird für jeden AST-Node neu generiert (`generateUid()`), um eindeutige Rendering-Identity zu garantieren. Die ursprüngliche Modul-ID aus `moduleData.meta.id` wird in `meta.moduleId` übernommen, was durchgängiges Tracking von UJLC-Dokument bis zum gerenderten DOM ermöglicht. Die **rekursive Composition** für verschachtelte Module (Slots) erfolgt über `composeModule()`-Aufrufe innerhalb der Module-Logik selbst, wobei der Composer als Koordinator fungiert. Optional integriert der Composer einen **Media Resolver** (ImageLibrary), der Backend-Referenzen in tatsächliche Image-URLs auflöst. Das **Error Handling** ist robust: Unbekannte Modultypen führen nicht zum Absturz, sondern erzeugen Error-Nodes, die im UI als Platzhalter mit Fehlermeldung gerendert werden können.
 
 #### 5.3.1.2 Komponent: Module Registry
 
-**Verantwortung:** Zentrale Verwaltung aller verfügbaren Module
-
-**Schnittstelle:**
+Die Module Registry verwaltet zentral alle verfügbaren Module und ermöglicht dem Composer, Module anhand ihres `type`-Strings zu finden. Sie unterstützt dynamische Registrierung und Deregistrierung von Modulen zur Laufzeit, was Custom-Module-Integration ermöglicht.
 
 ```typescript
 class ModuleRegistry {
@@ -408,239 +336,140 @@ const composer = new Composer(registry);
 
 #### 5.3.1.3 Komponent: Module Base Class
 
-**Verantwortung:** Abstrakte Basisklasse für alle Module (Vertrag definieren)
+Die **Module Base Class** ist eine abstrakte Basisklasse, die den Vertrag für Custom Modules definiert. Sie stellt Identifikations- und UI-Metadaten (`name`, `label`, `category`), Struktur-Definitionen (`fields`, `slots`) und die zentrale Transformationsmethode `compose(moduleData, composer)` bereit, die Module-Daten in AST-Nodes umwandelt.
 
-**Schnittstelle:**
+Durch diese Architektur ermöglicht die Module Base Class Custom Module Extensions ohne Core-Änderungen (siehe [Erweiterbarkeit 8.8](./08-crosscutting-concepts#_8-8-erweiterbarkeit)).
+
+#### 5.3.1.4 Konzept: Module-zu-Node-Transformation (1:N)
+
+**Fundamentales Architektur-Prinzip:** Ein Modul in einem UJLC-Dokument entspricht nicht zwingend einem einzelnen AST-Node. Die Beziehung ist **1:N** – ein Modul kann bei der Composition mehrere AST-Nodes erzeugen.
+
+**Warum ist das wichtig?**
+
+Module sind **logische, editierbare Einheiten** im Content-Dokument. AST-Nodes hingegen sind **Render-Primitive** für Adapter. Um komplexe Layouts zu ermöglichen, generieren manche Module zusätzliche strukturelle Wrapper-Nodes, die nicht eigenständig editierbar sind.
+
+**Beispiel: Grid-Modul**
+
+Ein Grid-Modul mit der ID `"grid-001"` im UJLC-Dokument erstellt bei der Composition:
 
 ```typescript
-abstract class ModuleBase {
-	// Identifikation
-	abstract readonly name: string;
-	abstract readonly label: string;
-	abstract readonly description: string;
-	abstract readonly category: ComponentCategory;
-	abstract readonly tags: readonly string[];
-	abstract readonly icon: string; // SVG inner content
+// Input: 1 Grid-Modul im UJLC-Dokument
+{
+  type: "grid",
+  meta: { id: "grid-001" },
+  slots: {
+    items: [
+      { type: "text", meta: { id: "text-001" }, ... },
+      { type: "button", meta: { id: "button-001" }, ... }
+    ]
+  }
+}
 
-	// Struktur
-	abstract readonly fields: FieldSet;
-	abstract readonly slots: SlotSet;
-
-	// Composition
-	abstract compose(
-		moduleData: UJLCModuleObject,
-		composer: Composer
-	): UJLAbstractNode | Promise<UJLAbstractNode>;
-
-	// Helpers
-	getSvgIcon(): string; // Wraps icon in <svg> tag
+// Output: 5 AST-Nodes (1 Grid + 2 Grid-Items + 2 Children)
+{
+  type: "grid",
+  id: generateUid(),               // Unique AST Node ID
+  meta: {
+    moduleId: "grid-001",          // Welchem Modul gehört dieser Node?
+    isModuleRoot: true             // Ist dieser Node das Modul selbst? (editierbar)
+  },
+  props: {
+    children: [
+      // Grid-Item 1 (struktureller Wrapper, nicht editierbar)
+      {
+        type: "grid-item",
+        id: generateUid(),
+        meta: {
+          moduleId: "grid-001",    // Gehört zum Grid-Modul
+          isModuleRoot: false      // Nicht editierbar (strukturell)
+        },
+        props: {
+          children: [
+            // Text-Modul (editierbar)
+            {
+              type: "text",
+              id: generateUid(),
+              meta: {
+                moduleId: "text-001",
+                isModuleRoot: true
+              },
+              props: { ... }
+            }
+          ]
+        }
+      },
+      // Grid-Item 2 (struktureller Wrapper, nicht editierbar)
+      {
+        type: "grid-item",
+        id: generateUid(),
+        meta: {
+          moduleId: "grid-001",
+          isModuleRoot: false
+        },
+        props: {
+          children: [
+            // Button-Modul (editierbar)
+            {
+              type: "button",
+              id: generateUid(),
+              meta: {
+                moduleId: "button-001",
+                isModuleRoot: true
+              },
+              props: { ... }
+            }
+          ]
+        }
+      }
+    ]
+  }
 }
 ```
 
-**Beispiel-Implementierung:**
+**Semantische Bedeutung der AST-Metadaten:**
 
-```typescript
-class TextModule extends ModuleBase {
-	readonly name = "text";
-	readonly label = "Text";
-	readonly description = "Rich text content with formatting";
-	readonly category = "content";
-	readonly tags = ["text", "content", "rich-text"] as const;
-	readonly icon = '<path d="M4 6h16M4 12h16M4 18h16"/>';
+Die AST-Metadaten erfüllen drei zentrale Funktionen: `node.id` ist der eindeutige Identifier des AST-Nodes selbst (generiert mit `generateUid()`) und garantiert, dass jeder Node im Rendering-Tree unterscheidbar ist. `meta.moduleId` beantwortet die Frage "Zu welchem Modul gehört dieser Node?" und wird für alle Nodes außer dem Root-Wrapper gesetzt – dadurch lassen sich strukturelle Wrapper-Nodes ihrem ursprünglichen Modul zuordnen. `meta.isModuleRoot` ist ein Boolean-Flag, das nur für editierbare Module-Nodes `true` ist: Es markiert, welche Nodes die eigentlichen Module repräsentieren und nicht nur Implementierungsdetails (wie `grid-item`-Wrapper).
 
-	readonly fields = [
-		{
-			key: "content",
-			field: new RichTextField({
-				label: "Content",
-				default: { type: "doc", content: [] },
-			}),
-		},
-	];
+**Konsequenzen für Adapter und Editor:**
 
-	readonly slots = [];
+Diese Metadaten-Strategie hat direkte Auswirkungen auf Rendering und Editor-Integration: **Alle Nodes** werden gerendert, einschließlich struktureller Wrapper wie `grid-item`, um korrekte Layouts zu garantieren. In visuellen Editoren sind jedoch **nur Nodes mit `meta.isModuleRoot === true` anklickbar und editierbar** – Wrapper-Nodes werden übersprungen, um die Benutzererfahrung nicht zu verwirren. Adapter setzen bei `showMetadata={true}` DOM-Attribute (`data-ujl-module-id`) auf allen Nodes mit `meta.moduleId`, was Editor-Integration via Click-to-Select ermöglicht. Durch das Modul-Tracking "wissen" selbst strukturelle Nodes wie Grid-Items, dass sie zum Grid-Modul gehören (`moduleId = "grid-001"`).
 
-	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-		return {
-			type: "text",
-			id: moduleData.meta.id,
-			props: {
-				content: moduleData.fields.content as ProseMirrorDocument,
-			},
-		};
-	}
-}
-```
+**Weitere Beispiele:**
 
-#### 5.3.1.4 Komponent: Field Base Class
+Die 1:N-Beziehung zeigt sich in verschiedenen Modultypen unterschiedlich: Ein **Call-to-Action-Modul** erzeugt typischerweise zwei Nodes (1 CTA-Container-Node + 1 Button-Node), die beide zum selben CTA-Modul gehören. Ein **Card-Modul** generiert einen Card-Node plus optional Header- und Footer-Wrapper-Nodes für strukturelle Trennung. **Container-Module** hingegen folgen meist einem 1:1-Mapping, da sie keine zusätzlichen strukturellen Wrapper benötigen.
 
-**Verantwortung:** Abstrakte Basisklasse für Field-Typen (Validation & Fitting)
+**Fazit:** Die 1:N-Beziehung ermöglicht flexible Layouts ohne die Editierbarkeit zu gefährden. Strukturelle Nodes sind Implementierungsdetails des Adapters, während Module die logische Content-Struktur repräsentieren.
 
-**Schnittstelle:**
+#### 5.3.1.5 Weitere Komponenten (kompakt)
 
-```typescript
-abstract class FieldBase<ValueT, ConfigT> {
-	protected abstract readonly defaultConfig: ConfigT;
+Die folgenden Komponenten sind für die Architektur relevant, werden aber bewusst kurz gehalten. Details siehe [Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts).
 
-	// Constructor merges user config with defaults
-	constructor(config?: Partial<ConfigT>);
+**Field Base Class:**
 
-	// Validation Pipeline
-	abstract validate(raw: UJLCFieldObject): raw is ValueT;
-	abstract fit(value: ValueT): ValueT;
+- **Verantwortung:** Abstrakte Basisklasse für Field-Typen mit Validation & Fitting
+- **Kernfunktionen:** `validate(raw)` für KI-Feedback (Type Guard), `fit(value)` für Robustheit (Constraints/Fallbacks)
+- **Built-in Types:** TextField, RichTextField, NumberField, ImageField
+- **Status:** Validator-Registry-Integration fehlt noch ([TD-011](./11-risks-and-technical-debt#_11-2-11-validator-registry-integration-fehlt))
 
-	// Combined: Validate → Fit
-	parse(raw: UJLCFieldObject): ValueT {
-		if (!this.validate(raw)) {
-			throw new Error("Invalid field value");
-		}
-		return this.fit(raw);
-	}
+**Media Library:**
 
-	// Serialization (für Editor)
-	serialize(value: ValueT): UJLCFieldObject;
+- **Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
+- **Dual Storage:** Inline (Base64 in `.ujlc.json`) oder Backend (Payload CMS via `ImageProvider`)
+- **API:** `async resolve(id: string): Promise<UJLImageData | null>`
+- **Referenz:** [ADR-004](./09-architecture-decisions#_9-4-adr-004-dual-media-storage-strategy-inline-vs-backend)
 
-	// Metadata
-	getFieldType(): string;
-}
-```
+**TipTap Schema:**
 
-**Built-in Field Types:**
-
-| Field           | Value Type             | Config                                | Zweck                        |
-| --------------- | ---------------------- | ------------------------------------- | ---------------------------- |
-| `TextField`     | `string`               | `maxLength`, `default`, `placeholder` | Einzeiliger Text             |
-| `RichTextField` | `ProseMirrorDocument`  | `default`                             | Rich Text (TipTap)           |
-| `NumberField`   | `number`               | `min`, `max`, `default`               | Numerischer Input            |
-| `ImageField`    | `UJLImageData \| null` | `default`                             | Bild-Auswahl (Media Library) |
-
-**Validation vs. Fitting:**
-
-```typescript
-class NumberField extends FieldBase<number, NumberFieldConfig> {
-	validate(raw: UJLCFieldObject): raw is number {
-		return typeof raw === "number"; // Type Guard
-	}
-
-	fit(value: number): number {
-		// Apply constraints (min, max)
-		if (this.config.min !== undefined && value < this.config.min) {
-			return this.config.min;
-		}
-		if (this.config.max !== undefined && value > this.config.max) {
-			return this.config.max;
-		}
-		return value;
-	}
-}
-```
-
-#### 5.3.1.5 Komponent: Media Library
-
-**Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
-
-**Schnittstelle:**
-
-```typescript
-class ImageLibrary {
-	constructor(
-		initialImages: Record<string, ImageEntry>,
-		provider?: ImageProvider // Optional: Backend Integration
-	);
-
-	// Resolve Media by ID
-	async resolve(id: string): Promise<UJLImageData | null>;
-
-	// Add Media Entry
-	addEntry(entry: ImageEntry): void;
-
-	// Get all entries
-	getAllEntries(): ImageEntry[];
-}
-
-interface ImageProvider {
-	resolve(id: string | number): Promise<ImageSource | null>; // Returns image source
-}
-```
-
-**Storage Modes:**
-
-1. **Inline Storage (Default):**
-   - Media eingebettet als Base64 in `.ujlc.json`
-   - Keine externe Abhängigkeit
-   - Vollständige Portabilität
-
-2. **Backend Storage (Payload CMS):**
-   - Image-Referenz in `.ujlc.json` (nur `imageId`)
-   - Resolver lädt Images von API
-   - Features: Responsive Images, Metadaten, Versionierung
-
-#### 5.3.1.6 Komponent: TipTap Schema
-
-**Verantwortung:** Shared Rich Text Schema für Editor & Serializer
-
-**Export:**
-
-```typescript
-// Exportiert TipTap Extensions Configuration
-export const ujlRichTextExtensions = [
-	StarterKit.configure({
-		// Serializable Extensions
-		heading: { levels: [1, 2, 3, 4, 5, 6] },
-		bold: {},
-		italic: {},
-		code: {},
-		blockquote: {},
-		bulletList: {},
-		orderedList: {},
-		listItem: {},
-		hardBreak: {},
-		horizontalRule: {},
-
-		// UI Extensions disabled (not serializable)
-		dropcursor: false,
-		gapcursor: false,
-	}),
-];
-```
-
-**Verwendung:**
-
-```typescript
-// Im Crafter Editor
-import { Editor } from "@tiptap/core";
-import { ujlRichTextExtensions } from "@ujl-framework/core";
-
-const editor = new Editor({
-	extensions: ujlRichTextExtensions,
-});
-
-// Im Adapter Serializer
-import { ujlRichTextExtensions } from "@ujl-framework/core";
-// Gleiche Extensions → WYSIWYG-Garantie
-```
+- **Verantwortung:** Shared Rich Text Schema für Editor & Serializer
+- **Export:** `ujlRichTextExtensions` (StarterKit mit serialisierbaren Extensions)
+- **Garantie:** Gleiches Schema → WYSIWYG-Konsistenz
+- **Referenz:** [ADR-008](./09-architecture-decisions#_9-8-adr-008-tiptap-prosemirror-für-rich-text-editing)
 
 ## 5.4 UI Layer (Level 2)
 
 ### 5.4.1 Baustein: ui
 
-**Zweck:** Wiederverwendbare UI-Komponenten (shadcn-svelte basiert)
-
-#### Whitebox: ui (Level 2)
-
-```mermaid
-graph TB
-    subgraph "ui Package"
-        Components[components/ui/<br/>Svelte Components]
-        Hooks[hooks/<br/>Svelte 5 Hooks]
-        Utils[utils/<br/>Utility Functions]
-        Styles[styles/<br/>CSS Styles]
-    end
-
-    Components --> Hooks
-    Components --> Utils
-    Components --> Styles
-```
+Das `ui`-Package stellt wiederverwendbare UI-Komponenten auf Basis von **shadcn-svelte** bereit. Diese Komponenten werden sowohl im Adapter-Layer für das Rendering von UJL-Dokumenten als auch im Crafter für die Editor-Oberfläche verwendet.
 
 #### Enthaltene Komponenten-Kategorien
 
@@ -655,59 +484,19 @@ graph TB
 
 #### Besondere Merkmale
 
-**Tailwind CSS Integration:**
+Das `ui`-Package nutzt **tailwind-variants** für type-safe Component-Variants, was konsistentes Styling über alle Komponenten hinweg garantiert. **Dark Mode Support** wird über `mode-watcher` implementiert, das automatisch auf System-Preferences reagiert und manuelle Theme-Umschaltung ermöglicht.
 
-```typescript
-// tailwind-variants für Type-Safe Variants
-import { tv } from "tailwind-variants";
+Das Package baut auf bewährten Svelte-Libraries auf: **`bits-ui`** liefert headless UI-Primitives mit eingebauter Accessibility (ARIA-Attributes, Keyboard Navigation). **`svelte-sonner`** steuert Toast-Notifications für User-Feedback. **`paneforge`** ermöglicht Resizable Panels für Layout-Management. Das Styling basiert auf **Tailwind CSS 4.x**, was Utility-First-CSS mit modernem Design-System verbindet.
 
-const button = tv({
-	base: "inline-flex items-center justify-center rounded-md",
-	variants: {
-		variant: {
-			default: "bg-primary text-primary-foreground",
-			destructive: "bg-destructive text-destructive-foreground",
-			outline: "border border-input bg-background",
-		},
-		size: {
-			default: "h-10 px-4 py-2",
-			sm: "h-9 rounded-md px-3",
-			lg: "h-11 rounded-md px-8",
-		},
-	},
-});
-```
-
-**Dark Mode Support:**
-
-```typescript
-// mode-watcher für Theme Management
-import { mode } from 'mode-watcher';
-
-<Button variant={$mode === 'dark' ? 'outline' : 'default'}>
-  Click me
-</Button>
-```
-
-**Abhängigkeiten:**
-
-- `bits-ui` - Headless UI Primitives (Accessibility)
-- `svelte-sonner` - Toast Notifications
-- `paneforge` - Resizable Panels
-- `tailwindcss` 4.x - Styling
-
-**Consumer:**
-
-- `@ujl-framework/adapter-svelte` (verwendet alle UI-Komponenten)
-- `@ujl-framework/crafter` (verwendet UI-Komponenten für Editor-UI)
+Das `ui`-Package wird von zwei primären Consumern genutzt: `@ujl-framework/adapter-svelte` verwendet alle UI-Komponenten für das Rendering von UJL-Dokumenten im Frontend. `@ujl-framework/crafter` importiert die UI-Komponenten für die Editor-Oberfläche selbst (Toolbars, Dialoge, Sidebars).
 
 ## 5.5 Adapter Layer (Level 2)
 
 ### 5.5.1 Baustein: adapter-svelte
 
-**Zweck:** Konvertiert AST zu Svelte 5 Components (für Svelte-Apps)
+Das `adapter-svelte`-Package konvertiert UJL Abstract Syntax Trees in Svelte 5 Components. Es ist der primäre Adapter für Svelte- und SvelteKit-Anwendungen und dient als Basis für den Web Adapter.
 
-#### Whitebox: adapter-svelte (Level 2)
+#### Whitebox: adapter-svelte
 
 ```mermaid
 graph TB
@@ -750,9 +539,7 @@ graph TB
 
 #### 5.5.1.1 Komponent: AdapterRoot
 
-**Verantwortung:** Root Component mit Theme-Provider und Metadata-Support
-
-**Props:**
+Die **AdapterRoot**-Komponente ist der Einstiegspunkt für das Rendering und übernimmt vier zentrale Aufgaben: Sie injiziert Design-Tokens als CSS Custom Properties (`--color-primary-500`, `--spacing-md`, etc.), setzt das Theme-Mode-Attribut für Dark/Light-Switching, fügt optional `data-ujl-module-id`-Attribute für Editor-Integration hinzu und delegiert Click-Events an einen optionalen Callback für Click-to-Select-Funktionalität.
 
 ```typescript
 interface AdapterRootProps {
@@ -760,60 +547,17 @@ interface AdapterRootProps {
 	tokenSet?: UJLTTokenSet; // Design Tokens (optional)
 	mode?: "light" | "dark" | "system"; // Theme Mode
 	showMetadata?: boolean; // Add data-ujl-module-id attributes
-	eventCallback?: (moduleId: string) => void; // Click-to-select
-}
-```
-
-**Funktionalität:**
-
-1. **Token Injection:** Generiert CSS Custom Properties aus TokenSet
-2. **Theme Mode:** Setzt `data-mode` Attribut für Dark/Light Mode
-3. **Metadata:** Optional `data-ujl-module-id` für Editor-Integration
-4. **Event Delegation:** Click Events → eventCallback (Editor-Interaktion)
-
-**CSS Custom Properties:**
-
-```css
-:root {
-	--color-primary-50: oklch(97% 0.01 260);
-	--color-primary-500: oklch(60% 0.15 260);
-	--color-primary-950: oklch(20% 0.05 260);
-
-	--font-base-family: "Inter", sans-serif;
-	--font-base-size-md: 16px;
-
-	--spacing-md: 16px;
-	--radius-md: 8px;
+	eventCallback?: (moduleId: string) => void; // Click-to-select callback
 }
 ```
 
 #### 5.5.1.2 Komponent: ASTNode (Recursive Router)
 
-**Verantwortung:** Dispatcht AST Node zu entsprechendem Svelte Component
-
-**Implementation:**
+Die **ASTNode**-Komponente ist ein rekursiver Router, der jeden AST-Node anhand seines `type`-Feldes an die entsprechende Svelte-Komponente dispatcht. Für Container-Nodes mit verschachtelten Children erfolgt ein rekursiver Aufruf via `<svelte:self>`, was beliebig tiefe Verschachtelungen ermöglicht. Unbekannte Node-Typen werden von einer Error-Komponente aufgefangen.
 
 ```svelte
-<script lang="ts">
-  import type { UJLAbstractNode } from '@ujl-framework/types';
-
-  // Node Components
-  import Button from './nodes/Button.svelte';
-  import Text from './nodes/Text.svelte';
-  import Container from './nodes/Container.svelte';
-  // ... weitere Imports
-
-  let { node, showMetadata, eventCallback } = $props<{
-    node: UJLAbstractNode;
-    showMetadata?: boolean;
-    eventCallback?: (moduleId: string) => void;
-  }>();
-</script>
-
 {#if node.type === 'button'}
   <Button {node} {showMetadata} {eventCallback} />
-{:else if node.type === 'text'}
-  <Text {node} {showMetadata} {eventCallback} />
 {:else if node.type === 'container'}
   <Container {node} {showMetadata} {eventCallback}>
     {#each node.props.children as child}
@@ -825,65 +569,18 @@ interface AdapterRootProps {
 {/if}
 ```
 
-**Wichtig:** Rekursive Selbstreferenz mit `<svelte:self>` für verschachtelte Nodes
-
 #### 5.5.1.3 Komponent: prosemirror-serializer
 
-**Verantwortung:** Synchrone, SSR-safe Konvertierung ProseMirror → HTML
-
-**Schnittstelle:**
+Der **ProseMirror-Serializer** konvertiert Rich-Text-Dokumente (ProseMirror-Format) synchron in HTML-Strings. Er ist **SSR-safe** (verwendet keine Browser-APIs), **synchron** (kein async/await), implementiert **XSS-Prevention** durch HTML-Escaping und garantiert **WYSIWYG-Konsistenz**, da er dieselben Extensions wie der TipTap-Editor verwendet.
 
 ```typescript
+// Einfache API: ProseMirror-Dokument → HTML-String
 export function prosemirrorToHtml(doc: ProseMirrorDocument): string;
 ```
 
-**Implementation (Auszug):**
-
-```typescript
-function serializeNode(node: ProseMirrorNode): string {
-	switch (node.type) {
-		case "paragraph":
-			return `<p>${serializeNodes(node.content)}</p>`;
-		case "heading":
-			const level = node.attrs?.level ?? 1;
-			return `<h${level}>${serializeNodes(node.content)}</h${level}>`;
-		case "text":
-			return applyMarks(escapeHtml(node.text), node.marks);
-		case "hardBreak":
-			return "<br>";
-		// ... weitere Node-Typen
-	}
-}
-
-function applyMarks(text: string, marks?: ProseMirrorMark[]): string {
-	if (!marks) return text;
-	return marks.reduce((html, mark) => {
-		switch (mark.type) {
-			case "bold":
-				return `<strong>${html}</strong>`;
-			case "italic":
-				return `<em>${html}</em>`;
-			case "code":
-				return `<code>${html}</code>`;
-			default:
-				return html;
-		}
-	}, text);
-}
-```
-
-**Eigenschaften:**
-
-- SSR-Safe (keine Browser-APIs)
-- Synchron (kein async/await)
-- XSS-Prevention (HTML Escaping)
-- WYSIWYG-Garantie (gleiche Extensions wie Editor)
-
 #### 5.5.1.4 Komponent: Imperative Adapter
 
-**Verantwortung:** Programmatische Component Mounting (für nicht-Svelte-Kontexte)
-
-**Schnittstelle:**
+Der **Imperative Adapter** ermöglicht programmatisches Component-Mounting für Kontexte außerhalb von Svelte-Templates, z.B. in bestehenden JavaScript-Anwendungen oder für dynamisches Rendering.
 
 ```typescript
 export function svelteAdapter(
@@ -923,9 +620,9 @@ await mounted.unmount();
 
 ### 5.5.2 Baustein: adapter-web
 
-**Zweck:** Framework-agnostic Custom Element (für React, Vue, Angular, etc.)
+Das `adapter-web`-Package stellt ein **framework-agnostisches Custom Element** (`<ujl-content>`) bereit, das in React, Vue, Angular oder beliebigen JavaScript-Anwendungen verwendet werden kann. Es kompiliert die Svelte-Komponenten aus `adapter-svelte` zur Build-Zeit in ein standalone Web Component, sodass keine Svelte-Runtime-Dependency benötigt wird.
 
-#### Whitebox: adapter-web (Level 2)
+#### Whitebox: adapter-web
 
 ```mermaid
 graph TB
@@ -997,7 +694,7 @@ el.setAttribute("node", JSON.stringify(astNode)); // Funktioniert nicht
 
 #### Komponent: webAdapter Function
 
-**Schnittstelle:**
+Die `webAdapter`-Funktion ist der programmatische Einstiegspunkt für die Web Component-Integration.
 
 ```typescript
 export function webAdapter(
@@ -1018,7 +715,7 @@ type MountedElement = {
 };
 ```
 
-**Implementation:**
+Die Implementierung zeigt den typischen Ablauf: Target-Element ermitteln, Custom Element erstellen, Properties setzen und ins DOM einfügen.
 
 ```typescript
 export function webAdapter(
@@ -1050,9 +747,9 @@ export function webAdapter(
 
 ### 5.6.1 Baustein: crafter
 
-**Zweck:** Visual Editor für UJLC und UJLT Dokumente
+Der **Crafter** ist ein visueller Editor für UJLC- und UJLT-Dokumente. Er ermöglicht WYSIWYG-Bearbeitung von Content (Editor-Modus) und Themes (Designer-Modus) und kann als NPM-Package in Host-Applikationen integriert werden.
 
-#### Whitebox: crafter (Level 2)
+#### Whitebox: crafter
 
 ```mermaid
 graph TB
@@ -1121,9 +818,7 @@ graph TB
 
 #### 5.6.1.1 Komponent: app.svelte (State Management)
 
-**Verantwortung:** Root Component mit zentralem State
-
-**State (Svelte 5 Runes):**
+Die **Root Component** verwaltet den zentralen State mit **Svelte 5 Runes**. Der State umfasst das aktuelle UJLC-Dokument, das UJLT-Theme, den Editor-Modus und UI-State wie expandierte Nodes.
 
 ```typescript
 let ujlcDocument = $state<UJLCDocument>(initialUJLC);
@@ -1145,9 +840,7 @@ setContext("crafter", context);
 
 #### 5.6.1.2 Komponent: Crafter Context API
 
-**Verantwortung:** Zentralisierte State-Mutationen (Functional Updates)
-
-**Schnittstelle (Auszug):**
+Die **Crafter Context API** zentralisiert alle State-Mutationen und erzwingt **Functional Updates** (immutable). Dies garantiert vorhersagbare State-Änderungen und ermöglicht Features wie Undo/Redo.
 
 ```typescript
 interface CrafterContext {
@@ -1193,18 +886,9 @@ context.updateRootSlot(root => [...root, newModule]);
 
 #### 5.6.1.3 Komponent: Editor Mode
 
-**Verantwortung:** Content-Editing mit Drag & Drop, Clipboard, Keyboard Shortcuts
+Der **Editor-Modus** ermöglicht Content-Bearbeitung mit Navigation Tree (Hierarchie-Ansicht), Drag & Drop für Node-Reordering, Clipboard-Unterstützung (Ctrl+C/X/V), Keyboard Shortcuts, einem durchsuchbaren Component Picker und Click-to-Select-Synchronisation zwischen Preview und Tree.
 
-**Features:**
-
-- Navigation Tree (Hierarchie-Ansicht)
-- Drag & Drop (Node/Slot Reordering)
-- Clipboard (Ctrl+C/X/V mit Clipboard API + localStorage Fallback)
-- Keyboard Shortcuts (Ctrl+C/X/V/I, Delete)
-- Component Picker (Module Registry → Searchable List)
-- Click-to-Select (Preview → Tree Synchronization)
-
-**Clipboard-Architektur:**
+Das Clipboard nutzt eine **Dual-Storage-Strategie**: Primär die moderne Clipboard API, mit localStorage als Fallback für ältere Browser.
 
 ```typescript
 interface ClipboardManager {
@@ -1220,17 +904,9 @@ interface ClipboardManager {
 
 #### 5.6.1.4 Komponent: Designer Mode
 
-**Verantwortung:** Theme-Editing (Colors, Typography, Spacing, Radius)
+Der **Designer-Modus** ermöglicht Theme-Bearbeitung mit Color Palette Editor (OKLCH-basiert mit automatischer Shade-Generierung von 50-950), Typography Editor (Font Family, Size, Weight), Spacing & Radius Editor und Live Preview für Echtzeit-Updates.
 
-**Features:**
-
-- Color Palette Editor (OKLCH-basiert)
-- Automatic Shade Generation (11 Shades: 50-950)
-- Typography Editor (Font Family, Size, Weight)
-- Spacing & Radius Editor (Token Management)
-- Live Preview (Echtzeit-Updates)
-
-**Color Palette Generator:**
+Die **Color Palette Generation** nutzt OKLCH für perzeptuelle Uniformität:
 
 ```typescript
 function generateColorPalette(baseColor: OklchColor): ColorPalette {
@@ -1249,9 +925,7 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 
 #### 5.6.1.5 Komponent: Media Service
 
-**Verantwortung:** Abstraktion für Media Storage (Inline vs. Backend)
-
-**Interface:**
+Der **Media Service** abstrahiert die Media-Storage-Strategie und ermöglicht sowohl Inline-Speicherung (Base64 in UJLC) als auch Backend-Speicherung (Payload CMS). Die Implementierung wird über eine Factory basierend auf der Konfiguration gewählt.
 
 ```typescript
 interface ImageService {
@@ -1272,19 +946,9 @@ interface ImageService {
 }
 ```
 
-**Implementierungen:**
+Es existieren zwei Implementierungen: Der **InlineImageService** speichert Bilder als Base64-Strings direkt im UJLC-Dokument (mit Compression via compressorjs), was keine Backend-Infrastruktur erfordert. Der **BackendImageService** nutzt die Payload CMS API mit multipart/form-data Upload und API-Key Authentication für größere Projekte.
 
-1. **InlineImageService:**
-   - Base64-Encoding via FileReader
-   - Storage in UJLC Document (ujlc.images)
-   - Compression via compressorjs
-
-2. **BackendImageService:**
-   - Payload CMS API Integration
-   - multipart/form-data Upload
-   - API-Key Authentication
-
-**Service Factory:**
+Eine Factory wählt die Implementierung basierend auf der Konfiguration:
 
 ```typescript
 function createImageService(config: ImageLibraryConfig): ImageService {
@@ -1297,9 +961,7 @@ function createImageService(config: ImageLibraryConfig): ImageService {
 
 ### 5.6.2 Baustein: demo
 
-**Zweck:** Demonstration der UJL-Integration
-
-**Struktur:**
+Die **Demo-App** demonstriert die UJL-Integration mit dem Web Adapter und zeigt, wie UJL-Dokumente in einer standalone HTML-Anwendung gerendert werden.
 
 ```
 demo/
@@ -1330,9 +992,7 @@ webAdapter(ast, tokenSet, {
 
 ### 5.6.3 Baustein: docs
 
-**Zweck:** Dokumentations-Website (VitePress)
-
-**Struktur:**
+Die **Dokumentations-Website** wird mit **VitePress 2.0** (Vue-basierter Static Site Generator) erstellt und enthält die Arc42-Architekturdokumentation sowie User Documentation.
 
 ```
 docs/
@@ -1347,9 +1007,7 @@ docs/
 
 ### 5.6.4 Baustein: examples
 
-**Zweck:** Beispiel-Dokumente und Themes
-
-**Struktur:**
+Das **Examples-Package** stellt Beispiel-Dokumente und Themes bereit, die für Demos, Tests und als Referenz für die Dokumentstruktur dienen.
 
 ```
 examples/
@@ -1375,15 +1033,15 @@ import { showcaseDocument, defaultTheme } from "@ujl-framework/examples";
 
 ## 5.7 Service Layer (Level 2)
 
-### 5.7.1 Baustein: media (Payload CMS)
+### 5.7.1 Baustein: library (Payload CMS)
 
-**Zweck:** Backend für Media Management mit Payload CMS
+Das **Library-Service** ist ein optionales Backend für Media Management, basierend auf **Payload CMS**. Er bietet Upload, Metadaten-Verwaltung, responsive Image-Generierung und eine REST-API für den Crafter und ContentFrames.
 
-#### Whitebox: media Service (Level 2)
+#### Whitebox: library Service
 
 ```mermaid
 graph TB
-    subgraph "media Service (Docker)"
+    subgraph "library Service (Docker)"
         NextApp[Next.js 15 App]
         PayloadCMS[Payload CMS 3.x]
 
@@ -1419,7 +1077,7 @@ graph TB
 
 #### Komponent: Images Collection
 
-**Schema:**
+Die Images Collection definiert das Schema für Bilder mit automatischer Generierung von 8 responsiven Größen (xs bis max), WebP-Konvertierung und IPTC-konformen Credit-Informationen.
 
 ```typescript
 export const Images: CollectionConfig = {
@@ -1596,41 +1254,7 @@ pnpm run build
 
 ### 5.9.1 Versionierung (Changesets)
 
-**Strategie:** Fixed Versioning (alle Packages synchron)
-
-**Workflow:**
-
-```bash
-# Feature Branch: Create Changeset
-pnpm changeset
-
-# Select changed packages
-# Enter changelog entry
-# Commit .changeset/xyz.md
-
-# develop Branch: Apply Changesets
-pnpm version-packages
-
-# → Updates package.json versions
-# → Generates CHANGELOG.md entries
-# → Commit version bump
-
-# Manual Publish (when ready)
-pnpm publish -r --access public
-```
-
-**Changeset Config (`.changeset/config.json`):**
-
-```json
-{
-	"fixed": [
-		["@ujl-framework/*"] // All packages linked
-	],
-	"changelog": "@changesets/cli/changelog",
-	"commit": false,
-	"access": "public"
-}
-```
+Die Versionierung nutzt **Changesets** mit **Fixed Versioning** – alle Packages werden synchron versioniert, um Kompatibilitätsprobleme zwischen Framework-Teilen zu vermeiden. Der Workflow sieht vor, dass auf Feature Branches Changesets erstellt werden (mit Changelog-Einträgen), die dann auf dem develop Branch automatisch in Versions-Updates und CHANGELOG-Einträge umgewandelt werden. Das manuelle Publishing erfolgt zentral über `pnpm publish -r --access public`. Die Konfiguration verknüpft alle `@ujl-framework/*` Packages als Fixed Group, sodass sie stets die gleiche Versionsnummer tragen.
 
 ### 5.9.2 Testing-Strategie
 
@@ -1661,43 +1285,10 @@ import { testId } from './test-attrs';
 
 ### 5.9.3 CI/CD Pipeline (GitLab CI)
 
-**Stages:**
+Die CI/CD Pipeline automatisiert Build, Test, Qualitätsprüfung und Deployment über **GitLab CI**. Sie durchläuft fünf Stages in sequenzieller Reihenfolge:
 
 1. **install** - `pnpm install --frozen-lockfile` (mit Cache)
 2. **build** - `pnpm run build` (alle Packages)
 3. **test** - `pnpm run test` (Vitest Unit Tests)
 4. **quality** - `pnpm run lint` + `pnpm run check` (ESLint + TypeScript)
-5. **deploy** - GitLab Pages (nur main/develop Branch)
-
-**Cache Strategy:**
-
-```yaml
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - node_modules/
-    - .pnpm-store/
-    - packages/*/node_modules/
-```
-
-### Architektur-Highlights
-
-1. **Layered Architecture**: Klare Trennung von Foundation, Core, UI, Adapter, Application
-2. **Dependency Inversion**: Höhere Schichten abhängig von niedrigeren (nie umgekehrt)
-3. **Plugin Architecture**: Module Registry mit Extension Points
-4. **Adapter Pattern**: Framework-Agnostic Rendering
-5. **Schema-First**: Zod als Single Source of Truth
-6. **Monorepo**: Koordinierte Releases mit Changesets
-
-### Zukünftige Erweiterungen
-
-**Geplante Bausteine:**
-
-- **adapter-pdf**: PDF Export (für Dokumentation)
-
-**Geplante Features:**
-
-- **Semantic Search**: pgvector Integration für Media Library
-- **AI Integration**: LLM-basierte Content-Generierung
-- **Theme Marketplace**: Community Themes (UJLT-Dateien)
-- **Module Marketplace**: Community Module (NPM Packages)
+5. **deploy** - Dokumentations-Website nach GitLab Pages (nur main/develop Branch)

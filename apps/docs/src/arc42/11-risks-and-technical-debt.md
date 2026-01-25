@@ -33,6 +33,10 @@ graph TB
         TD3["Hardcoded Configuration"]
         TD4["Legacy API Patterns"]
         TD5["API-Key im Frontend"]
+        TD6["Testing-Utilities fehlen"]
+        TD7["Validator-Registry fehlt"]
+        TD8["Theme-Umschaltung fehlt"]
+        TD9["Crafter-Registry-API fehlt"]
     end
 
     style HighRisk fill:#ef4444
@@ -659,6 +663,145 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 
 **Status:** Offen
 
+### 11.2.10 Testing-Utilities für Custom Modules
+
+|| Attribut | Wert |
+|| --------------- | -------------- |
+|| **Schulden-ID** | TD-010 |
+|| **Kategorie** | Entwickler-API |
+|| **Aufwand** | Mittel (3 Tage) |
+|| **Priorität** | Mittel |
+
+**Beschreibung:**
+
+Entwickler, die eigene Custom Modules erstellen möchten, haben aktuell keine Test-Utilities oder Best-Practice-Guidelines. Die Module-Registry-API ist zwar vorhanden, aber Test-Infrastruktur (z.B. Mock-Composer, Test-Fixtures) fehlt.
+
+**Potenzielle Auswirkungen:**
+
+- Höhere Einstiegshürde für externe Entwickler
+- Inkonsistente Modul-Qualität
+- Schwierige Fehlersuche bei Custom Modules
+- Fehlende Best-Practice-Dokumentation
+
+**Betroffene Pakete:**
+
+- `@ujl-framework/core` - Fehlende Test-Utilities
+- `@ujl-framework/docs` - Fehlende Developer-Guide-Sektion
+
+**Behebungsplan:**
+
+1. Test-Utilities entwickeln: `createTestComposer()`, `mockImageLibrary()`, etc.
+2. Beispiel-Tests für Custom Modules in Dokumentation
+3. Template-Dateien mit integrierten Test-Cases
+4. Developer Guide: "Testing Custom Modules" Sektion
+
+**Status:** Offen (abhängig von Crafter-Registry-API, siehe TD-013)
+
+### 11.2.11 Validator-Registry-Integration fehlt
+
+|| Attribut | Wert |
+|| --------------- | ----------------- |
+|| **Schulden-ID** | TD-011 |
+|| **Kategorie** | KI-Integration |
+|| **Aufwand** | Mittel (2-3 Tage) |
+|| **Priorität** | Mittel |
+
+**Beschreibung:**
+
+Das Field-System bietet `validate()` und `fit()` Methoden, aber der Validator im `types`-Package ist noch nicht an die Module Registry angebunden. Aktuell erfolgt nur Schema-Validierung (Zod), aber keine Registry-basierte Validierung (z.B. "Ist Modul-Type `xyz` registriert?").
+
+**Potenzielle Auswirkungen:**
+
+- Kein fundiertes Feedback für LLM-generierte Dokumente
+- Validierung ignoriert Custom Modules
+- Validator kann nicht prüfen, ob verwendete Module existieren
+- KI-Integration weniger robust
+
+**Betroffene Pakete:**
+
+- `@ujl-framework/types` - Validator-Implementierung
+- `@ujl-framework/core` - Module Registry
+
+**Behebungsplan:**
+
+1. Validator-Schnittstelle erweitern: `validate(document, registry?)`
+2. Registry-basierte Checks implementieren:
+   - Modul-Type existiert?
+   - Fields/Slots entsprechen Modul-Definition?
+   - Slot-Inhalte sind valide für Slot-Constraints?
+3. Detaillierte Fehlermeldungen für KI-Feedback
+4. Integration in CLI-Tool (`ujl-validate`)
+
+**Status:** Offen (mittelfristig geplant für LLM-Integration)
+
+### 11.2.12 Manuelle Theme-Umschaltung im Crafter fehlt
+
+|| Attribut | Wert |
+|| --------------- | ---------------- |
+|| **Schulden-ID** | TD-012 |
+|| **Kategorie** | Usability |
+|| **Aufwand** | Niedrig (1 Tag) |
+|| **Priorität** | Niedrig |
+
+**Beschreibung:**
+
+Der Crafter erkennt automatisch den System-Theme-Modus (Light/Dark via `prefers-color-scheme`), aber Nutzer können nicht manuell zwischen Light- und Dark-Mode wechseln. Dies ist besonders relevant für Designer, die Theme-Designs in beiden Modi testen möchten.
+
+**Potenzielle Auswirkungen:**
+
+- Eingeschränkte Testmöglichkeiten für Designer
+- Nutzer können Theme nicht unabhängig vom System-Setting wählen
+- Schlechtere User Experience
+
+**Betroffene Pakete:**
+
+- `@ujl-framework/crafter` - Theme-Mode-Switching UI
+- `@ujl-framework/adapter-svelte` - Theme-Mode-Propagierung
+
+**Behebungsplan:**
+
+1. UI-Toggle für Theme-Mode im Crafter-Header hinzufügen
+2. localStorage-basiertes Persistence für User-Präferenz
+3. Manuelle Umschaltung überschreibt System-Setting
+4. Visual Feedback (z.B. Sonne/Mond-Icon)
+
+**Status:** Offen (Nice-to-Have für Phase 2)
+
+### 11.2.13 Crafter-Registry-API für Entwickler fehlt
+
+|| Attribut | Wert |
+|| --------------- | ----------------- |
+|| **Schulden-ID** | TD-013 |
+|| **Kategorie** | Erweiterbarkeit |
+|| **Aufwand** | Mittel (3-4 Tage) |
+|| **Priorität** | Hoch |
+
+**Beschreibung:**
+
+Die Crafter-Klasse (exportiert aus `@ujl-framework/crafter`) unterstützt aktuell noch nicht die Möglichkeit, Custom Modules zur Laufzeit zu registrieren. Entwickler können zwar eigene `ModuleRegistry`-Instanzen für den `Composer` erstellen, aber der Crafter-Editor zeigt nur Built-in-Module an.
+
+**Potenzielle Auswirkungen:**
+
+- Entwickler können Custom Modules nicht im Crafter nutzen
+- Multi-Tenancy-Szenarien (verschiedene Modulsets pro Kunde) nicht möglich
+- Eingeschränkte Erweiterbarkeit
+- White-Label-Szenarien schwierig umzusetzen
+
+**Betroffene Pakete:**
+
+- `@ujl-framework/crafter` - Registry-Integration
+- `@ujl-framework/core` - Module Registry
+
+**Behebungsplan:**
+
+1. Crafter-Konstruktor erweitern: `new Crafter({ registry?: ModuleRegistry })`
+2. Component-Picker zeigt registrierte Module aus übergebener Registry
+3. Fallback auf Default Registry wenn keine übergeben
+4. Property Inspector nutzt Registry für Field-Rendering
+5. Dokumentation: "Custom Modules im Crafter" Guide
+
+**Status:** Offen (mittelfristig geplant, hohe Priorität)
+
 ## 11.3 Risiko-Matrix
 
 | Risiko-ID | Beschreibung                   | Wahrscheinlichkeit | Auswirkung | Priorität | Status         |
@@ -704,6 +847,10 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
    - Proxy-Endpoint implementieren
    - Token-basierte Client-Authentifizierung einführen
 
+5. **Crafter-Registry-API implementieren** (TD-013)
+   - Registry-Parameter im Crafter-Konstruktor
+   - Custom Modules im Component Picker anzeigen
+
 ### Mittelfristig (Phase 2 - Pilotierung)
 
 1. **Bundle Size optimieren** (R-003)
@@ -715,6 +862,14 @@ Der Media Service überträgt den API-Key direkt an das Frontend bzw. den Client
 
 3. **JSDoc vervollständigen** (TD-006)
    - API-Dokumentation generieren
+
+4. **Validator-Registry-Integration** (TD-011)
+   - Registry-basierte Validierung für LLM-Feedback
+   - CLI-Tool erweitern
+
+5. **Testing-Utilities für Custom Modules** (TD-010)
+   - Test-Helper entwickeln
+   - Developer Guide erstellen
 
 ### Langfristig (Phase 3+ - Community)
 

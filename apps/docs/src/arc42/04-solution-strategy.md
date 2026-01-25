@@ -122,12 +122,68 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 ) => OutputType;
 ```
 
+**Fundamentales Architektur-Prinzip: Module-zu-Node-Transformation (1:N)**
+
+Ein Modul im UJLC-Dokument entspricht **nicht zwingend einem einzelnen AST-Node**. Die Beziehung ist **1:N** – ein Modul kann mehrere AST-Nodes erzeugen. Dies ermöglicht komplexe Layouts ohne zusätzliche Module-Ebene.
+
+**Beispiel: Grid-Modul erzeugt 5 AST-Nodes**
+
+Ein einzelnes Grid-Modul mit 2 Kindern erzeugt: 1 Grid-Node + 2 Grid-Item-Wrapper-Nodes + 2 Kinder-Nodes. Die Grid-Items sind strukturelle Wrapper, die nicht editierbar sind (nur das Grid-Modul selbst).
+
+```typescript
+// Input: 1 Grid-Modul (UJLC)
+{
+  type: "grid",
+  meta: { id: "grid-001" },
+  slots: {
+    items: [
+      { type: "text", meta: { id: "text-001" }, ... },
+      { type: "button", meta: { id: "button-001" }, ... }
+    ]
+  }
+}
+
+// Output: 5 AST-Nodes (1 Grid + 2 Grid-Items + 2 Children)
+{
+  type: "grid",
+  id: generateUid(),
+  meta: {
+    moduleId: "grid-001",    // Welchem Modul gehört dieser Node?
+    isModuleRoot: true       // Ist dieser Node das Modul selbst? (editierbar)
+  },
+  props: {
+    children: [
+      {
+        type: "grid-item",   // Struktureller Wrapper (nicht editierbar)
+        id: generateUid(),
+        meta: { moduleId: "grid-001", isModuleRoot: false },
+        props: { children: [/* Text-Node */] }
+      },
+      {
+        type: "grid-item",   // Struktureller Wrapper (nicht editierbar)
+        id: generateUid(),
+        meta: { moduleId: "grid-001", isModuleRoot: false },
+        props: { children: [/* Button-Node */] }
+      }
+    ]
+  }
+}
+```
+
+**Konsequenzen der 1:N-Beziehung:**
+
+- **Flexible Layouts**: Strukturelle Wrapper-Nodes (z.B. Grid-Items) ermöglichen komplexe Layouts ohne Content-Duplikation
+- **Rendering**: Alle Nodes werden gerendert (einschließlich struktureller Wrapper)
+- **Editor-Integration**: Nur Nodes mit `meta.isModuleRoot === true` sind editierbar
+- **Modul-Tracking**: Grid-Items "wissen", dass sie zum Grid-Modul gehören (`meta.moduleId`)
+
 **Vorteile:**
 
 1. **Separation of Concerns**: Composition-Logik unabhängig von UI-Framework
 2. **Multiple Targets**: Ein AST, viele Rendering-Ziele
 3. **Feature-Vererbung**: Neue AST-Nodes funktionieren automatisch in allen Adaptern
 4. **Testbarkeit**: AST-Generierung kann isoliert getestet werden
+5. **Flexible Layouts**: 1:N-Beziehung ermöglicht strukturelle Wrapper ohne Content-Duplikation
 
 **Konsequenzen:**
 
@@ -136,8 +192,9 @@ type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 - Module-IDs bleiben erhalten (wichtig für Editor-Integration)
 - Mehrfachimplementierung für jeden Adapter
 - Adapter müssen synchron gehalten werden
+- Strukturelle Nodes sind Implementierungsdetails des Adapters
 
-**Referenz:** Siehe [ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering)
+**Referenz:** Siehe [ADR-003](./09-architecture-decisions#_9-3-adr-003-adapter-pattern-für-framework-agnostisches-rendering) und [Bausteinsicht 5.3.1.4](./05-building-block-view#_5-3-1-4-konzept-module-zu-node-transformation-1n)
 
 ### Strategie 4: Plugin-Architektur mit Module Registry
 

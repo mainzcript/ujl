@@ -7,37 +7,54 @@ description: "Wichtige Konzepte, die mehrere Bausteine betreffen"
 
 ## Übersicht der Konzepte
 
+Die folgenden querschnittlichen Konzepte betreffen mehrere Bausteine des UJL-Systems und sind architekturrelevant. Operative Aspekte (Logging, Caching, Security, i18n) werden in Abschnitt 8.13 kompakt behandelt.
+
 ```mermaid
 graph TB
-    subgraph DomainConcepts["Domain Concepts"]
-        AST["AST-basierte Composition"]
-        ModuleSystem["Modulares System"]
-        TokenSystem["Design Token System"]
+    subgraph CoreConcepts["Kern-Architektur"]
+        Domain["8.1 Domain Model<br/>(UJLC/UJLT/AST)"]
+        Validation["8.2 Schema-Validierung"]
+        Error["8.3 Fehlerbehandlung"]
     end
 
-    subgraph DevelopmentConcepts["Development Concepts"]
-        Validation["Schema-basierte Validierung"]
-        ErrorHandling["Fehlerbehandlung"]
-        StateManagement["Zustandsverwaltung"]
+    subgraph DataFlow["Datenfluss & State"]
+        State["8.4 Zustandsverwaltung"]
+        ImageLib["8.10 Image Library"]
+        RichText["8.11 Rich Text"]
     end
 
-    subgraph ArchitectureConcepts["Architecture Concepts"]
-        Layering["Schichten-Architektur"]
-        Extensibility["Erweiterbarkeit"]
-        Testing["Testbarkeit"]
+    subgraph UIArchitecture["UI-Architektur"]
+        Theme["8.5 Theming"]
+        Events["8.6 Event Handling"]
+        A11y["8.9 Barrierefreiheit"]
     end
 
-    subgraph UXConcepts["UX Concepts"]
-        Theming["Theming und Styling"]
-        EventHandling["Event Handling"]
-        Accessibility["Barrierefreiheit"]
+    subgraph CodeQuality["Code-Qualität"]
+        Test["8.7 Testbarkeit"]
+        Extend["8.8 Erweiterbarkeit"]
+        Build["8.12 Build/Deployment"]
     end
 
-    AST --> ModuleSystem
-    ModuleSystem --> TokenSystem
-    Validation --> ErrorHandling
-    Layering --> Extensibility
-    Theming --> EventHandling
+    subgraph Operations["8.13 Operations"]
+        Logging["Logging"]
+        Caching["Caching"]
+        Security["Security"]
+        I18n["i18n"]
+    end
+
+    Domain --> Validation
+    Validation --> Error
+    State --> ImageLib
+    State --> RichText
+    Theme --> Events
+    Events --> A11y
+    Extend --> Test
+
+    style CoreConcepts fill:#3b82f6
+    style DataFlow fill:#10b981
+    style UIArchitecture fill:#f59e0b
+    style CodeQuality fill:#8b5cf6
+    style Operations fill:#6b7280
 ```
 
 ## 8.1 Domain Model
@@ -1100,7 +1117,31 @@ function serializeNode(node: ProseMirrorNode): string {
 }
 ```
 
-## 8.12 Build und Deployment
+## 8.12 Operational Concerns (Überblick)
+
+Die folgenden operativen Aspekte sind für den Betrieb von UJL relevant, werden aber bewusst kurz gehalten, da sie eher zu Operations als zu Architektur gehören.
+
+### 8.12.1 Build-Strategie
+
+UJL verwendet **Vite** als Build-Tool mit optimierter Production-Konfiguration:
+
+- Tree-Shaking für ungenutzte Module
+- Code-Splitting für lazy Loading
+- Bundle-Größen-Monitoring via `rollup-plugin-visualizer`
+
+Details siehe [Deployment-View (Kapitel 7)](./07-deployment-view).
+
+### 8.12.2 Deployment-Optionen
+
+Drei Hauptszenarien sind dokumentiert:
+
+1. **Local Development**: Vite Dev Server mit HMR
+2. **CI/CD Pipeline**: GitLab CI mit Multi-Stage-Build
+3. **Production**: Docker Compose (Crafter + Media Service)
+
+Details siehe [Deployment-View (Kapitel 7)](./07-deployment-view).
+
+### 8.12 Logging und Monitoring (Architektur-Aspekte)
 
 ### 8.12.1 Monorepo-Struktur
 
@@ -1148,418 +1189,48 @@ pnpm version-packages
 pnpm publish -r --access public
 ```
 
-## 8.13 Logging und Monitoring
-
-### 8.13.1 Logging-Strategie
-
-UJL verwendet strukturiertes Logging über alle Komponenten hinweg:
-
-**Log-Levels:**
-
-| Level     | Verwendung                                 | Beispiel                          |
-| --------- | ------------------------------------------ | --------------------------------- |
-| **error** | Fehler, die Funktionalität beeinträchtigen | Module not found, API failure     |
-| **warn**  | Potenzielle Probleme                       | Deprecated field used, slow query |
-| **info**  | Wichtige Systemereignisse                  | Server started, build completed   |
-| **debug** | Detaillierte Entwicklungsinformationen     | Function calls, state changes     |
-
-**Namenskonvention:**
-
-```typescript
-// Format: [UJL:Package:Component] Message
-console.log("[UJL:Core:Composer] Composing document...");
-console.error("[UJL:Crafter:ModulePicker] Failed to load modules");
-console.warn("[UJL:Types:Validator] Using deprecated field structure");
-```
-
-**Kontext-basiertes Logging:**
-
-```typescript
-interface LogContext {
-	package: string; // 'core', 'crafter', 'adapter-svelte'
-	component: string; // 'Composer', 'ModulePicker'
-	action: string; // 'compose', 'validate', 'upload'
-	userId?: string;
-	documentId?: string;
-}
-
-function log(level: string, message: string, context: LogContext) {
-	const prefix = `[UJL:${context.package}:${context.component}]`;
-	console[level](`${prefix} ${message}`, {
-		action: context.action,
-		...context,
-	});
-}
-```
-
-### 8.13.2 Performance-Monitoring
-
-**Performance-Metriken:**
-
-```typescript
-// Composer Performance
-const start = performance.now();
-const ast = await composer.compose(document);
-const duration = performance.now() - start;
-
-if (duration > 100) {
-	console.warn(`[UJL:Core:Composer] Slow composition: ${duration}ms`, {
-		nodeCount: countNodes(ast),
-		moduleCount: document.ujlc.root.length,
-	});
-}
-```
-
-**Crafter-Metriken:**
-
-| Metrik               | Zielwert | Logging-Trigger |
-| -------------------- | -------- | --------------- |
-| Document Composition | <100ms   | >200ms → warn   |
-| Module Picker Load   | <50ms    | >100ms → warn   |
-| Image Upload         | <2s      | >5s → warn      |
-| Autosave             | <200ms   | >500ms → warn   |
-
-## 8.14 Caching-Strategie
-
-### 8.14.1 Client-Side Caching
-
-**Browser Cache (HTTP):**
-
-```nginx
-# Static Assets (Vite Build)
-location ~* \.(js|css|png|jpg|jpeg|gif|svg|woff|woff2)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
-
-# HTML (SSR Pages)
-location ~* \.html$ {
-    expires 5m;
-    add_header Cache-Control "public, must-revalidate";
-}
-```
-
-**Service Worker Cache (Optional):**
-
-```typescript
-// Workbox Strategy
-import { registerRoute } from "workbox-routing";
-import { CacheFirst, NetworkFirst } from "workbox-strategies";
-
-// Static Assets: Cache-First
-registerRoute(
-	({ request }) => request.destination === "script" || request.destination === "style",
-	new CacheFirst({ cacheName: "ujl-static" })
-);
-
-// API Calls: Network-First mit Fallback
-registerRoute(
-	({ url }) => url.pathname.startsWith("/api/"),
-	new NetworkFirst({ cacheName: "ujl-api", networkTimeoutSeconds: 3 })
-);
-```
-
-### 8.14.2 In-Memory Caching
+## 8.13 Operational Concerns (kompakt)
 
-**Module Registry Cache:**
-
-```typescript
-class ModuleRegistry {
-	private cache = new Map<string, Module>();
-
-	getModule(type: string): Module | undefined {
-		// Cache Hit
-		if (this.cache.has(type)) {
-			return this.cache.get(type);
-		}
+Die folgenden Abschnitte behandeln operative Aspekte, die für den Betrieb relevant sind, aber bewusst kurz gehalten werden, da sie eher zu Operations als zu Architektur gehören.
 
-		// Cache Miss: Load and Cache
-		const module = this.loadModule(type);
-		if (module) {
-			this.cache.set(type, module);
-		}
-		return module;
-	}
-}
-```
-
-**Composer Caching (Optional):**
-
-```typescript
-import LRU from "lru-cache";
+### 8.13.1 Logging-Strategie (Architektur-Aspekt)
 
-const astCache = new LRU<string, ASTNode>({
-	max: 100, // Max 100 Documents
-	maxSize: 50 * 1024 * 1024, // 50MB
-	sizeCalculation: ast => JSON.stringify(ast).length,
-});
-
-async function cachedCompose(document: UJLCDocument): Promise<ASTNode> {
-	const cacheKey = hashDocument(document);
+**Architektur-Entscheidung:** UJL nutzt strukturiertes, context-basiertes Logging mit standardisierten Log-Levels (`error`, `warn`, `info`, `debug`). Context-Tags wie `[Composer]`, `[Crafter]`, `[MediaService]` ermöglichen Filterung und Nachvollziehbarkeit.
 
-	if (astCache.has(cacheKey)) {
-		return astCache.get(cacheKey)!;
-	}
+**Performance-Monitoring:** Composer-Composition-Zeit und Crafter-Render-Zeit werden getrackt. Zielwert für Composition: <100ms (warn bei >200ms).
 
-	const ast = await composer.compose(document);
-	astCache.set(cacheKey, ast);
-	return ast;
-}
-```
+Konkrete Implementierung (Pino, Winston, etc.) ist deployment-abhängig.
 
-### 8.14.3 API-Response Caching
+### 8.13.2 Caching-Strategie (Architektur-Aspekt)
 
-**Media API (Payload CMS):**
+**Architektur-Entscheidung:** UJL nutzt Multi-Level-Caching:
 
-```typescript
-// Cache-Control Headers für Images
-app.get("/api/images/:id", async (req, res) => {
-	const image = await Image.findById(req.params.id);
-
-	res.setHeader("Cache-Control", "public, max-age=604800"); // 7 Tage
-	res.setHeader("ETag", image.etag);
-
-	if (req.headers["if-none-match"] === image.etag) {
-		return res.status(304).end();
-	}
-
-	res.json(image);
-});
-```
-
-### 8.14.4 CDN-Caching
+1. **Client-Side**: Browser-Cache (HTTP) + Optional Service Worker (Workbox)
+2. **In-Memory**: Module Registry Cache, Optional Composer AST-Cache (LRU)
+3. **API-Level**: ETag-basierte Cache-Control Headers für Media-API
+4. **CDN-Level**: CloudFlare/CDN für Static Assets und Media Files
 
-**CloudFlare Page Rules (Beispiel):**
-
-```yaml
-# Static Assets
-/assets/*:
-  Cache Level: Cache Everything
-  Edge Cache TTL: 1 month
-  Browser Cache TTL: 1 year
-
-# Media Files
-/media/*:
-  Cache Level: Cache Everything
-  Edge Cache TTL: 1 week
-  Browser Cache TTL: 1 week
+**Ziel:** Reduktion von Netzwerk-Requests und schnellere Wiederverwendung bereits geladener Ressourcen.
 
-# API
-/api/*:
-  Cache Level: Bypass
-```
+### 8.13.3 Security (Architektur-Aspekt)
 
-## 8.15 Security und Authorization
+**Architektur-Entscheidung:** Security ist in mehreren Schichten integriert:
 
-### 8.15.1 Input-Validierung
+1. **Input-Validierung**: Zod-Schema-Validierung für alle externen Inputs (UJLC/UJLT)
+2. **XSS-Prevention**: DOMPurify für Rich-Text-Sanitization, Svelte automatisches Escaping
+3. **CSRF-Protection**: Built-in in Payload CMS und SvelteKit
+4. **API-Authentifizierung**: API-Key-basiert für Media Service (mittelfristig OAuth geplant)
+5. **Rate Limiting**: Express-Rate-Limiter für Upload-Endpunkte
+6. **Secrets Management**: Environment Variables (Development), HashiCorp Vault (Production)
 
-Alle externen Inputs werden validiert:
+**Referenz:** Siehe [Risiken TD-009](./11-risks-and-technical-debt#_11-2-9-api-key-exposition-im-media-service) für bekannte Security-Schulden.
 
-```typescript
-// Schema-basierte Validierung
-const result = validateUJLCDocumentSafe(untrustedInput);
+### 8.13.4 Internationalisierung (i18n) - Status: Geplant
 
-if (!result.success) {
-	throw new ValidationError("Invalid document", result.error);
-}
+**Architektur-Vorbereitung:** UJL ist vorbereitet auf mehrsprachige Inhalte:
 
-// Zusätzliche Business-Rules
-if (document.ujlc.root.length > 1000) {
-	throw new Error("Document too large (max 1000 modules)");
-}
-```
+1. **Content-Level**: UJLC-Dokumente können Felder mit Locale-Keys enthalten (`{ "de": "Willkommen", "en": "Welcome" }`)
+2. **UI-Level**: Crafter nutzt `svelte-i18n` für UI-Übersetzungen
+3. **Formatting**: `date-fns` für lokalisierte Datum-/Zeit-Formatierung
 
-### 8.15.2 XSS-Prevention
-
-**Rich Text Sanitization:**
-
-```typescript
-import DOMPurify from "isomorphic-dompurify";
-
-function sanitizeHTML(html: string): string {
-	return DOMPurify.sanitize(html, {
-		ALLOWED_TAGS: ["p", "strong", "em", "a", "ul", "ol", "li"],
-		ALLOWED_ATTR: ["href", "title"],
-		ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-	});
-}
-```
-
-**Template Escaping (Svelte):**
-
-```svelte
-<!-- Automatisches Escaping -->
-<p>{userInput}</p>
-
-<!-- Sanitized HTML -->
-<div>{@html sanitize(richText)}</div>
-```
-
-### 8.15.3 CSRF-Protection
-
-**Payload CMS (built-in):**
-
-```typescript
-// CSRF Token automatisch in Forms
-export default buildConfig({
-	csrf: ["http://localhost:3000", "https://your-domain.com"],
-});
-```
-
-**SvelteKit (built-in):**
-
-```typescript
-// CSRF-Protection in Form Actions
-export const actions = {
-	default: async ({ request }) => {
-		// SvelteKit validiert CSRF-Token automatisch
-		const data = await request.formData();
-		// ...
-	},
-};
-```
-
-### 8.15.4 API-Key-Authentifizierung
-
-**Media Service:**
-
-```typescript
-// Middleware für API-Key-Check
-app.use("/api/images", (req, res, next) => {
-	const apiKey = req.headers["x-api-key"];
-
-	if (!apiKey || apiKey !== process.env.API_KEY) {
-		return res.status(401).json({ error: "Unauthorized" });
-	}
-
-	next();
-});
-```
-
-### 8.15.5 Rate Limiting
-
-**Express Rate Limiter:**
-
-```typescript
-import rateLimit from "express-rate-limit";
-
-const uploadLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 Minuten
-	max: 100, // Max 100 Uploads
-	message: "Too many uploads, please try again later",
-});
-
-app.post("/api/images", uploadLimiter, uploadHandler);
-```
-
-### 8.15.6 Secrets Management
-
-**Environment Variables:**
-
-```bash
-# .env (NICHT in Git committen)
-POSTGRES_PASSWORD=$(openssl rand -base64 32)
-PAYLOAD_SECRET=$(openssl rand -base64 32)
-API_KEY=$(openssl rand -base64 32)
-```
-
-**Vault Integration (Production):**
-
-```typescript
-// HashiCorp Vault
-import Vault from "node-vault";
-
-const vault = Vault({
-	endpoint: process.env.VAULT_ADDR,
-	token: process.env.VAULT_TOKEN,
-});
-
-const secrets = await vault.read("secret/data/ujl");
-const dbPassword = secrets.data.data.POSTGRES_PASSWORD;
-```
-
-## 8.16 Internationalisierung (i18n)
-
-### 8.16.1 Content-Mehrsprachigkeit (geplant)
-
-UJL unterstützt mehrsprachige Inhalte auf Document-Ebene:
-
-**UJLC mit i18n-Support:**
-
-```json
-{
-	"ujlc": {
-		"meta": { "version": "1.0.0" },
-		"i18n": {
-			"defaultLocale": "de",
-			"locales": ["de", "en", "fr"]
-		},
-		"root": [
-			{
-				"type": "text",
-				"meta": { "id": "text_1" },
-				"fields": {
-					"content": {
-						"de": "Willkommen",
-						"en": "Welcome",
-						"fr": "Bienvenue"
-					}
-				}
-			}
-		]
-	}
-}
-```
-
-### 8.16.2 UI-Mehrsprachigkeit
-
-**Crafter UI:**
-
-```typescript
-import { addMessages, init, getLocaleFromNavigator } from "svelte-i18n";
-
-// Translations laden
-addMessages("de", {
-	"module.add": "Modul hinzufügen",
-	"module.delete": "Modul löschen",
-});
-
-addMessages("en", {
-	"module.add": "Add Module",
-	"module.delete": "Delete Module",
-});
-
-// Initialisierung
-init({
-	fallbackLocale: "en",
-	initialLocale: getLocaleFromNavigator(),
-});
-```
-
-**Verwendung in Components:**
-
-```svelte
-<script>
-  import { _ } from 'svelte-i18n';
-</script>
-
-<button>{$_('module.add')}</button>
-```
-
-### 8.16.3 Date/Time/Number Formatting
-
-```typescript
-import { format } from "date-fns";
-import { de, enUS, fr } from "date-fns/locale";
-
-const locales = { de, en: enUS, fr };
-
-function formatDate(date: Date, locale: string): string {
-	return format(date, "PPP", { locale: locales[locale] });
-}
-
-// Outputs:
-// de: "24. Januar 2026"
-// en: "January 24, 2026"
-// fr: "24 janvier 2026"
-```
+**Status:** UI-Mehrsprachigkeit ist implementiert, Content-Mehrsprachigkeit ist für Phase 3 geplant.
