@@ -5,6 +5,8 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
 
 # Glossar
 
+Das Glossar definiert die Begriffe, die in UJL immer wieder vorkommen, und hält die Benennung über Kapitel hinweg stabil. Es soll weniger „lexikalisch“ sein als praktisch: Wer einen Begriff wie UJLC, AST, Module Registry oder Library Service liest, bekommt hier die Bedeutung, die im restlichen Dokument vorausgesetzt wird.
+
 ## UJL-spezifische Begriffe
 
 - **Unified JSON Layout (UJL)**  
@@ -78,13 +80,13 @@ description: "Wichtige Begriffe und Konzepte rund um UJL - von Modulen und Field
   Abstraktion im Core, die Image-IDs zu konkreten Bilddaten auflöst. Unterstützt Inline Storage (Data-URLs/Base64 im UJLC) und Backend Storage über einen Provider.
 
 - **Image Service**  
-  Crafter-Komponente, die Bildoperationen (Upload, List, Metadaten) kapselt. Je nach Storage-Modus nutzt sie Inline Storage oder den Library Service und migriert Dokumente beim Laden auf den konfigurierten Modus.
+  Crafter-Komponente, die Bildoperationen (Upload, List, Resolve, Delete) kapselt. Je nach Crafter-Konfiguration nutzt sie Inline Storage oder den Library Service. Dokumentseitige `_library`-Metadaten werden im aktuellen Stand nicht ausgewertet.
 
 - **Storage-Modus (Images)**  
   Konfiguration für die Speicherung von Bildern: `inline` (eingebettet im UJLC) oder `backend` (Referenzen über den Library Service).
 
 - **Migration (Storage-Modus)**  
-  Automatisches Umschreiben eines UJLC-Dokuments zwischen `inline` und `backend`, wenn Dokument-Modus und Crafter-Konfiguration nicht zusammenpassen.
+  Geplantes Umschreiben eines UJLC-Dokuments zwischen `inline` und `backend`, wenn Dokument und Crafter-Konfiguration nicht zusammenpassen. Im aktuellen Stand ist diese Migration als TODO vorgesehen und nicht implementiert.
 
 - **ImageProvider**  
   Schnittstelle, über die die Image Library Bilder aus externen Quellen (z. B. Library Service) auflösen kann.

@@ -5,6 +5,8 @@ description: "Wichtige Architekturentscheidungen und deren Begründung"
 
 # Architekturentscheidungen
 
+Die folgenden Entscheidungen beschreiben die wesentlichen Architektur-Weichenstellungen von UJL und ihre Konsequenzen für Erweiterbarkeit, Validierung, Rendering und Betrieb. Im Mittelpunkt stehen die Trennung von Content und Theme, die AST-Adapter-Architektur, das Registry-basierte Modulsystem, die Bildspeicherung (Inline vs. Backend) sowie die Tooling- und Technologieentscheidungen rund um Svelte, Zod und Monorepo-Management.
+
 ## 9.1 ADR-001: Strikte Trennung von Content (UJLC) und Design (UJLT)
 
 Um Brand-Compliance und Accessibility nicht nur als Guidelines, sondern architektonisch zu erzwingen, trennt UJL Content und Design strikt in zwei Dokumenttypen. UJLC (`.ujlc.json`) enthält ausschließlich strukturierte Inhalte (Module, Felder, Slots) und UJLT (`.ujlt.json`) Design-Tokens (z. B. Farben, Typografie, Spacing), die im Theme gepflegt werden und die ein Composer zur Laufzeit in einen AST zusammenführt. Das sorgt für konsistente CI und schnelle Theme-Updates, reduziert aber Flexibilität für per-Dokument-Design und erhöht den initialen Setup- und Lernaufwand.
@@ -51,7 +53,7 @@ Für das Monorepo verwendet UJL pnpm Workspaces (effizientes Dependency-Manageme
 
 Da der Crafter viele Interaktionen umfasst, die Unit-Tests nicht realistisch abbilden (z. B. Drag & Drop, Tree-Navigation, Preview-Sync), nutzt UJL Playwright für E2E-Tests in echten Browsern. Stabilität wird über test-spezifische Attribute (z. B. `data-testid`) erreicht und Debugging über Artefakte wie Screenshots/Videos unterstützt. Der Preis sind längere Laufzeiten, potenzielle Flakiness bei komplexen UI-Flows und zusätzlicher Setup-Aufwand.
 
-## 9.12 Tool-Entscheidungen (kompakt)
+## 9.12 Tool-Entscheidungen
 
 Die folgenden Tool-Entscheidungen sind für die Entwicklungs-Infrastruktur relevant, haben aber geringeren architektonischen Einfluss als die Kern-ADRs.
 

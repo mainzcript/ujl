@@ -5,9 +5,7 @@ description: "Wichtige Konzepte, die mehrere Bausteine betreffen"
 
 # Querschnittliche Konzepte
 
-## Übersicht der Konzepte
-
-Die folgenden querschnittlichen Konzepte betreffen mehrere Bausteine des UJL-Systems und sind architekturrelevant. Operative Aspekte (Logging, Caching, Security, i18n) werden in Abschnitt 8.13 kompakt behandelt.
+UJL ist so aufgebaut, dass sich wenige Prinzipien durch alle Bausteine ziehen: Inhalte und Design liegen in validierbaren JSON-Dokumenten (UJLC/UJLT), der Core komponiert daraus einen AST, und Adapter rendern diesen in DOM. Der Crafter nutzt denselben Datenvertrag und ergänzt Editor-spezifische Mechanik wie Selektion, Tree-Navigation und Bildverwaltung. Wer diese Linie verstanden hat, kann sich im Projekt schnell orientieren.
 
 ```mermaid
 graph TB
@@ -32,10 +30,10 @@ graph TB
     subgraph CodeQuality["Code-Qualität"]
         Test["8.7 Testbarkeit"]
         Extend["8.8 Erweiterbarkeit"]
-        Build["8.12 Build/Deployment"]
+        Build["8.12 Build und Distribution"]
     end
 
-    subgraph Operations["8.13 Operations"]
+    subgraph Operations["8.13 Betrieb"]
         Logging["Logging"]
         Caching["Caching"]
         Security["Security"]
@@ -88,7 +86,7 @@ interface UJLTDocument {
 
 ### 8.1.1.1 Embedding-Felder (AI-ready)
 
-UJLC ist so aufgebaut, dass Module zusätzlich zu ihren fachlichen Daten auch maschinenlesbare Signale tragen können. Dafür existieren im Dokument Metadaten, die Embeddings referenzieren, ohne dass UJL heute bereits eine Embedding-Pipeline mitliefert.
+UJLC ist so aufgebaut, dass Module zusätzlich zu ihren fachlichen Daten auch maschinenlesbare Signale tragen können. Dafür existieren im Dokument Metadaten, die Embeddings referenzieren, ohne dass UJL eine Embedding-Pipeline mitliefert.
 
 In der Praxis sind zwei Felder vorgesehen: Im Dokument-Meta identifiziert `_embedding_model_hash` das verwendete Embedding-Modell, und jedes Modul trägt in `meta._embedding` ein numerisches Vektor-Embedding (oft anfangs leer). Diese Struktur erlaubt später Use Cases wie semantische Suche, das Erkennen von betroffenen Modulen über Kosinusähnlichkeit und einen Editing-Workflow, der Änderungen gezielt auf Teilbäume begrenzt.
 
@@ -110,12 +108,7 @@ flowchart LR
     AdapterWeb --> WebComponents["Web Components"]
 ```
 
-**Vorteile:**
-
-- **Entkopplung**: Content-Struktur unabhängig vom Rendering-Framework
-- **Erweiterbarkeit**: Neue Adapter ohne Änderung der Core-Logik
-- **Testbarkeit**: AST-Generierung isoliert testbar
-- **ID-Propagation**: Modul-IDs werden vom UJLC durch den AST bis zum DOM durchgereicht
+Diese Trennung entkoppelt die Content-Struktur vom Rendering-Framework, macht Adapter austauschbar, erlaubt isolierte Tests der AST-Erzeugung und sorgt dafür, dass Modul-IDs vom UJLC über den AST bis ins DOM durchgereicht werden können.
 
 **AST Node Struktur:**
 
@@ -131,18 +124,11 @@ type UJLAbstractNode = {
 };
 ```
 
-**Metadaten-Felder:**
-
-- `meta.moduleId`: Referenz zur ursprünglichen Modul-ID im UJLC-Dokument. Wird verwendet für Click-to-Select im Editor und `data-ujl-module-id` Attribute.
-- `meta.isModuleRoot`: Kennzeichnet, ob dieser Node das Root-Element eines editierbaren Moduls ist. Layout-Wrapper und Kinder-Nodes haben `isModuleRoot=false`.
+Für die Editor-Integration kann ein Node Metadaten tragen: `meta.moduleId` referenziert die Modul-ID aus dem UJLC-Dokument (u.a. für Click-to-Select und `data-ujl-module-id`). `meta.isModuleRoot` unterscheidet editierbare Modulwurzeln von Layout-Wrappern oder Kindknoten.
 
 ### 8.1.3 Modulares System
 
-Module sind die Grundbausteine des UJL-Systems. Jedes Modul definiert:
-
-- **Fields**: Eingabefelder mit Validierung und Default-Werten
-- **Slots**: Container für verschachtelte Module
-- **Compose-Methode**: Transformation zu AST-Nodes
+Module sind die Grundbausteine des UJL-Systems. Ein Modul beschreibt seine Fields (mit Validierung und Default-Werten), seine Slots als Container für verschachtelte Module und eine `compose`-Methode, die die Daten in AST-Nodes übersetzt.
 
 ```mermaid
 classDiagram
@@ -296,28 +282,20 @@ class NumberField extends FieldBase<number, NumberFieldConfig> {
 
 ### 8.3.1 Error-Strategie
 
-Das UJL-Framework verfolgt eine **graceful degradation**-Strategie:
-
-| Kontext       | Strategie   | Verhalten                                               |
-| ------------- | ----------- | ------------------------------------------------------- |
-| Validierung   | Safe Parse  | Rückgabe von Result-Objekten                            |
-| Composition   | Error Nodes | Unbekannte Module werden als Error-Komponente gerendert |
-| Image Loading | Fallback    | Placeholder bei fehlenden Bildern                       |
-| API Calls     | Try-Catch   | Benutzerfreundliche Fehlermeldungen                     |
+UJL ist so gebaut, dass Fehler möglichst lokal bleiben. Bei Validierung kann statt Exceptions ein Result-Objekt zurückgegeben werden. In der Composition werden unbekannte Module als Error-Node dargestellt, statt den Renderprozess abzubrechen. Beim Auflösen von Bildern führt ein fehlender Treffer zu `null`, sodass Komponenten einen Placeholder anzeigen können. Im Crafter werden Backend-Probleme (z.B. nicht erreichbare Library-API) abgefangen und als UI-Feedback sichtbar gemacht.
 
 ### 8.3.2 Error Node Pattern
 
 Bei unbekannten Modultypen erzeugt der Composer einen Error-Node anstelle eines Absturzes:
 
 ```typescript
-// In Composer.composeModule()
+// packages/core/src/composer.ts (vereinfacht)
 if (!module) {
 	return {
 		type: "error",
-		id: moduleData.meta.id,
-		props: {
-			message: `Unknown module type: ${moduleData.type}`,
-		},
+		props: { message: `Unknown module type: ${moduleData.type}` },
+		id: generateUid(),
+		meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
 	};
 }
 ```
@@ -339,147 +317,17 @@ if (!result.success) {
 // ujlc → root → 0 → fields → content: Expected string, received number
 ```
 
-### 8.3.4 Error-Kategorien
+### 8.3.4 Umsetzung im Repository
 
-UJL unterscheidet zwischen verschiedenen Fehlerkategorien:
+Es gibt keine zentrale Error-Code-Taxonomie und kein projektweit einheitliches Structured-Logging. Fehlerbehandlung passiert dort, wo sie gebraucht wird: Validierung liefert Zod-Issues inklusive Pfad (siehe 8.3.3), die Composition rendert unbekannte Module als `type: "error"` (siehe 8.3.2), und `ImageLibrary.resolve()` liefert bei fehlenden Bildern `null`, sodass die UI einen Placeholder zeigen kann.
 
-| Kategorie            | Schweregrad | Beispiel              | Behandlung                         |
-| -------------------- | ----------- | --------------------- | ---------------------------------- |
-| **Validation Error** | Mittel      | Schema-Verletzung     | Safe Parse, Fehlermeldung          |
-| **Runtime Error**    | Hoch        | Module nicht gefunden | Error Node, Graceful Degradation   |
-| **Network Error**    | Mittel      | API nicht erreichbar  | Retry, Fallback, User Notification |
-| **User Error**       | Niedrig     | Ungültige Eingabe     | Inline-Validierung, Hilfetext      |
-| **System Error**     | Hoch        | Out of Memory         | Logging, Monitoring Alert          |
+### 8.3.5 Recovery und Robustheit
 
-**Error-Code-Konvention:**
+Generische Retry-/Backoff-Helfer sind nicht als gemeinsame Utility implementiert. An einzelnen Stellen gibt es kleine, zweckgebundene Retries, z.B. wenn der Crafter nach einer asynchronen Composition ein DOM-Element für Scroll/Selection wiederfinden muss. Für Backend-Storage prüft der Crafter die Erreichbarkeit der Library-API über `checkConnection()` und kann Fehler in der UI anzeigen.
 
-```typescript
-enum UJLErrorCode {
-	// Validation Errors (1xxx)
-	VALIDATION_SCHEMA = 1001,
-	VALIDATION_TYPE = 1002,
-	VALIDATION_REQUIRED = 1003,
+### 8.3.6 Logging
 
-	// Composition Errors (2xxx)
-	COMPOSITION_MODULE_NOT_FOUND = 2001,
-	COMPOSITION_CIRCULAR_DEPENDENCY = 2002,
-	COMPOSITION_INVALID_SLOT = 2003,
-
-	// Image Errors (3xxx)
-	MEDIA_NOT_FOUND = 3001,
-	MEDIA_UPLOAD_FAILED = 3002,
-	MEDIA_INVALID_FORMAT = 3003,
-
-	// System Errors (5xxx)
-	SYSTEM_INTERNAL = 5000,
-	SYSTEM_TIMEOUT = 5001,
-}
-```
-
-### 8.3.5 Error-Recovery-Strategien
-
-**Automatische Recovery:**
-
-```typescript
-// Retry mit Exponential Backoff
-async function fetchWithRetry(url: string, maxRetries = 3) {
-	for (let i = 0; i < maxRetries; i++) {
-		try {
-			return await fetch(url);
-		} catch (error) {
-			if (i === maxRetries - 1) throw error;
-			await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-		}
-	}
-}
-```
-
-**Fallback-Mechanismen:**
-
-```typescript
-// Image Fallback Chain
-async function resolveImage(id: string): Promise<ImageData> {
-	try {
-		// 1. Try Backend API
-		return await fetchImageFromAPI(id);
-	} catch {
-		try {
-			// 2. Try Local Cache
-			return await getImageFromCache(id);
-		} catch {
-			// 3. Return Placeholder
-			return DEFAULT_PLACEHOLDER;
-		}
-	}
-}
-```
-
-### 8.3.6 Error-Logging-Konventionen
-
-**Log-Struktur:**
-
-```typescript
-interface ErrorLog {
-	timestamp: string;
-	level: "error" | "warn" | "info";
-	code: UJLErrorCode;
-	message: string;
-	context: {
-		component: string;
-		action: string;
-		userId?: string;
-	};
-	stack?: string;
-	metadata?: Record<string, unknown>;
-}
-```
-
-**Logging in verschiedenen Kontexten:**
-
-```typescript
-// Crafter Editor
-console.error("[UJL:Editor]", {
-	code: UJLErrorCode.COMPOSITION_MODULE_NOT_FOUND,
-	message: 'Module "hero" not found in registry',
-	context: { component: "ModulePicker", action: "addModule" },
-});
-
-// Core Composer
-console.error("[UJL:Composer]", {
-	code: UJLErrorCode.VALIDATION_SCHEMA,
-	message: "Invalid UJLC document",
-	context: { component: "Composer", action: "compose" },
-	metadata: { documentId: "abc123" },
-});
-
-// Payload CMS
-console.error("[UJL:Image]", {
-	code: UJLErrorCode.MEDIA_UPLOAD_FAILED,
-	message: "Image upload failed",
-	context: { component: "ImageUpload", action: "upload" },
-	metadata: { fileName: "image.jpg", size: 5242880 },
-});
-```
-
-**Structured Logging (Production):**
-
-```typescript
-import pino from "pino";
-
-const logger = pino({
-	level: process.env.LOG_LEVEL || "info",
-	formatters: {
-		level: label => ({ level: label }),
-	},
-});
-
-logger.error({
-	code: UJLErrorCode.MEDIA_NOT_FOUND,
-	message: "Image not found",
-	context: { component: "MediaResolver", action: "resolve" },
-	imageId: "img_123",
-});
-```
+Der Crafter nutzt eine interne Logger-Utility für Warnungen/Fehler (z.B. bei fehlgeschlagenen UI-Aktionen oder Backend-Verbindungsproblemen). In anderen Paketen wird überwiegend mit einfachen Fehlerobjekten/Exceptions gearbeitet. Ein gemeinsames Logging-Konzept für produktiven Betrieb ist damit nicht technisch verankert.
 
 ## 8.4 Zustandsverwaltung (State Management)
 
@@ -488,18 +336,17 @@ logger.error({
 Der Crafter verwendet Svelte 5 Runes für reaktive Zustandsverwaltung:
 
 ```typescript
-// Mutable State
-let ujlcDocument = $state<UJLCDocument>(initialDoc);
-let expandedNodeIds = $state<Set<string>>(new Set());
+// packages/crafter/src/lib/stores/crafter-store.svelte.ts (Auszug)
+let _ujlcDocument = $state<UJLCDocument>(initialUjlcDocument);
+let _selectedNodeId = $state<string | null>(null);
 
-// Derived State (computed, async)
-const ast = $derived.by(async () => await composer.compose(ujlcDocument));
+const rootSlot = $derived(_ujlcDocument.ujlc.root);
+const meta = $derived(_ujlcDocument.ujlc.meta);
+const images = $derived(_ujlcDocument.ujlc.images);
 
-// Props (immutable from parent)
-let { tokenSet, mode } = $props<{
-	tokenSet: UJLTTokenSet;
-	mode: "light" | "dark" | "system";
-}>();
+const imageService = $derived.by(() =>
+	createImageService(meta._library, () => images, updateImages)
+);
 ```
 
 ### 8.4.2 Unidirectional Data Flow
@@ -508,9 +355,9 @@ Das UJL-Framework folgt dem **Flux-Pattern** mit unidirektionalem Datenfluss:
 
 ```mermaid
 flowchart TB
-    State["Central State (app.svelte)"] -->|"Props"| Children["Child Components"]
-    Children -->|"Events"| Context["Crafter Context"]
-    Context -->|"Mutations"| State
+    State["Crafter Store (crafter-store.svelte.ts)"] -->|"Props/Derived"| Children["UI Components"]
+    Children -->|"Actions/Events"| Context["Crafter Context (identisch zum Store)"]
+    Context -->|"State Updates"| State
 
     subgraph ReadOnly["Read-Only"]
         Children
@@ -521,35 +368,47 @@ flowchart TB
     end
 ```
 
-**Regeln:**
-
-1. **State-Ownership**: Nur `app.svelte` besitzt den globalen State
-2. **Props sind Read-Only**: Kinder empfangen Daten als Props
-3. **Mutations über Context**: Änderungen nur über Context-API
-4. **Functional Updates**: Immutable Update-Pattern
+In der Praxis ist vor allem wichtig, wie Änderungen durch das System laufen: UI-Komponenten lesen State und Derived Values aus dem Store. Mutationen passieren über Actions und `operations`, die immutable Updates durchführen. Dadurch bleiben Seiteneffekte begrenzt und Editor-Operationen (Move, Paste, Insert) verhalten sich nachvollziehbar.
 
 ### 8.4.3 Crafter Context API
 
-Die Context-API bündelt alle State-Mutationen:
+Der Crafter stellt den Store über Svelte Context bereit. Der Context-Typ ist identisch zum Store (`CrafterContext = CrafterStore`), damit Komponenten eine einheitliche API verwenden und keine zweite Schnittstelle gepflegt werden muss.
 
 ```typescript
 interface CrafterContext {
-	// State Updates (Functional)
-	updateRootSlot(fn: (root: UJLCModuleObject[]) => UJLCModuleObject[]): void;
-	updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
-
 	// Selection
+	readonly selectedNodeId: string | null;
 	setSelectedNodeId(nodeId: string | null): void;
-	getSelectedNodeId(): string | null;
 
-	// Tree Operations
+	// Functional Updates
+	updateRootSlot(fn: (root: UJLCSlotObject) => UJLCSlotObject): void;
+	updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
+	updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void;
+
+	// Document Operations (Auszug)
 	operations: {
-		copyNode(nodeId: string): void;
-		cutNode(nodeId: string): void;
-		pasteNode(targetId: string, position: "before" | "after" | "into"): void;
-		deleteNode(nodeId: string): void;
-		moveNode(nodeId: string, targetId: string, position: string): void;
-		insertNode(moduleType: string, targetId: string, position: string): void;
+		copyNode(nodeId: string): UJLCModuleObject | null;
+		cutNode(nodeId: string): UJLCModuleObject | null;
+		pasteNode(
+			node: UJLCModuleObject,
+			targetId: string,
+			slotName?: string,
+			position?: "before" | "after" | "into"
+		): string | null;
+		deleteNode(nodeId: string): boolean;
+		moveNode(
+			nodeId: string,
+			targetId: string,
+			slotName?: string,
+			position?: "before" | "after" | "into"
+		): boolean;
+		reorderNode(nodeId: string, targetId: string, position: "before" | "after"): boolean;
+		insertNode(
+			componentType: string,
+			targetId: string,
+			slotName?: string,
+			position?: "before" | "after" | "into"
+		): string | null;
 	};
 }
 ```
@@ -557,10 +416,10 @@ interface CrafterContext {
 **Functional Update Pattern:**
 
 ```typescript
-// Direkte Mutation (verboten)
+// Direkte Mutation (vermeiden)
 // ujlcDocument.ujlc.root.push(newModule);
 
-// Functional Update (empfohlen)
+// Functional Update
 context.updateRootSlot(root => [...root, newModule]);
 ```
 
@@ -612,45 +471,27 @@ type OklchColor = {
 };
 ```
 
-**Shade-System (11 Abstufungen pro Flavor):**
-
-| Shade   | Lightness | Verwendung            |
-| ------- | --------- | --------------------- |
-| 50      | 97%       | Hintergründe (hell)   |
-| 100-400 | 90-70%    | Helle Akzente         |
-| 500     | 60%       | Basis-Farbe           |
-| 600-900 | 50-25%    | Dunkle Akzente        |
-| 950     | 15%       | Hintergründe (dunkel) |
+Ein Flavor enthält Shades von `"50"` bis `"950"`. `"50"` ist dabei die hellste Abstufung und `"950"` die dunkelste. Welche konkreten OKLCH-Werte ein Theme dafür nutzt, hängt von der Palette ab. Zusätzlich enthält das Theme Referenzen für Light/Dark sowie Foreground-Zuordnungen (als Shade-Referenzen), damit Textfarben ohne separate Laufzeitberechnung konsistent aufgelöst werden können.
 
 ### 8.5.3 CSS Custom Properties
 
 Tokens werden zur Laufzeit als CSS Custom Properties injiziert:
 
 ```typescript
-function generateThemeCSSVariables(tokens: UJLTTokenSet): Record<string, string> {
-	return {
-		// Colors
-		"--primary-500": "oklch(60% 0.15 260)",
-		"--primary-light": "oklch(97% 0.01 260)",
-		"--primary-dark": "oklch(20% 0.05 260)",
+import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
 
-		// Typography
-		"--typography-base-font": '"Inter", sans-serif',
-		"--typography-base-size-md": "16px",
-
-		// Spacing and Radius
-		"--spacing": "1rem",
-		"--radius": "0.5rem",
-	};
-}
+const cssVars = generateThemeCSSVariables(tokens);
+// Beispielwerte (Format ist für `oklch(var(--...))` gedacht):
+// cssVars["--primary-500"] === "54.6% 0.245 262.881"
+// cssVars["--radius"] === "0.75rem"
 ```
 
 **Anwendung in Komponenten:**
 
 ```css
 .button-primary {
-	background-color: var(--primary-500);
-	color: var(--primary-light-foreground-primary);
+	background-color: oklch(var(--primary-500));
+	color: oklch(var(--primary-light-foreground-primary));
 	border-radius: var(--radius);
 	padding: var(--spacing);
 }
@@ -660,46 +501,29 @@ function generateThemeCSSVariables(tokens: UJLTTokenSet): Record<string, string>
 
 Das Theme-System unterstützt drei Modi:
 
-| Mode     | Verhalten                        |
-| -------- | -------------------------------- |
-| `light`  | Helle Varianten (Shade 50-400)   |
-| `dark`   | Dunkle Varianten (Shade 600-950) |
-| `system` | Folgt OS-Präferenz               |
+| Mode     | Verhalten              |
+| -------- | ---------------------- |
+| `light`  | Erzwingt hellen Modus  |
+| `dark`   | Erzwingt dunklen Modus |
+| `system` | Folgt OS-Präferenz     |
 
 ## 8.6 Event Handling
 
-### 8.6.1 Event Callback Pattern
+### 8.6.1 DOM-Hook für Editor-Integration
 
-Module-Komponenten unterstützen ein einheitliches Event-Callback-Pattern für Editor-Integration:
-
-```typescript
-interface NodeComponentProps {
-	node: UJLAbstractNode;
-	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
-}
-```
-
-**Factory-Funktion für Click-Handler:**
+Der Svelte-Adapter unterstützt Editor-Integration über DOM-Attribute: Wenn `showMetadata={true}` gesetzt ist, erhalten gerenderte Elemente mit `meta.moduleId` ein `data-ujl-module-id`. Der Crafter setzt darauf auf und nutzt Event-Delegation im Preview, um Klicks einem Modul zuzuordnen. Ob ein Klick wirklich selektierbar ist, entscheidet der Crafter über den AST (`meta.isModuleRoot === true`).
 
 ```typescript
-function createModuleClickHandler(
-	moduleId: string | undefined,
-	eventCallback: ((id: string) => void) | undefined
-): ((event: MouseEvent) => void) | undefined {
-	if (!eventCallback || !moduleId) return undefined;
+// packages/adapter-svelte/... (Schema)
+type Props = { node: UJLAbstractNode; showMetadata?: boolean };
 
-	return (event: MouseEvent) => {
-		event.preventDefault();
-		event.stopPropagation();
-		eventCallback(moduleId);
-	};
-}
+// in Node-Komponenten
+data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
 ```
 
 ### 8.6.2 Bidirektionale Synchronisation
 
-Der Crafter implementiert bidirektionale Synchronisation zwischen Tree und Preview:
+Tree und Preview hängen am selben Store. Selektion im Tree führt zu Highlighting und Scroll im Preview. Klicks im Preview werden über `data-ujl-module-id` dem Modulbaum zugeordnet; bevor selektiert wird, prüft der Crafter im AST, ob es sich um eine editierbare Modulwurzel handelt.
 
 ```mermaid
 sequenceDiagram
@@ -713,25 +537,33 @@ sequenceDiagram
     Preview->>Preview: scrollIntoView()
 
     Note over Tree,Preview: Preview zu Tree
-    Preview->>State: eventCallback(id)
+    Preview->>State: click auf [data-ujl-module-id]
     State->>Tree: expandToNode(id)
     Tree->>Tree: scrollIntoView()
 ```
 
 ### 8.6.3 Event-Propagation Control
 
-Um korrekte Modul-Selektion zu gewährleisten:
+Damit der Preview im Editor-Modus nicht „wie eine echte Website“ reagiert, werden Default-Aktionen (z.B. Link-Navigation) unterdrückt und Klicks gezielt in Selektion übersetzt:
 
 ```typescript
-function handleClick(event: MouseEvent) {
-	// Verhindert Standard-Aktionen (Links, Buttons)
-	event.preventDefault();
+function handlePreviewClick(event: MouseEvent) {
+	const clicked = (event.target as HTMLElement).closest("[data-ujl-module-id]");
+	if (!clicked) return;
 
-	// Verhindert Bubbling zu Parent-Modulen
+	// Im Editor-Modus Navigation/Default-Aktionen im Preview unterbinden
+	event.preventDefault();
 	event.stopPropagation();
 
-	// Callback mit Modul-ID
-	eventCallback(node.id);
+	const moduleId = clicked.getAttribute("data-ujl-module-id");
+	if (!moduleId || !ast) return;
+
+	// Nur editierbare Modulwurzeln (meta.isModuleRoot === true) sind selektierbar
+	const editableNode = findEditableNodeByModuleId(ast, moduleId);
+	if (!editableNode) return;
+
+	crafter.expandToNode(editableNode.meta.moduleId);
+	crafter.setSelectedNodeId(editableNode.meta.moduleId);
 }
 ```
 
@@ -739,58 +571,43 @@ function handleClick(event: MouseEvent) {
 
 ### 8.7.1 Test-Strategie
 
-Das UJL-Framework verfolgt eine mehrschichtige Test-Strategie:
+Tests sind hier nicht nur „nice to have“, weil viele Regeln über Datenverträge, Composition und Editor-Interaktion durchgesetzt werden. Unit- und Integration-Tests sichern Core-Logik (Fields, Modules, Composer) ab, E2E-Tests prüfen Crafter-Workflows, die erst im Browser vollständig sichtbar werden (DOM, Drag & Drop, Clipboard).
 
-| Ebene       | Framework  | Fokus                      | Coverage-Ziel  |
-| ----------- | ---------- | -------------------------- | -------------- |
-| Unit        | Vitest     | Fields, Modules, Utilities | 80%+           |
-| Integration | Vitest     | Composer, Registry         | 70%+           |
-| E2E         | Playwright | User Workflows             | Critical Paths |
+| Ebene       | Framework  | Fokus                        |
+| ----------- | ---------- | ---------------------------- |
+| Unit        | Vitest     | Fields, Module-Logik, Utils  |
+| Integration | Vitest     | Composer, Registry, Services |
+| E2E         | Playwright | Crafter User Workflows       |
 
 ### 8.7.2 Test Utilities
 
 **Mock Data Factories:**
 
 ```typescript
-// In tests/mockData.ts
-export function createMockTree(): UJLCModuleObject[] {
+// packages/crafter/tests/mockData.ts (Auszug)
+export function createMockTree(): UJLCSlotObject {
 	/* ... */
 }
 export function createMockTokenSet(): UJLTTokenSet {
 	/* ... */
 }
-export function createMockNode(type: string): UJLAbstractNode {
-	/* ... */
-}
 ```
 
-**Test Attributes (Conditional):**
-
-```typescript
-// In test-attrs.ts
-export function testId(id: string): Record<string, string> {
-	if (import.meta.env.PUBLIC_TEST_MODE !== "true") return {};
-	return { "data-testid": id };
-}
-```
-
-**Vorteile:**
-
-- Zero Runtime-Overhead in Production
-- Stabile Selektoren für E2E-Tests
-- Kein Aufblähen des DOM ohne Test-Modus
+Der Crafter bringt ein `testMode`-Flag in der Store-Konfiguration mit. Die E2E-Tests arbeiten vor allem über stabile Attribute wie `data-ujl-module-id`.
 
 ### 8.7.3 Vitest-Konfiguration
 
 ```typescript
-// vitest.config.ts (Standard für alle Packages)
+// Beispiel: packages/core/vitest.config.ts
 export default defineConfig({
 	test: {
-		include: ["**/*.test.ts"],
+		globals: true,
 		environment: "node",
+		include: ["src/**/*.test.{js,ts}"],
+		exclude: ["node_modules/**", "dist/**"],
 		coverage: {
 			provider: "v8",
-			reporter: ["text", "lcov"],
+			reporter: ["text", "json", "html"],
 		},
 	},
 });
@@ -845,13 +662,18 @@ class CustomModule extends ModuleBase {
 
 	readonly slots = [{ key: "content", slot: new Slot({ label: "Content", max: 10 }) }];
 
-	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
+	async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+		const children = await Promise.all(
+			(moduleData.slots.content ?? []).map(child => composer.composeModule(child))
+		);
+
 		return {
 			type: "custom",
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
 			props: {
 				title: this.fields[0].field.parse(moduleData.fields.title),
-				children: moduleData.slots.content.map(child => composer.composeModule(child)),
+				children,
 			},
 		};
 	}
@@ -868,6 +690,7 @@ composer.registerModule(new CustomModule());
 class EmailField extends FieldBase<string, EmailFieldConfig> {
 	protected readonly defaultConfig = {
 		label: "Email",
+		description: "Email address",
 		default: "",
 		placeholder: "name@example.com",
 	};
@@ -888,8 +711,8 @@ class EmailField extends FieldBase<string, EmailFieldConfig> {
 		return trimmed;
 	}
 
-	getFieldType(): string {
-		return "email";
+	getFieldType(): FieldType {
+		return "text";
 	}
 }
 ```
@@ -899,21 +722,29 @@ class EmailField extends FieldBase<string, EmailFieldConfig> {
 ```typescript
 // Custom Storage Backend
 class S3ImageService implements ImageService {
-	async upload(file: File, metadata: ImageMetadata): Promise<ImageEntry> {
-		// S3 Upload Logic
-		const key = await this.s3Client.upload(file);
-		const url = await this.s3Client.getSignedUrl(key);
-		return {
-			src: url,
-			metadata: metadata,
-		};
+	async checkConnection(): Promise<ConnectionStatus> {
+		// ...
 	}
 
-	async list(): Promise<ImageEntry[]> {
-		// S3 List Logic
+	async upload(file: File, metadata: ImageMetadata): Promise<UploadResult> {
+		// ...
 	}
 
-	// ... weitere Methoden
+	async get(imageId: string): Promise<ImageEntry | null> {
+		// ...
+	}
+
+	async list(): Promise<Array<{ id: string; entry: ImageEntry }>> {
+		// ...
+	}
+
+	async delete(imageId: string): Promise<boolean> {
+		// ...
+	}
+
+	async resolve(id: string | number): Promise<ImageSource | null> {
+		// ...
+	}
 }
 ```
 
@@ -923,31 +754,32 @@ class S3ImageService implements ImageService {
 
 Module erzeugen semantisch korrektes HTML:
 
-| Modul     | HTML-Element | ARIA-Attribute             |
+| Modul     | HTML-Element | A11y-Attribute             |
 | --------- | ------------ | -------------------------- |
 | Text      | p, h1-h6     | -                          |
 | Button    | button, a    | role="button" (wenn Link)  |
-| Image     | img          | alt (required)             |
+| Image     | img          | alt                        |
 | Container | section, div | aria-label (falls gesetzt) |
 
 ### 8.9.2 Farbkontrast
 
-Das OKLCH-System gewährleistet WCAG-konforme Kontraste:
+Kontraste werden im UJLT-Token-Set über Referenzen modelliert: Für jeden Hintergrund-Flavor enthält das Theme eine `lightForeground`/`darkForeground`-Map, die pro Vordergrund-Flavor auf einen Shade im jeweiligen Vordergrund-Flavor zeigt. Zur Laufzeit wird daraus eine konkrete OKLCH-Farbe aufgelöst.
 
 ```typescript
-function resolveForegroundColor(
-	background: OklchColor,
-	foreground: "primary" | "secondary" | "muted"
-): OklchColor {
-	// Berechnet kontrastreiches Vordergrund-Farbsystem
-	const contrastRatio = calculateContrastRatio(background, candidate);
-
-	// WCAG AA: 4.5:1 für normalen Text
-	// WCAG AAA: 7:1 für normalen Text
-	if (contrastRatio >= 4.5) return candidate;
-
-	// Fallback zu high-contrast variant
-	return getHighContrastVariant(background);
+// packages/types/src/ujl-theme.ts (vereinfacht)
+export function resolveForegroundColor(
+	palette: UJLTColorPalette,
+	backgroundFlavor: UJLTFlavor,
+	foregroundFlavor: UJLTFlavor,
+	mode: "light" | "dark"
+): UJLTOklch {
+	const backgroundSet = palette[backgroundFlavor];
+	const foregroundSet = palette[foregroundFlavor];
+	const shadeRef =
+		mode === "light"
+			? backgroundSet.lightForeground[foregroundFlavor]
+			: backgroundSet.darkForeground[foregroundFlavor];
+	return resolveColorFromShades(foregroundSet.shades, shadeRef);
 }
 ```
 
@@ -998,8 +830,11 @@ graph TB
 			"image-001": {
 				"src": "data:image/jpeg;base64,/9j/4AAQ...",
 				"metadata": {
-					"alt": "...",
-					"title": "..."
+					"filename": "example.jpg",
+					"mimeType": "image/jpeg",
+					"filesize": 45678,
+					"width": 1920,
+					"height": 1080
 				}
 			}
 		}
@@ -1020,7 +855,7 @@ graph TB
 		},
 		"images": {
 			"img-001": {
-				"src": "http://localhost:3000/api/images/67890abcdef12345",
+				"src": "http://localhost:3000/uploads/images/uuid.webp",
 				"metadata": {
 					"filename": "example.jpg",
 					"mimeType": "image/jpeg",
@@ -1037,24 +872,25 @@ graph TB
 ### 8.10.2 Image Service Interface
 
 ```typescript
-interface ImageService {
-	// Connection
-	checkConnection(): Promise<boolean>;
+// packages/crafter/src/lib/service-adapters/image-service.ts (Auszug)
+export type ConnectionStatus = { connected: boolean; error?: string };
+export type UploadResult = { imageId: string; entry: ImageEntry };
 
-	// CRUD Operations
-	upload(file: File, metadata: ImageMetadata): Promise<ImageEntry>;
-	get(id: string): Promise<ImageEntry | null>;
-	list(): Promise<ImageEntry[]>;
-	delete(id: string): Promise<void>;
+export interface ImageService extends ImageProvider {
+	checkConnection(): Promise<ConnectionStatus>;
+	upload(file: File, metadata: ImageMetadata): Promise<UploadResult>;
 
-	// Configuration
-	getStorageMode(): "inline" | "backend";
+	get(imageId: string): Promise<ImageEntry | null>;
+	list(): Promise<Array<{ id: string; entry: ImageEntry }>>;
+	delete(imageId: string): Promise<boolean>;
+
+	resolve(id: string | number): Promise<ImageSource | null>;
 }
 ```
 
 ### 8.10.3 Responsive Images
 
-Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten basierend auf Tailwind-Breakpoints:
+Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten, die sich an Tailwind-Breakpoints orientieren.
 
 | Size | Width  | Format | Verwendung      |
 | ---- | ------ | ------ | --------------- |
@@ -1069,10 +905,9 @@ Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten bas
 
 ### 8.10.4 Migration zwischen Storage-Modi
 
-Der Crafter ist pro Umgebung auf einen Storage-Modus konfiguriert (`inline` oder `backend`). Wenn ein Dokument in einem anderen Modus vorliegt, migriert der Crafter es beim Laden auf den konfigurierten Modus und schreibt das Dokument entsprechend um.
+Der Crafter wird pro Umgebung auf einen Storage-Modus konfiguriert (`inline` oder `backend`). Dabei gilt: Die Dokument-Metadaten `ujlc.meta._library` werden beim Laden nicht als Quelle der Wahrheit verwendet, sondern die Crafter-Konfiguration entscheidet über den genutzten Storage-Modus.
 
-- Dokument ist `backend`, Crafter ist `inline`: Bilder werden aus dem Library Service geladen, komprimiert und in `ujlc.images` eingebettet; `ujlc.meta._library` wird auf Inline umgestellt.
-- Dokument ist `inline`, Crafter ist `backend`: eingebettete Bilder werden in den Library Service hochgeladen; `ujlc.images` wird auf Backend-Referenzen umgeschrieben und `ujlc.meta._library` wird gesetzt.
+Eine automatische Migration zwischen Storage-Modi ist geplant (inkl. Backend->Backend, Inline->Backend, Backend->Inline), aber nicht implementiert.
 
 ## 8.11 Rich Text System
 
@@ -1081,21 +916,10 @@ Der Crafter ist pro Umgebung auf einen Storage-Modus konfiguriert (`inline` oder
 Das UJL-Framework verwendet TipTap (ProseMirror-Wrapper) für Rich Text:
 
 ```typescript
-// Shared Schema (packages/core)
+// packages/core/src/tiptap-schema.ts
 export const ujlRichTextExtensions = [
 	StarterKit.configure({
-		heading: { levels: [1, 2, 3, 4, 5, 6] },
-		bold: {},
-		italic: {},
-		code: {},
-		blockquote: {},
-		bulletList: {},
-		orderedList: {},
-		listItem: {},
-		hardBreak: {},
-		horizontalRule: {},
-
-		// Disabled (UI-only)
+		undoRedo: false,
 		dropcursor: false,
 		gapcursor: false,
 	}),
@@ -1140,29 +964,17 @@ function serializeNode(node: ProseMirrorNode): string {
 }
 ```
 
-## 8.12 Operational Concerns (Überblick)
+## 8.12 Build und Distribution
 
-Die folgenden operativen Aspekte sind für den Betrieb von UJL relevant, werden aber kurz gehalten, da sie eher zu Operations als zu Architektur gehören.
+UJL wird als pnpm-Workspace-Monorepo entwickelt. Die Kernpakete werden als Libraries gebaut und in Host-Anwendungen eingebunden; `dev-demo` und `docs` dienen Entwicklung, Demo und Dokumentation. Der Library Service ist ein separater Service und wird nur für Backend-Storage benötigt. Details zur konkreten Verteilung stehen in Kapitel 7.
 
 ### 8.12.1 Build-Strategie
 
-UJL verwendet **Vite** als Build-Tool mit optimierter Production-Konfiguration:
-
-- Tree-Shaking für ungenutzte Module
-- Code-Splitting für lazy Loading
-- Bundle-Größen-Monitoring via `rollup-plugin-visualizer`
-
-Details siehe [Deployment-View (Kapitel 7)](./07-deployment-view).
+Die Bibliothekspakete (z.B. `types`, `core`) werden als TypeScript-Output nach `dist/` gebaut. Für Svelte- und App-Pakete (z.B. `adapter-svelte`, `crafter`, `docs`) kommt Vite-basiertes Tooling (SvelteKit/VitePress) zum Einsatz. Tree-Shaking und Code-Splitting hängen am Ende vom Bundler der Host-App ab.
 
 ### 8.12.2 Deployment-Optionen
 
-Drei Hauptszenarien sind dokumentiert:
-
-1. **Local Development**: Vite Dev Server mit HMR
-2. **CI/CD Pipeline**: GitLab CI mit Multi-Stage-Build
-3. **Production**: Docker Compose (Crafter + Library Service)
-
-Details siehe [Deployment-View (Kapitel 7)](./07-deployment-view).
+Im produktiven Einsatz werden die UJL-Packages in eine Host-Anwendung integriert. Der Library Service kommt nur dann dazu, wenn Bilder nicht inline im Dokument gespeichert werden sollen.
 
 ### 8.12.3 Monorepo-Struktur
 
@@ -1190,7 +1002,7 @@ ujl/
 Build-Reihenfolge folgt der Dependency-Hierarchie:
 
 ```bash
-# Korrekte Reihenfolge (automatisch via pnpm)
+# Korrekte Reihenfolge (Root-Skript orchestriert)
 pnpm run build
 
 # Interne Reihenfolge:
@@ -1210,48 +1022,28 @@ pnpm version-packages
 pnpm publish -r --access public
 ```
 
-## 8.13 Operational Concerns (kompakt)
-
-Die folgenden Abschnitte behandeln operative Aspekte, die für den Betrieb relevant sind, aber kurz gehalten werden, da sie eher zu Operations als zu Architektur gehören.
+## 8.13 Betrieb
 
 ### 8.13.1 Logging-Strategie (Architektur-Aspekt)
 
-**Architektur-Entscheidung:** UJL nutzt strukturiertes, context-basiertes Logging mit standardisierten Log-Levels (`error`, `warn`, `info`, `debug`). Context-Tags wie `[Composer]`, `[Crafter]`, `[LibraryService]` ermöglichen Filterung und Nachvollziehbarkeit.
-
-**Performance-Monitoring:** Composer-Composition-Zeit und Crafter-Render-Zeit werden getrackt. Zielwert für Composition: <100ms (warn bei >200ms).
-
-Konkrete Implementierung (Pino, Winston, etc.) ist deployment-abhängig.
+Logging ist pragmatisch gelöst: Der Crafter nutzt eine Logger-Utility für Warnungen/Fehler und zeigt bei Bedarf Toasts, der Library Service loggt im Rahmen der Payload/Next-Umgebung. Ein einheitliches Structured-Logging für alle Pakete ist nicht als gemeinsames Infrastruktur-Thema umgesetzt.
 
 ### 8.13.2 Caching-Strategie (Architektur-Aspekt)
 
-**Architektur-Entscheidung:** UJL nutzt Multi-Level-Caching:
-
-1. **Client-Side**: Browser-Cache (HTTP) + Service Worker (Workbox, falls eingesetzt)
-2. **In-Memory**: Module Registry Cache, Composer AST-Cache (LRU, falls eingesetzt)
-3. **API-Level**: ETag-basierte Cache-Control Headers für Image API
-4. **CDN-Level**: CloudFlare/CDN für Static Assets und Image Files
-
-**Ziel:** Reduktion von Netzwerk-Requests und schnellere Wiederverwendung bereits geladener Ressourcen.
+Es gibt kein eigenes Caching-Konzept (z.B. kein AST-Cache im Composer). Caching-Entscheidungen liegen damit vor allem im Hosting der Host-Applikation und beim Betrieb des Library Service (z.B. Browser-/CDN-Caching für statische Assets und Uploads).
 
 ### 8.13.3 Security (Architektur-Aspekt)
 
-**Architektur-Entscheidung:** Security ist in mehreren Schichten integriert:
+Einige Sicherheitsmaßnahmen sind konkret:
 
-1. **Input-Validierung**: Zod-Schema-Validierung für alle externen Inputs (UJLC/UJLT)
-2. **XSS-Prevention**: DOMPurify für Rich-Text-Sanitization, Svelte automatisches Escaping
-3. **CSRF-Protection**: Built-in in Payload CMS und SvelteKit
-4. **API-Authentifizierung**: API-Key-basiert für Library Service (mittelfristig OAuth geplant)
-5. **Rate Limiting**: Express-Rate-Limiter für Upload-Endpunkte
-6. **Secrets Management**: Environment Variables (Development), HashiCorp Vault (Production)
+1. **Input-Validierung**: UJLC/UJLT werden über Zod-Schemas validiert (`@ujl-framework/types`).
+2. **Library Service Zugriffe**: Schreiboperationen in der Images-Collection benötigen Auth; im Crafter wird für Backend-Storage ein API-Key im Header `Authorization: users API-Key <key>` verwendet.
+3. **CORS**: Der Library Service ist standardmäßig offen konfiguriert und kann per `CORS_ALLOWED_ORIGINS` eingeschränkt werden.
+
+Weitere Themen wie Rate Limiting oder ein OAuth-Flow sind nicht umgesetzt und wären Teil des späteren produktiven Betriebs.
 
 **Referenz:** Siehe [Risiken TD-009](./11-risks-and-technical-debt#_11-2-9-api-key-exposition-im-library-service) für bekannte Security-Schulden.
 
-### 8.13.4 Internationalisierung (i18n) - Status: Geplant
+### 8.13.4 Internationalisierung (i18n)
 
-**Architektur-Vorbereitung:** UJL ist vorbereitet auf mehrsprachige Inhalte:
-
-1. **Content-Level**: UJLC-Dokumente können Felder mit Locale-Keys enthalten (`{ "de": "Willkommen", "en": "Welcome" }`)
-2. **UI-Level**: Crafter nutzt `svelte-i18n` für UI-Übersetzungen
-3. **Formatting**: `date-fns` für lokalisierte Datum-/Zeit-Formatierung
-
-**Status:** UI-Mehrsprachigkeit ist implementiert, Content-Mehrsprachigkeit ist für Phase 3 geplant.
+Mehrsprachigkeit ist vor allem im Library Service vorbereitet: Payload ist mit einer Locale-Liste vorkonfiguriert, und Felder wie `alt`/`description` sind in der Images-Collection lokalisiert. Für den Crafter und für UJLC/UJLT gibt es keine UI- und Content-Mehrsprachigkeit.

@@ -5,9 +5,7 @@ description: "Bausteinsicht und Moduldiagramm des UJL-Systems"
 
 # Bausteinsicht
 
-## Übersicht der Struktur
-
-Die Dokumentation folgt einer hierarchischen Gliederung: **Abschnitt 5.1** zeigt das Gesamtsystem mit allen Hauptbausteinen (Packages, Apps, Services) und deren Schnittstellen. Die **Abschnitte 5.2-5.7** vertiefen ausgewählte Bausteine und zeigen deren interne Struktur im Detail. Für wichtige Komponenten wie den Composer, die Module Registry oder den Crafter werden zusätzliche Detailsichten bereitgestellt.
+UJL ist als pnpm-Monorepo organisiert und gliedert sich in wenige, trennscharfe Bausteine: `types` definiert die Dokumentformate und Validierung, `core` komponiert UJLC in einen AST, `ui` liefert wiederverwendbare Svelte-Komponenten, und Adapter übersetzen den AST in konkrete Render-Targets. Der Crafter ist der visuelle Editor, der denselben Datenvertrag nutzt und Editing-Funktionen ergänzt. Für Bilder gibt es neben Inline-Storage einen Library Service (Payload CMS), der Uploads und Metadaten bereitstellt.
 
 ## 5.1 Whitebox Gesamtsystem (Level 1)
 
@@ -151,9 +149,9 @@ Die API wird von zwei primären Consumern genutzt: Der **Crafter-Editor** verwen
 
 Der **Crafter** ist als NPM-Package (`@ujl-framework/crafter`) in Host-Applikationen integrierbar und bietet eine programmatische API für Konfiguration und Steuerung. Host-Anwendungen (z.B. Custom CMSe, Redaktionstools) können den visuellen Editor einbetten und auf Document-Events reagieren.
 
-Die Integration erfolgt über eine **Mount-API**, die den Crafter in ein DOM-Element rendert. Die Host-Anwendung konfiguriert verfügbare Module, Themes und die Library-Integration über ein Config-Objekt. Der Crafter exponiert **Event-Handler** für Document-Änderungen (`onDocumentChange`, `onSave`), was bidirektionale Synchronisation mit externen Systemen ermöglicht. Bei Bedarf kann eine **Custom Module Registry** bereitgestellt werden, um projektspezifische Module zu registrieren.
+Die Integration erfolgt über eine **Mount-API**, die den Crafter in ein DOM-Element rendert. Die Host-Anwendung steuert Inhalte und Darstellung, indem sie ein UJLC-Dokument und ein UJLT-Theme übergibt; für Bild-Workflows wird die Library-Integration (Inline vs. Backend) konfiguriert. Der Crafter stellt Event-Handler bereit, um Änderungen aus dem Editor an die Host-Anwendung zurückzumelden.
 
-Die Host-Anwendung steuert das Verhalten über Config-Parameter: `initialDocument` (Start-UJLC), `theme` (aktives UJLT-Theme), `mediaProvider` (Backend vs. Inline), `moduleRegistry` (verfügbare Module) und `readonly` (Editor-Modus). Dies ermöglicht Szenarien wie "Read-Only-Preview", "Custom-Module-Integration" oder "Multi-Tenant-Editing".
+Die Integration erfolgt über `new UJLCrafter({ ... })`. Die relevanten Parameter sind `target`, `document`, `theme`, `editorTheme`, `library` (Inline vs. Backend inkl. `url` und `apiKey`) sowie `testMode`. Änderungen und Ereignisse werden über Callback-Registrierungen an die Host-Anwendung gemeldet: `onDocumentChange`, `onThemeChange`, `onNotification`.
 
 **Consumer:** Custom CMSe, Redaktionstools, Headless CMS Plugins (z.B. Strapi, Contentful Extensions)
 
@@ -162,9 +160,9 @@ Die Host-Anwendung steuert das Verhalten über Config-Parameter: `initialDocumen
 Die **Adapter-Packages** (`adapter-svelte`, `adapter-web`) bieten programmatische APIs für die Integration von UJL-Rendering in Host-Applikationen. Beide Adapter folgen dem gleichen `UJLAdapter`-Interface (definiert in `@ujl-framework/types`) und transformieren AST-Nodes in framework-spezifische UI-Komponenten.
 
 - `@ujl-framework/adapter-svelte` konvertiert AST-Nodes in Svelte 5 Components und nutzt die `mount()`-API für imperatives Rendering. Die Host-Anwendung übergibt AST-Node, Token-Set und Konfigurationsoptionen (`target`, `mode`, `showMetadata`). Der Adapter gibt ein `MountedComponent` zurück mit `instance` (Svelte Component) und `unmount()`-Methode für Cleanup.
-- `@ujl-framework/adapter-web` erzeugt Custom Elements (`<ujl-content>`) für framework-agnostisches Rendering. Der Adapter kompiliert Svelte-Komponenten zur Build-Zeit in ein standalone Web Component, sodass keine Svelte-Runtime-Dependency benötigt wird. Shadow DOM sorgt für Style-Isolation. Zusätzlich zu den Svelte-Adapter-Optionen unterstützt der Web Adapter einen `eventCallback` für Click-to-Select-Editor-Integration.
+- `@ujl-framework/adapter-web` erzeugt Custom Elements (`<ujl-content>`) für framework-agnostisches Rendering. Der Adapter kompiliert Svelte-Komponenten zur Build-Zeit in ein standalone Web Component, sodass keine Svelte-Runtime-Dependency benötigt wird. Shadow DOM sorgt für Style-Isolation.
 
-Beide Adapter akzeptieren `target` (DOM-Element oder CSS-Selector), `mode` (Theme-Modus: 'light', 'dark', 'system') und `showMetadata` (für Editor-Integration via `data-ujl-module-id`-Attribute). Die Typen sind in den jeweiligen Adapter-Packages definiert (`SvelteAdapterOptions`, `WebAdapterOptions`) und erweitern das generische `UJLAdapter`-Interface aus `@ujl-framework/types`.
+Beide Adapter akzeptieren `target` (DOM-Element oder CSS-Selector), `mode` (Theme-Modus: 'light', 'dark', 'system') und `showMetadata` (für Editor-Integration via `data-ujl-module-id`-Attribute). Editor-Interaktionen (Click-to-Select, Highlighting) werden nicht im Adapter implementiert, sondern in der Editor-Schicht über DOM-Event-Listener auf diesen Attributen.
 
 **Consumer:** Svelte/SvelteKit-Anwendungen (adapter-svelte), Framework-agnostische Web-Apps (adapter-web), Static Site Generators, React/Vue-Apps via Web Components
 
@@ -272,7 +270,7 @@ Der Composer wird standardmäßig mit einer **Default-Registry** initialisiert, 
 
 Der Composer ermöglicht **dynamische Registry-Verwaltung** über `registerModule()` und `unregisterModule()`, was zur Laufzeit Custom-Module hinzufügen oder entfernen erlaubt.
 
-Der Crafter erstellt aktuell intern einen neuen Composer mit Default-Registry (`new Composer()`), exponiert diesen aber nicht über seine API. Entwickler, die `@ujl-framework/crafter` installieren, haben aktuell **keine Möglichkeit**, Custom-Module zu registrieren. Die Crafter-API wird in Zukunft erweitert, z.B. durch eine `modules`-Option in `UJLCrafterOptions` oder eine exponierte `registerModule()`-Methode. Dies ermöglicht Custom-Module-Integration ohne Core-Änderungen.
+Der Crafter erstellt intern einen neuen Composer mit Default-Registry (`new Composer()`), exponiert diesen aber nicht über seine API. Entwickler, die `@ujl-framework/crafter` installieren, haben aktuell **keine Möglichkeit**, Custom-Module zu registrieren. Die Crafter-API wird in Zukunft erweitert, z.B. durch eine `modules`-Option in `UJLCrafterOptions` oder eine exponierte `registerModule()`-Methode. Dies ermöglicht Custom-Module-Integration ohne Core-Änderungen.
 
 **Ablauf:**
 
@@ -444,9 +442,9 @@ Die 1:N-Beziehung zeigt sich in verschiedenen Modultypen unterschiedlich: Ein **
 
 **Fazit:** Die 1:N-Beziehung ermöglicht flexible Layouts ohne die Editierbarkeit zu gefährden. Strukturelle Nodes sind Implementierungsdetails des Adapters, während Module die logische Content-Struktur repräsentieren.
 
-#### 5.3.1.5 Weitere Komponenten (kompakt)
+#### 5.3.1.5 Weitere Komponenten
 
-Die folgenden Komponenten sind für die Architektur relevant, werden aber kurz gehalten. Details siehe [Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts).
+Die folgenden Komponenten sind für die Architektur relevant. Details siehe [Querschnittliche Konzepte (Kapitel 8)](./08-crosscutting-concepts).
 
 **Field Base Class:**
 
@@ -543,7 +541,7 @@ graph TB
 
 #### 5.5.1.1 Komponent: AdapterRoot
 
-Die **AdapterRoot**-Komponente ist der Einstiegspunkt für das Rendering und übernimmt vier Aufgaben: Sie injiziert Design-Tokens als CSS Custom Properties (`--color-primary-500`, `--spacing-md`, etc.), setzt das Theme-Mode-Attribut für Dark/Light-Switching, fügt bei Bedarf `data-ujl-module-id`-Attribute für Editor-Integration hinzu und delegiert Click-Events an einen Callback für Click-to-Select-Funktionalität.
+Die **AdapterRoot**-Komponente ist der Einstiegspunkt für das Rendering: Sie rendert `UJLTheme` (Token-Injektion und Mode) und darunter den rekursiven AST-Router. Wenn `showMetadata=true`, reichen die Node-Komponenten die Modul-IDs als `data-ujl-module-id` ins DOM durch; Event-Handling findet außerhalb des Adapters statt.
 
 ```typescript
 interface AdapterRootProps {
@@ -551,7 +549,6 @@ interface AdapterRootProps {
 	tokenSet?: UJLTTokenSet; // Design Tokens (falls gesetzt)
 	mode?: "light" | "dark" | "system"; // Theme Mode
 	showMetadata?: boolean; // Add data-ujl-module-id attributes
-	eventCallback?: (moduleId: string) => void; // Click-to-select callback
 }
 ```
 
@@ -561,11 +558,11 @@ Die **ASTNode**-Komponente ist ein rekursiver Router, der jeden AST-Node anhand 
 
 ```svelte
 {#if node.type === 'button'}
-  <Button {node} {showMetadata} {eventCallback} />
+  <Button {node} {showMetadata} />
 {:else if node.type === 'container'}
-  <Container {node} {showMetadata} {eventCallback}>
+  <Container {node} {showMetadata}>
     {#each node.props.children as child}
-      <svelte:self node={child} {showMetadata} {eventCallback} />
+      <svelte:self node={child} {showMetadata} />
     {/each}
   </Container>
 {:else}
@@ -597,7 +594,6 @@ type SvelteAdapterOptions = {
 	target: string | HTMLElement;
 	mode?: "light" | "dark" | "system";
 	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedComponent = {
@@ -615,7 +611,6 @@ const mounted = svelteAdapter(ast, tokenSet, {
 	target: "#my-container",
 	mode: "system",
 	showMetadata: true,
-	eventCallback: id => console.log("Clicked:", id),
 });
 
 // Cleanup
@@ -676,12 +671,12 @@ export default defineConfig({
 
   export let node: UJLAbstractNode;
   export let tokenSet: UJLTTokenSet;
+  export let mode: 'light' | 'dark' | 'system' = 'system';
   export let showMetadata: boolean = false;
-  export let eventCallback: ((moduleId: string) => void) | undefined = undefined;
 </script>
 
 <!-- Render mit adapter-svelte -->
-<AdapterRoot {node} {tokenSet} {showMetadata} {eventCallback} />
+<AdapterRoot {node} {tokenSet} {mode} {showMetadata} />
 ```
 
 **Wichtig:** Props müssen als Properties gesetzt werden (nicht als Attribute)
@@ -709,8 +704,8 @@ export function webAdapter(
 
 type WebAdapterOptions = {
 	target: string | HTMLElement;
+	mode?: "light" | "dark" | "system";
 	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedElement = {
@@ -735,8 +730,8 @@ export function webAdapter(
 	const el = document.createElement("ujl-content") as UJLContentElement;
 	el.node = node;
 	el.tokenSet = tokenSet;
+	el.mode = options.mode ?? "system";
 	el.showMetadata = options.showMetadata ?? false;
-	el.eventCallback = options.eventCallback;
 
 	target.appendChild(el);
 
@@ -757,17 +752,16 @@ Der **Crafter** ist ein visueller Editor für UJLC- und UJLT-Dokumente. Er ermö
 
 ```mermaid
 graph TB
-    subgraph "crafter Package (SvelteKit)"
-        App[app.svelte<br/>Root Component + State]
-        Context[context.ts<br/>Crafter Context API]
+    subgraph "crafter Package (Vite Library)"
+        Entry[UJLCrafter.ts<br/>Imperative Mount API]
+        Store[crafter-store.svelte.ts<br/>State + Actions]
+        Context[context.ts<br/>Context = Store]
 
         subgraph "Header"
-            HeaderComp[header.svelte<br/>Top Toolbar]
-            ModeSwitcher[mode-switcher.svelte<br/>Editor/Designer Toggle]
+            HeaderComp[header.svelte<br/>Toolbar]
         end
 
         subgraph "Sidebar Left"
-            SidebarLeftComp[sidebar-left.svelte<br/>Mode Router]
             Editor[editor.svelte<br/>Content Editor]
             Designer[designer.svelte<br/>Theme Editor]
         end
@@ -777,8 +771,8 @@ graph TB
         end
 
         subgraph "Sidebar Right"
-            SidebarRightComp[sidebar-right.svelte<br/>Property Inspector]
-            Export[export.svelte<br/>Export/Import]
+            PropsPanel[properties-panel.svelte<br/>Property Inspector]
+            DesignerPanel[designer-panel.svelte<br/>Theme Inspector]
         end
 
         subgraph "Services"
@@ -794,21 +788,17 @@ graph TB
         end
     end
 
-    App --> Context
-    App --> HeaderComp
-    App --> SidebarLeftComp
-    App --> Preview
-    App --> SidebarRightComp
-
-    HeaderComp --> ModeSwitcher
-
-    SidebarLeftComp --> Editor
-    SidebarLeftComp --> Designer
+    Entry --> Store
+    Store --> Context
+    Store --> HeaderComp
+    Store --> Editor
+    Store --> Designer
+    Store --> Preview
+    Store --> PropsPanel
+    Store --> DesignerPanel
 
     Editor --> NavTree
     Editor --> ComponentPicker
-
-    SidebarRightComp --> Export
 
     NavTree --> Context
     Preview --> Context
@@ -817,75 +807,37 @@ graph TB
     ImageService --> InlineImage
     ImageService --> BackendImage
 
-    BackendImage -.->|API Calls| PayloadCMS[(Payload CMS<br/>Image Service)]
+    BackendImage -.->|API Calls| PayloadCMS[(Library Service<br/>Payload CMS)]
 ```
 
-#### 5.6.1.1 Komponent: app.svelte (State Management)
+#### 5.6.1.1 Komponent: crafter-store.svelte.ts (State Management)
 
-Die **Root Component** verwaltet den globalen State mit **Svelte 5 Runes**. Der State umfasst das aktuelle UJLC-Dokument, das UJLT-Theme, den Editor-Modus und UI-State wie expandierte Nodes.
+Der zentrale State des Crafters liegt in `crafter-store.svelte.ts`. Der Store kapselt Dokumente, UI-State (z.B. Selektion und Tree-Expansion) sowie die abgeleiteten Werte (Root-Slot, Tokens) und stellt Actions bereit.
 
 ```typescript
-let ujlcDocument = $state<UJLCDocument>(initialUJLC);
-let ujltDocument = $state<UJLTDocument>(initialUJLT);
-let mode = $state<"editor" | "designer">("editor");
-let expandedNodeIds = $state<Set<string>>(new Set());
+let _ujlcDocument = $state<UJLCDocument>(initialUjlcDocument);
+let _ujltDocument = $state<UJLTDocument>(initialUjltDocument);
+let _mode = $state<"editor" | "designer">("editor");
+let _expandedNodeIds = $state<Set<string>>(new Set());
+let _selectedNodeId = $state<string | null>(null);
 ```
 
-**Context Provider:**
+#### 5.6.1.2 Komponent: Context (Context = Store)
+
+Der Context ist absichtlich identisch zum Store (`CrafterContext = CrafterStore`). Komponenten erhalten damit Zugriff auf State, Actions und `operations`, ohne dass ein zweites Interface gepflegt werden muss.
 
 ```typescript
-import { setContext } from "svelte";
-import { createCrafterContext } from "./context";
-
-const context = createCrafterContext(ujlcDocument, ujltDocument, mode, expandedNodeIds);
-
-setContext("crafter", context);
-```
-
-#### 5.6.1.2 Komponent: Crafter Context API
-
-Die **Crafter Context API** bündelt alle State-Mutationen und erzwingt **Functional Updates** (immutable). Dies garantiert vorhersagbare State-Änderungen und ermöglicht Features wie Undo/Redo.
-
-```typescript
-interface CrafterContext {
-	// State Accessors
-	getUJLCDocument(): UJLCDocument;
-	getUJLTDocument(): UJLTDocument;
-	getMode(): "editor" | "designer";
-	getExpandedNodeIds(): Set<string>;
-
-	// State Updates (Functional)
-	updateRootSlot(fn: (root: UJLCModuleObject[]) => UJLCModuleObject[]): void;
-	updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void;
-
-	// Selection
-	setSelectedNodeId(nodeId: string | null): void;
-	getSelectedNodeId(): string | null;
-
-	// Tree Expansion
-	setNodeExpanded(nodeId: string, expanded: boolean): void;
-	expandToNode(nodeId: string): void; // Expand all parents
-
-	// Operations
-	operations: {
-		copyNode(nodeId: string): void;
-		cutNode(nodeId: string): void;
-		pasteNode(targetId: string, position: "before" | "after" | "into"): void;
-		deleteNode(nodeId: string): void;
-		moveNode(nodeId: string, targetId: string, position: string): void;
-		insertNode(moduleType: string, targetId: string, position: string): void;
-	};
-}
+export type CrafterContext = CrafterStore;
 ```
 
 **Functional Updates (Immutable):**
 
 ```typescript
-// Direktes Mutation (verboten)
+// Direkte Mutation (verboten)
 ujlcDocument.ujlc.root.push(newModule);
 
 // Functional Update (empfohlen)
-context.updateRootSlot(root => [...root, newModule]);
+store.updateRootSlot(root => [...root, newModule]);
 ```
 
 #### 5.6.1.3 Komponent: Editor Mode
@@ -933,20 +885,12 @@ Der **Image Service** abstrahiert die Storage-Strategie für Bilder und ermögli
 
 ```typescript
 interface ImageService {
-	// List Images
-	list(): Promise<ImageEntry[]>;
-
-	// Upload Image
-	upload(file: File, metadata: ImageMetadata): Promise<ImageEntry>;
-
-	// Update Metadata
-	updateMetadata(id: string, metadata: Partial<ImageMetadata>): Promise<void>;
-
-	// Delete Image
-	delete(id: string): Promise<void>;
-
-	// Get Storage Mode
-	getStorageMode(): "inline" | "backend";
+	checkConnection(): Promise<{ connected: boolean; error?: string }>;
+	upload(file: File, metadata: ImageMetadata): Promise<{ imageId: string; entry: ImageEntry }>;
+	get(imageId: string): Promise<ImageEntry | null>;
+	list(): Promise<Array<{ id: string; entry: ImageEntry }>>;
+	delete(imageId: string): Promise<boolean>;
+	resolve(id: string | number): Promise<ImageSource | null>;
 }
 ```
 
@@ -955,15 +899,14 @@ Es existieren zwei Implementierungen: Der **InlineImageService** speichert Bilde
 Eine Factory wählt die Implementierung basierend auf der Konfiguration:
 
 ```typescript
-function createImageService(config: ImageLibraryConfig): ImageService {
-	if (config.storage === "backend" && config.url) {
-		return new BackendImageService(config.url, apiKey);
-	}
-	return new InlineImageService(ujlcDocument);
-}
+const createImageService = createImageServiceFactory({
+	preferredStorage: "backend",
+	backendUrl: "http://localhost:3000",
+	backendApiKey: "<api-key>",
+});
 ```
 
-Beim Öffnen eines Dokuments migriert der Crafter es bei Bedarf auf den konfigurierten Storage-Modus. Wenn ein Dokument z. B. im Backend-Modus vorliegt, aber der Crafter auf Inline konfiguriert ist, werden die Bilder aus dem Library Service geladen, komprimiert, eingebettet und das Dokument anschließend auf Inline umgestellt (und umgekehrt).
+Der Storage-Modus wird im aktuellen Stand ausschließlich über die Crafter-Optionen konfiguriert; dokumentseitige `_library`-Metadaten werden dabei nicht ausgewertet. Eine automatische Migration zwischen Storage-Modi ist als TODO vorgesehen.
 
 ### 5.6.2 Baustein: dev-demo
 
@@ -1059,10 +1002,10 @@ graph TB
         end
     end
 
-    subgraph "External"
-        PostgreSQL[(PostgreSQL 17<br/>Database)]
-        Crafter[Crafter<br/>API Client]
-    end
+	    subgraph "External"
+	        PostgreSQL[(PostgreSQL 16<br/>Database)]
+	        Crafter[Crafter<br/>API Client]
+	    end
 
     NextApp --> PayloadCMS
     PayloadCMS --> ImagesCollection
@@ -1142,7 +1085,7 @@ const response = await fetch("http://localhost:3000/api/images", {
 
 Für lokale Entwicklung wird PostgreSQL per Docker Compose gestartet; der Payload-Server läuft als Node.js-Prozess über `pnpm run dev` (kein Payload-Container im Compose-File).
 
-**docker-compose.yml (aktuell, Auszug):**
+**docker-compose.yml (Auszug):**
 
 ```yaml
 services:
@@ -1164,11 +1107,16 @@ volumes:
 **Startup:**
 
 ```bash
-# Start all services
-docker-compose up -d
+cd services/library
 
-# View logs
-docker-compose logs -f payload
+# DB + Payload (empfohlen)
+pnpm run dev
+
+# Nur DB
+pnpm run dev:db
+
+# Nur Payload (setzt laufende DB voraus)
+pnpm run dev:payload
 ```
 
 ## 5.8 Deployment- und Build-Struktur

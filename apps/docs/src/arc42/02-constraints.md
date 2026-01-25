@@ -5,7 +5,7 @@ description: "Technische, organisatorische und konventionelle Constraints des UJ
 
 # Randbedingungen
 
-UJL wird als **Open-Source-Projekt** unter MIT-Lizenz entwickelt. Die wichtigsten Randbedingungen, die Architekturentscheidungen prägen:
+UJL ist ein Open-Source-Projekt (MIT) und wird von festen Randbedingungen geprägt: Barrierefreiheit nach WCAG 2.2, Datenschutz (DSGVO) und ein TypeScript/Svelte/Zod/Vite-Stack im pnpm-Monorepo. Für Bild-Workflows kann zusätzlich ein Library Service auf Basis von Payload CMS und PostgreSQL betrieben werden.
 
 **Qualität und Compliance:** Das Framework richtet sich nach **WCAG 2.2** für Barrierefreiheit und berücksichtigt rechtliche Anforderungen wie den European Accessibility Act und die **DSGVO** für Datenschutz. Performance ist für die Editor-Usability wichtig.
 
@@ -210,7 +210,7 @@ Die vollständige Barrierefreiheit ist noch **Work in Progress**. Die Content-Fr
 
 ::: warning Hinweis
 
-Die angegebenen Performance-Zielwerte sind aktuell **grobe Richtlinien**. Die endgültigen Performance-Anforderungen müssen noch genau geprüft und festgelegt werden.
+Die angegebenen Performance-Zielwerte sind **grobe Richtlinien**. Die endgültigen Performance-Anforderungen müssen noch genau geprüft und festgelegt werden.
 
 :::
 

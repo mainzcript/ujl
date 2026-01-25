@@ -5,9 +5,11 @@ description: "Laufzeitszenarien und Interaktionen zwischen Systemkomponenten"
 
 # Laufzeitsicht
 
+Die Laufzeitszenarien zeigen, wie UJL Inhalte validiert, komponiert und rendert und wie sich diese Abläufe im Crafter als Editor-Workflows wiederfinden. Im Kern geht es um den Weg vom UJLC/UJLT-Dokument über Composer und Registry zum AST, das Rendering über Adapter sowie die typischen Interaktionen beim Bearbeiten (Selektion, Mutationen, Clipboard, Bild-Upload).
+
 ## 6.1 Übersicht der Laufzeitszenarien
 
-Die folgenden Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
+Die Szenarien decken die wichtigsten Abläufe des UJL-Frameworks ab:
 
 | Szenario                     | Beschreibung                          | Beteiligte Bausteine                |
 | ---------------------------- | ------------------------------------- | ----------------------------------- |
@@ -127,7 +129,8 @@ sequenceDiagram
     children: [
       {
         type: "text",
-        id: "text-001",
+        id: "ast-node-001",
+        meta: { moduleId: "text-001", isModuleRoot: true },
         props: { content: { type: "doc", content: [...] } }
       }
     ]
@@ -384,7 +387,8 @@ sequenceDiagram
     Root->>Theme: Render UJLTheme with tokenSet
     activate Theme
     Theme->>Theme: Generate CSS Custom Properties
-    Theme->>Theme: Apply data-mode attribute
+    Theme->>Theme: Inject scoped theme styles
+    Theme->>Theme: Toggle dark class (mode/system)
 
     Theme->>ASTRouter: Render ASTNode with ast
     activate ASTRouter
@@ -413,11 +417,6 @@ sequenceDiagram
         end
     end
 
-    opt eventCallback provided
-        NodeComp->>NodeComp: Attach click handler
-        Note over NodeComp: onclick calls eventCallback(node.id)
-    end
-
     NodeComp-->>ASTRouter: Rendered Component
     deactivate NodeComp
 
@@ -442,7 +441,6 @@ sequenceDiagram
 4. **Theme Application**: Design Tokens werden als CSS Custom Properties injiziert
 5. **AST Routing**: `ASTNode` routet basierend auf `node.type` zur entsprechenden Komponente
 6. **Rekursives Rendering**: Für Kind-Nodes erfolgt ein rekursiver `<ASTNode>`-Aufruf
-7. **Event Binding**: Bei Bedarf werden Click-Handler für Editor-Integration registriert
 
 ### Komponenten-Hierarchie
 
@@ -469,50 +467,22 @@ AdapterRoot
 Das Theme-System generiert CSS Custom Properties aus dem `UJLTTokenSet`:
 
 ```css
-:root {
-	/* Color Tokens */
-	--color-primary-50: oklch(97% 0.01 260);
-	--color-primary-500: oklch(60% 0.15 260);
-	--color-primary-950: oklch(20% 0.05 260);
+[data-ujl-theme="..."] {
+	--radius: 0.75rem;
+	--spacing: 0.25rem;
 
-	/* Typography Tokens */
-	--font-base-family: "Inter", sans-serif;
-	--font-base-size-md: 16px;
+	/* OKLCH triplets (usage: oklch(var(--primary-500))) */
+	--primary-500: 54.6% 0.245 262.881;
+	--primary-950: 12.9% 0.042 264.695;
 
-	/* Spacing & Radius */
-	--spacing-md: 16px;
-	--radius-md: 8px;
-}
-
-[data-mode="dark"] {
-	/* Dark mode overrides via light/dark references */
+	/* Foreground shorthands are provided as additional vars */
+	--primary-light-foreground: 12.9% 0.042 264.695;
 }
 ```
 
-### Event-Handling (Editor-Modus)
+### Editor-Integration (Click-to-Select)
 
-::: warning Adapter-Unterstützung
-Die `eventCallback`-Funktion ist aktuell nur in `adapter-web` vollständig implementiert. Für `adapter-svelte` ist die Unterstützung geplant, aber noch nicht umgesetzt.
-:::
-
-Wenn `eventCallback` und `showMetadata` gesetzt sind (nur `adapter-web`):
-
-```typescript
-// In Node Component
-function handleClick(event: MouseEvent) {
-	if (eventCallback && node.id) {
-		event.preventDefault();
-		event.stopPropagation();
-		eventCallback(node.id);
-	}
-}
-```
-
-**Effekte:**
-
-- `data-ujl-module-id` Attribute werden gesetzt
-- Click-Events propagieren die Module-ID
-- Default-Aktionen werden verhindert (z.B. Button-Clicks)
+Die Adapter sind auf Rendering fokussiert. Für Editor-Funktionen wird `showMetadata={true}` gesetzt; dadurch tragen gerenderte DOM-Elemente ein `data-ujl-module-id`. Der Crafter nutzt Event-Delegation auf dem Preview-Container: Beim Klick wird die Module-ID über `closest('[data-ujl-module-id]')` ermittelt und im AST geprüft, ob es sich um ein editierbares Modul handelt (`meta.isModuleRoot === true`). Default-Aktionen (z.B. Link-Navigation) werden im Editor-Modus unterdrückt.
 
 ## 6.4 Crafter Editor Flow
 
@@ -533,13 +503,12 @@ sequenceDiagram
 
     User->>Preview: Klick auf Modul
     activate Preview
-    Preview->>Context: eventCallback(moduleId)
+    Preview->>Preview: handlePreviewClick(event)
     deactivate Preview
 
     activate Context
-    Context->>Context: setSelectedNodeId(moduleId)
-    Context->>Context: Update URL: ?selected=moduleId
     Context->>Context: expandToNode(moduleId)
+    Context->>Context: setSelectedNodeId(moduleId)
     Context-->>Tree: Selection changed
     Context-->>Props: Selection changed
     deactivate Context
@@ -550,8 +519,6 @@ sequenceDiagram
     deactivate Tree
 
     activate Props
-    Props->>Context: getSelectedNode()
-    Context-->>Props: UJLCModuleObject
     Props->>Props: Render field editors
     deactivate Props
 
@@ -578,14 +545,14 @@ sequenceDiagram
 
 ### State-Management
 
-**State-Variablen (app.svelte):**
+**State (Crafter Store):**
 
 ```typescript
-let ujlcDocument = $state<UJLCDocument>(initialUJLC);
-let ujltDocument = $state<UJLTDocument>(initialUJLT);
-let mode = $state<"editor" | "designer">("editor");
-let expandedNodeIds = $state<Set<string>>(new Set());
-let selectedNodeId = $state<string | null>(null);
+let _ujlcDocument = $state<UJLCDocument>(initialUjlcDocument);
+let _ujltDocument = $state<UJLTDocument>(initialUjltDocument);
+let _mode = $state<"editor" | "designer">("editor");
+let _expandedNodeIds = $state<Set<string>>(new Set());
+let _selectedNodeId = $state<string | null>(null);
 ```
 
 **Reactive AST Composition:**
@@ -598,15 +565,15 @@ const ast = $derived.by(async () => await composer.compose(ujlcDocument));
 
 ### Context Operations
 
-Die Context-API stellt immutable Update-Funktionen bereit:
+Die Operations-API stellt immutable Update-Funktionen bereit:
 
-| Operation                           | Beschreibung                      | Pattern                          |
-| ----------------------------------- | --------------------------------- | -------------------------------- |
-| `updateRootSlot(fn)`                | Root-Slot immutabel aktualisieren | `(root) => [...root, newModule]` |
-| `updateNodeField(id, field, value)` | Einzelnes Feld aktualisieren      | Immutable nested update          |
-| `moveNode(id, targetId, pos)`       | Modul verschieben                 | Remove + Insert                  |
-| `deleteNode(id)`                    | Modul löschen                     | `removeNodeFromTree()`           |
-| `pasteNode(node, targetId)`         | Modul einfügen                    | Clone + Insert                   |
+| Operation                           | Beschreibung                      | Pattern                                   |
+| ----------------------------------- | --------------------------------- | ----------------------------------------- |
+| `updateRootSlot(fn)`                | Root-Slot immutabel aktualisieren | `(slot) => ({ ...slot, content: [...] })` |
+| `updateNodeField(id, field, value)` | Einzelnes Feld aktualisieren      | Immutable nested update                   |
+| `moveNode(id, targetId, slot, pos)` | Modul verschieben                 | Remove + Insert                           |
+| `deleteNode(id)`                    | Modul löschen                     | `removeNodeFromTree()`                    |
+| `pasteNode(node, targetId, slot)`   | Modul einfügen                    | Clone + Insert                            |
 
 ### Drag & Drop Flow
 
@@ -634,7 +601,7 @@ sequenceDiagram
     User->>Target: drop
     activate Handler
     Handler->>Handler: Get position (before/after/into)
-    Handler->>Context: operations.moveNode(sourceId, targetId, position)
+    Handler->>Context: operations.moveNode(sourceId, targetId, slotName?, position)
     deactivate Handler
 
     activate Context
@@ -689,11 +656,8 @@ Das UJL-Framework unterstützt zwei Storage-Modi für Bilder:
 ::: info Crafter Konfiguration
 Der Crafter wird über eine Library-Konfiguration initialisiert (`library.storage` sowie bei Backend `library.url` und `library.apiKey`). Diese Konfiguration definiert den Ziel-Storage-Modus der aktuellen Umgebung.
 
-Beim Öffnen eines Dokuments prüft der Crafter `ujlc.meta._library` (falls vorhanden) und migriert das Dokument in den konfigurierten Modus, wenn es nicht passt:
-
-- Dokument ist `backend`, Crafter ist `inline`: Bilder über die Image API laden, komprimieren, in `ujlc.images` einbetten und die Dokument-Metadaten entsprechend umstellen.
-- Dokument ist `inline`, Crafter ist `backend`: eingebettete Bilder hochladen, Referenzen umschreiben und `ujlc.meta._library` auf das Backend setzen.
-  :::
+Hinweis: Dokumentseitige `_library`-Metadaten sind im Code vorhanden, werden im aktuellen Crafter aber nicht ausgewertet. Eine automatische Migration zwischen Storage-Modi ist als TODO vorgesehen.
+:::
 
 ### Sequenzdiagramm: Inline Upload
 
@@ -728,7 +692,7 @@ sequenceDiagram
     deactivate Service
 
     activate Picker
-    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {imageId, alt})
+    Picker->>Context: operations.updateNodeField(nodeId, fieldName, imageId)
     deactivate Picker
 
     Note over Context: Document updated with image reference
@@ -770,13 +734,13 @@ sequenceDiagram
     deactivate Service
 
     activate Picker
-    Picker->>Context: operations.updateNodeField(nodeId, fieldName, {imageId, alt})
+    Picker->>Context: operations.updateNodeField(nodeId, fieldName, imageId)
     deactivate Picker
 ```
 
 ### Storage-Modus Konfiguration
 
-Die Konfiguration wird im UJLC-Dokument gespeichert:
+In den Dokument-Metadaten existiert ein Feld `_library`, das den Storage-Modus beschreiben kann. Im aktuellen Crafter wird der Modus jedoch aus der Crafter-Konfiguration (`UJLCrafterOptions.library`) bestimmt; `_library` wird nicht als Quelle genutzt.
 
 ```typescript
 // Inline Storage (Default)

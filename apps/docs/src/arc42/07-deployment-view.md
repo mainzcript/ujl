@@ -5,6 +5,8 @@ description: "Verteilung der Systemkomponenten auf Infrastruktur und Deployment"
 
 # Verteilungssicht
 
+UJL wird als Libraries und Apps in einem Monorepo entwickelt und typischerweise als Packages in eine Host-Anwendung eingebunden. Die Dokumentation ist als statische Seite ausgelegt; der Library Service ist ein separater Backend-Baustein, der nur für Backend-Storage von Bildern benötigt wird und unabhängig betrieben werden kann. Für Entwicklung und CI ist vor allem wichtig, welche Teile lokal laufen, wie Builds orchestriert werden und wo Schnittstellen zwischen Frontend und Service entstehen.
+
 ## 7.1 Infrastruktur Ebene 1
 
 ### 7.1.1 Übersichtsdiagramm
@@ -176,12 +178,10 @@ graph LR
     end
 
     Install --> Build
-    Build --> Quality
     Build --> TestUnit
     Build --> TestE2E
-    TestUnit --> Deploy
-    TestE2E --> Deploy
-    Quality --> Deploy
+    Build --> Quality
+    Build --> Deploy
 
     Build -.-> DocsOutput
     Build -.-> DistPackages
@@ -280,7 +280,7 @@ graph TB
 
 Für lokale Entwicklung wird PostgreSQL über Docker Compose gestartet; der Payload-Server läuft als Node.js-Prozess über `pnpm` (kein Payload-Container im Compose-File).
 
-**docker-compose.yml (aktuell):**
+**docker-compose.yml:**
 
 ```yaml
 services:
@@ -393,13 +393,17 @@ sequenceDiagram
     Runner->>Cache: Store cache
 
     Runner->>Runner: build_all (pnpm run build)
-    Runner->>Runner: test_unit (pnpm test:unit)
-    Runner->>Runner: test_e2e (pnpm test:e2e, MR/main/develop)
-    Runner->>Runner: quality_check (lint + check)
+    Note over Runner: Jobs laufen parallel; pages hängt am Build-Artifact.
 
-    alt Branch is main/develop
-        Runner->>Pages: Deploy docs
-        Pages-->>GitLab: Deployment successful
+    par Tests & Checks
+        Runner->>Runner: test_unit (pnpm test:unit)
+        Runner->>Runner: test_e2e (pnpm test:e2e, MR/main/develop)
+        Runner->>Runner: quality_check (lint + check)
+    and Pages Deploy (main/develop)
+        alt Branch is main/develop
+            Runner->>Pages: Deploy docs
+            Pages-->>GitLab: Deployment successful
+        end
     end
 
     Runner-->>GitLab: Pipeline success/failure
@@ -408,7 +412,7 @@ sequenceDiagram
 
 **Charakteristiken:**
 
-In der CI werden Builds, Tests und Quality Checks als Quality Gates automatisiert ausgeführt. Der pnpm Store Cache ist branch-spezifisch konfiguriert, und die Docs werden ausschließlich aus `main` und `develop` deployed. Zusätzlich sind Retries für temporäre Infrastruktur-Fehler vorgesehen.
+Der Build erzeugt die Artefakte (u.a. `apps/docs/dist/`). Tests (Vitest/Playwright) und Lint/Type-Checks laufen in eigenen Jobs. Das Pages-Deployment nutzt das Build-Artifact und wird nur auf `main` und `develop` ausgeführt; in der aktuellen DAG-Konfiguration hängt es direkt am Build-Job und kann parallel zu Tests/Checks laufen. Retries sind für temporäre Runner-/Infrastruktur-Fehler aktiviert.
 
 ### 7.3.4 Szenario: Produktion (Integration in Host-Applikation)
 
@@ -497,7 +501,7 @@ Für zusätzliche Deployment-Szenarien (NPM Package Publishing, Self-Hosted Full
 
 ### 7.4.1 Mindestanforderungen
 
-UJL wird aktuell als Framework und Entwicklungsumgebung betrieben; belastbare Infrastruktur-Anforderungen für einen produktiven Betrieb sind damit noch nicht abgeleitet. Was heute sicher ist: Für lokale Entwicklung und CI braucht es eine aktuelle Node.js- und pnpm-Umgebung, und für den Library Service wird zusätzlich eine PostgreSQL-Datenbank benötigt (lokal über Docker Compose).
+UJL wird aktuell nur als Entwicklungsumgebung betrieben; belastbare Infrastruktur-Anforderungen für einen produktiven Betrieb sind damit noch nicht abgeleitet. Was heute sicher ist: Für lokale Entwicklung und CI braucht es eine Node.js- und pnpm-Umgebung, und für den Library Service wird zusätzlich eine PostgreSQL-Datenbank benötigt (lokal über Docker Compose).
 
 Für Produktion hängen Hardware- und Netzwerk-Anforderungen von der Host-Anwendung und vom konkreten Deployment des Library Service ab und werden erst mit ersten Produktions-Deployments festgelegt.
 
@@ -543,7 +547,7 @@ Das entspricht dem Produktions-Szenario in Abschnitt 7.3.4: Mehrere Instanzen de
 
 ### 7.6.2 Vertikale Skalierung
 
-Konkrete Sizing-Werte für CPU/RAM/Storage sind aktuell noch nicht definiert. Wenn ein produktiver Betrieb ansteht, werden PostgreSQL und der Library Service erfahrungsgemäß die ersten Komponenten sein, die Ressourcenbedarf treiben (Storage für Uploads, DB-Last, CPU/RAM für API/Processing). Bis dahin ist vertikale Skalierung der naheliegende erste Schritt, weil sie ohne Architekturänderung auskommt.
+Konkrete Sizing-Werte für CPU/RAM/Storage sind noch nicht definiert. Wenn ein produktiver Betrieb ansteht, werden PostgreSQL und der Library Service erfahrungsgemäß die ersten Komponenten sein, die Ressourcenbedarf treiben (Storage für Uploads, DB-Last, CPU/RAM für API/Processing). Bis dahin ist vertikale Skalierung der naheliegende erste Schritt, weil sie ohne Architekturänderung auskommt.
 
 ### 7.6.3 Datenbank-Skalierung
 

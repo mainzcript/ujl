@@ -5,6 +5,8 @@ description: "Systematische Einordnung von UJL im Vergleich zu anderen Webentwic
 
 # Kontext und Abgrenzung
 
+UJL sitzt zwischen Autorenwerkzeugen und Auslieferung: Designer:innen und Redakteur:innen erstellen Themes (UJLT) und Inhalte (UJLC), der Core komponiert daraus einen AST, und Adapter rendern den Output in eine Host-Anwendung. Ein CMS dient als Speicher und Workflow-System für die Dokumente; für Bilder kann bei Bedarf ein Library Service dazukommen. KI-Systeme sind in diesem Bild externe Produzenten strukturierter Daten, nicht ein integrierter Bestandteil des Frameworks.
+
 ## 3.1 Business Context
 
 UJL tauscht mit externen Akteuren und Systemen Inhalte, Themes, Assets und gerenderte Outputs aus. Die fachlichen Kommunikationsbeziehungen stehen im Vordergrund, nicht die technische Implementierung.

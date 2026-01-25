@@ -5,9 +5,7 @@ description: "Lösungsstrategie und Architektur-Konzept von UJL"
 
 # Lösungsstrategie
 
-## Überblick: Strategische Positionierung
-
-UJL verfolgt einen **architektonischen Ansatz** zur Lösung des Brand-Compliance-Dilemmas. Anstatt Markenkonsistenz und Barrierefreiheit durch Prozesse, Reviews oder Schulungen zu erzwingen, werden diese Eigenschaften in die technische Architektur eingebettet. Damit unterscheidet sich UJL von klassischen Page Buildern, die Gestaltungsfreiheit bieten und Compliance nachträglich prüfen: Compliance ist die Voraussetzung, Gestaltungsfreiheit existiert innerhalb definierter Leitplanken.
+UJL erzwingt Brand-Compliance und Barrierefreiheit über Datenverträge und Rendering, nicht über Disziplin im Prozess. Dafür trennt das System Content (UJLC) und Theme (UJLT), validiert beide zur Laufzeit gegen Schemas, komponiert Inhalte in einen framework-agnostischen AST und rendert diesen über Adapter. Erweiterbarkeit entsteht über registrierbare Module/Fields; Bild-Workflows lassen sich je nach Einsatz als Inline- oder Backend-Storage abbilden.
 
 ## 4.1 Kernstrategien zur Zielerreichung
 
@@ -151,36 +149,39 @@ const node = await composer.composeModule(moduleData);
 
 **Problem:** In klassischen Farbräumen (RGB, HSL) ist es schwer, konsistente Paletten zu erzeugen und Kontraste verlässlich zu berechnen. Das führt dazu, dass Themes im Alltag manuell nachjustiert werden müssen, obwohl das Ziel eine robuste Accessibility-Basis ist.
 
-**Lösung:** UJL beschreibt Farb-Tokens in OKLCH. Damit lassen sich Shades und Kontrastprüfungen algorithmisch ableiten, statt sie nur als Handwerk zu behandeln. In der Praxis bedeutet das: Das Theme liefert die Quelle, und der Crafter kann beim Bearbeiten direkt sehen, ob ein Token-Set die WCAG-Anforderungen erfüllt.
+**Lösung:** UJL beschreibt Farb-Tokens in OKLCH. Ein Theme enthält dabei nicht nur Shades, sondern auch Referenzen für Light/Dark und Foreground-Zuordnungen (als Shade-Referenzen). Der Crafter unterstützt beim Pflegen dieser Paletten mit Farb- und Kontrast-Utilities; beim Rendering werden die Tokens als CSS-Variablen in den DOM injiziert.
 
 ```typescript
 // OKLCH Color Definition
 type UJLTColor = {
-	l: number; // Lightness (0-100), perzeptuell uniform
+	l: number; // Lightness (0..1)
 	c: number; // Chroma (0+), Farbsättigung
 	h: number; // Hue (0-360), Farbton
 };
 
 // Color Palette mit 11 Shades
 type UJLTColorSet = {
-	50: UJLTColor; // Hellste Shade
-	100: UJLTColor;
-	200: UJLTColor;
+	"50": UJLTColor;
+	"100": UJLTColor;
+	"200": UJLTColor;
 	// ...
-	900: UJLTColor;
-	950: UJLTColor; // Dunkelste Shade
+	"900": UJLTColor;
+	"950": UJLTColor;
 };
 ```
 
-Die Tokens werden anschließend als CSS Custom Properties in den Output übertragen. Dadurch kann das Rendering ohne zusätzliche Theme-Logik arbeiten, während das Theme die Gestaltungsregeln liefert.
+Die Tokens werden anschließend als CSS Custom Properties in den Output übertragen. Die `UJLTheme`-Komponente erzeugt dabei eine Theme-Instanz-ID und injiziert die Variablen scoping-sicher unter `[data-ujl-theme="..."]`. Dark Mode wird über eine `dark`-Class auf derselben Theme-Root umgesetzt.
 
 **CSS-Output:**
 
 ```css
-:root {
-	--color-primary-50: oklch(97% 0.01 250);
-	--color-primary-500: oklch(60% 0.15 250);
-	--color-primary-950: oklch(20% 0.05 250);
+[data-ujl-theme="..."] {
+	--radius: 0.75rem;
+	--spacing: 0.25rem;
+
+	/* OKLCH triplets (usage: oklch(var(--primary-500))) */
+	--primary-500: 54.6% 0.245 262.881;
+	--primary-950: 12.9% 0.042 264.695;
 }
 ```
 
@@ -220,7 +221,7 @@ Das verschiebt Komplexität von "HTML-Handling" in ein explizites Schema und ein
 
 **Qualitätsziel:** Integrationsfähigkeit (Priorität 4) und Portabilität
 
-UJL unterstützt zwei Storage-Modi, weil sich Entwicklungs- und Integrationskontexte unterscheiden: Manche Dokumente sollen ohne Backend funktionieren, andere sollen Bild-Workflows mit Metadaten, responsive Varianten und gemeinsamer Verwaltung nutzen. Der Wechsel wird nicht als Sonderfall modelliert, sondern als Teil der Image Library. Der Crafter kann Dokumente außerdem zwischen den Modi migrieren (siehe Laufzeitsicht 6.5 und Querschnitt 8.10.4).
+UJL unterstützt zwei Storage-Modi, weil sich Entwicklungs- und Integrationskontexte unterscheiden: Manche Dokumente sollen ohne Backend funktionieren, andere sollen Bild-Workflows mit Verwaltung und Verarbeitung im Library Service nutzen. Der Wechsel wird nicht als Sonderfall modelliert, sondern über eine Image-Library-Abstraktion umgesetzt: Inline wird direkt aus dem Dokument aufgelöst, Backend über einen Provider.
 
 ```typescript
 // Image Library mit Provider
@@ -234,14 +235,14 @@ class ImageLibrary {
 		// 1. Check local cache
 		const local = this.images[id];
 		if (local) {
-			return { imageId: id, src: local.src, alt: local.metadata.alt || "" };
+			return { imageId: id, src: local.src };
 		}
 
 		// 2. Use provider for backend storage
 		if (this.provider) {
 			const imageSource = await this.provider.resolve(id);
 			if (imageSource) {
-				return { imageId: id, src: imageSource.src, alt: "" };
+				return { imageId: id, src: imageSource.src };
 			}
 		}
 
@@ -306,7 +307,7 @@ interface ImageProvider {
 }
 ```
 
-Die konkreten Backend-Features (Upload, Metadaten, responsive Varianten) liegen im Library Service. Die Arc42-Doku beschreibt die API und die Laufzeitflüsse; die Service-Details stehen in `services/library`.
+Die konkreten Backend-Features (Upload, Metadaten, responsive Varianten) liegen im Library Service. Die Arc42-Doku beschreibt die API und die Laufzeitflüsse; die Service-Details stehen in `services/library`. Im aktuellen Crafter wird der Storage-Modus über die Crafter-Konfiguration gewählt; dokumentseitige `_library`-Metadaten werden dabei nicht als Quelle genutzt.
 
 | Modus   | Charakteristik                                                                             |
 | ------- | ------------------------------------------------------------------------------------------ |
@@ -329,7 +330,7 @@ Die konkreten Backend-Features (Upload, Metadaten, responsive Varianten) liegen 
 | **Rich Text**          | TipTap 3 (ProseMirror)       | Strukturierte JSON-Dokumente, WYSIWYG-Konsistenz, SSR-Safe Serialization                    |
 | **Color System**       | OKLCH (colorjs.io)           | Perzeptuell uniforme Paletten, präzise Kontrast-Berechnungen, WCAG-Konformität              |
 | **Library Service**    | Payload CMS 3                | TypeScript-First, RESTful API, Image Processing (WebP, Focal Point), Self-Hosted            |
-| **Database**           | PostgreSQL 17                | Relational DB für Asset-Metadaten, pgvector-ready für zukünftige Semantic Search            |
+| **Database**           | PostgreSQL 16                | Relationale DB für Asset-Metadaten im Library Service                                       |
 | **Build Tool**         | Vite 7                       | Schnelles HMR, optimierte Production Builds, ESM-Native, SvelteKit-Integration              |
 | **Monorepo**           | pnpm Workspaces + Changesets | Effiziente Disk-Space-Nutzung, koordinierte Versionierung, Semantic Versioning Automation   |
 | **Testing**            | Vitest 4 + Playwright 1.57   | Unit Tests (Jest-API), E2E Tests (Cross-Browser), Test Attributes ohne Production Overhead  |
@@ -425,7 +426,7 @@ React wurde nicht als Basis gesetzt, weil Svelte-Compilation und Custom Elements
 
 UJL wird als Monorepo entwickelt und in mehrere Pakete geschnitten. Die Kernpakete sind als NPM-Pakete vorgesehen (`@ujl-framework/types`, `@ujl-framework/core`, `@ujl-framework/ui`, `@ujl-framework/adapter-svelte`, `@ujl-framework/adapter-web`, `@ujl-framework/crafter`), während `@ujl-framework/examples` intern bleibt. Der Library Service (`services/library`) wird als self-hosted Service betrieben, typischerweise mit Docker für die lokale PostgreSQL-DB.
 
-Für den Crafter gibt es je nach Umgebung drei Deployment-Wege: als SvelteKit SSR App (Vercel, Netlify oder eigener Node-Server), als statischer Export über einen passenden Adapter für Plattformen wie S3 oder GitHub Pages, oder als Container zusammen mit dem Library Service.
+Der Crafter ist im ein NPM-Package, das in Host-Anwendungen eingebettet wird. Es gibt im Repository kein separates Crafter-Deployment als eigenständige App; Betrieb und Auslieferung passieren über die jeweilige Host-Anwendung. Der Library Service ist davon entkoppelt und wird nur dann betrieben, wenn Backend-Storage für Bilder genutzt wird.
 
 **CI/CD Pipeline:**
 

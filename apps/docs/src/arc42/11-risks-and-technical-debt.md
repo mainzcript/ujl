@@ -5,7 +5,7 @@ description: "Technische Risiken und bekannte technische Schulden im UJL-System"
 
 # Risiken und technische Schulden
 
-## Übersicht
+UJL trägt typische Risiken eines jungen, modularen Toolchains: Abhängigkeiten und Build-Ketten im Monorepo, die Reife von Svelte-5-Ökosystem und eine wachsende Oberfläche an Paketen, die zusammen passen müssen. Die technische Schuldenliste sammelt konkrete, nachvollziehbare Punkte, die sich auf Stabilität, Sicherheit, Performance, Testbarkeit und Wartbarkeit auswirken können.
 
 ```mermaid
 graph TB
@@ -486,10 +486,10 @@ Die Naming Conventions sind zwischen Paketen nicht vollständig konsistent. Eini
 **Beispiele:**
 
 ```
-packages/crafter/src/lib/components/
-├── app.svelte              # kebab-case
-├── sidebar-left.svelte     # kebab-case
-└── nav-tree.svelte         # kebab-case
+packages/crafter/src/lib/components/ujl-crafter/
+├── ujl-crafter.svelte                # kebab-case
+├── header/header.svelte              # kebab-case
+└── sidebar/nav-tree/nav-tree.svelte  # kebab-case
 
 packages/adapter-svelte/src/lib/components/
 ├── AdapterRoot.svelte      # PascalCase

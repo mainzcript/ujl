@@ -5,9 +5,11 @@ description: "Qualitätsziele und -szenarien für das UJL-System"
 
 # Qualitätsanforderungen
 
+Die Qualitätsanforderungen leiten sich direkt aus den Zielen von UJL ab: Brand-Compliance soll technisch erzwingbar sein, Barrierefreiheit soll im Authoring mitgedacht werden, und Dokumente müssen robust validierbar und gut integrierbar bleiben. Die Szenarien konkretisieren das als überprüfbare Reaktionen des Systems, damit Qualitätsziele nicht abstrakt bleiben, sondern als Tests, Akzeptanzkriterien und Architekturregeln greifbar werden.
+
 ## 10.1 Quality Tree
 
-Der Quality Tree visualisiert die Hierarchie der Qualitätsziele und ihre Konkretisierungen. Die Nummerierung entspricht den Quality Scenarios in Abschnitt 10.2.
+Der Quality Tree visualisiert die Hierarchie der Qualitätsziele und ihre wichtigsten Konkretisierungen.
 
 ```mermaid
 graph TB
