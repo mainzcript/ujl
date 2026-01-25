@@ -80,54 +80,60 @@
 </Story>
 
 <!-- With Label -->
-<Story name="With Label" asChild>
-	<div class="max-w-md space-y-2">
-		<div class="flex justify-between text-sm">
-			<span class="font-medium">Uploading...</span>
-			<span class="text-muted-foreground">66%</span>
+<Story name="With Label" args={{ value: 66 }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-2">
+			<div class="flex justify-between text-sm">
+				<span class="font-medium">Uploading...</span>
+				<span class="text-muted-foreground">{args.value}%</span>
+			</div>
+			<Progress {...args} />
 		</div>
-		<Progress value={66} />
-	</div>
+	{/snippet}
 </Story>
 
 <!-- Custom Max -->
-<Story name="Custom Max" asChild>
-	<div class="max-w-md space-y-2">
-		<div class="flex justify-between text-sm">
-			<span>Progress</span>
-			<span>3 of 5 steps</span>
+<Story name="Custom Max" args={{ value: 3, max: 5 }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-2">
+			<div class="flex justify-between text-sm">
+				<span>Progress</span>
+				<span>{args.value} of {args.max} steps</span>
+			</div>
+			<Progress {...args} />
 		</div>
-		<Progress value={3} max={5} />
-	</div>
+	{/snippet}
 </Story>
 
 <!-- File Upload Example -->
-<Story name="File Upload Example" asChild>
-	<div class="max-w-md space-y-4 rounded-lg border p-4">
-		<div class="flex items-center gap-3">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="text-muted-foreground"
-			>
-				<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-				<path d="M14 2v4a2 2 0 0 0 2 2h4" />
-			</svg>
-			<div class="flex-1">
-				<p class="text-sm font-medium">document.pdf</p>
-				<p class="text-xs text-muted-foreground">2.4 MB</p>
+<Story name="File Upload Example" args={{ value: 78 }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-4 rounded-lg border p-4">
+			<div class="flex items-center gap-3">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="text-muted-foreground"
+				>
+					<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+					<path d="M14 2v4a2 2 0 0 0 2 2h4" />
+				</svg>
+				<div class="flex-1">
+					<p class="text-sm font-medium">document.pdf</p>
+					<p class="text-xs text-muted-foreground">2.4 MB</p>
+				</div>
+				<span class="text-sm text-muted-foreground">{args.value}%</span>
 			</div>
-			<span class="text-sm text-muted-foreground">78%</span>
+			<Progress {...args} />
 		</div>
-		<Progress value={78} />
-	</div>
+	{/snippet}
 </Story>
 
 <!-- Playground -->

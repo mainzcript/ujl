@@ -58,15 +58,11 @@
 <Story name="Default">Click me</Story>
 
 <!-- With Underline -->
-<Story name="With Underline">
-	{#snippet template()}
-		<div class="flex flex-col gap-2">
-			<Link href="#" underline={true} active={undefined} currentUrl={undefined}
-				>Underlined Link</Link
-			>
-			<Link href="#" underline={false} active={undefined} currentUrl={undefined}>No Underline</Link>
-		</div>
-	{/snippet}
+<Story name="With Underline" asChild>
+	<div class="flex flex-col gap-2">
+		<Link href="#" underline={true} active={undefined} currentUrl={undefined}>Underlined Link</Link>
+		<Link href="#" underline={false} active={undefined} currentUrl={undefined}>No Underline</Link>
+	</div>
 </Story>
 
 <!-- External Link -->

@@ -90,14 +90,17 @@
 </Story>
 
 <!-- Responsive -->
-<Story name="Responsive" asChild>
-	<div class="max-w-md">
-		<Image
-			src="https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800&h=400&fit=crop"
-			alt="Responsive image"
-			class="w-full"
-		/>
-	</div>
+<Story name="Responsive" args={{ alt: 'Responsive image' }}>
+	{#snippet template(args)}
+		<div class="max-w-md">
+			<Image
+				src={args.src ||
+					'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&h=400&fit=crop'}
+				alt={args.alt}
+				class="w-full"
+			/>
+		</div>
+	{/snippet}
 </Story>
 
 <!-- Gallery Example -->

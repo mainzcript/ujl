@@ -41,11 +41,13 @@
 <Story name="Default"></Story>
 
 <!-- With Label -->
-<Story name="With Label" asChild>
-	<div class="flex items-center gap-2">
-		<Switch id="airplane-mode" />
-		<Label for="airplane-mode">Airplane Mode</Label>
-	</div>
+<Story name="With Label">
+	{#snippet template(args)}
+		<div class="flex items-center gap-2">
+			<Switch id="airplane-mode" {...args} />
+			<Label for="airplane-mode">Airplane Mode</Label>
+		</div>
+	{/snippet}
 </Story>
 
 <!-- Checked States -->

@@ -123,32 +123,38 @@
 </Story>
 
 <!-- Range Slider -->
-<Story name="Range Slider" asChild>
-	<div class="max-w-md space-y-2">
-		<div class="flex justify-between">
-			<Label>Price Range</Label>
-			<span class="text-sm text-muted-foreground">$25 - $75</span>
+<Story name="Range Slider" args={{ value: [25, 75], max: 100 }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-2">
+			<div class="flex justify-between">
+				<Label>Price Range</Label>
+				{#if Array.isArray(args.value) && args.value.length >= 2}
+					<span class="text-sm text-muted-foreground">${args.value[0]} - ${args.value[1]}</span>
+				{/if}
+			</div>
+			<Slider {...args} />
 		</div>
-		<Slider type="multiple" value={[25, 75]} max={100} step={1} />
-	</div>
+	{/snippet}
 </Story>
 
 <!-- With Steps -->
-<Story name="With Steps" asChild>
-	<div class="max-w-md space-y-2">
-		<div class="flex justify-between">
-			<Label>Quality</Label>
-			<span class="text-sm text-muted-foreground">Medium</span>
+<Story name="With Steps" args={{ max: 100, step: 25, value: [50] }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-2">
+			<div class="flex justify-between">
+				<Label>Quality</Label>
+				<span class="text-sm text-muted-foreground">Medium</span>
+			</div>
+			<Slider {...args} />
+			<div class="flex justify-between text-xs text-muted-foreground">
+				<span>Low</span>
+				<span>Medium</span>
+				<span>High</span>
+				<span>Ultra</span>
+				<span>Max</span>
+			</div>
 		</div>
-		<Slider type="multiple" value={[50]} max={100} step={25} />
-		<div class="flex justify-between text-xs text-muted-foreground">
-			<span>Low</span>
-			<span>Medium</span>
-			<span>High</span>
-			<span>Ultra</span>
-			<span>Max</span>
-		</div>
-	</div>
+	{/snippet}
 </Story>
 
 <!-- Vertical -->
@@ -170,13 +176,15 @@
 </Story>
 
 <!-- Disabled -->
-<Story name="Disabled" asChild>
-	<div class="max-w-md space-y-4">
-		<div class="space-y-2">
-			<Label class="opacity-50">Disabled Slider</Label>
-			<Slider type="multiple" value={[50]} max={100} disabled />
+<Story name="Disabled" args={{ value: [50], max: 100, disabled: true, type: 'multiple' }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-4">
+			<div class="space-y-2">
+				<Label class="opacity-50">Disabled Slider</Label>
+				<Slider {...args} />
+			</div>
 		</div>
-	</div>
+	{/snippet}
 </Story>
 
 <!-- Audio Settings Example -->

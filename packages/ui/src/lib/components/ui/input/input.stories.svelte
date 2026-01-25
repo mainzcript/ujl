@@ -84,11 +84,13 @@
 </Story>
 
 <!-- With Label -->
-<Story name="With Label" asChild>
-	<div class="max-w-sm space-y-1">
-		<Label for="email">Email Address</Label>
-		<Input id="email" type="email" placeholder="you@example.com" />
-	</div>
+<Story name="With Label" args={{ type: 'email', placeholder: 'you@example.com' }}>
+	{#snippet template(args)}
+		<div class="max-w-sm space-y-1">
+			<Label for="email">Email Address</Label>
+			<Input id="email" type={args.type} placeholder={args.placeholder} />
+		</div>
+	{/snippet}
 </Story>
 
 <!-- States -->
@@ -114,11 +116,13 @@
 </Story>
 
 <!-- File Input -->
-<Story name="File Input" asChild>
-	<div class="max-w-sm space-y-1">
-		<Label for="file">Upload File</Label>
-		<Input id="file" type="file" />
-	</div>
+<Story name="File Input" args={{ type: 'file' }}>
+	{#snippet template(args)}
+		<div class="max-w-sm space-y-1">
+			<Label for="file">Upload File</Label>
+			<Input id="file" type={args.type} />
+		</div>
+	{/snippet}
 </Story>
 
 <!-- Playground -->

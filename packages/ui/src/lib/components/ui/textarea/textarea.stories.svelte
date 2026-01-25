@@ -38,11 +38,13 @@
 <Story name="Default"></Story>
 
 <!-- With Label -->
-<Story name="With Label" asChild>
-	<div class="max-w-md space-y-1">
-		<Label for="message">Your Message</Label>
-		<Textarea id="message" placeholder="Write your message here..." />
-	</div>
+<Story name="With Label" args={{ placeholder: 'Write your message here...' }}>
+	{#snippet template(args)}
+		<div class="max-w-md space-y-1">
+			<Label for="message">Your Message</Label>
+			<Textarea id="message" {...args} />
+		</div>
+	{/snippet}
 </Story>
 
 <!-- States -->
@@ -68,13 +70,15 @@
 </Story>
 
 <!-- With Character Count -->
-<Story name="With Character Count" asChild>
-	{@const maxLength = 280}
-	<div class="max-w-md space-y-1">
-		<Label for="bio">Bio</Label>
-		<Textarea id="bio" placeholder="Tell us about yourself..." maxlength={maxLength} />
-		<p class="text-right text-sm text-muted-foreground">Max {maxLength} characters</p>
-	</div>
+<Story name="With Character Count" args={{ placeholder: 'Tell us about yourself...' }}>
+	{#snippet template(args)}
+		{@const maxLength = 280}
+		<div class="max-w-md space-y-1">
+			<Label for="bio">Bio</Label>
+			<Textarea id="bio" {...args} maxlength={maxLength} />
+			<p class="text-right text-sm text-muted-foreground">Max {maxLength} characters</p>
+		</div>
+	{/snippet}
 </Story>
 
 <!-- Playground -->
