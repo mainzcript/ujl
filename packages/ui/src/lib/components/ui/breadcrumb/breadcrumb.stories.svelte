@@ -8,7 +8,7 @@
 		BreadcrumbList,
 		BreadcrumbPage,
 		BreadcrumbSeparator
-	} from './index.js';
+	} from './index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Navigation/Breadcrumb',

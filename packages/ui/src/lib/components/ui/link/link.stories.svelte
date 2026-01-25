@@ -1,6 +1,6 @@
 <script module>
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Link } from './index.js';
+	import { Link } from './index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Base/Link',

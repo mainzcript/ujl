@@ -1,6 +1,6 @@
 <script module>
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Separator } from './index.js';
+	import { Separator } from './index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Base/Separator',

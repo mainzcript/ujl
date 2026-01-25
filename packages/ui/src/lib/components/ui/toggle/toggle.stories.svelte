@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Toggle } from './index.js';
+	import { Toggle } from './index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Base/Toggle',

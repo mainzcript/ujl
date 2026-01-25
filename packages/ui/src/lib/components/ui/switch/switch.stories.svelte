@@ -1,7 +1,7 @@
 <script module>
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Switch } from './index.js';
-	import { Label } from '../label/index.js';
+	import { Switch } from './index.ts';
+	import { Label } from '../label/index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Base/Switch',

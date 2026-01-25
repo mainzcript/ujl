@@ -8,7 +8,7 @@
 		CardContent,
 		CardFooter,
 		CardAction
-	} from './index.js';
+	} from './index.ts';
 	import { Button } from '../button/index.ts';
 	import { Input } from '../input/index.ts';
 	import { Label } from '../label/index.ts';
