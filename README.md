@@ -47,6 +47,21 @@ ujl/
 - [AI Agent Context](./AGENTS.md) - High-level overview for AI assistants
 - [User Documentation](./apps/docs/) - Architecture and getting started
 
+## Getting Started
+
+For a full setup walkthrough, see the VitePress docs:
+
+- [Getting Started](./apps/docs/src/docs/01-getting-started.md)
+
+If you want a minimal local demo first:
+
+```bash
+pnpm install
+pnpm --filter @ujl-framework/dev-demo dev
+```
+
+This launches the Crafter demo on `http://localhost:5174`.
+
 ## CI/CD
 
 The project uses GitLab CI/CD with the following pipeline stages:

@@ -23,7 +23,17 @@ This starts the Crafter at [http://localhost:5174](http://localhost:5174) with i
 
 To use persistent library storage via the Library service, follow these steps:
 
-### Step 1: Start the Library Service
+### Step 1: Configure the Library Service
+
+```bash
+# In a separate terminal
+cd services/library
+cp .env.example .env
+```
+
+Open `.env` and set at least `PAYLOAD_SECRET`, `POSTGRES_PASSWORD`, and `DATABASE_URL`.
+
+### Step 2: Start the Library Service
 
 ```bash
 # In a separate terminal
@@ -36,21 +46,22 @@ This starts:
 - PostgreSQL database (via Docker)
 - Payload CMS server at [http://localhost:3000](http://localhost:3000)
 
-### Step 2: Create an Admin User
+### Step 3: Create an Admin User
 
 1. Open [http://localhost:3000/admin](http://localhost:3000/admin)
 2. Fill in the registration form (first user becomes admin), you can use any email - it will not be verified.
 3. Click "Create Account"
 
-### Step 3: Enable API Key
+### Step 4: Enable API Key
 
 1. In the Admin UI, go to **Users** in the sidebar
 2. Click on your user
 3. Scroll down to **Enable API Key**
 4. Toggle it on
-5. **Copy the generated API Key** (you'll need it in the next step)
+5. Click **Save**
+6. **Copy the generated API Key** (you'll need it in the next step)
 
-### Step 4: Configure Environment
+### Step 5: Configure Environment
 
 ```bash
 # In apps/dev-demo directory
@@ -65,7 +76,7 @@ VITE_BACKEND_URL=http://localhost:3000
 VITE_BACKEND_API_KEY=your-api-key-here  # Paste the key from Step 3
 ```
 
-### Step 5: Start the Demo
+### Step 6: Start the Demo
 
 ```bash
 pnpm --filter @ujl-framework/dev-demo dev

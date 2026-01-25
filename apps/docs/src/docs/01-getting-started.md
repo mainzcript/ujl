@@ -107,7 +107,17 @@ Die Demo startet auf `http://localhost:5174` (oder einem anderen Port) mit Inlin
 
 Um persistente Library-Speicherung über den Library-Service zu nutzen:
 
-1. **Library-Service starten:**
+1. **Library-Service konfigurieren:**
+
+   ```bash
+   # In einem separaten Terminal
+   cd services/library
+   cp .env.example .env
+   ```
+
+   Öffne `.env` und setze mindestens `PAYLOAD_SECRET`, `POSTGRES_PASSWORD` und `DATABASE_URL`.
+
+2. **Library-Service starten:**
 
    ```bash
    # In einem separaten Terminal
@@ -117,17 +127,18 @@ Um persistente Library-Speicherung über den Library-Service zu nutzen:
 
    Startet PostgreSQL (via Docker) und Payload CMS auf `http://localhost:3000`
 
-2. **Admin-User erstellen:**
+3. **Admin-User erstellen:**
    - Öffne `http://localhost:3000/admin`
    - Fülle das Registrierungsformular aus (erster User wird Admin)
    - Klicke auf "Create Account"
 
-3. **API-Key aktivieren:**
+4. **API-Key aktivieren:**
    - In der Admin-UI: **Users** → dein User
    - Scrolle zu **Enable API Key** und aktiviere es
+   - Klicke auf **Save**
    - **Kopiere den generierten API-Key**
 
-4. **Umgebung konfigurieren:**
+5. **Umgebung konfigurieren:**
 
    ```bash
    # In apps/dev-demo
@@ -142,7 +153,7 @@ Um persistente Library-Speicherung über den Library-Service zu nutzen:
    VITE_BACKEND_API_KEY=dein-api-key-hier
    ```
 
-5. **Demo starten:**
+6. **Demo starten:**
    ```bash
    pnpm --filter @ujl-framework/dev-demo dev
    ```

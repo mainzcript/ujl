@@ -154,6 +154,13 @@ pnpm run test     # Run tests
 
 The `dev` command uses `concurrently` to run Tailwind CSS watch and Vite in parallel.
 
+### E2E Tests (Playwright)
+
+The E2E tests start (or reuse) a dev server on port `5173` (see `playwright.config.ts`).
+
+- Make sure nothing else is listening on `http://localhost:5173` when running `pnpm run test:e2e` (e.g. VitePress in `apps/docs` also uses `5173` by default).
+- If you need a different port, update `baseURL` and `webServer.port` in `packages/crafter/playwright.config.ts`.
+
 ### Project Structure
 
 ```
