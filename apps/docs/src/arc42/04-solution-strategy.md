@@ -423,7 +423,7 @@ React wurde nicht als Basis gesetzt, weil Svelte-Compilation und Custom Elements
 
 ### Deployment-Strategie
 
-UJL wird als Monorepo entwickelt und in mehrere Pakete geschnitten. Die Kernpakete sind als NPM-Pakete vorgesehen (`@ujl-framework/types`, `@ujl-framework/core`, `@ujl-framework/ui`, `@ujl-framework/adapter-svelte`, `@ujl-framework/adapter-web`, `@ujl-framework/crafter`), während `@ujl-framework/examples` intern bleibt. Der Library Service (`@ujl-framework/library`) wird als self-hosted Service betrieben, typischerweise über Docker Compose.
+UJL wird als Monorepo entwickelt und in mehrere Pakete geschnitten. Die Kernpakete sind als NPM-Pakete vorgesehen (`@ujl-framework/types`, `@ujl-framework/core`, `@ujl-framework/ui`, `@ujl-framework/adapter-svelte`, `@ujl-framework/adapter-web`, `@ujl-framework/crafter`), während `@ujl-framework/examples` intern bleibt. Der Library Service (`services/library`) wird als self-hosted Service betrieben, typischerweise mit Docker für die lokale PostgreSQL-DB.
 
 Für den Crafter gibt es je nach Umgebung drei Deployment-Wege: als SvelteKit SSR App (Vercel, Netlify oder eigener Node-Server), als statischer Export über einen passenden Adapter für Plattformen wie S3 oder GitHub Pages, oder als Container zusammen mit dem Library Service.
 

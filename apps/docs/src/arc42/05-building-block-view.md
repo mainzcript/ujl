@@ -1140,27 +1140,25 @@ const response = await fetch("http://localhost:3000/api/images", {
 
 #### Deployment: Docker Compose
 
-**docker-compose.yml (Auszug):**
+Für lokale Entwicklung wird PostgreSQL per Docker Compose gestartet; der Payload-Server läuft als Node.js-Prozess über `pnpm run dev` (kein Payload-Container im Compose-File).
+
+**docker-compose.yml (aktuell, Auszug):**
 
 ```yaml
 services:
-  payload:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URI=postgres://postgres:password@postgres:5432/library
-      - PAYLOAD_SECRET=${PAYLOAD_SECRET}
-    depends_on:
-      - postgres
-
   postgres:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=library
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-library}
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
 ```
 
 **Startup:**
