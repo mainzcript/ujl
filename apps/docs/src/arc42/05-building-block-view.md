@@ -9,64 +9,16 @@ UJL ist als pnpm-Monorepo organisiert und gliedert sich in wenige, trennscharfe 
 
 ## 5.1 Whitebox Gesamtsystem (Level 1)
 
-### Übersichtsdiagramm
+### Architektur-Übersicht
 
-```mermaid
-graph TB
-    subgraph "Foundation Layer"
-        Types[types<br/>Type Definitions & Validation]
-    end
-
-    subgraph "Core Layer"
-        Core[core<br/>Composer & Module System]
-    end
-
-    subgraph "UI Layer"
-        UI[ui<br/>Component Library]
-    end
-
-    subgraph "Adapter Layer"
-        AdapterSvelte[adapter-svelte<br/>Svelte 5 Components]
-        AdapterWeb[adapter-web<br/>Web Components]
-    end
-
-	    subgraph "Application Layer"
-	        Crafter[crafter<br/>Visual Editor]
-	        DevDemo[dev-demo<br/>Demo Application]
-	        Docs[docs<br/>Documentation]
-	        Examples[examples<br/>Example Documents]
-	    end
-
-    subgraph "Service Layer"
-        ImageService[library<br/>Payload CMS Backend]
-    end
-
-    Types --> Core
-    Core --> UI
-    UI --> AdapterSvelte
-    AdapterSvelte --> AdapterWeb
-
-    Core --> Crafter
-    AdapterSvelte --> Crafter
-    UI --> Crafter
-    Types --> Crafter
-    Crafter -.->|API Calls| ImageService
-
-	    Core --> DevDemo
-	    AdapterWeb --> DevDemo
-	    Examples --> DevDemo
-	    Types --> DevDemo
-
-    Examples --> Types
-
-    style Types fill:#8b5cf6
-    style Core fill:#3b82f6
-    style UI fill:#10b981
-    style AdapterSvelte fill:#f59e0b
-    style AdapterWeb fill:#f59e0b
-    style Crafter fill:#ef4444
-    style ImageService fill:#6366f1
-```
+| Layer                 | Packages                             | Verantwortung                                               | Abhängigkeiten                               |
+| --------------------- | ------------------------------------ | ----------------------------------------------------------- | -------------------------------------------- |
+| **Application Layer** | crafter · dev-demo · docs · examples | End-User-Anwendungen, orchestrieren unterliegende Schichten | Adapter, UI, Core, Types, (Service optional) |
+| **Adapter Layer**     | adapter-svelte · adapter-web         | Framework-spezifische AST-Transformation                    | UI, Core, Types                              |
+| **UI Layer**          | ui                                   | Wiederverwendbare shadcn-svelte Komponenten                 | Core, Types                                  |
+| **Core Layer**        | core                                 | Composer, Module Registry, Field System, Image Library      | Types                                        |
+| **Foundation Layer**  | types                                | TypeScript-Typen, Zod-Schemas, Validator                    | –                                            |
+| **Service Layer**     | library                              | Payload CMS Backend für Asset-Management (optional)         | –                                            |
 
 ### Begründung der Zerlegung
 
@@ -171,27 +123,6 @@ Beide Adapter akzeptieren `target` (DOM-Element oder CSS-Selector), `mode` (Them
 ### 5.2.1 Baustein: types
 
 Das `types`-Package bildet das Fundament der gesamten UJL-Architektur. Es definiert nicht nur die TypeScript-Typen für UJLC- und UJLT-Dokumente, sondern enthält auch die **Validierungslogik** über Zod-Schemas und einen eigenständigen **CLI-Validator** (`ujl-validate`). Diese Doppelrolle aus Runtime-Validierung und statischer Typsicherheit macht `types` zur wichtigsten Komponente für Datenintegrität im gesamten System.
-
-#### Whitebox: types
-
-```mermaid
-graph TB
-    subgraph "types Package"
-        AST[ast.ts<br/>AST Node Types]
-        UJLC[ujl-content.ts<br/>UJLC Schemas & Types]
-        UJLT[ujl-theme.ts<br/>UJLT Schemas & Types]
-        Image[image.ts<br/>Image Types]
-        Prosemirror[prosemirror.ts<br/>Rich Text Types]
-        Validation[validation.ts<br/>Validation Functions]
-        CLI[cli.ts<br/>ujl-validate CLI]
-    end
-
-    CLI --> Validation
-    Validation --> UJLC
-    Validation --> UJLT
-    UJLC --> Image
-    UJLC --> Prosemirror
-```
 
 #### Enthaltene Elemente
 
@@ -1124,33 +1055,21 @@ pnpm run dev:payload
 ### Build-Reihenfolge (Dependency Order)
 
 ```mermaid
-graph TB
-    Types[1. types]
-    Core[2. core]
-    UI[3. ui]
-    AdapterSvelte[4. adapter-svelte]
-    AdapterWeb[5. adapter-web]
-    Crafter[6. crafter]
-    DevDemo[7. dev-demo]
-    Docs[8. docs]
-    Examples[examples]
+graph LR
+    Types[1. types] --> Core[2. core]
+    Core --> UI[3. ui]
+    UI --> AdapterSvelte[4. adapter-svelte]
 
-    Types --> Core
-    Core --> UI
-    UI --> AdapterSvelte
-    AdapterSvelte --> AdapterWeb
+    AdapterSvelte --> AdapterWeb[5. adapter-web]
+    AdapterSvelte --> Crafter[6. crafter]
 
-    Types --> Crafter
-    Core --> Crafter
-    UI --> Crafter
-    AdapterSvelte --> Crafter
+    AdapterWeb --> DevDemo[7. dev-demo]
+    Crafter --> DevDemo
 
-    Types --> DevDemo
-    Core --> DevDemo
-    AdapterWeb --> DevDemo
+    Types --> Examples[examples]
     Examples --> DevDemo
 
-    Types --> Examples
+    DevDemo --> Docs[8. docs]
 
     style Types fill:#8b5cf6
     style Core fill:#3b82f6
@@ -1160,6 +1079,7 @@ graph TB
     style Crafter fill:#ef4444
     style DevDemo fill:#6366f1
     style Docs fill:#6366f1
+    style Examples fill:#a78bfa
 ```
 
 **Build-Kommando (Monorepo-Root):**

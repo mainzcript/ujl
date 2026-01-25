@@ -13,12 +13,29 @@ UJL ist außerdem **AI-ready**, aber aktuell **ohne integrierte KI-Services**: E
 
 **Kernidee:**
 
-- **Inhalte** liegen als strukturierte JSON-Dokumente in `.ujlc.json` vor.
-- **Designregeln** liegen als Theme in `.ujlt.json` vor (z. B. Farben, Typografie, Abstände).
-- **Adapter** führen beides zusammen und erzeugen daraus den Output (ContentFrame, d. h. HTML/CSS/JS).
-- Der **UJL Crafter** ist ein visueller Editor zur Erstellung und Pflege von Inhalten und Themes.
+```mermaid
+flowchart LR
+    UJLC[UJLC Document<br/>Strukturierte Inhalte<br/>.ujlc.json]
+    UJLT[UJLT Theme<br/>Designregeln<br/>.ujlt.json]
+    Composer[Composer]
+    AST[Abstract Syntax Tree]
+    Adapter[Adapter<br/>Svelte/Web]
+    Output[Output<br/>HTML + CSS + JS]
+    Crafter[UJL Crafter<br/>Visueller Editor]
 
-UJL ist dabei **kein vollständiges CMS** und kein „Free-Form“-Page-Builder, sondern ein **Layout- und Governance-Layer**, der bestehende CMS- und Frontend-Stacks ergänzt.
+    UJLC --> Composer
+    UJLT --> Composer
+    Composer --> AST
+    AST --> Adapter
+    Adapter --> Output
+
+    Crafter -.erstellt/bearbeitet.-> UJLC
+    Crafter -.erstellt/bearbeitet.-> UJLT
+```
+
+UJL trennt Inhalte und Designregeln konsequent: Inhalte liegen als strukturierte JSON-Dokumente in `.ujlc.json` vor, während Designregeln als Theme in `.ujlt.json` definiert werden (Farben, Typografie, Abstände). Adapter führen beides zusammen und erzeugen daraus den Output als ContentFrame (HTML/CSS/JS). Der UJL Crafter dient als visueller Editor zur Erstellung und Pflege von Inhalten und Themes.
+
+UJL ist dabei **kein vollständiges CMS** und kein „Free-Form"-Page-Builder, sondern ein **Layout- und Governance-Layer**, der bestehende CMS- und Frontend-Stacks ergänzt.
 
 ## 1.1 Requirements Overview
 

@@ -362,18 +362,35 @@ UJL ist explizit nicht verantwortlich für **CMS-Kernfunktionen** (Speicherung, 
 
 **Szenario 1: UJL + Headless CMS**
 
-```
-[CMS] ←→ [UJLC/UJLT als JSON] ←→ [Composer] → [Adapter] → [Host-Frontend]
+Das CMS speichert UJLC und UJLT als JSON-Felder und liefert diese an die Host-Anwendung. Der Composer erzeugt daraus den AST, der Adapter rendert den Output.
+
+```mermaid
+flowchart LR
+    CMS[Headless CMS<br/>Speicherung] <-->|UJLC/UJLT JSON| Composer[Composer<br/>AST-Generierung]
+    Composer --> Adapter[Adapter<br/>Rendering]
+    Adapter --> Frontend[Host-Frontend<br/>Next.js/Nuxt/etc.]
 ```
 
 **Szenario 2: UJL + Static Site Generation**
 
-```
-[.ujlc/.ujlt Dateien] → [Build] → [Composer] → [Adapter] → [Static Output]
+UJLC und UJLT Dateien werden zur Build-Zeit eingelesen, komponiert und als statisches HTML ausgegeben.
+
+```mermaid
+flowchart LR
+    Files[.ujlc/.ujlt<br/>Dateien] --> Build[Build-Prozess<br/>Node.js/Vite]
+    Build --> Composer[Composer]
+    Composer --> Adapter[Adapter]
+    Adapter --> Output[Static HTML/CSS/JS]
 ```
 
 **Szenario 3: UJL als White-Label Editor**
 
-```
-[SaaS Host] → [Embedded Crafter] → [Preview/Adapter] → [Customer Frontend]
+Eine SaaS-Plattform bettet den Crafter ein. Kunden nutzen ihn zur Content-Erstellung, der Output wird in deren Frontend gerendert.
+
+```mermaid
+flowchart LR
+    SaaS[SaaS Platform] --> Crafter[Embedded Crafter<br/>Visual Editor]
+    Crafter --> Preview[Preview/Adapter<br/>Live-Vorschau]
+    Crafter --> CustomerDB[(Customer DB<br/>UJLC/UJLT)]
+    CustomerDB --> CustomerFrontend[Customer Frontend<br/>Individuelles Design]
 ```
