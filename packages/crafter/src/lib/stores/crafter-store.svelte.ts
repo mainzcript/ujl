@@ -17,7 +17,7 @@ import type {
 	UJLCDocument,
 	UJLTDocument,
 	UJLCSlotObject,
-	UJLCMediaLibrary,
+	UJLCImageLibrary,
 	UJLTTokenSet,
 	UJLCDocumentMeta
 } from '@ujl-framework/types';
@@ -25,7 +25,7 @@ import { generateUid, type Composer } from '@ujl-framework/core';
 import { findPathToNode, isRootNode } from '../utils/ujlc-tree.js';
 import { createOperations } from './operations.js';
 import { logger } from '../utils/logger.js';
-import type { MediaService } from '../services/media-service.js';
+import type { ImageService } from '../service-adapters/image-service.js';
 
 // ============================================
 // TYPES
@@ -45,35 +45,41 @@ export type CrafterMode = 'editor' | 'designer';
 export type ViewportSize = 1024 | 768 | 375 | null;
 
 /**
- * Media library context for field editing.
- * Stores which field is currently being edited in the media library.
+ * Image library context for field editing.
+ * Stores which field is currently being edited in the image library.
  */
-export type MediaLibraryContext = {
+export type ImageLibraryContext = {
 	fieldName: string;
 	nodeId: string;
 	currentValue: string | number | null;
 } | null;
 
 /**
- * Media library configuration from document meta.
+ * Library configuration from document meta.
  */
-export type MediaLibraryConfig = UJLCDocumentMeta['media_library'];
+export type LibraryConfig = UJLCDocumentMeta['_library'];
 
 /**
- * Function type for immutable media library updates.
+ * Function type for immutable image library updates.
  */
-export type UpdateMediaFn = (fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary) => void;
+export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void;
 
 /**
- * Factory interface for creating media services.
+ * Callback type for save action.
+ * Receives both documents so the developer can decide what to persist.
+ */
+export type SaveCallback = (document: UJLCDocument, theme: UJLTDocument) => void;
+
+/**
+ * Factory interface for creating image services.
  * Allows dependency injection of different storage implementations.
  */
-export interface MediaServiceFactory {
+export interface ImageServiceFactory {
 	(
-		config: MediaLibraryConfig,
-		getMedia: () => UJLCMediaLibrary,
-		updateMedia: UpdateMediaFn
-	): MediaService;
+		config: LibraryConfig,
+		getImages: () => UJLCImageLibrary,
+		updateImages: UpdateImagesFn
+	): ImageService;
 }
 
 /**
@@ -87,8 +93,8 @@ export interface CrafterStoreDeps {
 	initialUjltDocument: UJLTDocument;
 	/** Composer instance for AST generation and module registry */
 	composer: Composer;
-	/** Factory function to create media services */
-	createMediaService: MediaServiceFactory;
+	/** Factory function to create image services */
+	createImageService: ImageServiceFactory;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -122,7 +128,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  *   initialUjlcDocument: myDocument,
  *   initialUjltDocument: myTheme,
  *   composer: new Composer(),
- *   createMediaService: createMediaServiceFactory()
+ *   createImageService: createImageServiceFactory()
  * });
  *
  * // Read state
@@ -137,7 +143,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		initialUjlcDocument,
 		initialUjltDocument,
 		composer,
-		createMediaService,
+		createImageService,
 		testMode = false
 	} = deps;
 
@@ -158,22 +164,49 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _selectedNodeId = $state<string | null>(null);
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let _expandedNodeIds = $state<Set<string>>(new Set());
-	let _isMediaLibraryViewActive = $state(false);
-	let _mediaLibraryContext = $state<MediaLibraryContext>(null);
+	let _isImageLibraryViewActive = $state(false);
+	let _imageLibraryContext = $state<ImageLibraryContext>(null);
 	let _viewportType = $state<string | undefined>(undefined);
+
+	// Fullscreen state
+	let _isFullscreen = $state(false);
+	let _containerWidth = $state(0);
+	let _containerHeight = $state(0);
+	let _screenWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 0);
+	let _screenHeight = $state(typeof window !== 'undefined' ? window.innerHeight : 0);
+
+	// Save callback (set via API, controls Save button visibility)
+	let _onSaveCallback = $state<SaveCallback | null>(null);
 
 	// ============================================
 	// COMPUTED STATE (Derived - Automatic Reactivity)
 	// ============================================
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
-	const media = $derived(_ujlcDocument.ujlc.media);
+	const images = $derived(_ujlcDocument.ujlc.images);
 	const meta = $derived(_ujlcDocument.ujlc.meta);
 	const tokens = $derived(_ujltDocument.ujlt.tokens);
 
 	const viewportSize = $derived<ViewportSize>(
 		_viewportType ? (VIEWPORT_SIZES[_viewportType] ?? null) : null
 	);
+
+	/**
+	 * Returns true if the fullscreen button should be shown.
+	 * Shows button when container takes less than 80% of screen area, or when already in fullscreen mode (to allow minimizing).
+	 */
+	const _shouldShowFullscreenButton = $derived.by(() => {
+		if (_isFullscreen) return true;
+
+		if (_screenWidth === 0 || _screenHeight === 0) return false;
+		if (_containerWidth === 0 || _containerHeight === 0) return false;
+
+		const screenArea = _screenWidth * _screenHeight;
+		const containerArea = _containerWidth * _containerHeight;
+		const percentage = (containerArea / screenArea) * 100;
+
+		return percentage < 80;
+	});
 
 	// ============================================
 	// ACTIONS (Command Pattern - Single Responsibility)
@@ -229,17 +262,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Toggle media library view.
-	 * @param active - Whether to show the media library
+	 * Toggle image library view.
+	 * @param active - Whether to show the image library
 	 * @param context - Optional context for which field is being edited
 	 */
-	function setMediaLibraryViewActive(active: boolean, context?: MediaLibraryContext): void {
-		_isMediaLibraryViewActive = active;
+	function setImageLibraryViewActive(active: boolean, context?: ImageLibraryContext): void {
+		_isImageLibraryViewActive = active;
 		if (context !== undefined) {
-			_mediaLibraryContext = context;
+			_imageLibraryContext = context;
 		}
 		if (!active) {
-			_mediaLibraryContext = null;
+			_imageLibraryContext = null;
 		}
 	}
 
@@ -249,6 +282,46 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 */
 	function setViewportType(type: string | undefined): void {
 		_viewportType = type;
+	}
+
+	/**
+	 * Set container dimensions for fullscreen button visibility calculation.
+	 * @param width - Container width in pixels
+	 * @param height - Container height in pixels
+	 */
+	function setContainerSize(width: number, height: number): void {
+		_containerWidth = width;
+		_containerHeight = height;
+	}
+
+	/**
+	 * Set screen dimensions for fullscreen button visibility calculation.
+	 * @param width - Screen width in pixels
+	 * @param height - Screen height in pixels
+	 */
+	function setScreenSize(width: number, height: number): void {
+		_screenWidth = width;
+		_screenHeight = height;
+	}
+
+	/**
+	 * Toggle fullscreen mode.
+	 * Manages document.body overflow to prevent scrolling when in fullscreen.
+	 */
+	function toggleFullscreen(): void {
+		_isFullscreen = !_isFullscreen;
+		if (typeof window !== 'undefined' && document.body) {
+			document.body.style.overflow = _isFullscreen ? 'hidden' : '';
+		}
+	}
+
+	/**
+	 * Set the save callback.
+	 * When set, the Save button becomes visible in the header.
+	 * @param callback - The callback to invoke on save, or null to hide the button
+	 */
+	function setOnSaveCallback(callback: SaveCallback | null): void {
+		_onSaveCallback = callback;
 	}
 
 	// ============================================
@@ -278,13 +351,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Update media library with immutable function.
-	 * @param fn - Function that receives current media and returns new media
+	 * Update image library with immutable function.
+	 * @param fn - Function that receives current images and returns new images
 	 */
-	function updateMedia(fn: (media: UJLCMediaLibrary) => UJLCMediaLibrary): void {
+	function updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, media: fn(_ujlcDocument.ujlc.media) }
+			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) }
 		};
 	}
 
@@ -312,8 +385,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// SERVICES (Lazy Initialization via $derived.by)
 	// ============================================
 
-	const mediaService = $derived.by(() =>
-		createMediaService(meta.media_library, () => media, updateMedia)
+	const imageService = $derived.by(() =>
+		createImageService(meta._library, () => images, updateImages)
 	);
 
 	// ============================================
@@ -349,22 +422,28 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get expandedNodeIds() {
 			return _expandedNodeIds;
 		},
-		get isMediaLibraryViewActive() {
-			return _isMediaLibraryViewActive;
+		get isImageLibraryViewActive() {
+			return _isImageLibraryViewActive;
 		},
-		get mediaLibraryContext() {
-			return _mediaLibraryContext;
+		get imageLibraryContext() {
+			return _imageLibraryContext;
 		},
 		get viewportType() {
 			return _viewportType;
+		},
+		get isFullscreen() {
+			return _isFullscreen;
+		},
+		get onSaveCallback() {
+			return _onSaveCallback;
 		},
 
 		// Computed (readonly via getters)
 		get rootSlot() {
 			return rootSlot;
 		},
-		get media() {
-			return media;
+		get images() {
+			return images;
 		},
 		get meta() {
 			return meta;
@@ -375,10 +454,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get viewportSize() {
 			return viewportSize;
 		},
+		get shouldShowFullscreenButton() {
+			return _shouldShowFullscreenButton;
+		},
 
 		// Services
-		get mediaService() {
-			return mediaService;
+		get imageService() {
+			return imageService;
 		},
 		composer,
 
@@ -387,13 +469,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		setSelectedNodeId,
 		setNodeExpanded,
 		expandToNode,
-		setMediaLibraryViewActive,
+		setImageLibraryViewActive,
 		setViewportType,
+		setContainerSize,
+		setScreenSize,
+		toggleFullscreen,
+		setOnSaveCallback,
 
 		// Functional Updates
 		updateRootSlot,
 		updateTokenSet,
-		updateMedia,
+		updateImages,
 		setUjlcDocument,
 		setUjltDocument,
 
@@ -408,3 +494,38 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 /** Store type derived from factory return type */
 export type CrafterStore = ReturnType<typeof createCrafterStore>;
+
+/**
+ * Context type alias for semantic clarity.
+ * CrafterContext === CrafterStore (design decision: context IS store)
+ */
+export type CrafterContext = CrafterStore;
+
+// ============================================
+// CONTEXT SYMBOLS
+// ============================================
+
+/**
+ * Symbol for type-safe CrafterContext access.
+ * Using Symbol.for() allows the same symbol to be retrieved across modules.
+ */
+export const CRAFTER_CONTEXT = Symbol.for('ujl:crafter-context');
+
+/**
+ * Symbol for Composer context.
+ * Used for direct Composer access in components.
+ */
+export const COMPOSER_CONTEXT = Symbol.for('ujl:composer-context');
+
+/**
+ * Symbol for Shadow Root context access.
+ * Used to provide the Shadow Root reference to child components
+ * for scoped DOM queries within the Shadow DOM.
+ */
+export const SHADOW_ROOT_CONTEXT = Symbol.for('ujl:shadow-root-context');
+
+/**
+ * Context type for Shadow Root access.
+ * Uses a getter to satisfy Svelte 5's reactivity warnings.
+ */
+export type ShadowRootContext = { readonly value: ShadowRoot | undefined };

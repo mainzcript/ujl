@@ -10,22 +10,28 @@
 export {
 	createCrafterStore,
 	type CrafterStore,
+	type CrafterContext,
 	type CrafterStoreDeps,
 	type CrafterMode,
 	type ViewportSize,
-	type MediaLibraryContext,
-	type MediaLibraryConfig,
-	type UpdateMediaFn,
-	type MediaServiceFactory
+	type ImageLibraryContext,
+	type LibraryConfig,
+	type UpdateImagesFn,
+	type ImageServiceFactory,
+	type ShadowRootContext,
+	type SaveCallback,
+	CRAFTER_CONTEXT,
+	COMPOSER_CONTEXT,
+	SHADOW_ROOT_CONTEXT
 } from './crafter-store.svelte.js';
 
 // Operations
 export { createOperations, type CrafterOperations } from './operations.js';
 
-// Media Service Factory
+// Image Service Factory
 export {
-	createMediaServiceFactory,
-	defaultMediaServiceFactory,
-	type MediaServiceFactoryFn,
-	type MediaServiceFactoryOptions
-} from './media-service-factory.js';
+	createImageServiceFactory,
+	getDefaultImageServiceFactory,
+	type ImageServiceFactoryFn,
+	type ImageServiceFactoryOptions
+} from './image-service-factory.js';

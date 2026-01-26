@@ -4,10 +4,10 @@
  * @module ujl-crafter
  */
 
-// Einzige öffentliche API
-export { UJLCrafter, type UJLCrafterOptions, type MediaLibraryOptions } from './UJLCrafter.js';
+// Only public API
+export { UJLCrafter, type UJLCrafterOptions, type LibraryOptions } from './UJLCrafter.js';
 
-// Callback-Types (nur für API-Nutzer relevant)
+// Callback types (only relevant for API consumers)
 export type {
 	NotificationType,
 	NotificationCallback,

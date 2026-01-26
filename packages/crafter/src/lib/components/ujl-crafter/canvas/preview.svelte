@@ -14,13 +14,12 @@
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
 		type CrafterContext,
-		type ShadowRootContext
-	} from '../context.js';
+		type ShadowRootContext,
+		type CrafterMode
+	} from '$lib/stores/index.js';
 	import { logger } from '$lib/utils/logger.js';
 	import { createScopedSelector } from '$lib/utils/scoped-dom.js';
 	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
-
-	import type { CrafterMode } from '$lib/stores/index.js';
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -65,15 +64,9 @@
 
 	let ast = $state<UJLAbstractNode | null>(null);
 
-	const mediaResolver = {
-		async resolve(id: string): Promise<string | null> {
-			const entry = await crafter.mediaService.get(id);
-			return entry?.dataUrl ?? null;
-		}
-	};
-
 	$effect(() => {
-		composer.compose(ujlcDocument, mediaResolver).then((composedAst) => {
+		// ImageService implements ImageProvider, so it can be passed directly
+		composer.compose(ujlcDocument, crafter.imageService).then((composedAst) => {
 			ast = composedAst;
 		});
 	});

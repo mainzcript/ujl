@@ -121,13 +121,13 @@
 			{#if app.isDesktopSidebar}
 				<div
 					class={cn(
-						'h-full shrink-0 overflow-hidden duration-300',
+						'relative h-full shrink-0 overflow-hidden duration-300',
 						app.sidebarDesktopOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0'
 					)}
 					data-slot="app-sidebar"
 				>
 					{#if registry.sidebar}
-						<div class="h-full w-(--ujl-app-sidebar-width) p-2">
+						<div class="absolute h-full w-full overflow-auto p-2">
 							{@render registry.sidebar()}
 						</div>
 					{/if}
@@ -188,7 +188,7 @@
 		<Sheet bind:open={() => app.sidebarSheetOpen, (v) => (app.sidebarSheetOpen = v)}>
 			<SheetContent side="left">
 				<SheetHeader />
-				<div class="flex-1 p-4 pt-0">
+				<div class="relative flex-1 overflow-auto p-4 pt-0">
 					{#if registry.sidebar}
 						{@render registry.sidebar()}
 					{/if}
@@ -200,9 +200,11 @@
 	<!-- Drawer fallback for Panel (mobile) -->
 	<Drawer bind:open={() => app.panelDrawerOpen, (v) => (app.panelDrawerOpen = v)}>
 		<DrawerContent>
-			<div class="mx-auto w-full max-w-sm p-4">
+			<div class="flex h-full max-h-full w-full flex-col items-center overflow-hidden p-4">
 				{#if registry.panel}
-					{@render registry.panel()}
+					<div class="min-h-0 w-full max-w-md flex-1 overflow-y-auto">
+						{@render registry.panel()}
+					</div>
 				{/if}
 			</div>
 		</DrawerContent>

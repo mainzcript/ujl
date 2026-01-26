@@ -59,7 +59,7 @@ Quick reference for agents:
 
 **Services**: `library` (Payload CMS for asset management – images, fonts, documents)
 
-**Apps**: `docs` (VitePress), `demo` (showcase), `landing` (marketing)
+**Apps**: `docs` (VitePress), `dev-demo` (integration demo)
 
 ## Navigation Tips for Agents
 
@@ -69,7 +69,7 @@ Quick reference for agents:
   - `packages/adapter-web/` — for framework-agnostic Web Components (uses `adapter-svelte` internally)
 - For UI building blocks: `packages/ui/`.
 - For authoring/editorial workflows: `packages/crafter/`.
-- For media/assets: `services/library/`.
+- For assets: `services/library/`.
 
 ## Developer Guidelines
 

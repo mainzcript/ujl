@@ -36,9 +36,9 @@ describe("ImageField", () => {
 			});
 		});
 
-		describe("valid Media IDs", () => {
-			it("should accept valid Media ID strings", () => {
-				expect(field.validate("media-id-123")).toBe(true);
+		describe("valid Image IDs", () => {
+			it("should accept valid Image ID strings", () => {
+				expect(field.validate("image-id-123")).toBe(true);
 				expect(field.validate("V1StGXR8_Z")).toBe(true);
 				expect(field.validate("image-abc-def-ghi")).toBe(true);
 			});
@@ -46,7 +46,7 @@ describe("ImageField", () => {
 			it("should accept any non-empty string", () => {
 				expect(field.validate("a")).toBe(true);
 				expect(field.validate("short")).toBe(true);
-				expect(field.validate("very-long-media-id-string-with-many-characters")).toBe(true);
+				expect(field.validate("very-long-image-id-string-with-many-characters")).toBe(true);
 			});
 		});
 
@@ -56,8 +56,8 @@ describe("ImageField", () => {
 			});
 
 			it("should accept strings with special characters", () => {
-				expect(field.validate("media_id-123")).toBe(true);
-				expect(field.validate("media.id.456")).toBe(true);
+				expect(field.validate("image_id-123")).toBe(true);
+				expect(field.validate("image.id.456")).toBe(true);
 			});
 		});
 	});
@@ -67,15 +67,15 @@ describe("ImageField", () => {
 			expect(field.fit(null)).toBe(null);
 		});
 
-		it("should return Media ID string unchanged", () => {
-			const mediaId = "media-id-123";
-			expect(field.fit(mediaId)).toBe(mediaId);
+		it("should return Image ID string unchanged", () => {
+			const imageId = "image-id-123";
+			expect(field.fit(imageId)).toBe(imageId);
 		});
 	});
 
 	describe("getFieldType", () => {
-		it('should return "media"', () => {
-			expect(field.getFieldType()).toBe("media");
+		it('should return "image"', () => {
+			expect(field.getFieldType()).toBe("image");
 		});
 	});
 });

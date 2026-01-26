@@ -1,7 +1,25 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from 'vaul-svelte';
+	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { type WithElementRef } from '$lib/utils.js';
+	import { getDrawerContext } from './context.js';
 
-	let { ref = $bindable(null), ...restProps }: DrawerPrimitive.CloseProps = $props();
+	interface DrawerCloseProps extends WithElementRef<HTMLButtonAttributes> {
+		children?: Snippet;
+	}
+
+	let { ref = $bindable(null), children, ...restProps }: DrawerCloseProps = $props();
+
+	const drawerContext = getDrawerContext();
+
+	/**
+	 * Handle click - close the drawer.
+	 */
+	function handleClick() {
+		drawerContext?.setOpen(false);
+	}
 </script>
 
-<DrawerPrimitive.Close bind:ref data-slot="drawer-close" {...restProps} />
+<button bind:this={ref} type="button" data-slot="drawer-close" onclick={handleClick} {...restProps}>
+	{@render children?.()}
+</button>

@@ -24,12 +24,13 @@
 
 	import {
 		createCrafterStore,
-		createMediaServiceFactory,
+		createImageServiceFactory,
 		type CrafterStore,
-		type CrafterStoreDeps
+		type CrafterStoreDeps,
+		CRAFTER_CONTEXT,
+		COMPOSER_CONTEXT,
+		SHADOW_ROOT_CONTEXT
 	} from '$lib/stores/index.js';
-
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, SHADOW_ROOT_CONTEXT } from './context.js';
 
 	import Header from './header/header.svelte';
 	import Editor from './sidebar/editor.svelte';
@@ -97,10 +98,10 @@
 
 			const composer = new Composer();
 
-			const mediaServiceFactory = createMediaServiceFactory({
+			const imageServiceFactory = createImageServiceFactory({
 				showToasts: true,
-				onConnectionError: (error, endpoint) => {
-					logger.error('Media backend connection error:', error, endpoint);
+				onConnectionError: (error, url) => {
+					logger.error('Image backend connection error:', error, url);
 				}
 			});
 
@@ -108,7 +109,7 @@
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				createMediaService: mediaServiceFactory
+				createImageService: imageServiceFactory
 			};
 
 			const store = createCrafterStore(storeDeps);
@@ -133,6 +134,69 @@
 	// Portal container for overlay components (dropdowns, dialogs, etc.)
 	// This ensures overlays render inside Shadow DOM and inherit styles
 	let portalContainerRef: HTMLDivElement | undefined = $state();
+
+	// ============================================
+	// FULLSCREEN TRACKING
+	// ============================================
+
+	// Reference to App container for size tracking
+	let appContainerRef: HTMLElement | null = $state(null);
+
+	// ResizeObserver for container size tracking
+	$effect(() => {
+		if (!appContainerRef) return;
+
+		const observer = new ResizeObserver((entries) => {
+			const entry = entries[0];
+			if (entry) {
+				const width = entry.contentRect.width;
+				const height = entry.contentRect.height;
+				store.setContainerSize(width, height);
+			}
+		});
+
+		observer.observe(appContainerRef);
+
+		// Measure initial size on mount
+		store.setContainerSize(appContainerRef.offsetWidth, appContainerRef.offsetHeight);
+
+		return () => {
+			observer.disconnect();
+		};
+	});
+
+	// Window resize listener for screen size tracking
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const handleResize = () => {
+			store.setScreenSize(window.innerWidth, window.innerHeight);
+		};
+
+		handleResize();
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	});
+
+	// ESC key handler to exit fullscreen
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const handleEscape = (event: KeyboardEvent) => {
+			if (event.key === 'Escape' && store.isFullscreen) {
+				store.toggleFullscreen();
+			}
+		};
+
+		window.addEventListener('keydown', handleEscape);
+
+		return () => {
+			window.removeEventListener('keydown', handleEscape);
+		};
+	});
 
 	// ============================================
 	// EDITOR THEME
@@ -194,7 +258,9 @@
 	}
 
 	function handleSave() {
-		toast.info('Save functionality coming soon!');
+		if (store.onSaveCallback) {
+			store.onSaveCallback(store.ujlcDocument, store.ujltDocument);
+		}
 	}
 
 	// ============================================
@@ -218,11 +284,11 @@
 
 <UJLTheme
 	tokens={editorTokenSet}
-	class="h-screen"
+	class={store.isFullscreen ? 'fixed inset-0 isolate z-9999 h-full w-full' : 'h-full w-full'}
 	data-crafter-instance={store.instanceId}
 	portalContainer={portalContainerRef}
 >
-	<App>
+	<App bind:ref={appContainerRef}>
 		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects
 			mode={store.mode}
@@ -240,7 +306,7 @@
 				onModeChange={handleModeChange}
 				viewportType={store.viewportType}
 				onViewportTypeChange={handleViewportTypeChange}
-				onSave={handleSave}
+				onSave={store.onSaveCallback ? handleSave : undefined}
 				onImportTheme={handleImportTheme}
 				onImportContent={handleImportContent}
 				onExportTheme={handleExportTheme}

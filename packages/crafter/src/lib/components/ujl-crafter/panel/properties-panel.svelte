@@ -1,16 +1,13 @@
 <!-- Properties panel for editing selected module fields -->
 <script lang="ts">
-	import { Button } from '@ujl-framework/ui';
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
+	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import { Composer, type AnyModule } from '@ujl-framework/core';
 	import { findNodeById } from '$lib/utils/ujlc-tree.js';
-	import { FieldInput, MediaLibraryBrowser } from '$lib/components/ui/index.js';
+	import { FieldInput } from '$lib/components/ui/index.js';
 	import { logger } from '$lib/utils/logger.js';
-	import { MediaLibraryUploader } from '$lib/components/ui/media-library-uploader/index.js';
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
@@ -42,18 +39,6 @@
 		return fieldEntries().length > 0;
 	});
 
-	const mediaCount = $derived(() => {
-		return Object.keys(crafter.media).length;
-	});
-
-	let mediaReloadTrigger = $state(0);
-
-	function handleUploadComplete(mediaId: string) {
-		logger.info('Upload complete:', mediaId);
-		// Increment trigger to force browser reload
-		mediaReloadTrigger++;
-	}
-
 	function getModuleLabel(module: AnyModule | null | undefined): string {
 		if (!module) return '';
 		return module.label ?? '';
@@ -75,51 +60,7 @@
 </script>
 
 <div class="h-full overflow-y-auto">
-	{#if crafter.isMediaLibraryViewActive}
-		<!-- Media Library View -->
-		<div class="flex h-full flex-col">
-			<!-- Fixed Header with Back Button and Upload -->
-			<div class="sticky top-0 z-10 space-y-3 bg-sidebar p-3">
-				<div class="flex w-full items-center gap-2">
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon"
-						class="size-8 shrink-0"
-						onclick={() => crafter.setMediaLibraryViewActive(false)}
-					>
-						<ArrowLeftIcon class="h-4 w-4" />
-					</Button>
-					<div class="flex w-full items-center justify-between">
-						<span class="text-sm font-medium">Media Library</span>
-						<span class="text-xs text-muted-foreground">
-							{mediaCount()}
-							{mediaCount() === 1 ? 'item' : 'items'}
-						</span>
-					</div>
-				</div>
-				<MediaLibraryUploader onUploadComplete={handleUploadComplete} />
-			</div>
-
-			<!-- Scrollable Media Grid -->
-			<div class="flex-1 overflow-y-auto">
-				{#key mediaReloadTrigger}
-					<MediaLibraryBrowser
-						selectedMediaId={crafter.mediaLibraryContext?.currentValue != null
-							? String(crafter.mediaLibraryContext?.currentValue)
-							: null}
-						onSelect={(mediaId: string) => {
-							const context = crafter.mediaLibraryContext;
-							if (context && context.nodeId && context.fieldName) {
-								crafter.operations.updateNodeField(context.nodeId, context.fieldName, mediaId);
-							}
-							crafter.setMediaLibraryViewActive(false);
-						}}
-					/>
-				{/key}
-			</div>
-		</div>
-	{:else if !selectedNodeId}
+	{#if !selectedNodeId}
 		<div class="flex h-full items-center justify-center p-8 text-center">
 			<div class="space-y-3">
 				<div class="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
@@ -182,7 +123,6 @@
 								{fieldEntry}
 								value={selectedNode()!.fields[fieldEntry.key]}
 								onChange={(value: unknown) => handleFieldUpdate(fieldEntry.key, value)}
-								nodeId={selectedNodeId}
 							/>
 						{/each}
 					</div>

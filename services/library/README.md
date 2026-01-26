@@ -2,16 +2,16 @@
 
 The **UJL Library** is the asset management backend for the UJL Framework. It provides a self-hosted service for managing images, with planned support for fonts and documents in future releases.
 
-When you use the [UJL Crafter](../../packages/crafter/README.md) in "backend storage" mode, uploaded images are stored and served through this service instead of being embedded as Base64 in the document. This keeps your `.ujlc.json` files lightweight and enables features like automatic image resizing, WebP conversion, and centralized media management across multiple documents.
+When you use the [UJL Crafter](../../packages/crafter/README.md) in "backend storage" mode, uploaded images are stored and served through this service instead of being embedded as Base64 in the document. This keeps your `.ujlc.json` files lightweight and enables features like automatic image resizing, WebP conversion, and centralized image management across multiple documents.
 
-The Library is built on [Payload CMS 3.0](https://payloadcms.com/) with PostgreSQL as the database. It runs as a Docker container and exposes a REST API that the Crafter (and other UJL applications) can consume.
+The Library is built on [Payload CMS 3.0](https://payloadcms.com/) with PostgreSQL as the database. It exposes a REST API that the Crafter (and other UJL applications) can consume.
 
 ## Why a Separate Service?
 
-The UJL Framework separates content from design – and the Library extends this principle to assets. Instead of coupling media files directly into your content documents, the Library acts as a central repository:
+The UJL Framework separates content from design, and the Library extends this principle to assets. Instead of coupling image files directly into your content documents, the Library acts as a central repository:
 
 - **Reusability**: Use the same image across multiple documents without duplication
-- **Performance**: Automatic resizing generates optimized variants (thumbnail, small, medium, large, xlarge)
+- **Performance**: Automatic resizing generates optimized variants (xs, sm, md, lg, xl, xxl, xxxl, max)
 - **Localization**: Store localized metadata (alt text, descriptions) for each image
 - **Consistency**: All images are converted to WebP format with consistent quality settings
 
@@ -30,29 +30,33 @@ The UJL Framework separates content from design – and the Library extends this
    cp .env.example .env
    ```
 
-   Open `.env` and configure:
+   Open `.env` and configure the required variables:
 
    | Variable            | Required | Description                                              |
    | ------------------- | -------- | -------------------------------------------------------- |
    | `PAYLOAD_SECRET`    | Yes      | Min. 32 characters. Generate with `openssl rand -hex 32` |
    | `POSTGRES_PASSWORD` | Yes      | Password for PostgreSQL database                         |
+   | `DATABASE_URL`      | Yes      | PostgreSQL connection string                             |
 
-   Example:
+   Example `.env`:
 
    ```env
-   PAYLOAD_SECRET=your-generated-secret-at-least-32-chars
-   POSTGRES_PASSWORD=mysecretpw
+   PAYLOAD_SECRET=a1b2c3d4e5f6...  # Generate with: openssl rand -hex 32
+   POSTGRES_PASSWORD=mysecretpassword
+   DATABASE_URL=postgres://postgres:mysecretpassword@localhost:5432/library
    ```
 
-   > **Note:** The database URL is automatically derived from `POSTGRES_PASSWORD` in `docker-compose.yml` – you don't need to set it manually.
+   > **Note:** The password in `DATABASE_URL` must match `POSTGRES_PASSWORD`.
 
-2. **Start the services**
+2. **Start development**
 
    ```bash
-   docker-compose up
+   pnpm run dev
    ```
 
-   On first start, this will install dependencies and initialize the database. Wait until you see "ready" in the logs – this may take a few minutes.
+   This automatically starts PostgreSQL (via Docker) and the Payload development server. Both logs appear in the terminal with colored labels (blue for DB, green for Payload).
+
+   On first start, Payload will initialize the database schema. Wait until you see "Ready" in the logs.
 
 3. **Create your admin user**
 
@@ -68,7 +72,7 @@ The UJL Framework separates content from design – and the Library extends this
 
 ## Integration with UJL Crafter
 
-Once the Library is running, you can configure the Crafter to use it for media storage:
+Once the Library is running, you can configure the Crafter to use it for backend image storage:
 
 ```typescript
 import { UJLCrafter } from '@ujl-framework/crafter'
@@ -77,15 +81,15 @@ const crafter = new UJLCrafter({
   target: '#editor-container',
   document: myDocument,
   theme: myTheme,
-  mediaLibrary: {
+  library: {
     storage: 'backend',
-    endpoint: 'http://localhost:3000/api',
+    url: 'http://localhost:3000',
     apiKey: 'your-api-key-here',
   },
 })
 ```
 
-When configured this way, images uploaded through the Crafter's media library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
+When configured this way, images uploaded through the Crafter's image library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
 
 ## API Reference
 
@@ -93,15 +97,13 @@ The Library exposes a REST API at `http://localhost:3000/api`. All endpoints fol
 
 ### Endpoints
 
-| Method | Endpoint     | Auth Required | Description                 |
-| ------ | ------------ | ------------- | --------------------------- |
-| GET    | `/media`     | No            | List images with pagination |
-| GET    | `/media/:id` | No            | Get a single image by ID    |
-| POST   | `/media`     | Yes           | Upload a new image          |
-| PATCH  | `/media/:id` | Yes           | Update image metadata       |
-| DELETE | `/media/:id` | Yes           | Delete an image             |
-
-> **Note:** The collection is currently named `media` for compatibility with the existing Crafter implementation. This will be renamed to `images` in a future update.
+| Method | Endpoint      | Auth Required | Description                 |
+| ------ | ------------- | ------------- | --------------------------- |
+| GET    | `/images`     | No            | List images with pagination |
+| GET    | `/images/:id` | No            | Get a single image by ID    |
+| POST   | `/images`     | Yes           | Upload a new image          |
+| PATCH  | `/images/:id` | Yes           | Update image metadata       |
+| DELETE | `/images/:id` | Yes           | Delete an image             |
 
 ### Authentication
 
@@ -172,45 +174,42 @@ When not set, all origins are allowed.
 
 ## Development
 
-### Running with Docker (recommended)
+### Available Scripts
 
-```bash
-docker-compose up
-```
+| Script                 | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `pnpm run dev`         | Start DB + Payload (recommended)         |
+| `pnpm run dev:db`      | Start only PostgreSQL                    |
+| `pnpm run dev:payload` | Start only Payload (requires running DB) |
+| `pnpm run devsafe`     | Clear `.next` cache and start dev        |
+| `pnpm run build`       | Build for production                     |
+| `pnpm run check`       | TypeScript type check                    |
+| `pnpm run lint`        | Run ESLint                               |
+| `pnpm run format`      | Format code with Prettier                |
+| `pnpm run clean`       | Remove build artifacts (.next, etc.)     |
+| `pnpm run clean:hard`  | Full reset: DB, uploads, build artifacts |
 
-This starts both the Payload application and PostgreSQL database. The application is available at http://localhost:3000.
-
-### Running locally (without Docker)
-
-If you prefer to run without Docker, you'll need a local PostgreSQL instance:
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-```
-
-When running without Docker, you must set `DATABASE_URL` manually in your `.env`:
-
-```env
-PAYLOAD_SECRET=your-generated-secret
-DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/library
-```
-
-### Useful commands
+### Useful Commands
 
 ```bash
 # Regenerate TypeScript types after schema changes
 pnpm run generate:types
 
 # Run integration and E2E tests (requires running database)
-docker-compose up -d
+# Start dev in one terminal, then in another:
 pnpm run test:local
 
 # Build for production
-pnpm build
+pnpm run build
+
+# Stop the database
+docker-compose down
+
+# Clean build artifacts
+pnpm run clean
+
+# Full reset (deletes database AND uploaded files!)
+pnpm run clean:hard
 ```
 
 ## Related Documentation

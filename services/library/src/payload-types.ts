@@ -68,7 +68,7 @@ export interface Config {
   blocks: {}
   collections: {
     users: User
-    media: Media
+    images: Image
     'payload-kv': PayloadKv
     'payload-locked-documents': PayloadLockedDocument
     'payload-preferences': PayloadPreference
@@ -77,7 +77,7 @@ export interface Config {
   collectionsJoins: {}
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>
-    media: MediaSelect<false> | MediaSelect<true>
+    images: ImagesSelect<false> | ImagesSelect<true>
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>
     'payload-locked-documents':
       | PayloadLockedDocumentsSelect<false>
@@ -152,11 +152,43 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "images".
  */
-export interface Media {
+export interface Image {
   id: number
-  alt: string
+  /**
+   * Internal name for this image.
+   */
+  title?: string | null
+  /**
+   * Optional caption shown below the image. Example: "The team celebrates the product launch at the Berlin office."
+   */
+  description?: string | null
+  /**
+   * Describes what is visible in the image (for visually impaired users). Example: "Five people standing around a table with laptops, smiling at the camera."
+   */
+  alt?: string | null
+  /**
+   * Who created this image and how may it be used?
+   */
+  credit?: {
+    /**
+     * The person who created the image. Example: "Jane Smith" or "Design Team"
+     */
+    creator?: string | null
+    /**
+     * The full credit as it should appear when published (may include agency or company). Example: "Illustration: Jane Smith / UJL Inc."
+     */
+    creditLine?: string | null
+    /**
+     * Copyright statement. Example: "© 2026 UJL Inc. All rights reserved."
+     */
+    copyrightNotice?: string | null
+    /**
+     * Link to the license terms. Example: "https://creativecommons.org/licenses/by/4.0/"
+     */
+    licenseUrl?: string | null
+  }
   updatedAt: string
   createdAt: string
   url?: string | null
@@ -168,6 +200,72 @@ export interface Media {
   height?: number | null
   focalX?: number | null
   focalY?: number | null
+  sizes?: {
+    xs?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    sm?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    md?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    lg?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    xl?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    xxl?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    xxxl?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+    max?: {
+      url?: string | null
+      width?: number | null
+      height?: number | null
+      mimeType?: string | null
+      filesize?: number | null
+      filename?: string | null
+    }
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -198,8 +296,8 @@ export interface PayloadLockedDocument {
         value: number | User
       } | null)
     | ({
-        relationTo: 'media'
-        value: number | Media
+        relationTo: 'images'
+        value: number | Image
       } | null)
   globalSlug?: string | null
   user: {
@@ -270,10 +368,20 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "images_select".
  */
-export interface MediaSelect<T extends boolean = true> {
+export interface ImagesSelect<T extends boolean = true> {
+  title?: T
+  description?: T
   alt?: T
+  credit?:
+    | T
+    | {
+        creator?: T
+        creditLine?: T
+        copyrightNotice?: T
+        licenseUrl?: T
+      }
   updatedAt?: T
   createdAt?: T
   url?: T
@@ -285,6 +393,90 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T
   focalX?: T
   focalY?: T
+  sizes?:
+    | T
+    | {
+        xs?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        sm?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        md?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        lg?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        xl?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        xxl?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        xxxl?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+        max?:
+          | T
+          | {
+              url?: T
+              width?: T
+              height?: T
+              mimeType?: T
+              filesize?: T
+              filename?: T
+            }
+      }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

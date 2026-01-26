@@ -3,13 +3,20 @@ import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types
 import { Composer } from '@ujl-framework/core';
 import {
 	createCrafterStore,
-	createMediaServiceFactory,
-	type CrafterStore
+	createImageServiceFactory,
+	type CrafterStore,
+	type SaveCallback
 } from '$lib/stores/index.js';
 import { logger } from '$lib/utils/logger.js';
+import CrafterElement from './ujl-crafter-element.svelte';
 
-// Import Custom Element to register it (side effect)
-import './ujl-crafter-element.svelte';
+// Register the Custom Element if not already registered
+if (!customElements.get('ujl-crafter-internal')) {
+	customElements.define(
+		'ujl-crafter-internal',
+		CrafterElement as unknown as CustomElementConstructor
+	);
+}
 
 import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
 import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
@@ -30,20 +37,23 @@ export type DocumentChangeCallback = (document: UJLCDocument) => void;
 
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
+// Re-export SaveCallback from store for API consistency
+export type { SaveCallback } from '$lib/stores/index.js';
+
 /**
- * Configuration options for the media library.
- * Determines how media assets (images, etc.) are stored and retrieved.
+ * Configuration options for the library.
+ * Determines how library assets are stored and retrieved.
  *
  * Two storage modes are available:
- * - `inline`: Media stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Media stored on a Payload CMS server (requires endpoint and apiKey)
+ * - `inline`: Library stored as Base64 in the UJLC document (no additional config needed)
+ * - `backend`: Library stored on a Payload CMS server (requires url and apiKey)
  *
- * Note: Document-level media_library configuration is ignored.
+ * Note: Document-level _library configuration is ignored.
  * Only this options-based configuration is used.
  */
-export type MediaLibraryOptions =
+export type LibraryOptions =
 	| { storage: 'inline' }
-	| { storage: 'backend'; endpoint: string; apiKey: string };
+	| { storage: 'backend'; url: string; apiKey: string };
 
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
@@ -54,8 +64,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
-	/** Media library configuration (default: inline storage) */
-	mediaLibrary?: MediaLibraryOptions;
+	/** Library configuration (default: inline storage) */
+	library?: LibraryOptions;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -115,25 +125,25 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
-		// Media library configuration from options (defaults to inline storage)
-		// Note: Document-level media_library configuration is ignored - only options are used
-		const mediaLibrary = options.mediaLibrary ?? { storage: 'inline' as const };
+		// Library configuration from options (defaults to inline storage)
+		// Note: Document-level _library configuration is ignored - only options are used
+		const library = options.library ?? { storage: 'inline' as const };
 
 		// Runtime validation for backend storage
-		if (mediaLibrary.storage === 'backend') {
-			if (!mediaLibrary.endpoint || !mediaLibrary.apiKey) {
-				throw new Error('UJLCrafter: Backend storage requires both endpoint and apiKey');
+		if (library.storage === 'backend') {
+			if (!library.url || !library.apiKey) {
+				throw new Error('UJLCrafter: Backend storage requires both url and apiKey');
 			}
 		}
 
-		const mediaServiceFactory = createMediaServiceFactory({
-			preferredStorage: mediaLibrary.storage,
-			backendEndpoint: mediaLibrary.storage === 'backend' ? mediaLibrary.endpoint : undefined,
-			backendApiKey: mediaLibrary.storage === 'backend' ? mediaLibrary.apiKey : undefined,
+		const imageServiceFactory = createImageServiceFactory({
+			preferredStorage: library.storage,
+			backendUrl: library.storage === 'backend' ? library.url : undefined,
+			backendApiKey: library.storage === 'backend' ? library.apiKey : undefined,
 			showToasts: false,
-			onConnectionError: (error, endpoint) => {
-				logger.error('Media backend connection error:', error, endpoint);
-				this.notify('error', 'Media backend connection error', `Failed to connect to ${endpoint}`);
+			onConnectionError: (error, url) => {
+				logger.error('Image backend connection error:', error, url);
+				this.notify('error', 'Image backend connection error', `Failed to connect to ${url}`);
 			}
 		});
 
@@ -145,7 +155,7 @@ export class UJLCrafter {
 				? validateUJLTDocument(options.theme)
 				: this.getDefaultTheme(),
 			composer: this.composer,
-			createMediaService: mediaServiceFactory,
+			createImageService: imageServiceFactory,
 			testMode: options.testMode ?? false
 		});
 
@@ -277,6 +287,23 @@ export class UJLCrafter {
 	onNotification(callback: NotificationCallback): () => void {
 		this.notificationCallbacks.add(callback);
 		return () => this.notificationCallbacks.delete(callback);
+	}
+
+	/**
+	 * Register a callback for the Save button.
+	 * When set, the Save button becomes visible in the header.
+	 * The callback receives both documents so you can decide what to persist.
+	 *
+	 * @example
+	 * ```typescript
+	 * crafter.onSave((document, theme) => {
+	 *   saveToServer(document);
+	 * });
+	 * ```
+	 */
+	onSave(callback: SaveCallback): () => void {
+		this.store.setOnSaveCallback(callback);
+		return () => this.store.setOnSaveCallback(null);
 	}
 
 	// ============================================

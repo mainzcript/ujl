@@ -1,11 +1,14 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type SanitizedConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
+// Type assertion needed due to sharp 0.34.x type mismatch with Payload's SharpDependency
+const sharpInstance = sharp as unknown as SanitizedConfig['sharp']
+
 import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+import { Images } from './collections/Images'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +33,7 @@ export default buildConfig({
     },
   },
   cors,
-  collections: [Users, Media],
+  collections: [Users, Images],
   // Localization: Pre-configured for common European languages
   // Add/remove locales requires migration + rebuild
   localization: {
@@ -71,6 +74,6 @@ export default buildConfig({
     push: process.env.NODE_ENV !== 'production',
     migrationDir: './src/migrations',
   }),
-  sharp,
+  sharp: sharpInstance,
   plugins: [],
 })
