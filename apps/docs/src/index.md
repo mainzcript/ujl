@@ -17,8 +17,8 @@ hero:
       text: Architektur
       link: /arc42/01-introduction-and-goals
     - theme: alt
-      text: Vorschau
-      link: https://demo.ujl-framework.org
+      text: Demo
+      link: /demo
 
 features:
   - title: "Brand-Compliance by Design"

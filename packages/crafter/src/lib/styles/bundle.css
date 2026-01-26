@@ -1,0 +1,21 @@
+/**
+ * UJL Crafter Styles Bundle
+ *
+ * Entry-point for all styles injected into Shadow DOM.
+ * See README.md for architecture documentation.
+ *
+ * Note: Fonts are NOT included in this bundle.
+ * Consumers should import fonts separately based on their needs.
+ */
+
+/* External dependencies */
+@import '@ujl-framework/ui/styles';
+@import '@ujl-framework/adapter-svelte/bundle.css';
+
+/* Tailwind source scanning */
+@source '../components/**/*.{svelte,js,ts}';
+
+/* Internal styles */
+@import './base/tailwind-shadow.css';
+@import './global/editor-mode.css';
+@import './components.css';

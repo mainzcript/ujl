@@ -24,11 +24,6 @@ export type SvelteAdapterOptions = {
 	 * (default: false)
 	 */
 	showMetadata?: boolean;
-	/**
-	 * Callback function triggered when a module is clicked
-	 * Receives the module ID from the clicked element
-	 */
-	eventCallback?: (moduleId: string) => void;
 };
 
 /**

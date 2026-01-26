@@ -1,0 +1,40 @@
+/**
+ * Selection styles for editor mode.
+ *
+ * These styles provide visual feedback when hovering over and selecting
+ * UJL modules in the preview canvas. The accent color comes from the
+ * editor theme tokens, with fallback to the preview theme's accent.
+ */
+
+/* Hover state for editable modules */
+.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover {
+	outline: 2px dashed oklch(var(--editor-accent-light, var(--accent-light)) / 0.7);
+	outline-offset: var(--spacing);
+	cursor: pointer;
+}
+
+/* Selected state for editable modules */
+.ujl-editor-mode [data-ujl-module-id].ujl-selected {
+	outline: 2px solid oklch(var(--editor-accent-light, var(--accent-light)));
+	outline-offset: var(--spacing);
+}
+
+/* Dark mode: hover state */
+.dark .ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):hover {
+	outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)) / 0.7);
+}
+
+/* Dark mode: selected state */
+.dark .ujl-editor-mode [data-ujl-module-id].ujl-selected {
+	outline-color: oklch(var(--editor-accent-dark, var(--accent-dark)));
+}
+
+/* Explicitly remove outline when not selected to prevent lingering styles */
+.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected) {
+	outline: none;
+}
+
+/* Prevent nested hover styles - parent should not show hover when child is hovered */
+.ujl-editor-mode [data-ujl-module-id]:not(.ujl-selected):has([data-ujl-module-id]:hover) {
+	outline: none !important;
+}

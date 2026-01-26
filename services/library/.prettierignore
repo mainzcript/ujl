@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+out/
+build/
+
+# Generated files
+pnpm-lock.yaml
+
+# Media uploads
+media/

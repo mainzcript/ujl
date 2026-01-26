@@ -25,6 +25,8 @@
 	)}
 	{...restProps}
 >
-	{@render children?.()}
+	<span class="flex items-center gap-2">
+		{@render children?.()}
+	</span>
 	<ChevronsUpDownIcon class="size-4 opacity-50" />
 </SelectPrimitive.Trigger>

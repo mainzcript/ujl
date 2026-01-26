@@ -6,9 +6,9 @@
  * - "text" - TextField
  * - "number" - NumberField
  * - "richtext" - RichTextField (TipTap/ProseMirror)
- * - "media" - ImageField (Images)
+ * - "image" - ImageField (Images)
  */
-export const FIELD_TYPES = ["text", "number", "richtext", "media"] as const;
+export const FIELD_TYPES = ["text", "number", "richtext", "image"] as const;
 
 /**
  * Field Type

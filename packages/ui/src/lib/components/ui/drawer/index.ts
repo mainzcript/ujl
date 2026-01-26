@@ -1,4 +1,4 @@
-import { Drawer as DrawerPrimitive } from 'vaul-svelte';
+import { Dialog as DialogPrimitive } from 'bits-ui';
 
 import Root from './drawer.svelte';
 import Content from './drawer-content.svelte';
@@ -13,7 +13,16 @@ import Trigger from './drawer-trigger.svelte';
 import TriggerButton from './drawer-trigger-button.svelte';
 import CloseButton from './drawer-close-button.svelte';
 
-const Portal: typeof DrawerPrimitive.Portal = DrawerPrimitive.Portal;
+// Re-export context utilities for advanced use cases
+export {
+	getDrawerContext,
+	hasDrawerContext,
+	type DrawerContext,
+	type DrawerDirection
+} from './context.js';
+
+// Use bits-ui Portal for Shadow DOM compatibility
+const Portal: typeof DialogPrimitive.Portal = DialogPrimitive.Portal;
 
 export {
 	Root as Drawer,

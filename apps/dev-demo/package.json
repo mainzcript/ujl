@@ -1,0 +1,34 @@
+{
+	"name": "@ujl-framework/dev-demo",
+	"private": true,
+	"description": "UJL Crafter Integration Demo – Minimal setup for evaluating the UJL Framework",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"format": "prettier --write .",
+		"lint": "prettier --check .",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@fontsource-variable/inter": "^5.2.8",
+		"@fontsource-variable/jetbrains-mono": "^5.2.8",
+		"@fontsource-variable/merriweather": "^5.2.6",
+		"@fontsource-variable/montserrat": "^5.2.8",
+		"@fontsource-variable/noto-sans": "^5.2.10",
+		"@fontsource-variable/nunito-sans": "^5.2.7",
+		"@fontsource-variable/open-sans": "^5.2.7",
+		"@fontsource-variable/oswald": "^5.2.8",
+		"@fontsource-variable/raleway": "^5.2.8",
+		"@fontsource-variable/roboto": "^5.2.9",
+		"@ujl-framework/crafter": "workspace:*",
+		"@ujl-framework/examples": "workspace:*",
+		"@ujl-framework/types": "workspace:*"
+	},
+	"devDependencies": {
+		"prettier": "^3.8.1",
+		"typescript": "^5.9.3",
+		"vite": "^7.3.1"
+	}
+}

@@ -5,7 +5,7 @@
  * different components. They do not depend on Svelte APIs.
  */
 
-import { logger } from '$lib/utils/logger.js';
+import { logger } from './logger.js';
 
 /**
  * Downloads an arbitrary data object as a pretty-printed JSON file.

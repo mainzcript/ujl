@@ -8,7 +8,7 @@
 		...restProps
 	} = $props();
 
-	const baseStyle = 'grid grid-cols-12 gap-6';
+	const baseStyle = 'grid grid-cols-12 gap-6 @container/ujl-grid';
 </script>
 
 <svelte:element this={as} class={cn(baseStyle, className)} {...restProps}>

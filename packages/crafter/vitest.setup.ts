@@ -1,6 +1,27 @@
 import '@testing-library/jest-dom/vitest';
-import { expect, afterEach } from 'vitest';
+import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/svelte';
+
+// Mock svelte-sonner to avoid timeout issues in tests
+vi.mock('svelte-sonner', () => ({
+	toast: {
+		error: vi.fn(),
+		success: vi.fn(),
+		info: vi.fn(),
+		warning: vi.fn()
+	}
+}));
+
+// Custom matcher type declarations
+declare module 'vitest' {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	interface Assertion<T> {
+		toBeValidNodeId(): this;
+	}
+	interface AsymmetricMatchersContaining {
+		toBeValidNodeId(): this;
+	}
+}
 
 // Cleanup after each test
 afterEach(() => {

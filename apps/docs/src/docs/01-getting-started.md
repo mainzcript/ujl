@@ -5,9 +5,11 @@ description: "Anwender-Dokumentation für UJL"
 
 # Dokumentation
 
-## UJL Entwickler-Anleitung
+::: warning Entwicklungsstand
 
-> ⚠️ Diese Anleitung beschreibt den aktuellen Entwicklungsstand des Projekts. Das Projekt befindet sich noch im Aufbau und ist nicht bereit für die Integration in Produktionsumgebungen. Diese Anleitung ist für alle gedacht, die den Crafter bereits im "Baustellen-Zustand" erkunden möchten.
+Das UJL-Framework befindet sich im aktiven Aufbau. Die Rendering-Pipeline ist weitgehend stabil, der Crafter ist jedoch noch nicht produktionsreif. Diese Anleitung richtet sich an Entwickler:innen, die das Framework bereits jetzt erkunden möchten.
+
+:::
 
 ## Projekt-Übersicht
 
@@ -21,11 +23,11 @@ ujl/
 │   ├── ui/            # UI-Komponenten (shadcn-svelte)
 │   ├── adapter-svelte/  # Svelte-Adapter für UJL-Rendering
 │   ├── adapter-web/   # Web Components Adapter
-│   ├── crafter/       # 🚧 Visual Editor (Work in Progress)
+│   ├── crafter/       # Visual Editor
 │   └── examples/      # Beispiel-UJL-Dateien
 │
 ├── apps/              # Anwendungen
-│   ├── demo/          # Demo-App (nutzt adapter-web)
+│   ├── dev-demo/      # Dev Demo: Crafter Integration Demo
 │   └── docs/          # Dokumentations-Website
 │
 └── services/          # Backend-Services
@@ -41,15 +43,14 @@ ujl/
 
 ### Zwei Hauptwerkzeuge
 
-1. **Rendering Pipeline** (fast produktionsreif)
+1. **Rendering Pipeline**
    - Rendert UJL-Dateien zu HTML/CSS/JS
    - Validiert Syntax und Kompatibilität
    - Verwendbar über `adapter-svelte` oder `adapter-web`
 
-2. **Crafter** (in Entwicklung) 🚧
+2. **Crafter**
    - Visueller Editor für Content und Design
    - Zwei Modi: Editor (Content) & Designer (Theme)
-   - Noch nicht für produktiven Einsatz bereit
 
 ## Schnellstart
 
@@ -84,32 +85,87 @@ Der Crafter startet dann auf `http://localhost:5173` (oder einem anderen Port, f
 - Interaktive UI zum Bearbeiten von UJL-Content und -Themes
 - Live-Preview der Änderungen
 
-**Wichtig zu wissen:**
+### Die Dev-Demo starten
 
-- Der Crafter ist noch nicht fertig entwickelt
-- Viele Features sind noch im Aufbau
-- Er ist noch NICHT in die Demo-App integrierbar
-- Nutze ihn nur zum Experimentieren und Verstehen der Architektur
+Die **Dev-Demo** (`apps/dev-demo`) ist eine minimale Integration-Demo für den UJL Crafter. Sie zeigt, wie der Crafter in eine Vanilla TypeScript-Anwendung eingebunden wird und unterstützt zwei Library-Speichermodi:
 
-### Die Demo-App starten
+- **Inline** (Standard): Bilder werden als Base64 direkt im Dokument gespeichert
+- **Backend**: Bilder werden auf einem Payload CMS Server (`services/library`) gespeichert
 
-Die **Demo-App** demonstriert das fertige Rendering von UJL-Dokumenten.
+#### Schnellstart (Inline-Modus)
+
+Der einfachste Weg, die Demo zu starten, ohne zusätzliche Konfiguration:
 
 ```bash
 # Aus dem Projekt-Root:
-pnpm --filter @ujl-framework/demo dev
+pnpm --filter @ujl-framework/dev-demo dev
 ```
 
-Die Demo läuft auf `http://localhost:5173` (oder einem anderen Port).
+Die Demo startet auf `http://localhost:5174` (oder einem anderen Port) mit Inline-Library-Speicher.
+
+#### Backend-Modus Setup
+
+Um persistente Library-Speicherung über den Library-Service zu nutzen:
+
+1. **Library-Service konfigurieren:**
+
+   ```bash
+   # In einem separaten Terminal
+   cd services/library
+   cp .env.example .env
+   ```
+
+   Öffne `.env` und setze mindestens `PAYLOAD_SECRET`, `POSTGRES_PASSWORD` und `DATABASE_URL`.
+
+2. **Library-Service starten:**
+
+   ```bash
+   # In einem separaten Terminal
+   cd services/library
+   pnpm run dev
+   ```
+
+   Startet PostgreSQL (via Docker) und Payload CMS auf `http://localhost:3000`
+
+3. **Admin-User erstellen:**
+   - Öffne `http://localhost:3000/admin`
+   - Fülle das Registrierungsformular aus (erster User wird Admin)
+   - Klicke auf "Create Account"
+
+4. **API-Key aktivieren:**
+   - In der Admin-UI: **Users** → dein User
+   - Scrolle zu **Enable API Key** und aktiviere es
+   - Klicke auf **Save**
+   - **Kopiere den generierten API-Key**
+
+5. **Umgebung konfigurieren:**
+
+   ```bash
+   # In apps/dev-demo
+   cp .env.example .env
+   ```
+
+   Bearbeite `.env`:
+
+   ```bash
+   VITE_LIBRARY_STORAGE=backend
+   VITE_BACKEND_URL=http://localhost:3000
+   VITE_BACKEND_API_KEY=dein-api-key-hier
+   ```
+
+6. **Demo starten:**
+   ```bash
+   pnpm --filter @ujl-framework/dev-demo dev
+   ```
+
+Jetzt werden hochgeladene Bilder im Library-Service gespeichert.
 
 **Was du siehst:**
 
-- Eine minimale Website
-- Verwendet `@ujl-framework/adapter-web` für Web Components
-- Rendert vordefinierte UJL-Showcase-Dokumente aus dem Examples Paket
-- Zeigt das fertige Output-Format (ContentFrame)
-
-**Hinweis:** Die Demo nutzt NICHT den Crafter, sondern nur den Renderer. Sie zeigt das Endergebnis eines bereits erstellten UJL-Dokuments.
+- Eine minimale Vanilla TypeScript-Anwendung
+- UJL Crafter eingebettet und funktionsfähig
+- Möglichkeit, zwischen Inline- und Backend-Speicherung zu wechseln
+- Perfekt für Evaluierung und Integrationstests
 
 ## Build-Prozess
 
@@ -117,7 +173,7 @@ Das Monorepo hat Build-Abhängigkeiten, die beachtet werden müssen:
 
 ```bash
 # Gesamtes Projekt bauen (empfohlen)
-# Baut Demo, Crafter und Dokumentation in der richtigen Reihenfolge
+# Baut Crafter und Dokumentation in der richtigen Reihenfolge
 pnpm run build
 
 # Oder einzelne Packages mit --filter (Reihenfolge beachten!):
@@ -126,25 +182,6 @@ pnpm --filter @ujl-framework/core build          # 2. Core (braucht Types)
 pnpm --filter @ujl-framework/ui build            # 3. UI (braucht Core)
 pnpm --filter @ujl-framework/adapter-svelte build # 4. Svelte Adapter
 pnpm --filter @ujl-framework/adapter-web build   # 5. Web Adapter
-pnpm --filter @ujl-framework/demo build          # 6. Demo App
-pnpm --filter @ujl-framework/crafter build       # Crafter
-pnpm --filter @ujl-framework/docs build           # 7. Dokumentation
+pnpm --filter @ujl-framework/crafter build       # 6. Crafter
+pnpm --filter @ujl-framework/docs build          # 7. Dokumentation
 ```
-
-## Experimentieren mit UJL
-
-### Neue UJL-Beispieldatei erstellen
-
-Um eigene UJL-Dateien zu testen:
-
-1. Erstelle eine `.ujlc.json` in `packages/examples/src/documents/`
-2. Definiere Struktur mit `type`, `fields`, und `slots`
-3. Exportiere sie in `packages/examples/src/index.ts`
-4. Nutze sie in Demo oder Crafter zum Testen
-
-## Wichtige Hinweise
-
-### 🚧 Aktueller Stand des Crafters
-
-- Der Crafter ist **noch lange nicht produktionsreif**
-- Viele Features sind in Arbeit oder noch Platzhalter
