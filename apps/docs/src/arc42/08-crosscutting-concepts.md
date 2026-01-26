@@ -7,54 +7,6 @@ description: "Wichtige Konzepte, die mehrere Bausteine betreffen"
 
 UJL ist so aufgebaut, dass sich wenige Prinzipien durch alle Bausteine ziehen: Inhalte und Design liegen in validierbaren JSON-Dokumenten (UJLC/UJLT), der Core komponiert daraus einen AST, und Adapter rendern diesen in DOM. Der Crafter nutzt denselben Datenvertrag und ergänzt Editor-spezifische Mechanik wie Selektion, Tree-Navigation und Bildverwaltung. Wer diese Linie verstanden hat, kann sich im Projekt schnell orientieren.
 
-```mermaid
-graph TB
-    subgraph CoreConcepts["Kern-Architektur"]
-        Domain["8.1 Domain Model<br/>(UJLC/UJLT/AST)"]
-        Validation["8.2 Schema-Validierung"]
-        Error["8.3 Fehlerbehandlung"]
-    end
-
-    subgraph DataFlow["Datenfluss & State"]
-        State["8.4 Zustandsverwaltung"]
-        ImageLib["8.10 Image Library"]
-        RichText["8.11 Rich Text"]
-    end
-
-    subgraph UIArchitecture["UI-Architektur"]
-        Theme["8.5 Theming"]
-        Events["8.6 Event Handling"]
-        A11y["8.9 Barrierefreiheit"]
-    end
-
-    subgraph CodeQuality["Code-Qualität"]
-        Test["8.7 Testbarkeit"]
-        Extend["8.8 Erweiterbarkeit"]
-        Build["8.12 Build und Distribution"]
-    end
-
-    subgraph Operations["8.13 Betrieb"]
-        Logging["Logging"]
-        Caching["Caching"]
-        Security["Security"]
-        I18n["i18n"]
-    end
-
-    Domain --> Validation
-    Validation --> Error
-    State --> ImageLib
-    State --> RichText
-    Theme --> Events
-    Events --> A11y
-    Extend --> Test
-
-    style CoreConcepts fill:#3b82f6
-    style DataFlow fill:#10b981
-    style UIArchitecture fill:#f59e0b
-    style CodeQuality fill:#8b5cf6
-    style Operations fill:#6b7280
-```
-
 ## 8.1 Domain Model
 
 ### 8.1.1 UJL Document Formats

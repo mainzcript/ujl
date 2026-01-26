@@ -7,85 +7,7 @@ description: "Qualitätsziele und -szenarien für das UJL-System"
 
 Die Qualitätsanforderungen leiten sich direkt aus den Zielen von UJL ab: Brand-Compliance soll technisch erzwingbar sein, Barrierefreiheit soll im Authoring mitgedacht werden, und Dokumente müssen robust validierbar und gut integrierbar bleiben. Die Szenarien konkretisieren das als überprüfbare Reaktionen des Systems, damit Qualitätsziele nicht abstrakt bleiben, sondern als Tests, Akzeptanzkriterien und Architekturregeln greifbar werden.
 
-## 10.1 Quality Tree
-
-Der Quality Tree visualisiert die Hierarchie der Qualitätsziele und ihre wichtigsten Konkretisierungen.
-
-```mermaid
-graph TB
-    subgraph Qualität["UJL Qualitätsziele"]
-        Q["Qualität"]
-    end
-
-    subgraph Prio1["Priorität 1"]
-        BC["Brand-Compliance<br/>by Design"]
-    end
-
-    subgraph Prio2["Priorität 2"]
-        ACC["Accessibility<br/>Guaranteed"]
-    end
-
-    subgraph Prio3["Priorität 3"]
-        VAL["Validierbarkeit<br/>& Robustheit"]
-    end
-
-    subgraph Prio4["Priorität 4"]
-        INT["Integrationsfähigkeit"]
-    end
-
-    subgraph Prio5["Priorität 5"]
-        EXT["Erweiterbarkeit"]
-    end
-
-    subgraph Weitere["Weitere Ziele"]
-        PERF["Performance"]
-        DX["Developer<br/>Experience"]
-        MAINT["Maintainability"]
-    end
-
-    Q --> BC
-    Q --> ACC
-    Q --> VAL
-    Q --> INT
-    Q --> EXT
-    Q --> PERF
-    Q --> DX
-    Q --> MAINT
-
-    BC --> BC1["QS-BC-01<br/>Design-Isolation"]
-    BC --> BC2["QS-BC-02<br/>Zentrale Theme-Updates"]
-    BC --> BC3["QS-BC-03<br/>Schema-Validierung"]
-
-    ACC --> ACC1["QS-ACC-01<br/>Farbkontrast"]
-    ACC --> ACC2["QS-ACC-02<br/>Keyboard-Navigation"]
-    ACC --> ACC3["QS-ACC-03<br/>Semantisches HTML"]
-
-    VAL --> VAL1["QS-VAL-01<br/>Strukturierte Daten"]
-    VAL --> VAL2["QS-VAL-02<br/>Validierbarkeit"]
-    VAL --> VAL3["QS-VAL-03<br/>Deterministische Ausgabe"]
-
-    INT --> INT1["QS-INT-01<br/>Web Component Integration"]
-    INT --> INT2["QS-INT-02<br/>Style Isolation"]
-    INT --> INT3["QS-INT-03<br/>CMS-Integration"]
-
-    EXT --> EXT1["QS-EXT-01<br/>Custom Modules"]
-    EXT --> EXT2["QS-EXT-02<br/>Custom Adapters"]
-    EXT --> EXT3["QS-EXT-03<br/>Image Storage"]
-
-    PERF --> PERF1["QS-PERF-01<br/>Bundle-Größe"]
-    PERF --> PERF2["QS-PERF-02<br/>Crafter-Reaktionszeit"]
-    PERF --> PERF3["QS-PERF-03<br/>Rendering-Performance"]
-
-    DX --> DX1["QS-DX-01<br/>Type Safety"]
-    DX --> DX2["QS-DX-02<br/>Onboarding-Zeit"]
-    DX --> DX3["QS-DX-03<br/>Dokumentation"]
-
-    MAINT --> MAINT1["QS-MAINT-01<br/>Test-Abdeckung"]
-    MAINT --> MAINT2["QS-MAINT-02<br/>Modulare Struktur"]
-    MAINT --> MAINT3["QS-MAINT-03<br/>Versionierung"]
-```
-
-### Qualitätsziel-Übersicht
+## 10.1 Qualitätsziel-Übersicht
 
 | ID    | Qualitätsziel                    | Priorität | Primäre Stakeholder                    | Referenz                                                                                                          |
 | ----- | -------------------------------- | --------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -473,3 +395,58 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | pnpm + Changesets (ADR-010)       | QS-MAINT-02, QS-MAINT-03                            |
 | Playwright E2E (ADR-011)          | QS-ACC-02, QS-MAINT-01                              |
 | `AGENTS.md` / Agent Instructions  | QS-DX-04                                            |
+
+## 10.5 Externe Evaluation
+
+### Kontext
+
+Im Rahmen der Projektentwicklung wurde UJL durch einen externen Fullstack-Entwickler (ehemaliger Teamleiter) evaluiert, um erste Rückmeldungen zu Usability, Developer Experience und Integrationsfähigkeit zu erhalten. Die Evaluation umfasste das Testen des Crafters (Editor- und Designer-Modus) sowie die Installation und API-Bewertung im Monorepo-Kontext.
+
+Diese Evaluation ist nicht als repräsentative Studie zu verstehen, sondern als initiales qualitatives Feedback, das Stärken der aktuellen Implementierung bestätigt und konkrete Verbesserungspotenziale identifiziert.
+
+### Testumfang
+
+**Getestete Komponenten:**
+
+- Crafter (Visual Editor) - Editor-Modus und Designer-Modus
+- Developer Installation (Monorepo Setup)
+- Integration-API (API-Analyse, kein produktiver Einsatz)
+
+**Nicht getestet:**
+
+- Produktive Integration in externe Anwendung (NPM-Package noch nicht veröffentlicht)
+- Web Components Adapter in realer Host-Applikation
+- Performance unter Last
+- Multi-User-Szenarien
+
+### Bewertung: Crafter UI/UX
+
+**Positive Aspekte:**
+
+Der Evaluator bewertet das Design des Crafters als modern, aufgeräumt und nutzerfreundlich. Die visuelle Gestaltung und grundlegende Bedienbarkeit auf großen Bildschirmen werden als gelungen eingeschätzt. Der Designer-Modus ist aus Sicht eines Entwicklers mit Frontend-Kenntnissen gut bedienbar, wobei zu beachten ist, dass diese Einschätzung aus einer technisch versierten Perspektive erfolgt und die Zugänglichkeit für Design-Einsteiger noch nicht validiert wurde.
+
+**Identifizierte Usability-Gaps:**
+
+Auf kleineren Bildschirmen ist die Bedienung teilweise unintuitiv. Das Hinzufügen neuer Module ist nicht direkt ersichtlich, da der aktuelle Workflow mehrere Schritte erfordert: Navigation in den Tree, Auswahl der Komponente und Verwendung des Drei-Punkte-Kontextmenüs für Operationen wie Add, Copy, Paste und Delete. Tastenkombinationen existieren zwar als Alternative, sind aber nicht unmittelbar erkennbar. Das Property Panel ist auf kleinen Bildschirmen hinter einem Settings-Icon versteckt, was die Auffindbarkeit erschwert.
+
+**Geplante Verbesserungen:**
+
+Als Konsequenz aus dem Feedback sind folgende Maßnahmen geplant:
+
+- Implementierung eines Kontextmenüs direkt in der Preview-Ansicht bei selektierten Modulen
+- Verbesserte Tool-Discoverability durch kontextsensitive UI-Elemente, die wahrscheinlich benötigte Funktionen direkt im Sichtfeld des Benutzers anbieten
+- Optimierung der Bedienung auf kleineren Bildschirmen durch direkteren Zugriff auf Bearbeitungsfunktionen
+
+### Bewertung: Developer Experience
+
+**Positive Aspekte:**
+
+Die Integration-API wird als einfach und framework-agnostisch bewertet. Die Developer-Installation im Monorepo-Kontext funktionierte problemlos. Die vorhandene Dokumentation wurde als ausreichend und verständlich eingeschätzt, um sich in die API einzufinden.
+
+**Identifizierter Bedarf:**
+
+Als wesentlicher Wunsch wurde die Möglichkeit genannt, eigene Module direkt über die Crafter-API zu registrieren. Dieses Feature ist bereits als prioritäres Element auf der Roadmap vermerkt und wird die Erweiterbarkeit des Frameworks für Entwickler erheblich verbessern.
+
+### Einordnung und Ausblick
+
+Die Evaluation bestätigt die grundsätzliche Richtung der Architektur (Framework-Agnostik, klare API, moderne UI) und identifiziert konkrete UX-Verbesserungen für den Crafter. Die gewonnenen Erkenntnisse fließen direkt in die Roadmap ein, insbesondere bezüglich Kontextmenü-Implementierung und Custom-Module-Registration. Zukünftige Evaluationen sollten auch Nutzer ohne Entwicklerhintergrund einbeziehen, um die Zugänglichkeit des Designer-Modus umfassender zu bewerten.
