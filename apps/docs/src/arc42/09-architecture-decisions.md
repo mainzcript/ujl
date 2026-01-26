@@ -883,7 +883,7 @@ UJL nutzt Playwright für E2E-Tests des Crafters. Ein Test für Tree- und Previe
 import { test, expect } from "@playwright/test";
 
 test("should select node in tree and preview", async ({ page }) => {
-	await page.goto("http://localhost:5173");
+	await page.goto("/"); // nutzt baseURL aus Playwright-Config
 
 	await page.click('[data-testid="tree-node-m1"]');
 
@@ -899,7 +899,7 @@ Ein Test für Clipboard-Operationen demonstriert Copy und Paste via Keyboard:
 
 ```typescript
 test("should copy/paste node via keyboard", async ({ page }) => {
-	await page.goto("http://localhost:5173");
+	await page.goto("/"); // nutzt baseURL aus Playwright-Config
 
 	await page.click('[data-testid="tree-node-m1"]');
 	await page.keyboard.press("Control+C");
@@ -924,7 +924,7 @@ Test-spezifische Attribute werden in Svelte-Komponenten gesetzt:
 </div>
 ```
 
-Die Playwright-Konfiguration definiert testDir als './tests/e2e', fullyParallel als true, retries abhängig von CI-Umgebung (2 in CI, 0 lokal), workers abhängig von CI (1 in CI, undefined lokal), Reporter als html und json mit outputFile 'test-results/results.json', use mit baseURL 'http://localhost:5173', trace 'on-first-retry', screenshot 'only-on-failure' und video 'retain-on-failure', sowie projects für chromium, firefox und webkit mit Desktop Chrome, Desktop Firefox und Desktop Safari.
+Die Playwright-Konfiguration definiert testDir als './tests/e2e', fullyParallel als true, retries abhängig von CI-Umgebung (2 in CI, 0 lokal), workers abhängig von CI (1 in CI, undefined lokal), Reporter als html und json mit outputFile 'test-results/results.json', use mit baseURL auf den lokalen Dev-Server (Port 5173), trace 'on-first-retry', screenshot 'only-on-failure' und video 'retain-on-failure', sowie projects für chromium, firefox und webkit mit Desktop Chrome, Desktop Firefox und Desktop Safari.
 
 ### Konsequenzen
 
