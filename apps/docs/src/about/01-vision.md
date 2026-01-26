@@ -12,18 +12,18 @@ description: "Was UJL ist, welches Problem es löst und warum es gebraucht wird"
 UJL stellt einen Drag-&-Drop-Editor bereit, mit dem Inhalte visuell erstellt und gepflegt werden können, ohne dass Redakteur:innen Farben, Abstände, Typografie oder semantische Strukturen frei verändern können. Inhalte lassen sich flexibel aufbauen und anpassen, während Design-Entscheidungen systematisch geschützt bleiben. Typische Fehler bei Kontrast, Struktur oder Semantik sind dabei technisch ausgeschlossen.
 
 > **UJL trennt Inhalt und Design konsequent auf technischer Ebene.**  
-> Redakteur:innen bearbeiten Inhalte – Designregeln sind für sie nicht veränderbar.
+> Redakteur:innen bearbeiten Inhalte, Designregeln sind für sie nicht veränderbar.
 
-Im Unterschied zu klassischen Page Buildern basiert UJL nicht auf frei editierbarem HTML oder CSS, sondern auf **strukturierten Daten**, die vor dem Rendern gegen definierte Regeln validiert werden. Alles, was im Editor gebaut werden kann, ist damit per Definition markenkonform und barrierearm – innerhalb der zuvor konfigurierten Leitplanken.
+Im Unterschied zu klassischen Page Buildern basiert UJL nicht auf frei editierbarem HTML oder CSS, sondern auf **strukturierten Daten**, die vor dem Rendern gegen definierte Regeln validiert werden. Alles, was im Editor gebaut werden kann, ist damit per Definition markenkonform und barrierearm innerhalb der zuvor konfigurierten Leitplanken.
 
-UJL ist bewusst **kein CMS** und **keine Plattform**.  
+UJL ist **kein CMS** und **keine Plattform**.  
 Es ist ein **visueller Layout-Layer**, der bestehende CMS- und Frontend-Systeme ergänzt, ohne sie zu ersetzen.
 
-::: tip Frühe Vorschau
+::: tip Demo
 
-Du möchtest sehen, wie UJL in der Praxis aussieht? Wir haben eine frühe Vorschau des UJL Crafter veröffentlicht. Bitte beachte, dass es sich um eine sehr frühe Version handelt – viele Features sind noch in Entwicklung.
+Du möchtest sehen, wie UJL in der Praxis aussieht? Wir haben eine frühe Vorschau des UJL Crafter veröffentlicht. Bitte beachte, dass es sich um eine sehr frühe Version handelt, viele Features sind noch in Entwicklung.
 
-→ [Vorschau ausprobieren](/demo)
+→ [Demo ausprobieren](/demo)
 
 :::
 
@@ -45,7 +45,7 @@ In der Praxis entstehen Inhalte, die optisch oft „ausreichend“ wirken, aber 
 
 ### 3. Barrierefreiheit als Nacharbeit
 
-Barrierefreiheit wird in vielen Projekten erst am Ende berücksichtigt – häufig ausgelöst durch externe Audits oder regulatorische Anforderungen wie den EU Accessibility Act. Die Ursache liegt jedoch tiefer: Redaktionelle Werkzeuge erlauben Gestaltungsfreiheiten, die Barrierefreiheit unabsichtlich unterlaufen können.
+Barrierefreiheit wird in vielen Projekten erst am Ende berücksichtigt, oft ausgelöst durch externe Audits oder regulatorische Anforderungen wie den EU Accessibility Act. Die Ursache liegt jedoch tiefer: Redaktionelle Werkzeuge erlauben Gestaltungsfreiheiten, die Barrierefreiheit unabsichtlich unterlaufen können.
 
 Die Folge sind teure Nachbesserungen, rechtliche Risiken und eine schlechtere Nutzererfahrung.
 
@@ -53,9 +53,9 @@ Die Folge sind teure Nachbesserungen, rechtliche Risiken und eine schlechtere Nu
 
 UJL löst diese Probleme nicht durch zusätzliche Kontrollen oder komplexere Prozesse, sondern durch Architektur.
 
-Redakteur:innen arbeiten visuell und flexibel, während Designer:innen Regeln einmal zentral definieren. Das System stellt sicher, dass ungültige Kombinationen gar nicht erst entstehen können. Gestaltung ist frei, aber nicht beliebig.
+Redakteur:innen arbeiten visuell und flexibel, während Designer:innen Regeln einmal im Theme definieren. Das System stellt sicher, dass ungültige Kombinationen gar nicht erst entstehen können. Gestaltung ist frei, aber nicht beliebig.
 
-Konkret bedeutet das: Inhalte werden aus klar definierten Modulen aufgebaut, Design-Systeme werden zentral festgelegt, und visuelles Arbeiten findet ausschließlich innerhalb sicherer Grenzen statt. Statt freiem HTML erzeugt UJL strukturierte Daten, die vor dem Rendern automatisch validiert werden.
+Konkret: Inhalte entstehen aus definierten Modulen, Design-Systeme werden im Theme festgelegt, und visuelles Arbeiten findet innerhalb fester Leitplanken statt. Statt freiem HTML erzeugt UJL strukturierte Daten, die vor dem Rendern automatisch validiert werden.
 
 Das Ergebnis ist ein Arbeitsprozess, in dem Redakteur:innen selbstständig arbeiten können, Markenauftritte konsistent bleiben und Barrierefreiheit systematisch eingehalten wird. Review- und Korrekturschleifen werden dadurch weitgehend überflüssig.
 
@@ -68,7 +68,7 @@ Was in UJL gebaut werden kann, ist per Definition innerhalb der Leitplanken.
 
 Governance verlagert sich damit weg von manuellen Kontrollen hin zu architektonischer Absicherung.
 
-## KI – sinnvoll integriert, nicht unkontrolliert
+## KI: sinnvoll integriert, nicht unkontrolliert
 
 UJL ist so aufgebaut, dass KI unterstützt, ohne Kontrolle zu übernehmen. KI-Systeme erzeugen strukturierte Inhalte statt freies Markup. Diese Ergebnisse werden automatisch validiert, bevor sie Bestandteil einer Seite werden.
 
@@ -76,7 +76,7 @@ Das ermöglicht effizientere Content-Erstellung, reduziert den Prompt-Aufwand un
 
 ## Rollenbasiertes Arbeiten ohne Reibung
 
-UJL trennt Verantwortlichkeiten klar. Designer:innen definieren Design-Systeme, Redakteur:innen erstellen Inhalte, Entwickler:innen erweitern Module und integrieren UJL in bestehende Systeme. Jede Rolle arbeitet innerhalb ihres Fachbereichs, ohne unbeabsichtigt die Arbeit der anderen zu gefährden.
+UJL trennt Verantwortlichkeiten nach Rollen. Designer:innen definieren Design-Systeme, Redakteur:innen erstellen Inhalte, Entwickler:innen erweitern Module und integrieren UJL in bestehende Systeme. Jede Rolle arbeitet innerhalb ihres Fachbereichs, ohne unbeabsichtigt die Arbeit der anderen zu gefährden.
 
 ## Integration statt Systemwechsel
 
@@ -86,9 +86,9 @@ Das reduziert den Einführungsaufwand, vermeidet Lock-in und ermöglicht eine sc
 
 ## Gesellschaftliche Relevanz
 
-UJL adressiert zentrale Herausforderungen moderner digitaler Arbeit.
+UJL adressiert wichtige Herausforderungen moderner digitaler Arbeit.
 
-Barrierefreiheit wird nicht nachträglich geprüft, sondern bereits beim Erstellen abgesichert. Das senkt Kosten, reduziert Risiken und verbessert digitale Teilhabe – insbesondere unter steigenden regulatorischen Anforderungen.
+Barrierefreiheit wird nicht nachträglich geprüft, sondern bereits beim Erstellen abgesichert. Das senkt Kosten, reduziert Risiken und verbessert digitale Teilhabe, besonders unter steigenden regulatorischen Anforderungen.
 
 Strukturierte Daten ermöglichen zudem eine ressourcenschonendere KI-Nutzung. Durch Open Source, Self-Hosting und transparente Architektur stärkt UJL digitale Souveränität und Vertrauen. Gleichzeitig senkt es die Hürden für professionelle Webgestaltung, da auch Nicht-Techniker:innen hochwertige, konsistente Inhalte erstellen können.
 

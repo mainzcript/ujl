@@ -72,11 +72,11 @@ Die Infrastruktur, die wir aktuell benötigen, um UJL zu entwickeln (beispielswe
 
 Darüber hinaus wird UJL durch ein wachsendes Netzwerk an Entwickler:innen unterstützt, die das Projekt mit Ideen und Feedback bereichern:
 
-- **Lukas Antoine** – Co-Founder von mainzcript, Full-Stack-Entwickler und Lehrer für Informatik und Mathematik.
-- **Leon Scherer** – Freier Web-Entwickler und Svelte-Experte
-- **Philipp Oehl** – .NET-Entwickler mit Backend-Expertise
-- **Ulla Suhare** – Frontend-Entwicklerin mit Schwerpunkt auf Angular und TypeScript
-- **Jannik Seus** – Master-Student mit Fokus auf skalierbare, AI-unterstützte Lösungen
+- **Lukas Antoine**: Co-Founder von mainzcript, Full-Stack-Entwickler und Lehrer für Informatik und Mathematik.
+- **Leon Scherer**: Freier Web-Entwickler und Svelte-Experte
+- **Philipp Oehl**: .NET-Entwickler mit Backend-Expertise
+- **Ulla Suhare**: Frontend-Entwicklerin mit Schwerpunkt auf Angular und TypeScript
+- **Jannik Seus**: Master-Student mit Fokus auf skalierbare, AI-unterstützte Lösungen
 
 ## Mitwirken
 
