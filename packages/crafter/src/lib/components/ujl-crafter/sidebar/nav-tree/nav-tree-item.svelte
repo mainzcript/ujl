@@ -32,7 +32,7 @@
 	} from '$lib/utils/ujlc-tree.js';
 	import { getContext } from 'svelte';
 	import { cn } from '@ujl-framework/ui/utils';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 
 	let {
 		node,

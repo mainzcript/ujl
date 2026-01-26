@@ -3,7 +3,7 @@
 	import type { ImageMetadata } from '@ujl-framework/types';
 	import { logger } from '$lib/utils/logger.js';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import { toast } from 'svelte-sonner';
 	import UploadIcon from '@lucide/svelte/icons/upload';
 	import XIcon from '@lucide/svelte/icons/x';

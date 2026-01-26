@@ -3,7 +3,7 @@
 	import ShareIcon from '@lucide/svelte/icons/share';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '../context.js';
+	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import { Composer, type AnyModule } from '@ujl-framework/core';
 	import { findNodeById } from '$lib/utils/ujlc-tree.js';
 	import { FieldInput } from '$lib/components/ui/index.js';

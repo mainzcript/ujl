@@ -472,3 +472,38 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 /** Store type derived from factory return type */
 export type CrafterStore = ReturnType<typeof createCrafterStore>;
+
+/**
+ * Context type alias for semantic clarity.
+ * CrafterContext === CrafterStore (design decision: context IS store)
+ */
+export type CrafterContext = CrafterStore;
+
+// ============================================
+// CONTEXT SYMBOLS
+// ============================================
+
+/**
+ * Symbol for type-safe CrafterContext access.
+ * Using Symbol.for() allows the same symbol to be retrieved across modules.
+ */
+export const CRAFTER_CONTEXT = Symbol.for('ujl:crafter-context');
+
+/**
+ * Symbol for Composer context.
+ * Used for direct Composer access in components.
+ */
+export const COMPOSER_CONTEXT = Symbol.for('ujl:composer-context');
+
+/**
+ * Symbol for Shadow Root context access.
+ * Used to provide the Shadow Root reference to child components
+ * for scoped DOM queries within the Shadow DOM.
+ */
+export const SHADOW_ROOT_CONTEXT = Symbol.for('ujl:shadow-root-context');
+
+/**
+ * Context type for Shadow Root access.
+ * Uses a getter to satisfy Svelte 5's reactivity warnings.
+ */
+export type ShadowRootContext = { readonly value: ShadowRoot | undefined };

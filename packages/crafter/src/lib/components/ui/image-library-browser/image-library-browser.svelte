@@ -12,7 +12,7 @@
 		DialogCloseButton
 	} from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import type { ImageMetadata, ImageEntry } from '@ujl-framework/types';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';

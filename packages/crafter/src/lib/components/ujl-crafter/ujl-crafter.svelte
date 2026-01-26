@@ -26,10 +26,11 @@
 		createCrafterStore,
 		createImageServiceFactory,
 		type CrafterStore,
-		type CrafterStoreDeps
+		type CrafterStoreDeps,
+		CRAFTER_CONTEXT,
+		COMPOSER_CONTEXT,
+		SHADOW_ROOT_CONTEXT
 	} from '$lib/stores/index.js';
-
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, SHADOW_ROOT_CONTEXT } from './context.js';
 
 	import Header from './header/header.svelte';
 	import Editor from './sidebar/editor.svelte';

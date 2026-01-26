@@ -4,7 +4,7 @@
 	import NavTreeItem from './nav-tree-item.svelte';
 	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
 	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 
 	let {
 		nodes,

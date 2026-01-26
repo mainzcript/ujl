@@ -17,8 +17,7 @@
 	} from '@ujl-framework/ui';
 	import { useApp } from '$lib/components/ui/app/index.js';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
-	import type { CrafterMode } from '$lib/stores/index.js';
+	import { CRAFTER_CONTEXT, type CrafterContext, type CrafterMode } from '$lib/stores/index.js';
 	import ThreeDotsIcon from '@lucide/svelte/icons/more-vertical';
 	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
 	import ShareIcon from '@lucide/svelte/icons/share';

@@ -10,13 +10,18 @@
 export {
 	createCrafterStore,
 	type CrafterStore,
+	type CrafterContext,
 	type CrafterStoreDeps,
 	type CrafterMode,
 	type ViewportSize,
 	type ImageLibraryContext,
 	type LibraryConfig,
 	type UpdateImagesFn,
-	type ImageServiceFactory
+	type ImageServiceFactory,
+	type ShadowRootContext,
+	CRAFTER_CONTEXT,
+	COMPOSER_CONTEXT,
+	SHADOW_ROOT_CONTEXT
 } from './crafter-store.svelte.js';
 
 // Operations

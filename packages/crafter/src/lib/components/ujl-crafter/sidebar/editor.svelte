@@ -3,7 +3,7 @@
 	import { onMount, getContext } from 'svelte';
 	import NavTree from './nav-tree/nav-tree.svelte';
 	import ComponentPicker from './component-picker.svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import {
 		findNodeById,
 		ROOT_NODE_ID,
