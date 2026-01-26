@@ -8,36 +8,38 @@
 		"apps/*",
 		"services/*"
 	],
-	"packageManager": "pnpm@10.26.2",
+	"packageManager": "pnpm@10.28.1",
 	"scripts": {
-		"build": "pnpm run demo:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
+		"build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
 		"check": "pnpm -r run check",
-		"test": "pnpm -r run test",
+		"test:unit": "pnpm -r --if-present run test:unit",
+		"test:e2e": "pnpm -r --if-present run test:e2e",
+		"test": "pnpm run test:unit && pnpm run test:e2e",
 		"clean": "pnpm -r run clean && rimraf node_modules",
 		"types:build": "pnpm --filter @ujl-framework/types build",
 		"core:build": "pnpm types:build && pnpm --filter @ujl-framework/core build",
 		"ui:build": "pnpm run core:build && pnpm --filter @ujl-framework/ui build",
 		"adapter-svelte:build": "pnpm run ui:build && pnpm --filter @ujl-framework/adapter-svelte build",
 		"adapter-web:build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/adapter-web build",
-		"demo:build": "pnpm run adapter-web:build && pnpm --filter @ujl-framework/demo build",
 		"docs:build": "pnpm --filter @ujl-framework/docs build",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish",
-		"rtc": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check && pnpm run test"
+		"rtc": "pnpm run rtc:lite && pnpm run test",
+		"rtc:lite": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.8",
-		"@types/node": "^25.0.3",
-		"@typescript-eslint/eslint-plugin": "^8.51.0",
-		"@typescript-eslint/parser": "^8.51.0",
+		"@types/node": "^25.0.10",
+		"@typescript-eslint/eslint-plugin": "^8.53.1",
+		"@typescript-eslint/parser": "^8.53.1",
 		"eslint": "^9.39.2",
-		"prettier": "^3.7.4",
+		"prettier": "^3.8.1",
 		"rimraf": "^6.1.2",
 		"typescript": "^5.9.3",
-		"vite": "^7.3.0"
+		"vite": "^7.3.1"
 	},
 	"engines": {
 		"node": ">=18.0.0",

@@ -1,6 +1,7 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { TextField } from "../../fields/concretes/text-field.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -62,7 +63,11 @@ export class Button extends ModuleBase {
 				label,
 				href,
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }

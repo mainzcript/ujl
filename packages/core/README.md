@@ -4,17 +4,7 @@
 
 UJL Core provides the foundational building blocks for creating reusable, composable web layouts. Instead of writing HTML directly, you define layouts using `.ujlc.json` documents that get composed into AST nodes and rendered through adapters. This architectural approach enables **Brand-Compliance by Design** – design rules are enforced at the schema level, making it impossible for content editors to break brand guidelines or accessibility standards.
 
-This separation enables powerful features like:
-
-- **Modular Architecture**: Create reusable modules with fields and slots
-- **Type Safety**: Full TypeScript support with compile-time validation
-- **Extensibility**: Easy to add custom modules and field types
-- **Multiple Outputs**: Render to HTML, Svelte components, or any format via adapters
-- **AI-native**: JSON-based structure optimized for LLMs. AI generates structured data that is validated against schemas before rendering, ensuring brand compliance and accessibility
-- **Brand-Compliance by Design**: Schema validation ensures only valid, brand-compliant layouts can be created
-- **Accessibility Built-in**: Semantic HTML and WCAG-compliant structures are enforced through the module system
-
----
+Die **modulare Architektur** ermöglicht wiederverwendbare Module mit Fields und Slots. Vollständige **TypeScript-Unterstützung** sorgt für Compile-Time-Validierung, während die **Erweiterbarkeit** das Hinzufügen eigener Module und Field-Types erlaubt. **Multiple Outputs** werden über Adapter ermöglicht (HTML, Svelte, Web Components). Die **AI-native JSON-Struktur** ist für LLMs optimiert und validiert KI-generierten Output gegen Schemas. **Brand-Compliance by Design** stellt durch Schema-Validierung sicher, dass nur valide, markenkonforme Layouts erstellt werden können. **Barrierefreiheit** ist durch semantisches HTML und WCAG-konforme Strukturen im Modulsystem eingebaut.
 
 ## Installation
 
@@ -97,31 +87,41 @@ This package implements the composition layer:
 - **Module Registry**: Manages available modules and provides type-safe access
 - **AST Generation**: Creates abstract nodes with preserved IDs for downstream adapters
 
-### Module ID Propagation
+### Modules vs. AST Nodes
 
-The Composer automatically transfers module IDs from the UJLC document to the AST:
+Understanding the distinction between **Modules** and **AST Nodes** is crucial for working with the UJL Framework.
 
-```typescript
-// In UJLC document
-{
-	type: "text",
-	meta: { id: "text-001" },  // ← ID defined here
-	fields: { content: "Hello" }
-}
+**Modules** are the building blocks defined in `.ujlc.json` documents. They exist at the document level, are created by users or editors (via the Crafter or manually), and are registered in the Module Registry as `ModuleBase` implementations. Examples include `text`, `button`, `card`, `grid`, and `container` modules. These modules represent actual content components that can be edited and manipulated.
 
-// After composition
-{
-	type: "text",
-	id: "text-001",  // ← ID preserved in AST
-	props: { content: "Hello" }
-}
-```
+**AST Nodes**, on the other hand, are created during the composition phase by the Composer. They exist only in the Abstract Syntax Tree, not in the original document. Every AST node (except the root wrapper) has a `meta.moduleId` field that indicates which module it belongs to.
 
-This enables:
+The key semantic distinction is:
+
+- **`node.id`**: A unique, randomly generated identifier for the AST node itself (generated with `generateUid()`)
+- **`meta.moduleId`**: "Zu welchem Modul gehört dieser Node?" (Set for all nodes except root wrapper)
+- **`meta.isModuleRoot`**: "Ist dieser Node das Modul selbst?" (Only `true` for editable module nodes)
+
+When a module is composed, it creates a primary AST node where `meta.isModuleRoot === true`. This node represents the module itself and is editable. However, modules may also generate additional AST nodes for structural purposes (like `grid-item` wrappers or internal buttons). These child nodes also have `meta.moduleId` set to the parent module's ID, but their `isModuleRoot` is `false` or `undefined`, making them non-editable parts of the module's structure.
+
+**Example:**
+
+When a Grid module is composed, the Grid module itself creates a `grid` AST node with:
+
+- A unique `id` (generated with `generateUid()`)
+- `meta.moduleId = "grid-001"` (from the UJLC document)
+- `meta.isModuleRoot = true` (making it editable)
+
+However, the Grid module also automatically creates `grid-item` AST nodes for each child with:
+
+- Unique `id`s (generated with `generateUid()`)
+- `meta.moduleId = "grid-001"` (they belong to the Grid module)
+- `meta.isModuleRoot = false` (making them non-editable, but they still know they belong to the Grid module)
+
+This architecture enables:
 
 - Tracking modules through the composition pipeline
-- Click-to-select in visual editors
-- DOM element identification with `data-ujl-module-id`
+- Click-to-select in visual editors (only editable nodes are selectable)
+- DOM element identification with `data-ujl-module-id` (set on all nodes with `meta.moduleId` when `showMetadata={true}`; editability is checked in the editor layer)
 - Programmatic module manipulation
 
 ## Extensibility
@@ -263,71 +263,80 @@ Fields support optional UI metadata in their config:
 | `RichTextField` | Rich text (TipTap) | `default` (ProseMirror Document) |
 | `ImageField`    | Image upload       | `default` (UJLImageData \| null) |
 
-### Media Library System
+### Library System
 
-The core package provides a flexible media library system that supports both inline and backend storage modes:
+The core package provides a flexible library system that supports both inline and backend storage modes. Currently, only images are supported, with plans for additional asset types in future releases.
 
 **Storage Modes:**
 
-- **Inline Storage** - Media stored as Base64-encoded data within UJLC documents
-- **Backend Storage** - Media stored on a Payload CMS server with references in documents
+- **Inline Storage** - Images stored as Base64-encoded data within UJLC documents
+- **Backend Storage** - Images stored on a Payload CMS server with references in documents
 
-**Media Library Configuration:**
+**Library Configuration:**
 
-Media library configuration is stored in the document metadata at `ujlc.meta.media_library`:
+Library configuration is stored in the document metadata at `ujlc.meta._library`:
 
 ```typescript
 {
   "ujlc": {
     "meta": {
-      "media_library": {
+      "_library": {
         "storage": "inline" | "backend",
-        "endpoint": "http://localhost:3000/api"  // Required for backend storage
+        "url": "http://localhost:3000"  // Required for backend storage
       }
     },
-    "media": {
-      "media-001": {
-        "id": "media-001",
-        "storage": "inline",
-        "data": "data:image/jpeg;base64,..."  // For inline storage
-        // OR
-        "mediaId": "67890abcdef12345"  // For backend storage
+    "images": {
+      "img-001": {
+        "src": "data:image/jpeg;base64,...",  // For inline storage (Base64)
+        "metadata": {
+          "filename": "example.jpg",
+          "mimeType": "image/jpeg",
+          "filesize": 45678,
+          "width": 1920,
+          "height": 1080
+        }
+      }
+      // OR for backend storage
+      "img-002": {
+        "src": "http://localhost:3000/api/images/67890abcdef12345",
+        "metadata": { /* ... */ }
       }
     }
   }
 }
 ```
 
-**Media Entry Types:**
+**Image Entry Types:**
 
-The `UJLCMediaEntry` type supports both storage modes:
+The `ImageEntry` type contains the image URL and metadata:
 
 ```typescript
-type UJLCMediaEntryInline = {
-	id: string;
-	storage: "inline";
-	data: string; // Base64-encoded data URL
+type ImageEntry = {
+	src: string; // Image URL (HTTP or Base64 Data-URL)
+	metadata: ImageMetadata; // Technical metadata
 };
 
-type UJLCMediaEntryBackend = {
-	id: string;
-	storage: "backend";
-	mediaId: string; // Reference to Payload CMS media document
+type ImageMetadata = {
+	filename: string;
+	mimeType: string;
+	filesize: number;
+	width: number;
+	height: number;
 };
 ```
 
 **ImageField Integration:**
 
-The `ImageField` uses media library entries via the `UJLImageData` type:
+The `ImageField` uses library entries (currently images) via the `UJLImageData` type:
 
 ```typescript
 type UJLImageData = {
-	mediaId: string; // References entry in ujlc.media
+	imageId: string | number; // References entry in ujlc.images
 	alt: string;
 };
 ```
 
-For more details on media library setup and configuration, see the [Media Library Setup Guide](../crafter/MEDIA_LIBRARY_SETUP.md).
+For more details on library setup and configuration, see the [Library Setup Guide](../crafter/MEDIA_LIBRARY_SETUP.md).
 
 ### Rich Text Schema
 
@@ -344,16 +353,7 @@ const editor = new Editor({
 
 **Supported Extensions:**
 
-- Document, Paragraph, Text (base)
-- Heading (h1-h6)
-- Bold, Italic, Code (marks)
-- HardBreak, Blockquote, HorizontalRule
-- BulletList, OrderedList, ListItem
-
-**Disabled Extensions (UI-only):**
-
-- UndoRedo (editor state only)
-- Dropcursor, Gapcursor (UI only)
+Das Schema unterstützt Document, Paragraph und Text als Basis-Elemente, Headings (h1-h6), die Marks Bold, Italic und Code sowie HardBreak, Blockquote, HorizontalRule und Listen (BulletList, OrderedList, ListItem). UndoRedo (nur Editor-State), Dropcursor und Gapcursor (UI-only) sind deaktiviert.
 
 This schema is used by both the Crafter editor and the adapter serializers to ensure WYSIWYG consistency.
 

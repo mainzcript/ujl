@@ -1,4 +1,8 @@
 <script lang="ts">
+	/**
+	 * Styles for this component are in richtext-input.css (co-located).
+	 * Svelte <style> blocks don't work in Shadow DOM - see src/lib/styles/README.md
+	 */
 	import { onMount, onDestroy } from 'svelte';
 	import { Editor } from '@tiptap/core';
 	import type { ProseMirrorDocument } from '@ujl-framework/types';
@@ -88,7 +92,9 @@
 	});
 </script>
 
-<InputGroup class="h-auto">
+<InputGroup
+	class="h-auto focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+>
 	<!-- Toolbar at top -->
 	<InputGroupAddon align="block-start" class="">
 		<InputGroupButton
@@ -120,57 +126,3 @@
 		class="richtext-editor flex max-h-64 min-h-16 w-full flex-1 resize-none overflow-y-auto rounded-none border-0 p-3 pt-0 text-base shadow-none focus-visible:ring-0 md:text-sm"
 	></div>
 </InputGroup>
-
-<style>
-	/* ProseMirror editor content */
-	.richtext-editor :global(.ProseMirror) {
-		outline: none;
-		min-height: calc(4rem - 1rem); /* Container min-height minus padding */
-		width: 100%;
-		font-size: inherit;
-		line-height: 1.5;
-		color: oklch(var(--foreground));
-	}
-
-	/* Placeholder styling */
-	.richtext-editor :global(.ProseMirror p.is-editor-empty:first-child::before) {
-		color: oklch(var(--muted-foreground));
-		content: 'Enter text...';
-		float: left;
-		height: 0;
-		pointer-events: none;
-	}
-
-	/* Typography adjustments for ProseMirror content */
-	.richtext-editor :global(.ProseMirror p) {
-		margin: 0;
-		margin-bottom: 0.5rem;
-	}
-
-	.richtext-editor :global(.ProseMirror p:last-child) {
-		margin-bottom: 0;
-	}
-
-	.richtext-editor :global(.ProseMirror h1),
-	.richtext-editor :global(.ProseMirror h2),
-	.richtext-editor :global(.ProseMirror h3),
-	.richtext-editor :global(.ProseMirror h4),
-	.richtext-editor :global(.ProseMirror h5),
-	.richtext-editor :global(.ProseMirror h6) {
-		margin-top: 0.75rem;
-		margin-bottom: 0.5rem;
-		font-weight: 600;
-	}
-
-	.richtext-editor :global(.ProseMirror ul),
-	.richtext-editor :global(.ProseMirror ol) {
-		margin: 0.5rem 0;
-		padding-left: 1.5rem;
-	}
-
-	.richtext-editor :global(.ProseMirror blockquote) {
-		margin: 0.5rem 0;
-		padding-left: 1rem;
-		border-left: 2px solid oklch(var(--border));
-	}
-</style>

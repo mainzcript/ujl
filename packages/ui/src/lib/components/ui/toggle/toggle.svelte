@@ -5,7 +5,7 @@
 		base: "text-foreground hover:bg-muted data-[state=on]:bg-accent data-[state=on]:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-[color,box-shadow] focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		variants: {
 			variant: {
-				default: 'bg-transparent',
+				default: 'border border-border bg-flavor-foreground/5',
 				outline:
 					'border-input shadow-xs hover:bg-accent hover:text-accent-foreground border bg-transparent'
 			},

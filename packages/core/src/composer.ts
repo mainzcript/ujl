@@ -1,7 +1,13 @@
-import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-framework/types";
-import { MediaLibrary, type MediaResolver } from "./media/index.js";
+import type {
+	ImageProvider,
+	UJLAbstractNode,
+	UJLCDocument,
+	UJLCModuleObject,
+} from "@ujl-framework/types";
+import { ImageLibrary } from "./image/index.js";
 import { createDefaultRegistry } from "./modules/default-registry.js";
 import { ModuleRegistry, type AnyModule } from "./modules/index.js";
+import { generateUid } from "./utils.js";
 
 /**
  * Composer class for converting UJL documents to Abstract Syntax Trees
@@ -12,7 +18,7 @@ import { ModuleRegistry, type AnyModule } from "./modules/index.js";
  */
 export class Composer {
 	protected _module_registry: ModuleRegistry;
-	protected _media_library: MediaLibrary | null = null;
+	protected _image_library: ImageLibrary | null = null;
 
 	/**
 	 * Create a new composer instance
@@ -33,7 +39,7 @@ export class Composer {
 	/**
 	 * Compose a single module into an abstract syntax tree node
 	 * @param moduleData - The module data to compose
-	 * @returns Composed abstract syntax tree node (async for media resolution)
+	 * @returns Composed abstract syntax tree node (async for image resolution)
 	 */
 	public async composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode> {
 		const module = this._module_registry.getModule(moduleData.type);
@@ -46,7 +52,11 @@ export class Composer {
 				props: {
 					message: `Unknown module type: ${moduleData.type}`,
 				},
-				id: moduleData.meta.id,
+				id: generateUid(),
+				meta: {
+					moduleId: moduleData.meta.id, // Error node represents a failed module
+					isModuleRoot: true,
+				},
 			};
 		}
 	}
@@ -54,12 +64,12 @@ export class Composer {
 	/**
 	 * Compose a UJL document into an abstract syntax tree
 	 * @param doc - The UJL document to compose
-	 * @param mediaResolver - Optional resolver for backend media storage
-	 * @returns Composed abstract syntax tree node (async for media resolution)
+	 * @param imageProvider - Optional provider for backend image storage
+	 * @returns Composed abstract syntax tree node (async for image resolution)
 	 */
-	public async compose(doc: UJLCDocument, mediaResolver?: MediaResolver): Promise<UJLAbstractNode> {
-		// Initialize media library from document with optional resolver
-		this._media_library = new MediaLibrary(doc.ujlc.media ?? {}, mediaResolver);
+	public async compose(doc: UJLCDocument, imageProvider?: ImageProvider): Promise<UJLAbstractNode> {
+		// Initialize image library from document with optional provider
+		this._image_library = new ImageLibrary(doc.ujlc.images ?? {}, imageProvider);
 
 		const children: UJLAbstractNode[] = [];
 
@@ -72,6 +82,7 @@ export class Composer {
 			type: "wrapper",
 			props: { children },
 			id: "__root__",
+			// meta.moduleId NOT set - Root wrapper is not a module
 		};
 	}
 
@@ -84,12 +95,12 @@ export class Composer {
 	}
 
 	/**
-	 * Get the media library instance
+	 * Get the image library instance
 	 * Only available during composition
-	 * @returns The media library instance or null if not composing
+	 * @returns The image library instance or null if not composing
 	 */
-	public getMediaLibrary(): MediaLibrary | null {
-		return this._media_library;
+	public getImageLibrary(): ImageLibrary | null {
+		return this._image_library;
 	}
 
 	/**

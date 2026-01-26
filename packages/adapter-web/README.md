@@ -34,8 +34,7 @@ const ast = composer.compose(ujlDocument);
 // Target can be a CSS selector string or an HTMLElement
 const mountedElement = webAdapter(ast, tokenSet, {
 	target: '#my-container',
-	showMetadata: true,
-	eventCallback: (moduleId) => console.log('Module clicked:', moduleId)
+	showMetadata: true
 });
 
 // Cleanup
@@ -51,11 +50,10 @@ const el = document.createElement('ujl-content') as UJLContentElement;
 el.node = astNode;
 el.tokenSet = tokenSet;
 el.showMetadata = true;
-el.eventCallback = (moduleId) => console.log('Clicked:', moduleId);
 document.body.appendChild(el);
 ```
 
-> **Important**: Props (`node`, `tokenSet`, `showMetadata`, `eventCallback`) must be set as **Properties**, not HTML attributes, since attributes are strings. The programmatic API handles this automatically.
+> **Important**: Props (`node`, `tokenSet`, `showMetadata`) must be set as **Properties**, not HTML attributes, since attributes are strings. The programmatic API handles this automatically.
 
 ## Editor Features
 
@@ -67,12 +65,7 @@ The adapter supports the same optional editor features as `adapter-svelte`:
 - Enables programmatic module selection and highlighting
 - Useful for building visual editors
 
-**`eventCallback` (function)**
-
-- Callback triggered when a module is clicked
-- Receives the module ID as parameter
-- Automatically prevents default actions and event bubbling
-- Essential for click-to-select functionality in editors
+**Note:** The adapter focuses on pure rendering. Editor-specific functionality (like click handling) should be implemented in your editor layer using event listeners on the rendered DOM elements.
 
 ### Example: Visual Editor Integration
 
@@ -87,25 +80,37 @@ let selectedModuleId = null;
 
 const mounted = webAdapter(ast, tokenSet, {
 	target: '#preview',
-	showMetadata: true,
-	eventCallback: (moduleId) => {
-		// Update selection
-		selectedModuleId = moduleId;
+	showMetadata: true
+});
 
-		// Remove previous highlights
-		document
-			.querySelectorAll('[data-ujl-module-id].selected')
-			.forEach((el) => el.classList.remove('selected'));
+// Implement click handling in your editor layer
+const previewElement = document.querySelector('#preview');
+previewElement?.addEventListener('click', (event) => {
+	const clickedElement = event.target.closest('[data-ujl-module-id]');
+	if (!clickedElement) return;
 
-		// Highlight selected module
-		const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
-		if (element) {
-			element.classList.add('selected');
-		}
+	const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+	if (!moduleId) return;
 
-		// Update sidebar, inspector, etc.
-		updateEditorUI(moduleId);
+	// Check editability in AST (meta.isModuleRoot === true)
+	// Then handle selection, highlighting, etc.
+
+	// Update selection
+	selectedModuleId = moduleId;
+
+	// Remove previous highlights
+	document
+		.querySelectorAll('[data-ujl-module-id].selected')
+		.forEach((el) => el.classList.remove('selected'));
+
+	// Highlight selected module
+	const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
+	if (element) {
+		element.classList.add('selected');
 	}
+
+	// Update sidebar, inspector, etc.
+	updateEditorUI(moduleId);
 });
 ```
 
@@ -127,7 +132,6 @@ function webAdapter(
 - `tokenSet`: Design token set (`UJLTTokenSet`) to apply to the rendered AST
 - `options.target`: DOM element or selector where the Custom Element should be mounted
 - `options.showMetadata`: If `true`, adds `data-ujl-module-id` attributes (default: `false`)
-- `options.eventCallback`: Callback function for module clicks
 
 **Returns:**
 
@@ -139,7 +143,6 @@ function webAdapter(
 type WebAdapterOptions = {
 	target: string | HTMLElement;
 	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedElement = {
@@ -161,20 +164,18 @@ All features from `adapter-svelte` are available in `adapter-web`:
 - Full AST node support (all module types)
 - Theme token support with light/dark/system modes
 - Metadata attributes (`showMetadata`)
-- Click event callbacks (`eventCallback`)
-- Event prevention and propagation handling
 - All styling and layout capabilities
 
-## Event Handling
+## Editor Integration
 
-Event handling in `adapter-web` works identically to `adapter-svelte`. For implementation details, see [adapter-svelte Event Handling](../adapter-svelte/README.md#event-handling-implementation).
+The adapter is designed for pure rendering. For editor functionality (like click-to-select), implement event listeners in your editor layer. See [adapter-svelte Editor Integration](../adapter-svelte/README.md#editor-integration) for implementation details.
 
-Summary:
+This approach:
 
-- Only the clicked module triggers the callback
-- Events are prevented from bubbling to parent modules
-- Default behaviors are suppressed in editor mode
-- Module IDs are correctly passed to callbacks
+- Keeps the adapter focused on rendering
+- Allows flexible editor implementations
+- Enables different event types (click, hover, etc.)
+- Maintains clean separation of concerns
 
 ## Development
 

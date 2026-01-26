@@ -106,6 +106,49 @@ const requireJsExtensionPlugin = {
 	}
 };
 
+/**
+ * ESLint rule: Disallows <style> blocks in Svelte components (Shadow DOM limitation)
+ *
+ * The Crafter uses Shadow DOM for style isolation. However, Svelte injects
+ * component styles into document.head, NOT into the Shadow DOM.
+ *
+ * Solution: Use co-located .css files instead:
+ * - Create {component-name}.css next to the Svelte component
+ * - Import it in styles/components.css
+ * - See: src/lib/styles/README.md
+ */
+const noStyleBlock = {
+	meta: {
+		type: 'problem',
+		docs: {
+			description: 'Disallow <style> blocks in Svelte components (Shadow DOM limitation)',
+			recommended: true
+		},
+		messages: {
+			noStyleBlock:
+				'<style> blocks do not work in Shadow DOM. ' +
+				'Create a co-located .css file instead and import it in styles/components.css. ' +
+				'See src/lib/styles/README.md for details.'
+		}
+	},
+	create(context) {
+		return {
+			SvelteStyleElement(node) {
+				context.report({
+					node,
+					messageId: 'noStyleBlock'
+				});
+			}
+		};
+	}
+};
+
+const crafterRulesPlugin = {
+	rules: {
+		'no-style-block': noStyleBlock
+	}
+};
+
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
@@ -166,6 +209,18 @@ export default defineConfig(
 		files: ['**/nav-secondary.svelte'],
 		rules: {
 			'svelte/no-navigation-without-resolve': 'off'
+		}
+	},
+	{
+		// Disallow <style> blocks in Crafter components (Shadow DOM limitation)
+		// Exception: ujl-crafter-element.svelte (root Custom Element)
+		files: ['src/lib/components/**/*.svelte'],
+		ignores: ['**/ujl-crafter-element.svelte'],
+		plugins: {
+			'crafter-rules': crafterRulesPlugin
+		},
+		rules: {
+			'crafter-rules/no-style-block': 'error'
 		}
 	}
 );

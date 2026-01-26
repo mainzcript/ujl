@@ -1,0 +1,72 @@
+/**
+ * RichText Editor Shadow DOM Styles
+ *
+ * Component: src/lib/components/ui/richtext-input/richtext-input.svelte
+ *
+ * These styles must be in a separate CSS file (not in Svelte <style>)
+ * because Svelte injects component styles into document.head,
+ * not into the Shadow DOM where the Crafter runs.
+ */
+
+/* ProseMirror editor content */
+.richtext-editor .ProseMirror {
+	outline: none;
+	min-height: calc(4rem - 1rem); /* Container min-height minus padding */
+	width: 100%;
+	font-size: inherit;
+	line-height: 1.5;
+	color: oklch(var(--foreground));
+}
+
+/*
+ * Remove default focus styles from ProseMirror editor.
+ * Focus indication is handled by the InputGroup container via focus-within.
+ */
+.richtext-editor .ProseMirror:focus,
+.richtext-editor .ProseMirror:focus-visible,
+.richtext-editor .ProseMirror.ProseMirror-focused {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+/* Placeholder styling */
+.richtext-editor .ProseMirror p.is-editor-empty:first-child::before {
+	color: oklch(var(--muted-foreground));
+	content: 'Enter text...';
+	float: left;
+	height: 0;
+	pointer-events: none;
+}
+
+/* Typography adjustments for ProseMirror content */
+.richtext-editor .ProseMirror p {
+	margin: 0;
+	margin-bottom: 0.5rem;
+}
+
+.richtext-editor .ProseMirror p:last-child {
+	margin-bottom: 0;
+}
+
+.richtext-editor .ProseMirror h1,
+.richtext-editor .ProseMirror h2,
+.richtext-editor .ProseMirror h3,
+.richtext-editor .ProseMirror h4,
+.richtext-editor .ProseMirror h5,
+.richtext-editor .ProseMirror h6 {
+	margin-top: 0.75rem;
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+}
+
+.richtext-editor .ProseMirror ul,
+.richtext-editor .ProseMirror ol {
+	margin: 0.5rem 0;
+	padding-left: 1.5rem;
+}
+
+.richtext-editor .ProseMirror blockquote {
+	margin: 0.5rem 0;
+	padding-left: 1rem;
+	border-left: 2px solid oklch(var(--border));
+}

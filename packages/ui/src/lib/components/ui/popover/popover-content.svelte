@@ -17,9 +17,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<PopoverPrimitive.Portal {...portalProps}>
+<PopoverPrimitive.Portal to={portalTarget} {...portalProps}>
 	<PopoverPrimitive.Content
 		bind:ref
 		data-slot="popover-content"
@@ -28,7 +29,7 @@
 		{align}
 		class={cn(
 			isDark && 'dark',
-			'elevation z-50 w-72 rounded-md p-4 backdrop-blur',
+			'z-50 w-72 rounded-md border border-border bg-background/90 p-4 shadow shadow-foreground/10 backdrop-blur',
 			'origin-(--bits-popover-content-transform-origin) data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
 			className
 		)}
