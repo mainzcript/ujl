@@ -6,7 +6,6 @@
 		CollapsibleContent,
 		CollapsibleTriggerButton
 	} from './index.ts';
-	import { Button } from '../button/index.ts';
 
 	const { Story } = defineMeta({
 		title: 'Components/Layout/Collapsible',

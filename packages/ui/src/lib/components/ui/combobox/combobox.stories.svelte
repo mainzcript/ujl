@@ -64,7 +64,7 @@
 				<ComboboxInput placeholder="Search framework..." />
 				<ComboboxList>
 					<ComboboxEmpty>No framework found.</ComboboxEmpty>
-					{#each frameworks as framework}
+					{#each frameworks as framework (framework.value)}
 						<ComboboxItem value={framework.value} label={framework.label} />
 					{/each}
 				</ComboboxList>
@@ -84,7 +84,7 @@
 					<ComboboxInput placeholder="Search framework..." />
 					<ComboboxList>
 						<ComboboxEmpty>No framework found.</ComboboxEmpty>
-						{#each frameworks as framework}
+						{#each frameworks as framework (framework.value)}
 							<ComboboxItem value={framework.value} label={framework.label} />
 						{/each}
 					</ComboboxList>
@@ -135,7 +135,7 @@
 				<ComboboxInput placeholder="Search country..." />
 				<ComboboxList>
 					<ComboboxEmpty>No country found.</ComboboxEmpty>
-					{#each countries as country}
+					{#each countries as country (country.value)}
 						<ComboboxItem value={country.value} label={country.label}>
 							<span class="flex items-center gap-2">
 								<span>{country.flag}</span>
@@ -278,7 +278,7 @@
 				<ComboboxInput placeholder="Search framework..." />
 				<ComboboxList>
 					<ComboboxEmpty>No framework found.</ComboboxEmpty>
-					{#each frameworks as framework}
+					{#each frameworks as framework (framework.value)}
 						<ComboboxItem value={framework.value} label={framework.label} />
 					{/each}
 				</ComboboxList>

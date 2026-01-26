@@ -54,7 +54,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each invoices as invoice}
+				{#each invoices as invoice (invoice.invoice)}
 					<TableRow>
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>{invoice.status}</TableCell>
@@ -81,7 +81,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each invoices.slice(0, 5) as invoice}
+				{#each invoices.slice(0, 5) as invoice (invoice.invoice)}
 					<TableRow>
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>{invoice.status}</TableCell>
@@ -113,7 +113,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each invoices as invoice}
+				{#each invoices as invoice (invoice.invoice)}
 					<TableRow>
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>
@@ -152,7 +152,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each users as user, i}
+				{#each users as user, i (user.email)}
 					<TableRow>
 						<TableCell>
 							<Checkbox checked={i === 0 || i === 2} />
@@ -191,7 +191,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each invoices as invoice, i}
+				{#each invoices as invoice, i (invoice.invoice)}
 					<TableRow class={i % 2 === 0 ? 'bg-muted/50' : ''}>
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>{invoice.status}</TableCell>
@@ -218,7 +218,7 @@
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{#each users as user}
+					{#each users as user (user.email)}
 						<TableRow>
 							<TableCell>
 								<div class="flex flex-col">
@@ -265,7 +265,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each [{ id: '001', product: 'Widget A', qty: 10, price: '$9.99' }, { id: '002', product: 'Widget B', qty: 5, price: '$14.99' }, { id: '003', product: 'Widget C', qty: 20, price: '$4.99' }, { id: '004', product: 'Widget D', qty: 8, price: '$19.99' }, { id: '005', product: 'Widget E', qty: 15, price: '$7.99' }] as item}
+				{#each [{ id: '001', product: 'Widget A', qty: 10, price: '$9.99' }, { id: '002', product: 'Widget B', qty: 5, price: '$14.99' }, { id: '003', product: 'Widget C', qty: 20, price: '$4.99' }, { id: '004', product: 'Widget D', qty: 8, price: '$19.99' }, { id: '005', product: 'Widget E', qty: 15, price: '$7.99' }] as item (item.id)}
 					<TableRow>
 						<TableCell class="h-8 px-2">{item.id}</TableCell>
 						<TableCell class="h-8 px-2">{item.product}</TableCell>
@@ -333,7 +333,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each Array(3) as _, i}
+				{#each Array.from({ length: 3 }, (_, i) => i) as i (i)}
 					<TableRow>
 						<TableCell>Row {i + 1}, Cell 1</TableCell>
 						<TableCell>Row {i + 1}, Cell 2</TableCell>
