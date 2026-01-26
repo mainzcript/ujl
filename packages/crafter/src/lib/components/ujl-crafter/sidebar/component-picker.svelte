@@ -10,7 +10,7 @@
 	} from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
 	import { Composer, type AnyModule, type ComponentCategory } from '@ujl-framework/core';
-	import { COMPOSER_CONTEXT } from '../context.js';
+	import { COMPOSER_CONTEXT } from '$lib/stores/index.js';
 
 	let {
 		open = $bindable(false),

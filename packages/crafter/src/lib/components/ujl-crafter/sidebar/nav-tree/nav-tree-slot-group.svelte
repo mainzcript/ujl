@@ -112,7 +112,7 @@
 							role="button"
 							tabindex="0"
 							class={cn(
-								'group/slot flex w-full items-center justify-between rounded-md',
+								'group/slot flex w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
 								isDropTarget &&
 									'bg-accent/15 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed',
 								isDragging && 'opacity-50',

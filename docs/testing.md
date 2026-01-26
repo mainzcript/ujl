@@ -16,7 +16,7 @@ The configuration is package-specific but follows a unified standard.
 All tests use the unified pattern `*.test.ts`. The test type is determined by location:
 
 ```
-packages/<package>/
+packages/<package>/               # Core packages
 ├── src/                          # Source code + Unit tests
 │   └── **/*.test.ts              # Unit tests (co-located with code)
 └── tests/                        # Dedicated test folder
@@ -25,6 +25,14 @@ packages/<package>/
     ├── integration/              # Integration tests (if needed)
     │   └── **/*.test.ts
     └── mockData.ts               # Shared test utilities
+
+services/<service>/               # Backend services (e.g., services/library)
+├── src/                          # Source code + Unit tests
+│   └── **/*.test.ts
+└── tests/                        # E2E/Integration tests if present
+
+apps/<app>/                       # Applications (docs, demos)
+└── tests/                        # App-specific tests if present
 ```
 
 ### Unit Tests
@@ -97,6 +105,18 @@ If dedicated integration tests become necessary (e.g., for database connections 
     "test": "pnpm run test:unit && pnpm run test:e2e"
   }
 }
+```
+
+### Running Tests in a Specific Package or Service
+
+From the repo root, use pnpm filters to target a single workspace:
+
+```bash
+# Example: Crafter package
+pnpm --filter @ujl-framework/crafter test
+
+# Example: Library service
+pnpm --filter @ujl-framework/library test
 ```
 
 ## RTC (Ready to Commit)

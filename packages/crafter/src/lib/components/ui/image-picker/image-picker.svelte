@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Text, Popover, PopoverTrigger, PopoverContent } from '@ujl-framework/ui';
 	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/components/ujl-crafter/context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import type { ImageEntry } from '@ujl-framework/types';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import { logger } from '$lib/utils/logger.js';

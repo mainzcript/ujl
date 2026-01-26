@@ -10,7 +10,7 @@
 		UJLTTypographyLink,
 		UJLTTypographyCode
 	} from '@ujl-framework/types';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '../context.js';
+	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
 	import { updateFlavorByOriginal } from '$lib/utils/colors/index.js';
 	import AmbientColorGroup from './designer/components/colors/ambient-color-group.svelte';
 	import ThemeColorsGroup from './designer/components/colors/theme-colors-group.svelte';

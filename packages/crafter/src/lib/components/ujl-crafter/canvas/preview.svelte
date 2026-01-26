@@ -14,13 +14,12 @@
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
 		type CrafterContext,
-		type ShadowRootContext
-	} from '../context.js';
+		type ShadowRootContext,
+		type CrafterMode
+	} from '$lib/stores/index.js';
 	import { logger } from '$lib/utils/logger.js';
 	import { createScopedSelector } from '$lib/utils/scoped-dom.js';
 	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
-
-	import type { CrafterMode } from '$lib/stores/index.js';
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
