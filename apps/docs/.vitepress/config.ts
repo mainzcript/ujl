@@ -40,7 +40,7 @@ export default withMermaid({
 				collapsed: false,
 				items: [
 					{ text: "Getting Started", link: "/docs/01-getting-started" },
-					{ text: "Roadmap", link: "/about/04-roadmap" },
+					{ text: "Roadmap", link: "/docs/02-roadmap" },
 				],
 			},
 			{
