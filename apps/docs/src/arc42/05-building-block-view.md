@@ -39,7 +39,7 @@ Diese Schichtung bringt mehrere Vorteile: Dependencies zeigen ausschließlich na
 | **types**          | TypeScript-Typen, Zod-Schemas und Validator für UJL-Dokumente | `@ujl-framework/types`          |
 | **core**           | Composer, Module Registry, Field System, Image Library        | `@ujl-framework/core`           |
 | **ui**             | shadcn-svelte UI-Komponenten (Button, Card, Dialog, etc.)     | `@ujl-framework/ui`             |
-| **adapter-svelte** | Svelte 5 Adapter (AST → Svelte Components)                    | `@ujl-framework/adapter-svelte` |
+| **adapter-svelte** | Svelte Adapter (AST → Svelte Components)                      | `@ujl-framework/adapter-svelte` |
 | **adapter-web**    | Web Components Adapter (AST → Custom Elements)                | `@ujl-framework/adapter-web`    |
 | **crafter**        | Visual Editor (WYSIWYG) für Content und Themes                | `@ujl-framework/crafter`        |
 | **examples**       | Beispiel-Dokumente und Themes (.ujlc.json, .ujlt.json)        | `@ujl-framework/examples`       |
@@ -111,7 +111,7 @@ Die Integration erfolgt über `new UJLCrafter({ ... })`. Die relevanten Paramete
 
 Die **Adapter-Packages** (`adapter-svelte`, `adapter-web`) bieten programmatische APIs für die Integration von UJL-Rendering in Host-Applikationen. Beide Adapter folgen dem gleichen `UJLAdapter`-Interface (definiert in `@ujl-framework/types`) und transformieren AST-Nodes in framework-spezifische UI-Komponenten.
 
-- `@ujl-framework/adapter-svelte` konvertiert AST-Nodes in Svelte 5 Components und nutzt die `mount()`-API für imperatives Rendering. Die Host-Anwendung übergibt AST-Node, Token-Set und Konfigurationsoptionen (`target`, `mode`, `showMetadata`). Der Adapter gibt ein `MountedComponent` zurück mit `instance` (Svelte Component) und `unmount()`-Methode für Cleanup.
+- `@ujl-framework/adapter-svelte` konvertiert AST-Nodes in Svelte Components und nutzt die `mount()`-API für imperatives Rendering. Die Host-Anwendung übergibt AST-Node, Token-Set und Konfigurationsoptionen (`target`, `mode`, `showMetadata`). Der Adapter gibt ein `MountedComponent` zurück mit `instance` (Svelte Component) und `unmount()`-Methode für Cleanup.
 - `@ujl-framework/adapter-web` erzeugt Custom Elements (`<ujl-content>`) für framework-agnostisches Rendering. Der Adapter kompiliert Svelte-Komponenten zur Build-Zeit in ein standalone Web Component, sodass keine Svelte-Runtime-Dependency benötigt wird. Shadow DOM sorgt für Style-Isolation.
 
 Beide Adapter akzeptieren `target` (DOM-Element oder CSS-Selector), `mode` (Theme-Modus: 'light', 'dark', 'system') und `showMetadata` (für Editor-Integration via `data-ujl-module-id`-Attribute). Editor-Interaktionen (Click-to-Select, Highlighting) werden nicht im Adapter implementiert, sondern in der Editor-Schicht über DOM-Event-Listener auf diesen Attributen.
@@ -137,7 +137,7 @@ Das `types`-Package bildet das Fundament der gesamten UJL-Architektur. Es defini
 
 #### Schnittstellen und Abhängigkeiten
 
-Das `types`-Package hat wenige externe Abhängigkeiten: Es nutzt ausschließlich **Zod 4.2** für Schema-Validierung und Type Inference. Dieser Fokus sorgt dafür, dass die Foundation Layer leichtgewichtig und stabil bleibt.
+Das `types`-Package hat wenige externe Abhängigkeiten: Es nutzt ausschließlich **Zod** für Schema-Validierung und Type Inference. Dieser Fokus sorgt dafür, dass die Foundation Layer leichtgewichtig und stabil bleibt.
 
 Als Single Source of Truth wird `types` von nahezu allen anderen Packages konsumiert: `@ujl-framework/core` importiert sämtliche Typen für Composer und Module Registry. Die Adapter-Packages (`adapter-svelte`, `adapter-web`) benötigen die AST-Node-Definitionen für korrektes Rendering. Der `crafter` importiert alle Typen für Editor-Funktionalität, während Demo-Apps die Document-Types für Beispiel-Content verwenden. Diese Rolle macht Änderungen an `types` besonders folgenreich. Jede Breaking Change betrifft die gesamte Architektur.
 
@@ -193,7 +193,7 @@ graph TB
     ModuleConcretes --> TipTapSchema
 ```
 
-#### 5.3.1.1 Komponent: Composer
+#### 5.3.1.1 Komponente: Composer
 
 Der **Composer** orchestriert die Transformation von UJLC-Dokumenten in Abstract Syntax Trees. Er koordiniert die rekursive Composition über die Module Registry, löst Image-Referenzen auf und garantiert, dass jedes Modul korrekt in AST-Nodes transformiert wird.
 
@@ -223,7 +223,7 @@ UJLAbstractNode (with ID preserved)
 
 Der Composer garantiert **ID-Propagation** über zwei getrennte Identifier: `node.id` wird für jeden AST-Node neu generiert (`generateUid()`), um eindeutige Rendering-Identity zu garantieren. Die ursprüngliche Modul-ID aus `moduleData.meta.id` wird in `meta.moduleId` übernommen, was durchgängiges Tracking von UJLC-Dokument bis zum gerenderten DOM ermöglicht. Die **rekursive Composition** für verschachtelte Module (Slots) erfolgt über `composeModule()`-Aufrufe innerhalb der Module-Logik selbst, wobei der Composer als Koordinator fungiert. Bei Bedarf integriert der Composer einen **Image Resolver** (ImageLibrary), der Backend-Referenzen in tatsächliche Image-URLs auflöst. Das **Error Handling** ist robust: Unbekannte Modultypen führen nicht zum Absturz, sondern erzeugen Error-Nodes, die im UI als Platzhalter mit Fehlermeldung gerendert werden können.
 
-#### 5.3.1.2 Komponent: Module Registry
+#### 5.3.1.2 Komponente: Module Registry
 
 Die Module Registry verwaltet alle verfügbaren Module und ermöglicht dem Composer, Module anhand ihres `type`-Strings zu finden. Sie unterstützt dynamische Registrierung und Deregistrierung von Modulen zur Laufzeit, was Custom-Module-Integration ermöglicht.
 
@@ -267,7 +267,7 @@ registry.registerModule(new CustomModule());
 const composer = new Composer(registry);
 ```
 
-#### 5.3.1.3 Komponent: Module Base Class
+#### 5.3.1.3 Komponente: Module Base Class
 
 Die **Module Base Class** ist eine abstrakte Basisklasse, die den Vertrag für Custom Modules definiert. Sie stellt Identifikations- und UI-Metadaten (`name`, `label`, `category`), Struktur-Definitionen (`fields`, `slots`) und die Transformationsmethode `compose(moduleData, composer)` bereit, die Module-Daten in AST-Nodes umwandelt.
 
@@ -419,7 +419,7 @@ Das `ui`-Package stellt wiederverwendbare UI-Komponenten auf Basis von **shadcn-
 
 Das `ui`-Package nutzt **tailwind-variants** für type-safe Component-Variants, was konsistentes Styling über alle Komponenten hinweg garantiert. **Dark Mode Support** wird über `mode-watcher` implementiert, das automatisch auf System-Preferences reagiert und manuelle Theme-Umschaltung ermöglicht.
 
-Das Package baut auf bewährten Svelte-Libraries auf: **`bits-ui`** liefert headless UI-Primitives mit eingebauter Accessibility (ARIA-Attributes, Keyboard Navigation). **`svelte-sonner`** steuert Toast-Notifications für User-Feedback. **`paneforge`** ermöglicht Resizable Panels für Layout-Management. Das Styling basiert auf **Tailwind CSS 4.x**, was Utility-First-CSS mit modernem Design-System verbindet.
+Das Package baut auf bewährten Svelte-Libraries auf: **`bits-ui`** liefert headless UI-Primitives mit eingebauter Accessibility (ARIA-Attributes, Keyboard Navigation). **`svelte-sonner`** steuert Toast-Notifications für User-Feedback. **`paneforge`** ermöglicht Resizable Panels für Layout-Management. Das Styling basiert auf **Tailwind CSS**, was Utility-First-CSS mit modernem Design-System verbindet.
 
 Das `ui`-Package wird von zwei primären Consumern genutzt: `@ujl-framework/adapter-svelte` verwendet alle UI-Komponenten für das Rendering von UJL-Dokumenten im Frontend. `@ujl-framework/crafter` importiert die UI-Komponenten für die Editor-Oberfläche selbst (Toolbars, Dialoge, Sidebars).
 
@@ -427,7 +427,7 @@ Das `ui`-Package wird von zwei primären Consumern genutzt: `@ujl-framework/adap
 
 ### 5.5.1 Baustein: adapter-svelte
 
-Das `adapter-svelte`-Package konvertiert UJL Abstract Syntax Trees in Svelte 5 Components. Es ist der primäre Adapter für Svelte- und SvelteKit-Anwendungen und dient als Basis für den Web Adapter.
+Das `adapter-svelte`-Package konvertiert UJL Abstract Syntax Trees in Svelte Components. Es ist der primäre Adapter für Svelte- und SvelteKit-Anwendungen und dient als Basis für den Web Adapter.
 
 #### Whitebox: adapter-svelte
 
@@ -470,7 +470,7 @@ graph TB
     Adapter --> AdapterRoot
 ```
 
-#### 5.5.1.1 Komponent: AdapterRoot
+#### 5.5.1.1 Komponente: AdapterRoot
 
 Die **AdapterRoot**-Komponente ist der Einstiegspunkt für das Rendering: Sie rendert `UJLTheme` (Token-Injektion und Mode) und darunter den rekursiven AST-Router. Wenn `showMetadata=true`, reichen die Node-Komponenten die Modul-IDs als `data-ujl-module-id` ins DOM durch; Event-Handling findet außerhalb des Adapters statt.
 
@@ -483,7 +483,7 @@ interface AdapterRootProps {
 }
 ```
 
-#### 5.5.1.2 Komponent: ASTNode (Recursive Router)
+#### 5.5.1.2 Komponente: ASTNode (Recursive Router)
 
 Die **ASTNode**-Komponente ist ein rekursiver Router, der jeden AST-Node anhand seines `type`-Feldes an die entsprechende Svelte-Komponente dispatcht. Für Container-Nodes mit verschachtelten Children erfolgt ein rekursiver Aufruf via `<svelte:self>`, was beliebig tiefe Verschachtelungen ermöglicht. Unbekannte Node-Typen werden von einer Error-Komponente aufgefangen.
 
@@ -501,7 +501,7 @@ Die **ASTNode**-Komponente ist ein rekursiver Router, der jeden AST-Node anhand 
 {/if}
 ```
 
-#### 5.5.1.3 Komponent: prosemirror-serializer
+#### 5.5.1.3 Komponente: prosemirror-serializer
 
 Der **ProseMirror-Serializer** konvertiert Rich-Text-Dokumente (ProseMirror-Format) synchron in HTML-Strings. Er ist **SSR-safe** (verwendet keine Browser-APIs), **synchron** (kein async/await), implementiert **XSS-Prevention** durch HTML-Escaping und garantiert **WYSIWYG-Konsistenz**, da er dieselben Extensions wie der TipTap-Editor verwendet.
 
@@ -510,7 +510,7 @@ Der **ProseMirror-Serializer** konvertiert Rich-Text-Dokumente (ProseMirror-Form
 export function prosemirrorToHtml(doc: ProseMirrorDocument): string;
 ```
 
-#### 5.5.1.4 Komponent: Imperative Adapter
+#### 5.5.1.4 Komponente: Imperative Adapter
 
 Der **Imperative Adapter** ermöglicht programmatisches Component-Mounting für Kontexte außerhalb von Svelte-Templates, z.B. in bestehenden JavaScript-Anwendungen oder für dynamisches Rendering.
 
@@ -622,7 +622,7 @@ el.tokenSet = tokenSet;
 el.setAttribute("node", JSON.stringify(astNode)); // Funktioniert nicht
 ```
 
-#### Komponent: webAdapter Function
+#### Komponente: webAdapter Function
 
 Die `webAdapter`-Funktion ist der programmatische Einstiegspunkt für die Web Component-Integration.
 
@@ -741,7 +741,7 @@ graph TB
     BackendImage -.->|API Calls| PayloadCMS[(Library Service<br/>Payload CMS)]
 ```
 
-#### 5.6.1.1 Komponent: crafter-store.svelte.ts (State Management)
+#### 5.6.1.1 Komponente: crafter-store.svelte.ts (State Management)
 
 Der zentrale State des Crafters liegt in `crafter-store.svelte.ts`. Der Store kapselt Dokumente, UI-State (z.B. Selektion und Tree-Expansion) sowie die abgeleiteten Werte (Root-Slot, Tokens) und stellt Actions bereit.
 
@@ -753,7 +753,7 @@ let _expandedNodeIds = $state<Set<string>>(new Set());
 let _selectedNodeId = $state<string | null>(null);
 ```
 
-#### 5.6.1.2 Komponent: Context (Context = Store)
+#### 5.6.1.2 Komponente: Context (Context = Store)
 
 Der Context ist absichtlich identisch zum Store (`CrafterContext = CrafterStore`). Komponenten erhalten damit Zugriff auf State, Actions und `operations`, ohne dass ein zweites Interface gepflegt werden muss.
 
@@ -771,7 +771,7 @@ ujlcDocument.ujlc.root.push(newModule);
 store.updateRootSlot(root => [...root, newModule]);
 ```
 
-#### 5.6.1.3 Komponent: Editor Mode
+#### 5.6.1.3 Komponente: Editor Mode
 
 Der **Editor-Modus** ermöglicht Content-Bearbeitung mit Navigation Tree (Hierarchie-Ansicht), Drag & Drop für Node-Reordering, Clipboard-Unterstützung (Ctrl+C/X/V), Keyboard Shortcuts, einem durchsuchbaren Component Picker und Click-to-Select-Synchronisation zwischen Preview und Tree.
 
@@ -789,7 +789,7 @@ interface ClipboardManager {
 }
 ```
 
-#### 5.6.1.4 Komponent: Designer Mode
+#### 5.6.1.4 Komponente: Designer Mode
 
 Der **Designer-Modus** ermöglicht Theme-Bearbeitung mit Color Palette Editor (OKLCH-basiert mit automatischer Shade-Generierung von 50-950), Typography Editor (Font Family, Size, Weight), Spacing & Radius Editor und Live Preview für Echtzeit-Updates.
 
@@ -810,7 +810,7 @@ function generateColorPalette(baseColor: OklchColor): ColorPalette {
 }
 ```
 
-#### 5.6.1.5 Komponent: Image Service
+#### 5.6.1.5 Komponente: Image Service
 
 Der **Image Service** abstrahiert die Storage-Strategie für Bilder und ermöglicht sowohl Inline-Speicherung (Base64 in UJLC) als auch Backend-Speicherung (Library Service, Payload CMS). Die Implementierung wird über eine Factory basierend auf der Konfiguration gewählt.
 
@@ -916,8 +916,8 @@ Der **Library Service** ist ein Backend für Asset-Management auf Basis von **Pa
 ```mermaid
 graph TB
     subgraph "library Service (Docker)"
-        NextApp[Next.js 15 App]
-        PayloadCMS[Payload CMS 3.x]
+        NextApp[Next.js App]
+        PayloadCMS[Payload CMS]
 
         subgraph "Collections"
             ImagesCollection[Images Collection<br/>Images with Metadata]
@@ -934,7 +934,7 @@ graph TB
     end
 
 	    subgraph "External"
-	        PostgreSQL[(PostgreSQL 16<br/>Database)]
+	        PostgreSQL[(PostgreSQL<br/>Database)]
 	        Crafter[Crafter<br/>API Client]
 	    end
 
@@ -949,9 +949,9 @@ graph TB
     Crafter -.->|REST API| NextApp
 ```
 
-#### Komponent: Images Collection
+#### Komponente: Images Collection
 
-Die Images Collection definiert das Schema für Bilder mit automatischer Generierung von 8 responsiven Größen (xs bis max), WebP-Konvertierung und IPTC-konformen Credit-Informationen.
+Die Images Collection definiert das Schema für Bilder mit automatischer Generierung von 8 responsiven Größen (xs bis max), WebP-Konvertierung, IPTC-konformen Credit-Informationen und schema.org ImageObject Kompatibilität. Das Datenmodell orientiert sich an Industriestandards für Asset-Management und ermöglicht zukünftige Integrationen mit strukturierten Daten-Ökosystemen.
 
 ```typescript
 export const Images: CollectionConfig = {
@@ -981,15 +981,30 @@ export const Images: CollectionConfig = {
 			name: "credit",
 			type: "group", // IPTC-orientierte Credit-Informationen
 			fields: [
-				{ name: "creator", type: "text" },
-				{ name: "creditLine", type: "text" },
-				{ name: "copyrightNotice", type: "text" },
-				{ name: "licenseUrl", type: "text" },
+				{ name: "creator", type: "text" }, // IPTC: Creator / schema.org: creator
+				{ name: "creditLine", type: "text" }, // IPTC: Credit Line
+				{ name: "copyrightNotice", type: "text" }, // IPTC: Copyright Notice / schema.org: copyrightNotice
+				{ name: "licenseUrl", type: "text" }, // schema.org: license
 			],
 		},
 	],
 };
 ```
+
+**IPTC-Metadaten und schema.org Kompatibilität:**
+
+Die Credit-Felder folgen dem IPTC-Standard für Bildinformationen und sind zugleich kompatibel mit schema.org ImageObject. Dies ermöglicht die standardisierte Abbildung von Urheberrechten und Lizenzen, die sowohl in redaktionellen Workflows (IPTC) als auch in strukturierten Daten für Suchmaschinen (schema.org) verwendet werden können. Die Feldstruktur ist bewusst auf zukünftige Erweiterungen ausgelegt, etwa für JSON-LD Export oder automatisierte Compliance-Prüfungen.
+
+| UJL Field                | IPTC Standard    | schema.org Property | Beschreibung                         |
+| ------------------------ | ---------------- | ------------------- | ------------------------------------ |
+| `credit.creator`         | Creator          | creator             | Fotograf, Agentur oder Rechteinhaber |
+| `credit.creditLine`      | Credit Line      | creditText          | Vollständige Credit-Angabe           |
+| `credit.copyrightNotice` | Copyright Notice | copyrightNotice     | Copyright-Statement                  |
+| `credit.licenseUrl`      | –                | license             | URL zur Lizenzvereinbarung           |
+| `alt`                    | –                | text                | Barrierefreiheit (Accessibility)     |
+| `description`            | Description      | description         | Inhaltsbeschreibung (lokalisiert)    |
+
+**Datenschutz-Feature:** Beim Upload werden Dateinamen automatisch durch UUIDs ersetzt, um sensible Informationen aus Original-Dateinamen zu entfernen und Datenschutz-Compliance zu gewährleisten.
 
 **REST API:**
 

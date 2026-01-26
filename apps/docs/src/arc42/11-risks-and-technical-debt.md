@@ -5,13 +5,13 @@ description: "Technische Risiken und bekannte technische Schulden im UJL-System"
 
 # Risiken und technische Schulden
 
-UJL ist ein junges Framework, das auf modernen Technologieentscheidungen wie Svelte 5, Runes, pnpm Workspaces und dem OKLCH-Farbraum basiert. Diese Entscheidungen bringen technische und organisatorische Risiken mit sich. Durch die Priorisierung der Kernarchitektur und des Content-/Design-Separationsansatzes entstehen technische Schulden. Features wie Undo/Redo, vollständige Internationalisierung oder Bundle-Optimierung wurden zunächst zurückgestellt.
+UJL ist ein junges Framework, das auf modernen Technologieentscheidungen wie Svelte mit Runes, pnpm Workspaces und dem OKLCH-Farbraum basiert. Diese Entscheidungen bringen technische und organisatorische Risiken mit sich. Durch die Priorisierung der Kernarchitektur und des Content-/Design-Separationsansatzes entstehen technische Schulden. Features wie Undo/Redo, vollständige Internationalisierung oder Bundle-Optimierung wurden zunächst zurückgestellt.
 
 ## Risiko-Übersicht
 
 | Risiko-ID | Titel                              | Kategorie            | Priorität | Wahrscheinlichkeit | Auswirkung | Status         |
 | --------- | ---------------------------------- | -------------------- | --------- | ------------------ | ---------- | -------------- |
-| R-001     | Svelte 5 Runes Ecosystem Maturity  | Technologie          | Hoch      | Mittel             | Hoch       | Überwacht      |
+| R-001     | Svelte Runes Ecosystem Maturity    | Technologie          | Hoch      | Mittel             | Hoch       | Überwacht      |
 | R-002     | Monorepo Build-Komplexität         | Build-System         | Hoch      | Hoch               | Mittel     | Mitigiert      |
 | R-003     | Bundle Size Management             | Performance          | Hoch      | Mittel             | Hoch       | Überwacht      |
 | R-007     | Small-Team-Risiko (1-3 Entwickler) | Organisation         | Mittel    | Hoch               | Hoch       | Akzeptiert     |
@@ -40,7 +40,7 @@ UJL ist ein junges Framework, das auf modernen Technologieentscheidungen wie Sve
 
 ## 11.1 Technische Risiken
 
-### 11.1.1 Svelte 5 Runes - Ecosystem Maturity
+### 11.1.1 Svelte Runes - Ecosystem Maturity
 
 | Attribut               | Wert                     |
 | ---------------------- | ------------------------ |
@@ -52,19 +52,19 @@ UJL ist ein junges Framework, das auf modernen Technologieentscheidungen wie Sve
 
 **Beschreibung:**
 
-Das UJL Framework basiert auf Svelte 5 mit dem neuen Runes-System (`$state`, `$derived`, `$props`). Svelte 5 wurde im Oktober 2024 veröffentlicht und ist damit noch relativ neu. Das Ecosystem aus Libraries, Tools und Community-Wissen ist noch nicht vollständig ausgereift, was zu Unsicherheiten bei der langfristigen Stabilität führt.
+Das UJL Framework basiert auf Svelte mit dem Runes-System (`$state`, `$derived`, `$props`). Das Ecosystem aus Libraries, Tools und Community-Wissen ist noch nicht vollständig ausgereift, was zu Unsicherheiten bei der langfristigen Stabilität führt.
 
 **Potenzielle Auswirkungen:**
 
-Breaking Changes könnten bereits in Minor-Releases von Svelte auftreten, da das Runes-System noch aktiv weiterentwickelt wird. Inkompatibilitäten mit Drittanbieter-Libraries sind wahrscheinlich, da viele noch auf Svelte 4 Patterns basieren und nicht mit Runes kompatibel sind. Die Community-Ressourcen für Troubleshooting sind begrenzt, da weniger Entwickler Erfahrung mit dem neuen System haben. Die Migration existierender Svelte 4 Code-Beispiele aus Tutorials oder Foren ist nicht direkt übertragbar, was den Lernaufwand erhöht.
+Breaking Changes könnten bereits in Minor-Releases von Svelte auftreten, da das Runes-System noch aktiv weiterentwickelt wird. Inkompatibilitäten mit Drittanbieter-Libraries sind wahrscheinlich, da viele noch auf älteren Svelte Patterns basieren und nicht mit Runes kompatibel sind. Die Community-Ressourcen für Troubleshooting sind begrenzt, da weniger Entwickler Erfahrung mit dem neuen System haben. Die Migration existierender Code-Beispiele aus Tutorials oder Foren ist nicht direkt übertragbar, was den Lernaufwand erhöht.
 
 **Betroffene Pakete:**
 
-Das Risiko betrifft primär `@ujl-framework/adapter-svelte`, das Svelte 5 Runes für Reaktivität verwendet, `@ujl-framework/crafter` mit intensiver Nutzung von `$state`, `$derived` und `$props` sowie `@ujl-framework/ui` mit Svelte 5 Komponenten die auf Runes basieren.
+Das Risiko betrifft primär `@ujl-framework/adapter-svelte`, das Svelte Runes für Reaktivität verwendet, `@ujl-framework/crafter` mit intensiver Nutzung von `$state`, `$derived` und `$props` sowie `@ujl-framework/ui` mit Svelte Komponenten die auf Runes basieren.
 
 **Mitigationsmaßnahmen:**
 
-Svelte-Versionen werden explizit ohne Caret in der `package.json` gepinnt, um unerwartete Breaking Changes zu vermeiden. Ein regelmäßiges Changelog-Monitoring stellt sicher, dass Svelte Release Notes vor Updates geprüft werden. Die Context API dient als Abstraktionsschicht und Puffer zwischen Svelte-Interna und Business-Logik. Eine Fallback-Dokumentation zur Migration von Svelte 4 zu 5 hilft bei zukünftigen Anpassungen.
+Svelte-Versionen werden explizit ohne Caret in der `package.json` gepinnt, um unerwartete Breaking Changes zu vermeiden. Ein regelmäßiges Changelog-Monitoring stellt sicher, dass Svelte Release Notes vor Updates geprüft werden. Die Context API dient als Abstraktionsschicht und Puffer zwischen Svelte-Interna und Business-Logik.
 
 **Status:** Aktiv überwacht
 
@@ -674,7 +674,7 @@ Zunächst wird der Crafter-Konstruktor um einen optionalen Registry-Parameter er
 
 | Risiko-ID | Beschreibung                       | Wahrscheinlichkeit | Auswirkung | Priorität | Status         |
 | --------- | ---------------------------------- | ------------------ | ---------- | --------- | -------------- |
-| R-001     | Svelte 5 Ecosystem Maturity        | Mittel             | Hoch       | Hoch      | Überwacht      |
+| R-001     | Svelte Ecosystem Maturity          | Mittel             | Hoch       | Hoch      | Überwacht      |
 | R-002     | Monorepo Build-Komplexität         | Hoch               | Mittel     | Hoch      | Mitigiert      |
 | R-003     | Bundle Size Management             | Mittel             | Hoch       | Hoch      | Überwacht      |
 | R-004     | Payload CMS Abhängigkeit           | Niedrig            | Mittel     | Mittel    | Akzeptiert     |

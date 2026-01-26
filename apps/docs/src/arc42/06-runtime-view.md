@@ -488,7 +488,7 @@ Die Adapter sind auf Rendering fokussiert. Für Editor-Funktionen wird `showMeta
 
 ### Übersicht
 
-Der Crafter ist der Visual Editor für UJL-Dokumente. Er nutzt Svelte 5 Runes für reaktives State-Management und eine Context-API für Mutationen.
+Der Crafter ist der Visual Editor für UJL-Dokumente. Er nutzt Svelte Runes für reaktives State-Management und eine Context-API für Mutationen.
 
 ### Hauptszenario: Modul bearbeiten
 
@@ -1044,7 +1044,7 @@ flowchart TD
     end
 
     subgraph Adapters["Adapter Layer"]
-        Svelte["adapter-svelte<br/>Svelte 5 Components"]
+        Svelte["adapter-svelte<br/>Svelte Components"]
         Web["adapter-web<br/>Custom Element"]
     end
 
@@ -1068,7 +1068,7 @@ flowchart TD
 
 ### Reactive Updates im Crafter
 
-Der Crafter nutzt Svelte 5 Runes für effiziente reaktive Updates:
+Der Crafter nutzt Svelte Runes für effiziente reaktive Updates:
 
 ```typescript
 // State

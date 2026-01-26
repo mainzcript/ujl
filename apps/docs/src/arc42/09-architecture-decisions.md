@@ -18,7 +18,7 @@ Im Mittelpunkt stehen die Trennung von Content und Theme, die AST-Adapter-Archit
 | ADR-003 | Adapter Pattern für Framework-Agnostisches Rendering       | Kern-Architektur    | ACCEPTED |
 | ADR-004 | Dual Image Storage Strategy (Inline vs. Backend)           | Content-Management  | ACCEPTED |
 | ADR-005 | Zod für Runtime Validation mit Type Inference              | Validierung & Types | ACCEPTED |
-| ADR-006 | Svelte 5 als primäres UI-Framework                         | Technologie-Stack   | ACCEPTED |
+| ADR-006 | Svelte als primäres UI-Framework                           | Technologie-Stack   | ACCEPTED |
 | ADR-007 | Payload CMS für Library Service                            | Infrastruktur       | ACCEPTED |
 | ADR-008 | TipTap/ProseMirror für Structured Rich Text                | Content-Management  | ACCEPTED |
 | ADR-009 | OKLCH Farbraum für Design Tokens                           | Design-System       | ACCEPTED |
@@ -30,7 +30,7 @@ Im Mittelpunkt stehen die Trennung von Content und Theme, die AST-Adapter-Archit
 | ADR-015 | TypeScript Strict Mode für Maximum Type Safety             | Validierung & Types | ACCEPTED |
 | ADR-016 | Image Library Abstraction mit Provider-Interface           | Content-Management  | ACCEPTED |
 | ADR-017 | Embedding Strategy für KI-gestützte Content-Suche          | Infrastruktur       | PROPOSED |
-| ADR-018 | Svelte 5 Runes für reaktive State Management               | Technologie-Stack   | ACCEPTED |
+| ADR-018 | Svelte Runes für reaktive State Management                 | Technologie-Stack   | ACCEPTED |
 | ADR-019 | Strukturierter Content statt HTML-Strings                  | Content-Management  | ACCEPTED |
 | ADR-020 | Foreground-Mapping für WCAG-konforme Kontraste             | Design-System       | ACCEPTED |
 | ADR-021 | Monorepo Package Layering (Packages → Apps → Docs)         | Architektur         | ACCEPTED |
@@ -44,7 +44,7 @@ Im Mittelpunkt stehen die Trennung von Content und Theme, die AST-Adapter-Archit
 
 ### Kontext
 
-Traditionelle Web-Technologien wie HTML und CSS ermöglichen es Content-Autor:innen, Design-Regeln durch inline-Styles, CSS-Klassen oder direktes Markup zu umgehen. Dies führt zu Brand-Inkonsistenzen, da jedes Dokument visuell anders aussehen kann, zu Accessibility-Problemen durch inkonsistente Kontraste und Typografie, zu erhöhtem Wartungsaufwand bei Theme-Updates sowie zu Governance-Overhead durch notwendige manuelle Review-Prozesse. Die zentrale Anforderung war, Brand-Compliance und Accessibility architektonisch durchzusetzen und nicht nur durch organisatorische Prozesse zu steuern.
+Traditionelle Web-Technologien wie HTML und CSS ermöglichen es Redakteur:innen, Design-Regeln durch inline-Styles, CSS-Klassen oder direktes Markup zu umgehen. Dies führt zu Brand-Inkonsistenzen, da jedes Dokument visuell anders aussehen kann, zu Accessibility-Problemen durch inkonsistente Kontraste und Typografie, zu erhöhtem Wartungsaufwand bei Theme-Updates sowie zu Governance-Overhead durch notwendige manuelle Review-Prozesse. Die zentrale Anforderung war, Brand-Compliance und Accessibility architektonisch durchzusetzen und nicht nur durch organisatorische Prozesse zu steuern.
 
 ### Entscheidung
 
@@ -93,7 +93,7 @@ const ast = await composer.compose(ujlcDocument, ujltDocument);
 
 #### Vorteile
 
-Die architektonische Trennung erzwingt technisch, dass Content-Autor:innen Design-Regeln nicht brechen können. Theme-Updates wirken sofort global auf alle Dokumente, ohne dass manuelle Anpassungen in einzelnen Dokumenten nötig sind. Die Governance erfolgt über Schema-Validierung statt über manuelle Review-Prozesse, was den Aufwand reduziert und Fehler vermeidet. Die klare Verantwortlichkeitstrennung zwischen Designern (Theme-Pflege) und Redakteuren (Content-Pflege) vereinfacht Workflows. Ein Theme kann für viele Dokumente wiederverwendet werden, was Konsistenz über verschiedene Projekte hinweg ermöglicht.
+Die architektonische Trennung erzwingt technisch, dass Redakteur:innen Design-Regeln nicht brechen können. Theme-Updates wirken sofort global auf alle Dokumente, ohne dass manuelle Anpassungen in einzelnen Dokumenten nötig sind. Die Governance erfolgt über Schema-Validierung statt über manuelle Review-Prozesse, was den Aufwand reduziert und Fehler vermeidet. Die klare Verantwortlichkeitstrennung zwischen Designern (Theme-Pflege) und Redakteuren (Content-Pflege) vereinfacht Workflows. Ein Theme kann für viele Dokumente wiederverwendet werden, was Konsistenz über verschiedene Projekte hinweg ermöglicht.
 
 #### Nachteile
 
@@ -461,7 +461,7 @@ console.log(`Average: ${(end - start) / 1000}ms per validation`);
 
 Diese Entscheidung steht in Beziehung zu ADR-001, da UJLC und UJLT mit Zod validiert werden, sowie zu ADR-002, da Fields Zod für Validierung nutzen.
 
-## 9.6 ADR-006: Svelte 5 als primäres UI-Framework
+## 9.6 ADR-006: Svelte als primäres UI-Framework
 
 ### Status
 
@@ -473,7 +473,7 @@ UJL benötigt ein UI-Framework für den Crafter (Editor) mit komplexer interakti
 
 ### Entscheidung
 
-UJL setzt auf Svelte 5 mit Runes für Crafter und primären Adapter. Die Entscheidungskriterien waren nach Wichtigkeit geordnet erstens Custom Elements Support mit höchster Priorität, da Web Components Kernziel der Architektur waren und Svelte's svelte:options customElement den Export trivial macht. Zweitens Bundle-Größe und Performance mit höchster Priorität, da Svelte zu Vanilla JS ohne Runtime-Framework kompiliert. Der Svelte-Adapter hat etwa 45 KB (gzip), der Web-Adapter etwa 12 KB (gzip), während React etwa 42 KB (react + react-dom) und Vue etwa 34 KB (runtime) benötigen. Drittens Fine-grained Reactivity mit hoher Priorität, da Svelte 5 Runes perfekt zu Editor-State-Management passen:
+UJL setzt auf Svelte mit Runes für Crafter und primären Adapter. Die Entscheidungskriterien waren nach Wichtigkeit geordnet erstens Custom Elements Support mit höchster Priorität, da Web Components Kernziel der Architektur waren und Svelte's svelte:options customElement den Export trivial macht. Zweitens Bundle-Größe und Performance mit höchster Priorität, da Svelte zu Vanilla JS ohne Runtime-Framework kompiliert. Der Svelte-Adapter hat etwa 45 KB (gzip), der Web-Adapter etwa 12 KB (gzip), während React etwa 42 KB (react + react-dom) und Vue etwa 34 KB (runtime) benötigen. Drittens Fine-grained Reactivity mit hoher Priorität, da Svelte Runes perfekt zu Editor-State-Management passen:
 
 ```typescript
 let _ujlcDocument = $state<UJLCDocument>(initialDoc);
@@ -491,7 +491,7 @@ Die kleine Bundle-Größe von etwa 45 KB für adapter-svelte ist ein klarer Vort
 
 #### Nachteile
 
-Das kleinere Ökosystem bedeutet weniger Libraries als bei React. Svelte 5 mit Runes ist ein relativ junges Framework aus 2024. Team-Onboarding ist aufwendiger, da Svelte weniger verbreitet ist als React. Die SSR-Komplexität ist höher, da SvelteKit weniger mature ist als Next.js.
+Das kleinere Ökosystem bedeutet weniger Libraries als bei React. Team-Onboarding ist aufwendiger, da Svelte weniger verbreitet ist als React. Die SSR-Komplexität ist höher, da SvelteKit weniger mature ist als Next.js.
 
 ### Betrachtete Alternativen
 
@@ -1158,7 +1158,7 @@ Die Embedding-Modell-Wahl zwischen OpenAI, Cohere oder Ollama (lokal) ist offen.
 
 Diese Entscheidung steht in Beziehung zu ADR-007, da Payload ohne AI-Features verwendet wird, sowie zur offenen Entscheidung 9.23.2 bezüglich pgvector für Embeddings.
 
-## 9.18 ADR-018: Svelte 5 Runes für State Management
+## 9.18 ADR-018: Svelte Runes für State Management
 
 ### Status
 
@@ -1166,11 +1166,11 @@ Diese Entscheidung steht in Beziehung zu ADR-007, da Payload ohne AI-Features ve
 
 ### Kontext
 
-Svelte 5 führt Runes ein als Ersatz für Stores (writable, readable, derived). Runes bieten Fine-grained Reactivity, sodass nur geänderte Werte Updates triggern, sind Compiler-gestützt für bessere Performance als Stores und haben eine einfachere API mit $state und $derived statt Store-Boilerplate. Die Anforderungen umfassten reaktiven State für Crafter mit Dokument, Selektion und AST, Derived Values wie rootSlot aus Dokument sowie Context-API für Component-Zugriff.
+Svelte führt Runes ein als Ersatz für Stores (writable, readable, derived). Runes bieten Fine-grained Reactivity, sodass nur geänderte Werte Updates triggern, sind Compiler-gestützt für bessere Performance als Stores und haben eine einfachere API mit $state und $derived statt Store-Boilerplate. Die Anforderungen umfassten reaktiven State für Crafter mit Dokument, Selektion und AST, Derived Values wie rootSlot aus Dokument sowie Context-API für Component-Zugriff.
 
 ### Entscheidung
 
-Der Crafter nutzt Svelte 5 Runes statt Stores. Der crafter-store.svelte.ts definiert \_ujlcDocument als `$state<UJLCDocument>`, \_ujltTokenSet als `$state<UJLTTokenSet>` und \_selectedNodeId als `$state<string | null>`. Derived Values werden definiert als rootSlot aus `$derived(\_ujlcDocument.ujlc.root)`, meta aus `$derived(\_ujlcDocument.ujlc.meta)` und images aus `$derived(\_ujlcDocument.ujlc.images)`. Der imageService wird mit `$derived.by()` erstellt aus meta.\_library, images und updateImages. Functional Updates nutzen eine updateRootSlot-Funktion, die ein fn nimmt und \_ujlcDocument.ujlc.root mit `fn(\_ujlcDocument.ujlc.root)` setzt.
+Der Crafter nutzt Svelte Runes statt Stores. Der crafter-store.svelte.ts definiert \_ujlcDocument als `$state<UJLCDocument>`, \_ujltTokenSet als `$state<UJLTTokenSet>` und \_selectedNodeId als `$state<string | null>`. Derived Values werden definiert als rootSlot aus `$derived(\_ujlcDocument.ujlc.root)`, meta aus `$derived(\_ujlcDocument.ujlc.meta)` und images aus `$derived(\_ujlcDocument.ujlc.images)`. Der imageService wird mit `$derived.by()` erstellt aus meta.\_library, images und updateImages. Functional Updates nutzen eine updateRootSlot-Funktion, die ein fn nimmt und \_ujlcDocument.ujlc.root mit `fn(\_ujlcDocument.ujlc.root)` setzt.
 
 Die Context-API nutzt crafter-context.svelte.ts mit einem CRAFTER_KEY Symbol('crafter'), setCrafterContext-Funktion für setContext(CRAFTER_KEY, store) und getCrafterContext-Funktion für `getContext<CrafterStore>(CRAFTER_KEY)`.
 
@@ -1182,11 +1182,11 @@ Fine-grained Reactivity bedeutet, dass nur geänderte Werte Re-Render triggern. 
 
 #### Nachteile
 
-Svelte 5 only bedeutet keine Rückwärtskompatibilität. Die neue API erfordert, dass das Team Runes lernt.
+Die neue API erfordert, dass das Team Runes lernt.
 
 ### Verwandte Entscheidungen
 
-Diese Entscheidung steht in Beziehung zu ADR-006 für die Svelte 5 Framework-Wahl.
+Diese Entscheidung steht in Beziehung zu ADR-006 für die Svelte Framework-Wahl.
 
 ## 9.19 ADR-019: Structured Content statt HTML
 

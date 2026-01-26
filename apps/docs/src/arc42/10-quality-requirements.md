@@ -302,7 +302,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Stimulus**          | Produktion-Bundle wird erstellt                                                                                               |
 | **Systemreaktion**    | Vite/SvelteKit optimiert Bundle mit Tree-Shaking                                                                              |
 | **Messbare Antwort**  | - adapter-web: <100KB (gzip)<br/>- adapter-svelte: <80KB (gzip, ohne Svelte Runtime)<br/>- Keine unbenutzten Module im Bundle |
-| **Architektur-Bezug** | Svelte 5 Compilation ([ADR-006](./09-architecture-decisions#_9-6-adr-006-svelte-5-als-primäres-ui-framework))                 |
+| **Architektur-Bezug** | Svelte Compilation ([ADR-006](./09-architecture-decisions#_9-6-adr-006-svelte-als-primäres-ui-framework))                     |
 
 **Testbarkeit:** Bundle-Size-Analyse im Build-Prozess.
 
@@ -314,7 +314,7 @@ Die folgenden Szenarien konkretisieren die Qualitätsziele durch messbare Akzept
 | **Stimulus**          | Nutzer:in interagiert mit dem Crafter (Klick, Drag, Eingabe)                                                                    |
 | **Systemreaktion**    | UI reagiert ohne spürbare Verzögerung                                                                                           |
 | **Messbare Antwort**  | - <200ms Reaktionszeit bei bis zu 200 Modulen<br/>- Kein UI-Freezing bei Drag & Drop<br/>- Flüssige Live-Preview-Aktualisierung |
-| **Architektur-Bezug** | Svelte 5 Runes, Fine-grained Reactivity ([Lösungsstrategie 4.2](./04-solution-strategy#_4-2-technologie-entscheidungen))        |
+| **Architektur-Bezug** | Svelte Runes, Fine-grained Reactivity ([Lösungsstrategie 4.2](./04-solution-strategy#_4-2-technologie-entscheidungen))          |
 
 **Testbarkeit:** Performance-Profiling mit großen Dokumenten.
 
@@ -466,7 +466,7 @@ Diese Tabelle zeigt, wie architektonische Entscheidungen die Qualitätsszenarien
 | Adapter Pattern (ADR-003)         | QS-EXT-02, QS-INT-01, QS-INT-02                     |
 | Dual Image Storage (ADR-004)      | QS-EXT-03, QS-INT-03                                |
 | Zod Runtime Validation (ADR-005)  | QS-BC-03, QS-VAL-01, QS-VAL-02, QS-DX-01, QS-INT-03 |
-| Svelte 5 (ADR-006)                | QS-PERF-01, QS-PERF-02, QS-PERF-03                  |
+| Svelte (ADR-006)                  | QS-PERF-01, QS-PERF-02, QS-PERF-03                  |
 | Payload CMS (ADR-007)             | QS-EXT-03                                           |
 | TipTap/ProseMirror (ADR-008)      | QS-VAL-01, QS-VAL-03, QS-ACC-03                     |
 | OKLCH Farbraum (ADR-009)          | QS-ACC-01                                           |

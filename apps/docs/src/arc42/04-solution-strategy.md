@@ -322,24 +322,24 @@ Die konkreten Backend-Features (Upload, Metadaten, responsive Varianten) liegen 
 
 | Schicht                | Technologie                  | Begründung                                                                                  |
 | ---------------------- | ---------------------------- | ------------------------------------------------------------------------------------------- |
-| **UI Framework**       | Svelte 5                     | Minimale Bundle-Größe durch Compilation, Fine-grained Reactivity, Custom Elements Support   |
+| **UI Framework**       | Svelte                       | Minimale Bundle-Größe durch Compilation, Fine-grained Reactivity, Custom Elements Support   |
 | **UI Components**      | shadcn-svelte + bits-ui      | Wiederverwendbare UI-Bausteine auf Tailwind-Basis, konsistente Patterns, gute Accessibility |
-| **Type System**        | TypeScript 5.9 (Strict)      | Compile-Time Safety, IDE-Support, generierte Declaration Files                              |
-| **Runtime Validation** | Zod 4.2                      | Schema → Type Inference, detaillierte Fehler, rekursive Schemas                             |
-| **Styling**            | Tailwind CSS 4               | Utility-First, Tree-Shaking, Design-Token-Integration via CSS Custom Properties             |
-| **Rich Text**          | TipTap 3 (ProseMirror)       | Strukturierte JSON-Dokumente, WYSIWYG-Konsistenz, SSR-Safe Serialization                    |
+| **Type System**        | TypeScript (Strict)          | Compile-Time Safety, IDE-Support, generierte Declaration Files                              |
+| **Runtime Validation** | Zod                          | Schema → Type Inference, detaillierte Fehler, rekursive Schemas                             |
+| **Styling**            | Tailwind CSS                 | Utility-First, Tree-Shaking, Design-Token-Integration via CSS Custom Properties             |
+| **Rich Text**          | TipTap (ProseMirror)         | Strukturierte JSON-Dokumente, WYSIWYG-Konsistenz, SSR-Safe Serialization                    |
 | **Color System**       | OKLCH (colorjs.io)           | Perzeptuell uniforme Paletten, präzise Kontrast-Berechnungen, WCAG-Konformität              |
-| **Library Service**    | Payload CMS 3                | TypeScript-First, RESTful API, Image Processing (WebP, Focal Point), Self-Hosted            |
-| **Database**           | PostgreSQL 16                | Relationale DB für Asset-Metadaten im Library Service                                       |
-| **Build Tool**         | Vite 7                       | Schnelles HMR, optimierte Production Builds, ESM-Native, SvelteKit-Integration              |
+| **Library Service**    | Payload CMS                  | TypeScript-First, RESTful API, Image Processing (WebP, Focal Point), Self-Hosted            |
+| **Database**           | PostgreSQL                   | Relationale DB für Asset-Metadaten im Library Service                                       |
+| **Build Tool**         | Vite                         | Schnelles HMR, optimierte Production Builds, ESM-Native, SvelteKit-Integration              |
 | **Monorepo**           | pnpm Workspaces + Changesets | Effiziente Disk-Space-Nutzung, koordinierte Versionierung, Semantic Versioning Automation   |
-| **Testing**            | Vitest 4 + Playwright 1.57   | Unit Tests (Jest-API), E2E Tests (Cross-Browser), Test Attributes ohne Production Overhead  |
+| **Testing**            | Vitest + Playwright          | Unit Tests (Jest-API), E2E Tests (Cross-Browser), Test Attributes ohne Production Overhead  |
 | **Documentation**      | VitePress                    | Markdown-basiert, Vue-powered, schnell, integrierbar mit CI/CD                              |
 | **CI/CD**              | GitLab CI                    | Multi-Stage Pipeline, Caching, GitLab Pages Deployment                                      |
 
 ### Entscheidungstreiber für Technologie-Wahl
 
-Die Technologieauswahl folgt den Quality Goals aus Kapitel 1.2: integrierbare Outputs (Adapter/Web Components), überprüfbare Datenverträge (Schema-first) und ein Backend, das Bild-Workflows im Library Service unterstützt. Deshalb nutzt UJL Svelte 5 für Crafter und den primären Adapter, Zod für Runtime-Validierung und Payload CMS im Library Service für Bildverwaltung bei Bedarf.
+Die Technologieauswahl folgt den Quality Goals aus Kapitel 1.2: integrierbare Outputs (Adapter/Web Components), überprüfbare Datenverträge (Schema-first) und ein Backend, das Bild-Workflows im Library Service unterstützt. Deshalb nutzt UJL Svelte für Crafter und den primären Adapter, Zod für Runtime-Validierung und Payload CMS im Library Service für Bildverwaltung bei Bedarf.
 
 Für das Monorepo sind pnpm Workspaces und Changesets gewählt, weil sie strikte Dependency-Grenzen, reproduzierbare Installationen und koordinierte Releases über mehrere Packages unterstützen.
 

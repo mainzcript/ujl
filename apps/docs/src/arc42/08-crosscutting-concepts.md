@@ -331,9 +331,9 @@ Der Crafter nutzt eine interne Logger-Utility für Warnungen/Fehler (z.B. bei fe
 
 ## 8.4 Zustandsverwaltung (State Management)
 
-### 8.4.1 Svelte 5 Runes
+### 8.4.1 Svelte Runes
 
-Der Crafter verwendet Svelte 5 Runes für reaktive Zustandsverwaltung:
+Der Crafter verwendet Svelte Runes für reaktive Zustandsverwaltung:
 
 ```typescript
 // packages/crafter/src/lib/stores/crafter-store.svelte.ts (Auszug)
@@ -890,7 +890,7 @@ export interface ImageService extends ImageProvider {
 
 ### 8.10.3 Responsive Images
 
-Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten, die sich an Tailwind-Breakpoints orientieren.
+Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten, die sich an Tailwind-Breakpoints orientieren. Alle Größen werden mit `position: 'center'` als Cropping-Strategie konfiguriert und können durch Focal Points überschrieben werden.
 
 | Size | Width  | Format | Verwendung      |
 | ---- | ------ | ------ | --------------- |
@@ -902,6 +902,8 @@ Der Backend-Storage (Payload CMS) generiert automatisch responsive Varianten, di
 | xxl  | 1536px | WebP   | Extra Large     |
 | xxxl | 1920px | WebP   | Full HD         |
 | max  | 2560px | WebP   | 2K/Retina       |
+
+**Focal Points:** Payload CMS bietet in der Admin-Oberfläche die Möglichkeit, einen Fokuspunkt pro Bild zu definieren. Dieser Punkt markiert den wichtigsten Bildbereich und wird beim automatischen Zuschneiden responsiver Varianten berücksichtigt. Ohne manuell gesetzten Focal Point greift die Standard-Strategie `position: 'center'`. Dies ist besonders relevant für Bilder mit Off-Center-Motiven wie Porträts oder Produktfotografie, bei denen ein zentriertes Zuschneiden wichtige Bildinhalte abschneiden würde.
 
 ### 8.10.4 Migration zwischen Storage-Modi
 
@@ -1039,6 +1041,7 @@ Einige Sicherheitsmaßnahmen sind konkret:
 1. **Input-Validierung**: UJLC/UJLT werden über Zod-Schemas validiert (`@ujl-framework/types`).
 2. **Library Service Zugriffe**: Schreiboperationen in der Images-Collection benötigen Auth; im Crafter wird für Backend-Storage ein API-Key im Header `Authorization: users API-Key <key>` verwendet.
 3. **CORS**: Der Library Service ist standardmäßig offen konfiguriert und kann per `CORS_ALLOWED_ORIGINS` eingeschränkt werden.
+4. **Datenschutz durch Filename Anonymization**: Beim Upload von Bildern in den Library Service werden Original-Dateinamen automatisch durch UUIDs ersetzt. Dies verhindert, dass sensible Informationen aus Dateinamen (z.B. personenbezogene Daten, interne Projektnamen) in der URL oder in Metadaten exponiert werden. Der Original-Dateiname wird weiterhin in der Datenbank gespeichert und ist über die API abrufbar, aber die öffentlich zugängliche URL enthält nur eine UUID mit der korrekten Dateiendung.
 
 Weitere Themen wie Rate Limiting oder ein OAuth-Flow sind nicht umgesetzt und wären Teil des späteren produktiven Betriebs.
 
