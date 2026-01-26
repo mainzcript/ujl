@@ -77,7 +77,7 @@ Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglic
 
 Verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:
 
-**mainzcript GbR – Software-Studio**  
+**mainzcript GbR, Software-Studio**  
 Gesellschafter: Marius Klein und Lukas Antoine
 Wallaustraße 15  
 55118 Mainz  
@@ -153,7 +153,7 @@ Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenomm
 
 Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.  
 Der Websitebetreiber hat ein berechtigtes Interesse an der technisch fehlerfreien Darstellung  
-und der Optimierung seiner Website – hierzu müssen die Server-Log-Dateien erfasst werden.
+und der Optimierung seiner Website. Hierzu müssen die Server-Log-Dateien erfasst werden.
 
 ### Cookies und Tracking-Tools
 

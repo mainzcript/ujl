@@ -23,12 +23,12 @@ stages:
 
 variables:
   # Image pinning for reproducibility (can be extended to digest later)
-  NODE_VERSION: "22-slim"
-  PNPM_VERSION: "10.28.1"
-  PLAYWRIGHT_VERSION: "1.57.0"
+  NODE_VERSION: '22-slim'
+  PNPM_VERSION: '10.28.1'
+  PLAYWRIGHT_VERSION: '1.58.0'
 
   # pnpm store (must match cache path)
-  PNPM_STORE_PATH: ".pnpm-store"
+  PNPM_STORE_PATH: '.pnpm-store'
 
 # Reusable cache definition (deduplicates YAML)
 .cache_pnpm_pull: &cache_pnpm_pull
@@ -75,10 +75,10 @@ build_all:
       artifacts: false
   variables:
     # Kubernetes memory limits only for build job (where OOM occurs)
-    KUBERNETES_MEMORY_LIMIT: "4Gi"
-    KUBERNETES_MEMORY_REQUEST: "2Gi"
+    KUBERNETES_MEMORY_LIMIT: '4Gi'
+    KUBERNETES_MEMORY_REQUEST: '2Gi'
     # Node.js memory limit as fallback
-    NODE_OPTIONS: "--max-old-space-size=3072"
+    NODE_OPTIONS: '--max-old-space-size=3072'
   script:
     - pnpm install --frozen-lockfile --prefer-offline
     - pnpm run build
