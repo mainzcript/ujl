@@ -18,9 +18,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<TooltipPrimitive.Portal>
+<TooltipPrimitive.Portal to={portalTarget}>
 	<TooltipPrimitive.Content
 		bind:ref
 		data-slot="tooltip-content"

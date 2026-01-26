@@ -1,8 +1,7 @@
-import { defineConfig } from "vitepress";
-import markdownItTextualUml from "markdown-it-textual-uml";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid({
 	srcDir: "src",
 	outDir: "dist",
 
@@ -22,6 +21,7 @@ export default defineConfig({
 		nav: [
 			{ text: "Über UJL", link: "/about/01-vision" },
 			{ text: "Dokumentation", link: "/docs/01-getting-started" },
+			{ text: "Demo", link: "/demo" },
 			{ text: "Architektur", link: "/arc42/01-introduction-and-goals" },
 		],
 
@@ -85,13 +85,21 @@ export default defineConfig({
 		},
 	},
 
-	vite: {
-		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
+	// Plugin configuration: mermaid and mermaidPlugin are optional
+	// See https://emersonbottero.github.io/vitepress-plugin-mermaid/guide/getting-started.html
+	mermaidPlugin: {
+		class: "mermaid",
 	},
 
-	markdown: {
-		config: md => {
-			md.use(markdownItTextualUml);
+	vite: {
+		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
+		optimizeDeps: {
+			include: ["mermaid", "@braintree/sanitize-url"],
+		},
+		resolve: {
+			alias: {
+				dayjs: "dayjs/",
+			},
 		},
 	},
 });

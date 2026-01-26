@@ -9,7 +9,7 @@ description: "Angaben gemäß § 5 DDG (ehemals TMG)"
 
 **Diensteanbieter / Verantwortlich**
 
-mainzcript GbR – Software-Studio  
+mainzcript GbR, Software-Studio  
 Gesellschafter: Marius Klein und Lukas Antoine
 Wallaustraße 15  
 55118 Mainz  

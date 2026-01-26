@@ -1,5 +1,6 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
 
@@ -51,15 +52,23 @@ export class GridModule extends ModuleBase {
 		return {
 			type: "grid",
 			props: {
-				children: children.map((child, index) => ({
+				children: children.map(child => ({
 					type: "grid-item",
 					props: {
 						children: [child],
 					},
-					id: `${moduleData.meta.id}-item-${index}`,
+					id: generateUid(),
+					meta: {
+						moduleId: moduleData.meta.id,
+						isModuleRoot: false,
+					},
 				})),
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }

@@ -2,6 +2,7 @@ import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@uj
 import type { Composer } from "../../composer.js";
 import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/index.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
 
@@ -94,7 +95,11 @@ export class CardModule extends ModuleBase {
 				description,
 				children,
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }

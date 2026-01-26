@@ -5,16 +5,15 @@
 	interface Props {
 		node: UJLAbstractNode & { type: 'wrapper' };
 		showMetadata?: boolean;
-		eventCallback?: (id: string) => void;
 	}
 
-	let { node, showMetadata = false, eventCallback }: Props = $props();
+	let { node, showMetadata = false }: Props = $props();
 </script>
 
 <div class="ujl-wrapper space-y-6">
 	{#if node.props.children}
 		{#each node.props.children as childNode, i (i)}
-			<ASTNode node={childNode} {showMetadata} {eventCallback} />
+			<ASTNode node={childNode} {showMetadata} />
 		{/each}
 	{/if}
 </div>

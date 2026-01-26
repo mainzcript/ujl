@@ -15,9 +15,10 @@
 	const themeContext = getUjlThemeContext();
 	const themeId = $derived(themeContext?.themeId ?? null);
 	const isDark = $derived(themeContext ? themeContext.isDark : false);
+	const portalTarget = $derived(themeContext?.portalContainer ?? undefined);
 </script>
 
-<ContextMenuPrimitive.Portal {...portalProps}>
+<ContextMenuPrimitive.Portal to={portalTarget} {...portalProps}>
 	<ContextMenuPrimitive.Content
 		bind:ref
 		data-slot="context-menu-content"

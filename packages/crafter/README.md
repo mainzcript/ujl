@@ -1,166 +1,203 @@
-# @ujl-framework/crafter - Visual Editor for UJL Content
+# @ujl-framework/crafter
 
-This package contains the visual editor for UJL content. It provides a SvelteKit-based interface with drag & drop functionality for modules, live preview with real-time updates, a property panel for module properties, and a theme editor for `.ujlt.json` files. The Crafter enables editors to create and edit UJL content visually without having to write JSON code.
+**Visual Editor for UJL Content** - A Svelte based visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
+
+The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend image storage.
+
+---
+
+## Installation
+
+```bash
+pnpm add @ujl-framework/crafter
+```
+
+> **Note:** The Crafter is a fully encapsulated bundle with Shadow DOM. All styles are automatically injected - no CSS import required. All dependencies (including the Svelte runtime) are bundled.
+
+**Fonts:**
+
+The Crafter does not bundle fonts. To use the fonts available in Designer Mode, import them in your application (e.g., via [Fontsource](https://fontsource.org/)). A backend-based font service is planned for future versions.
+
+```typescript
+import '@fontsource-variable/inter';
+import '@fontsource-variable/open-sans';
+// ... add more as needed
+```
+
+## Usage
+
+The Crafter is a self-contained ES module that bundles all dependencies including the Svelte runtime. Styles are automatically injected into the Shadow DOM - no CSS import required.
+
+### Basic Example
+
+```typescript
+import { UJLCrafter } from '@ujl-framework/crafter';
+
+const crafter = new UJLCrafter({
+	target: '#editor-container',
+	document: myContentDocument, // Optional: Initial content
+	theme: myPreviewTheme, // Optional: Theme for preview content
+	editorTheme: myEditorTheme // Optional: Theme for Crafter UI
+});
+
+// Cleanup when done
+crafter.destroy();
+```
+
+### With Backend Image Storage
+
+```typescript
+const crafter = new UJLCrafter({
+	target: '#editor-container',
+	document: myContentDocument,
+	theme: myPreviewTheme,
+	library: {
+		storage: 'backend',
+		url: 'http://localhost:3000',
+		apiKey: 'your-api-key'
+	}
+});
+```
+
+### Event Handling
+
+```typescript
+// Listen for document changes
+const unsubscribe = crafter.onDocumentChange((doc) => {
+	console.log('Document changed:', doc);
+});
+
+// Listen for theme changes
+crafter.onThemeChange((theme) => {
+	console.log('Theme changed:', theme);
+});
+
+// Enable Save button with callback
+crafter.onSave((document, theme) => {
+	saveToServer(document);
+});
+
+// Get current state
+const currentDoc = crafter.getDocument();
+const currentTheme = crafter.getTheme();
+const mode = crafter.getMode(); // 'editor' | 'designer'
+
+// Programmatically control the editor
+crafter.setMode('designer');
+crafter.selectNode('module-123');
+```
 
 ## Architecture
 
-The Crafter uses a reactive architecture based on Svelte 5's runes and context API. For UJL document structure (`UJLCDocument`, `UJLTDocument`), see [@ujl-framework/types](../types/README.md).
+The Crafter follows the UJL Framework's core principle of separating content and design. It operates in two modes: **Editor Mode** for editing content documents (`.ujlc.json`) and **Designer Mode** for editing theme documents (`.ujlt.json`).
 
-### Single Source of Truth
+All state is managed centrally in the `CrafterStore`, which uses Svelte 5 runes for reactivity. The store holds the current documents, transforms them via the `Composer` into an AST, and renders the preview using `@ujl-framework/adapter-svelte`.
 
-`app.svelte` holds the central state: `ujlcDocument`, `ujltDocument` (validated on initialization), `mode` ('editor' | 'designer'), and `expandedNodeIds` for tree expansion. All state is managed reactively via Svelte 5 runes.
+The Crafter also distinguishes between two independent themes: the **Editor Theme** controls the styling of the Crafter UI itself, while the **Preview Theme** controls how the content appears in the preview canvas. This allows you to use a consistent editor appearance across projects while previewing content with different themes.
 
-### Bidirectional Tree ↔ Preview Synchronization
+## Features
 
-The Crafter provides seamless bidirectional synchronization between the navigation tree and the visual preview:
+In **Editor Mode**, the Crafter provides module tree navigation, click-to-select in the preview, drag & drop reordering, a property panel with type-safe inputs, and an image library for image management. In **Designer Mode**, you can edit design tokens (colors, typography, spacing) with live preview. The editor also includes viewport simulation (Desktop/Tablet/Mobile) and import/export for `.ujlc.json` and `.ujlt.json` files.
 
-- **Tree → Preview**: Clicking a node scrolls to the component in the preview (smart scrolling only when needed)
-- **Preview → Tree**: Clicking a component expands parent nodes, selects the component, and scrolls the tree to reveal it
+## Image Library
 
-Implementation uses centralized expand state via Svelte 5 `$state` runes and path-finding algorithms. See `context.ts` and `ujlc-tree.ts` for details.
+The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
 
-### Context API
+| Storage Mode | Required Options | Description                         |
+| ------------ | ---------------- | ----------------------------------- |
+| `inline`     | None             | Images stored as Base64 in document |
+| `backend`    | `url`, `apiKey`  | Images stored on Payload CMS server |
 
-All mutations go through a central **Crafter Context API** (`context.ts`) using functional updates for atomic, predictable state changes:
+For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
-- **Theme & Content**: `updateTokenSet(fn)`, `updateRootSlot(fn)` - Immutable updates for theme tokens and content structure
-- **Selection**: `setSelectedNodeId(nodeId)` - Updates URL and triggers synchronization
-- **Tree Expansion**: `getExpandedNodeIds()`, `setNodeExpanded()`, `expandToNode()` - Manages tree expansion state
-- **Operations**: `operations.*` - High-level document manipulation (copy, cut, paste, delete, move, insert nodes/slots)
+## API Reference
 
-All operations use immutable utilities and validate inputs. See `context.ts` for complete API documentation.
+```typescript
+class UJLCrafter {
+	constructor(options: UJLCrafterOptions);
 
-### Component Structure
+	// State
+	getDocument(): UJLCDocument;
+	getTheme(): UJLTDocument;
+	getMode(): 'editor' | 'designer';
+	getSelectedNodeId(): string | null;
 
-Key components:
+	setDocument(document: UJLCDocument): void;
+	setTheme(theme: UJLTDocument): void;
+	setMode(mode: 'editor' | 'designer'): void;
+	selectNode(nodeId: string | null): void;
 
-- **`app.svelte`**: Root component managing state (`ujlcDocument`, `ujltDocument`, `expandedNodeIds`, mode) and providing `CrafterContext`
-- **`sidebar-left.svelte`**: Routes between Editor and Designer modes based on `mode` prop
-- **`designer.svelte`**: Theme editor UI (colors, typography, spacing, radius) using `updateTokenSet()`
-- **`editor.svelte`**: Content editor with clipboard, keyboard shortcuts, and component insertion
-- **`nav-tree.svelte`**: Navigation tree with drag & drop, selection via URL parameters
-- **`preview.svelte`**: Visual preview using `Composer` and `AdapterRoot`, handles click-to-select synchronization
+	// Events (return unsubscribe function)
+	onDocumentChange(callback: (doc: UJLCDocument) => void): () => void;
+	onThemeChange(callback: (theme: UJLTDocument) => void): () => void;
+	onNotification(callback: (type, message, description?) => void): () => void;
+	onSave(callback: (doc: UJLCDocument, theme: UJLTDocument) => void): () => void;
 
-For implementation details, see component source files in `src/lib/components/`.
+	// Lifecycle
+	destroy(): void;
+}
 
-### Data Flow
-
-Components receive data via props (read-only) and update state through the Context API. State changes trigger reactive updates via Svelte 5 runes, causing props to recompute and UI to re-render.
-
-### Editor Features
-
-- **Selection**: Tracked via URL parameter `?selected=<id>`, visual feedback in tree and preview
-- **Clipboard**: Cross-browser support (Clipboard API + localStorage fallback), supports nodes and slots
-- **Keyboard Shortcuts**: `Ctrl+C/X/V/I`, `Delete` for copy, cut, paste, insert, delete operations
-- **Drag & Drop**: Node and slot dragging with position calculation (before/after/into), validation prevents invalid drops
-- **Component Insertion**: Searchable component picker from Module Registry, grouped by category
-- **Media Library**: Integrated media management with support for inline and backend storage modes
-
-For implementation details, see `editor.svelte`, `nav-tree-drag-handler.svelte.ts`, and `ujlc-tree.ts`.
-
-### Media Library Integration
-
-The Crafter provides a unified media management system that supports two storage modes:
-
-**Storage Modes:**
-
-- **Inline Storage** (default) - Media stored as Base64 within UJLC documents
-- **Backend Storage** - Media stored on a Payload CMS server
-
-**Key Components:**
-
-- `media-picker.svelte` - UI component for selecting and uploading media
-- `media-library-browser.svelte` - Browse and select from existing media
-- `media-library-uploader.svelte` - Upload new media files
-- `media-service.ts` - Abstract service interface for media operations
-- `inline-media-service.ts` - Implementation for inline storage
-- `backend-media-service.ts` - Implementation for backend storage via Payload CMS
-
-**Configuration:**
-
-Media library configuration is stored in the UJLC document at `ujlc.meta.media_library`:
-
-```json
-{
-	"ujlc": {
-		"meta": {
-			"media_library": {
-				"storage": "backend",
-				"endpoint": "http://localhost:3000/api"
-			}
-		}
-	}
+interface UJLCrafterOptions {
+	target: string | HTMLElement;
+	document?: UJLCDocument;
+	theme?: UJLTDocument;
+	editorTheme?: UJLTDocument;
+	library?: { storage: 'inline' } | { storage: 'backend'; url: string; apiKey: string };
+	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
 ```
 
-**Environment Variables:**
+## Development
 
-For backend storage, configure the API key in `env/.env.local`:
-
-```env
-PUBLIC_MEDIA_API_KEY=your-api-key-here
+```bash
+pnpm run dev      # Development server (Tailwind CSS + Vite in parallel)
+pnpm run build    # Production build
+pnpm run check    # Type check (TypeScript + Svelte)
+pnpm run lint     # Check formatting and code quality
+pnpm run format   # Auto-fix formatting
+pnpm run test     # Run tests
 ```
 
-See [MEDIA_LIBRARY_SETUP.md](./MEDIA_LIBRARY_SETUP.md) for detailed setup instructions.
+The `dev` command uses `concurrently` to run Tailwind CSS watch and Vite in parallel.
 
-### Theme Token Generation
+### E2E Tests (Playwright)
 
-The Designer generates OKLCH color palettes from input colors, derives light/dark variants, and provides typography editing for base text, headings, code, highlight, and links. Spacing and radius tokens are also configurable. See `$lib/utils/colors/` and `designer.svelte` for implementation details.
+The E2E tests start (or reuse) a dev server on port `5173` (see `playwright.config.ts`).
 
-## Testing Strategy
+- Make sure nothing else is listening on `http://localhost:5173` when running `pnpm run test:e2e` (e.g. VitePress in `apps/docs` also uses `5173` by default).
+- If you need a different port, update `baseURL` and `webServer.port` in `packages/crafter/playwright.config.ts`.
 
-The Crafter follows the unified testing guidelines documented in [Testing Guidelines](../../../docs/testing.md). This section covers Crafter-specific details.
+### Project Structure
 
-### E2E Tests with Playwright
-
-The Crafter uses Playwright for end-to-end testing of user workflows.
-
-#### Configuration
-
-- **Framework**: Playwright 1.56.1
-- **Browser**: Chromium (additional browsers optionally available)
-- **Configuration**: `playwright.config.ts`
-- **Test Pattern**: `e2e/**/*.test.ts`
-- **Timeouts**: 30s per test, 120s for webserver startup
-
-#### Covered User Flows
-
-1. **Typography & Spacing Editor** (`typography-spacing.test.ts`)
-   - Typography groups visibility and interaction
-   - Font selection, size updates, flavor selection
-   - Spacing and radius token editing
-
-2. **Page Setup** (`page-setup.test.ts`)
-   - Disclaimer dialog behavior
-   - Layout structure (Sidebar Left, Preview, Sidebar Right)
-   - Mode switcher functionality
-
-3. **Editor Mode** (`editor.test.ts`)
-   - Navigation tree visibility and interaction
-   - Node expansion/collapse
-   - Node selection with URL parameters
-
-4. **Preview Interactions** (`preview.test.ts`)
-   - Component rendering with metadata
-   - Click-to-select functionality
-   - Tree-to-preview synchronization
-   - Hover effects and theme changes
-
-5. **Sidebar Right** (`sidebar-right.test.ts`)
-   - Export/Import dropdowns
-   - Property editing for selected nodes
-
-#### Test Utilities
-
-**Test Attributes** (`test-attrs.ts`): Conditional test attributes for E2E tests.
-
-```typescript
-testId('my-component'); // → {data-testid: 'my-component'}
-testAttrs({ nodeId: '123' }); // → {data-node-id: '123'}
-test('item', { nodeId: '123' }); // → Combines testId + testAttrs
+```
+src/
+├── lib/
+│   ├── components/
+│   │   ├── ui/                 # Reusable UI components (inputs, pickers, etc.)
+│   │   └── ujl-crafter/        # Main Crafter components
+│   │       ├── canvas/         # Preview canvas
+│   │       ├── header/         # App header with mode switch, viewport controls
+│   │       ├── panel/          # Right panel (properties, designer)
+│   │       ├── sidebar/        # Left sidebar (nav tree, component picker)
+│   │       ├── UJLCrafter.ts   # Public API class
+│   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
+│   │       └── ujl-crafter.svelte          # Main UI component
+│   ├── service-adapters/       # Image service adapter implementations
+│   ├── stores/                 # CrafterStore (Svelte 5 runes)
+│   ├── styles/                 # CSS architecture (see below)
+│   └── utils/                  # Helpers (clipboard, colors, DOM utilities)
+└── dev/                        # Development app for local testing
 ```
 
-- **Activation**: Only when `PUBLIC_TEST_MODE=true` is set
-- **Usage**: Enables stable selectors without production overhead
+### Styles Architecture
 
-For test execution commands and general testing guidelines, see [Testing Guidelines](../../../docs/testing.md). For CI/CD pipeline information, see the [UJL Framework README](../../../README.md#cicd).
+The Crafter uses Shadow DOM for style isolation. Due to a Svelte limitation, component styles defined in `<style>` blocks are injected into `document.head` instead of the Shadow DOM.
+
+**Solution:** Component styles are placed in co-located `.css` files and imported via `bundle.css`. An ESLint rule prevents accidental use of `<style>` blocks.
+
+See [src/lib/styles/README.md](src/lib/styles/README.md) for details.
+
+## Related
+
+- [UJL Framework README](../../README.md)
+- [UJL Library](../../services/library/README.md)

@@ -6,3 +6,6 @@ export type { SvelteNodeDescriptor, SvelteAdapterOptions, MountedComponent } fro
 
 // Component exports
 export { AdapterRoot } from './components/index.js';
+
+// Utility exports
+export { getModuleId } from './utils/events.js';

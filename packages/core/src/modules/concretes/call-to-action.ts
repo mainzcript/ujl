@@ -2,6 +2,7 @@ import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@uj
 import type { Composer } from "../../composer.js";
 import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/concretes/text-field.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -132,7 +133,11 @@ export class CallToActionModule extends ModuleBase {
 							label: primaryButtonLabel,
 							href: primaryButtonHref,
 						},
-						id: `${moduleData.meta.id}-primary-button`,
+						id: generateUid(),
+						meta: {
+							moduleId: moduleData.meta.id,
+							isModuleRoot: false,
+						},
 					},
 					secondary: {
 						type: "button",
@@ -140,11 +145,19 @@ export class CallToActionModule extends ModuleBase {
 							label: secondaryButtonLabel,
 							href: secondaryButtonHref,
 						},
-						id: `${moduleData.meta.id}-secondary-button`,
+						id: generateUid(),
+						meta: {
+							moduleId: moduleData.meta.id,
+							isModuleRoot: false,
+						},
 					},
 				},
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }

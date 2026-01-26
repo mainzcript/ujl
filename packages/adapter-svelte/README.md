@@ -29,6 +29,12 @@ The package provides two style exports:
 
 We recommend using the `./styles` export in your Svelte application.
 
+## Modules vs. AST Nodes
+
+The adapter relies on the distinction between **Modules** and **AST Nodes** to determine how nodes should be rendered and handled. For a complete explanation of this fundamental concept, see the [Core package documentation](../../core/README.md#modules-vs-ast-nodes).
+
+**In summary:** The adapter sets `data-ujl-module-id` attributes on all nodes with `meta.moduleId` when `showMetadata={true}`. Editor-specific functionality (like click handling) should be implemented in your editor layer using event listeners on the rendered DOM elements.
+
 ## Usage
 
 The adapter provides two ways to render UJL content:
@@ -70,36 +76,23 @@ For Svelte components, use `AdapterRoot` directly. This approach is more idiomat
 - `node`: The UJL AST node to render
 - `tokenSet`: Design token set (`UJLTTokenSet`) to apply to the rendered AST (optional)
 - `mode`: Theme mode - 'light', 'dark', or 'system' (default: 'system')
-- `showMetadata`: If `true`, adds `data-ujl-module-id` attributes to module elements (default: `false`)
-- `eventCallback`: Callback function triggered when a module is clicked, receives the module ID
+- `showMetadata`: If `true`, adds `data-ujl-module-id` attributes to module nodes (default: `false`)
 
 ### Editor Features
 
-The adapter supports optional features for building visual editors:
+The adapter supports optional metadata attributes for building visual editors:
 
 ```svelte
-<script lang="ts">
-	function handleModuleClick(moduleId: string) {
-		console.log('Module clicked:', moduleId);
-		// Update your editor state, highlight in sidebar, etc.
-	}
-</script>
-
-<AdapterRoot node={ast} {tokenSet} {mode} showMetadata={true} eventCallback={handleModuleClick} />
+<AdapterRoot node={ast} {tokenSet} {mode} showMetadata={true} />
 ```
 
 **When `showMetadata={true}`:**
 
-- All rendered modules receive a `data-ujl-module-id` attribute with their unique ID
+- All nodes with `meta.moduleId` receive a `data-ujl-module-id` attribute
 - This enables programmatic module selection and highlighting
 - Useful for visual editors like the Crafter
 
-**When `eventCallback` is provided:**
-
-- Modules become clickable and trigger the callback with their ID
-- Events use `preventDefault()` to prevent default actions (e.g., button clicks)
-- Events use `stopPropagation()` to prevent event bubbling to parent modules
-- This enables click-to-select functionality in editors
+**Note:** The adapter focuses on pure rendering. Editor-specific functionality (like click handling) should be implemented in your editor layer (e.g., the Crafter) using event listeners on the rendered DOM elements.
 
 ### Legacy: Using `svelteAdapter` Function (Imperative Mounting)
 
@@ -116,13 +109,27 @@ const tokenSet = ujltDocument.ujlt.tokens;
 const mountedComponent = svelteAdapter(ast, tokenSet, {
 	target: '#my-container',
 	mode: 'system',
-	showMetadata: true,
-	eventCallback: (moduleId) => console.log('Clicked:', moduleId)
+	showMetadata: true
 });
 
 // Cleanup
 await mountedComponent.unmount();
 ```
+
+## Helper Functions
+
+The adapter provides utility functions for working with AST nodes:
+
+```typescript
+import { getModuleId } from '@ujl-framework/adapter-svelte';
+
+// Get the module ID from a node (which module it belongs to)
+const moduleId = getModuleId(node); // Returns node.meta?.moduleId ?? null
+```
+
+**Use Cases:**
+
+- `getModuleId`: Get which module a node belongs to (works for all nodes with moduleId)
 
 ## API Reference
 
@@ -134,7 +141,6 @@ interface AdapterRootProps {
 	tokenSet?: UJLTTokenSet;
 	mode?: 'light' | 'dark' | 'system';
 	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
 }
 ```
 
@@ -155,7 +161,6 @@ type SvelteAdapterOptions = {
 	target: string | HTMLElement;
 	mode?: 'light' | 'dark' | 'system';
 	showMetadata?: boolean;
-	eventCallback?: (moduleId: string) => void;
 };
 
 type MountedComponent = {
@@ -164,26 +169,37 @@ type MountedComponent = {
 };
 ```
 
-## Event Handling Implementation
+## Event Handling in Editor Layers
 
-When `eventCallback` is provided, all module components implement the following pattern:
+The adapter focuses on pure rendering. For editor functionality (like click-to-select), implement event listeners in your editor layer.
+
+**Example: Implementing click handling in an editor:**
 
 ```typescript
+import { getModuleId } from '@ujl-framework/adapter-svelte';
+
 function handleClick(event: MouseEvent) {
-	if (eventCallback && node.id) {
-		event.preventDefault();
-		event.stopPropagation();
-		eventCallback(node.id);
+	const clickedElement = (event.target as HTMLElement).closest('[data-ujl-module-id]');
+	if (!clickedElement) return;
+
+	const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+	if (!moduleId) return;
+
+	// Check if the clicked node is editable (isModuleRoot === true) in your AST
+	// Then handle selection, highlighting, etc.
+	const node = findNodeByModuleId(ast, moduleId);
+	if (node?.meta?.isModuleRoot === true) {
+		selectModule(moduleId);
 	}
 }
 ```
 
-This ensures:
+**Key points:**
 
-- Only the clicked module triggers the callback
-- Parent modules don't receive the event
-- Default behaviors (navigation, form submission) are suppressed in editor mode
-- The correct module ID is always passed to the callback (all AST nodes have a required `id` field)
+- The adapter only adds `data-ujl-module-id` attributes when `showMetadata={true}`
+- Event handling must be implemented in your editor layer (e.g., the Crafter)
+- Check `meta.isModuleRoot === true` in your AST to determine if a node is editable
+- Non-editable nodes (like `grid-item` wrappers) have `meta.moduleId` but `isModuleRoot === false`
 
 ## Development
 
@@ -207,9 +223,11 @@ pnpm run lint
 src/
 ├── lib/
 │   ├── components/
-│   │   ├── nodes/          # Module component implementations
+│   │   ├── nodes/          # AST node component implementations
 │   │   ├── ASTNode.svelte  # Central router component
 │   │   └── AdapterRoot.svelte  # Root component with theme support
+│   ├── utils/
+│   │   └── events.ts       # Event handling utilities (getModuleId)
 │   ├── styles/             # CSS styles
 │   ├── types.ts            # TypeScript definitions
 │   └── adapter.ts          # Imperative mounting API

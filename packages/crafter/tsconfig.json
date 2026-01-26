@@ -1,7 +1,10 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
+		"target": "ES2020",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
+		"noEmit": true,
 		"allowJs": true,
 		"checkJs": true,
 		"esModuleInterop": true,
@@ -9,6 +12,15 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"strict": true
-	}
+		"strict": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"types": ["svelte", "node", "vite/client", "vitest/globals"],
+		"baseUrl": ".",
+		"paths": {
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"]
+		}
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
 }

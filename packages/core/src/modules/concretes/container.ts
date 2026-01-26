@@ -1,5 +1,6 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
+import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
 
@@ -38,7 +39,11 @@ export class ContainerModule extends ModuleBase {
 			props: {
 				children,
 			},
-			id: moduleData.meta.id,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot: true,
+			},
 		};
 	}
 }
