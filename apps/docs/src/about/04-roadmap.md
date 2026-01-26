@@ -15,80 +15,72 @@ Zeitliche Angaben werden **nicht als fixe Fristen**, sondern als **Abfolge von E
 
 ## Phase 1: Stabilisierung & Vervollständigung des MVP
 
-**Ziel:**  
+### Ziel
+
 Ein technisch stabiles, konsistent nutzbares Produkt, das sich für reale Pilotprojekte eignet.
 
 In dieser Phase liegt der Fokus auf der **Absicherung und Vervollständigung** der bereits existierenden Kernkomponenten. Ziel ist es, aus dem bestehenden Entwicklungsstand ein echtes Minimum Viable Product zu formen, das nicht nur demonstriert, sondern produktiv eingesetzt werden kann.
 
-**Schwerpunkte dieser Phase:**
+### Konkrete nächste Schritte
 
-- Konsolidierung des UJL Core (Schema, Modul-System, Rendering-Pipeline)
-- Fertigstellung des Crafter-Editors für redaktionelles Arbeiten
-- Etablierung eines konsistenten Theme- und Design-Token-Systems
-- Einführung eines einfachen Backend-Services (z. B. für Medienverwaltung)
-- Verbesserung von Dokumentation, Setup und Developer Experience
+1. **Usability / Editor-UX verbessern**
+   - Mobile Workflows vereinfachen: Nach Auswahl eines Moduls in der Vorschau soll die Konfiguration ohne zusätzlichen Klick auf ein separates Settings-Icon erreichbar sein.
+   - Kontext-Interaktionen in die Vorschau verlagern: Eine kleines Kontextmenü wird direkt über dem aktüll selektierten Modul eingeblendet und bietet Aktionen wie _Einfügen_, _Kopieren/Duplizieren_, _Verschieben_ und _Löschen_.
+   - Modul-Insert vereinfachen: Neue Module sollen nicht primär über das Drei-Punkte-Menü im Navigationsbaum eingefügt werden müssen, sondern über die Vorschau (Island + Dropzones).
+   - Drag-and-Drop ausbaün: Mehr Interaktionen sollen direkt in der Vorschau möglich sein (Reorder, Insert via Dropzones) statt nur im Tree.
 
-**Ergebnis dieser Phase:**  
+2. **Deployment optimieren**: Module Registry über eine Crafter-API verfügbar machen, um Module dynamisch abzufragen (z. B. für Editor, Integrationen und spätere Automatisierung).
+
+3. **Technische Schulden minimieren**: Gezielte Abarbeitung der priorisierten technischen Schulden und Risiken aus der arc42-Dokumentation (siehe [Risiken und technische Schulden](/arc42/11-risks-and-technical-debt)).
+
+4. **AI-Features implementieren**: Embedding-Model + Generative KI in den Crafter integrieren (z. B. für Suche/Assistenz und zum Generieren von Modul-Vorschlägen aus Kontext).
+
+### Ergebnis dieser Phase
+
 UJL kann in abgeschlossenen Projekten eingesetzt werden, Inhalte lassen sich stabil erstellen, speichern und rendern. Der Editor ist für Redakteur:innen nutzbar, ohne dass grundlegende Funktionen fehlen.
 
 ## Phase 2: Pilotierung in realen Projekten
 
-**Ziel:**  
+### Ziel
+
 Validierung von UJL unter realen Produktionsbedingungen.
 
 Nach der technischen Stabilisierung folgt eine Phase, in der UJL **gezielt in echten Projekten eingesetzt** wird. Diese Pilotierungen dienen nicht primär der Skalierung, sondern der Validierung von Architektur, Bedienbarkeit und Erweiterbarkeit.
 
 Der Fokus liegt dabei auf Partnern mit realen Anforderungen, insbesondere aus dem Agentur- und Projektumfeld.
 
-**Schwerpunkte dieser Phase:**
+### Ergebnis dieser Phase
 
-- Einsatz von UJL in ausgewählten Pilotprojekten
-- Sammlung von strukturiertem Feedback aus realer Nutzung
-- Identifikation typischer Integrations- und Workflow-Hürden
-- Erweiterung des Modulkatalogs auf Basis realer Anforderungen
-- Verbesserung der Editor-UX auf Grundlage echter Nutzungsszenarien
-
-**Ergebnis dieser Phase:**  
-UJL ist nicht nur technisch funktionsfähig, sondern **praxisvalidiert**. Typische Fehlerquellen, UX-Probleme und Integrationsfragen sind identifiziert und adressiert.
+UJL ist nicht nur technisch funktionsfähig, sondern **praxisvalidiert**. Typische Fehlerqüllen, UX-Probleme und Integrationsfragen sind identifiziert und adressiert.
 
 ## Phase 3: Öffnung & Community-Readiness
 
-**Ziel:**  
+### Ziel
+
 Vorbereitung auf öffentliche Nutzung und externe Beiträge.
 
-Auf Basis der Pilotierung wird UJL für eine breitere Nutzung geöffnet. Diese Phase dient nicht der maximalen Reichweite, sondern der **kontrollierten Öffnung** für Entwickler:innen, Agenturen und frühe Anwender:innen.
+Auf Basis der Pilotierung wird UJL für eine breitere Nutzung geöffnet. Diese Phase ist eine **kontrollierten Öffnung** für Entwickler:innen, Agenturen und frühe Anwender:innen.
 
-**Schwerpunkte dieser Phase:**
+### Ergebnis dieser Phase
 
-- Öffentliche Bereitstellung des Open-Source-Repositories
-- Contributor-Guidelines und Projektstruktur
-- Ausbau der Dokumentation (Getting Started, Architekturüberblick)
-- Etablierung erster Community-Kanäle
-- Technische Vorbereitung für externe Erweiterungen
-
-**Ergebnis dieser Phase:**  
 UJL ist offen nutzbar, nachvollziehbar dokumentiert und strukturell so aufgestellt, dass externe Beiträge möglich und sinnvoll sind.
 
 ## Phase 4: Erweiterbarkeit & Integrationen
 
-**Ziel:**  
+### Ziel
+
 UJL als erweiterbares System etablieren.
 
 In dieser Phase wird der Fokus auf **Erweiterbarkeit und Integration** gelegt. UJL soll sich sauber in bestehende Systemlandschaften einfügen lassen und gezielt an unterschiedliche Anwendungsfälle anpassbar sein.
 
-**Schwerpunkte dieser Phase:**
+### Ergebnis dieser Phase
 
-- Konzeption und Umsetzung eines Erweiterungs- bzw. Plugin-Mechanismus
-- Erste gezielte CMS-Integrationen (z. B. Headless-CMS)
-- Stabilisierung der Adapter-Architektur
-- Verbesserung der Integrationsdokumentation
-
-**Ergebnis dieser Phase:**  
 UJL lässt sich konsistent erweitern und in bestehende Stacks integrieren, ohne den Core zu verändern. Das System ist anschlussfähig für unterschiedliche Nutzungsszenarien.
 
 ## Phase 5: Weiterführende Funktionen & Perspektive
 
-**Ziel:**  
+### Ziel
+
 Schrittweise Weiterentwicklung auf Basis realer Nutzung.
 
 Alle weiterführenden Funktionen werden **nicht vorab fest versprochen**, sondern ergeben sich aus Nutzung, Feedback und Nachfrage. Dazu zählen unter anderem:

@@ -33,13 +33,15 @@ export default withMermaid({
 					{ text: "Vision & Wertversprechen", link: "/about/01-vision" },
 					{ text: "Use Cases", link: "/about/02-use-cases" },
 					{ text: "Team", link: "/about/03-team" },
-					{ text: "Roadmap", link: "/about/04-roadmap" },
 				],
 			},
 			{
 				text: "Dokumentation",
 				collapsed: false,
-				items: [{ text: "Getting Started", link: "/docs/01-getting-started" }],
+				items: [
+					{ text: "Getting Started", link: "/docs/01-getting-started" },
+					{ text: "Roadmap", link: "/about/04-roadmap" },
+				],
 			},
 			{
 				text: "Architektur (arc42)",
