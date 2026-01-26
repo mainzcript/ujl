@@ -93,5 +93,13 @@ export default withMermaid({
 
 	vite: {
 		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
+		optimizeDeps: {
+			include: ["mermaid", "@braintree/sanitize-url"],
+		},
+		resolve: {
+			alias: {
+				dayjs: "dayjs/",
+			},
+		},
 	},
 });
