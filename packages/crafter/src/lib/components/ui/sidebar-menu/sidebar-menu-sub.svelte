@@ -15,7 +15,7 @@
 	data-slot="sidebar-menu-sub"
 	data-sidebar="menu-sub"
 	class={cn(
-		'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5',
+		'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border py-0.5 ps-2.5',
 		className
 	)}
 	{...restProps}
