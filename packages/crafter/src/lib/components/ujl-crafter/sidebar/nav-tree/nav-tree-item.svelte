@@ -256,7 +256,7 @@
 									tabindex="0"
 									data-tree-node-id={node.meta.id}
 									class={cn(
-										'group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md',
+										'group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
 										isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
 										isDragging && 'opacity-50',
 										showDropInto &&
@@ -420,7 +420,7 @@
 								tabindex="0"
 								data-tree-node-id={node.meta.id}
 								class={cn(
-									'group/dropdown flex h-full w-full items-center justify-between rounded-md',
+									'group/dropdown flex h-full w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
 									isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
 									isDragging && 'opacity-50',
 									showDropInto &&
@@ -548,7 +548,7 @@
 								{...props}
 								variant="ghost"
 								size="icon"
-								class="mr-1 h-6 w-6 opacity-0 group-hover/node:opacity-100"
+								class="mr-2 h-6 w-6 opacity-0 group-hover/node:opacity-100"
 								onclick={(e) => e.stopPropagation()}
 							>
 								<MoreVerticalIcon class="size-4" />
