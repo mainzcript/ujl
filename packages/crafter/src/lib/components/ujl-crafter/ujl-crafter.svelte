@@ -258,7 +258,9 @@
 	}
 
 	function handleSave() {
-		toast.info('Save functionality coming soon!');
+		if (store.onSaveCallback) {
+			store.onSaveCallback(store.ujlcDocument, store.ujltDocument);
+		}
 	}
 
 	// ============================================
@@ -304,7 +306,7 @@
 				onModeChange={handleModeChange}
 				viewportType={store.viewportType}
 				onViewportTypeChange={handleViewportTypeChange}
-				onSave={handleSave}
+				onSave={store.onSaveCallback ? handleSave : undefined}
 				onImportTheme={handleImportTheme}
 				onImportContent={handleImportContent}
 				onExportTheme={handleExportTheme}

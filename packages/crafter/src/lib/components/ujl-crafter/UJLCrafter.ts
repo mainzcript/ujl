@@ -4,7 +4,8 @@ import { Composer } from '@ujl-framework/core';
 import {
 	createCrafterStore,
 	createImageServiceFactory,
-	type CrafterStore
+	type CrafterStore,
+	type SaveCallback
 } from '$lib/stores/index.js';
 import { logger } from '$lib/utils/logger.js';
 import CrafterElement from './ujl-crafter-element.svelte';
@@ -35,6 +36,9 @@ export type NotificationCallback = (
 export type DocumentChangeCallback = (document: UJLCDocument) => void;
 
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
+
+// Re-export SaveCallback from store for API consistency
+export type { SaveCallback } from '$lib/stores/index.js';
 
 /**
  * Configuration options for the library.
@@ -283,6 +287,23 @@ export class UJLCrafter {
 	onNotification(callback: NotificationCallback): () => void {
 		this.notificationCallbacks.add(callback);
 		return () => this.notificationCallbacks.delete(callback);
+	}
+
+	/**
+	 * Register a callback for the Save button.
+	 * When set, the Save button becomes visible in the header.
+	 * The callback receives both documents so you can decide what to persist.
+	 *
+	 * @example
+	 * ```typescript
+	 * crafter.onSave((document, theme) => {
+	 *   saveToServer(document);
+	 * });
+	 * ```
+	 */
+	onSave(callback: SaveCallback): () => void {
+		this.store.setOnSaveCallback(callback);
+		return () => this.store.setOnSaveCallback(null);
 	}
 
 	// ============================================

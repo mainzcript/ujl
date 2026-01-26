@@ -72,6 +72,11 @@ crafter.onThemeChange((theme) => {
 	console.log('Theme changed:', theme);
 });
 
+// Enable Save button with callback
+crafter.onSave((document, theme) => {
+	saveToServer(document);
+});
+
 // Get current state
 const currentDoc = crafter.getDocument();
 const currentTheme = crafter.getTheme();
@@ -126,6 +131,7 @@ class UJLCrafter {
 	onDocumentChange(callback: (doc: UJLCDocument) => void): () => void;
 	onThemeChange(callback: (theme: UJLTDocument) => void): () => void;
 	onNotification(callback: (type, message, description?) => void): () => void;
+	onSave(callback: (doc: UJLCDocument, theme: UJLTDocument) => void): () => void;
 
 	// Lifecycle
 	destroy(): void;

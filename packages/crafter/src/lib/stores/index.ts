@@ -19,6 +19,7 @@ export {
 	type UpdateImagesFn,
 	type ImageServiceFactory,
 	type ShadowRootContext,
+	type SaveCallback,
 	CRAFTER_CONTEXT,
 	COMPOSER_CONTEXT,
 	SHADOW_ROOT_CONTEXT
