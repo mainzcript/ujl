@@ -496,23 +496,21 @@
 </script>
 
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col">
-	<div class="p-2">
-		<NavTree
-			nodes={rootSlot}
-			{clipboard}
-			onCopy={handleCopy}
-			onCut={handleCut}
-			onPaste={handlePaste}
-			onDelete={handleDelete}
-			onInsert={handleInsert}
-			onNodeMove={handleNodeMove}
-			onSlotCopy={handleSlotCopy}
-			onSlotCut={handleSlotCut}
-			onSlotPaste={handleSlotPaste}
-			onSlotMove={handleSlotMove}
-			onSlotClick={handleSlotClick}
-		/>
-	</div>
+	<NavTree
+		nodes={rootSlot}
+		{clipboard}
+		onCopy={handleCopy}
+		onCut={handleCut}
+		onPaste={handlePaste}
+		onDelete={handleDelete}
+		onInsert={handleInsert}
+		onNodeMove={handleNodeMove}
+		onSlotCopy={handleSlotCopy}
+		onSlotCut={handleSlotCut}
+		onSlotPaste={handleSlotPaste}
+		onSlotMove={handleSlotMove}
+		onSlotClick={handleSlotClick}
+	/>
 </div>
 
 <ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />
