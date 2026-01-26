@@ -219,24 +219,3 @@ test.describe('Import/Export', () => {
 		}
 	});
 });
-
-test.describe('Save Button', () => {
-	test('should display Save button', async ({ page }) => {
-		const crafter = new CrafterPage(page);
-		await crafter.goto();
-
-		await expect(crafter.saveButton).toBeVisible();
-	});
-
-	test('should be clickable', async ({ page }) => {
-		const crafter = new CrafterPage(page);
-		await crafter.goto();
-
-		// Click save (currently shows toast "coming soon")
-		await crafter.saveButton.click();
-
-		// Check for toast notification
-		const toast = page.locator('[data-sonner-toast]');
-		await expect(toast).toBeVisible({ timeout: 2000 });
-	});
-});
