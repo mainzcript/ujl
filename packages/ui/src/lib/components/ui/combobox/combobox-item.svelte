@@ -1,9 +1,9 @@
 <script lang="ts">
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { CommandItem } from '../command/index.js';
-	import { getComboboxContext } from './context.js';
-	import { cn } from '$lib/utils.js';
+	import CheckIcon from "@lucide/svelte/icons/check";
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { CommandItem } from "../command/index.js";
+	import { getComboboxContext } from "./context.js";
+	import { cn } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
@@ -27,7 +27,7 @@
 <CommandItem
 	bind:ref
 	data-slot="combobox-item"
-	class={cn('relative pr-8 pl-2', className)}
+	class={cn("relative pr-8 pl-2", className)}
 	keywords={computedKeywords}
 	{value}
 	{...restProps}

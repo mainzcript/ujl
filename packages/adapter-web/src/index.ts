@@ -6,10 +6,10 @@
  */
 
 // Import UJLContent to ensure it's bundled and the Custom Element is registered
-import './components/UJLContent.svelte';
+import "./components/UJLContent.svelte";
 
 // Export types
-export * from './types.js';
+export * from "./types.js";
 
 // Export webAdapter function
-export { webAdapter } from './adapter.js';
+export { webAdapter } from "./adapter.js";

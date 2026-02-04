@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Combobox,
 		ComboboxTrigger,
@@ -9,45 +9,45 @@
 		ComboboxEmpty,
 		ComboboxGroup,
 		ComboboxItem,
-		ComboboxSeparator
-	} from './index.ts';
-	import { Label } from '../label/index.ts';
+		ComboboxSeparator,
+	} from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/Combobox',
+		title: "Components/Forms/Combobox",
 		component: Combobox,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			open: {
-				control: 'boolean',
-				description: 'Whether the combobox dropdown is open',
+				control: "boolean",
+				description: "Whether the combobox dropdown is open",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			open: true
-		}
+			open: true,
+		},
 	});
 
 	const frameworks = [
-		{ value: 'svelte', label: 'Svelte' },
-		{ value: 'react', label: 'React' },
-		{ value: 'vue', label: 'Vue' },
-		{ value: 'angular', label: 'Angular' },
-		{ value: 'solid', label: 'Solid' },
-		{ value: 'qwik', label: 'Qwik' }
+		{ value: "svelte", label: "Svelte" },
+		{ value: "react", label: "React" },
+		{ value: "vue", label: "Vue" },
+		{ value: "angular", label: "Angular" },
+		{ value: "solid", label: "Solid" },
+		{ value: "qwik", label: "Qwik" },
 	];
 
 	const countries = [
-		{ value: 'us', label: 'United States', flag: '🇺🇸' },
-		{ value: 'uk', label: 'United Kingdom', flag: '🇬🇧' },
-		{ value: 'de', label: 'Germany', flag: '🇩🇪' },
-		{ value: 'fr', label: 'France', flag: '🇫🇷' },
-		{ value: 'jp', label: 'Japan', flag: '🇯🇵' },
-		{ value: 'au', label: 'Australia', flag: '🇦🇺' }
+		{ value: "us", label: "United States", flag: "🇺🇸" },
+		{ value: "uk", label: "United Kingdom", flag: "🇬🇧" },
+		{ value: "de", label: "Germany", flag: "🇩🇪" },
+		{ value: "fr", label: "France", flag: "🇫🇷" },
+		{ value: "jp", label: "Japan", flag: "🇯🇵" },
+		{ value: "au", label: "Australia", flag: "🇦🇺" },
 	];
 </script>
 

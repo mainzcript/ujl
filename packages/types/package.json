@@ -7,7 +7,10 @@
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"exports": {
-		".": "./dist/index.js"
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
 	},
 	"bin": {
 		"ujl-validate": "./bin/ujl-validate.js"
@@ -18,8 +21,8 @@
 		"bin"
 	],
 	"scripts": {
-		"build": "pnpm run clean && tsc",
-		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\"",
+		"build": "pnpm run clean && tsc -b tsconfig.build.json",
+		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\"",
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
@@ -51,7 +54,7 @@
 	"homepage": "https://ujl-framework.org",
 	"repository": {
 		"type": "git",
-		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"url": "git+https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
 		"directory": "packages/types"
 	}
 }

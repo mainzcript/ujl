@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext } from "svelte";
 	import type {
 		UJLTTokenSet,
 		UJLTFlavor,
@@ -8,19 +8,19 @@
 		UJLTTypographyHeading,
 		UJLTTypographyHighlight,
 		UJLTTypographyLink,
-		UJLTTypographyCode
-	} from '@ujl-framework/types';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
-	import { updateFlavorByOriginal } from '$lib/utils/colors/index.js';
-	import AmbientColorGroup from './designer/components/colors/ambient-color-group.svelte';
-	import ThemeColorsGroup from './designer/components/colors/theme-colors-group.svelte';
-	import NotificationColorsGroup from './designer/components/colors/notification-colors-group.svelte';
-	import BaseTypographyGroup from './designer/components/typography/base-typography-group.svelte';
-	import HeadingTypographyGroup from './designer/components/typography/heading-typography-group.svelte';
-	import HighlightTypographyGroup from './designer/components/typography/highlight-typography-group.svelte';
-	import LinkTypographyGroup from './designer/components/typography/link-typography-group.svelte';
-	import CodeTypographyGroup from './designer/components/typography/code-typography-group.svelte';
-	import AppearanceGroup from './designer/components/appearance-group.svelte';
+		UJLTTypographyCode,
+	} from "@ujl-framework/types";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import { updateFlavorByOriginal } from "$lib/utils/colors/index.js";
+	import AmbientColorGroup from "./designer/components/colors/ambient-color-group.svelte";
+	import ThemeColorsGroup from "./designer/components/colors/theme-colors-group.svelte";
+	import NotificationColorsGroup from "./designer/components/colors/notification-colors-group.svelte";
+	import BaseTypographyGroup from "./designer/components/typography/base-typography-group.svelte";
+	import HeadingTypographyGroup from "./designer/components/typography/heading-typography-group.svelte";
+	import HighlightTypographyGroup from "./designer/components/typography/highlight-typography-group.svelte";
+	import LinkTypographyGroup from "./designer/components/typography/link-typography-group.svelte";
+	import CodeTypographyGroup from "./designer/components/typography/code-typography-group.svelte";
+	import AppearanceGroup from "./designer/components/appearance-group.svelte";
 
 	let { tokens }: { tokens: UJLTTokenSet } = $props();
 
@@ -36,12 +36,12 @@
 	 * @param flavor - The color flavor to update (e.g., 'primary', 'secondary', etc.)
 	 * @param hex - The new hex color string (e.g., "#3b82f6")
 	 */
-	function updateColorToken(flavor: Exclude<UJLTFlavor, 'ambient'>, hex: string) {
+	function updateColorToken(flavor: Exclude<UJLTFlavor, "ambient">, hex: string) {
 		crafter.updateTokenSet((oldTokens: UJLTTokenSet) => {
 			const updatedPalette = updateFlavorByOriginal(oldTokens.color, flavor, { hex });
 			return {
 				...oldTokens,
-				color: updatedPalette
+				color: updatedPalette,
 			};
 		});
 	}
@@ -50,12 +50,12 @@
 	 * Helper function to update the ambient color flavor from a dual original input.
 	 * Accepts UJLTAmbientColorSet['_original'] so that ambient can be driven by separate light/dark hex values.
 	 */
-	function updateAmbientColorToken(original: UJLTAmbientColorSet['_original']) {
+	function updateAmbientColorToken(original: UJLTAmbientColorSet["_original"]) {
 		crafter.updateTokenSet((oldTokens: UJLTTokenSet) => {
-			const updatedPalette = updateFlavorByOriginal(oldTokens.color, 'ambient', original);
+			const updatedPalette = updateFlavorByOriginal(oldTokens.color, "ambient", original);
 			return {
 				...oldTokens,
-				color: updatedPalette
+				color: updatedPalette,
 			};
 		});
 	}
@@ -64,7 +64,7 @@
 	function updateRadiusToken(value: number) {
 		crafter.updateTokenSet((oldTokens: UJLTTokenSet) => ({
 			...oldTokens,
-			radius: value
+			radius: value,
 		}));
 	}
 
@@ -72,7 +72,7 @@
 	function updateSpacingToken(value: number) {
 		crafter.updateTokenSet((oldTokens: UJLTTokenSet) => ({
 			...oldTokens,
-			spacing: value
+			spacing: value,
 		}));
 	}
 
@@ -90,9 +90,9 @@
 				...oldTokens.typography,
 				base: {
 					...oldTokens.typography.base,
-					...updates
-				}
-			}
+					...updates,
+				},
+			},
 		}));
 	}
 
@@ -110,9 +110,9 @@
 				...oldTokens.typography,
 				heading: {
 					...oldTokens.typography.heading,
-					...updates
-				}
-			}
+					...updates,
+				},
+			},
 		}));
 	}
 
@@ -130,9 +130,9 @@
 				...oldTokens.typography,
 				highlight: {
 					...oldTokens.typography.highlight,
-					...updates
-				}
-			}
+					...updates,
+				},
+			},
 		}));
 	}
 
@@ -150,9 +150,9 @@
 				...oldTokens.typography,
 				link: {
 					...oldTokens.typography.link,
-					...updates
-				}
-			}
+					...updates,
+				},
+			},
 		}));
 	}
 
@@ -164,9 +164,9 @@
 				...oldTokens.typography,
 				code: {
 					...oldTokens.typography.code,
-					...updates
-				}
-			}
+					...updates,
+				},
+			},
 		}));
 	}
 </script>
@@ -187,9 +187,9 @@
 		primaryColorSet={tokens.color.primary}
 		secondaryColorSet={tokens.color.secondary}
 		accentColorSet={tokens.color.accent}
-		onPrimaryChange={(hex: string) => updateColorToken('primary', hex)}
-		onSecondaryChange={(hex: string) => updateColorToken('secondary', hex)}
-		onAccentChange={(hex: string) => updateColorToken('accent', hex)}
+		onPrimaryChange={(hex: string) => updateColorToken("primary", hex)}
+		onSecondaryChange={(hex: string) => updateColorToken("secondary", hex)}
+		onAccentChange={(hex: string) => updateColorToken("accent", hex)}
 	/>
 
 	<NotificationColorsGroup
@@ -198,10 +198,10 @@
 		warningColorSet={tokens.color.warning}
 		destructiveColorSet={tokens.color.destructive}
 		infoColorSet={tokens.color.info}
-		onSuccessChange={(hex: string) => updateColorToken('success', hex)}
-		onWarningChange={(hex: string) => updateColorToken('warning', hex)}
-		onDestructiveChange={(hex: string) => updateColorToken('destructive', hex)}
-		onInfoChange={(hex: string) => updateColorToken('info', hex)}
+		onSuccessChange={(hex: string) => updateColorToken("success", hex)}
+		onWarningChange={(hex: string) => updateColorToken("warning", hex)}
+		onDestructiveChange={(hex: string) => updateColorToken("destructive", hex)}
+		onInfoChange={(hex: string) => updateColorToken("info", hex)}
 	/>
 
 	<BaseTypographyGroup typography={tokens.typography.base} onChange={updateBaseTypography} />

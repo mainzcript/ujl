@@ -1,46 +1,46 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Input } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Input } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Input',
+		title: "Components/Base/Input",
 		component: Input,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			type: {
-				control: { type: 'select' },
-				options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'date', 'file'],
-				description: 'The type of input',
+				control: { type: "select" },
+				options: ["text", "email", "password", "number", "tel", "url", "search", "date", "file"],
+				description: "The type of input",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'text' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "text" },
+				},
 			},
 			placeholder: {
-				control: 'text',
-				description: 'Placeholder text',
-				table: { category: 'Content' }
+				control: "text",
+				description: "Placeholder text",
+				table: { category: "Content" },
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the input is disabled',
+				control: "boolean",
+				description: "Whether the input is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			required: {
-				control: 'boolean',
-				description: 'Whether the input is required',
-				table: { category: 'Validation' }
-			}
+				control: "boolean",
+				description: "Whether the input is required",
+				table: { category: "Validation" },
+			},
 		},
 		args: {
-			type: 'text',
-			placeholder: 'Enter text...',
-			disabled: false
-		}
+			type: "text",
+			placeholder: "Enter text...",
+			disabled: false,
+		},
 	});
 </script>
 
@@ -84,7 +84,7 @@
 </Story>
 
 <!-- With Label -->
-<Story name="With Label" args={{ type: 'email', placeholder: 'you@example.com' }}>
+<Story name="With Label" args={{ type: "email", placeholder: "you@example.com" }}>
 	{#snippet template(args)}
 		<div class="max-w-sm space-y-1">
 			<Label for="email">Email Address</Label>
@@ -116,7 +116,7 @@
 </Story>
 
 <!-- File Input -->
-<Story name="File Input" args={{ type: 'file' }}>
+<Story name="File Input" args={{ type: "file" }}>
 	{#snippet template(args)}
 		<div class="max-w-sm space-y-1">
 			<Label for="file">Upload File</Label>

@@ -7,10 +7,10 @@
 // Only public API
 export {
 	UJLCrafter,
-	type UJLCrafterOptions,
-	type LibraryOptions,
-	type NotificationType,
-	type NotificationCallback,
 	type DocumentChangeCallback,
-	type ThemeChangeCallback
-} from './components/ujl-crafter/index.js';
+	type LibraryOptions,
+	type NotificationCallback,
+	type NotificationType,
+	type ThemeChangeCallback,
+	type UJLCrafterOptions,
+} from "./components/ujl-crafter/index.js";

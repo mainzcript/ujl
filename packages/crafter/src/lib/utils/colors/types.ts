@@ -1,5 +1,5 @@
-import type { UJLTShadeKey } from '@ujl-framework/types';
-import type Color from 'colorjs.io';
+import type { UJLTShadeKey } from "@ujl-framework/types";
+import type Color from "colorjs.io";
 
 /**
  * Color shade set using Color objects from colorjs.io.

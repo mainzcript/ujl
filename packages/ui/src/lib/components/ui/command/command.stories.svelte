@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Command,
 		CommandDialog,
@@ -9,27 +9,27 @@
 		CommandGroup,
 		CommandItem,
 		CommandSeparator,
-		CommandShortcut
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
+		CommandShortcut,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Complex/Command',
+		title: "Components/Complex/Command",
 		component: Command,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			value: {
-				control: 'text',
-				description: 'The currently selected value',
+				control: "text",
+				description: "The currently selected value",
 				table: {
-					category: 'State',
-					defaultValue: { summary: '' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "" },
+				},
+			},
 		},
 		args: {
-			value: ''
-		}
+			value: "",
+		},
 	});
 
 	let open = $state(false);

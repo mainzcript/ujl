@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Slider as SliderPrimitive } from 'bits-ui';
-	import { cn, type WithoutChildrenOrChild } from '$lib/utils.js';
+	import { Slider as SliderPrimitive } from "bits-ui";
+	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
 		value = $bindable(),
-		orientation = 'horizontal',
+		orientation = "horizontal",
 		class: className,
 		...restProps
 	}: WithoutChildrenOrChild<SliderPrimitive.RootProps> = $props();
@@ -21,8 +21,8 @@ get along, so we shut typescript up by casting `value` to `never`.
 	data-slot="slider"
 	{orientation}
 	class={cn(
-		'relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col',
-		className
+		"relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
+		className,
 	)}
 	{...restProps}
 >
@@ -31,13 +31,13 @@ get along, so we shut typescript up by casting `value` to `never`.
 			data-orientation={orientation}
 			data-slot="slider-track"
 			class={cn(
-				'relative grow overflow-hidden rounded-full bg-flavor-foreground/25 data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5'
+				"relative grow overflow-hidden rounded-full bg-flavor-foreground/25 data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
 			)}
 		>
 			<SliderPrimitive.Range
 				data-slot="slider-range"
 				class={cn(
-					'absolute bg-flavor-foreground-accent data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full'
+					"absolute bg-flavor-foreground-accent data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
 				)}
 			/>
 		</span>

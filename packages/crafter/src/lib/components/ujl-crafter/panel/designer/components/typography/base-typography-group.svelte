@@ -3,20 +3,20 @@
 	Receives UJLTTypographyBase props and forwards changes via onChange callback to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTTypographyBase } from '@ujl-framework/types';
+	import { untrack } from "svelte";
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTTypographyBase } from "@ujl-framework/types";
 	import {
 		FontCombobox,
 		StyleToggles,
 		NumberSliderWithInput,
-		FontWeightSlider
-	} from '$lib/components/ui/index.js';
+		FontWeightSlider,
+	} from "$lib/components/ui/index.js";
 
 	let {
 		typography,
-		onChange
+		onChange,
 	}: {
 		typography: UJLTTypographyBase;
 		onChange?: (updates: Partial<UJLTTypographyBase>) => void;
@@ -75,7 +75,7 @@
 					bind:value={font}
 					onchange={(value) => {
 						font = value;
-						handleUpdate('font', value);
+						handleUpdate("font", value);
 					}}
 				/>
 				<NumberSliderWithInput
@@ -88,7 +88,7 @@
 					min={0}
 					sliderMin={0.5}
 					sliderMax={2}
-					onchange={() => handleUpdate('size', size)}
+					onchange={() => handleUpdate("size", size)}
 				/>
 				<NumberSliderWithInput
 					id="base-line-height"
@@ -100,7 +100,7 @@
 					min={0}
 					sliderMin={0.8}
 					sliderMax={2.5}
-					onchange={() => handleUpdate('lineHeight', lineHeight)}
+					onchange={() => handleUpdate("lineHeight", lineHeight)}
 				/>
 				<NumberSliderWithInput
 					id="base-letter-spacing"
@@ -111,13 +111,13 @@
 					step={0.01}
 					sliderMin={-0.1}
 					sliderMax={0.1}
-					onchange={() => handleUpdate('letterSpacing', letterSpacing)}
+					onchange={() => handleUpdate("letterSpacing", letterSpacing)}
 				/>
 				<FontWeightSlider
 					id="base-weight"
 					label="Weight"
 					bind:value={weight}
-					onchange={() => handleUpdate('weight', weight)}
+					onchange={() => handleUpdate("weight", weight)}
 				/>
 				<StyleToggles
 					id="base"
@@ -129,15 +129,15 @@
 					showTextTransform={true}
 					onItalicChange={(v) => {
 						italic = v;
-						handleUpdate('italic', v);
+						handleUpdate("italic", v);
 					}}
 					onUnderlineChange={(v) => {
 						underline = v;
-						handleUpdate('underline', v);
+						handleUpdate("underline", v);
 					}}
 					onTextTransformChange={(v) => {
-						textTransform = v as 'none' | 'capitalize' | 'uppercase' | 'lowercase';
-						handleUpdate('textTransform', v);
+						textTransform = v as "none" | "capitalize" | "uppercase" | "lowercase";
+						handleUpdate("textTransform", v);
 					}}
 				/>
 			</div>

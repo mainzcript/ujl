@@ -1,6 +1,6 @@
-import { getContext, hasContext, setContext } from 'svelte';
+import { getContext, hasContext, setContext } from "svelte";
 
-export const COMBOBOX_CONTEXT = Symbol('combobox');
+export const COMBOBOX_CONTEXT = Symbol("combobox");
 
 export type ComboboxContext = {
 	get value(): string;

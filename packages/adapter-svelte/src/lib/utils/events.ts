@@ -2,7 +2,7 @@
  * Utility functions for working with AST nodes
  */
 
-import type { UJLAbstractNode } from '@ujl-framework/types';
+import type { UJLAbstractNode } from "@ujl-framework/types";
 
 /**
  * Get the module ID from an AST node

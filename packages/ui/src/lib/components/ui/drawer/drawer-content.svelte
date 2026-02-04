@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { Dialog as DialogPrimitive } from 'bits-ui';
-	import { cn, type WithElementRef } from '$lib/utils.js';
-	import { getUjlThemeContext } from '../ujl-theme/context.js';
-	import { getDrawerContext } from './context.js';
-	import DrawerOverlay from './drawer-overlay.svelte';
+	import type { Snippet } from "svelte";
+	import type { HTMLAttributes } from "svelte/elements";
+	import { Dialog as DialogPrimitive } from "bits-ui";
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import { getUjlThemeContext } from "../ujl-theme/context.js";
+	import { getDrawerContext } from "./context.js";
+	import DrawerOverlay from "./drawer-overlay.svelte";
 
 	interface DrawerContentProps extends WithElementRef<HTMLAttributes<HTMLDivElement>> {
 		class?: string;
@@ -37,18 +37,18 @@
 	let lastScrollTime = $state(0);
 
 	// Derived values
-	const direction = $derived(drawerContext?.direction ?? 'bottom');
-	const isVertical = $derived(direction === 'top' || direction === 'bottom');
+	const direction = $derived(drawerContext?.direction ?? "bottom");
+	const isVertical = $derived(direction === "top" || direction === "bottom");
 	const closeThreshold = $derived(drawerContext?.closeThreshold ?? 0.5);
 	const scrollLockTimeout = $derived(drawerContext?.scrollLockTimeout ?? 500);
 	const isOpen = $derived(drawerContext?.open ?? false);
 
 	// Only allow positive drag in the "close" direction
 	const effectiveDelta = $derived.by(() => {
-		if (direction === 'bottom') return Math.max(0, currentDelta);
-		if (direction === 'top') return Math.min(0, currentDelta);
-		if (direction === 'right') return Math.max(0, currentDelta);
-		if (direction === 'left') return Math.min(0, currentDelta);
+		if (direction === "bottom") return Math.max(0, currentDelta);
+		if (direction === "top") return Math.min(0, currentDelta);
+		if (direction === "right") return Math.max(0, currentDelta);
+		if (direction === "left") return Math.min(0, currentDelta);
 		return currentDelta;
 	});
 
@@ -57,16 +57,16 @@
 	// - base translate: open -> 0%, closed -> +/-100% (depending on direction)
 	// - drag translate: px offset while dragging (effectiveDelta)
 	const baseTranslate = $derived.by(() => {
-		if (isOpen) return '0%';
+		if (isOpen) return "0%";
 		switch (direction) {
-			case 'bottom':
-			case 'right':
-				return '100%';
-			case 'top':
-			case 'left':
-				return '-100%';
+			case "bottom":
+			case "right":
+				return "100%";
+			case "top":
+			case "left":
+				return "-100%";
 			default:
-				return '100%';
+				return "100%";
 		}
 	});
 
@@ -81,7 +81,7 @@
 
 	// Transition style (disable during drag to avoid “rubber band”)
 	const transitionClasses = $derived(
-		isDragging ? 'transition-none' : 'transition-transform duration-[240ms] ease-out'
+		isDragging ? "transition-none" : "transition-transform duration-[240ms] ease-out",
 	);
 
 	/**
@@ -90,7 +90,7 @@
 	 */
 	function isInteractiveElement(target: EventTarget | null): boolean {
 		if (!(target instanceof HTMLElement)) return false;
-		const interactiveTags = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'A'];
+		const interactiveTags = ["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A"];
 		if (interactiveTags.includes(target.tagName)) return true;
 		if (target.closest('button, input, textarea, select, a, [role="button"]')) return true;
 		return false;
@@ -178,16 +178,16 @@
 	// Direction-specific CSS classes
 	const directionClasses = $derived.by(() => {
 		switch (direction) {
-			case 'top':
-				return 'inset-x-0 top-0 mb-24 max-h-[80vh] rounded-b-lg';
-			case 'bottom':
-				return 'inset-x-0 bottom-0 mt-24 max-h-[80vh] rounded-t-lg';
-			case 'left':
-				return 'inset-y-0 left-0 w-3/4 sm:max-w-sm';
-			case 'right':
-				return 'inset-y-0 right-0 w-3/4 sm:max-w-sm';
+			case "top":
+				return "inset-x-0 top-0 mb-24 max-h-[80vh] rounded-b-lg";
+			case "bottom":
+				return "inset-x-0 bottom-0 mt-24 max-h-[80vh] rounded-t-lg";
+			case "left":
+				return "inset-y-0 left-0 w-3/4 sm:max-w-sm";
+			case "right":
+				return "inset-y-0 right-0 w-3/4 sm:max-w-sm";
 			default:
-				return '';
+				return "";
 		}
 	});
 </script>
@@ -203,16 +203,16 @@
 		data-slot="drawer-content"
 		data-ujl-theme={themeId}
 		data-ujl-drawer-direction={direction}
-		data-ujl-drawer-dragging={isDragging ? 'true' : undefined}
-		data-state={isOpen ? 'open' : 'closed'}
+		data-ujl-drawer-dragging={isDragging ? "true" : undefined}
+		data-state={isOpen ? "open" : "closed"}
 		class={cn(
-			isDark && 'dark',
-			'bg-ambient/95 text-ambient-foreground outline outline-foreground/10 backdrop-blur-sm',
-			'group/drawer-content fixed z-50 flex h-auto flex-col will-change-transform',
-			'data-[state=closed]:pointer-events-none',
+			isDark && "dark",
+			"bg-ambient/95 text-ambient-foreground outline outline-foreground/10 backdrop-blur-sm",
+			"group/drawer-content fixed z-50 flex h-auto flex-col will-change-transform",
+			"data-[state=closed]:pointer-events-none",
 			transitionClasses,
 			directionClasses,
-			className
+			className,
 		)}
 		style={transformStyle}
 		onpointerdown={handlePointerDown}
@@ -223,7 +223,7 @@
 		{...restProps}
 	>
 		<!-- Drag handle indicator for bottom drawer -->
-		{#if direction === 'bottom'}
+		{#if direction === "bottom"}
 			<div class="mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-foreground/10"></div>
 		{/if}
 		{@render children?.()}

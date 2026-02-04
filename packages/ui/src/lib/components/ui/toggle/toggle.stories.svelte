@@ -1,53 +1,53 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Toggle } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Toggle } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Toggle',
+		title: "Components/Base/Toggle",
 		component: Toggle,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			variant: {
-				control: { type: 'select' },
-				options: ['default', 'outline'],
-				description: 'The visual style variant',
+				control: { type: "select" },
+				options: ["default", "outline"],
+				description: "The visual style variant",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			size: {
-				control: { type: 'select' },
-				options: ['default', 'sm', 'lg'],
-				description: 'The size of the toggle',
+				control: { type: "select" },
+				options: ["default", "sm", "lg"],
+				description: "The size of the toggle",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			pressed: {
-				control: 'boolean',
-				description: 'Whether the toggle is pressed',
+				control: "boolean",
+				description: "Whether the toggle is pressed",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the toggle is disabled',
+				control: "boolean",
+				description: "Whether the toggle is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			variant: 'default',
-			size: 'default',
+			variant: "default",
+			size: "default",
 			pressed: false,
-			disabled: false
-		}
+			disabled: false,
+		},
 	});
 </script>
 

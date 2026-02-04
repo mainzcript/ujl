@@ -1,4 +1,4 @@
-import { generateUid } from '@ujl-framework/core';
+import { generateUid } from "@ujl-framework/core";
 
 const THROTTLE_INTERVAL = 100;
 const SMOOTHING_FACTOR = 2 * THROTTLE_INTERVAL;
@@ -37,7 +37,7 @@ const defaultRoi: ROI = {
 	width: 0,
 	height: 0,
 	visibleRatio: 0,
-	screenRatio: 0
+	screenRatio: 0,
 };
 
 /**
@@ -96,7 +96,7 @@ export default class PositionSpy {
 			width: lerp(this.currentRoi.width, this.targetRoi.width, alpha),
 			height: lerp(this.currentRoi.height, this.targetRoi.height, alpha),
 			visibleRatio: lerp(this.currentRoi.visibleRatio, this.targetRoi.visibleRatio, alpha),
-			screenRatio: lerp(this.currentRoi.screenRatio, this.targetRoi.screenRatio, alpha)
+			screenRatio: lerp(this.currentRoi.screenRatio, this.targetRoi.screenRatio, alpha),
 		};
 
 		return this.currentRoi;
@@ -133,9 +133,9 @@ export default class PositionSpy {
 		// Check if element is actually visible (not hidden by CSS)
 		const computedStyle = window.getComputedStyle(this.element);
 		const isVisible =
-			computedStyle.display !== 'none' &&
-			computedStyle.visibility !== 'hidden' &&
-			computedStyle.opacity !== '0' &&
+			computedStyle.display !== "none" &&
+			computedStyle.visibility !== "hidden" &&
+			computedStyle.opacity !== "0" &&
 			this.element.isConnected;
 
 		// Update the non-animated isConnected value
@@ -145,7 +145,7 @@ export default class PositionSpy {
 		const visibleWidth = Math.max(0, Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0));
 		const visibleHeight = Math.max(
 			0,
-			Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0)
+			Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0),
 		);
 		const visibleArea = visibleWidth * visibleHeight;
 
@@ -155,7 +155,7 @@ export default class PositionSpy {
 			width: rect.width,
 			height: rect.height,
 			visibleRatio: isVisible && elemArea > 0 ? visibleArea / elemArea : 0,
-			screenRatio: isVisible && screenArea > 0 ? visibleArea / screenArea : 0
+			screenRatio: isVisible && screenArea > 0 ? visibleArea / screenArea : 0,
 		};
 	}
 
@@ -167,8 +167,8 @@ export default class PositionSpy {
 	public static start(): void {
 		if (PositionSpy.running) return;
 		PositionSpy.running = true;
-		window.addEventListener('scroll', PositionSpy.onScroll, { passive: true });
-		window.addEventListener('resize', PositionSpy.onResize);
+		window.addEventListener("scroll", PositionSpy.onScroll, { passive: true });
+		window.addEventListener("resize", PositionSpy.onResize);
 		PositionSpy.intervalId = window.setInterval(() => PositionSpy.requestUpdate(), 1000);
 	}
 
@@ -178,8 +178,8 @@ export default class PositionSpy {
 	private static stop(): void {
 		if (!PositionSpy.running) return;
 		PositionSpy.running = false;
-		window.removeEventListener('scroll', PositionSpy.onScroll);
-		window.removeEventListener('resize', PositionSpy.onResize);
+		window.removeEventListener("scroll", PositionSpy.onScroll);
+		window.removeEventListener("resize", PositionSpy.onResize);
 		if (PositionSpy.intervalId !== undefined) {
 			clearInterval(PositionSpy.intervalId);
 			PositionSpy.intervalId = undefined;

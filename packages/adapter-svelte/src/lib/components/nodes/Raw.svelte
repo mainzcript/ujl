@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/types';
+	import type { UJLAbstractNode } from "@ujl-framework/types";
 
 	interface Props {
-		node: UJLAbstractNode & { type: 'raw-html' };
+		node: UJLAbstractNode & { type: "raw-html" };
 	}
 
 	let { node }: Props = $props();

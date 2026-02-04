@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { setDrawerContext, type DrawerDirection } from './context.js';
+	import type { Snippet } from "svelte";
+	import { setDrawerContext, type DrawerDirection } from "./context.js";
 
 	interface DrawerProps {
 		/** Whether the drawer is open (bindable) */
@@ -26,13 +26,13 @@
 	let {
 		open = $bindable(false),
 		activeSnapPoint = $bindable(null),
-		direction = 'bottom',
+		direction = "bottom",
 		shouldScaleBackground = true,
 		closeThreshold = 0.5,
 		scrollLockTimeout = 500,
 		snapPoints,
 		onOpenChange,
-		children
+		children,
 	}: DrawerProps = $props();
 
 	// Capture initial values for context (these are not expected to change at runtime)
@@ -49,11 +49,11 @@
 
 	// Handle scroll lock on body when drawer opens
 	$effect(() => {
-		if (typeof document === 'undefined') return;
+		if (typeof document === "undefined") return;
 
 		if (open) {
 			const originalOverflow = document.body.style.overflow;
-			document.body.style.overflow = 'hidden';
+			document.body.style.overflow = "hidden";
 			return () => {
 				document.body.style.overflow = originalOverflow;
 			};
@@ -62,36 +62,36 @@
 
 	// Handle background scaling
 	$effect(() => {
-		if (typeof document === 'undefined' || !initialShouldScaleBackground) return;
+		if (typeof document === "undefined" || !initialShouldScaleBackground) return;
 
-		const wrapper = document.querySelector('[data-ujl-drawer-wrapper]') as HTMLElement | null;
+		const wrapper = document.querySelector("[data-ujl-drawer-wrapper]") as HTMLElement | null;
 		if (!wrapper) return;
 
 		if (open) {
-			wrapper.style.transform = 'scale(0.95)';
-			wrapper.style.transformOrigin = 'center';
-			wrapper.style.transition = 'transform 0.3s ease';
+			wrapper.style.transform = "scale(0.95)";
+			wrapper.style.transformOrigin = "center";
+			wrapper.style.transition = "transform 0.3s ease";
 			return () => {
-				wrapper.style.transform = '';
-				wrapper.style.transformOrigin = '';
-				wrapper.style.transition = '';
+				wrapper.style.transform = "";
+				wrapper.style.transformOrigin = "";
+				wrapper.style.transition = "";
 			};
 		}
 	});
 
 	// Handle ESC key to close
 	$effect(() => {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		function handleKeydown(event: KeyboardEvent) {
-			if (event.key === 'Escape' && open) {
+			if (event.key === "Escape" && open) {
 				open = false;
 				onOpenChange?.(false);
 			}
 		}
 
-		window.addEventListener('keydown', handleKeydown);
-		return () => window.removeEventListener('keydown', handleKeydown);
+		window.addEventListener("keydown", handleKeydown);
+		return () => window.removeEventListener("keydown", handleKeydown);
 	});
 
 	// Notify parent of open state changes
@@ -121,7 +121,7 @@
 		setActiveSnapPoint: (point: number | string | null) => {
 			activeSnapPoint = point;
 		},
-		isNested: false
+		isNested: false,
 	});
 </script>
 

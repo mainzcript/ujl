@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Drawer,
 		DrawerContent,
@@ -8,48 +8,48 @@
 		DrawerTitle,
 		DrawerDescription,
 		DrawerTriggerButton,
-		DrawerCloseButton
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
+		DrawerCloseButton,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Overlays/Drawer',
+		title: "Components/Overlays/Drawer",
 		component: Drawer,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			direction: {
-				control: { type: 'select' },
-				options: ['bottom', 'top', 'left', 'right'],
-				description: 'The direction from which the drawer slides in',
+				control: { type: "select" },
+				options: ["bottom", "top", "left", "right"],
+				description: "The direction from which the drawer slides in",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'bottom' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "bottom" },
+				},
 			},
 			shouldScaleBackground: {
-				control: 'boolean',
-				description: 'Whether the background should scale when the drawer opens',
+				control: "boolean",
+				description: "Whether the background should scale when the drawer opens",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'true' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "true" },
+				},
 			},
 			snapPoints: {
-				control: 'object',
-				description: 'Array of snap points (0-1) where the drawer can rest',
+				control: "object",
+				description: "Array of snap points (0-1) where the drawer can rest",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'undefined' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "undefined" },
+				},
+			},
 		},
 		args: {
-			direction: 'bottom',
+			direction: "bottom",
 			shouldScaleBackground: true,
-			snapPoints: undefined
-		}
+			snapPoints: undefined,
+		},
 	});
 </script>
 
@@ -80,7 +80,7 @@
 </Story>
 
 <!-- From Top -->
-<Story name="From Top" args={{ direction: 'top' }}>
+<Story name="From Top" args={{ direction: "top" }}>
 	{#snippet template(args)}
 		<Drawer {...args}>
 			<DrawerTriggerButton variant="outline">Open from Top</DrawerTriggerButton>
@@ -104,7 +104,7 @@
 </Story>
 
 <!-- From Left -->
-<Story name="From Left" args={{ direction: 'left' }}>
+<Story name="From Left" args={{ direction: "left" }}>
 	{#snippet template(args)}
 		<Drawer {...args}>
 			<DrawerTriggerButton variant="outline">Open from Left</DrawerTriggerButton>
@@ -128,7 +128,7 @@
 </Story>
 
 <!-- From Right -->
-<Story name="From Right" args={{ direction: 'right' }}>
+<Story name="From Right" args={{ direction: "right" }}>
 	{#snippet template(args)}
 		<Drawer {...args}>
 			<DrawerTriggerButton variant="outline">Open from Right</DrawerTriggerButton>

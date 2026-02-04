@@ -3,8 +3,8 @@
  * Uses Svelte 5 runes for reactive state
  */
 
-export type DragPosition = 'before' | 'after' | 'into' | null;
-export type DragType = 'node' | 'slot';
+export type DragPosition = "before" | "after" | "into" | null;
+export type DragType = "node" | "slot";
 
 export interface DragState {
 	draggedNodeId: string | null;
@@ -37,14 +37,14 @@ export function createDragHandler(
 		nodeId: string,
 		targetId: string,
 		slotName?: string,
-		position?: 'before' | 'after' | 'into'
+		position?: "before" | "after" | "into",
 	) => boolean,
 	onSlotMove?: (
 		sourceParentId: string,
 		sourceSlotName: string,
 		targetParentId: string,
-		targetSlotName: string
-	) => boolean
+		targetSlotName: string,
+	) => boolean,
 ): DragHandler {
 	// Reactive state using Svelte 5 runes
 	let draggedNodeId = $state<string | null>(null);
@@ -69,17 +69,17 @@ export function createDragHandler(
 
 		// Clean up global listener if it exists
 		if (globalDragEndListener) {
-			document.removeEventListener('dragend', globalDragEndListener);
+			document.removeEventListener("dragend", globalDragEndListener);
 			globalDragEndListener = null;
 		}
 	}
 
 	function handleDragStart(event: DragEvent, nodeId: string) {
 		draggedNodeId = nodeId;
-		dragType = 'node';
+		dragType = "node";
 		if (event.dataTransfer) {
-			event.dataTransfer.effectAllowed = 'move';
-			event.dataTransfer.setData('text/plain', JSON.stringify({ type: 'node', nodeId }));
+			event.dataTransfer.effectAllowed = "move";
+			event.dataTransfer.setData("text/plain", JSON.stringify({ type: "node", nodeId }));
 		}
 
 		// Add global dragend listener as fallback for cancelled drags (ESC, outside window, etc.)
@@ -87,18 +87,18 @@ export function createDragHandler(
 		globalDragEndListener = () => {
 			reset();
 		};
-		document.addEventListener('dragend', globalDragEndListener, { once: true });
+		document.addEventListener("dragend", globalDragEndListener, { once: true });
 	}
 
 	function handleSlotDragStart(event: DragEvent, parentId: string, slotName: string) {
 		draggedSlotParentId = parentId;
 		draggedSlotName = slotName;
-		dragType = 'slot';
+		dragType = "slot";
 		if (event.dataTransfer) {
-			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.effectAllowed = "move";
 			event.dataTransfer.setData(
-				'text/plain',
-				JSON.stringify({ type: 'slot', parentId, slotName })
+				"text/plain",
+				JSON.stringify({ type: "slot", parentId, slotName }),
 			);
 		}
 
@@ -107,24 +107,24 @@ export function createDragHandler(
 		globalDragEndListener = () => {
 			reset();
 		};
-		document.addEventListener('dragend', globalDragEndListener, { once: true });
+		document.addEventListener("dragend", globalDragEndListener, { once: true });
 	}
 
 	function handleDragOver(event: DragEvent, targetNodeId: string) {
 		// Prevent dropping on itself
-		if (dragType === 'node' && draggedNodeId === targetNodeId) return;
-		if (dragType === 'slot' && draggedSlotParentId === targetNodeId) return;
+		if (dragType === "node" && draggedNodeId === targetNodeId) return;
+		if (dragType === "slot" && draggedSlotParentId === targetNodeId) return;
 
 		event.preventDefault();
 		event.stopPropagation();
 
 		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = 'move';
+			event.dataTransfer.dropEffect = "move";
 		}
 
 		// For slot drags on nodes, we only show "into" position
-		if (dragType === 'slot') {
-			dropPosition = 'into';
+		if (dragType === "slot") {
+			dropPosition = "into";
 		} else {
 			// For node drags, calculate drop position based on mouse Y position
 			const target = event.currentTarget as HTMLElement;
@@ -134,11 +134,11 @@ export function createDragHandler(
 
 			// Top 25%: before, Bottom 25%: after, Middle 50%: into
 			if (y < height * 0.25) {
-				dropPosition = 'before';
+				dropPosition = "before";
 			} else if (y > height * 0.75) {
-				dropPosition = 'after';
+				dropPosition = "after";
 			} else {
-				dropPosition = 'into';
+				dropPosition = "into";
 			}
 		}
 
@@ -155,7 +155,7 @@ export function createDragHandler(
 	function handleSlotDragOver(event: DragEvent, parentNodeId: string, slotName: string) {
 		// Prevent dropping slot on itself
 		if (
-			dragType === 'slot' &&
+			dragType === "slot" &&
 			draggedSlotParentId === parentNodeId &&
 			draggedSlotName === slotName
 		) {
@@ -166,12 +166,12 @@ export function createDragHandler(
 		event.stopPropagation();
 
 		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = 'move';
+			event.dataTransfer.dropEffect = "move";
 		}
 
 		dropTargetId = parentNodeId;
 		dropTargetSlot = slotName;
-		dropPosition = 'into';
+		dropPosition = "into";
 	}
 
 	/**
@@ -183,12 +183,12 @@ export function createDragHandler(
 		event.stopPropagation();
 
 		// Prevent dropping on itself
-		if (dragType === 'node' && draggedNodeId === targetNodeId && !targetSlotName) {
+		if (dragType === "node" && draggedNodeId === targetNodeId && !targetSlotName) {
 			reset();
 			return;
 		}
 		if (
-			dragType === 'slot' &&
+			dragType === "slot" &&
 			draggedSlotParentId === targetNodeId &&
 			draggedSlotName === targetSlotName
 		) {
@@ -197,11 +197,11 @@ export function createDragHandler(
 		}
 
 		// Handle node being dragged
-		if (dragType === 'node' && draggedNodeId && onNodeMove) {
-			onNodeMove(draggedNodeId, targetNodeId, targetSlotName, dropPosition || 'into');
+		if (dragType === "node" && draggedNodeId && onNodeMove) {
+			onNodeMove(draggedNodeId, targetNodeId, targetSlotName, dropPosition || "into");
 		}
 		// Handle slot being dragged
-		else if (dragType === 'slot' && draggedSlotParentId && draggedSlotName && onSlotMove) {
+		else if (dragType === "slot" && draggedSlotParentId && draggedSlotName && onSlotMove) {
 			// If targetSlotName is provided, drop into that specific slot
 			// Otherwise use the dragged slot's name (matching slot type)
 			const finalTargetSlot = targetSlotName || draggedSlotName;
@@ -247,6 +247,6 @@ export function createDragHandler(
 		handleDrop,
 		handleDragEnd,
 		handleSlotDragOver,
-		reset
+		reset,
 	};
 }

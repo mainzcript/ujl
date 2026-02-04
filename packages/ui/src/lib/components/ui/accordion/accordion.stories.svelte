@@ -1,32 +1,32 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Navigation/Accordion',
+		title: "Components/Navigation/Accordion",
 		component: Accordion,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			type: {
-				control: { type: 'select' },
-				options: ['single', 'multiple'],
-				description: 'Whether to allow single or multiple items to be open',
+				control: { type: "select" },
+				options: ["single", "multiple"],
+				description: "Whether to allow single or multiple items to be open",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'single' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "single" },
+				},
 			},
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			type: 'single'
-		}
+			type: "single",
+		},
 	});
 </script>
 

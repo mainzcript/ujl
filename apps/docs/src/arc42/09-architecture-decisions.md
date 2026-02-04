@@ -143,7 +143,7 @@ class CustomModule extends ModuleBase {
 				title: this.fields[0].field.parse(moduleData.fields.title),
 				image: this.fields[1].field.parse(moduleData.fields.image),
 				children: await Promise.all(
-					(moduleData.slots.body ?? []).map(child => composer.composeModule(child))
+					(moduleData.slots.body ?? []).map((child) => composer.composeModule(child)),
 				),
 			},
 		};
@@ -403,7 +403,7 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 }
 
 export function validateUJLCDocumentSafe(
-	data: unknown
+	data: unknown,
 ): SafeParseReturnType<unknown, UJLCDocument> {
 	return UJLCDocumentSchema.safeParse(data);
 }
@@ -916,11 +916,11 @@ Test-spezifische Attribute werden in Svelte-Komponenten gesetzt:
 
 ```svelte
 <div
-  data-testid="tree-node-{node.meta.id}"
-  data-ujl-module-id={node.meta.id}
-  class:selected={isSelected}
+	data-testid="tree-node-{node.meta.id}"
+	data-ujl-module-id={node.meta.id}
+	class:selected={isSelected}
 >
-  {node.type}
+	{node.type}
 </div>
 ```
 

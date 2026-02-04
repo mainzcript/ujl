@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { setApp, setAppRegistry, useApp } from './context.svelte.js';
+	import { setApp, setAppRegistry, useApp } from "./context.svelte.js";
 
 	let {
 		initialSidebarOpen = true,
 		initialPanelOpen = false,
-		onAppReady
+		onAppReady,
 	}: {
 		initialSidebarOpen?: boolean;
 		initialPanelOpen?: boolean;
@@ -23,7 +23,7 @@
 	const app = (() =>
 		setApp({
 			initialSidebarOpen,
-			initialPanelOpen
+			initialPanelOpen,
 		}))();
 
 	// Set registry for components that need it
@@ -37,7 +37,7 @@
 				getSidebarOpen: () => app.sidebarDesktopOpen,
 				getPanelOpen: () => app.panelDesktopOpen,
 				getIsSidebarVisible: () => app.isSidebarVisible,
-				getIsPanelVisible: () => app.isPanelVisible
+				getIsPanelVisible: () => app.isPanelVisible,
 			});
 		}
 	});

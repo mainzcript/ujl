@@ -7,6 +7,11 @@ This directory contains guidelines and documentation for developers working on t
 - [Testing Guidelines](./testing.md) - Test infrastructure and best practices
 - [Code Review Playbook](./code-review.md) - Code review process and standards
 
+## Tooling
+
+- Linting and formatting are centralized at the repo root (ESLint flat config + Prettier).
+- Run tooling from the repository root for consistent results.
+
 ## External Documentation
 
 - [User & Architecture Docs](../apps/docs/) - Public documentation website (VitePress)
@@ -16,4 +21,3 @@ This directory contains guidelines and documentation for developers working on t
 ## Structure
 
 All developer guidelines are versioned in this directory. For detailed information about specific topics, refer to the individual guideline files.
-

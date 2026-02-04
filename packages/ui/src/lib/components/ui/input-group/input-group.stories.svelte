@@ -1,30 +1,30 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		InputGroup,
 		InputGroupAddon,
 		InputGroupButton,
 		InputGroupInput,
 		InputGroupText,
-		InputGroupTextarea
-	} from './index.ts';
-	import { Label } from '../label/index.ts';
-	import { Kbd } from '../kbd/index.ts';
+		InputGroupTextarea,
+	} from "./index.ts";
+	import { Label } from "../label/index.ts";
+	import { Kbd } from "../kbd/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/InputGroup',
+		title: "Components/Forms/InputGroup",
 		component: InputGroup,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes',
+				control: "text",
+				description: "Additional CSS classes",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
-		args: {}
+		args: {},
 	});
 </script>
 

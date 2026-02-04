@@ -5,7 +5,7 @@
  * different components. They do not depend on Svelte APIs.
  */
 
-import Compressor from 'compressorjs';
+import Compressor from "compressorjs";
 
 /**
  * Load image and return dimensions
@@ -22,7 +22,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
 
 		img.onerror = () => {
 			URL.revokeObjectURL(objectUrl);
-			reject(new Error('Failed to load image'));
+			reject(new Error("Failed to load image"));
 		};
 
 		img.src = objectUrl;
@@ -59,18 +59,18 @@ export async function compressImage(file: File): Promise<File> {
 		file: File,
 		maxWidth: number,
 		maxHeight: number,
-		quality: number
+		quality: number,
 	): Promise<File | Blob> => {
 		return new Promise((resolve, reject) => {
 			new Compressor(file, {
 				maxWidth: Math.round(maxWidth),
 				maxHeight: Math.round(maxHeight),
 				quality,
-				convertTypes: ['image/png'],
+				convertTypes: ["image/png"],
 				convertSize: 5_000_000,
-				mimeType: 'auto',
+				mimeType: "auto",
 				success: resolve,
-				error: reject
+				error: reject,
 			});
 		});
 	};
@@ -80,7 +80,7 @@ export async function compressImage(file: File): Promise<File> {
 		if (result instanceof File) return result;
 		return new File([result], originalName, {
 			type: result.type,
-			lastModified: Date.now()
+			lastModified: Date.now(),
 		});
 	};
 

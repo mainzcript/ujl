@@ -3,17 +3,17 @@
 	 * Styles for this component are in richtext-input.css (co-located).
 	 * Svelte <style> blocks don't work in Shadow DOM - see src/lib/styles/README.md
 	 */
-	import { onMount, onDestroy } from 'svelte';
-	import { Editor } from '@tiptap/core';
-	import type { ProseMirrorDocument } from '@ujl-framework/types';
-	import { InputGroup, InputGroupAddon, InputGroupButton } from '@ujl-framework/ui';
-	import { ujlRichTextExtensions } from '@ujl-framework/core';
-	import BoldIcon from '@lucide/svelte/icons/bold';
-	import CodeIcon from '@lucide/svelte/icons/code';
+	import { onMount, onDestroy } from "svelte";
+	import { Editor } from "@tiptap/core";
+	import type { ProseMirrorDocument } from "@ujl-framework/types";
+	import { InputGroup, InputGroupAddon, InputGroupButton } from "@ujl-framework/ui";
+	import { ujlRichTextExtensions } from "@ujl-framework/core";
+	import BoldIcon from "@lucide/svelte/icons/bold";
+	import CodeIcon from "@lucide/svelte/icons/code";
 
 	let {
 		value,
-		onChange
+		onChange,
 	}: {
 		value: ProseMirrorDocument | undefined;
 		onChange: (value: ProseMirrorDocument) => void;
@@ -26,8 +26,8 @@
 	let isCodeActive = $state(false);
 
 	const EMPTY_DOCUMENT: ProseMirrorDocument = {
-		type: 'doc',
-		content: [{ type: 'paragraph', content: [] }]
+		type: "doc",
+		content: [{ type: "paragraph", content: [] }],
 	};
 
 	// Prevents unnecessary editor updates when value reference hasn't changed
@@ -46,7 +46,7 @@
 			},
 			onSelectionUpdate: ({ editor: e }: { editor: Editor }) => {
 				updateActiveStates(e);
-			}
+			},
 		});
 		previousValue = value;
 		updateActiveStates(editor);
@@ -54,8 +54,8 @@
 
 	function updateActiveStates(e: Editor | null) {
 		if (!e) return;
-		isBoldActive = e.isActive('bold');
-		isCodeActive = e.isActive('code');
+		isBoldActive = e.isActive("bold");
+		isCodeActive = e.isActive("code");
 	}
 
 	function toggleBold() {
@@ -98,7 +98,7 @@
 	<!-- Toolbar at top -->
 	<InputGroupAddon align="block-start" class="">
 		<InputGroupButton
-			variant={isBoldActive ? 'default' : 'muted'}
+			variant={isBoldActive ? "default" : "muted"}
 			size="icon-xs"
 			type="button"
 			onclick={toggleBold}
@@ -108,7 +108,7 @@
 			<BoldIcon />
 		</InputGroupButton>
 		<InputGroupButton
-			variant={isCodeActive ? 'default' : 'muted'}
+			variant={isCodeActive ? "default" : "muted"}
 			size="icon-xs"
 			type="button"
 			onclick={toggleCode}

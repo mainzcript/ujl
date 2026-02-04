@@ -1,34 +1,34 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { HoverCard, HoverCardContent, HoverCardTrigger } from './index.ts';
-	import { Button } from '../button/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { HoverCard, HoverCardContent, HoverCardTrigger } from "./index.ts";
+	import { Button } from "../button/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Overlays/HoverCard',
+		title: "Components/Overlays/HoverCard",
 		component: HoverCard,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			openDelay: {
-				control: { type: 'number' },
-				description: 'The delay in milliseconds before the hover card opens',
+				control: { type: "number" },
+				description: "The delay in milliseconds before the hover card opens",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '700' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "700" },
+				},
 			},
 			closeDelay: {
-				control: { type: 'number' },
-				description: 'The delay in milliseconds before the hover card closes',
+				control: { type: "number" },
+				description: "The delay in milliseconds before the hover card closes",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '300' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "300" },
+				},
+			},
 		},
 		args: {
 			openDelay: 200,
-			closeDelay: 300
-		}
+			closeDelay: 300,
+		},
 	});
 </script>
 

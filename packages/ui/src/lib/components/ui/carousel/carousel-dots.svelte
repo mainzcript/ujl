@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Card } from '$lib/index.js';
-	import { getCarouselContext } from './context.js';
-	import { cn, type WithElementRef } from '$lib/utils.js';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import type { CarouselState } from './carousel.js';
+	import { Card } from "$lib/index.js";
+	import { getCarouselContext } from "./context.js";
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import type { HTMLAttributes } from "svelte/elements";
+	import type { CarouselState } from "./carousel.js";
 
 	let {
 		ref = $bindable(null),
@@ -11,7 +11,7 @@
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
 
-	const carouselCtx = getCarouselContext('<Carousel.Dots/>');
+	const carouselCtx = getCarouselContext("<Carousel.Dots/>");
 
 	let carouselState: CarouselState | undefined = $state(undefined);
 	let itemCount: number = $state(0); // Memoize the dots array to avoid recreating it on every update
@@ -33,7 +33,7 @@
 	});
 </script>
 
-<Card bind:ref class={cn('relative inline-block rounded-full px-2 py-1', className)} {...restProps}>
+<Card bind:ref class={cn("relative inline-block rounded-full px-2 py-1", className)} {...restProps}>
 	<div class="flex" role="tablist" aria-label="Carousel navigation">
 		{#each Array(itemCount), i (i)}
 			{@const isActive = carouselState
@@ -43,8 +43,8 @@
 				class="duration-200 hover:scale-150"
 				onclick={() => carouselCtx.carousel?.scrollTo(i)}
 				role="tab"
-				aria-current={isActive ? 'true' : 'false'}
-				aria-selected={isActive ? 'true' : 'false'}
+				aria-current={isActive ? "true" : "false"}
+				aria-selected={isActive ? "true" : "false"}
 			>
 				<div
 					data-is-active={isActive}

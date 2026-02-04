@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { Text } from '$lib/index.js';
-	import { type WithElementRef } from '$lib/utils.js';
+	import type { HTMLAttributes } from "svelte/elements";
+	import { Text } from "$lib/index.js";
+	import { type WithElementRef } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
@@ -9,7 +9,7 @@
 		as,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLElement>> & {
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 		as?: keyof HTMLElementTagNameMap;
 	} = $props();
 </script>

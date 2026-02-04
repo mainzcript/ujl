@@ -128,14 +128,14 @@ function validateTheme(data: unknown) {
 		console.log(`   Radius: ${theme.ujlt.tokens.radius}`);
 		const primaryLight = resolveColorFromShades(
 			theme.ujlt.tokens.color.primary.shades,
-			theme.ujlt.tokens.color.primary.light
+			theme.ujlt.tokens.color.primary.light,
 		);
 		console.log(
-			`   Primary Light: l=${primaryLight.l.toFixed(3)}, c=${primaryLight.c.toFixed(3)}, h=${primaryLight.h.toFixed(3)}`
+			`   Primary Light: l=${primaryLight.l.toFixed(3)}, c=${primaryLight.c.toFixed(3)}, h=${primaryLight.h.toFixed(3)}`,
 		);
 
 		console.log("\n🎨 Available Colors:");
-		Object.keys(theme.ujlt.tokens.color).forEach(flavor => {
+		Object.keys(theme.ujlt.tokens.color).forEach((flavor) => {
 			console.log(`   - ${flavor}`);
 		});
 
@@ -154,7 +154,7 @@ function validateTheme(data: unknown) {
 
 			if (contrast < 0.3) {
 				console.log(
-					`   ⚠️  ${flavorKey}: Low contrast (${contrast.toFixed(2)}) between light and lightForeground`
+					`   ⚠️  ${flavorKey}: Low contrast (${contrast.toFixed(2)}) between light and lightForeground`,
 				);
 				warnings++;
 			}
@@ -198,7 +198,7 @@ function validateContent(data: unknown) {
 		console.log("📄 Document Details:");
 		console.log(`   Title: ${doc.ujlc.meta.title}`);
 		console.log(
-			`   Description: ${doc.ujlc.meta.description.substring(0, 60)}${doc.ujlc.meta.description.length > 60 ? "..." : ""}`
+			`   Description: ${doc.ujlc.meta.description.substring(0, 60)}${doc.ujlc.meta.description.length > 60 ? "..." : ""}`,
 		);
 		console.log(`   Version: ${doc.ujlc.meta._version}`);
 		console.log(`   Tags: ${doc.ujlc.meta.tags.join(", ")}`);
@@ -213,7 +213,7 @@ function validateContent(data: unknown) {
 		function analyzeModules(modules: UJLCModuleObject[], depth: number = 1) {
 			maxDepth = Math.max(maxDepth, depth);
 
-			modules.forEach(module => {
+			modules.forEach((module) => {
 				moduleCount++;
 				uniqueIds.add(module.meta.id);
 
@@ -221,7 +221,7 @@ function validateContent(data: unknown) {
 				moduleTypes.set(module.type, count + 1);
 
 				// Recursively traverse slots
-				Object.values(module.slots).forEach(slot => {
+				Object.values(module.slots).forEach((slot) => {
 					analyzeModules(slot, depth + 1);
 				});
 			});

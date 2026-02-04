@@ -1,34 +1,34 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './index.ts';
-	import { Button } from '../button/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./index.ts";
+	import { Button } from "../button/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Feedback/Tooltip',
+		title: "Components/Feedback/Tooltip",
 		component: Tooltip,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			delayDuration: {
-				control: { type: 'number' },
+				control: { type: "number" },
 				description:
-					'The duration from when the mouse enters the trigger until the tooltip opens (in ms)',
+					"The duration from when the mouse enters the trigger until the tooltip opens (in ms)",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '700' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "700" },
+				},
 			},
 			disableHoverableContent: {
-				control: 'boolean',
-				description: 'When true, the tooltip closes when hovering over the content',
+				control: "boolean",
+				description: "When true, the tooltip closes when hovering over the content",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			delayDuration: 200
-		}
+			delayDuration: 200,
+		},
 	});
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { UJLAbstractTextNode } from '@ujl-framework/types';
-	import { RichText } from '../ui/index.js';
+	import type { UJLAbstractTextNode } from "@ujl-framework/types";
+	import { RichText } from "../ui/index.js";
 
 	interface Props {
 		node: UJLAbstractTextNode;

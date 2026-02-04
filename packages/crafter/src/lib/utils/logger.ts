@@ -16,5 +16,5 @@ export const logger = {
 	},
 	error: (message: string, ...args: unknown[]) => {
 		console.error(`[Crafter] ${message}`, ...args);
-	}
+	},
 };

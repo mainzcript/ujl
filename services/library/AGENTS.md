@@ -36,32 +36,32 @@ src/
 ### Minimal Config Pattern
 
 ```typescript
-import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { buildConfig } from "payload";
+import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export default buildConfig({
-  admin: {
-    user: 'users',
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [Users, Images],
-  editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URL,
-  }),
-})
+	admin: {
+		user: "users",
+		importMap: {
+			baseDir: path.resolve(dirname),
+		},
+	},
+	collections: [Users, Images],
+	editor: lexicalEditor(),
+	secret: process.env.PAYLOAD_SECRET,
+	typescript: {
+		outputFile: path.resolve(dirname, "payload-types.ts"),
+	},
+	db: mongooseAdapter({
+		url: process.env.DATABASE_URL,
+	}),
+});
 ```
 
 ## Collections
@@ -69,45 +69,45 @@ export default buildConfig({
 ### Basic Collection
 
 ```typescript
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
 export const Posts: CollectionConfig = {
-  slug: 'posts',
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'author', 'status', 'createdAt'],
-  },
-  fields: [
-    { name: 'title', type: 'text', required: true },
-    { name: 'slug', type: 'text', unique: true, index: true },
-    { name: 'content', type: 'richText' },
-    { name: 'author', type: 'relationship', relationTo: 'users' },
-  ],
-  timestamps: true,
-}
+	slug: "posts",
+	admin: {
+		useAsTitle: "title",
+		defaultColumns: ["title", "author", "status", "createdAt"],
+	},
+	fields: [
+		{ name: "title", type: "text", required: true },
+		{ name: "slug", type: "text", unique: true, index: true },
+		{ name: "content", type: "richText" },
+		{ name: "author", type: "relationship", relationTo: "users" },
+	],
+	timestamps: true,
+};
 ```
 
 ### Auth Collection with RBAC
 
 ```typescript
 export const Users: CollectionConfig = {
-  slug: 'users',
-  auth: true,
-  fields: [
-    {
-      name: 'roles',
-      type: 'select',
-      hasMany: true,
-      options: ['admin', 'editor', 'user'],
-      defaultValue: ['user'],
-      required: true,
-      saveToJWT: true, // Include in JWT for fast access checks
-      access: {
-        update: ({ req: { user } }) => user?.roles?.includes('admin'),
-      },
-    },
-  ],
-}
+	slug: "users",
+	auth: true,
+	fields: [
+		{
+			name: "roles",
+			type: "select",
+			hasMany: true,
+			options: ["admin", "editor", "user"],
+			defaultValue: ["user"],
+			required: true,
+			saveToJWT: true, // Include in JWT for fast access checks
+			access: {
+				update: ({ req: { user } }) => user?.roles?.includes("admin"),
+			},
+		},
+	],
+};
 ```
 
 ## Fields
@@ -155,22 +155,22 @@ slugField({ fieldToUse: 'title' })
 ```typescript
 // ❌ SECURITY BUG: Access control bypassed
 await payload.find({
-  collection: 'posts',
-  user: someUser, // Ignored! Operation runs with ADMIN privileges
-})
+	collection: "posts",
+	user: someUser, // Ignored! Operation runs with ADMIN privileges
+});
 
 // ✅ SECURE: Enforces user permissions
 await payload.find({
-  collection: 'posts',
-  user: someUser,
-  overrideAccess: false, // REQUIRED
-})
+	collection: "posts",
+	user: someUser,
+	overrideAccess: false, // REQUIRED
+});
 
 // ✅ Administrative operation (intentional bypass)
 await payload.find({
-  collection: 'posts',
-  // No user, overrideAccess defaults to true
-})
+	collection: "posts",
+	// No user, overrideAccess defaults to true
+});
 ```
 
 **Rule**: When passing `user` to Local API, ALWAYS set `overrideAccess: false`
@@ -247,36 +247,36 @@ hooks: {
 ### Collection-Level Access
 
 ```typescript
-import type { Access } from 'payload'
+import type { Access } from "payload";
 
 // Boolean return
-const authenticated: Access = ({ req: { user } }) => Boolean(user)
+const authenticated: Access = ({ req: { user } }) => Boolean(user);
 
 // Query constraint (row-level security)
 const ownPostsOnly: Access = ({ req: { user } }) => {
-  if (!user) return false
-  if (user?.roles?.includes('admin')) return true
+	if (!user) return false;
+	if (user?.roles?.includes("admin")) return true;
 
-  return {
-    author: { equals: user.id },
-  }
-}
+	return {
+		author: { equals: user.id },
+	};
+};
 
 // Async access check
 const projectMemberAccess: Access = async ({ req, id }) => {
-  const { user, payload } = req
+	const { user, payload } = req;
 
-  if (!user) return false
-  if (user.roles?.includes('admin')) return true
+	if (!user) return false;
+	if (user.roles?.includes("admin")) return true;
 
-  const project = await payload.findByID({
-    collection: 'projects',
-    id: id as string,
-    depth: 0,
-  })
+	const project = await payload.findByID({
+		collection: "projects",
+		id: id as string,
+		depth: 0,
+	});
 
-  return project.members?.includes(user.id)
-}
+	return project.members?.includes(user.id);
+};
 ```
 
 ### Field-Level Access
@@ -305,27 +305,27 @@ const projectMemberAccess: Access = async ({ req, id }) => {
 
 ```typescript
 // Anyone
-export const anyone: Access = () => true
+export const anyone: Access = () => true;
 
 // Authenticated only
-export const authenticated: Access = ({ req: { user } }) => Boolean(user)
+export const authenticated: Access = ({ req: { user } }) => Boolean(user);
 
 // Admin only
 export const adminOnly: Access = ({ req: { user } }) => {
-  return user?.roles?.includes('admin')
-}
+	return user?.roles?.includes("admin");
+};
 
 // Admin or self
 export const adminOrSelf: Access = ({ req: { user } }) => {
-  if (user?.roles?.includes('admin')) return true
-  return { id: { equals: user?.id } }
-}
+	if (user?.roles?.includes("admin")) return true;
+	return { id: { equals: user?.id } };
+};
 
 // Published or authenticated
 export const authenticatedOrPublished: Access = ({ req: { user } }) => {
-  if (user) return true
-  return { _status: { equals: 'published' } }
-}
+	if (user) return true;
+	return { _status: { equals: "published" } };
+};
 ```
 
 ## Hooks
@@ -333,64 +333,64 @@ export const authenticatedOrPublished: Access = ({ req: { user } }) => {
 ### Common Hook Patterns
 
 ```typescript
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
 export const Posts: CollectionConfig = {
-  slug: 'posts',
-  hooks: {
-    // Before validation - format data
-    beforeValidate: [
-      async ({ data, operation }) => {
-        if (operation === 'create') {
-          data.slug = slugify(data.title)
-        }
-        return data
-      },
-    ],
+	slug: "posts",
+	hooks: {
+		// Before validation - format data
+		beforeValidate: [
+			async ({ data, operation }) => {
+				if (operation === "create") {
+					data.slug = slugify(data.title);
+				}
+				return data;
+			},
+		],
 
-    // Before save - business logic
-    beforeChange: [
-      async ({ data, req, operation, originalDoc }) => {
-        if (operation === 'update' && data.status === 'published') {
-          data.publishedAt = new Date()
-        }
-        return data
-      },
-    ],
+		// Before save - business logic
+		beforeChange: [
+			async ({ data, req, operation, originalDoc }) => {
+				if (operation === "update" && data.status === "published") {
+					data.publishedAt = new Date();
+				}
+				return data;
+			},
+		],
 
-    // After save - side effects
-    afterChange: [
-      async ({ doc, req, operation, previousDoc, context }) => {
-        // Check context to prevent loops
-        if (context.skipNotification) return
+		// After save - side effects
+		afterChange: [
+			async ({ doc, req, operation, previousDoc, context }) => {
+				// Check context to prevent loops
+				if (context.skipNotification) return;
 
-        if (operation === 'create') {
-          await sendNotification(doc)
-        }
-        return doc
-      },
-    ],
+				if (operation === "create") {
+					await sendNotification(doc);
+				}
+				return doc;
+			},
+		],
 
-    // After read - computed fields
-    afterRead: [
-      async ({ doc, req }) => {
-        doc.viewCount = await getViewCount(doc.id)
-        return doc
-      },
-    ],
+		// After read - computed fields
+		afterRead: [
+			async ({ doc, req }) => {
+				doc.viewCount = await getViewCount(doc.id);
+				return doc;
+			},
+		],
 
-    // Before delete - cascading deletes
-    beforeDelete: [
-      async ({ req, id }) => {
-        await req.payload.delete({
-          collection: 'comments',
-          where: { post: { equals: id } },
-          req, // Important for transaction
-        })
-      },
-    ],
-  },
-}
+		// Before delete - cascading deletes
+		beforeDelete: [
+			async ({ req, id }) => {
+				await req.payload.delete({
+					collection: "comments",
+					where: { post: { equals: id } },
+					req, // Important for transaction
+				});
+			},
+		],
+	},
+};
 ```
 
 ## Queries
@@ -400,47 +400,47 @@ export const Posts: CollectionConfig = {
 ```typescript
 // Find with complex query
 const posts = await payload.find({
-  collection: 'posts',
-  where: {
-    and: [{ status: { equals: 'published' } }, { 'author.name': { contains: 'john' } }],
-  },
-  depth: 2, // Populate relationships
-  limit: 10,
-  sort: '-createdAt',
-  select: {
-    title: true,
-    author: true,
-  },
-})
+	collection: "posts",
+	where: {
+		and: [{ status: { equals: "published" } }, { "author.name": { contains: "john" } }],
+	},
+	depth: 2, // Populate relationships
+	limit: 10,
+	sort: "-createdAt",
+	select: {
+		title: true,
+		author: true,
+	},
+});
 
 // Find by ID
 const post = await payload.findByID({
-  collection: 'posts',
-  id: '123',
-  depth: 2,
-})
+	collection: "posts",
+	id: "123",
+	depth: 2,
+});
 
 // Create
 const newPost = await payload.create({
-  collection: 'posts',
-  data: {
-    title: 'New Post',
-    status: 'draft',
-  },
-})
+	collection: "posts",
+	data: {
+		title: "New Post",
+		status: "draft",
+	},
+});
 
 // Update
 await payload.update({
-  collection: 'posts',
-  id: '123',
-  data: { status: 'published' },
-})
+	collection: "posts",
+	id: "123",
+	data: { status: "published" },
+});
 
 // Delete
 await payload.delete({
-  collection: 'posts',
-  id: '123',
-})
+	collection: "posts",
+	id: "123",
+});
 ```
 
 ### Query Operators
@@ -535,44 +535,44 @@ Components are defined using **file paths** (not direct imports) in your config:
 - File extensions can be omitted
 
 ```typescript
-import { buildConfig } from 'payload'
+import { buildConfig } from "payload";
 
 export default buildConfig({
-  admin: {
-    components: {
-      // Logo and branding
-      graphics: {
-        Logo: '/components/Logo',
-        Icon: '/components/Icon',
-      },
+	admin: {
+		components: {
+			// Logo and branding
+			graphics: {
+				Logo: "/components/Logo",
+				Icon: "/components/Icon",
+			},
 
-      // Navigation
-      Nav: '/components/CustomNav',
-      beforeNavLinks: ['/components/CustomNavItem'],
-      afterNavLinks: ['/components/NavFooter'],
+			// Navigation
+			Nav: "/components/CustomNav",
+			beforeNavLinks: ["/components/CustomNavItem"],
+			afterNavLinks: ["/components/NavFooter"],
 
-      // Header
-      header: ['/components/AnnouncementBanner'],
-      actions: ['/components/ClearCache', '/components/Preview'],
+			// Header
+			header: ["/components/AnnouncementBanner"],
+			actions: ["/components/ClearCache", "/components/Preview"],
 
-      // Dashboard
-      beforeDashboard: ['/components/WelcomeMessage'],
-      afterDashboard: ['/components/Analytics'],
+			// Dashboard
+			beforeDashboard: ["/components/WelcomeMessage"],
+			afterDashboard: ["/components/Analytics"],
 
-      // Auth
-      beforeLogin: ['/components/SSOButtons'],
-      logout: { Button: '/components/LogoutButton' },
+			// Auth
+			beforeLogin: ["/components/SSOButtons"],
+			logout: { Button: "/components/LogoutButton" },
 
-      // Settings
-      settingsMenu: ['/components/SettingsMenu'],
+			// Settings
+			settingsMenu: ["/components/SettingsMenu"],
 
-      // Views
-      views: {
-        dashboard: { Component: '/components/CustomDashboard' },
-      },
-    },
-  },
-})
+			// Views
+			views: {
+				dashboard: { Component: "/components/CustomDashboard" },
+			},
+		},
+	},
+});
 ```
 
 **Component Path Rules:**
@@ -602,59 +602,59 @@ export default buildConfig({
 
 ```tsx
 // Server Component (default)
-import type { Payload } from 'payload'
+import type { Payload } from "payload";
 
 async function MyServerComponent({ payload }: { payload: Payload }) {
-  const posts = await payload.find({ collection: 'posts' })
-  return <div>{posts.totalDocs} posts</div>
+	const posts = await payload.find({ collection: "posts" });
+	return <div>{posts.totalDocs} posts</div>;
 }
 
-export default MyServerComponent
+export default MyServerComponent;
 ```
 
 **Client Components** need the `'use client'` directive:
 
 ```tsx
-'use client'
-import { useState } from 'react'
-import { useAuth } from '@payloadcms/ui'
+"use client";
+import { useState } from "react";
+import { useAuth } from "@payloadcms/ui";
 
 export function MyClientComponent() {
-  const [count, setCount] = useState(0)
-  const { user } = useAuth()
+	const [count, setCount] = useState(0);
+	const { user } = useAuth();
 
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      {user?.email}: Clicked {count} times
-    </button>
-  )
+	return (
+		<button onClick={() => setCount(count + 1)}>
+			{user?.email}: Clicked {count} times
+		</button>
+	);
 }
 ```
 
 ### Using Hooks (Client Components Only)
 
 ```tsx
-'use client'
+"use client";
 import {
-  useAuth, // Current user
-  useConfig, // Payload config (client-safe)
-  useDocumentInfo, // Document info (id, collection, etc.)
-  useField, // Field value and setter
-  useForm, // Form state
-  useFormFields, // Multiple field values (optimized)
-  useLocale, // Current locale
-  useTranslation, // i18n translations
-  usePayload, // Local API methods
-} from '@payloadcms/ui'
+	useAuth, // Current user
+	useConfig, // Payload config (client-safe)
+	useDocumentInfo, // Document info (id, collection, etc.)
+	useField, // Field value and setter
+	useForm, // Form state
+	useFormFields, // Multiple field values (optimized)
+	useLocale, // Current locale
+	useTranslation, // i18n translations
+	usePayload, // Local API methods
+} from "@payloadcms/ui";
 
 export function MyComponent() {
-  const { user } = useAuth()
-  const { config } = useConfig()
-  const { id, collection } = useDocumentInfo()
-  const locale = useLocale()
-  const { t } = useTranslation()
+	const { user } = useAuth();
+	const { config } = useConfig();
+	const { id, collection } = useDocumentInfo();
+	const locale = useLocale();
+	const { t } = useTranslation();
 
-  return <div>Hello {user?.email}</div>
+	return <div>Hello {user?.email}</div>;
 }
 ```
 
@@ -662,26 +662,26 @@ export function MyComponent() {
 
 ```typescript
 export const Posts: CollectionConfig = {
-  slug: 'posts',
-  admin: {
-    components: {
-      // Edit view
-      edit: {
-        PreviewButton: '/components/PostPreview',
-        SaveButton: '/components/CustomSave',
-        SaveDraftButton: '/components/SaveDraft',
-        PublishButton: '/components/Publish',
-      },
+	slug: "posts",
+	admin: {
+		components: {
+			// Edit view
+			edit: {
+				PreviewButton: "/components/PostPreview",
+				SaveButton: "/components/CustomSave",
+				SaveDraftButton: "/components/SaveDraft",
+				PublishButton: "/components/Publish",
+			},
 
-      // List view
-      list: {
-        Header: '/components/ListHeader',
-        beforeList: ['/components/BulkActions'],
-        afterList: ['/components/ListFooter'],
-      },
-    },
-  },
-}
+			// List view
+			list: {
+				Header: "/components/ListHeader",
+				beforeList: ["/components/BulkActions"],
+				afterList: ["/components/ListFooter"],
+			},
+		},
+	},
+};
 ```
 
 ### Field Components
@@ -732,10 +732,10 @@ export const Posts: CollectionConfig = {
 
    ```tsx
    // ❌ BAD: Re-renders on every form change
-   const { fields } = useForm()
+   const { fields } = useForm();
 
    // ✅ GOOD: Only re-renders when specific field changes
-   const value = useFormFields(([fields]) => fields[path])
+   const value = useFormFields(([fields]) => fields[path]);
    ```
 
 3. **Prefer Server Components** - Only use Client Components when you need:
@@ -749,29 +749,29 @@ export const Posts: CollectionConfig = {
 ### Styling Components
 
 ```tsx
-import './styles.scss'
+import "./styles.scss";
 
 export function MyComponent() {
-  return <div className="my-component">Content</div>
+	return <div className="my-component">Content</div>;
 }
 ```
 
 ```scss
 // Use Payload's CSS variables
 .my-component {
-  background-color: var(--theme-elevation-500);
-  color: var(--theme-text);
-  padding: var(--base);
-  border-radius: var(--border-radius-m);
+	background-color: var(--theme-elevation-500);
+	color: var(--theme-text);
+	padding: var(--base);
+	border-radius: var(--border-radius-m);
 }
 
 // Import Payload's SCSS library
-@import '~@payloadcms/ui/scss';
+@import "~@payloadcms/ui/scss";
 
 .my-component {
-  @include mid-break {
-    background-color: var(--theme-elevation-900);
-  }
+	@include mid-break {
+		background-color: var(--theme-elevation-900);
+	}
 }
 ```
 
@@ -779,16 +779,16 @@ export function MyComponent() {
 
 ```tsx
 import type {
-  TextFieldServerComponent,
-  TextFieldClientComponent,
-  TextFieldCellComponent,
-  SelectFieldServerComponent,
-  // ... etc
-} from 'payload'
+	TextFieldServerComponent,
+	TextFieldClientComponent,
+	TextFieldCellComponent,
+	SelectFieldServerComponent,
+	// ... etc
+} from "payload";
 
 export const MyField: TextFieldClientComponent = (props) => {
-  // Fully typed props
-}
+	// Fully typed props
+};
 ```
 
 ### Import Map
@@ -805,128 +805,128 @@ payload generate:importmap
 
 ```typescript
 export default buildConfig({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname, 'src'),
-      importMapFile: path.resolve(dirname, 'app', 'custom-import-map.js'),
-    },
-  },
-})
+	admin: {
+		importMap: {
+			baseDir: path.resolve(dirname, "src"),
+			importMapFile: path.resolve(dirname, "app", "custom-import-map.js"),
+		},
+	},
+});
 ```
 
 ## Custom Endpoints
 
 ```typescript
-import type { Endpoint } from 'payload'
-import { APIError } from 'payload'
+import type { Endpoint } from "payload";
+import { APIError } from "payload";
 
 // Always check authentication
 export const protectedEndpoint: Endpoint = {
-  path: '/protected',
-  method: 'get',
-  handler: async (req) => {
-    if (!req.user) {
-      throw new APIError('Unauthorized', 401)
-    }
+	path: "/protected",
+	method: "get",
+	handler: async (req) => {
+		if (!req.user) {
+			throw new APIError("Unauthorized", 401);
+		}
 
-    // Use req.payload for database operations
-    const data = await req.payload.find({
-      collection: 'posts',
-      where: { author: { equals: req.user.id } },
-    })
+		// Use req.payload for database operations
+		const data = await req.payload.find({
+			collection: "posts",
+			where: { author: { equals: req.user.id } },
+		});
 
-    return Response.json(data)
-  },
-}
+		return Response.json(data);
+	},
+};
 
 // Route parameters
 export const trackingEndpoint: Endpoint = {
-  path: '/:id/tracking',
-  method: 'get',
-  handler: async (req) => {
-    const { id } = req.routeParams
+	path: "/:id/tracking",
+	method: "get",
+	handler: async (req) => {
+		const { id } = req.routeParams;
 
-    const tracking = await getTrackingInfo(id)
+		const tracking = await getTrackingInfo(id);
 
-    if (!tracking) {
-      return Response.json({ error: 'not found' }, { status: 404 })
-    }
+		if (!tracking) {
+			return Response.json({ error: "not found" }, { status: 404 });
+		}
 
-    return Response.json(tracking)
-  },
-}
+		return Response.json(tracking);
+	},
+};
 ```
 
 ## Drafts & Versions
 
 ```typescript
 export const Pages: CollectionConfig = {
-  slug: 'pages',
-  versions: {
-    drafts: {
-      autosave: true,
-      schedulePublish: true,
-      validate: false, // Don't validate drafts
-    },
-    maxPerDoc: 100,
-  },
-  access: {
-    read: ({ req: { user } }) => {
-      // Public sees only published
-      if (!user) return { _status: { equals: 'published' } }
-      // Authenticated sees all
-      return true
-    },
-  },
-}
+	slug: "pages",
+	versions: {
+		drafts: {
+			autosave: true,
+			schedulePublish: true,
+			validate: false, // Don't validate drafts
+		},
+		maxPerDoc: 100,
+	},
+	access: {
+		read: ({ req: { user } }) => {
+			// Public sees only published
+			if (!user) return { _status: { equals: "published" } };
+			// Authenticated sees all
+			return true;
+		},
+	},
+};
 
 // Create draft
 await payload.create({
-  collection: 'pages',
-  data: { title: 'Draft Page' },
-  draft: true, // Skips required field validation
-})
+	collection: "pages",
+	data: { title: "Draft Page" },
+	draft: true, // Skips required field validation
+});
 
 // Read with drafts
 const page = await payload.findByID({
-  collection: 'pages',
-  id: '123',
-  draft: true, // Returns draft if available
-})
+	collection: "pages",
+	id: "123",
+	draft: true, // Returns draft if available
+});
 ```
 
 ## Field Type Guards
 
 ```typescript
 import {
-  fieldAffectsData,
-  fieldHasSubFields,
-  fieldIsArrayType,
-  fieldIsBlockType,
-  fieldSupportsMany,
-  fieldHasMaxDepth,
-} from 'payload'
+	fieldAffectsData,
+	fieldHasSubFields,
+	fieldIsArrayType,
+	fieldIsBlockType,
+	fieldSupportsMany,
+	fieldHasMaxDepth,
+} from "payload";
 
 function processField(field: Field) {
-  // Check if field stores data
-  if (fieldAffectsData(field)) {
-    console.log(field.name) // Safe to access
-  }
+	// Check if field stores data
+	if (fieldAffectsData(field)) {
+		console.log(field.name); // Safe to access
+	}
 
-  // Check if field has nested fields
-  if (fieldHasSubFields(field)) {
-    field.fields.forEach(processField) // Safe to access
-  }
+	// Check if field has nested fields
+	if (fieldHasSubFields(field)) {
+		field.fields.forEach(processField); // Safe to access
+	}
 
-  // Check field type
-  if (fieldIsArrayType(field)) {
-    console.log(field.minRows, field.maxRows)
-  }
+	// Check field type
+	if (fieldIsArrayType(field)) {
+		console.log(field.minRows, field.maxRows);
+	}
 
-  // Check capabilities
-  if (fieldSupportsMany(field) && field.hasMany) {
-    console.log('Multiple values supported')
-  }
+	// Check capabilities
+	if (fieldSupportsMany(field) && field.hasMany) {
+		console.log("Multiple values supported");
+	}
 }
 ```
 
@@ -935,45 +935,45 @@ function processField(field: Field) {
 ### Using Plugins
 
 ```typescript
-import { seoPlugin } from '@payloadcms/plugin-seo'
-import { redirectsPlugin } from '@payloadcms/plugin-redirects'
+import { seoPlugin } from "@payloadcms/plugin-seo";
+import { redirectsPlugin } from "@payloadcms/plugin-redirects";
 
 export default buildConfig({
-  plugins: [
-    seoPlugin({
-      collections: ['posts', 'pages'],
-    }),
-    redirectsPlugin({
-      collections: ['pages'],
-    }),
-  ],
-})
+	plugins: [
+		seoPlugin({
+			collections: ["posts", "pages"],
+		}),
+		redirectsPlugin({
+			collections: ["pages"],
+		}),
+	],
+});
 ```
 
 ### Creating Plugins
 
 ```typescript
-import type { Config, Plugin } from 'payload'
+import type { Config, Plugin } from "payload";
 
 interface MyPluginConfig {
-  collections?: string[]
-  enabled?: boolean
+	collections?: string[];
+	enabled?: boolean;
 }
 
 export const myPlugin =
-  (options: MyPluginConfig): Plugin =>
-  (config: Config): Config => ({
-    ...config,
-    collections: config.collections?.map((collection) => {
-      if (options.collections?.includes(collection.slug)) {
-        return {
-          ...collection,
-          fields: [...collection.fields, { name: 'pluginField', type: 'text' }],
-        }
-      }
-      return collection
-    }),
-  })
+	(options: MyPluginConfig): Plugin =>
+	(config: Config): Config => ({
+		...config,
+		collections: config.collections?.map((collection) => {
+			if (options.collections?.includes(collection.slug)) {
+				return {
+					...collection,
+					fields: [...collection.fields, { name: "pluginField", type: "text" }],
+				};
+			}
+			return collection;
+		}),
+	});
 ```
 
 ## Best Practices

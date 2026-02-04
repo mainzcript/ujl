@@ -1,25 +1,25 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Skeleton } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Skeleton } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Skeleton',
+		title: "Components/Base/Skeleton",
 		component: Skeleton,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes for sizing and styling',
-				table: { category: 'Appearance' }
-			}
-		}
+				control: "text",
+				description: "Additional CSS classes for sizing and styling",
+				table: { category: "Appearance" },
+			},
+		},
 	});
 </script>
 
 <!-- Default -->
 <Story name="Default">
 	{#snippet template(args)}
-		<Skeleton {...args} class={args.class || 'h-4 w-[250px]'} />
+		<Skeleton {...args} class={args.class || "h-4 w-[250px]"} />
 	{/snippet}
 </Story>
 
@@ -109,6 +109,6 @@
 <!-- Playground -->
 <Story name="Playground">
 	{#snippet template(args)}
-		<Skeleton {...args} class={args.class || 'h-4 w-[250px]'} />
+		<Skeleton {...args} class={args.class || "h-4 w-[250px]"} />
 	{/snippet}
 </Story>

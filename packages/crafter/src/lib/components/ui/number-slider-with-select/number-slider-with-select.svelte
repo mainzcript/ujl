@@ -12,9 +12,9 @@
 		SelectLabel,
 		SelectItem,
 		Slider,
-		Label
-	} from '@ujl-framework/ui';
-	import { generateUid } from '@ujl-framework/core';
+		Label,
+	} from "@ujl-framework/ui";
+	import { generateUid } from "@ujl-framework/core";
 
 	let {
 		value = $bindable<number | undefined>(),
@@ -26,7 +26,7 @@
 		min,
 		max,
 		step = 1,
-		onchange
+		onchange,
 	}: {
 		value?: number;
 		options: Array<{ value: string; label: string }>;
@@ -50,7 +50,7 @@
 
 	// Local string state for the Select value. This keeps the Select value (string)
 	// independent from the numeric `value` prop so we can handle conversion manually.
-	let selectValue = $state('');
+	let selectValue = $state("");
 
 	// Find the option that matches the current numeric value
 	const currentOption = $derived.by(() => {
@@ -66,7 +66,7 @@
 			// Fallback: if value doesn't match any option, use the numeric value as string
 			selectValue = String(value);
 		} else {
-			selectValue = '';
+			selectValue = "";
 		}
 	});
 
@@ -99,13 +99,13 @@
 		return v;
 	};
 
-	const numericStep = $derived(typeof step === 'string' ? Number(step) : step);
+	const numericStep = $derived(typeof step === "string" ? Number(step) : step);
 
 	// Get display label for current value
 	const displayLabel = $derived.by(() => {
 		if (currentOption) return currentOption.label;
 		if (value !== undefined && !Number.isNaN(value)) return String(value);
-		return '';
+		return "";
 	});
 </script>
 
@@ -136,7 +136,7 @@
 					</SelectTrigger>
 					<SelectContent>
 						<SelectGroup>
-							<SelectLabel>{label || 'Options'}</SelectLabel>
+							<SelectLabel>{label || "Options"}</SelectLabel>
 							{#each options as option (option.value)}
 								<SelectItem value={option.value} label={option.label}>
 									{option.label}

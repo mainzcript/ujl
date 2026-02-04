@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 /**
  * Merge class names using clsx and tailwind-merge
@@ -15,14 +15,14 @@ export function cn(...inputs: ClassValue[]) {
  * Useful for component props that should not accept a 'child' prop.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
+export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
 
 /**
  * Removes the 'children' property from a type.
  * Useful for component props that should not accept a 'children' prop.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'children'> : T;
+export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, "children"> : T;
 
 /**
  * Removes both 'child' and 'children' properties from a type.

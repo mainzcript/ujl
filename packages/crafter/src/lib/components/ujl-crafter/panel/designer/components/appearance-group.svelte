@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import { NumberSliderWithInput } from '$lib/components/ui/index.js';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import { NumberSliderWithInput } from "$lib/components/ui/index.js";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
 
 	let {
 		radiusValue,
 		onRadiusChange,
 		spacingValue,
-		onSpacingChange
+		onSpacingChange,
 	}: {
 		radiusValue: number;
 		onRadiusChange?: (value: number) => void;

@@ -1,5 +1,5 @@
-import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
-import type { WebAdapterOptions, MountedElement, UJLContentElement } from './types.js';
+import type { UJLAbstractNode, UJLAdapter, UJLTTokenSet } from "@ujl-framework/types";
+import type { MountedElement, UJLContentElement, WebAdapterOptions } from "./types.js";
 
 /**
  * Web adapter for UJL Framework
@@ -27,12 +27,12 @@ import type { WebAdapterOptions, MountedElement, UJLContentElement } from './typ
 export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: WebAdapterOptions
+	options: WebAdapterOptions,
 ): MountedElement => {
 	// Resolve target element (selector string or HTMLElement)
 	let targetElement: HTMLElement;
 
-	if (typeof options.target === 'string') {
+	if (typeof options.target === "string") {
 		const element = document.querySelector(options.target);
 		if (!element) {
 			throw new Error(`Target element not found: ${options.target}`);
@@ -43,10 +43,10 @@ export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 	}
 
 	// Clear target element before mounting
-	targetElement.innerHTML = '';
+	targetElement.innerHTML = "";
 
 	// Create and configure Custom Element
-	const customElement = document.createElement('ujl-content') as UJLContentElement;
+	const customElement = document.createElement("ujl-content") as UJLContentElement;
 	customElement.node = node;
 	customElement.tokenSet = tokenSet;
 	if (options.mode !== undefined) {
@@ -68,6 +68,6 @@ export const webAdapter: UJLAdapter<MountedElement, WebAdapterOptions> = (
 		element: customElement,
 		unmount: () => {
 			customElement.remove();
-		}
+		},
 	};
 };

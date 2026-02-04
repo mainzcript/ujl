@@ -10,18 +10,18 @@
 		SelectItem,
 		SelectLabel,
 		SelectGroup,
-		Label
-	} from '@ujl-framework/ui';
-	import type { UJLTTypographyFlavor, UJLTColorPalette } from '@ujl-framework/types';
-	import { typographyFlavors } from '@ujl-framework/types';
-	import { formatOklch } from '$lib/utils/colors/index.js';
+		Label,
+	} from "@ujl-framework/ui";
+	import type { UJLTTypographyFlavor, UJLTColorPalette } from "@ujl-framework/types";
+	import { typographyFlavors } from "@ujl-framework/types";
+	import { formatOklch } from "$lib/utils/colors/index.js";
 
 	let {
 		id,
-		label = 'Flavor',
+		label = "Flavor",
 		value = $bindable<UJLTTypographyFlavor>(),
 		palette,
-		onchange
+		onchange,
 	}: {
 		id: string;
 		label?: string;
@@ -32,7 +32,7 @@
 
 	const flavorOptions = typographyFlavors.map((flavor) => ({
 		value: flavor,
-		label: flavor.charAt(0).toUpperCase() + flavor.slice(1)
+		label: flavor.charAt(0).toUpperCase() + flavor.slice(1),
 	}));
 
 	// Extract hex colors for all typography flavors from the palette
@@ -46,7 +46,7 @@
 			if (colorSet) {
 				colors[flavor] = {
 					light: formatOklch(colorSet.shades[palette.ambient.lightForeground[flavor]]),
-					dark: formatOklch(colorSet.shades[palette.ambient.darkForeground[flavor]])
+					dark: formatOklch(colorSet.shades[palette.ambient.darkForeground[flavor]]),
 				};
 			}
 		}

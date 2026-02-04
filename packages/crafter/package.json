@@ -105,7 +105,7 @@
 	"homepage": "https://ujl-framework.org",
 	"repository": {
 		"type": "git",
-		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"url": "git+https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
 		"directory": "packages/crafter"
 	}
 }

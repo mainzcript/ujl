@@ -1,33 +1,33 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Popover,
 		PopoverContent,
 		PopoverTrigger,
 		PopoverClose,
-		PopoverTriggerButton
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
+		PopoverTriggerButton,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Overlays/Popover',
+		title: "Components/Overlays/Popover",
 		component: Popover,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			open: {
-				control: 'boolean',
-				description: 'Whether the popover is open',
+				control: "boolean",
+				description: "Whether the popover is open",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			open: false
-		}
+			open: false,
+		},
 	});
 </script>
 

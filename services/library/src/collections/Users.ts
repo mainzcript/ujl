@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
 /**
  * Users collection for UJL Library
@@ -7,13 +7,13 @@ import type { CollectionConfig } from 'payload'
  * API keys are used by the Crafter and other UJL applications to authenticate.
  */
 export const Users: CollectionConfig = {
-  slug: 'users',
-  admin: {
-    useAsTitle: 'email',
-  },
-  auth: {
-    // Enable API key generation for programmatic access
-    useAPIKey: true,
-  },
-  fields: [],
-}
+	slug: "users",
+	admin: {
+		useAsTitle: "email",
+	},
+	auth: {
+		// Enable API key generation for programmatic access
+		useAPIKey: true,
+	},
+	fields: [],
+};

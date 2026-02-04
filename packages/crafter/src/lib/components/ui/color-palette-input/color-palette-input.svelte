@@ -4,22 +4,22 @@
 	Visualizes key foreground/background combinations from the new color system.
 -->
 <script lang="ts">
-	import { ColorPicker, Label } from '@ujl-framework/ui';
-	import SunIcon from '@lucide/svelte/icons/sun';
-	import MoonIcon from '@lucide/svelte/icons/moon';
+	import { ColorPicker, Label } from "@ujl-framework/ui";
+	import SunIcon from "@lucide/svelte/icons/sun";
+	import MoonIcon from "@lucide/svelte/icons/moon";
 	import type {
 		UJLTColorSet,
 		UJLTShadeKey,
 		UJLTColorPalette,
 		UJLTFlavor,
-		UJLTAmbientColorSet
-	} from '@ujl-framework/types';
+		UJLTAmbientColorSet,
+	} from "@ujl-framework/types";
 	import {
 		colorShades,
 		resolveColorFromShades,
-		resolveForegroundColor
-	} from '@ujl-framework/types';
-	import { getBaseHexFromColorSet, formatOklch } from '$lib/utils/colors/index.js';
+		resolveForegroundColor,
+	} from "@ujl-framework/types";
+	import { getBaseHexFromColorSet, formatOklch } from "$lib/utils/colors/index.js";
 
 	type PreviewSample = {
 		lightBg: string;
@@ -36,13 +36,13 @@
 		onOriginalChange,
 		palette,
 		flavor,
-		dualOriginal = false
+		dualOriginal = false,
 	}: {
 		colorSet: UJLTColorSet | null;
 		label: string;
 		id?: string;
 		onChange?: (hex: string) => void;
-		onOriginalChange?: (original: UJLTAmbientColorSet['_original']) => void;
+		onOriginalChange?: (original: UJLTAmbientColorSet["_original"]) => void;
 		palette: UJLTColorPalette;
 		flavor: UJLTFlavor;
 		dualOriginal?: boolean;
@@ -61,16 +61,16 @@
 	// - otherwise derives a stable initial value from the theme tokens
 	const pickerHex = $derived.by(() => {
 		if (userHex) return userHex;
-		if (!colorSet) return '#000000';
+		if (!colorSet) return "#000000";
 		return getBaseHexFromColorSet(colorSet);
 	});
 
 	const lightPickerHex = $derived.by(() => {
 		if (userLightHex) return userLightHex;
-		if (!colorSet) return '#000000';
+		if (!colorSet) return "#000000";
 
 		const original = colorSet._original;
-		if ('lightHex' in original) {
+		if ("lightHex" in original) {
 			return original.lightHex;
 		}
 
@@ -79,10 +79,10 @@
 
 	const darkPickerHex = $derived.by(() => {
 		if (userDarkHex) return userDarkHex;
-		if (!colorSet) return '#000000';
+		if (!colorSet) return "#000000";
 
 		const original = colorSet._original;
-		if ('lightHex' in original) {
+		if ("lightHex" in original) {
 			return original.darkHex;
 		}
 
@@ -121,15 +121,15 @@
 		const darkBg = resolveColorFromShades(ambientSet.shades, ambientSet.dark);
 
 		// Resolve foreground colors from shade references
-		const lightFg = resolveForegroundColor(palette, 'ambient', flavor, 'light');
-		const darkFg = resolveForegroundColor(palette, 'ambient', flavor, 'dark');
+		const lightFg = resolveForegroundColor(palette, "ambient", flavor, "light");
+		const darkFg = resolveForegroundColor(palette, "ambient", flavor, "dark");
 
 		return {
 			// Flavor on Ambient: ambient background, flavor foreground
 			lightBg: formatOklch(lightBg),
 			darkBg: formatOklch(darkBg),
 			lightFg: formatOklch(lightFg),
-			darkFg: formatOklch(darkFg)
+			darkFg: formatOklch(darkFg),
 		};
 	});
 
@@ -144,15 +144,15 @@
 		const darkBg = resolveColorFromShades(flavorSet.shades, flavorSet.dark);
 
 		// Resolve foreground colors from shade references
-		const lightFg = resolveForegroundColor(palette, flavor, 'ambient', 'light');
-		const darkFg = resolveForegroundColor(palette, flavor, 'ambient', 'dark');
+		const lightFg = resolveForegroundColor(palette, flavor, "ambient", "light");
+		const darkFg = resolveForegroundColor(palette, flavor, "ambient", "dark");
 
 		return {
 			// Ambient on Flavor: flavor background, ambient foreground
 			lightBg: formatOklch(lightBg),
 			darkBg: formatOklch(darkBg),
 			lightFg: formatOklch(lightFg),
-			darkFg: formatOklch(darkFg)
+			darkFg: formatOklch(darkFg),
 		};
 	});
 
@@ -173,8 +173,8 @@
 
 		const baseOriginal = colorSet._original;
 
-		const baseLightHex = 'lightHex' in baseOriginal ? baseOriginal.lightHex : baseOriginal.hex;
-		const baseDarkHex = 'lightHex' in baseOriginal ? baseOriginal.darkHex : baseOriginal.hex;
+		const baseLightHex = "lightHex" in baseOriginal ? baseOriginal.lightHex : baseOriginal.hex;
+		const baseDarkHex = "lightHex" in baseOriginal ? baseOriginal.darkHex : baseOriginal.hex;
 
 		// Use user input if available, otherwise fall back to base values
 		// Note: The "Light" picker (userLightHex) should correspond to lightHex (lighter color)
@@ -183,8 +183,8 @@
 		const darkHex = userDarkHex ?? baseDarkHex;
 
 		onOriginalChange({
-			lightHex: lightHex,
-			darkHex: darkHex
+			lightHex,
+			darkHex,
 		});
 	}
 
@@ -204,12 +204,12 @@
 </script>
 
 <div class="space-y-2">
-	<Label for={id || `color-input-${label.toLowerCase().replace(/\s+/g, '-')}`} class="text-xs">
+	<Label for={id || `color-input-${label.toLowerCase().replace(/\s+/g, "-")}`} class="text-xs">
 		{label}
 	</Label>
 	{#if !dualOriginal}
 		<ColorPicker
-			id={id || `color-input-${label.toLowerCase().replace(/\s+/g, '-')}`}
+			id={id || `color-input-${label.toLowerCase().replace(/\s+/g, "-")}`}
 			value={pickerHex}
 			onChange={handleColorChange}
 		/>
@@ -218,7 +218,7 @@
 			<div class="space-y-1">
 				<div class="text-[0.65rem] text-muted-foreground">Light</div>
 				<ColorPicker
-					id={(id || `color-input-${label.toLowerCase().replace(/\s+/g, '-')}`) + '-light'}
+					id={`${id || `color-input-${label.toLowerCase().replace(/\s+/g, "-")}`}-light`}
 					value={lightPickerHex}
 					onChange={handleLightColorChange}
 				/>
@@ -226,7 +226,7 @@
 			<div class="space-y-1">
 				<div class="text-[0.65rem] text-muted-foreground">Dark</div>
 				<ColorPicker
-					id={(id || `color-input-${label.toLowerCase().replace(/\s+/g, '-')}`) + '-dark'}
+					id={`${id || `color-input-${label.toLowerCase().replace(/\s+/g, "-")}`}-dark`}
 					value={darkPickerHex}
 					onChange={handleDarkColorChange}
 				/>
@@ -251,7 +251,7 @@
 			</div>
 
 			{#if preview}
-				{#if flavor === 'ambient'}
+				{#if flavor === "ambient"}
 					<!-- For ambient flavor, only show one preview (ambient on ambient) -->
 					<div class="grid grid-cols-2 gap-2">
 						<!-- Ambient on Ambient - Light -->

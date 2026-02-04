@@ -488,16 +488,16 @@ interface AdapterRootProps {
 Die **ASTNode**-Komponente ist ein rekursiver Router, der jeden AST-Node anhand seines `type`-Feldes an die entsprechende Svelte-Komponente dispatcht. Für Container-Nodes mit verschachtelten Children erfolgt ein rekursiver Aufruf via `<svelte:self>`, was beliebig tiefe Verschachtelungen ermöglicht. Unbekannte Node-Typen werden von einer Error-Komponente aufgefangen.
 
 ```svelte
-{#if node.type === 'button'}
-  <Button {node} {showMetadata} />
-{:else if node.type === 'container'}
-  <Container {node} {showMetadata}>
-    {#each node.props.children as child}
-      <svelte:self node={child} {showMetadata} />
-    {/each}
-  </Container>
+{#if node.type === "button"}
+	<Button {node} {showMetadata} />
+{:else if node.type === "container"}
+	<Container {node} {showMetadata}>
+		{#each node.props.children as child}
+			<svelte:self node={child} {showMetadata} />
+		{/each}
+	</Container>
 {:else}
-  <Error {node} />
+	<Error {node} />
 {/if}
 ```
 
@@ -518,7 +518,7 @@ Der **Imperative Adapter** ermöglicht programmatisches Component-Mounting für 
 export function svelteAdapter(
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: SvelteAdapterOptions
+	options: SvelteAdapterOptions,
 ): MountedComponent;
 
 type SvelteAdapterOptions = {
@@ -630,7 +630,7 @@ Die `webAdapter`-Funktion ist der programmatische Einstiegspunkt für die Web Co
 export function webAdapter(
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: WebAdapterOptions
+	options: WebAdapterOptions,
 ): MountedElement;
 
 type WebAdapterOptions = {
@@ -651,7 +651,7 @@ Die Implementierung zeigt den typischen Ablauf: Target-Element ermitteln, Custom
 export function webAdapter(
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: WebAdapterOptions
+	options: WebAdapterOptions,
 ): MountedElement {
 	const target =
 		typeof options.target === "string" ? document.querySelector(options.target) : options.target;
@@ -768,7 +768,7 @@ export type CrafterContext = CrafterStore;
 ujlcDocument.ujlc.root.push(newModule);
 
 // Functional Update (empfohlen)
-store.updateRootSlot(root => [...root, newModule]);
+store.updateRootSlot((root) => [...root, newModule]);
 ```
 
 #### 5.6.1.3 Komponente: Editor Mode

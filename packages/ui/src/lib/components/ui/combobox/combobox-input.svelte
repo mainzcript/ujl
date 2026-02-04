@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { CommandInput } from '../command/index.js';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { CommandInput } from "../command/index.js";
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		value = $bindable(''),
+		value = $bindable(""),
 		...restProps
 	}: CommandPrimitive.InputProps = $props();
 </script>

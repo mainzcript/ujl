@@ -1,1 +1,1 @@
-export { default as RichTextInput } from './richtext-input.svelte';
+export { default as RichTextInput } from "./richtext-input.svelte";

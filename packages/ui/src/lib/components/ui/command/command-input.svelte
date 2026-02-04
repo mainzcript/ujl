@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import SearchIcon from '@lucide/svelte/icons/search';
-	import { cn } from '$lib/utils.js';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import SearchIcon from "@lucide/svelte/icons/search";
+	import { cn } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		value = $bindable(''),
+		value = $bindable(""),
 		...restProps
 	}: CommandPrimitive.InputProps = $props();
 </script>
@@ -19,8 +19,8 @@
 	<CommandPrimitive.Input
 		data-slot="command-input"
 		class={cn(
-			'flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
-			className
+			"flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+			className,
 		)}
 		bind:ref
 		{...restProps}

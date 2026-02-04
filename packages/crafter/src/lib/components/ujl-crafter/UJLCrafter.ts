@@ -1,36 +1,36 @@
-import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
-import { Composer } from '@ujl-framework/core';
 import {
 	createCrafterStore,
 	createImageServiceFactory,
 	type CrafterStore,
-	type SaveCallback
-} from '$lib/stores/index.js';
-import { logger } from '$lib/utils/logger.js';
-import CrafterElement from './ujl-crafter-element.svelte';
+	type SaveCallback,
+} from "$lib/stores/index.js";
+import { logger } from "$lib/utils/logger.js";
+import { Composer } from "@ujl-framework/core";
+import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
+import CrafterElement from "./ujl-crafter-element.svelte";
 
 // Register the Custom Element if not already registered
-if (!customElements.get('ujl-crafter-internal')) {
+if (!customElements.get("ujl-crafter-internal")) {
 	customElements.define(
-		'ujl-crafter-internal',
-		CrafterElement as unknown as CustomElementConstructor
+		"ujl-crafter-internal",
+		CrafterElement as unknown as CustomElementConstructor,
 	);
 }
 
-import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
-import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
+import showcaseDocument from "@ujl-framework/examples/documents/showcase" with { type: "json" };
+import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 
 // ============================================
 // TYPES
 // ============================================
 
-export type NotificationType = 'success' | 'error' | 'info' | 'warning';
+export type NotificationType = "success" | "error" | "info" | "warning";
 
 export type NotificationCallback = (
 	type: NotificationType,
 	message: string,
-	description?: string
+	description?: string,
 ) => void;
 
 export type DocumentChangeCallback = (document: UJLCDocument) => void;
@@ -38,7 +38,7 @@ export type DocumentChangeCallback = (document: UJLCDocument) => void;
 export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 
 // Re-export SaveCallback from store for API consistency
-export type { SaveCallback } from '$lib/stores/index.js';
+export type { SaveCallback } from "$lib/stores/index.js";
 
 /**
  * Configuration options for the library.
@@ -52,8 +52,8 @@ export type { SaveCallback } from '$lib/stores/index.js';
  * Only this options-based configuration is used.
  */
 export type LibraryOptions =
-	| { storage: 'inline' }
-	| { storage: 'backend'; url: string; apiKey: string };
+	| { storage: "inline" }
+	| { storage: "backend"; url: string; apiKey: string };
 
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
@@ -127,24 +127,24 @@ export class UJLCrafter {
 
 		// Library configuration from options (defaults to inline storage)
 		// Note: Document-level _library configuration is ignored - only options are used
-		const library = options.library ?? { storage: 'inline' as const };
+		const library = options.library ?? { storage: "inline" as const };
 
 		// Runtime validation for backend storage
-		if (library.storage === 'backend') {
+		if (library.storage === "backend") {
 			if (!library.url || !library.apiKey) {
-				throw new Error('UJLCrafter: Backend storage requires both url and apiKey');
+				throw new Error("UJLCrafter: Backend storage requires both url and apiKey");
 			}
 		}
 
 		const imageServiceFactory = createImageServiceFactory({
 			preferredStorage: library.storage,
-			backendUrl: library.storage === 'backend' ? library.url : undefined,
-			backendApiKey: library.storage === 'backend' ? library.apiKey : undefined,
+			backendUrl: library.storage === "backend" ? library.url : undefined,
+			backendApiKey: library.storage === "backend" ? library.apiKey : undefined,
 			showToasts: false,
 			onConnectionError: (error, url) => {
-				logger.error('Image backend connection error:', error, url);
-				this.notify('error', 'Image backend connection error', `Failed to connect to ${url}`);
-			}
+				logger.error("Image backend connection error:", error, url);
+				this.notify("error", "Image backend connection error", `Failed to connect to ${url}`);
+			},
 		});
 
 		this.store = createCrafterStore({
@@ -156,7 +156,7 @@ export class UJLCrafter {
 				: this.getDefaultTheme(),
 			composer: this.composer,
 			createImageService: imageServiceFactory,
-			testMode: options.testMode ?? false
+			testMode: options.testMode ?? false,
 		});
 
 		this.mount();
@@ -167,7 +167,7 @@ export class UJLCrafter {
 	// ============================================
 
 	private resolveTarget(target: string | HTMLElement): HTMLElement {
-		if (typeof target === 'string') {
+		if (typeof target === "string") {
 			const element = document.querySelector(target);
 			if (!element) {
 				throw new Error(`UJLCrafter: Target element not found: ${target}`);
@@ -179,7 +179,7 @@ export class UJLCrafter {
 
 	private mount(): void {
 		// Create Custom Element (Shadow DOM is created automatically by Svelte)
-		this.element = document.createElement('ujl-crafter-internal') as UJLCrafterElement;
+		this.element = document.createElement("ujl-crafter-internal") as UJLCrafterElement;
 
 		// Set props via DOM properties (complex objects work fine)
 		this.element.store = this.store;
@@ -225,7 +225,7 @@ export class UJLCrafter {
 	}
 
 	/** Get the current editor mode */
-	getMode(): 'editor' | 'designer' {
+	getMode(): "editor" | "designer" {
 		return this.store.mode;
 	}
 
@@ -258,7 +258,7 @@ export class UJLCrafter {
 	}
 
 	/** Set the editor mode */
-	setMode(mode: 'editor' | 'designer'): void {
+	setMode(mode: "editor" | "designer"): void {
 		this.store.setMode(mode);
 	}
 

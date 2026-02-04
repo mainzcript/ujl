@@ -5,9 +5,9 @@
  * based on the AST node type.
  -->
 <script lang="ts">
-	import type { UJLAbstractNode, UJLAbstractErrorNode } from '@ujl-framework/types';
-	import { generateUid } from '@ujl-framework/core';
-	import { NODE_TYPES } from '../constants.js';
+	import type { UJLAbstractNode, UJLAbstractErrorNode } from "@ujl-framework/types";
+	import { generateUid } from "@ujl-framework/core";
+	import { NODE_TYPES } from "../constants.js";
 	import {
 		Container,
 		Wrapper,
@@ -19,8 +19,8 @@
 		Grid,
 		GridItem,
 		CallToAction,
-		Image
-	} from './nodes/index.js';
+		Image,
+	} from "./nodes/index.js";
 
 	interface Props {
 		node: UJLAbstractNode;

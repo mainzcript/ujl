@@ -1,56 +1,56 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Link } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Link } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Link',
+		title: "Components/Base/Link",
 		component: Link,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			href: {
-				control: 'text',
-				description: 'The URL the link points to',
+				control: "text",
+				description: "The URL the link points to",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '#' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "#" },
+				},
 			},
 			external: {
-				control: 'boolean',
-				description: 'Opens link in new tab with noopener noreferrer',
+				control: "boolean",
+				description: "Opens link in new tab with noopener noreferrer",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'false' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "false" },
+				},
 			},
 			underline: {
-				control: 'boolean',
-				description: 'Whether to show underline',
-				table: { category: 'Appearance' }
+				control: "boolean",
+				description: "Whether to show underline",
+				table: { category: "Appearance" },
 			},
 			active: {
-				control: 'boolean',
-				description: 'Force active state',
-				table: { category: 'State' }
+				control: "boolean",
+				description: "Force active state",
+				table: { category: "State" },
 			},
 			activeClass: {
-				control: 'text',
-				description: 'CSS class when link is active',
-				table: { category: 'Appearance' }
+				control: "text",
+				description: "CSS class when link is active",
+				table: { category: "Appearance" },
 			},
 			inactiveClass: {
-				control: 'text',
-				description: 'CSS class when link is inactive',
-				table: { category: 'Appearance' }
-			}
+				control: "text",
+				description: "CSS class when link is inactive",
+				table: { category: "Appearance" },
+			},
 		},
 		args: {
-			href: '#',
+			href: "#",
 			external: false,
 			currentUrl: undefined,
 			underline: false,
-			active: undefined
-		}
+			active: undefined,
+		},
 	});
 </script>
 

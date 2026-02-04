@@ -23,8 +23,8 @@ pnpm add @ujl-framework/core
 ### Programmatic API (Recommended)
 
 ```typescript
-import { webAdapter } from '@ujl-framework/adapter-web';
-import { Composer } from '@ujl-framework/core';
+import { webAdapter } from "@ujl-framework/adapter-web";
+import { Composer } from "@ujl-framework/core";
 
 // Create or import your UJL document (ujlDocument) and token set (tokenSet) here
 
@@ -33,8 +33,8 @@ const ast = composer.compose(ujlDocument);
 
 // Target can be a CSS selector string or an HTMLElement
 const mountedElement = webAdapter(ast, tokenSet, {
-	target: '#my-container',
-	showMetadata: true
+	target: "#my-container",
+	showMetadata: true,
 });
 
 // Cleanup
@@ -46,7 +46,7 @@ mountedElement.unmount();
 You can also use the Custom Element directly, but note that props must be set as **Properties**, not HTML attributes:
 
 ```typescript
-const el = document.createElement('ujl-content') as UJLContentElement;
+const el = document.createElement("ujl-content") as UJLContentElement;
 el.node = astNode;
 el.tokenSet = tokenSet;
 el.showMetadata = true;
@@ -70,8 +70,8 @@ The adapter supports the same optional editor features as `adapter-svelte`:
 ### Example: Visual Editor Integration
 
 ```typescript
-import { webAdapter } from '@ujl-framework/adapter-web';
-import { Composer } from '@ujl-framework/core';
+import { webAdapter } from "@ujl-framework/adapter-web";
+import { Composer } from "@ujl-framework/core";
 
 const composer = new Composer();
 const ast = composer.compose(ujlDocument);
@@ -79,17 +79,17 @@ const ast = composer.compose(ujlDocument);
 let selectedModuleId = null;
 
 const mounted = webAdapter(ast, tokenSet, {
-	target: '#preview',
-	showMetadata: true
+	target: "#preview",
+	showMetadata: true,
 });
 
 // Implement click handling in your editor layer
-const previewElement = document.querySelector('#preview');
-previewElement?.addEventListener('click', (event) => {
-	const clickedElement = event.target.closest('[data-ujl-module-id]');
+const previewElement = document.querySelector("#preview");
+previewElement?.addEventListener("click", (event) => {
+	const clickedElement = event.target.closest("[data-ujl-module-id]");
 	if (!clickedElement) return;
 
-	const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+	const moduleId = clickedElement.getAttribute("data-ujl-module-id");
 	if (!moduleId) return;
 
 	// Check editability in AST (meta.isModuleRoot === true)
@@ -100,13 +100,13 @@ previewElement?.addEventListener('click', (event) => {
 
 	// Remove previous highlights
 	document
-		.querySelectorAll('[data-ujl-module-id].selected')
-		.forEach((el) => el.classList.remove('selected'));
+		.querySelectorAll("[data-ujl-module-id].selected")
+		.forEach((el) => el.classList.remove("selected"));
 
 	// Highlight selected module
 	const element = document.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 	if (element) {
-		element.classList.add('selected');
+		element.classList.add("selected");
 	}
 
 	// Update sidebar, inspector, etc.
@@ -122,7 +122,7 @@ previewElement?.addEventListener('click', (event) => {
 function webAdapter(
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: WebAdapterOptions
+	options: WebAdapterOptions,
 ): MountedElement;
 ```
 

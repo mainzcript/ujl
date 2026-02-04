@@ -8,13 +8,13 @@
 	- Deselecting node when panel is closed (editor mode)
 -->
 <script lang="ts">
-	import { useApp } from '$lib/components/ui/app/index.js';
-	import type { CrafterMode } from '$lib/stores/index.js';
+	import { useApp } from "$lib/components/ui/app/index.js";
+	import type { CrafterMode } from "$lib/stores/index.js";
 
 	let {
 		mode,
 		setSelectedNodeId,
-		selectedNodeId
+		selectedNodeId,
 	}: {
 		mode: CrafterMode;
 		setSelectedNodeId: (nodeId: string | null) => void;
@@ -25,14 +25,14 @@
 
 	// Auto-open panel when node is selected (desktop, editor mode)
 	$effect(() => {
-		if (selectedNodeId && app.isDesktopPanel && mode === 'editor') {
+		if (selectedNodeId && app.isDesktopPanel && mode === "editor") {
 			app.preferPanel();
 		}
 	});
 
 	// Open panel by default in designer mode (desktop)
 	$effect(() => {
-		if (mode === 'designer' && app.isDesktopPanel) {
+		if (mode === "designer" && app.isDesktopPanel) {
 			app.preferPanel();
 		}
 	});
@@ -40,7 +40,7 @@
 	// Deselect node when panel closes to maintain consistent UI state
 	$effect(() => {
 		return app.onPanelClose(() => {
-			if (mode === 'editor') {
+			if (mode === "editor") {
 				setSelectedNodeId(null);
 			}
 		});

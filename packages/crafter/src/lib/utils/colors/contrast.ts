@@ -1,7 +1,7 @@
-import type { UJLTShadeKey } from '@ujl-framework/types';
-import Color from 'colorjs.io';
-import type { ColorShades } from './types.ts';
-import { orderShadesByDistance } from './shades.ts';
+import type { UJLTShadeKey } from "@ujl-framework/types";
+import Color from "colorjs.io";
+import { orderShadesByDistance } from "./shades.ts";
+import type { ColorShades } from "./types.ts";
 
 /**
  * Result type for color picking functions that return both shade key and color.
@@ -23,16 +23,16 @@ export type ShadeColorResult = {
 export function pickFgColor(shades: ColorShades, bgColor: Color): ShadeColorResult {
 	const shadesWithContrast = Object.entries(shades).map(([key, color]) => ({
 		key: key as UJLTShadeKey,
-		color: color,
-		absContrast: Math.abs(bgColor.contrast(color, 'APCA'))
+		color,
+		absContrast: Math.abs(bgColor.contrast(color, "APCA")),
 	}));
 	const highestContrastShade = shadesWithContrast.reduce(
 		(max, shade) => (shade.absContrast > max.absContrast ? shade : max),
-		shadesWithContrast[0]
+		shadesWithContrast[0],
 	);
 	return {
 		key: highestContrastShade.key,
-		color: highestContrastShade.color
+		color: highestContrastShade.color,
 	};
 }
 
@@ -52,13 +52,13 @@ export function pickSimilarFgColor(
 	color: Color,
 	shades: ColorShades,
 	bgColor: Color,
-	threshold: number = 60
+	threshold: number = 60,
 ): ShadeColorResult {
 	const orderedShades = orderShadesByDistance(color, shades);
 	const shadesWithContrast = orderedShades.map((shade) => ({
 		key: shade.key,
 		color: shades[shade.key],
-		absContrast: Math.abs(bgColor.contrast(shades[shade.key], 'APCA'))
+		absContrast: Math.abs(bgColor.contrast(shades[shade.key], "APCA")),
 	}));
 
 	// Find the most similar shade that meets the contrast threshold
@@ -66,17 +66,17 @@ export function pickSimilarFgColor(
 	if (closestShade) {
 		return {
 			key: closestShade.key,
-			color: closestShade.color
+			color: closestShade.color,
 		};
 	}
 
 	// Fallback: return the shade with highest contrast if threshold cannot be met
 	const highestContrastShade = shadesWithContrast.reduce(
 		(max, shade) => (shade.absContrast > max.absContrast ? shade : max),
-		shadesWithContrast[0]
+		shadesWithContrast[0],
 	);
 	return {
 		key: highestContrastShade.key,
-		color: highestContrastShade.color
+		color: highestContrastShade.color,
 	};
 }

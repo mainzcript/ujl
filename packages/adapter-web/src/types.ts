@@ -1,4 +1,4 @@
-import type { UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
+import type { UJLAbstractNode, UJLTTokenSet } from "@ujl-framework/types";
 
 /**
  * Options for the webAdapter function.
@@ -7,7 +7,7 @@ export interface WebAdapterOptions {
 	/** DOM element or CSS selector where the Custom Element should be mounted */
 	target: string | HTMLElement;
 	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
-	mode?: 'light' | 'dark' | 'system';
+	mode?: "light" | "dark" | "system";
 	/**
 	 * Show metadata attributes on module elements
 	 * When true, adds data-ujl-module-id attribute to module elements
@@ -41,7 +41,7 @@ export interface UJLContentElement extends HTMLElement {
 	/** Optional design token set to apply to the rendered AST */
 	tokenSet?: UJLTTokenSet;
 	/** Theme mode: 'light', 'dark', or 'system' (default: 'system') */
-	mode?: 'light' | 'dark' | 'system';
+	mode?: "light" | "dark" | "system";
 	/** Show metadata attributes on module elements (default: false) */
 	showMetadata?: boolean;
 	/** Callback function triggered when a module is clicked */
@@ -50,6 +50,6 @@ export interface UJLContentElement extends HTMLElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'ujl-content': UJLContentElement;
+		"ujl-content": UJLContentElement;
 	}
 }

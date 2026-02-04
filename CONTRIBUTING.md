@@ -31,6 +31,11 @@ pnpm --filter @ujl-framework/crafter dev
 pnpm --filter @ujl-framework/dev-demo dev
 ```
 
+### Tooling Notes
+
+- ESLint and Prettier are configured centrally at the repo root.
+- Run linting/formatting from the repository root for consistent results.
+
 ## Development Workflow
 
 ### Branch Strategy

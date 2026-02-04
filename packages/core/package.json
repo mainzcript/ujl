@@ -7,10 +7,13 @@
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"exports": {
-		".": "./dist/index.js"
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
 	},
 	"scripts": {
-		"build": "pnpm run clean && tsc",
+		"build": "pnpm run clean && tsc -b tsconfig.build.json",
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
@@ -19,10 +22,11 @@
 		"test:unit:ui": "vitest --ui",
 		"test:unit:coverage": "vitest run --coverage",
 		"test": "vitest run",
-		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true})\""
+		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\""
 	},
 	"dependencies": {
 		"@tiptap/starter-kit": "^3.17.1",
+		"@ujl-framework/types": "workspace:*",
 		"nanoid": "^5.1.6"
 	},
 	"devDependencies": {
@@ -30,7 +34,6 @@
 		"@eslint/js": "^9.39.2",
 		"@types/node": "^25.0.10",
 		"@ujl-framework/examples": "workspace:*",
-		"@ujl-framework/types": "workspace:*",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"globals": "^17.1.0",
@@ -44,7 +47,7 @@
 	"homepage": "https://ujl-framework.org",
 	"repository": {
 		"type": "git",
-		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"url": "git+https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
 		"directory": "packages/core"
 	}
 }

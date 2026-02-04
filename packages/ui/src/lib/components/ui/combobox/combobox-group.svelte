@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { CommandGroup } from '../command/index.js';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { CommandGroup } from "../command/index.js";
 
 	let {
 		ref = $bindable(null),
@@ -11,7 +11,7 @@
 		...restProps
 	}: CommandPrimitive.GroupProps & {
 		heading?: string;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 	} = $props();
 </script>
 
