@@ -1,7 +1,8 @@
 {
 	"name": "ujl-monorepo",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"description": "Unified JSON Layout Framework - The Open-Source Web-Builder of the Future",
+	"license": "MIT",
 	"private": true,
 	"workspaces": [
 		"packages/*",
@@ -54,5 +55,11 @@
 		"ignoredBuiltDependencies": [
 			"@parcel/watcher"
 		]
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git"
 	}
 }

@@ -1,7 +1,8 @@
 {
 	"name": "@ujl-framework/types",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"description": "UJL Types",
+	"license": "MIT",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
@@ -45,5 +46,12 @@
 	},
 	"dependencies": {
 		"zod": "^4.3.6"
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"directory": "packages/types"
 	}
 }

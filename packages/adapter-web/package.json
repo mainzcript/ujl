@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/adapter-web",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"scripts": {
 		"build": "vite build",
 		"prepack": "vite build && publint",
@@ -45,5 +45,13 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"directory": "packages/adapter-web"
+	},
+	"license": "MIT"
 }

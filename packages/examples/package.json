@@ -1,7 +1,8 @@
 {
 	"name": "@ujl-framework/examples",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"description": "UJL Examples - Example Material and Test Data",
+	"license": "MIT",
 	"type": "module",
 	"files": [
 		"src/"
@@ -39,5 +40,12 @@
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.53.1",
 		"vitest": "^4.0.18"
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"directory": "packages/examples"
 	}
 }

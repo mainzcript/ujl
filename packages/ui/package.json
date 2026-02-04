@@ -1,7 +1,8 @@
 {
 	"name": "@ujl-framework/ui",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"description": "UJL UI - shadcn-svelte Component Library",
+	"license": "MIT",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && pnpm run prepack",
@@ -96,5 +97,12 @@
 		"components",
 		"ui",
 		"shadcn-svelte"
-	]
+	],
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"directory": "packages/ui"
+	}
 }
