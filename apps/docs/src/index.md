@@ -1,6 +1,8 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
+title: "UJL Crafter"
+description: "Garantiert markenkonforme und barrierefreie Websites mit KI erstellen"
 
 hero:
   name: "UJL Crafter"
