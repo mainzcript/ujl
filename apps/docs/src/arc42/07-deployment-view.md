@@ -210,7 +210,7 @@ stages:
 
 variables:
   NODE_VERSION: "22-slim"
-  PNPM_VERSION: "10.28.1"
+  PNPM_VERSION: "10.28.2"
   PLAYWRIGHT_VERSION: "1.57.0"
   PNPM_STORE_PATH: ".pnpm-store"
 ```
