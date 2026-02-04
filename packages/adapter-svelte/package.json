@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/adapter-svelte",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && pnpm run prepack",
@@ -79,5 +79,13 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "https://gitlab.mainzcript.eu/ujl-framework/ujl.git",
+		"directory": "packages/adapter-svelte"
+	},
+	"license": "MIT"
 }

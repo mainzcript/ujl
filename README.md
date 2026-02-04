@@ -8,7 +8,7 @@
 
 > **Create and maintain brand-compliant and accessible websites with AI.**
 
-UJL is an editor – the UJL **Crafter** – that enables content teams to work autonomously while guaranteeing brand compliance and accessibility. Unlike traditional solutions where design rules can be broken, UJL enforces them architecturally through strict separation of content and design.
+UJL comes with an editor – the UJL **Crafter** – that enables content teams to work autonomously while guaranteeing brand compliance and accessibility. Unlike traditional solutions where design rules can be broken, UJL enforces them architecturally through strict separation of content and design.
 
 A central concept of UJL is the strict separation of content and design. Unlike HTML and CSS, where content and styling are technically separated, UJL works at a higher abstraction level. Content is structured and described through modules as reusable building blocks in a JSON format (`.ujlc.json`), while design specifications are centrally stored in a `.ujlt.json` file. The UJL Renderer combines both elements and generates a **ContentFrame** (HTML/CSS/JS) that consistently adheres to the corporate design.
 
@@ -62,18 +62,21 @@ pnpm --filter @ujl-framework/dev-demo dev
 
 This launches the Crafter demo on `http://localhost:5174`.
 
-## CI/CD
+## CI/CD & Releases
 
-The project uses GitLab CI/CD with the following pipeline stages:
+There is currently **no automated CI/CD or release pipeline**. Releases are performed manually on `main` after a
+release branch is merged.
 
-- **install** - Install dependencies (with cache)
-- **build** - Build packages + docs
-- **test** - Unit tests (Vitest) across all packages
-- **quality** - Linting + type checking
-- **deploy** - GitLab Pages (only main/develop)
+High-level flow (manual):
 
-Configuration: [`.gitlab-ci.yml`](./.gitlab-ci.yml)
+- `develop` → `release/x.y.z`
+- Run `pnpm changeset version` on the release branch
+- Merge `release/*` → `main`
+- Tag `main` (e.g., `v0.0.1`)
+- Publish to npmjs.org
+- Create a GitHub Release from the tag
+- Merge `main` back into `develop`
 
 ## License
 
-Open source (license is still pending, but will most likely be MIT). The project will definitely be released under a permissive open source license.
+MIT
