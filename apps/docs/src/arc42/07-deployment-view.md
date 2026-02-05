@@ -17,12 +17,16 @@ graph TB
         Dev[Developer Workstation]
     end
 
-    subgraph "CI/CD Pipeline"
-        GitLab[GitLab CI/CD]
+    subgraph "Source Control"
+        Repo[Git repository]
+    end
+
+    subgraph "CI Pipeline"
+        CI[CI Pipeline]
     end
 
     subgraph "Hosting Layer"
-        Pages[GitLab Pages<br/>Static Hosting]
+        Web[Static Webserver<br/>Hetzner (self-hosted)]
         LibraryServer[Library Service Host<br/>Self-hosted]
     end
 
@@ -30,14 +34,16 @@ graph TB
         NPM[NPM Registry<br/>geplant]
     end
 
-    Dev -->|git push| GitLab
-    GitLab -->|deploy docs| Pages
-    GitLab -->|publish packages| NPM
+    Dev -->|git push| Repo
+    Repo -->|triggers| CI
+    CI -->|publish packages| NPM
+    Dev -->|upload docs (manual)| Web
     Dev -->|Library Service starten| LibraryServer
 
     style Dev fill:#3b82f6
-    style GitLab fill:#f59e0b
-    style Pages fill:#10b981
+    style Repo fill:#6b7280
+    style CI fill:#181717
+    style Web fill:#10b981
     style LibraryServer fill:#6366f1
     style NPM fill:#8b5cf6
 ```
@@ -46,21 +52,21 @@ graph TB
 
 Die Deployment-Architektur folgt dem Prinzip **"Static-First, Services-When-Needed"**:
 
-| Aspekt              | Entscheidung               | Begründung                                     |
-| ------------------- | -------------------------- | ---------------------------------------------- |
-| **Core-Packages**   | NPM Distribution           | Wiederverwendbarkeit, einfache Integration     |
-| **Crafter**         | NPM Package (Vite Library) | Einbettbar in bestehende Projekte              |
-| **Documentation**   | Static Site (GitLab Pages) | Kosteneffizient, schnell, einfach zu deployen  |
-| **Library Service** | Self-hosted Service        | Eigenständig betreibbar, getrennt vom Frontend |
-| **dev-demo**        | Static Build               | Showcase ohne Serverkosten                     |
+| Aspekt              | Entscheidung               | Begründung                                           |
+| ------------------- | -------------------------- | ---------------------------------------------------- |
+| **Core-Packages**   | NPM Distribution           | Wiederverwendbarkeit, einfache Integration           |
+| **Crafter**         | NPM Package (Vite Library) | Einbettbar in bestehende Projekte                    |
+| **Documentation**   | Static Site (self-hosted)  | Einfaches Hosting auf eigenem Server (z. B. Hetzner) |
+| **Library Service** | Self-hosted Service        | Eigenständig betreibbar, getrennt vom Frontend       |
+| **dev-demo**        | Static Build               | Showcase ohne Serverkosten                           |
 
 ### 7.1.3 Qualitäts- und Leistungsmerkmale
 
-| Infrastruktur-Element         | Verfügbarkeit      | Skalierbarkeit     | Sicherheit                        |
-| ----------------------------- | ------------------ | ------------------ | --------------------------------- |
-| GitLab Pages                  | 99.9% (GitLab SLA) | Automatisch (CDN)  | HTTPS, DDoS-Schutz                |
-| Library Service (self-hosted) | Abhängig vom Host  | Abhängig vom Setup | API-Key Auth, Network Isolation   |
-| NPM Registry                  | 99.99% (npm SLA)   | Automatisch        | npm audit, Vulnerability Scanning |
+| Infrastruktur-Element          | Verfügbarkeit      | Skalierbarkeit      | Sicherheit                        |
+| ------------------------------ | ------------------ | ------------------- | --------------------------------- |
+| Static Webserver (self-hosted) | Abhaengig vom Host | Abhaengig vom Setup | HTTPS (TLS), Security Hardening   |
+| Library Service (self-hosted)  | Abhängig vom Host  | Abhängig vom Setup  | API-Key Auth, Network Isolation   |
+| NPM Registry                   | 99.99% (npm SLA)   | Automatisch         | npm audit, Vulnerability Scanning |
 
 ## 7.2 Infrastruktur Ebene 2
 
@@ -157,99 +163,18 @@ Wenn du Bild- oder Asset-Workflows testen möchtest, starte zusätzlich den Libr
 | Library Service (Payload, Dev)  | 3000  | Admin UI und REST API (`/admin`, `/api/*`).                                 |
 | PostgreSQL (Library DB, Docker) | 5432  | Datenbank für den Library Service (lokal via Docker Compose).               |
 
-### 7.2.2 CI/CD Pipeline (GitLab CI)
+### 7.2.2 CI Pipeline (Build/Checks)
 
-```mermaid
-graph LR
-    subgraph "GitLab CI Pipeline"
-        Install[install_deps<br/>pnpm install]
-        Build[build_all<br/>pnpm run build]
-        TestUnit[test_unit<br/>pnpm test:unit]
-        TestE2E[test_e2e<br/>pnpm test:e2e]
-        Quality[quality_check<br/>lint + check]
-        Deploy[pages<br/>GitLab Pages]
-    end
+Fuer Pull Requests und Branches werden Build-, Test- und Qualitaetschecks automatisiert ausgefuehrt (CI).
 
-    subgraph "Artifacts"
-        DocsOutput[apps/docs/dist/]
-        DistPackages[packages/*/dist/]
-        DistApps[apps/*/dist/]
-        Public[public/]
-    end
+Das Deployment der Dokumentation erfolgt bewusst **manuell** auf einen self-hosted Webserver (Hetzner): In CI wird nur das Build-Artifact erzeugt (`apps/docs/dist/`).
 
-    Install --> Build
-    Build --> TestUnit
-    Build --> TestE2E
-    Build --> Quality
-    Build --> Deploy
-
-    Build -.-> DocsOutput
-    Build -.-> DistPackages
-    Build -.-> DistApps
-    Deploy -.-> Public
-
-    style Install fill:#8b5cf6
-    style Build fill:#3b82f6
-    style TestUnit fill:#10b981
-    style TestE2E fill:#10b981
-    style Quality fill:#f59e0b
-    style Deploy fill:#ef4444
-```
-
-#### Pipeline-Konfiguration
-
-Die CI/CD-Pipeline ist in `.gitlab-ci.yml` definiert:
-
-```yaml
-stages:
-  - install
-  - build
-  - test
-  - quality
-  - deploy
-
-variables:
-  NODE_VERSION: "22-slim"
-  PNPM_VERSION: "10.28.2"
-  PLAYWRIGHT_VERSION: "1.57.0"
-  PNPM_STORE_PATH: ".pnpm-store"
-```
-
-#### Stage-Details
-
-| Stage       | Job             | Beschreibung                                                            |
-| ----------- | --------------- | ----------------------------------------------------------------------- |
-| **install** | `install_deps`  | Dependencies installieren (wärmt pnpm Store für nachfolgende Jobs)      |
-| **build**   | `build_all`     | Build für Packages und Apps (inkl. `apps/docs/dist`)                    |
-| **test**    | `test_unit`     | Unit-Tests (Vitest)                                                     |
-| **test**    | `test_e2e`      | E2E-Tests (Playwright, läuft nur in MR sowie auf main/develop)          |
-| **quality** | `quality_check` | Linting + TypeScript Check                                              |
-| **deploy**  | `pages`         | Docs-Artifact nach GitLab Pages kopieren (`apps/docs/dist` → `public/`) |
-
-#### Caching-Strategie
-
-```yaml
-cache:
-  key:
-    files:
-      - pnpm-lock.yaml
-    prefix: dependencies
-  paths:
-    - .pnpm-store/
-```
-
-Der Cache-Key basiert auf `pnpm-lock.yaml` und sorgt damit für reproduzierbare Installationen. Zusätzlich wird der pnpm Store als `.pnpm-store/` gecacht, damit Folge-Jobs weniger neu installieren müssen.
-
-#### Deployment-Regeln
-
-```yaml
-pages:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "develop"
-```
-
-Die Dokumentation wird nur aus `main` (Produktions-Doku) und `develop` (Preview-Doku) nach GitLab Pages deployed.
+| Zweck   | Command(s)                        | Output/Notizen                           |
+| ------- | --------------------------------- | ---------------------------------------- |
+| install | `pnpm install --frozen-lockfile`  | reproduzierbare Installation             |
+| build   | `pnpm run build`                  | u. a. `apps/docs/dist/`                  |
+| test    | `pnpm run test`                   | Vitest + Playwright (falls konfiguriert) |
+| quality | `pnpm run lint`, `pnpm run check` | ESLint + TypeScript                      |
 
 ### 7.2.3 Library Service (Docker)
 
@@ -378,41 +303,35 @@ In der lokalen Entwicklung stehen Hot Module Replacement (HMR) und schnelle Feed
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
-    participant GitLab as GitLab
-    participant Runner as GitLab Runner
+    participant Repo as Git repository
+    participant CI as CI Pipeline
     participant Cache as Cache Storage
-    participant Pages as GitLab Pages
 
-    Dev->>GitLab: git push origin feature/xyz
-    GitLab->>Runner: Trigger Pipeline
+    Dev->>Repo: git push origin feature/xyz
+    Repo->>CI: Trigger Pipeline
 
-    Runner->>Cache: Check cache (.pnpm-store)
-    Cache-->>Runner: Cache hit/miss
+    CI->>Cache: Check cache (.pnpm-store)
+    Cache-->>CI: Cache hit/miss
 
-    Runner->>Runner: install_deps (pnpm install)
-    Runner->>Cache: Store cache
+    CI->>CI: install_deps (pnpm install)
+    CI->>Cache: Store cache
 
-    Runner->>Runner: build_all (pnpm run build)
-    Note over Runner: Jobs laufen parallel; pages hängt am Build-Artifact.
+    CI->>CI: build_all (pnpm run build)
+    Note over CI: Jobs laufen parallel; Docs-Artifact ist apps/docs/dist/.
 
     par Tests & Checks
-        Runner->>Runner: test_unit (pnpm test:unit)
-        Runner->>Runner: test_e2e (pnpm test:e2e, MR/main/develop)
-        Runner->>Runner: quality_check (lint + check)
-    and Pages Deploy (main/develop)
-        alt Branch is main/develop
-            Runner->>Pages: Deploy docs
-            Pages-->>GitLab: Deployment successful
-        end
+        CI->>CI: test_unit (pnpm test:unit)
+        CI->>CI: test_e2e (pnpm test:e2e)
+        CI->>CI: quality_check (lint + check)
     end
 
-    Runner-->>GitLab: Pipeline success/failure
-    GitLab-->>Dev: Pipeline Notification
+    CI-->>Repo: Pipeline success/failure
+    Repo-->>Dev: Pipeline Notification
 ```
 
 **Charakteristiken:**
 
-Der Build erzeugt die Artefakte (u.a. `apps/docs/dist/`). Tests (Vitest/Playwright) und Lint/Type-Checks laufen in eigenen Jobs. Das Pages-Deployment nutzt das Build-Artifact und wird nur auf `main` und `develop` ausgeführt; in der aktuellen DAG-Konfiguration hängt es direkt am Build-Job und kann parallel zu Tests/Checks laufen. Retries sind für temporäre Runner-/Infrastruktur-Fehler aktiviert.
+Der Build erzeugt die Artefakte (u. a. `apps/docs/dist/`). Tests (Vitest/Playwright) und Lint/Type-Checks laufen in eigenen Jobs.
 
 ### 7.3.4 Szenario: Produktion (Integration in Host-Applikation)
 
@@ -525,7 +444,7 @@ Dieser Abschnitt beantwortet für Entwickler:innen zwei praktische Fragen:
 | Baustein (Workspace)                      | Typ               | Build-Output im Repo      | Nutzung / Betrieb                                                        |
 | ----------------------------------------- | ----------------- | ------------------------- | ------------------------------------------------------------------------ |
 | `packages/*` (z.B. `@ujl-framework/core`) | Package (Library) | `packages/<name>/dist/`   | als Dependency in Host-Apps (geplant: Veröffentlichung via NPM Registry) |
-| `apps/docs`                               | App (Doku)        | `apps/docs/dist/`         | Deployment via GitLab Pages                                              |
+| `apps/docs`                               | App (Doku)        | `apps/docs/dist/`         | self-hosted static website (Hetzner), manueller Upload                   |
 | `apps/dev-demo`                           | App (Demo)        | `apps/dev-demo/dist/`     | lokal/Preview via `vite preview` bzw. separat deploybar                  |
 | `services/library`                        | Service (Backend) | `services/library/.next/` | self-hosted Service (Node.js) mit PostgreSQL (Docker für lokale DB)      |
 
@@ -591,7 +510,7 @@ Welche Signale wir für Skalierung heranziehen, wird erst mit erstem Produktions
 
 ### 7.7.1 Logging
 
-Aktuell reicht für Entwicklung die Standard-Ausgabe der jeweiligen Prozesse: Vite/VitePress und der Library Service loggen in die Konsole, die lokale PostgreSQL-DB in die Docker-Logs, und CI-Logs sind in GitLab sichtbar.
+Aktuell reicht fuer Entwicklung die Standard-Ausgabe der jeweiligen Prozesse: Vite/VitePress und der Library Service loggen in die Konsole, die lokale PostgreSQL-DB in die Docker-Logs, und CI-Logs sind im CI-System einsehbar.
 
 ### 7.7.2 Health Checks
 
@@ -616,7 +535,7 @@ sequenceDiagram
     participant Dev as Developer
     participant Changesets as Changesets CLI
     participant Git as Git
-    participant CI as GitLab CI
+    participant CI as CI Pipeline
     participant NPM as NPM Registry
 
     Dev->>Changesets: pnpm changeset

@@ -11,7 +11,7 @@ and Library service), see:
 
 ```bash
 # Clone the repository
-git clone git@gitlab.mainzcript.eu:ujl-framework/ujl.git
+git clone git@github.com:mainzcript/ujl.git
 cd ujl
 
 # Install dependencies
@@ -43,7 +43,7 @@ pnpm --filter @ujl-framework/dev-demo dev
 We follow a **GitFlow-lean** branching strategy:
 
 - **`main`**: Production-ready releases only
-- **`develop`**: Active development branch (default)
+- **`develop`**: Active development branch
 - **`feat/*`**: Feature branches from `develop`
 - **`fix/*`**: Bug fix branches from `develop`
 - **`release/*`**: Release preparation from `develop`
@@ -55,7 +55,7 @@ Further **rules** for branch names:
 - Keep descriptions concise but descriptive
 - No special characters except hyphens
 
-> Note: You will not be able to push branches which are not following the naming convention. `main` and `develop` branches are protected and cannot be pushed to directly.
+> Note: `main` and `develop` are protected and cannot be pushed to directly. New branches are created from `develop` (except rare hotfixes from `main`).
 
 ### 1. Making Changes
 
@@ -95,9 +95,10 @@ We follow conventional commits:
 ### 4. Pull Request
 
 1. Push your branch
-2. Create a pull request
+2. Create a pull request targeting `develop` (except hotfixes targeting `main`)
 3. Ensure all checks pass
 4. Request review from maintainers
+5. Merge using **squash** (squash-only history)
 
 ## Release Process
 

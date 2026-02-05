@@ -51,7 +51,7 @@ ujl/
 
 For a full setup walkthrough, see the VitePress docs:
 
-- [Getting Started](./apps/docs/src/docs/01-getting-started.md)
+- [Installation & Integration](./apps/docs/src/docs/02-installation.md)
 
 If you want a minimal local demo first:
 
@@ -64,18 +64,21 @@ This launches the Crafter demo on `http://localhost:5174`.
 
 ## CI/CD & Releases
 
-There is currently **no automated CI/CD or release pipeline**. Releases are performed manually on `main` after a
-release branch is merged.
+**CI Pipeline** runs automatically on every push and pull request via GitHub Actions:
+- Build all packages
+- Run unit tests (Vitest)
+- Run E2E tests (Playwright)
+- Quality checks (ESLint, TypeScript)
 
-High-level flow (manual):
+**Releases** are performed manually using Changesets:
 
-- `develop` → `release/x.y.z`
-- Run `pnpm changeset version` on the release branch
-- Merge `release/*` → `main`
-- Tag `main` (e.g., `v0.0.1`)
-- Publish to npmjs.org
-- Create a GitHub Release from the tag
-- Merge `main` back into `develop`
+1. `develop` → `release/x.y.z`
+2. Run `pnpm changeset version` on the release branch
+3. Merge `release/*` → `main`
+4. Tag `main` (e.g., `v0.0.1`)
+5. Publish to npmjs.org
+6. Create a GitHub Release from the tag
+7. Merge `main` back into `develop`
 
 ## License
 

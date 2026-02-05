@@ -47,16 +47,15 @@ Hierzu sowie zu weiteren Fragen zum Thema Datenschutz können Sie sich jederzeit
 
 ## 2. Hosting
 
-### GitLab Pages
+### Eigenes Hosting (Hetzner)
 
-Diese Website wird über eine eigene GitLab-Instanz von mainzcript gehostet.
+Diese Website wird auf einem von uns betriebenen Webserver als statische Website gehostet.
 
-**GitLab-Instanz:**  
-[gitlab.mainzcript.eu](https://gitlab.mainzcript.eu)
+**Hosting-Provider:** Hetzner Online GmbH
 
-Weitere Informationen zur Datenverarbeitung finden Sie in dieser Datenschutzerklärung.
+Bei jedem Zugriff auf unsere Website werden durch den Webserver automatisch Informationen in Server-Logfiles verarbeitet (z. B. IP-Adresse, Datum und Uhrzeit des Zugriffs, abgerufene Seite/Datei, User-Agent). Die Verarbeitung erfolgt zur technischen Bereitstellung, zur Gewaehrleistung der Stabilitaet und zur Abwehr von Angriffen.
 
-Der Einsatz von GitLab Pages erfolgt zum Zwecke der sicheren, schnellen und zuverlässigen Bereitstellung unseres Online-Angebots (Art. 6 Abs. 1 lit. f DSGVO).
+Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
 
 ## 3. Allgemeine Hinweise und Pflichtinformationen
 

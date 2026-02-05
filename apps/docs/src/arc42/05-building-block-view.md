@@ -1120,17 +1120,17 @@ pnpm run build
 
 ### Artifact-Typen
 
-| Package        | Build Tool | Output                                              | Distribution            |
-| -------------- | ---------- | --------------------------------------------------- | ----------------------- |
-| types          | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)           |
-| core           | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)           |
-| ui             | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)           |
-| adapter-svelte | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)           |
-| adapter-web    | Vite       | `dist/index.js` (bundled) + `dist/index.d.ts`       | NPM (geplant)           |
-| crafter        | SvelteKit  | `dist/**/*` (SvelteKit Package)                     | NPM (geplant)           |
-| dev-demo       | Vite       | `dist/**/*` (Static Files)                          | Private                 |
-| docs           | VitePress  | `.vitepress/dist/**/*` (Static Site)                | GitLab Pages            |
-| library        | Next.js    | Docker Image                                        | Docker Hub (bei Bedarf) |
+| Package        | Build Tool | Output                                              | Distribution                 |
+| -------------- | ---------- | --------------------------------------------------- | ---------------------------- |
+| types          | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)                |
+| core           | TypeScript | `dist/*.js` + `dist/*.d.ts`                         | NPM (geplant)                |
+| ui             | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)                |
+| adapter-svelte | SvelteKit  | `dist/*.js` + `dist/*.svelte` + `dist/styles/*.css` | NPM (geplant)                |
+| adapter-web    | Vite       | `dist/index.js` (bundled) + `dist/index.d.ts`       | NPM (geplant)                |
+| crafter        | SvelteKit  | `dist/**/*` (SvelteKit Package)                     | NPM (geplant)                |
+| dev-demo       | Vite       | `dist/**/*` (Static Files)                          | Private                      |
+| docs           | VitePress  | `.vitepress/dist/**/*` (Static Site)                | Static Hosting (self-hosted) |
+| library        | Next.js    | Docker Image                                        | Docker Hub (bei Bedarf)      |
 
 ## 5.9 Querschnittliche Aspekte
 
@@ -1165,12 +1165,15 @@ import { testId } from './test-attrs';
 // → Generates: data-testid="submit-button" (nur im Test-Modus)
 ```
 
-### 5.9.3 CI/CD Pipeline (GitLab CI)
+### 5.9.3 CI Pipeline (Build/Checks)
 
-Die CI/CD Pipeline automatisiert Build, Test, Qualitätsprüfung und Deployment über **GitLab CI**. Sie durchläuft fünf Stages in sequenzieller Reihenfolge:
+Die CI Pipeline automatisiert Build, Test und Qualitaetspruefung.
 
 1. **install** - `pnpm install --frozen-lockfile` (mit Cache)
 2. **build** - `pnpm run build` (alle Packages)
 3. **test** - `pnpm run test` (Vitest Unit Tests)
 4. **quality** - `pnpm run lint` + `pnpm run check` (ESLint + TypeScript)
-5. **deploy** - Dokumentations-Website nach GitLab Pages (nur main/develop Branch)
+
+### 5.9.4 Dokumentation (Auslieferung)
+
+Die Dokumentation wird als statisches Artifact gebaut (`apps/docs/dist/`) und anschliessend manuell auf den Webserver hochgeladen.

@@ -11,30 +11,30 @@ Im Mittelpunkt stehen die Trennung von Content und Theme, die AST-Adapter-Archit
 
 ## ADR-Übersicht
 
-| ADR     | Titel                                                      | Kategorie           | Status   |
-| ------- | ---------------------------------------------------------- | ------------------- | -------- |
-| ADR-001 | Strikte Trennung von Content (UJLC) und Design (UJLT)      | Kern-Architektur    | ACCEPTED |
-| ADR-002 | Plugin-System mit Registry Pattern                         | Kern-Architektur    | ACCEPTED |
-| ADR-003 | Adapter Pattern für Framework-Agnostisches Rendering       | Kern-Architektur    | ACCEPTED |
-| ADR-004 | Dual Image Storage Strategy (Inline vs. Backend)           | Content-Management  | ACCEPTED |
-| ADR-005 | Zod für Runtime Validation mit Type Inference              | Validierung & Types | ACCEPTED |
-| ADR-006 | Svelte als primäres UI-Framework                           | Technologie-Stack   | ACCEPTED |
-| ADR-007 | Payload CMS für Library Service                            | Infrastruktur       | ACCEPTED |
-| ADR-008 | TipTap/ProseMirror für Structured Rich Text                | Content-Management  | ACCEPTED |
-| ADR-009 | OKLCH Farbraum für Design Tokens                           | Design-System       | ACCEPTED |
-| ADR-010 | pnpm Workspaces + Changesets für Monorepo                  | DevOps & Tooling    | ACCEPTED |
-| ADR-011 | Playwright für E2E Testing des Crafters                    | Testing             | ACCEPTED |
-| ADR-012 | GitLab CI/CD mit Build-, Test-, Quality- und Deploy-Stages | DevOps & Tooling    | ACCEPTED |
-| ADR-013 | VitePress für technische Dokumentation                     | Dokumentation       | ACCEPTED |
-| ADR-014 | Vitest für Unit Tests                                      | Testing             | ACCEPTED |
-| ADR-015 | TypeScript Strict Mode für Maximum Type Safety             | Validierung & Types | ACCEPTED |
-| ADR-016 | Image Library Abstraction mit Provider-Interface           | Content-Management  | ACCEPTED |
-| ADR-017 | Embedding Strategy für KI-gestützte Content-Suche          | Infrastruktur       | PROPOSED |
-| ADR-018 | Svelte Runes für reaktive State Management                 | Technologie-Stack   | ACCEPTED |
-| ADR-019 | Strukturierter Content statt HTML-Strings                  | Content-Management  | ACCEPTED |
-| ADR-020 | Foreground-Mapping für WCAG-konforme Kontraste             | Design-System       | ACCEPTED |
-| ADR-021 | Monorepo Package Layering (Packages → Apps → Docs)         | Architektur         | ACCEPTED |
-| ADR-022 | Test Attributes ohne Production Overhead                   | Testing             | ACCEPTED |
+| ADR     | Titel                                                 | Kategorie           | Status   |
+| ------- | ----------------------------------------------------- | ------------------- | -------- |
+| ADR-001 | Strikte Trennung von Content (UJLC) und Design (UJLT) | Kern-Architektur    | ACCEPTED |
+| ADR-002 | Plugin-System mit Registry Pattern                    | Kern-Architektur    | ACCEPTED |
+| ADR-003 | Adapter Pattern für Framework-Agnostisches Rendering  | Kern-Architektur    | ACCEPTED |
+| ADR-004 | Dual Image Storage Strategy (Inline vs. Backend)      | Content-Management  | ACCEPTED |
+| ADR-005 | Zod für Runtime Validation mit Type Inference         | Validierung & Types | ACCEPTED |
+| ADR-006 | Svelte als primäres UI-Framework                      | Technologie-Stack   | ACCEPTED |
+| ADR-007 | Payload CMS für Library Service                       | Infrastruktur       | ACCEPTED |
+| ADR-008 | TipTap/ProseMirror für Structured Rich Text           | Content-Management  | ACCEPTED |
+| ADR-009 | OKLCH Farbraum für Design Tokens                      | Design-System       | ACCEPTED |
+| ADR-010 | pnpm Workspaces + Changesets für Monorepo             | DevOps & Tooling    | ACCEPTED |
+| ADR-011 | Playwright für E2E Testing des Crafters               | Testing             | ACCEPTED |
+| ADR-012 | CI Pipeline fuer Build-, Test- und Quality-Checks     | DevOps & Tooling    | ACCEPTED |
+| ADR-013 | VitePress für technische Dokumentation                | Dokumentation       | ACCEPTED |
+| ADR-014 | Vitest für Unit Tests                                 | Testing             | ACCEPTED |
+| ADR-015 | TypeScript Strict Mode für Maximum Type Safety        | Validierung & Types | ACCEPTED |
+| ADR-016 | Image Library Abstraction mit Provider-Interface      | Content-Management  | ACCEPTED |
+| ADR-017 | Embedding Strategy für KI-gestützte Content-Suche     | Infrastruktur       | PROPOSED |
+| ADR-018 | Svelte Runes für reaktive State Management            | Technologie-Stack   | ACCEPTED |
+| ADR-019 | Strukturierter Content statt HTML-Strings             | Content-Management  | ACCEPTED |
+| ADR-020 | Foreground-Mapping für WCAG-konforme Kontraste        | Design-System       | ACCEPTED |
+| ADR-021 | Monorepo Package Layering (Packages → Apps → Docs)    | Architektur         | ACCEPTED |
+| ADR-022 | Test Attributes ohne Production Overhead              | Testing             | ACCEPTED |
 
 ## 9.1 ADR-001: Strikte Trennung von Content (UJLC) und Design (UJLT)
 
@@ -111,7 +111,7 @@ Die Entscheidung steht in direktem Zusammenhang mit ADR-005 zur Schema-Validieru
 
 ### Status
 
-**ACCEPTED** - Implementiert
+**ACCEPTED** - In Umsetzung
 
 ### Kontext
 
@@ -930,7 +930,7 @@ Die Playwright-Konfiguration definiert testDir als './tests/e2e', fullyParallel 
 
 #### Vorteile
 
-Realistische Tests nutzen echte Browser-Events für Drag & Drop und Clipboard. Cross-Browser-Tests laufen in Chrome, Firefox und Safari. Stabile Selektoren verwenden data-testid statt CSS-Klassen. Debugging wird durch Screenshots, Videos und Traces unterstützt. Auto-Wait bedeutet, dass Playwright automatisch auf DOM-Updates wartet. CI-Ready bedeutet Headless-Modus für GitLab CI.
+Realistische Tests nutzen echte Browser-Events für Drag & Drop und Clipboard. Cross-Browser-Tests laufen in Chrome, Firefox und Safari. Stabile Selektoren verwenden data-testid statt CSS-Klassen. Debugging wird durch Screenshots, Videos und Traces unterstützt. Auto-Wait bedeutet, dass Playwright automatisch auf DOM-Updates wartet. CI-Ready bedeutet Headless-Modus in der CI.
 
 #### Nachteile
 
@@ -952,33 +952,33 @@ Die Test-Laufzeiten betragen circa 2s für Vitest Unit Tests (20 Test-Dateien mi
 
 Diese Entscheidung steht in Beziehung zu ADR-014, da Vitest für Unit und Integration-Tests verwendet wird, sowie zu ADR-022, das die data-testid-Strategie definiert.
 
-## 9.12 ADR-012: GitLab CI/CD
+## 9.12 ADR-012: CI Pipeline
 
 ### Status
 
-**ACCEPTED** - Implementiert
+**ACCEPTED** - In Umsetzung
 
 ### Kontext
 
-UJL benötigt automatisierte CI/CD für Build mit TypeScript-Compilation und Svelte-Builds, Tests mit Unit-Tests (Vitest) und E2E-Tests (Playwright), Quality mit Linting (ESLint) und Type-Checking (tsc) sowie Deployment mit GitLab Pages für Dokumentation. Die Anforderungen umfassten Integration in Repository-Workflow mit Merge Requests und Issues, Caching für schnelle Builds, Multi-Stage-Pipeline sowie Deployment zu GitLab Pages.
+UJL benötigt automatisierte CI fuer Build (TypeScript-Compilation und Svelte-Builds), Tests (Vitest Unit Tests, Playwright E2E) sowie Quality (ESLint, Type-Checking). Die Dokumentation wird als statisches Artifact gebaut und anschliessend manuell auf einem self-hosted Webserver bereitgestellt.
 
 ### Entscheidung
 
-UJL nutzt GitLab CI/CD. Die Pipeline definiert stages für install, build, test, quality und deploy. Variables setzen NODE_VERSION auf "22", PNPM_VERSION auf "10.28.2" und PNPM_STORE_PATH auf .pnpm-store. Der install stage führt pnpm install --frozen-lockfile aus und cached .pnpm-store. Der build stage führt pnpm run build aus und erzeugt artifacts in packages/\*/dist und apps/docs/dist mit expire_in 1 week. Der test stage ist aufgeteilt in test_unit (führt pnpm test:unit aus) und test_e2e (führt pnpm test:e2e mit Playwright aus, nur auf MRs und main/develop branches). Der quality stage führt pnpm run lint und pnpm run check aus. Der pages stage läuft nur auf main und develop, führt cp -r apps/docs/dist/. public/ aus und erzeugt artifacts in public.
+UJL nutzt eine CI Pipeline. Die Pipeline fuehrt reproduzierbar install, build, test und quality Checks aus (pnpm install --frozen-lockfile, pnpm run build, pnpm run test, pnpm run lint, pnpm run check). Artefakte (z. B. packages/\*/dist und apps/docs/dist) werden fuer nachgelagerte Schritte bereitgestellt; die Dokumentation wird anschliessend manuell auf den Webserver deployed.
 
 ### Konsequenzen
 
 #### Vorteile
 
-Die Integration bedeutet, dass Merge Requests, Issues und Registry in einem Tool sind. Caching des pnpm-Store ermöglicht schnelle Builds. GitLab Pages bietet kostenloses Docs-Hosting. Multi-Stage bedeutet klare Pipeline-Struktur.
+Die Integration bedeutet, dass Pull Requests, Issues und Registry in einem Tool sind. Caching des pnpm-Store ermoeglicht schnelle Builds. Die Pipeline bleibt nachvollziehbar und wartbar.
 
 #### Nachteile
 
-Vendor-Lock-in durch GitLab-spezifische Syntax ist gegeben. Debugging bedeutet, dass CI-Logs weniger interaktiv sind als lokal.
+Gewisser Vendor-Lock-in durch die konkrete CI-Implementierung. Debugging bedeutet, dass CI-Logs weniger interaktiv sind als lokal.
 
 ### Verwandte Entscheidungen
 
-Diese Entscheidung steht in Beziehung zu ADR-010, da CI pnpm nutzt, sowie zu ADR-013, da Docs zu GitLab Pages deployen.
+Diese Entscheidung steht in Beziehung zu ADR-010, da CI pnpm nutzt, sowie zu ADR-013 (Dokumentation als statische Seite).
 
 ## 9.13 ADR-013: VitePress für Dokumentation
 
@@ -988,7 +988,7 @@ Diese Entscheidung steht in Beziehung zu ADR-010, da CI pnpm nutzt, sowie zu ADR
 
 ### Kontext
 
-Arc42-Dokumentation benötigt Markdown-basiertes Schreiben für einfache Erstellung, Versionierung über Git, statisches HTML-Output für GitLab Pages sowie Features wie Search, Sidebar und Navigation.
+Arc42-Dokumentation benötigt Markdown-basiertes Schreiben fuer einfache Erstellung, Versionierung ueber Git, statisches HTML-Output (self-hosted) sowie Features wie Search, Sidebar und Navigation.
 
 ### Entscheidung
 
@@ -998,7 +998,7 @@ UJL nutzt VitePress für Dokumentation. Die Struktur umfasst apps/docs/ mit .vit
 
 #### Vorteile
 
-Markdown-first bedeutet einfaches Schreiben. Vite-Performance bietet schnelles HMR. Built-in Search ermöglicht lokale Suche ohne Backend. GitLab Pages liefert statisches HTML für Deployment.
+Markdown-first bedeutet einfaches Schreiben. Vite-Performance bietet schnelles HMR. Built-in Search ermoeglicht lokale Suche ohne Backend. Self-hosted Hosting liefert statisches HTML fuer Deployment.
 
 #### Nachteile
 
@@ -1006,7 +1006,7 @@ Vite-Abhängigkeit bedeutet Coupling an das Vite-Ökosystem.
 
 ### Verwandte Entscheidungen
 
-Diese Entscheidung steht in Beziehung zu ADR-012, da Docs via GitLab CI deployen.
+Diese Entscheidung steht in Beziehung zu ADR-012, da Docs als Artifact in der CI gebaut und manuell deployed werden.
 
 ## 9.14 ADR-014: Vitest für Unit-Tests
 

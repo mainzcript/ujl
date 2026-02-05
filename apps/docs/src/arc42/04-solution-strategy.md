@@ -335,7 +335,7 @@ Die konkreten Backend-Features (Upload, Metadaten, responsive Varianten) liegen 
 | **Monorepo**           | pnpm Workspaces + Changesets | Effiziente Disk-Space-Nutzung, koordinierte Versionierung, Semantic Versioning Automation   |
 | **Testing**            | Vitest + Playwright          | Unit Tests (Jest-API), E2E Tests (Cross-Browser), Test Attributes ohne Production Overhead  |
 | **Documentation**      | VitePress                    | Markdown-basiert, Vue-powered, schnell, integrierbar mit CI/CD                              |
-| **CI/CD**              | GitLab CI                    | Multi-Stage Pipeline, Caching, GitLab Pages Deployment                                      |
+| **CI/CD**              | CI Pipeline                  | Multi-Stage Pipeline, Caching, reproduzierbare Builds                                       |
 
 ### Entscheidungstreiber für Technologie-Wahl
 
@@ -428,7 +428,7 @@ UJL wird als Monorepo entwickelt und in mehrere Pakete geschnitten. Die Kernpake
 
 Der Crafter ist im ein NPM-Package, das in Host-Anwendungen eingebettet wird. Es gibt im Repository kein separates Crafter-Deployment als eigenständige App; Betrieb und Auslieferung passieren über die jeweilige Host-Anwendung. Der Library Service ist davon entkoppelt und wird nur dann betrieben, wenn Backend-Storage für Bilder genutzt wird.
 
-**CI/CD Pipeline:**
+**CI Pipeline (Build/Checks):**
 
 ```yaml
 Stages:
@@ -436,8 +436,9 @@ Stages:
 2. build      → pnpm run build (types → core → ui → adapters → crafter → docs)
 3. test       → pnpm run test (Vitest Unit Tests)
 4. quality    → pnpm run lint + pnpm run check (ESLint + TypeScript)
-5. deploy     → GitLab Pages (docs only on main/develop)
 ```
+
+Die Auslieferung der Dokumentation ist bewusst kein Teil der CI Pipeline: Das Build-Artifact `apps/docs/dist/` wird manuell auf den Webserver hochgeladen.
 
 Als Leitlinien ziehen sich ein paar Prinzipien durch die Umsetzung: Content, Design und Rendering bleiben getrennt, und die Datenverträge werden über Zod-Schemas definiert und zur Laufzeit geprüft. Module werden nicht über Vererbung erweitert, sondern über Composition aus Fields und Slots sowie über eine Registry als Plugin-System. Zustandsänderungen werden funktional formuliert, damit Änderungen nachvollziehbar bleiben.
 
