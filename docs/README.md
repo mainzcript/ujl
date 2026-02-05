@@ -6,6 +6,7 @@ This directory contains guidelines and documentation for developers working on t
 
 - [Testing Guidelines](./testing.md) - Test infrastructure and best practices
 - [Code Review Playbook](./code-review.md) - Code review process and standards
+- [Bundle Strategy & Performance](./bundle-strategy.md) - Bundle sizes, lazy loading patterns, and optimization
 
 ## Tooling
 

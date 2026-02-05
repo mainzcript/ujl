@@ -142,10 +142,11 @@ export default withMermaid({
 		publicDir: "public",
 		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
 		optimizeDeps: {
-			include: ["mermaid", "@braintree/sanitize-url"],
+			include: ["mermaid"],
 		},
 		resolve: {
 			alias: {
+				// Required for Mermaid ESM compatibility
 				dayjs: "dayjs/",
 			},
 		},

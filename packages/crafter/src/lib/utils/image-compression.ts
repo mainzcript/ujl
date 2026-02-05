@@ -3,9 +3,21 @@
  *
  * These helpers are intentionally UI-agnostic and can be reused from
  * different components. They do not depend on Svelte APIs.
+ *
+ * Note: Compressorjs is lazy-loaded to reduce initial bundle size (~30KB).
+ * It's only loaded when compressImage() is actually called.
  */
 
-import Compressor from "compressorjs";
+// Lazy-load compressorjs only when needed (reduces initial bundle by ~30KB)
+let CompressorClass: typeof import("compressorjs").default | null = null;
+
+async function getCompressor(): Promise<typeof import("compressorjs").default> {
+	if (!CompressorClass) {
+		const module = await import("compressorjs");
+		CompressorClass = module.default;
+	}
+	return CompressorClass;
+}
 
 /**
  * Load image and return dimensions
@@ -54,13 +66,14 @@ export async function compressImage(file: File): Promise<File> {
 	// Helper: Get file size in bytes
 	const getFileSize = (f: File | Blob): number => f.size;
 
-	// Helper: Compress with specific settings
-	const compressWithSettings = (
+	// Helper: Compress with specific settings (lazy-loads compressorjs on first call)
+	const compressWithSettings = async (
 		file: File,
 		maxWidth: number,
 		maxHeight: number,
 		quality: number,
 	): Promise<File | Blob> => {
+		const Compressor = await getCompressor();
 		return new Promise((resolve, reject) => {
 			new Compressor(file, {
 				maxWidth: Math.round(maxWidth),

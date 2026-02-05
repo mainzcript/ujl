@@ -1,11 +1,13 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
 	const isDev = command === "serve";
+	const isAnalyze = mode === "analyze";
 
 	return {
 		// Dev server uses src/dev/index.html as entry
@@ -44,6 +46,17 @@ export default defineConfig(({ command }) => {
 							exclude: ["src/**/*.test.*", "src/dev/**/*"],
 						}),
 					]),
+			// Bundle analyzer (only in analyze mode)
+			...(isAnalyze
+				? [
+						visualizer({
+							filename: "stats.html",
+							open: true,
+							gzipSize: true,
+							brotliSize: true,
+						}),
+					]
+				: []),
 		],
 
 		// Library build configuration (only for production build)
@@ -56,6 +69,8 @@ export default defineConfig(({ command }) => {
 			},
 			rollupOptions: {
 				// Bundle everything, including Svelte runtime (framework-agnostic bundle)
+				// Note: manualChunks is not used for library builds as the entire bundle
+				// must be loaded anyway. Code-splitting only makes sense for applications.
 				external: [],
 			},
 			// CSS is injected into Shadow DOM via ?inline import, no separate CSS file needed
