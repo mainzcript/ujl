@@ -23,7 +23,7 @@ stages:
 
 variables:
   # Image pinning for reproducibility (can be extended to digest later)
-  NODE_VERSION: "22-slim"
+  NODE_VERSION: "22"
   PNPM_VERSION: "10.28.2"
   PLAYWRIGHT_VERSION: "1.58.0"
 
