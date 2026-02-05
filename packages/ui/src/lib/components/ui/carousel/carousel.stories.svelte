@@ -1,21 +1,21 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Carousel,
 		CarouselContent,
 		CarouselItem,
 		CarouselPrevious,
 		CarouselNext,
-		CarouselDots
-	} from './index.ts';
-	import { Card, CardContent } from '../card/index.ts';
+		CarouselDots,
+	} from "./index.ts";
+	import { Card, CardContent } from "../card/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Complex/Carousel',
+		title: "Components/Complex/Carousel",
 		component: Carousel,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {},
-		args: {}
+		args: {},
 	});
 </script>
 
@@ -78,7 +78,7 @@
 		<div class="w-full max-w-2xl">
 			<Carousel>
 				<CarouselContent>
-					{#each ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'] as color, i (color)}
+					{#each ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-pink-500"] as color, i (color)}
 						<CarouselItem>
 							<div class={`${color} flex aspect-video items-center justify-center rounded-lg`}>
 								<span class="text-2xl font-semibold text-white">Image {i + 1}</span>
@@ -102,7 +102,7 @@
 		<div class="w-full max-w-3xl">
 			<Carousel>
 				<CarouselContent class="-ml-2 md:-ml-4">
-					{#each [{ title: 'Getting Started', desc: 'Learn the basics of our platform' }, { title: 'Components', desc: 'Explore our component library' }, { title: 'Theming', desc: 'Customize colors and styles' }, { title: 'Plugins', desc: 'Extend functionality with plugins' }, { title: 'Deployment', desc: 'Deploy your application' }] as item, i (item.title)}
+					{#each [{ title: "Getting Started", desc: "Learn the basics of our platform" }, { title: "Components", desc: "Explore our component library" }, { title: "Theming", desc: "Customize colors and styles" }, { title: "Plugins", desc: "Extend functionality with plugins" }, { title: "Deployment", desc: "Deploy your application" }] as item, i (item.title)}
 						<CarouselItem class="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3">
 							<Card>
 								<CardContent class="p-6">
@@ -131,7 +131,7 @@
 		<div class="w-full max-w-xl">
 			<Carousel>
 				<CarouselContent>
-					{#each [{ name: 'Alice Johnson', role: 'CEO', quote: 'This product has transformed our workflow completely.' }, { name: 'Bob Smith', role: 'Developer', quote: 'The best developer experience I have ever had.' }, { name: 'Carol Williams', role: 'Designer', quote: 'Beautiful components that are easy to customize.' }] as testimonial (testimonial.name)}
+					{#each [{ name: "Alice Johnson", role: "CEO", quote: "This product has transformed our workflow completely." }, { name: "Bob Smith", role: "Developer", quote: "The best developer experience I have ever had." }, { name: "Carol Williams", role: "Designer", quote: "Beautiful components that are easy to customize." }] as testimonial (testimonial.name)}
 						<CarouselItem>
 							<Card>
 								<CardContent class="p-8 text-center">
@@ -173,7 +173,7 @@
 		<div class="w-full max-w-lg">
 			<Carousel>
 				<CarouselContent>
-					{#each [{ name: 'Product A', price: '$99', color: 'bg-gradient-to-br from-blue-400 to-blue-600' }, { name: 'Product B', price: '$149', color: 'bg-gradient-to-br from-purple-400 to-purple-600' }, { name: 'Product C', price: '$199', color: 'bg-gradient-to-br from-green-400 to-green-600' }, { name: 'Product D', price: '$249', color: 'bg-gradient-to-br from-orange-400 to-orange-600' }] as product (product.name)}
+					{#each [{ name: "Product A", price: "$99", color: "bg-gradient-to-br from-blue-400 to-blue-600" }, { name: "Product B", price: "$149", color: "bg-gradient-to-br from-purple-400 to-purple-600" }, { name: "Product C", price: "$199", color: "bg-gradient-to-br from-green-400 to-green-600" }, { name: "Product D", price: "$249", color: "bg-gradient-to-br from-orange-400 to-orange-600" }] as product (product.name)}
 						<CarouselItem>
 							<Card class="overflow-hidden">
 								<div class={`${product.color} flex aspect-square items-center justify-center`}>

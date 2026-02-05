@@ -9,12 +9,12 @@
  * Uses navigator.userAgentData (modern) or navigator.userAgent (fallback)
  */
 export function isMac(): boolean {
-	if (typeof navigator === 'undefined') return false;
+	if (typeof navigator === "undefined") return false;
 
 	// Modern API (Chrome 101+)
-	if ('userAgentData' in navigator) {
+	if ("userAgentData" in navigator) {
 		const uaData = navigator.userAgentData as { platform?: string };
-		return uaData.platform?.toLowerCase() === 'macos';
+		return uaData.platform?.toLowerCase() === "macos";
 	}
 
 	// Fallback for older browsers
@@ -26,5 +26,5 @@ export function isMac(): boolean {
  * Mac: ⌘ (Cmd), Windows/Linux: Ctrl
  */
 export function getModifierKey(): string {
-	return isMac() ? '⌘' : 'Ctrl';
+	return isMac() ? "⌘" : "Ctrl";
 }

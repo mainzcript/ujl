@@ -8,7 +8,7 @@
  * Convention: CSS files are co-located with their Svelte components.
  */
 
-@import '../components/ui/richtext-input/richtext-input.css';
+@import "../components/ui/richtext-input/richtext-input.css";
 
 /* Add new component imports here:
  * @import '../components/ui/example/example.css';

@@ -6,15 +6,15 @@
 		DrawerContent,
 		Sheet,
 		SheetContent,
-		SheetHeader
-	} from '@ujl-framework/ui';
-	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import type { Snippet } from 'svelte';
-	import XIcon from '@lucide/svelte/icons/x';
-	import { setApp, setAppRegistry } from './context.svelte.js';
-	import { APP_SIDEBAR_WIDTH, APP_PANEL_WIDTH } from './constants.js';
-	import AppSidebarTrigger from './app-sidebar-trigger.svelte';
+		SheetHeader,
+	} from "@ujl-framework/ui";
+	import { cn, type WithElementRef } from "@ujl-framework/ui/utils";
+	import type { HTMLAttributes } from "svelte/elements";
+	import type { Snippet } from "svelte";
+	import XIcon from "@lucide/svelte/icons/x";
+	import { setApp, setAppRegistry } from "./context.svelte.js";
+	import { APP_SIDEBAR_WIDTH, APP_PANEL_WIDTH } from "./constants.js";
+	import AppSidebarTrigger from "./app-sidebar-trigger.svelte";
 
 	let {
 		ref = $bindable(null),
@@ -38,7 +38,7 @@
 	const app = (() =>
 		setApp({
 			initialSidebarOpen,
-			initialPanelOpen
+			initialPanelOpen,
 		}))();
 
 	// Set App registry (used by child components to register their content)
@@ -88,7 +88,7 @@
 	bind:this={containerRef}
 	data-slot="app-wrapper"
 	style="--ujl-app-sidebar-width: {APP_SIDEBAR_WIDTH}; --ujl-app-panel-width: {APP_PANEL_WIDTH}; {style}"
-	class={cn('h-full bg-background', className)}
+	class={cn("h-full bg-background", className)}
 	{...restProps}
 >
 	<!-- Render children first so they can register their content -->
@@ -99,8 +99,8 @@
 		<header class="flex items-center gap-2">
 			<div
 				class={cn(
-					'flex shrink-0 items-center justify-between gap-2 overflow-hidden duration-300',
-					app.sidebarDesktopOpen && app.isDesktopSidebar ? 'min-w-[240px]' : 'min-w-0'
+					"flex shrink-0 items-center justify-between gap-2 overflow-hidden duration-300",
+					app.sidebarDesktopOpen && app.isDesktopSidebar ? "min-w-[240px]" : "min-w-0",
 				)}
 			>
 				<AppSidebarTrigger />
@@ -121,8 +121,8 @@
 			{#if app.isDesktopSidebar}
 				<div
 					class={cn(
-						'relative h-full shrink-0 overflow-hidden duration-300',
-						app.sidebarDesktopOpen ? 'w-(--ujl-app-sidebar-width)' : '-ms-1 w-0'
+						"relative h-full shrink-0 overflow-hidden duration-300",
+						app.sidebarDesktopOpen ? "w-(--ujl-app-sidebar-width)" : "-ms-1 w-0",
 					)}
 					data-slot="app-sidebar"
 				>
@@ -155,8 +155,8 @@
 					{#if app.isDesktopPanel}
 						<div
 							class={cn(
-								'shrink-0 overflow-hidden duration-300',
-								app.panelDesktopOpen ? 'w-sm' : '-ms-1 w-0'
+								"shrink-0 overflow-hidden duration-300",
+								app.panelDesktopOpen ? "w-sm" : "-ms-1 w-0",
 							)}
 							data-slot="app-panel"
 						>

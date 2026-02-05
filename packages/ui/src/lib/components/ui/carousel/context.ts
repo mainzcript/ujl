@@ -1,7 +1,7 @@
-import { getContext, hasContext, setContext } from 'svelte';
-import type { Carousel } from './carousel.js';
+import { getContext, hasContext, setContext } from "svelte";
+import type { Carousel } from "./carousel.js";
 
-const CAROUSEL_CONTEXT = Symbol('CAROUSEL_CONTEXT');
+const CAROUSEL_CONTEXT = Symbol("CAROUSEL_CONTEXT");
 
 export type CarouselContext = {
 	carousel: Carousel | null;
@@ -12,7 +12,7 @@ export function setCarouselContext(config: CarouselContext): CarouselContext {
 	return config;
 }
 
-export function getCarouselContext(name = 'This component') {
+export function getCarouselContext(name = "This component") {
 	if (!hasContext(CAROUSEL_CONTEXT)) {
 		throw new Error(`${name} must be used within a <Carousel.Root> component`);
 	}

@@ -1,41 +1,41 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Tabs, TabsContent, TabsList, TabsTrigger } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Tabs, TabsContent, TabsList, TabsTrigger } from "./index.ts";
 	import {
 		Card,
 		CardContent,
 		CardDescription,
 		CardFooter,
 		CardHeader,
-		CardTitle
-	} from '../card/index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
+		CardTitle,
+	} from "../card/index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
 	const { Story } = defineMeta({
-		title: 'Components/Navigation/Tabs',
+		title: "Components/Navigation/Tabs",
 		component: Tabs,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			value: {
-				control: 'text',
-				description: 'The currently active tab value',
+				control: "text",
+				description: "The currently active tab value",
 				table: {
-					category: 'State',
-					defaultValue: { summary: '' }
-				}
+					category: "State",
+					defaultValue: { summary: "" },
+				},
 			},
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			value: 'account'
-		}
+			value: "account",
+		},
 	});
 </script>
 
@@ -120,7 +120,7 @@
 </Story>
 
 <!-- Multiple Tabs -->
-<Story name="Multiple Tabs" args={{ value: 'overview' }}>
+<Story name="Multiple Tabs" args={{ value: "overview" }}>
 	{#snippet template(args)}
 		<Tabs value={args.value} class="w-[500px]">
 			<TabsList>
@@ -158,7 +158,7 @@
 </Story>
 
 <!-- With Icons -->
-<Story name="With Icons" args={{ value: 'music' }}>
+<Story name="With Icons" args={{ value: "music" }}>
 	{#snippet template(args)}
 		<Tabs value={args.value} class="w-[400px]">
 			<TabsList>
@@ -232,7 +232,7 @@
 </Story>
 
 <!-- Disabled Tab -->
-<Story name="With Disabled Tab" args={{ value: 'active' }}>
+<Story name="With Disabled Tab" args={{ value: "active" }}>
 	{#snippet template(args)}
 		<Tabs value={args.value} class="w-[400px]">
 			<TabsList>
@@ -254,7 +254,7 @@
 </Story>
 
 <!-- Full Width -->
-<Story name="Full Width" args={{ value: 'tab1' }}>
+<Story name="Full Width" args={{ value: "tab1" }}>
 	{#snippet template(args)}
 		<Tabs value={args.value} class="w-full max-w-[600px]">
 			<TabsList class="w-full">

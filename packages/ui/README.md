@@ -34,11 +34,11 @@ pnpm add @ujl-framework/ui
 		Heading,
 		Dialog,
 		DialogContent,
-		DialogTriggerButton
-	} from '@ujl-framework/ui';
+		DialogTriggerButton,
+	} from "@ujl-framework/ui";
 
 	// Import styles
-	import '@ujl-framework/ui/styles';
+	import "@ujl-framework/ui/styles";
 </script>
 
 <Card>
@@ -57,7 +57,7 @@ pnpm add @ujl-framework/ui
 ### Tools
 
 ```javascript
-import { PositionSpy, scrollToHash } from '@ujl-framework/ui/tools';
+import { PositionSpy, scrollToHash } from "@ujl-framework/ui/tools";
 
 // Use utility functions
 PositionSpy.subscribe(/* ... */);

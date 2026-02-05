@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { Command } from '../command/index.js';
-	import type { CommandRootApi } from '../command/command.svelte';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { Command } from "../command/index.js";
+	import type { CommandRootApi } from "../command/command.svelte";
 
 	export type ComboboxCommandApi = CommandRootApi;
 
 	let {
 		ref = $bindable(null),
-		value = $bindable(''),
+		value = $bindable(""),
 		class: className,
 		children,
 		...restProps
-	}: Omit<CommandPrimitive.RootProps, 'api'> & {
-		children?: import('svelte').Snippet;
+	}: Omit<CommandPrimitive.RootProps, "api"> & {
+		children?: import("svelte").Snippet;
 	} = $props();
 </script>
 

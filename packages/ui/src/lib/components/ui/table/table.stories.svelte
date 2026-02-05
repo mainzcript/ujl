@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Table,
 		TableBody,
@@ -8,35 +8,35 @@
 		TableHead,
 		TableHeader,
 		TableRow,
-		TableFooter
-	} from './index.ts';
-	import { Badge } from '../badge/index.ts';
-	import { Checkbox } from '../checkbox/index.ts';
+		TableFooter,
+	} from "./index.ts";
+	import { Badge } from "../badge/index.ts";
+	import { Checkbox } from "../checkbox/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Complex/Table',
+		title: "Components/Complex/Table",
 		component: Table,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {},
-		args: {}
+		args: {},
 	});
 
 	const invoices = [
-		{ invoice: 'INV001', status: 'Paid', method: 'Credit Card', amount: '$250.00' },
-		{ invoice: 'INV002', status: 'Pending', method: 'PayPal', amount: '$150.00' },
-		{ invoice: 'INV003', status: 'Unpaid', method: 'Bank Transfer', amount: '$350.00' },
-		{ invoice: 'INV004', status: 'Paid', method: 'Credit Card', amount: '$450.00' },
-		{ invoice: 'INV005', status: 'Paid', method: 'PayPal', amount: '$550.00' },
-		{ invoice: 'INV006', status: 'Pending', method: 'Bank Transfer', amount: '$200.00' },
-		{ invoice: 'INV007', status: 'Unpaid', method: 'Credit Card', amount: '$300.00' }
+		{ invoice: "INV001", status: "Paid", method: "Credit Card", amount: "$250.00" },
+		{ invoice: "INV002", status: "Pending", method: "PayPal", amount: "$150.00" },
+		{ invoice: "INV003", status: "Unpaid", method: "Bank Transfer", amount: "$350.00" },
+		{ invoice: "INV004", status: "Paid", method: "Credit Card", amount: "$450.00" },
+		{ invoice: "INV005", status: "Paid", method: "PayPal", amount: "$550.00" },
+		{ invoice: "INV006", status: "Pending", method: "Bank Transfer", amount: "$200.00" },
+		{ invoice: "INV007", status: "Unpaid", method: "Credit Card", amount: "$300.00" },
 	];
 
 	const users = [
-		{ name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-		{ name: 'Jane Smith', email: 'jane@example.com', role: 'Editor', status: 'Active' },
-		{ name: 'Bob Johnson', email: 'bob@example.com', role: 'Viewer', status: 'Inactive' },
-		{ name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
-		{ name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Viewer', status: 'Pending' }
+		{ name: "John Doe", email: "john@example.com", role: "Admin", status: "Active" },
+		{ name: "Jane Smith", email: "jane@example.com", role: "Editor", status: "Active" },
+		{ name: "Bob Johnson", email: "bob@example.com", role: "Viewer", status: "Inactive" },
+		{ name: "Alice Brown", email: "alice@example.com", role: "Editor", status: "Active" },
+		{ name: "Charlie Wilson", email: "charlie@example.com", role: "Viewer", status: "Pending" },
 	];
 </script>
 
@@ -118,11 +118,11 @@
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>
 							<Badge
-								variant={invoice.status === 'Paid'
-									? 'success'
-									: invoice.status === 'Pending'
-										? 'warning'
-										: 'destructive'}
+								variant={invoice.status === "Paid"
+									? "success"
+									: invoice.status === "Pending"
+										? "warning"
+										: "destructive"}
 							>
 								{invoice.status}
 							</Badge>
@@ -162,11 +162,11 @@
 						<TableCell>{user.role}</TableCell>
 						<TableCell>
 							<Badge
-								variant={user.status === 'Active'
-									? 'success'
-									: user.status === 'Pending'
-										? 'warning'
-										: 'default'}
+								variant={user.status === "Active"
+									? "success"
+									: user.status === "Pending"
+										? "warning"
+										: "default"}
 							>
 								{user.status}
 							</Badge>
@@ -192,7 +192,7 @@
 			</TableHeader>
 			<TableBody>
 				{#each invoices as invoice, i (invoice.invoice)}
-					<TableRow class={i % 2 === 0 ? 'bg-muted/50' : ''}>
+					<TableRow class={i % 2 === 0 ? "bg-muted/50" : ""}>
 						<TableCell class="font-medium">{invoice.invoice}</TableCell>
 						<TableCell>{invoice.status}</TableCell>
 						<TableCell>{invoice.method}</TableCell>
@@ -265,7 +265,7 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#each [{ id: '001', product: 'Widget A', qty: 10, price: '$9.99' }, { id: '002', product: 'Widget B', qty: 5, price: '$14.99' }, { id: '003', product: 'Widget C', qty: 20, price: '$4.99' }, { id: '004', product: 'Widget D', qty: 8, price: '$19.99' }, { id: '005', product: 'Widget E', qty: 15, price: '$7.99' }] as item (item.id)}
+				{#each [{ id: "001", product: "Widget A", qty: 10, price: "$9.99" }, { id: "002", product: "Widget B", qty: 5, price: "$14.99" }, { id: "003", product: "Widget C", qty: 20, price: "$4.99" }, { id: "004", product: "Widget D", qty: 8, price: "$19.99" }, { id: "005", product: "Widget E", qty: 15, price: "$7.99" }] as item (item.id)}
 					<TableRow>
 						<TableCell class="h-8 px-2">{item.id}</TableCell>
 						<TableCell class="h-8 px-2">{item.product}</TableCell>

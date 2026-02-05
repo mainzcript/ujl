@@ -1,41 +1,41 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Badge } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Badge } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Badge',
+		title: "Components/Base/Badge",
 		component: Badge,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			variant: {
-				control: { type: 'select' },
+				control: { type: "select" },
 				options: [
-					'default',
-					'ambient',
-					'primary',
-					'secondary',
-					'accent',
-					'success',
-					'warning',
-					'destructive',
-					'info',
-					'outline'
+					"default",
+					"ambient",
+					"primary",
+					"secondary",
+					"accent",
+					"success",
+					"warning",
+					"destructive",
+					"info",
+					"outline",
 				],
-				description: 'The visual style variant of the badge',
+				description: "The visual style variant of the badge",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			href: {
-				control: 'text',
-				description: 'URL for link badges',
-				table: { category: 'Behavior' }
-			}
+				control: "text",
+				description: "URL for link badges",
+				table: { category: "Behavior" },
+			},
 		},
 		args: {
-			variant: 'default'
-		}
+			variant: "default",
+		},
 	});
 </script>
 

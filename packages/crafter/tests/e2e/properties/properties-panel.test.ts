@@ -4,10 +4,10 @@
  * Tests for the properties panel that shows when a module is selected.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Properties Panel', () => {
+test.describe("Properties Panel", () => {
 	test('should show "No module selected" when nothing selected', async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
@@ -16,10 +16,10 @@ test.describe('Properties Panel', () => {
 		await expect(crafter.getSelectedPreviewModule()).not.toBeVisible();
 
 		// Panel should show no selection message
-		await expect(crafter.panel.getByText('No module selected')).toBeVisible();
+		await expect(crafter.panel.getByText("No module selected")).toBeVisible();
 	});
 
-	test('should show module label when selected', async ({ page }) => {
+	test("should show module label when selected", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -32,22 +32,22 @@ test.describe('Properties Panel', () => {
 		await page.waitForTimeout(300);
 
 		// Should no longer show "No module selected"
-		await expect(crafter.panel.getByText('No module selected')).not.toBeVisible();
+		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible();
 	});
 
-	test('should display editable fields for selected module', async ({ page }) => {
+	test("should display editable fields for selected module", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Find and select a Text module (which has editable fields)
-		await crafter.insertComponent('Text');
+		await crafter.insertComponent("Text");
 
 		// Wait for panel to update
 		await page.waitForTimeout(500);
 
 		// Text module uses RichText which has a contenteditable div (TipTap editor)
 		// Also check for regular inputs/textareas
-		const inputs = crafter.panel.locator('input, textarea');
+		const inputs = crafter.panel.locator("input, textarea");
 		const contentEditables = crafter.panel.locator('[contenteditable="true"]');
 
 		const inputCount = await inputs.count();
@@ -57,31 +57,31 @@ test.describe('Properties Panel', () => {
 		expect(inputCount + contentEditableCount).toBeGreaterThan(0);
 	});
 
-	test('should update preview when field is edited', async ({ page }) => {
+	test("should update preview when field is edited", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Insert a Text module
-		await crafter.insertComponent('Text');
+		await crafter.insertComponent("Text");
 		await page.waitForTimeout(500);
 
 		// Find the text input in the panel
-		const textInput = crafter.panel.locator('input, textarea').first();
+		const textInput = crafter.panel.locator("input, textarea").first();
 
 		if (await textInput.isVisible()) {
 			// Clear and type new content
-			await textInput.fill('Test Content 12345');
+			await textInput.fill("Test Content 12345");
 
 			// Wait for preview update
 			await page.waitForTimeout(500);
 
 			// The preview should contain the new text
 			const previewText = await crafter.canvas.textContent();
-			expect(previewText).toContain('Test Content 12345');
+			expect(previewText).toContain("Test Content 12345");
 		}
 	});
 
-	test('should show field labels', async ({ page }) => {
+	test("should show field labels", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -93,7 +93,7 @@ test.describe('Properties Panel', () => {
 		await page.waitForTimeout(300);
 
 		// Check for label elements
-		const labels = crafter.panel.locator('label');
+		const labels = crafter.panel.locator("label");
 		const labelCount = await labels.count();
 
 		// If there are inputs/contenteditable, there should be labels
@@ -110,7 +110,7 @@ test.describe('Properties Panel', () => {
 		await crafter.goto();
 
 		// Try to find and click a slot in the tree (inside Shadow DOM)
-		const slotElements = crafter.crafterElement.locator('[data-tree-slot-name]');
+		const slotElements = crafter.crafterElement.locator("[data-tree-slot-name]");
 		const slotCount = await slotElements.count();
 
 		if (slotCount > 0) {
@@ -119,11 +119,11 @@ test.describe('Properties Panel', () => {
 			await page.waitForTimeout(300);
 
 			// Should show slot selected message
-			await expect(crafter.panel.getByText('Slot selected')).toBeVisible();
+			await expect(crafter.panel.getByText("Slot selected")).toBeVisible();
 		}
 	});
 
-	test('should handle number fields', async ({ page }) => {
+	test("should handle number fields", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -139,17 +139,17 @@ test.describe('Properties Panel', () => {
 
 			if (await numberInput.first().isVisible()) {
 				// Found a number input
-				await numberInput.first().fill('42');
+				await numberInput.first().fill("42");
 				await page.waitForTimeout(300);
 
 				// Value should be set
-				await expect(numberInput.first()).toHaveValue('42');
+				await expect(numberInput.first()).toHaveValue("42");
 				break;
 			}
 		}
 	});
 
-	test('should handle boolean toggle fields', async ({ page }) => {
+	test("should handle boolean toggle fields", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -164,21 +164,21 @@ test.describe('Properties Panel', () => {
 
 			if (await toggle.first().isVisible()) {
 				// Get initial state
-				const initialState = await toggle.first().getAttribute('data-state');
+				const initialState = await toggle.first().getAttribute("data-state");
 
 				// Click to toggle
 				await toggle.first().click();
 				await page.waitForTimeout(300);
 
 				// State should change
-				const newState = await toggle.first().getAttribute('data-state');
+				const newState = await toggle.first().getAttribute("data-state");
 				expect(newState).not.toBe(initialState);
 				break;
 			}
 		}
 	});
 
-	test('should update panel when selecting different modules', async ({ page }) => {
+	test("should update panel when selecting different modules", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -201,11 +201,11 @@ test.describe('Properties Panel', () => {
 
 		// Panel content might change (different module type)
 		// At minimum, both should not show "No module selected"
-		expect(firstPanelContent).not.toContain('No module selected');
-		expect(secondPanelContent).not.toContain('No module selected');
+		expect(firstPanelContent).not.toContain("No module selected");
+		expect(secondPanelContent).not.toContain("No module selected");
 	});
 
-	test('should show panel toggle button in header', async ({ page }) => {
+	test("should show panel toggle button in header", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 

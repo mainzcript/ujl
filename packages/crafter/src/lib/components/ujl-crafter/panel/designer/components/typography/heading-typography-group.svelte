@@ -3,22 +3,22 @@
 	Receives UJLTTypographyHeading props and forwards changes via onChange callback to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTTypographyHeading, UJLTColorPalette } from '@ujl-framework/types';
+	import { untrack } from "svelte";
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTTypographyHeading, UJLTColorPalette } from "@ujl-framework/types";
 	import {
 		FontCombobox,
 		FlavorSelect,
 		StyleToggles,
 		NumberSliderWithInput,
-		FontWeightSlider
-	} from '$lib/components/ui/index.js';
+		FontWeightSlider,
+	} from "$lib/components/ui/index.js";
 
 	let {
 		typography,
 		palette,
-		onChange
+		onChange,
 	}: {
 		typography: UJLTTypographyHeading;
 		palette: UJLTColorPalette;
@@ -80,7 +80,7 @@
 					bind:value={font}
 					onchange={(value) => {
 						font = value;
-						handleUpdate('font', value);
+						handleUpdate("font", value);
 					}}
 				/>
 				<NumberSliderWithInput
@@ -93,7 +93,7 @@
 					min={0}
 					sliderMin={0.5}
 					sliderMax={2}
-					onchange={() => handleUpdate('size', size)}
+					onchange={() => handleUpdate("size", size)}
 				/>
 				<NumberSliderWithInput
 					id="heading-line-height"
@@ -105,7 +105,7 @@
 					min={0}
 					sliderMin={0.8}
 					sliderMax={2.5}
-					onchange={() => handleUpdate('lineHeight', lineHeight)}
+					onchange={() => handleUpdate("lineHeight", lineHeight)}
 				/>
 				<NumberSliderWithInput
 					id="heading-letter-spacing"
@@ -116,13 +116,13 @@
 					step={0.01}
 					sliderMin={-0.1}
 					sliderMax={0.1}
-					onchange={() => handleUpdate('letterSpacing', letterSpacing)}
+					onchange={() => handleUpdate("letterSpacing", letterSpacing)}
 				/>
 				<FontWeightSlider
 					id="heading-weight"
 					label="Weight"
 					bind:value={weight}
-					onchange={() => handleUpdate('weight', weight)}
+					onchange={() => handleUpdate("weight", weight)}
 				/>
 				<StyleToggles
 					id="heading"
@@ -134,15 +134,15 @@
 					showTextTransform={true}
 					onItalicChange={(v) => {
 						italic = v;
-						handleUpdate('italic', v);
+						handleUpdate("italic", v);
 					}}
 					onUnderlineChange={(v) => {
 						underline = v;
-						handleUpdate('underline', v);
+						handleUpdate("underline", v);
 					}}
 					onTextTransformChange={(v) => {
-						textTransform = v as 'none' | 'capitalize' | 'uppercase' | 'lowercase';
-						handleUpdate('textTransform', v);
+						textTransform = v as "none" | "capitalize" | "uppercase" | "lowercase";
+						handleUpdate("textTransform", v);
 					}}
 				/>
 				<FlavorSelect
@@ -151,7 +151,7 @@
 					{palette}
 					onchange={(value) => {
 						flavor = value;
-						handleUpdate('flavor', value);
+						handleUpdate("flavor", value);
 					}}
 				/>
 			</div>

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { getCarouselContext } from './context.js';
-	import { cn } from '$lib/utils.js';
-	import { Carousel } from './carousel.js';
+	import type { HTMLAttributes } from "svelte/elements";
+	import { getCarouselContext } from "./context.js";
+	import { cn } from "$lib/utils.js";
+	import { Carousel } from "./carousel.js";
 	let { class: className, children, ...restProps }: HTMLAttributes<HTMLDivElement> = $props();
 
-	const carouselCtx = getCarouselContext('<Carousel.wrapper/>');
+	const carouselCtx = getCarouselContext("<Carousel.wrapper/>");
 
 	let wrapper: HTMLDivElement;
 
@@ -30,7 +30,7 @@
 		class="no-scrollbar -mx-22 -my-2 snap-x snap-mandatory overflow-x-scroll py-2"
 		style="mask: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%); -webkit-mask: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);"
 	>
-		<div data-slot="carousel-track" class={cn('isolate flex', className)} {...restProps}>
+		<div data-slot="carousel-track" class={cn("isolate flex", className)} {...restProps}>
 			<div
 				class="relative w-20 min-w-0 shrink-0 grow-0"
 				data-slot="carousel-placeholder-start"

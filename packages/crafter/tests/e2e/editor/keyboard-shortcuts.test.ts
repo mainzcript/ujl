@@ -4,22 +4,22 @@
  * Tests for keyboard shortcuts in the editor.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Keyboard Shortcuts', () => {
-	test('should open component picker with Ctrl+I', async ({ page }) => {
+test.describe("Keyboard Shortcuts", () => {
+	test("should open component picker with Ctrl+I", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Press Ctrl+I
-		await page.keyboard.press('Control+i');
+		await page.keyboard.press("Control+i");
 
 		// Component picker should be visible
 		await expect(crafter.componentPicker).toBeVisible();
 	});
 
-	test('should open component picker with Ctrl+I even without selection', async ({ page }) => {
+	test("should open component picker with Ctrl+I even without selection", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -27,13 +27,13 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getSelectedPreviewModule()).not.toBeVisible();
 
 		// Press Ctrl+I
-		await page.keyboard.press('Control+i');
+		await page.keyboard.press("Control+i");
 
 		// Component picker should open (insert at root)
 		await expect(crafter.componentPicker).toBeVisible();
 	});
 
-	test('should copy selected node with Ctrl+C', async ({ page }) => {
+	test("should copy selected node with Ctrl+C", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -48,7 +48,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getPreviewModule(moduleIds[0])).toBeVisible();
 	});
 
-	test('should cut selected node with Ctrl+X', async ({ page }) => {
+	test("should cut selected node with Ctrl+X", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -69,7 +69,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getPreviewModule(moduleToRemove)).not.toBeVisible({ timeout: 2000 });
 	});
 
-	test('should paste node with Ctrl+V after copy', async ({ page }) => {
+	test("should paste node with Ctrl+V after copy", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -95,7 +95,7 @@ test.describe('Keyboard Shortcuts', () => {
 		expect(newIds.length).toBeGreaterThan(0);
 	});
 
-	test('should delete selected node with Delete key', async ({ page }) => {
+	test("should delete selected node with Delete key", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -121,7 +121,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getPreviewModule(moduleToDelete)).not.toBeVisible();
 	});
 
-	test('should delete node with Backspace key', async ({ page }) => {
+	test("should delete node with Backspace key", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -131,7 +131,7 @@ test.describe('Keyboard Shortcuts', () => {
 
 		// Select and delete with Backspace
 		await crafter.selectModuleInPreview(moduleToDelete);
-		await page.keyboard.press('Backspace');
+		await page.keyboard.press("Backspace");
 
 		// Wait for DOM update
 		await page.waitForTimeout(500);
@@ -140,7 +140,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getPreviewModule(moduleToDelete)).not.toBeVisible();
 	});
 
-	test('should deselect with Escape key', async ({ page }) => {
+	test("should deselect with Escape key", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -156,7 +156,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.getSelectedPreviewModule()).not.toBeVisible({ timeout: 2000 });
 	});
 
-	test('should not trigger shortcuts when input is focused', async ({ page }) => {
+	test("should not trigger shortcuts when input is focused", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -168,40 +168,40 @@ test.describe('Keyboard Shortcuts', () => {
 		await page.waitForTimeout(300);
 
 		// Find an input in the properties panel
-		const input = crafter.panel.locator('input').first();
+		const input = crafter.panel.locator("input").first();
 
 		if (await input.isVisible()) {
 			// Focus the input
 			await input.focus();
 
 			// Type Ctrl+I (should not open component picker)
-			await page.keyboard.press('Control+i');
+			await page.keyboard.press("Control+i");
 
 			// Component picker should NOT be visible (shortcut blocked in input)
 			await expect(crafter.componentPicker).not.toBeVisible({ timeout: 1000 });
 		}
 	});
 
-	test('should not delete root node', async ({ page }) => {
+	test("should not delete root node", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Get the root node (first in tree, marked as __root__)
-		const rootNode = crafter.getTreeNode('__root__');
+		const rootNode = crafter.getTreeNode("__root__");
 
 		if (await rootNode.isVisible()) {
 			// Try to select root (should not be selectable)
 			await rootNode.click();
 
 			// Try to delete
-			await page.keyboard.press('Delete');
+			await page.keyboard.press("Delete");
 
 			// Root should still exist
 			await expect(rootNode).toBeVisible();
 		}
 	});
 
-	test('should not allow paste when nothing is copied', async ({ page }) => {
+	test("should not allow paste when nothing is copied", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -223,7 +223,7 @@ test.describe('Keyboard Shortcuts', () => {
 		expect(newModuleIds.length).toBe(initialCount);
 	});
 
-	test('should close component picker with Escape', async ({ page }) => {
+	test("should close component picker with Escape", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -232,7 +232,7 @@ test.describe('Keyboard Shortcuts', () => {
 		await expect(crafter.componentPicker).toBeVisible();
 
 		// Close with Escape
-		await page.keyboard.press('Escape');
+		await page.keyboard.press("Escape");
 
 		// Should be closed
 		await expect(crafter.componentPicker).not.toBeVisible({ timeout: 2000 });

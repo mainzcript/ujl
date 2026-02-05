@@ -4,7 +4,7 @@
  * Provides reusable Page Objects and helper functions for Playwright tests.
  */
 
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from "@playwright/test";
 
 /**
  * Page Object for the Crafter editor.
@@ -38,7 +38,7 @@ export class CrafterPage {
 		this.page = page;
 
 		// Shadow DOM root - all elements inside the Crafter are in Shadow DOM
-		const shadowHost = page.locator('ujl-crafter-internal');
+		const shadowHost = page.locator("ujl-crafter-internal");
 
 		// Main layout - routed through Shadow DOM
 		this.crafterElement = shadowHost;
@@ -49,25 +49,25 @@ export class CrafterPage {
 		// Navigation tree
 		this.navTree = shadowHost.locator('[data-crafter="nav-tree"]');
 		// Use first() to avoid strict mode violation (Document appears twice)
-		this.navTreeHeader = this.navTree.locator('> div').first();
+		this.navTreeHeader = this.navTree.locator("> div").first();
 
 		// Header (in app-provider, uses <header> element)
-		this.header = shadowHost.locator('header');
+		this.header = shadowHost.locator("header");
 		this.modeSelector = shadowHost.locator('[data-crafter="mode-selector"]');
 		this.viewportToggles = shadowHost.locator('[data-crafter="viewport-toggles"]');
-		this.saveButton = shadowHost.getByRole('button', { name: 'Save' });
-		this.menuButton = shadowHost.getByTitle('More Actions');
+		this.saveButton = shadowHost.getByRole("button", { name: "Save" });
+		this.menuButton = shadowHost.getByTitle("More Actions");
 
 		// Component Picker (Dialog - in portal inside Shadow DOM)
 		this.componentPicker = shadowHost.locator('[data-crafter="component-picker"]');
-		this.componentPickerSearch = this.componentPicker.getByPlaceholder('Search');
+		this.componentPickerSearch = this.componentPicker.getByPlaceholder("Search");
 	}
 
 	/**
 	 * Navigate to the Crafter and wait for it to be ready.
 	 */
 	async goto() {
-		await this.page.goto('/');
+		await this.page.goto("/");
 		await this.waitForReady();
 	}
 
@@ -98,7 +98,7 @@ export class CrafterPage {
 	 * Get the currently selected module in the preview.
 	 */
 	getSelectedPreviewModule(): Locator {
-		return this.crafterElement.locator('[data-ujl-module-id].ujl-selected');
+		return this.crafterElement.locator("[data-ujl-module-id].ujl-selected");
 	}
 
 	/**
@@ -145,9 +145,9 @@ export class CrafterPage {
 	/**
 	 * Switch between Editor and Designer mode.
 	 */
-	async setMode(mode: 'editor' | 'designer') {
+	async setMode(mode: "editor" | "designer") {
 		await this.modeSelector.click();
-		await this.page.getByRole('option', { name: mode, exact: false }).click();
+		await this.page.getByRole("option", { name: mode, exact: false }).click();
 	}
 
 	/**
@@ -155,14 +155,14 @@ export class CrafterPage {
 	 */
 	async getMode(): Promise<string> {
 		const modeText = await this.modeSelector.textContent();
-		return modeText?.toLowerCase().includes('designer') ? 'designer' : 'editor';
+		return modeText?.toLowerCase().includes("designer") ? "designer" : "editor";
 	}
 
 	/**
 	 * Open the component picker dialog.
 	 */
 	async openComponentPicker() {
-		await this.page.keyboard.press('Control+i');
+		await this.page.keyboard.press("Control+i");
 		await expect(this.componentPicker).toBeVisible();
 	}
 
@@ -173,48 +173,48 @@ export class CrafterPage {
 		await this.openComponentPicker();
 		await this.componentPickerSearch.fill(componentName);
 		// CommandItem renders as role="option", not button
-		await this.page.getByRole('option', { name: componentName, exact: false }).first().click();
+		await this.page.getByRole("option", { name: componentName, exact: false }).first().click();
 	}
 
 	/**
 	 * Copy the currently selected node.
 	 */
 	async copySelectedNode() {
-		await this.page.keyboard.press('Control+c');
+		await this.page.keyboard.press("Control+c");
 	}
 
 	/**
 	 * Cut the currently selected node.
 	 */
 	async cutSelectedNode() {
-		await this.page.keyboard.press('Control+x');
+		await this.page.keyboard.press("Control+x");
 	}
 
 	/**
 	 * Paste from clipboard.
 	 */
 	async pasteNode() {
-		await this.page.keyboard.press('Control+v');
+		await this.page.keyboard.press("Control+v");
 	}
 
 	/**
 	 * Delete the currently selected node.
 	 */
 	async deleteSelectedNode() {
-		await this.page.keyboard.press('Delete');
+		await this.page.keyboard.press("Delete");
 	}
 
 	/**
 	 * Press Escape to deselect.
 	 */
 	async deselect() {
-		await this.page.keyboard.press('Escape');
+		await this.page.keyboard.press("Escape");
 	}
 
 	/**
 	 * Set viewport simulation (desktop, tablet, mobile, or null for responsive).
 	 */
-	async setViewport(type: 'desktop' | 'tablet' | 'mobile' | null) {
+	async setViewport(type: "desktop" | "tablet" | "mobile" | null) {
 		if (type === null) {
 			// Click active toggle to deselect
 			const activeToggle = this.viewportToggles.locator('[data-state="on"]');
@@ -222,7 +222,7 @@ export class CrafterPage {
 				await activeToggle.click();
 			}
 		} else {
-			await this.viewportToggles.getByTitle(new RegExp(type, 'i')).click();
+			await this.viewportToggles.getByTitle(new RegExp(type, "i")).click();
 		}
 	}
 
@@ -231,7 +231,7 @@ export class CrafterPage {
 	 */
 	async exportContent() {
 		await this.menuButton.click();
-		await this.page.getByRole('menuitem', { name: 'Export Content' }).click();
+		await this.page.getByRole("menuitem", { name: "Export Content" }).click();
 	}
 
 	/**
@@ -239,7 +239,7 @@ export class CrafterPage {
 	 */
 	async exportTheme() {
 		await this.menuButton.click();
-		await this.page.getByRole('menuitem', { name: 'Export Theme' }).click();
+		await this.page.getByRole("menuitem", { name: "Export Theme" }).click();
 	}
 
 	/**
@@ -247,23 +247,23 @@ export class CrafterPage {
 	 * Excludes virtual nodes like __root__ which are not user-selectable.
 	 */
 	async getVisibleTreeNodeIds(): Promise<string[]> {
-		const nodes = this.crafterElement.locator('[data-tree-node-id]');
+		const nodes = this.crafterElement.locator("[data-tree-node-id]");
 		const ids = await nodes.evaluateAll((elements) =>
-			elements.map((el) => el.getAttribute('data-tree-node-id') ?? '')
+			elements.map((el) => el.getAttribute("data-tree-node-id") ?? ""),
 		);
 		// Filter out empty IDs and virtual nodes (starting with __)
-		return ids.filter((id) => id !== '' && !id.startsWith('__'));
+		return ids.filter((id) => id !== "" && !id.startsWith("__"));
 	}
 
 	/**
 	 * Get all module IDs in the preview.
 	 */
 	async getPreviewModuleIds(): Promise<string[]> {
-		const modules = this.crafterElement.locator('[data-ujl-module-id]');
+		const modules = this.crafterElement.locator("[data-ujl-module-id]");
 		const ids = await modules.evaluateAll((elements) =>
-			elements.map((el) => el.getAttribute('data-ujl-module-id') ?? '')
+			elements.map((el) => el.getAttribute("data-ujl-module-id") ?? ""),
 		);
-		return ids.filter((id) => id !== '');
+		return ids.filter((id) => id !== "");
 	}
 
 	/**
@@ -301,7 +301,7 @@ export class CrafterPage {
 	async isNoModuleSelectedVisible(): Promise<boolean> {
 		// Panel must be visible first
 		if (!(await this.panel.isVisible())) return false;
-		return this.panel.getByText('No module selected').isVisible();
+		return this.panel.getByText("No module selected").isVisible();
 	}
 
 	/**
@@ -315,7 +315,7 @@ export class CrafterPage {
 	 * Update a text field in the properties panel.
 	 */
 	async updateTextField(fieldName: string, value: string) {
-		const input = this.getFieldInput(fieldName).locator('input, textarea').first();
+		const input = this.getFieldInput(fieldName).locator("input, textarea").first();
 		await input.fill(value);
 	}
 

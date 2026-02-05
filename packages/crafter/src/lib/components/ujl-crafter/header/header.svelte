@@ -13,22 +13,22 @@
 		SelectLabel,
 		SelectItem,
 		ToggleGroup,
-		ToggleGroupItem
-	} from '@ujl-framework/ui';
-	import { useApp } from '$lib/components/ui/app/index.js';
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext, type CrafterMode } from '$lib/stores/index.js';
-	import ThreeDotsIcon from '@lucide/svelte/icons/more-vertical';
-	import FolderOpenIcon from '@lucide/svelte/icons/folder-open';
-	import ShareIcon from '@lucide/svelte/icons/share';
-	import PencilRulerIcon from '@lucide/svelte/icons/pencil-ruler';
-	import PaletteIcon from '@lucide/svelte/icons/palette';
-	import MonitorIcon from '@lucide/svelte/icons/monitor';
-	import TabletIcon from '@lucide/svelte/icons/tablet';
-	import SmartphoneIcon from '@lucide/svelte/icons/smartphone';
-	import Settings2Icon from '@lucide/svelte/icons/settings-2';
-	import MaximizeIcon from '@lucide/svelte/icons/maximize';
-	import MinimizeIcon from '@lucide/svelte/icons/minimize';
+		ToggleGroupItem,
+	} from "@ujl-framework/ui";
+	import { useApp } from "$lib/components/ui/app/index.js";
+	import { getContext } from "svelte";
+	import { CRAFTER_CONTEXT, type CrafterContext, type CrafterMode } from "$lib/stores/index.js";
+	import ThreeDotsIcon from "@lucide/svelte/icons/more-vertical";
+	import FolderOpenIcon from "@lucide/svelte/icons/folder-open";
+	import ShareIcon from "@lucide/svelte/icons/share";
+	import PencilRulerIcon from "@lucide/svelte/icons/pencil-ruler";
+	import PaletteIcon from "@lucide/svelte/icons/palette";
+	import MonitorIcon from "@lucide/svelte/icons/monitor";
+	import TabletIcon from "@lucide/svelte/icons/tablet";
+	import SmartphoneIcon from "@lucide/svelte/icons/smartphone";
+	import Settings2Icon from "@lucide/svelte/icons/settings-2";
+	import MaximizeIcon from "@lucide/svelte/icons/maximize";
+	import MinimizeIcon from "@lucide/svelte/icons/minimize";
 
 	let {
 		mode,
@@ -39,7 +39,7 @@
 		onImportTheme,
 		onImportContent,
 		onExportTheme,
-		onExportContent
+		onExportContent,
 	}: {
 		mode: CrafterMode;
 		onModeChange?: (mode: CrafterMode) => void;
@@ -59,7 +59,7 @@
 	let contentFileInput: HTMLInputElement | null = $state(null);
 
 	function handleModeChange(newMode: string | undefined) {
-		if (newMode === 'editor' || newMode === 'designer') {
+		if (newMode === "editor" || newMode === "designer") {
 			onModeChange?.(newMode);
 		}
 	}
@@ -69,7 +69,7 @@
 		const file = target.files?.[0];
 		if (file && onImportTheme) {
 			onImportTheme(file);
-			target.value = '';
+			target.value = "";
 		}
 	}
 
@@ -78,7 +78,7 @@
 		const file = target.files?.[0];
 		if (file && onImportContent) {
 			onImportContent(file);
-			target.value = '';
+			target.value = "";
 		}
 	}
 </script>
@@ -102,7 +102,7 @@
 	<div class="flex items-center gap-2">
 		<Select type="single" value={mode} onValueChange={handleModeChange}>
 			<SelectTrigger class="w-[150px]" data-crafter="mode-selector">
-				{#if mode === 'editor'}
+				{#if mode === "editor"}
 					<PencilRulerIcon />
 					<span>Editor</span>
 				{:else}
@@ -198,7 +198,7 @@
 				variant="ghost"
 				size="icon"
 				onclick={() => store.toggleFullscreen()}
-				title={store.isFullscreen ? 'Exit fullscreen (ESC)' : 'Enter fullscreen'}
+				title={store.isFullscreen ? "Exit fullscreen (ESC)" : "Enter fullscreen"}
 			>
 				{#if store.isFullscreen}
 					<MinimizeIcon />
@@ -209,7 +209,7 @@
 		{/if}
 		<Button
 			onclick={() => app.togglePanel()}
-			variant={app.isPanelVisible ? 'muted' : 'ghost'}
+			variant={app.isPanelVisible ? "muted" : "ghost"}
 			size="icon"
 		>
 			<Settings2Icon />

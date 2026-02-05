@@ -107,7 +107,7 @@ type UJLAbstractNode =
 type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: OptionsType
+	options: OptionsType,
 ) => OutputType;
 ```
 
@@ -228,7 +228,7 @@ UJL unterstützt zwei Storage-Modi, weil sich Entwicklungs- und Integrationskont
 class ImageLibrary {
 	constructor(
 		initialImages: Record<string, ImageEntry>,
-		provider?: ImageProvider // Externe Image-Quelle (falls vorhanden)
+		provider?: ImageProvider, // Externe Image-Quelle (falls vorhanden)
 	);
 
 	async resolve(id: string): Promise<UJLImageData | null> {

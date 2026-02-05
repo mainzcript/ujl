@@ -1,40 +1,40 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Separator } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Separator } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Separator',
+		title: "Components/Base/Separator",
 		component: Separator,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			orientation: {
-				control: { type: 'select' },
-				options: ['horizontal', 'vertical'],
-				description: 'The orientation of the separator',
+				control: { type: "select" },
+				options: ["horizontal", "vertical"],
+				description: "The orientation of the separator",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'horizontal' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "horizontal" },
+				},
 			},
 			decorative: {
-				control: 'boolean',
-				description: 'Whether the separator is purely decorative',
+				control: "boolean",
+				description: "Whether the separator is purely decorative",
 				table: {
-					category: 'Accessibility',
-					defaultValue: { summary: 'true' }
-				}
-			}
+					category: "Accessibility",
+					defaultValue: { summary: "true" },
+				},
+			},
 		},
 		args: {
-			orientation: 'horizontal'
-		}
+			orientation: "horizontal",
+		},
 	});
 </script>
 
 <!-- Default (Horizontal) -->
 <Story name="Default">
 	{#snippet template(args)}
-		<div class={args.orientation === 'vertical' ? 'flex h-20 items-center' : 'w-full max-w-md'}>
+		<div class={args.orientation === "vertical" ? "flex h-20 items-center" : "w-full max-w-md"}>
 			<Separator {...args} />
 		</div>
 	{/snippet}
@@ -116,7 +116,7 @@
 <!-- Playground -->
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class={args.orientation === 'vertical' ? 'flex h-20 items-center' : 'w-full max-w-md'}>
+		<div class={args.orientation === "vertical" ? "flex h-20 items-center" : "w-full max-w-md"}>
 			<Separator {...args} />
 		</div>
 	{/snippet}

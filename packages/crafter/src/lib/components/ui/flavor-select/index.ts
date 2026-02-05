@@ -1,1 +1,1 @@
-export { default as FlavorSelect } from './flavor-select.svelte';
+export { default as FlavorSelect } from "./flavor-select.svelte";

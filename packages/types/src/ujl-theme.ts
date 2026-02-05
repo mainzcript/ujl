@@ -344,7 +344,7 @@ export function resolveForegroundColor(
 	palette: UJLTColorPalette,
 	backgroundFlavor: UJLTFlavor,
 	foregroundFlavor: UJLTFlavor,
-	mode: "light" | "dark"
+	mode: "light" | "dark",
 ): UJLTOklch {
 	const backgroundSet = palette[backgroundFlavor];
 	const foregroundSet = palette[foregroundFlavor];
@@ -362,19 +362,19 @@ export function resolveForegroundColor(
  * @returns A resolved color palette with actual OKLCH values
  */
 export function resolveColorPalette(
-	palette: UJLTColorPalette
+	palette: UJLTColorPalette,
 ): Record<UJLTFlavor, ResolvedUJLTColorSet> {
 	const resolved: Record<UJLTFlavor, ResolvedUJLTColorSet> = {} as Record<
 		UJLTFlavor,
 		ResolvedUJLTColorSet
 	>;
 
-	flavors.forEach(flavor => {
+	flavors.forEach((flavor) => {
 		const colorSet = palette[flavor];
 		const lightForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
 		const darkForeground: Record<UJLTFlavor, UJLTOklch> = {} as Record<UJLTFlavor, UJLTOklch>;
 
-		flavors.forEach(fgFlavor => {
+		flavors.forEach((fgFlavor) => {
 			lightForeground[fgFlavor] = resolveForegroundColor(palette, flavor, fgFlavor, "light");
 			darkForeground[fgFlavor] = resolveForegroundColor(palette, flavor, fgFlavor, "dark");
 		});

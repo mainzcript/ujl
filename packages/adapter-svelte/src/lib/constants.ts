@@ -6,17 +6,17 @@
  * and enable refactoring.
  */
 export const NODE_TYPES = {
-	CONTAINER: 'container',
-	WRAPPER: 'wrapper',
-	RAW_HTML: 'raw-html',
-	ERROR: 'error',
-	TEXT: 'text',
-	BUTTON: 'button',
-	CARD: 'card',
-	GRID: 'grid',
-	GRID_ITEM: 'grid-item',
-	CALL_TO_ACTION: 'call-to-action',
-	IMAGE: 'image'
+	CONTAINER: "container",
+	WRAPPER: "wrapper",
+	RAW_HTML: "raw-html",
+	ERROR: "error",
+	TEXT: "text",
+	BUTTON: "button",
+	CARD: "card",
+	GRID: "grid",
+	GRID_ITEM: "grid-item",
+	CALL_TO_ACTION: "call-to-action",
+	IMAGE: "image",
 } as const;
 
 /**

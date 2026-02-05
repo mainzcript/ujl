@@ -1,42 +1,42 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { ColorPicker } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { ColorPicker } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/ColorPicker',
+		title: "Components/Forms/ColorPicker",
 		component: ColorPicker,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			value: {
-				control: 'color',
-				description: 'The selected color value in hex format',
+				control: "color",
+				description: "The selected color value in hex format",
 				table: {
-					category: 'State',
-					defaultValue: { summary: '#000000' }
-				}
+					category: "State",
+					defaultValue: { summary: "#000000" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the color picker is disabled',
+				control: "boolean",
+				description: "Whether the color picker is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			placeholder: {
-				control: 'text',
-				description: 'Placeholder text for the input',
+				control: "text",
+				description: "Placeholder text for the input",
 				table: {
-					category: 'Content'
-				}
-			}
+					category: "Content",
+				},
+			},
 		},
 		args: {
-			value: '#3b82f6',
+			value: "#3b82f6",
 			disabled: false,
-			placeholder: ''
-		}
+			placeholder: "",
+		},
 	});
 </script>
 
@@ -80,14 +80,14 @@
 </Story>
 
 <!-- Disabled -->
-<Story name="Disabled" args={{ value: '#6b7280', disabled: true }}>
+<Story name="Disabled" args={{ value: "#6b7280", disabled: true }}>
 	{#snippet template(args)}
 		<ColorPicker {...args} class="w-full max-w-[200px]" />
 	{/snippet}
 </Story>
 
 <!-- With Placeholder -->
-<Story name="With Placeholder" args={{ value: '', placeholder: 'Enter color' }}>
+<Story name="With Placeholder" args={{ value: "", placeholder: "Enter color" }}>
 	{#snippet template(args)}
 		<ColorPicker {...args} class="w-full max-w-[200px]" />
 	{/snippet}

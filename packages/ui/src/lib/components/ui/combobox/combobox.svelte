@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Popover as PopoverPrimitive } from 'bits-ui';
-	import { setComboboxContext } from './context.js';
+	import { Popover as PopoverPrimitive } from "bits-ui";
+	import { setComboboxContext } from "./context.js";
 
 	let {
 		open = $bindable(false),
-		value = $bindable(''),
+		value = $bindable(""),
 		children,
 		...restProps
 	}: PopoverPrimitive.RootProps & {
 		open?: boolean;
 		value?: string;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 	} = $props();
 
 	setComboboxContext({
@@ -25,7 +25,7 @@
 		},
 		set open(newOpen: boolean) {
 			open = newOpen;
-		}
+		},
 	});
 </script>
 

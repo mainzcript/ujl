@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { UJLAbstractGridNode } from '@ujl-framework/types';
-	import { Grid } from '@ujl-framework/ui';
-	import ASTNode from '../ASTNode.svelte';
+	import type { UJLAbstractGridNode } from "@ujl-framework/types";
+	import { Grid } from "@ujl-framework/ui";
+	import ASTNode from "../ASTNode.svelte";
 
 	interface Props {
 		node: UJLAbstractGridNode;

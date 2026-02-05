@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { UJLCrafter } from '../lib/components/ujl-crafter/index.js';
-	import { onMount, onDestroy } from 'svelte';
+	import { UJLCrafter } from "../lib/components/ujl-crafter/index.js";
+	import { onMount, onDestroy } from "svelte";
 
 	// Container reference
 	let crafterContainer: HTMLDivElement | undefined = $state();
@@ -9,13 +9,13 @@
 	let crafter: UJLCrafter | null = null;
 
 	// Check if running in test mode (set by Playwright via environment variable)
-	const isTestMode = import.meta.env.PUBLIC_TEST_MODE === 'true';
+	const isTestMode = import.meta.env.PUBLIC_TEST_MODE === "true";
 
 	onMount(() => {
 		if (crafterContainer) {
 			crafter = new UJLCrafter({
 				target: crafterContainer,
-				testMode: isTestMode
+				testMode: isTestMode,
 			});
 		}
 	});

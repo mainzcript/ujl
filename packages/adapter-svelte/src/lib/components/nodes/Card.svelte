@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { UJLAbstractCardNode } from '@ujl-framework/types';
-	import { Card, CardTitle, CardContent, CardHeader } from '@ujl-framework/ui';
-	import ASTNode from '../ASTNode.svelte';
-	import { RichText } from '../ui/rich-text/index.js';
+	import type { UJLAbstractCardNode } from "@ujl-framework/types";
+	import { Card, CardTitle, CardContent, CardHeader } from "@ujl-framework/ui";
+	import ASTNode from "../ASTNode.svelte";
+	import { RichText } from "../ui/rich-text/index.js";
 
 	interface Props {
 		node: UJLAbstractCardNode;

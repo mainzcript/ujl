@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Card,
 		CardHeader,
@@ -7,34 +7,34 @@
 		CardDescription,
 		CardContent,
 		CardFooter,
-		CardAction
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
-	import { Badge } from '../badge/index.ts';
+		CardAction,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
+	import { Badge } from "../badge/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/Card',
+		title: "Components/Layout/Card",
 		component: Card,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			class: 'w-[350px]'
-		}
+			class: "w-[350px]",
+		},
 	});
 </script>
 
 <!-- Default -->
-<Story name="Default" args={{ class: 'w-[350px]' }}>
+<Story name="Default" args={{ class: "w-[350px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader>
@@ -49,7 +49,7 @@
 </Story>
 
 <!-- With Footer -->
-<Story name="With Footer" args={{ class: 'w-[350px]' }}>
+<Story name="With Footer" args={{ class: "w-[350px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader>
@@ -68,7 +68,7 @@
 </Story>
 
 <!-- With Action -->
-<Story name="With Action" args={{ class: 'w-[350px]' }}>
+<Story name="With Action" args={{ class: "w-[350px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader>
@@ -86,7 +86,7 @@
 </Story>
 
 <!-- Login Form -->
-<Story name="Login Form" args={{ class: 'w-[350px]' }}>
+<Story name="Login Form" args={{ class: "w-[350px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader>
@@ -111,7 +111,7 @@
 </Story>
 
 <!-- Payment Method -->
-<Story name="Payment Method" args={{ class: 'w-[400px]' }}>
+<Story name="Payment Method" args={{ class: "w-[400px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader>
@@ -146,7 +146,7 @@
 </Story>
 
 <!-- Stats Card -->
-<Story name="Stats Card" args={{ class: 'w-[200px]' }}>
+<Story name="Stats Card" args={{ class: "w-[200px]" }}>
 	{#snippet template(args)}
 		<div class="flex gap-4">
 			<Card class={args.class}>
@@ -181,7 +181,7 @@
 </Story>
 
 <!-- Bordered Sections -->
-<Story name="Bordered Sections" args={{ class: 'w-[350px]' }}>
+<Story name="Bordered Sections" args={{ class: "w-[350px]" }}>
 	{#snippet template(args)}
 		<Card class={args.class}>
 			<CardHeader class="border-b">

@@ -1,22 +1,22 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Kbd, KbdGroup } from './index.ts';
-	import { Text } from '../text/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Kbd, KbdGroup } from "./index.ts";
+	import { Text } from "../text/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Typography/Kbd',
+		title: "Components/Typography/Kbd",
 		component: Kbd,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes',
+				control: "text",
+				description: "Additional CSS classes",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
-		args: {}
+		args: {},
 	});
 </script>
 

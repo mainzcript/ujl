@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Button } from '@ujl-framework/ui';
-	import type { ImageMetadata } from '@ujl-framework/types';
-	import { logger } from '$lib/utils/logger.js';
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
-	import { toast } from 'svelte-sonner';
-	import UploadIcon from '@lucide/svelte/icons/upload';
-	import XIcon from '@lucide/svelte/icons/x';
+	import { Button } from "@ujl-framework/ui";
+	import type { ImageMetadata } from "@ujl-framework/types";
+	import { logger } from "$lib/utils/logger.js";
+	import { getContext } from "svelte";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import { toast } from "svelte-sonner";
+	import UploadIcon from "@lucide/svelte/icons/upload";
+	import XIcon from "@lucide/svelte/icons/x";
 
 	let {
 		onUploadComplete,
-		onClose
+		onClose,
 	}: {
 		onUploadComplete?: (imageId: string) => void;
 		onClose?: () => void;
@@ -19,8 +19,8 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const imageService = $derived(crafter.imageService);
 
-	const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
-	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(',');
+	const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(",");
 
 	let fileInputRef: HTMLInputElement | null = $state(null);
 	let isCompressing = $state(false);
@@ -43,7 +43,7 @@
 
 			img.onerror = () => {
 				URL.revokeObjectURL(objectUrl);
-				reject(new Error('Failed to load image'));
+				reject(new Error("Failed to load image"));
 			};
 
 			img.src = objectUrl;
@@ -65,10 +65,10 @@
 
 		// Validate file type
 		if (!ACCEPTED_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_IMAGE_TYPES)[number])) {
-			toast.error('Unsupported file type', {
-				description: `Please use JPEG, PNG, WebP, or GIF.`
+			toast.error("Unsupported file type", {
+				description: `Please use JPEG, PNG, WebP, or GIF.`,
 			});
-			target.value = '';
+			target.value = "";
 			return;
 		}
 
@@ -84,28 +84,28 @@
 				mimeType: file.type,
 				filesize: file.size,
 				width,
-				height
+				height,
 			};
 
 			// Use ImageService to upload (handles compression and storage)
 			const result = await imageService.upload(file, metadata);
 
-			logger.info('Image uploaded successfully:', result.imageId);
+			logger.info("Image uploaded successfully:", result.imageId);
 
 			// Notify parent component
 			onUploadComplete?.(result.imageId);
-			toast.success('Image uploaded successfully');
+			toast.success("Image uploaded successfully");
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
-			logger.error('Image upload error:', err);
-			toast.error('Upload failed', {
-				description: errorMessage
+			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
+			logger.error("Image upload error:", err);
+			toast.error("Upload failed", {
+				description: errorMessage,
 			});
 		} finally {
 			isCompressing = false;
 			// Reset input to allow selecting the same file again
 			if (target) {
-				target.value = '';
+				target.value = "";
 			}
 		}
 	}

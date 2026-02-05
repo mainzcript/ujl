@@ -1,24 +1,24 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { AspectRatio } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { AspectRatio } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/AspectRatio',
+		title: "Components/Layout/AspectRatio",
 		component: AspectRatio,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			ratio: {
-				control: { type: 'number' },
-				description: 'The aspect ratio (width / height)',
+				control: { type: "number" },
+				description: "The aspect ratio (width / height)",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: '1' }
-				}
-			}
+					category: "Appearance",
+					defaultValue: { summary: "1" },
+				},
+			},
 		},
 		args: {
-			ratio: 16 / 9
-		}
+			ratio: 16 / 9,
+		},
 	});
 </script>
 

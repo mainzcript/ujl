@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { getCarouselContext } from './context.js';
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { HTMLAttributes } from "svelte/elements";
+	import { getCarouselContext } from "./context.js";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
@@ -12,7 +12,7 @@
 
 	let wrapper: HTMLDivElement;
 
-	const carouselCtx = getCarouselContext('<Carousel.Item/>');
+	const carouselCtx = getCarouselContext("<Carousel.Item/>");
 
 	$effect(() => {
 		const carousel = carouselCtx.carousel;
@@ -36,7 +36,7 @@
 		data-slot="carousel-item"
 		role="group"
 		aria-roledescription="slide"
-		class={cn('will-change-all duration-10', className)}
+		class={cn("will-change-all duration-10", className)}
 		{...restProps}
 	>
 		{@render children?.()}

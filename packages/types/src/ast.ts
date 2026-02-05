@@ -171,5 +171,5 @@ export type {
 export type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: OptionsType
+	options: OptionsType,
 ) => OutputType;

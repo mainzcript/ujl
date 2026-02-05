@@ -63,7 +63,7 @@ export function createScopedSelector(instanceId: string, root?: ShadowRoot | Doc
 			const container = getContainer();
 			if (!container) {
 				// Return empty NodeList by querying for impossible selector
-				return queryRoot.querySelectorAll<T>(':scope:not(*)');
+				return queryRoot.querySelectorAll<T>(":scope:not(*)");
 			}
 			return container.querySelectorAll<T>(selector);
 		},
@@ -73,7 +73,7 @@ export function createScopedSelector(instanceId: string, root?: ShadowRoot | Doc
 		 * Useful when you need direct access to the container.
 		 * @returns The container element or null
 		 */
-		getContainer
+		getContainer,
 	};
 }
 

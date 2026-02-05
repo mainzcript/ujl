@@ -4,19 +4,19 @@
  * Tests for the navigation tree in the sidebar.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Tree Navigation', () => {
-	test('should display Document header in navigation tree', async ({ page }) => {
+test.describe("Tree Navigation", () => {
+	test("should display Document header in navigation tree", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		await expect(crafter.navTreeHeader).toBeVisible();
-		await expect(crafter.navTreeHeader).toContainText('Document');
+		await expect(crafter.navTreeHeader).toContainText("Document");
 	});
 
-	test('should display root-level modules in tree', async ({ page }) => {
+	test("should display root-level modules in tree", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -27,7 +27,7 @@ test.describe('Tree Navigation', () => {
 		expect(nodeIds.length).toBeGreaterThan(0);
 	});
 
-	test('should select node when clicked', async ({ page }) => {
+	test("should select node when clicked", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -41,10 +41,10 @@ test.describe('Tree Navigation', () => {
 		await crafter.selectNodeInTree(firstNodeId);
 
 		// Check that properties panel no longer shows "No module selected"
-		await expect(crafter.panel.getByText('No module selected')).not.toBeVisible({ timeout: 2000 });
+		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible({ timeout: 2000 });
 	});
 
-	test('should show selection highlight on selected node', async ({ page }) => {
+	test("should show selection highlight on selected node", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -60,7 +60,7 @@ test.describe('Tree Navigation', () => {
 		await expect(selectedModule).toBeVisible({ timeout: 2000 });
 	});
 
-	test('should deselect when pressing Escape', async ({ page }) => {
+	test("should deselect when pressing Escape", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -78,17 +78,17 @@ test.describe('Tree Navigation', () => {
 		await expect(crafter.getSelectedPreviewModule()).not.toBeVisible({ timeout: 2000 });
 
 		// Properties panel should show "No module selected"
-		await expect(crafter.panel.getByText('No module selected')).toBeVisible();
+		await expect(crafter.panel.getByText("No module selected")).toBeVisible();
 	});
 
-	test('should expand/collapse tree nodes with children', async ({ page }) => {
+	test("should expand/collapse tree nodes with children", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Find a node with a chevron (has children) - in Shadow DOM
 		// The chevron button is inside a CollapsibleTrigger which has data-state="open" or "closed"
 		const nodesWithChevron = crafter.crafterElement.locator(
-			'[data-tree-node-id]:has([data-crafter="tree-chevron"])'
+			'[data-tree-node-id]:has([data-crafter="tree-chevron"])',
 		);
 		const count = await nodesWithChevron.count();
 
@@ -97,15 +97,15 @@ test.describe('Tree Navigation', () => {
 			const chevron = nodeWithChildren.locator('[data-crafter="tree-chevron"]');
 
 			// Get the collapsible trigger (parent of the chevron button) - it has data-state
-			const collapsibleTrigger = nodeWithChildren.locator('[data-state]').first();
-			const initialState = await collapsibleTrigger.getAttribute('data-state');
+			const collapsibleTrigger = nodeWithChildren.locator("[data-state]").first();
+			const initialState = await collapsibleTrigger.getAttribute("data-state");
 
 			// Click to toggle expand/collapse
 			await chevron.click();
 			await crafter.waitForAnimation();
 
 			// State should change
-			const newState = await collapsibleTrigger.getAttribute('data-state');
+			const newState = await collapsibleTrigger.getAttribute("data-state");
 			expect(newState).not.toBe(initialState);
 
 			// Click again to toggle back
@@ -113,7 +113,7 @@ test.describe('Tree Navigation', () => {
 			await crafter.waitForAnimation();
 
 			// Should be back to initial state
-			const finalState = await collapsibleTrigger.getAttribute('data-state');
+			const finalState = await collapsibleTrigger.getAttribute("data-state");
 			expect(finalState).toBe(initialState);
 		} else {
 			// If no expandable nodes, skip this test
@@ -121,7 +121,7 @@ test.describe('Tree Navigation', () => {
 		}
 	});
 
-	test('should display module type names in tree', async ({ page }) => {
+	test("should display module type names in tree", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -130,16 +130,16 @@ test.describe('Tree Navigation', () => {
 
 		// Check for common module types from the showcase document
 		const hasModuleTypes =
-			treeText?.includes('Container') ||
-			treeText?.includes('Text') ||
-			treeText?.includes('Card') ||
-			treeText?.includes('Grid') ||
-			treeText?.includes('Image');
+			treeText?.includes("Container") ||
+			treeText?.includes("Text") ||
+			treeText?.includes("Card") ||
+			treeText?.includes("Grid") ||
+			treeText?.includes("Image");
 
 		expect(hasModuleTypes).toBe(true);
 	});
 
-	test('should show dropdown menu via more button', async ({ page }) => {
+	test("should show dropdown menu via more button", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -152,8 +152,8 @@ test.describe('Tree Navigation', () => {
 
 		// Click the more button (three dots) - it has MoreVerticalIcon
 		const moreButton = treeNode
-			.locator('button')
-			.filter({ has: page.locator('svg') })
+			.locator("button")
+			.filter({ has: page.locator("svg") })
 			.last();
 		await moreButton.click();
 
@@ -162,10 +162,10 @@ test.describe('Tree Navigation', () => {
 		await expect(dropdownMenu).toBeVisible({ timeout: 2000 });
 
 		// Should have common actions
-		await expect(dropdownMenu.getByText('Copy')).toBeVisible();
+		await expect(dropdownMenu.getByText("Copy")).toBeVisible();
 	});
 
-	test('should scroll to node in preview when selected in tree', async ({ page }) => {
+	test("should scroll to node in preview when selected in tree", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 

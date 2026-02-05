@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Dialog,
 		DialogContent,
@@ -10,29 +10,29 @@
 		DialogDescription,
 		DialogTrigger,
 		DialogTriggerButton,
-		DialogCloseButton
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
+		DialogCloseButton,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Overlays/Dialog',
+		title: "Components/Overlays/Dialog",
 		component: Dialog,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			open: {
-				control: 'boolean',
-				description: 'Whether the dialog is open',
+				control: "boolean",
+				description: "Whether the dialog is open",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			open: false
-		}
+			open: false,
+		},
 	});
 </script>
 

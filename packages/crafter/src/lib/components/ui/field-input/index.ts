@@ -1,1 +1,1 @@
-export { default as FieldInput } from './field-input.svelte';
+export { default as FieldInput } from "./field-input.svelte";

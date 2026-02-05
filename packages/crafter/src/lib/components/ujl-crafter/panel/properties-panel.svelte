@@ -1,24 +1,24 @@
 <!-- Properties panel for editing selected module fields -->
 <script lang="ts">
-	import ShareIcon from '@lucide/svelte/icons/share';
-	import FileJsonIcon from '@lucide/svelte/icons/file-json';
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
-	import { Composer, type AnyModule } from '@ujl-framework/core';
-	import { findNodeById } from '$lib/utils/ujlc-tree.js';
-	import { FieldInput } from '$lib/components/ui/index.js';
-	import { logger } from '$lib/utils/logger.js';
+	import ShareIcon from "@lucide/svelte/icons/share";
+	import FileJsonIcon from "@lucide/svelte/icons/file-json";
+	import { getContext } from "svelte";
+	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import { Composer, type AnyModule } from "@ujl-framework/core";
+	import { findNodeById } from "$lib/utils/ujlc-tree.js";
+	import { FieldInput } from "$lib/components/ui/index.js";
+	import { logger } from "$lib/utils/logger.js";
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
+		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
 
 	// Slot selection uses format: parentId:slotName
 	const isSlotSelected = $derived(() => {
-		return selectedNodeId?.includes(':') || false;
+		return selectedNodeId?.includes(":") || false;
 	});
 
 	const selectedNode = $derived(() => {
@@ -27,21 +27,27 @@
 	});
 
 	const module = $derived(() => {
-		if (!selectedNode()) return null;
-		return composer.getRegistry().getModule(selectedNode()!.type);
+		const node = selectedNode();
+		if (!node) return null;
+		return composer.getRegistry().getModule(node.type);
 	});
 
 	const fieldEntries = $derived(() => {
-		return module()?.fields || [];
+		return module()?.fields ?? [];
 	});
+
+	// Helper to safely get field values for the template
+	const getFieldValue = (fieldKey: string): unknown => {
+		return selectedNode()?.fields[fieldKey];
+	};
 
 	const hasEditableFields = $derived(() => {
 		return fieldEntries().length > 0;
 	});
 
 	function getModuleLabel(module: AnyModule | null | undefined): string {
-		if (!module) return '';
-		return module.label ?? '';
+		if (!module) return "";
+		return module.label ?? "";
 	}
 
 	/**
@@ -54,7 +60,7 @@
 		const success = crafter.operations.updateNodeField(selectedNodeId, fieldName, newValue);
 
 		if (!success) {
-			logger.error('Failed to update field:', fieldName);
+			logger.error("Failed to update field:", fieldName);
 		}
 	}
 </script>
@@ -121,7 +127,7 @@
 							<FieldInput
 								fieldName={fieldEntry.key}
 								{fieldEntry}
-								value={selectedNode()!.fields[fieldEntry.key]}
+								value={getFieldValue(fieldEntry.key)}
 								onChange={(value: unknown) => handleFieldUpdate(fieldEntry.key, value)}
 							/>
 						{/each}

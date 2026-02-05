@@ -1,55 +1,55 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Text, Heading, Highlight, Code } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Text, Heading, Highlight, Code } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Typography/Text',
+		title: "Components/Typography/Text",
 		component: Text,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			size: {
-				control: { type: 'select' },
-				options: ['default', 'xs', 'sm', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'],
-				description: 'The size of the text',
+				control: { type: "select" },
+				options: ["default", "xs", "sm", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl"],
+				description: "The size of the text",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			weight: {
-				control: { type: 'select' },
-				options: ['default', 'bold'],
-				description: 'The font weight of the text',
+				control: { type: "select" },
+				options: ["default", "bold"],
+				description: "The font weight of the text",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			intensity: {
-				control: { type: 'select' },
-				options: ['muted', 'default', 'solid'],
-				description: 'The color intensity of the text',
+				control: { type: "select" },
+				options: ["muted", "default", "solid"],
+				description: "The color intensity of the text",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			as: {
-				control: { type: 'select' },
-				options: ['p', 'span', 'div', 'label'],
-				description: 'The HTML element to render',
+				control: { type: "select" },
+				options: ["p", "span", "div", "label"],
+				description: "The HTML element to render",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'p' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "p" },
+				},
+			},
 		},
 		args: {
-			size: 'default',
-			weight: 'default',
-			intensity: 'default',
-			as: 'p'
-		}
+			size: "default",
+			weight: "default",
+			intensity: "default",
+			as: "p",
+		},
 	});
 </script>
 

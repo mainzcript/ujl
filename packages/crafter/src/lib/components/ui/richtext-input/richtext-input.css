@@ -32,7 +32,7 @@
 /* Placeholder styling */
 .richtext-editor .ProseMirror p.is-editor-empty:first-child::before {
 	color: oklch(var(--muted-foreground));
-	content: 'Enter text...';
+	content: "Enter text...";
 	float: left;
 	height: 0;
 	pointer-events: none;

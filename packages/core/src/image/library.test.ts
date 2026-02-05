@@ -408,12 +408,12 @@ describe("ImageLibrary", () => {
 
 			const id1 = library.add(
 				{ src: "data:image/png;base64,abc123" },
-				{ filename: "test1.png", filesize: 1000, mimeType: "image/png", width: 100, height: 100 }
+				{ filename: "test1.png", filesize: 1000, mimeType: "image/png", width: 100, height: 100 },
 			);
 
 			const id2 = library.add(
 				{ src: "data:image/jpeg;base64,def456" },
-				{ filename: "test2.jpg", filesize: 2000, mimeType: "image/jpeg", width: 200, height: 200 }
+				{ filename: "test2.jpg", filesize: 2000, mimeType: "image/jpeg", width: 200, height: 200 },
 			);
 
 			const obj = library.toObject();

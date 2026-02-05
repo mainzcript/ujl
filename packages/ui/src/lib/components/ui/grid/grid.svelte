@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { cn } from '$lib/utils.js';
+	import { cn } from "$lib/utils.js";
 
 	let {
-		class: className = '',
+		class: className = "",
 		children,
-		as = 'div', // `div` is the default element
+		as = "div", // `div` is the default element
 		...restProps
 	} = $props();
 
-	const baseStyle = 'grid grid-cols-12 gap-6 @container/ujl-grid';
+	const baseStyle = "grid grid-cols-12 gap-6 @container/ujl-grid";
 </script>
 
 <svelte:element this={as} class={cn(baseStyle, className)} {...restProps}>

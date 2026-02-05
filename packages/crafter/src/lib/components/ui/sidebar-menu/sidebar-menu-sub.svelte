@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '@ujl-framework/ui/utils';
-	import type { HTMLAttributes } from 'svelte/elements';
+	import { cn, type WithElementRef } from "@ujl-framework/ui/utils";
+	import type { HTMLAttributes } from "svelte/elements";
 
 	let {
 		ref = $bindable(null),
@@ -15,8 +15,8 @@
 	data-slot="sidebar-menu-sub"
 	data-sidebar="menu-sub"
 	class={cn(
-		'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border py-0.5 ps-2.5',
-		className
+		"mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border py-0.5 ps-2.5",
+		className,
 	)}
 	{...restProps}
 >

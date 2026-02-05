@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { LinkPreview as HoverCardPrimitive } from 'bits-ui';
-	import { cn } from '$lib/utils.js';
-	import { getUjlThemeContext } from '../ujl-theme/context.js';
+	import { LinkPreview as HoverCardPrimitive } from "bits-ui";
+	import { cn } from "$lib/utils.js";
+	import { getUjlThemeContext } from "../ujl-theme/context.js";
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		align = 'center',
+		align = "center",
 		sideOffset = 4,
 		portalProps,
 		...restProps
@@ -28,10 +28,10 @@
 		{align}
 		{sideOffset}
 		class={cn(
-			isDark && 'dark',
-			'elevation z-50 mt-3 w-64 rounded-md p-4 backdrop-blur',
-			'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
-			className
+			isDark && "dark",
+			"elevation z-50 mt-3 w-64 rounded-md p-4 backdrop-blur",
+			"data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+			className,
 		)}
 		{...restProps}
 	/>

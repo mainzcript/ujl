@@ -1,30 +1,30 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { ResizablePaneGroup, ResizablePane, ResizableHandle } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { ResizablePaneGroup, ResizablePane, ResizableHandle } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/Resizable',
+		title: "Components/Layout/Resizable",
 		component: ResizablePaneGroup,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			direction: {
-				control: { type: 'select' },
-				options: ['horizontal', 'vertical'],
-				description: 'The direction of the resizable panes',
+				control: { type: "select" },
+				options: ["horizontal", "vertical"],
+				description: "The direction of the resizable panes",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'horizontal' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "horizontal" },
+				},
+			},
 		},
 		args: {
-			direction: 'horizontal'
-		}
+			direction: "horizontal",
+		},
 	});
 </script>
 
 <!-- Default -->
-<Story name="Default" args={{ direction: 'horizontal' }}>
+<Story name="Default" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[200px] max-w-md rounded-lg border">
 			<ResizablePane defaultSize={50}>
@@ -43,7 +43,7 @@
 </Story>
 
 <!-- With Handle -->
-<Story name="With Handle" args={{ direction: 'horizontal' }}>
+<Story name="With Handle" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[200px] max-w-md rounded-lg border">
 			<ResizablePane defaultSize={50}>
@@ -62,7 +62,7 @@
 </Story>
 
 <!-- Vertical -->
-<Story name="Vertical" args={{ direction: 'vertical' }}>
+<Story name="Vertical" args={{ direction: "vertical" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[300px] max-w-md rounded-lg border">
 			<ResizablePane defaultSize={30}>
@@ -81,7 +81,7 @@
 </Story>
 
 <!-- Three Panes -->
-<Story name="Three Panes" args={{ direction: 'horizontal' }}>
+<Story name="Three Panes" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[200px] max-w-2xl rounded-lg border">
 			<ResizablePane defaultSize={25}>
@@ -106,7 +106,7 @@
 </Story>
 
 <!-- Nested Layout -->
-<Story name="Nested Layout" args={{ direction: 'horizontal' }}>
+<Story name="Nested Layout" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[400px] max-w-2xl rounded-lg border">
 			<ResizablePane defaultSize={25}>
@@ -135,7 +135,7 @@
 </Story>
 
 <!-- With Min/Max Size -->
-<Story name="With Min Max Size" args={{ direction: 'horizontal' }}>
+<Story name="With Min Max Size" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[200px] max-w-md rounded-lg border">
 			<ResizablePane defaultSize={50} minSize={20} maxSize={80}>
@@ -155,7 +155,7 @@
 </Story>
 
 <!-- Collapsible Sidebar -->
-<Story name="Collapsible Sidebar" args={{ direction: 'horizontal' }}>
+<Story name="Collapsible Sidebar" args={{ direction: "horizontal" }}>
 	{#snippet template(args)}
 		<ResizablePaneGroup {...args} class="min-h-[300px] max-w-2xl rounded-lg border">
 			<ResizablePane defaultSize={20} minSize={10} collapsible collapsedSize={5}>

@@ -75,18 +75,18 @@ The UJL Framework separates content from design, and the Library extends this pr
 Once the Library is running, you can configure the Crafter to use it for backend image storage:
 
 ```typescript
-import { UJLCrafter } from '@ujl-framework/crafter'
+import { UJLCrafter } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
-  target: '#editor-container',
-  document: myDocument,
-  theme: myTheme,
-  library: {
-    storage: 'backend',
-    url: 'http://localhost:3000',
-    apiKey: 'your-api-key-here',
-  },
-})
+	target: "#editor-container",
+	document: myDocument,
+	theme: myTheme,
+	library: {
+		storage: "backend",
+		url: "http://localhost:3000",
+		apiKey: "your-api-key-here",
+	},
+});
 ```
 
 When configured this way, images uploaded through the Crafter's image library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.

@@ -73,7 +73,7 @@ export abstract class ModuleBase {
 	 */
 	public abstract compose(
 		moduleData: UJLCModuleObject,
-		composer: Composer
+		composer: Composer,
 	): UJLAbstractNode | Promise<UJLAbstractNode>;
 
 	/** Human-readable display name */
@@ -111,7 +111,7 @@ export abstract class ModuleBase {
 	 * @returns Parsed field value or fallback
 	 */
 	protected parseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T {
-		const entry = this.fields.find(f => f.key === key);
+		const entry = this.fields.find((f) => f.key === key);
 		if (!entry) return fallback;
 		const parsed = entry.field.parse(moduleData.fields[key]);
 		return (parsed ?? fallback) as T;

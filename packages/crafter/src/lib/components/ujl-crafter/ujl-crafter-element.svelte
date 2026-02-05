@@ -18,28 +18,28 @@
 -->
 <svelte:options
 	customElement={{
-		tag: 'ujl-crafter-internal',
-		shadow: 'open',
+		tag: "ujl-crafter-internal",
+		shadow: "open",
 		props: {
-			store: { type: 'Object' },
-			composer: { type: 'Object' },
-			editorTheme: { type: 'Object' }
-		}
+			store: { type: "Object" },
+			composer: { type: "Object" },
+			editorTheme: { type: "Object" },
+		},
 	}}
 />
 
 <script lang="ts">
-	import type { UJLTDocument } from '@ujl-framework/types';
-	import type { CrafterStore } from '$lib/stores/index.js';
-	import type { Composer } from '@ujl-framework/core';
-	import bundledStyles from '$lib/styles/_bundled.css?inline';
-	import UJLCrafterInner from './ujl-crafter.svelte';
+	import type { UJLTDocument } from "@ujl-framework/types";
+	import type { CrafterStore } from "$lib/stores/index.js";
+	import type { Composer } from "@ujl-framework/core";
+	import bundledStyles from "$lib/styles/_bundled.css?inline";
+	import UJLCrafterInner from "./ujl-crafter.svelte";
 
 	// Props from the wrapper class (set via DOM properties)
 	let {
 		store,
 		composer,
-		editorTheme
+		editorTheme,
 	}: {
 		store: CrafterStore;
 		composer: Composer;
@@ -60,7 +60,7 @@
 		return {
 			update(css: string) {
 				element.textContent = css;
-			}
+			},
 		};
 	}
 </script>

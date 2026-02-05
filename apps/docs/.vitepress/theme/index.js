@@ -1,7 +1,7 @@
 import DefaultTheme from "vitepress/theme";
-import "./custom.css";
-import CrafterDemo from "./components/CrafterDemo.vue";
 import { onMounted, onUnmounted } from "vue";
+import CrafterDemo from "./components/CrafterDemo.vue";
+import "./custom.css";
 
 export default {
 	...DefaultTheme,
@@ -10,7 +10,7 @@ export default {
 		app.component("CrafterDemo", CrafterDemo);
 	},
 	setup() {
-		const openLightbox = mermaidEl => {
+		const openLightbox = (mermaidEl) => {
 			const svg = mermaidEl.querySelector("svg");
 			if (!svg) return;
 
@@ -27,7 +27,7 @@ export default {
 				<div class="mermaid-lightbox-hint">Klicken oder ESC zum Schließen</div>
 			`;
 
-			const handleKeydown = e => {
+			const handleKeydown = (e) => {
 				if (e.key === "Escape") close();
 			};
 
@@ -43,7 +43,7 @@ export default {
 		};
 
 		// Event delegation avoids per-diagram listeners and works with async rendering
-		const handleDocumentClick = event => {
+		const handleDocumentClick = (event) => {
 			const target = event.target;
 
 			// Preserve native link behavior in mermaid diagrams

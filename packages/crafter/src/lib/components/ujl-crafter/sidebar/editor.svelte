@@ -1,27 +1,27 @@
 <script lang="ts">
-	import type { UJLCSlotObject } from '@ujl-framework/types';
-	import { onMount, getContext } from 'svelte';
-	import NavTree from './nav-tree/nav-tree.svelte';
-	import ComponentPicker from './component-picker.svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
+	import type { UJLCSlotObject } from "@ujl-framework/types";
+	import { onMount, getContext } from "svelte";
+	import NavTree from "./nav-tree/nav-tree.svelte";
+	import ComponentPicker from "./component-picker.svelte";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 	import {
 		findNodeById,
 		ROOT_NODE_ID,
 		ROOT_SLOT_NAME,
 		parseSlotSelection,
 		isRootNode,
-		isModuleObject
-	} from '$lib/utils/ujlc-tree.js';
+		isModuleObject,
+	} from "$lib/utils/ujlc-tree.js";
 	import {
 		writeToBrowserClipboard,
 		readFromBrowserClipboard,
 		writeToClipboardEvent,
 		readFromClipboardEvent,
-		type UJLClipboardData
-	} from '$lib/utils/clipboard.js';
+		type UJLClipboardData,
+	} from "$lib/utils/clipboard.js";
 
 	let {
-		rootSlot
+		rootSlot,
 	}: {
 		rootSlot: UJLCSlotObject;
 	} = $props();
@@ -38,7 +38,7 @@
 	let isHandlingKeyboardShortcut = $state(false);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
+		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
 
 	// Slot selection uses format: parentId:slotName
@@ -57,7 +57,7 @@
 	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
 	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo);
 	const canDelete = $derived(
-		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId)
+		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
 	);
 	const canPaste = $derived.by(() => {
 		if (!clipboard) return false;
@@ -65,7 +65,7 @@
 		if (selectedNodeId === ROOT_NODE_ID) {
 			return (
 				isModuleObject(clipboard) ||
-				(clipboard.type === 'slot' && clipboard.slotName === ROOT_SLOT_NAME)
+				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
 			);
 		}
 
@@ -79,7 +79,7 @@
 				return true;
 			}
 
-			if (clipboard.type === 'slot') {
+			if (clipboard.type === "slot") {
 				if (isRootNode(selectedSlotInfo.parentId)) {
 					return clipboard.slotName === ROOT_SLOT_NAME;
 				}
@@ -94,7 +94,7 @@
 		if (isRootNode(selectedNodeId)) {
 			return (
 				isModuleObject(clipboard) ||
-				(clipboard.type === 'slot' && clipboard.slotName === ROOT_SLOT_NAME)
+				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
 			);
 		}
 
@@ -104,7 +104,7 @@
 			return true;
 		}
 
-		if (clipboard.type === 'slot' && selectedNode.slots) {
+		if (clipboard.type === "slot" && selectedNode.slots) {
 			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
 		}
 
@@ -126,7 +126,7 @@
 
 		const tagName = actualTarget.tagName.toLowerCase();
 
-		if (tagName === 'input' || tagName === 'textarea') {
+		if (tagName === "input" || tagName === "textarea") {
 			return true;
 		}
 
@@ -134,7 +134,7 @@
 			return true;
 		}
 
-		if (tagName === 'select') {
+		if (tagName === "select") {
 			return true;
 		}
 
@@ -182,10 +182,10 @@
 					pasteData,
 					slotInfo.parentId,
 					slotInfo.slotName,
-					'into'
+					"into",
 				);
 			} else {
-				newNodeId = crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, 'after');
+				newNodeId = crafter.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, "after");
 			}
 			if (newNodeId) {
 				crafter.setSelectedNodeId(newNodeId);
@@ -193,7 +193,7 @@
 			return;
 		}
 
-		if (pasteData.type === 'slot') {
+		if (pasteData.type === "slot") {
 			if (isSlotSelection && slotInfo) {
 				crafter.operations.pasteSlot(pasteData, slotInfo.parentId);
 			} else {
@@ -217,13 +217,13 @@
 	function handleSlotInsert(componentType: string, parentId: string, slotName: string): boolean {
 		let newNodeId: string | null = null;
 		if (isRootNode(parentId)) {
-			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, 'into');
+			newNodeId = crafter.operations.insertNode(componentType, ROOT_NODE_ID, slotName, "into");
 		} else {
 			const targetNode = findNodeById(rootSlot, parentId);
 			if (!targetNode) {
 				return false;
 			}
-			newNodeId = crafter.operations.insertNode(componentType, parentId, slotName, 'into');
+			newNodeId = crafter.operations.insertNode(componentType, parentId, slotName, "into");
 		}
 		if (newNodeId) {
 			crafter.setSelectedNodeId(newNodeId);
@@ -240,7 +240,7 @@
 				componentType,
 				ROOT_NODE_ID,
 				ROOT_SLOT_NAME,
-				'into'
+				"into",
 			);
 		} else {
 			// Regular module: insert after current module (consistent with paste)
@@ -249,7 +249,7 @@
 				return false;
 			}
 
-			newNodeId = crafter.operations.insertNode(componentType, nodeId, undefined, 'after');
+			newNodeId = crafter.operations.insertNode(componentType, nodeId, undefined, "after");
 		}
 		if (newNodeId) {
 			crafter.setSelectedNodeId(newNodeId);
@@ -275,14 +275,14 @@
 	}
 
 	function handleSlotClick(parentId: string, slotName: string) {
-		if (crafter.mode !== 'editor') return;
+		if (crafter.mode !== "editor") return;
 		crafter.setSelectedNodeId(`${parentId}:${slotName}`);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (isEditableElement(event)) return;
 
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			if (selectedNodeId) {
 				event.preventDefault();
 				crafter.setSelectedNodeId(null);
@@ -291,7 +291,7 @@
 		}
 
 		// Ctrl+I (Add) should always work, even without selection
-		if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
+		if ((event.ctrlKey || event.metaKey) && event.key === "i") {
 			event.preventDefault();
 			if (selectedSlotInfo && selectedNodeId) {
 				// Slot selected: insert into slot
@@ -309,7 +309,7 @@
 		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
 		if (!selectedNodeId && !clipboard) return;
 
-		if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
+		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
 			if (canPaste) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
@@ -324,7 +324,7 @@
 			return;
 		}
 
-		if (event.key === 'Delete' || event.key === 'Backspace') {
+		if (event.key === "Delete" || event.key === "Backspace") {
 			if (canDelete && selectedNodeId) {
 				event.preventDefault();
 				handleDelete(selectedNodeId);
@@ -334,7 +334,7 @@
 
 		if (selectedSlotInfo || !selectedNodeId) return;
 
-		if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
+		if ((event.ctrlKey || event.metaKey) && event.key === "c") {
 			if (canCopy) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
@@ -347,7 +347,7 @@
 			}
 		}
 
-		if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
+		if ((event.ctrlKey || event.metaKey) && event.key === "x") {
 			if (canCut) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
@@ -413,10 +413,10 @@
 	}
 
 	onMount(() => {
-		window.addEventListener('keydown', handleKeyDown);
-		window.addEventListener('copy', handleCopyEvent);
-		window.addEventListener('cut', handleCutEvent);
-		window.addEventListener('paste', handlePasteEvent);
+		window.addEventListener("keydown", handleKeyDown);
+		window.addEventListener("copy", handleCopyEvent);
+		window.addEventListener("cut", handleCutEvent);
+		window.addEventListener("paste", handlePasteEvent);
 
 		readFromBrowserClipboard().then((data) => {
 			if (data) {
@@ -432,14 +432,14 @@
 			});
 		};
 
-		window.addEventListener('focus', handleFocus);
+		window.addEventListener("focus", handleFocus);
 
 		return () => {
-			window.removeEventListener('keydown', handleKeyDown);
-			window.removeEventListener('copy', handleCopyEvent);
-			window.removeEventListener('cut', handleCutEvent);
-			window.removeEventListener('paste', handlePasteEvent);
-			window.removeEventListener('focus', handleFocus);
+			window.removeEventListener("keydown", handleKeyDown);
+			window.removeEventListener("copy", handleCopyEvent);
+			window.removeEventListener("cut", handleCutEvent);
+			window.removeEventListener("paste", handlePasteEvent);
+			window.removeEventListener("focus", handleFocus);
 		};
 	});
 
@@ -451,7 +451,7 @@
 		nodeId: string,
 		targetId: string,
 		slotName?: string,
-		position?: 'before' | 'after' | 'into'
+		position?: "before" | "after" | "into",
 	): boolean {
 		return crafter.operations.moveNode(nodeId, targetId, slotName, position);
 	}
@@ -484,13 +484,13 @@
 		sourceParentId: string,
 		sourceSlotName: string,
 		targetParentId: string,
-		targetSlotName: string
+		targetSlotName: string,
 	): boolean {
 		return crafter.operations.moveSlot(
 			sourceParentId,
 			sourceSlotName,
 			targetParentId,
-			targetSlotName
+			targetSlotName,
 		);
 	}
 </script>

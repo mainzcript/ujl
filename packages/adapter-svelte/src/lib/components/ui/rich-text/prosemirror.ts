@@ -1,4 +1,4 @@
-import type { ProseMirrorDocument, ProseMirrorNode, ProseMirrorMark } from '@ujl-framework/types';
+import type { ProseMirrorDocument, ProseMirrorMark, ProseMirrorNode } from "@ujl-framework/types";
 
 /**
  * Converts a ProseMirror Document to HTML synchronously
@@ -16,33 +16,33 @@ import type { ProseMirrorDocument, ProseMirrorNode, ProseMirrorMark } from '@ujl
  * @returns HTML string representation
  */
 export function prosemirrorToHtml(doc: ProseMirrorDocument): string {
-	if (!doc || doc.type !== 'doc' || !Array.isArray(doc.content)) {
-		return '';
+	if (!doc || doc.type !== "doc" || !Array.isArray(doc.content)) {
+		return "";
 	}
 
 	return serializeNodes(doc.content);
 }
 
 function serializeNodes(nodes: ProseMirrorNode[]): string {
-	return nodes.map((node) => serializeNode(node)).join('');
+	return nodes.map((node) => serializeNode(node)).join("");
 }
 
 function serializeNode(node: ProseMirrorNode): string {
 	const { type, content, text, marks = [] } = node;
 
 	// Text node
-	if (type === 'text' && text !== undefined) {
+	if (type === "text" && text !== undefined) {
 		const escapedText = escapeHtml(text);
 		return applyMarks(escapedText, marks);
 	}
 
 	// Hard break
-	if (type === 'hardBreak') {
-		return '<br>';
+	if (type === "hardBreak") {
+		return "<br>";
 	}
 
 	// Block nodes
-	let html = '';
+	let html = "";
 	if (content) {
 		html = serializeNodes(content);
 	}
@@ -51,26 +51,26 @@ function serializeNode(node: ProseMirrorNode): string {
 	const wrapped = applyMarks(html, marks);
 
 	switch (type) {
-		case 'paragraph':
+		case "paragraph":
 			return `<p>${wrapped}</p>`;
-		case 'heading': {
+		case "heading": {
 			const level = node.attrs?.level || 1;
 			return `<h${level}>${wrapped}</h${level}>`;
 		}
-		case 'codeBlock': {
+		case "codeBlock": {
 			// For code blocks, extract raw text content (don't serialize as HTML)
 			const codeText = extractTextContent(node);
 			return `<pre><code>${escapeHtml(codeText)}</code></pre>`;
 		}
-		case 'blockquote':
+		case "blockquote":
 			return `<blockquote>${wrapped}</blockquote>`;
-		case 'horizontalRule':
-			return '<hr>';
-		case 'bulletList':
+		case "horizontalRule":
+			return "<hr>";
+		case "bulletList":
 			return `<ul>${wrapped}</ul>`;
-		case 'orderedList':
+		case "orderedList":
 			return `<ol>${wrapped}</ol>`;
-		case 'listItem':
+		case "listItem":
 			return `<li>${wrapped}</li>`;
 		default:
 			// Unknown node type - return content without wrapper
@@ -86,21 +86,21 @@ function applyMarks(content: string, marks: ProseMirrorMark[]): string {
 	for (let i = marks.length - 1; i >= 0; i--) {
 		const mark = marks[i];
 		switch (mark.type) {
-			case 'bold':
+			case "bold":
 				result = `<strong>${result}</strong>`;
 				break;
-			case 'italic':
+			case "italic":
 				result = `<em>${result}</em>`;
 				break;
-			case 'code':
+			case "code":
 				// Content is already escaped from text node, no need to escape again
 				result = `<code>${result}</code>`;
 				break;
-			case 'link': {
-				const href = mark.attrs?.href || '#';
+			case "link": {
+				const href = mark.attrs?.href || "#";
 				const target = mark.attrs?.target
 					? ` target="${escapeHtml(mark.attrs.target as string)}"`
-					: '';
+					: "";
 				result = `<a href="${escapeHtml(href as string)}"${target}>${result}</a>`;
 				break;
 			}
@@ -114,16 +114,16 @@ function extractTextContent(node: ProseMirrorNode): string {
 		return node.text;
 	}
 	if (node.content) {
-		return node.content.map(extractTextContent).join('');
+		return node.content.map(extractTextContent).join("");
 	}
-	return '';
+	return "";
 }
 
 function escapeHtml(text: string): string {
 	return text
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;');
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
 }

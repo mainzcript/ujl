@@ -1,6 +1,6 @@
-import Text, { type TextWeight, type TextSize, type TextIntensity } from './text.svelte';
-import Heading from './heading.svelte';
-import Highlight from './highlight.svelte';
-import Code from './code.svelte';
+import Code from "./code.svelte";
+import Heading from "./heading.svelte";
+import Highlight from "./highlight.svelte";
+import Text, { type TextIntensity, type TextSize, type TextWeight } from "./text.svelte";
 
-export { type TextWeight, type TextSize, type TextIntensity, Text, Heading, Highlight, Code };
+export { Code, Heading, Highlight, Text, type TextIntensity, type TextSize, type TextWeight };

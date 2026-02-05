@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { type CarouselContext, setCarouselContext } from './context.js';
-	import type { WithElementRef } from '$lib/utils.js';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import type { CarouselOptions } from './carousel.js';
-	import { DEFAULT_OPTIONS } from './carousel.js';
+	import { type CarouselContext, setCarouselContext } from "./context.js";
+	import type { WithElementRef } from "$lib/utils.js";
+	import type { HTMLAttributes } from "svelte/elements";
+	import type { CarouselOptions } from "./carousel.js";
+	import { DEFAULT_OPTIONS } from "./carousel.js";
 
 	type CarouselProps = {
 		options?: Partial<CarouselOptions>;
@@ -19,7 +19,7 @@
 
 	// Context setup
 	let carouselCtx = $state<CarouselContext>({
-		carousel: null
+		carousel: null,
 	});
 
 	setCarouselContext(carouselCtx);

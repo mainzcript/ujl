@@ -1,21 +1,21 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Avatar, AvatarImage, AvatarFallback } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Avatar, AvatarImage, AvatarFallback } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Display/Avatar',
+		title: "Components/Display/Avatar",
 		component: Avatar,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes for sizing',
+				control: "text",
+				description: "Additional CSS classes for sizing",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
-		args: {}
+		args: {},
 	});
 </script>
 
@@ -197,16 +197,16 @@
 <Story name="Team List">
 	{#snippet template()}
 		<div class="w-full max-w-sm space-y-3">
-			{#each [{ name: 'John Doe', role: 'Admin', img: 'https://i.pravatar.cc/150?img=11' }, { name: 'Jane Smith', role: 'Editor', img: 'https://i.pravatar.cc/150?img=12' }, { name: 'Bob Wilson', role: 'Viewer', img: 'https://i.pravatar.cc/150?img=13' }] as member (member.name)}
+			{#each [{ name: "John Doe", role: "Admin", img: "https://i.pravatar.cc/150?img=11" }, { name: "Jane Smith", role: "Editor", img: "https://i.pravatar.cc/150?img=12" }, { name: "Bob Wilson", role: "Viewer", img: "https://i.pravatar.cc/150?img=13" }] as member (member.name)}
 				<div class="flex items-center justify-between rounded-lg border p-3">
 					<div class="flex items-center gap-3">
 						<Avatar class="size-10">
 							<AvatarImage src={member.img} alt={member.name} />
 							<AvatarFallback
 								>{member.name
-									.split(' ')
+									.split(" ")
 									.map((n) => n[0])
-									.join('')}</AvatarFallback
+									.join("")}</AvatarFallback
 							>
 						</Avatar>
 						<div class="flex flex-col">

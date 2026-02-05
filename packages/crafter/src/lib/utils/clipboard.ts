@@ -2,8 +2,8 @@
  * Browser clipboard integration for UJL editor.
  */
 
-import type { UJLCModuleObject } from '@ujl-framework/types';
-import { logger } from './logger.js';
+import type { UJLCModuleObject } from "@ujl-framework/types";
+import { logger } from "./logger.js";
 
 /**
  * Clipboard data format for UJL editor
@@ -11,7 +11,7 @@ import { logger } from './logger.js';
 export type UJLClipboardData =
 	| UJLCModuleObject
 	| {
-			type: 'slot';
+			type: "slot";
 			slotName: string;
 			content: UJLCModuleObject[];
 	  };
@@ -20,12 +20,12 @@ export type UJLClipboardData =
  * Prefix marker for UJL clipboard data in browser clipboard
  * This allows us to identify UJL clipboard data vs. regular text
  */
-const UJL_CLIPBOARD_PREFIX = '__UJL_CLIPBOARD__:';
+const UJL_CLIPBOARD_PREFIX = "__UJL_CLIPBOARD__:";
 
 /**
  * Storage key for persisting clipboard data across page reloads
  */
-const CLIPBOARD_STORAGE_KEY = '__UJL_CLIPBOARD_STORAGE__';
+const CLIPBOARD_STORAGE_KEY = "__UJL_CLIPBOARD_STORAGE__";
 
 /**
  * Serializes UJL clipboard data to a JSON string with prefix marker.
@@ -50,8 +50,8 @@ export function deserializeClipboard(text: string): UJLClipboardData | null {
 		// Validate structure: must have meta.id (node) or type === 'slot'
 		if (
 			data &&
-			typeof data === 'object' &&
-			('meta' in data || (data as { type?: string }).type === 'slot')
+			typeof data === "object" &&
+			("meta" in data || (data as { type?: string }).type === "slot")
 		) {
 			return data as UJLClipboardData;
 		}
@@ -66,7 +66,7 @@ export function deserializeClipboard(text: string): UJLClipboardData | null {
  * Checks if browser clipboard API is available.
  */
 export function isClipboardAvailable(): boolean {
-	return typeof navigator !== 'undefined' && !!navigator.clipboard?.writeText;
+	return typeof navigator !== "undefined" && !!navigator.clipboard?.writeText;
 }
 
 /**
@@ -77,7 +77,7 @@ export function isClipboardAvailable(): boolean {
 export async function writeToBrowserClipboard(data: UJLClipboardData): Promise<void> {
 	// Persist to localStorage (works even without clipboard API)
 	try {
-		if (typeof localStorage !== 'undefined') {
+		if (typeof localStorage !== "undefined") {
 			localStorage.setItem(CLIPBOARD_STORAGE_KEY, serializeClipboard(data));
 		}
 	} catch {
@@ -92,7 +92,7 @@ export async function writeToBrowserClipboard(data: UJLClipboardData): Promise<v
 		await navigator.clipboard.writeText(serializeClipboard(data));
 	} catch (error) {
 		// Silently fail if clipboard unavailable (permissions or context)
-		logger.warn('Failed to write to browser clipboard:', error);
+		logger.warn("Failed to write to browser clipboard:", error);
 	}
 }
 
@@ -110,7 +110,7 @@ export async function readFromBrowserClipboard(): Promise<UJLClipboardData | nul
 			const text = await navigator.clipboard.readText();
 			const data = deserializeClipboard(text);
 			// If we got valid data from clipboard API, update localStorage for future fallback
-			if (data && typeof localStorage !== 'undefined') {
+			if (data && typeof localStorage !== "undefined") {
 				try {
 					localStorage.setItem(CLIPBOARD_STORAGE_KEY, text);
 				} catch {
@@ -127,7 +127,7 @@ export async function readFromBrowserClipboard(): Promise<UJLClipboardData | nul
 
 	// Fallback to localStorage (works without user interaction, Safari/page-reload workaround)
 	try {
-		if (typeof localStorage !== 'undefined') {
+		if (typeof localStorage !== "undefined") {
 			const stored = localStorage.getItem(CLIPBOARD_STORAGE_KEY);
 			if (stored) {
 				const data = deserializeClipboard(stored);
@@ -148,12 +148,12 @@ export async function readFromBrowserClipboard(): Promise<UJLClipboardData | nul
  */
 export function writeToClipboardEvent(event: ClipboardEvent, data: UJLClipboardData): void {
 	if (!event.clipboardData) {
-		logger.warn('ClipboardEvent has no clipboardData');
+		logger.warn("ClipboardEvent has no clipboardData");
 		return;
 	}
 
 	event.preventDefault();
-	event.clipboardData.setData('text/plain', serializeClipboard(data));
+	event.clipboardData.setData("text/plain", serializeClipboard(data));
 }
 
 /**
@@ -164,6 +164,6 @@ export function readFromClipboardEvent(event: ClipboardEvent): UJLClipboardData 
 		return null;
 	}
 
-	const text = event.clipboardData.getData('text/plain');
+	const text = event.clipboardData.getData("text/plain");
 	return text ? deserializeClipboard(text) : null;
 }
