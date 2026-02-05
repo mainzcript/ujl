@@ -11,7 +11,7 @@
 	],
 	"packageManager": "pnpm@10.28.2",
 	"scripts": {
-		"build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
+		"build": "pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
 		"check": "pnpm -r run check",
@@ -57,7 +57,7 @@
 		"vite": "^7.3.1"
 	},
 	"engines": {
-		"node": ">=20.0.0",
+		"node": ">=22.0.0",
 		"pnpm": ">=10.0.0"
 	},
 	"pnpm": {

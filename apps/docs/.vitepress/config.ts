@@ -64,9 +64,9 @@ export default withMermaid({
 		logo: "/assets/logo-icon.png",
 
 		nav: [
-			{ text: "Über UJL", link: "/about/01-vision" },
-			{ text: "Dokumentation", link: "/docs/01-getting-started" },
-			{ text: "Demo", link: "/demo" },
+			{ text: "Vision", link: "/about/01-vision" },
+			{ text: "Demo", link: "/docs/01-demo" },
+			{ text: "Installation", link: "/docs/02-installation" },
 			{ text: "Architektur", link: "/arc42/01-introduction-and-goals" },
 		],
 
@@ -84,8 +84,9 @@ export default withMermaid({
 				text: "Dokumentation",
 				collapsed: false,
 				items: [
-					{ text: "Getting Started", link: "/docs/01-getting-started" },
-					{ text: "Roadmap", link: "/docs/02-roadmap" },
+					{ text: "Live Demo", link: "/docs/01-demo" },
+					{ text: "Installation & Integration", link: "/docs/02-installation" },
+					{ text: "Roadmap", link: "/docs/03-roadmap" },
 				],
 			},
 			{
