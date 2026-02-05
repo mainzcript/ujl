@@ -106,15 +106,23 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browsers
+        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('packages/crafter/package.json') }}
           restore-keys: |
             playwright-${{ runner.os }}-
 
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: packages/crafter
         run: pnpm exec playwright install --with-deps
+
+      - name: Install Playwright system deps (cached)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        working-directory: packages/crafter
+        run: pnpm exec playwright install-deps
 
       - name: Build (needed for e2e)
         env:
