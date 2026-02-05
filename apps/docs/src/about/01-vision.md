@@ -23,7 +23,7 @@ Es ist ein **visueller Layout-Layer**, der bestehende CMS- und Frontend-Systeme 
 
 Du möchtest sehen, wie UJL in der Praxis aussieht? Wir haben eine frühe Vorschau des UJL Crafter veröffentlicht. Bitte beachte, dass es sich um eine sehr frühe Version handelt, viele Features sind noch in Entwicklung.
 
-→ [Demo ausprobieren](/demo)
+→ [Demo ausprobieren](/docs/01-demo)
 
 :::
 

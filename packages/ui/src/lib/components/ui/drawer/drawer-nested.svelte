@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { setDrawerContext, type DrawerDirection } from './context.js';
+	import type { Snippet } from "svelte";
+	import { setDrawerContext, type DrawerDirection } from "./context.js";
 
 	interface DrawerNestedProps {
 		/** Whether the drawer is open (bindable) */
@@ -26,13 +26,13 @@
 	let {
 		open = $bindable(false),
 		activeSnapPoint = $bindable(null),
-		direction = 'bottom',
+		direction = "bottom",
 		shouldScaleBackground = false, // Default to false for nested drawers
 		closeThreshold = 0.5,
 		scrollLockTimeout = 500,
 		snapPoints,
 		onOpenChange,
-		children
+		children,
 	}: DrawerNestedProps = $props();
 
 	// Capture initial values for context (these are not expected to change at runtime)
@@ -49,17 +49,17 @@
 
 	// Handle ESC key to close
 	$effect(() => {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		function handleKeydown(event: KeyboardEvent) {
-			if (event.key === 'Escape' && open) {
+			if (event.key === "Escape" && open) {
 				open = false;
 				onOpenChange?.(false);
 			}
 		}
 
-		window.addEventListener('keydown', handleKeydown);
-		return () => window.removeEventListener('keydown', handleKeydown);
+		window.addEventListener("keydown", handleKeydown);
+		return () => window.removeEventListener("keydown", handleKeydown);
 	});
 
 	// Notify parent of open state changes
@@ -89,7 +89,7 @@
 		setActiveSnapPoint: (point: number | string | null) => {
 			activeSnapPoint = point;
 		},
-		isNested: true
+		isNested: true,
 	});
 </script>
 

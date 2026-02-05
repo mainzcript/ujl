@@ -1,4 +1,4 @@
-import type { UJLTOklch } from '@ujl-framework/types';
+import type { UJLTOklch } from "@ujl-framework/types";
 
 /**
  * Formats an OKLCH color object as a CSS OKLCH string.
@@ -18,7 +18,7 @@ import type { UJLTOklch } from '@ujl-framework/types';
  */
 export function formatOklch(oklch: UJLTOklch): string {
 	const lPercent = oklch.l * 100;
-	const lFormatted = Math.max(0, Math.min(100, lPercent)).toFixed(1) + '%';
+	const lFormatted = `${Math.max(0, Math.min(100, lPercent)).toFixed(1)}%`;
 	const cFormatted = Math.max(0, Math.min(100, oklch.c)).toFixed(3);
 	// Handle NaN for achromatic colors (black, white, gray) - they have no hue
 	const h = Number.isNaN(oklch.h) ? 0 : oklch.h;

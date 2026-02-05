@@ -14,13 +14,13 @@
 	which handles Shadow DOM creation and style injection.
 -->
 <script lang="ts">
-	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from '../ui/app/index.js';
-	import { Badge, UJLTheme } from '@ujl-framework/ui';
-	import { setContext } from 'svelte';
-	import { toast } from 'svelte-sonner';
-	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-	import { validateUJLCDocument, validateUJLTDocument } from '@ujl-framework/types';
-	import { Composer } from '@ujl-framework/core';
+	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from "../ui/app/index.js";
+	import { Badge, UJLTheme } from "@ujl-framework/ui";
+	import { setContext } from "svelte";
+	import { toast } from "svelte-sonner";
+	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
+	import { Composer } from "@ujl-framework/core";
 
 	import {
 		createCrafterStore,
@@ -29,21 +29,21 @@
 		type CrafterStoreDeps,
 		CRAFTER_CONTEXT,
 		COMPOSER_CONTEXT,
-		SHADOW_ROOT_CONTEXT
-	} from '$lib/stores/index.js';
+		SHADOW_ROOT_CONTEXT,
+	} from "$lib/stores/index.js";
 
-	import Header from './header/header.svelte';
-	import Editor from './sidebar/editor.svelte';
-	import Preview from './canvas/preview.svelte';
-	import PropertiesPanel from './panel/properties-panel.svelte';
-	import DesignerPanel from './panel/designer-panel.svelte';
-	import CrafterEffects from './crafter-effects.svelte';
+	import Header from "./header/header.svelte";
+	import Editor from "./sidebar/editor.svelte";
+	import Preview from "./canvas/preview.svelte";
+	import PropertiesPanel from "./panel/properties-panel.svelte";
+	import DesignerPanel from "./panel/designer-panel.svelte";
+	import CrafterEffects from "./crafter-effects.svelte";
 
-	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
-	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
+	import showcaseDocument from "@ujl-framework/examples/documents/showcase" with { type: "json" };
+	import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 
-	import { downloadJsonFile, readJsonFile } from '$lib/utils/files.js';
-	import { logger } from '$lib/utils/logger.js';
+	import { downloadJsonFile, readJsonFile } from "$lib/utils/files.js";
+	import { logger } from "$lib/utils/logger.js";
 
 	// ============================================
 	// PROPS
@@ -70,7 +70,7 @@
 		initialContent,
 		initialTheme,
 		editorTheme,
-		shadowRoot
+		shadowRoot,
 	}: Props = $props();
 
 	// ============================================
@@ -81,7 +81,7 @@
 		if (externalStore) {
 			return {
 				store: externalStore,
-				composer: externalComposer ?? new Composer()
+				composer: externalComposer ?? new Composer(),
 			};
 		} else {
 			// Capture initial props in a closure - we intentionally don't react to prop changes
@@ -90,9 +90,9 @@
 				const theme = initialTheme;
 				return {
 					validatedContent: validateUJLCDocument(
-						(content ?? showcaseDocument) as unknown as UJLCDocument
+						(content ?? showcaseDocument) as unknown as UJLCDocument,
 					),
-					validatedTheme: validateUJLTDocument((theme ?? defaultTheme) as unknown as UJLTDocument)
+					validatedTheme: validateUJLTDocument((theme ?? defaultTheme) as unknown as UJLTDocument),
 				};
 			})();
 
@@ -101,15 +101,15 @@
 			const imageServiceFactory = createImageServiceFactory({
 				showToasts: true,
 				onConnectionError: (error, url) => {
-					logger.error('Image backend connection error:', error, url);
-				}
+					logger.error("Image backend connection error:", error, url);
+				},
 			});
 
 			const storeDeps: CrafterStoreDeps = {
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				createImageService: imageServiceFactory
+				createImageService: imageServiceFactory,
 			};
 
 			const store = createCrafterStore(storeDeps);
@@ -124,7 +124,7 @@
 	setContext(SHADOW_ROOT_CONTEXT, {
 		get value() {
 			return shadowRoot;
-		}
+		},
 	});
 
 	// ============================================
@@ -167,34 +167,34 @@
 
 	// Window resize listener for screen size tracking
 	$effect(() => {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		const handleResize = () => {
 			store.setScreenSize(window.innerWidth, window.innerHeight);
 		};
 
 		handleResize();
-		window.addEventListener('resize', handleResize);
+		window.addEventListener("resize", handleResize);
 
 		return () => {
-			window.removeEventListener('resize', handleResize);
+			window.removeEventListener("resize", handleResize);
 		};
 	});
 
 	// ESC key handler to exit fullscreen
 	$effect(() => {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		const handleEscape = (event: KeyboardEvent) => {
-			if (event.key === 'Escape' && store.isFullscreen) {
+			if (event.key === "Escape" && store.isFullscreen) {
 				store.toggleFullscreen();
 			}
 		};
 
-		window.addEventListener('keydown', handleEscape);
+		window.addEventListener("keydown", handleEscape);
 
 		return () => {
-			window.removeEventListener('keydown', handleEscape);
+			window.removeEventListener("keydown", handleEscape);
 		};
 	});
 
@@ -206,7 +206,7 @@
 		(editorTheme
 			? validateUJLTDocument(editorTheme)
 			: validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
-		).ujlt.tokens
+		).ujlt.tokens,
 	);
 
 	// ============================================
@@ -214,27 +214,27 @@
 	// ============================================
 
 	function handleExportTheme() {
-		downloadJsonFile(store.ujltDocument, 'theme.ujlt.json');
+		downloadJsonFile(store.ujltDocument, "theme.ujlt.json");
 	}
 
 	function handleExportContent() {
-		downloadJsonFile(store.ujlcDocument, 'content.ujlc.json');
+		downloadJsonFile(store.ujlcDocument, "content.ujlc.json");
 	}
 
 	async function handleImportTheme(file: File) {
 		const data = await readJsonFile(file);
 		if (!data) {
-			toast.error('Failed to read or parse the theme file.');
+			toast.error("Failed to read or parse the theme file.");
 			return;
 		}
 		try {
 			const validatedDocument = validateUJLTDocument(data as unknown as UJLTDocument);
 			store.setUjltDocument(validatedDocument);
-			toast.success('Theme imported successfully.');
+			toast.success("Theme imported successfully.");
 		} catch (error) {
-			logger.error('Theme validation failed:', error);
-			toast.error('Invalid theme file', {
-				description: 'The imported theme file is invalid. Please check the file format.'
+			logger.error("Theme validation failed:", error);
+			toast.error("Invalid theme file", {
+				description: "The imported theme file is invalid. Please check the file format.",
 			});
 		}
 	}
@@ -242,17 +242,17 @@
 	async function handleImportContent(file: File) {
 		const data = await readJsonFile(file);
 		if (!data) {
-			toast.error('Failed to read or parse the content file.');
+			toast.error("Failed to read or parse the content file.");
 			return;
 		}
 		try {
 			const validatedDocument = validateUJLCDocument(data as unknown as UJLCDocument);
 			store.setUjlcDocument(validatedDocument);
-			toast.success('Content imported successfully.');
+			toast.success("Content imported successfully.");
 		} catch (error) {
-			logger.error('Content validation failed:', error);
-			toast.error('Invalid content file', {
-				description: 'The imported content file is invalid. Please check the file format.'
+			logger.error("Content validation failed:", error);
+			toast.error("Invalid content file", {
+				description: "The imported content file is invalid. Please check the file format.",
 			});
 		}
 	}
@@ -268,7 +268,7 @@
 	// ============================================
 
 	function handleModeChange(newMode: string | undefined) {
-		if (newMode === 'editor' || newMode === 'designer') {
+		if (newMode === "editor" || newMode === "designer") {
 			store.setMode(newMode);
 		}
 	}
@@ -284,7 +284,7 @@
 
 <UJLTheme
 	tokens={editorTokenSet}
-	class={store.isFullscreen ? 'fixed inset-0 isolate z-9999 h-full w-full' : 'h-full w-full'}
+	class={store.isFullscreen ? "fixed inset-0 isolate z-9999 h-full w-full" : "h-full w-full"}
 	data-crafter-instance={store.instanceId}
 	portalContainer={portalContainerRef}
 >
@@ -322,7 +322,7 @@
 			<div class="h-full">
 				<div
 					class="mx-auto min-w-[375px] duration-300"
-					style={store.viewportSize ? `width: ${store.viewportSize}px;` : 'width: 100%;'}
+					style={store.viewportSize ? `width: ${store.viewportSize}px;` : "width: 100%;"}
 				>
 					<Preview
 						ujlcDocument={store.ujlcDocument}
@@ -335,7 +335,7 @@
 		</AppCanvas>
 
 		<AppPanel>
-			{#if store.mode === 'editor'}
+			{#if store.mode === "editor"}
 				<PropertiesPanel />
 			{:else}
 				<DesignerPanel tokens={store.tokens} />

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTTypographyCode } from '@ujl-framework/types';
+	import { untrack } from "svelte";
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTTypographyCode } from "@ujl-framework/types";
 	import {
 		FontCombobox,
 		NumberSliderWithInput,
-		FontWeightSlider
-	} from '$lib/components/ui/index.js';
+		FontWeightSlider,
+	} from "$lib/components/ui/index.js";
 
 	let {
 		typography,
-		onChange
+		onChange,
 	}: {
 		typography: UJLTTypographyCode;
 		onChange?: (updates: Partial<UJLTTypographyCode>) => void;
@@ -64,7 +64,7 @@
 					bind:value={font}
 					onchange={(value) => {
 						font = value;
-						handleUpdate('font', value);
+						handleUpdate("font", value);
 					}}
 				/>
 				<NumberSliderWithInput
@@ -77,7 +77,7 @@
 					min={0}
 					sliderMin={0.5}
 					sliderMax={2}
-					onchange={() => handleUpdate('size', size)}
+					onchange={() => handleUpdate("size", size)}
 				/>
 				<NumberSliderWithInput
 					id="code-line-height"
@@ -89,7 +89,7 @@
 					min={0}
 					sliderMin={0.8}
 					sliderMax={2.5}
-					onchange={() => handleUpdate('lineHeight', lineHeight)}
+					onchange={() => handleUpdate("lineHeight", lineHeight)}
 				/>
 				<NumberSliderWithInput
 					id="code-letter-spacing"
@@ -100,13 +100,13 @@
 					step={0.01}
 					sliderMin={-0.1}
 					sliderMax={0.1}
-					onchange={() => handleUpdate('letterSpacing', letterSpacing)}
+					onchange={() => handleUpdate("letterSpacing", letterSpacing)}
 				/>
 				<FontWeightSlider
 					id="code-weight"
 					label="Weight"
 					bind:value={weight}
-					onchange={() => handleUpdate('weight', weight)}
+					onchange={() => handleUpdate("weight", weight)}
 				/>
 			</div>
 		</CollapsibleContent>

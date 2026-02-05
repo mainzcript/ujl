@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 	import {
 		InputGroup,
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupButton,
-		InputGroupText
-	} from '$lib/components/ui/input-group/index.js';
-	import SwatchBookIcon from '@lucide/svelte/icons/swatch-book';
+		InputGroupText,
+	} from "$lib/components/ui/input-group/index.js";
+	import SwatchBookIcon from "@lucide/svelte/icons/swatch-book";
 
 	interface ColorPickerProps extends WithElementRef<HTMLAttributes<HTMLDivElement>> {
 		value?: string;
@@ -21,7 +21,7 @@
 
 	let {
 		ref = $bindable(null),
-		value = $bindable('#000000'),
+		value = $bindable("#000000"),
 		onChange,
 		disabled = false,
 		id,
@@ -40,10 +40,10 @@
 	 * separation of concerns: $state manages the local editable value, $effect syncs from external changes.
 	 */
 	// eslint-disable-next-line svelte/prefer-writable-derived
-	let textValue = $state(value.replace(/^#/, ''));
+	let textValue = $state(value.replace(/^#/, ""));
 
 	$effect(() => {
-		textValue = value.replace(/^#/, '');
+		textValue = value.replace(/^#/, "");
 	});
 
 	/**
@@ -54,7 +54,7 @@
 	 * @returns "#000000" for light backgrounds, "#ffffff" for dark backgrounds
 	 */
 	function getContrastColor(hexColor: string): string {
-		const hex = hexColor.replace('#', '');
+		const hex = hexColor.replace("#", "");
 
 		const r = parseInt(hex.substring(0, 2), 16);
 		const g = parseInt(hex.substring(2, 4), 16);
@@ -68,7 +68,7 @@
 		const luminance =
 			0.2126 * getLuminance(r) + 0.7152 * getLuminance(g) + 0.0722 * getLuminance(b);
 
-		return luminance > 0.5 ? '#000000' : '#ffffff';
+		return luminance > 0.5 ? "#000000" : "#ffffff";
 	}
 
 	let iconColor = $derived(getContrastColor(value));
@@ -85,7 +85,7 @@
 		if (!hex) return null;
 
 		// Add # prefix if missing
-		if (!hex.startsWith('#')) hex = `#${hex}`;
+		if (!hex.startsWith("#")) hex = `#${hex}`;
 
 		// Validate hex format (#rgb or #rrggbb)
 		const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex);
@@ -93,7 +93,7 @@
 
 		// Expand 3-digit hex to 6-digit format
 		if (match[1].length === 3) {
-			const [r, g, b] = match[1].split('');
+			const [r, g, b] = match[1].split("");
 			hex = `#${r}${r}${g}${g}${b}${b}`;
 		}
 
@@ -157,7 +157,7 @@
 	}
 </script>
 
-<InputGroup {ref} class={cn('w-full', className)} {...restProps as HTMLAttributes<HTMLDivElement>}>
+<InputGroup {ref} class={cn("w-full", className)} {...restProps as HTMLAttributes<HTMLDivElement>}>
 	<!-- Hidden native color input used only to open the browser color picker -->
 	<input
 		bind:this={colorInputRef}

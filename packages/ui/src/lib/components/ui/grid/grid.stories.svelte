@@ -1,38 +1,38 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Grid, GridItem } from './index.ts';
-	import { Card, CardHeader, CardTitle, CardContent } from '../card/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Grid, GridItem } from "./index.ts";
+	import { Card, CardHeader, CardTitle, CardContent } from "../card/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/Grid',
+		title: "Components/Layout/Grid",
 		component: Grid,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			as: {
-				control: { type: 'select' },
-				options: ['div', 'section', 'article', 'main'],
-				description: 'The HTML element to render',
+				control: { type: "select" },
+				options: ["div", "section", "article", "main"],
+				description: "The HTML element to render",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'div' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "div" },
+				},
 			},
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			as: 'div'
-		}
+			as: "div",
+		},
 	});
 </script>
 
 <!-- Default -->
-<Story name="Default" args={{ as: 'div' }}>
+<Story name="Default" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-12 rounded bg-muted p-4 text-center">Full Width (12 cols)</GridItem>
@@ -41,7 +41,7 @@
 </Story>
 
 <!-- Two Columns -->
-<Story name="Two Columns" args={{ as: 'div' }}>
+<Story name="Two Columns" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-6 rounded bg-muted p-4 text-center">6 cols</GridItem>
@@ -51,7 +51,7 @@
 </Story>
 
 <!-- Three Columns -->
-<Story name="Three Columns" args={{ as: 'div' }}>
+<Story name="Three Columns" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-4 rounded bg-muted p-4 text-center">4 cols</GridItem>
@@ -62,7 +62,7 @@
 </Story>
 
 <!-- Four Columns -->
-<Story name="Four Columns" args={{ as: 'div' }}>
+<Story name="Four Columns" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-3 rounded bg-muted p-4 text-center">3 cols</GridItem>
@@ -74,7 +74,7 @@
 </Story>
 
 <!-- Asymmetric Layout -->
-<Story name="Asymmetric Layout" args={{ as: 'div' }}>
+<Story name="Asymmetric Layout" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-8 rounded bg-muted p-4 text-center">Main Content (8 cols)</GridItem>
@@ -84,7 +84,7 @@
 </Story>
 
 <!-- Complex Layout -->
-<Story name="Complex Layout" args={{ as: 'div' }}>
+<Story name="Complex Layout" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-12 rounded bg-primary/20 p-4 text-center">Header (12 cols)</GridItem
@@ -98,7 +98,7 @@
 </Story>
 
 <!-- With Cards -->
-<Story name="With Cards" args={{ as: 'div' }}>
+<Story name="With Cards" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-4">
@@ -130,7 +130,7 @@
 </Story>
 
 <!-- Responsive Pattern -->
-<Story name="Responsive Pattern" args={{ as: 'div' }}>
+<Story name="Responsive Pattern" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem
@@ -168,7 +168,7 @@
 </Story>
 
 <!-- Nested Grids -->
-<Story name="Nested Grids" args={{ as: 'div' }}>
+<Story name="Nested Grids" args={{ as: "div" }}>
 	{#snippet template(args)}
 		<Grid as={args.as} class="w-full">
 			<GridItem class="col-span-6 rounded border p-4">

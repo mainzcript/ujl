@@ -1,39 +1,39 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Switch } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Switch } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Switch',
+		title: "Components/Base/Switch",
 		component: Switch,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			checked: {
-				control: 'boolean',
-				description: 'Whether the switch is checked',
+				control: "boolean",
+				description: "Whether the switch is checked",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the switch is disabled',
+				control: "boolean",
+				description: "Whether the switch is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			required: {
-				control: 'boolean',
-				description: 'Whether the switch is required',
-				table: { category: 'Validation' }
-			}
+				control: "boolean",
+				description: "Whether the switch is required",
+				table: { category: "Validation" },
+			},
 		},
 		args: {
 			checked: false,
-			disabled: false
-		}
+			disabled: false,
+		},
 	});
 </script>
 

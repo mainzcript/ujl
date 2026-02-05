@@ -4,11 +4,11 @@
  * Tests for clicking and interacting with modules in the preview canvas.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Preview Interaction', () => {
-	test('should render content in preview', async ({ page }) => {
+test.describe("Preview Interaction", () => {
+	test("should render content in preview", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -17,7 +17,7 @@ test.describe('Preview Interaction', () => {
 		expect(moduleIds.length).toBeGreaterThan(0);
 	});
 
-	test('should select node when clicking in preview', async ({ page }) => {
+	test("should select node when clicking in preview", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -35,7 +35,7 @@ test.describe('Preview Interaction', () => {
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 	});
 
-	test('should add ujl-selected class to selected module', async ({ page }) => {
+	test("should add ujl-selected class to selected module", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -52,12 +52,12 @@ test.describe('Preview Interaction', () => {
 		await expect(selectedModule).toBeVisible();
 	});
 
-	test('should show properties panel when module selected', async ({ page }) => {
+	test("should show properties panel when module selected", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Initially "No module selected"
-		await expect(crafter.panel.getByText('No module selected')).toBeVisible();
+		await expect(crafter.panel.getByText("No module selected")).toBeVisible();
 
 		// Click on a selectable module
 		const moduleId = await crafter.getFirstSelectableModuleId();
@@ -65,11 +65,11 @@ test.describe('Preview Interaction', () => {
 		await crafter.selectModuleInPreview(moduleId!);
 
 		// Properties panel should show module info
-		await expect(crafter.panel.getByText('No module selected')).not.toBeVisible({ timeout: 2000 });
+		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible({ timeout: 2000 });
 	});
 
-	test('should expand parent nodes in tree when selecting nested module in preview', async ({
-		page
+	test("should expand parent nodes in tree when selecting nested module in preview", async ({
+		page,
 	}) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
@@ -77,7 +77,7 @@ test.describe('Preview Interaction', () => {
 		// Find a container node with children (has a chevron)
 		// Exclude __root__ which is a virtual node
 		const nodesWithChevron = crafter.crafterElement.locator(
-			'[data-tree-node-id]:not([data-tree-node-id^="__"]):has([data-crafter="tree-chevron"])'
+			'[data-tree-node-id]:not([data-tree-node-id^="__"]):has([data-crafter="tree-chevron"])',
 		);
 		const containerCount = await nodesWithChevron.count();
 		expect(containerCount).toBeGreaterThan(0);
@@ -87,20 +87,20 @@ test.describe('Preview Interaction', () => {
 		const chevron = containerNode.locator('[data-crafter="tree-chevron"]');
 
 		// Get container ID directly from the element
-		const containerId = await containerNode.getAttribute('data-tree-node-id');
+		const containerId = await containerNode.getAttribute("data-tree-node-id");
 		expect(containerId).not.toBeNull();
 
 		// Collapse the container first (click chevron if it's expanded)
-		const collapsibleTrigger = containerNode.locator('[data-state]').first();
-		const initialState = await collapsibleTrigger.getAttribute('data-state');
+		const collapsibleTrigger = containerNode.locator("[data-state]").first();
+		const initialState = await collapsibleTrigger.getAttribute("data-state");
 
-		if (initialState === 'open') {
+		if (initialState === "open") {
 			await chevron.click();
 			await crafter.waitForAnimation();
 		}
 
 		// Verify container is collapsed
-		await expect(collapsibleTrigger).toHaveAttribute('data-state', 'closed');
+		await expect(collapsibleTrigger).toHaveAttribute("data-state", "closed");
 
 		// Get all module IDs in the preview
 		const allPreviewModuleIds = await crafter.getPreviewModuleIds();
@@ -109,12 +109,12 @@ test.describe('Preview Interaction', () => {
 		// The container's first child in preview should be directly after it in the hierarchy
 		// We need a module that is NOT a top-level container
 		const topLevelContainerIds = await nodesWithChevron.evaluateAll((elements) =>
-			elements.map((el) => el.getAttribute('data-tree-node-id'))
+			elements.map((el) => el.getAttribute("data-tree-node-id")),
 		);
 
 		// Find a module that is not a top-level container (so it must be a child)
 		const childId = allPreviewModuleIds.find(
-			(id) => id !== containerId && !topLevelContainerIds.includes(id)
+			(id) => id !== containerId && !topLevelContainerIds.includes(id),
 		);
 		expect(childId).toBeDefined();
 
@@ -129,12 +129,12 @@ test.describe('Preview Interaction', () => {
 		await expect(childTreeNode).toBeVisible();
 	});
 
-	test('should prevent link navigation in editor mode', async ({ page }) => {
+	test("should prevent link navigation in editor mode", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Find a link in the preview (if any)
-		const links = page.locator('[data-ujl-module-id] a');
+		const links = page.locator("[data-ujl-module-id] a");
 		const linkCount = await links.count();
 
 		if (linkCount > 0) {
@@ -151,7 +151,7 @@ test.describe('Preview Interaction', () => {
 		}
 	});
 
-	test('should sync selection between tree and preview', async ({ page }) => {
+	test("should sync selection between tree and preview", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -167,14 +167,14 @@ test.describe('Preview Interaction', () => {
 		await expect(selectedModule).toBeVisible();
 
 		// The corresponding tree node for the selected module should exist
-		const selectedId = await selectedModule.getAttribute('data-ujl-module-id');
+		const selectedId = await selectedModule.getAttribute("data-ujl-module-id");
 		expect(selectedId).not.toBeNull();
 
 		const treeNode = crafter.getTreeNode(selectedId!);
 		await expect(treeNode).toBeVisible();
 	});
 
-	test('should clear selection when clicking empty area', async ({ page }) => {
+	test("should clear selection when clicking empty area", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -191,7 +191,7 @@ test.describe('Preview Interaction', () => {
 		await expect(crafter.getSelectedPreviewModule()).not.toBeVisible({ timeout: 2000 });
 	});
 
-	test('should show hover effects on preview modules', async ({ page }) => {
+	test("should show hover effects on preview modules", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -205,11 +205,11 @@ test.describe('Preview Interaction', () => {
 
 		// The module should have hover styling (outline or background)
 		// This is CSS-based, so we check for the ujl-editor-mode class on container
-		const previewContainer = crafter.crafterElement.locator('.ujl-editor-mode');
+		const previewContainer = crafter.crafterElement.locator(".ujl-editor-mode");
 		await expect(previewContainer).toBeVisible();
 	});
 
-	test('should scroll tree node into view when selected in preview', async ({ page }) => {
+	test("should scroll tree node into view when selected in preview", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 

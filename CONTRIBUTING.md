@@ -2,7 +2,12 @@
 
 ## Getting Started
 
-### Development Setup
+This repository is a **pnpm monorepo**. For the full setup guide (including the Crafter + dev-demo
+and Library service), see:
+
+- [Getting Started](./apps/docs/src/docs/01-getting-started.md)
+
+### Development Setup (Quick)
 
 ```bash
 # Clone the repository
@@ -12,21 +17,37 @@ cd ujl
 # Install dependencies
 pnpm install
 
-# Start development
-pnpm ui:dev          # Start UI package development
-pnpm ui:storybook    # Start Storybook for UI components
+# Build all packages (recommended before running apps)
+pnpm run build
 ```
+
+### Run Common Targets
+
+```bash
+# Crafter (visual editor)
+pnpm --filter @ujl-framework/crafter dev
+
+# Dev demo (integration example)
+pnpm --filter @ujl-framework/dev-demo dev
+```
+
+### Tooling Notes
+
+- ESLint and Prettier are configured centrally at the repo root.
+- Run linting/formatting from the repository root for consistent results.
 
 ## Development Workflow
 
 ### Branch Strategy
 
-We follow the **Gitflow** branching strategy:
+We follow a **GitFlow-lean** branching strategy:
 
 - **`main`**: Production-ready releases only
 - **`develop`**: Active development branch (default)
 - **`feat/*`**: Feature branches from `develop`
 - **`fix/*`**: Bug fix branches from `develop`
+- **`release/*`**: Release preparation from `develop`
+- **`hotfix/*`**: Urgent fixes from `main`
 
 Further **rules** for branch names:
 
@@ -91,29 +112,33 @@ pnpm changeset
 # Update versions and changelogs (version bump)
 pnpm version-packages
 
-# Publish packages (DO NOT PUBLISH YET)
+# Publish packages (manual, from main)
 pnpm release
 ```
 
 **Current Process:**
 
-1. Changesets are created on feature branches and merged to `develop`
-2. **Version bump** happens on `develop` branch with `pnpm version-packages`
-3. **No publishing yet** - packages could be published manually to npm registry in the future using `pnpm release`
-4. After version bump, merge `develop` → `main` (formality)
+1. Changesets are created on `feature/*`/`fix/*` branches and merged to `develop`
+2. Create a release branch from `develop` (e.g., `release/0.0.1`)
+3. Run `pnpm version-packages` on the release branch (generates version bumps + `CHANGELOG.md`)
+4. Merge `release/*` → `main`
+5. Tag `main` (e.g., `v0.0.1`)
+6. Publish from `main` using `pnpm release`
+7. Merge `main` back into `develop`
 
-> **Note:** Currently, we only manage version numbers. No actual publishing to npm registry is configured yet.
+> **Note:** The first public release `0.0.1` uses a single consolidated Changeset that summarizes the current state of the framework.
 
 ### Package Linking
 
-The following packages are linked and versioned together:
+The following packages are versioned together (fixed):
 
 - `@ujl-framework/core`
 - `@ujl-framework/crafter`
 - `@ujl-framework/ui`
 - `@ujl-framework/adapter-svelte`
+- `@ujl-framework/adapter-web`
 - `@ujl-framework/examples`
-- `@ujl-framework/docs`
+- `@ujl-framework/types`
 
 ## Development Guidelines
 

@@ -11,9 +11,9 @@ const documentsDir = join(__dirname, "documents");
 const themesDir = join(__dirname, "themes");
 
 describe("Example Documents", () => {
-	const documentFiles = readdirSync(documentsDir).filter(file => file.endsWith(".ujlc.json"));
+	const documentFiles = readdirSync(documentsDir).filter((file) => file.endsWith(".ujlc.json"));
 
-	documentFiles.forEach(filename => {
+	documentFiles.forEach((filename) => {
 		it(`should validate ${filename}`, () => {
 			const filePath = join(documentsDir, filename);
 			const fileContent = readFileSync(filePath, "utf-8");
@@ -29,9 +29,9 @@ describe("Example Documents", () => {
 });
 
 describe("Example Themes", () => {
-	const themeFiles = readdirSync(themesDir).filter(file => file.endsWith(".ujlt.json"));
+	const themeFiles = readdirSync(themesDir).filter((file) => file.endsWith(".ujlt.json"));
 
-	themeFiles.forEach(filename => {
+	themeFiles.forEach((filename) => {
 		it(`should validate ${filename}`, () => {
 			const filePath = join(themesDir, filename);
 			const fileContent = readFileSync(filePath, "utf-8");

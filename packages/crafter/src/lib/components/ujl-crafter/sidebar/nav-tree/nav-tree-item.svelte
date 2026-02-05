@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import MoreVerticalIcon from '@lucide/svelte/icons/more-vertical';
+	import type { UJLCModuleObject } from "@ujl-framework/types";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import MoreVerticalIcon from "@lucide/svelte/icons/more-vertical";
 	import {
 		Collapsible,
 		CollapsibleTrigger,
@@ -9,18 +9,18 @@
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuTrigger,
-		Button
-	} from '@ujl-framework/ui';
+		Button,
+	} from "@ujl-framework/ui";
 	import {
 		SidebarMenuItem,
 		SidebarMenuButton,
 		SidebarMenuSub,
 		SidebarMenuSubItem,
-		SidebarMenuSubButton
-	} from '$lib/components/ui/sidebar-menu/index.js';
-	import EditorToolbar from '../editor-toolbar.svelte';
-	import NavTreeSlotGroup from './nav-tree-slot-group.svelte';
-	import NavTreeItem from './nav-tree-item.svelte';
+		SidebarMenuSubButton,
+	} from "$lib/components/ui/sidebar-menu/index.js";
+	import EditorToolbar from "../editor-toolbar.svelte";
+	import NavTreeSlotGroup from "./nav-tree-slot-group.svelte";
+	import NavTreeItem from "./nav-tree-item.svelte";
 	import {
 		getDisplayName,
 		getChildren,
@@ -28,11 +28,11 @@
 		hasMultipleSlots,
 		getAllSlotEntries,
 		canAcceptDrop,
-		canNodeAcceptPaste
-	} from '$lib/utils/ujlc-tree.js';
-	import { getContext } from 'svelte';
-	import { cn } from '@ujl-framework/ui/utils';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
+		canNodeAcceptPaste,
+	} from "$lib/utils/ujlc-tree.js";
+	import { getContext } from "svelte";
+	import { cn } from "@ujl-framework/ui/utils";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 
 	let {
 		node,
@@ -63,7 +63,7 @@
 		onSlotCopy,
 		onSlotCut,
 		onSlotPaste,
-		onSlotDragOver
+		onSlotDragOver,
 	}: {
 		node: UJLCModuleObject;
 		level?: number;
@@ -71,15 +71,15 @@
 		selectedNodeId: string | null;
 		clipboard:
 			| UJLCModuleObject
-			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+			| { type: "slot"; slotName: string; content: UJLCModuleObject[] }
 			| null;
 		draggedNodeId: string | null;
 		draggedSlotName: string | null;
 		draggedSlotParentId: string | null;
-		dragType: 'node' | 'slot' | null;
+		dragType: "node" | "slot" | null;
 		dropTargetId: string | null;
 		dropTargetSlot: string | null;
-		dropPosition: 'before' | 'after' | 'into' | null;
+		dropPosition: "before" | "after" | "into" | null;
 		onNodeClick: (nodeId: string) => void;
 		onCopy: (nodeId: string) => void;
 		onCut: (nodeId: string) => void;
@@ -101,12 +101,12 @@
 
 	let dropdownOpen = $state(false);
 
-	const isDragging = $derived(dragType === 'node' && draggedNodeId === node.meta.id);
+	const isDragging = $derived(dragType === "node" && draggedNodeId === node.meta.id);
 	const isDropTarget = $derived(dropTargetId === node.meta.id && !dropTargetSlot);
 	const isSelected = $derived(selectedNodeId === node.meta.id);
-	const showDropBefore = $derived(isDropTarget && dropPosition === 'before');
-	const showDropAfter = $derived(isDropTarget && dropPosition === 'after');
-	const showDropInto = $derived(isDropTarget && dropPosition === 'into' && canAcceptDrop(node));
+	const showDropBefore = $derived(isDropTarget && dropPosition === "before");
+	const showDropAfter = $derived(isDropTarget && dropPosition === "after");
+	const showDropInto = $derived(isDropTarget && dropPosition === "into" && canAcceptDrop(node));
 	const hasMultiple = $derived(hasMultipleSlots(node));
 	const canPaste = $derived(canNodeAcceptPaste(node, clipboard));
 	// Allow add for all nodes (adds after the node, consistent with paste behavior)
@@ -130,7 +130,7 @@
 	}
 
 	// Root node display name
-	const displayName = $derived(isRootNode ? 'Document' : getDisplayName(node));
+	const displayName = $derived(isRootNode ? "Document" : getDisplayName(node));
 
 	// Root node cannot be copied, cut, or deleted
 	const canCopyRoot = $derived(!isRootNode);
@@ -256,11 +256,11 @@
 									tabindex="0"
 									data-tree-node-id={node.meta.id}
 									class={cn(
-										'group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-										isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
-										isDragging && 'opacity-50',
+										"group/node-root flex h-full w-full items-center justify-between gap-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+										isSelected && "bg-foreground/5 text-flavor-foreground-accent",
+										isDragging && "opacity-50",
 										showDropInto &&
-											'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+											"bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed",
 									)}
 									draggable={!isRootNode}
 									ondragstart={isRootNode ? undefined : (e) => onDragStart(e, node.meta.id)}
@@ -340,25 +340,25 @@
 						tabindex="0"
 						data-tree-node-id={node.meta.id}
 						class={cn(
-							'group/root flex h-full w-full items-center justify-between rounded-md',
+							"group/root flex h-full w-full items-center justify-between rounded-md",
 							props?.class as string,
-							isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
-							isDragging && 'opacity-50',
+							isSelected && "bg-foreground/5 text-flavor-foreground-accent",
+							isDragging && "opacity-50",
 							showDropInto &&
-								'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+								"bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed",
 						)}
 						onclick={(e) => {
 							// Only trigger selection if click is not on dropdown button
 							if (
 								e.target instanceof HTMLElement &&
-								!e.target.closest('button[data-radix-collection-item]') &&
+								!e.target.closest("button[data-radix-collection-item]") &&
 								!e.target.closest('[role="menuitem"]')
 							) {
 								onNodeClick(node.meta.id);
 							}
 						}}
 						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
+							if (e.key === "Enter" || e.key === " ") {
 								e.preventDefault();
 								onNodeClick(node.meta.id);
 							}
@@ -420,11 +420,11 @@
 								tabindex="0"
 								data-tree-node-id={node.meta.id}
 								class={cn(
-									'group/dropdown flex h-full w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-									isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
-									isDragging && 'opacity-50',
+									"group/dropdown flex h-full w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+									isSelected && "bg-foreground/5 text-flavor-foreground-accent",
+									isDragging && "opacity-50",
 									showDropInto &&
-										'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed'
+										"bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed",
 								)}
 								draggable="true"
 								ondragstart={(e) => onDragStart(e, node.meta.id)}
@@ -502,11 +502,11 @@
 				tabindex="0"
 				data-tree-node-id={node.meta.id}
 				class={cn(
-					'group/node flex h-full w-full items-center justify-between rounded-md ps-2',
+					"group/node flex h-full w-full items-center justify-between rounded-md ps-2",
 					showDropInto &&
-						'bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed',
-					isSelected && 'bg-foreground/5 text-flavor-foreground-accent',
-					isDragging && 'opacity-50'
+						"bg-accent/20 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed",
+					isSelected && "bg-foreground/5 text-flavor-foreground-accent",
+					isDragging && "opacity-50",
 				)}
 				draggable="true"
 				ondragstart={(e) => onDragStart(e, node.meta.id)}
@@ -518,14 +518,14 @@
 					// Only trigger selection if click is not on dropdown button
 					if (
 						e.target instanceof HTMLElement &&
-						!e.target.closest('button[data-radix-collection-item]') &&
+						!e.target.closest("button[data-radix-collection-item]") &&
 						!e.target.closest('[role="menuitem"]')
 					) {
 						onNodeClick(node.meta.id);
 					}
 				}}
 				onkeydown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
+					if (e.key === "Enter" || e.key === " ") {
 						e.preventDefault();
 						onNodeClick(node.meta.id);
 					}

@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		ContextMenu,
 		ContextMenuTrigger,
@@ -13,17 +13,17 @@
 		ContextMenuRadioGroup,
 		ContextMenuRadioItem,
 		ContextMenuLabel,
-		ContextMenuShortcut
-	} from './index.ts';
+		ContextMenuShortcut,
+	} from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Complex/ContextMenu',
+		title: "Components/Complex/ContextMenu",
 		component: ContextMenu,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {},
 		args: {
-			open: false
-		}
+			open: false,
+		},
 	});
 </script>
 

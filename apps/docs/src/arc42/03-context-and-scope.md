@@ -257,8 +257,8 @@ const crafter = new UJLCrafter({
 });
 
 // Event-Handling
-crafter.onDocumentChange(doc => console.log("Changed:", doc));
-crafter.onThemeChange(theme => console.log("Theme:", theme));
+crafter.onDocumentChange((doc) => console.log("Changed:", doc));
+crafter.onThemeChange((theme) => console.log("Theme:", theme));
 
 // Cleanup
 crafter.destroy();
@@ -280,13 +280,13 @@ pnpm add @ujl-framework/adapter-svelte @ujl-framework/core svelte
 
 ```svelte
 <script lang="ts">
-  import { Composer } from '@ujl-framework/core';
-  import { AdapterRoot } from '@ujl-framework/adapter-svelte';
-  import '@ujl-framework/adapter-svelte/styles';
+	import { Composer } from "@ujl-framework/core";
+	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
+	import "@ujl-framework/adapter-svelte/styles";
 
-  const composer = new Composer();
-  const ast = $derived.by(async () => await composer.compose(ujlcDocument));
-  const tokenSet = $derived(ujltDocument.ujlt.tokens);
+	const composer = new Composer();
+	const ast = $derived.by(async () => await composer.compose(ujlcDocument));
+	const tokenSet = $derived(ujltDocument.ujlt.tokens);
 </script>
 
 <AdapterRoot node={ast} {tokenSet} mode="system" />

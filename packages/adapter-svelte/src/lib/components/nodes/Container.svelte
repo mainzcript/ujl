@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/types';
-	import { Container } from '@ujl-framework/ui';
-	import ASTNode from '../ASTNode.svelte';
+	import type { UJLAbstractNode } from "@ujl-framework/types";
+	import { Container } from "@ujl-framework/ui";
+	import ASTNode from "../ASTNode.svelte";
 
 	interface Props {
-		node: UJLAbstractNode & { type: 'container' };
+		node: UJLAbstractNode & { type: "container" };
 		showMetadata?: boolean;
 	}
 

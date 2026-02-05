@@ -9,13 +9,13 @@
  */
 
 /* External dependencies */
-@import '@ujl-framework/ui/styles';
-@import '@ujl-framework/adapter-svelte/bundle.css';
+@import "@ujl-framework/ui/styles";
+@import "@ujl-framework/adapter-svelte/bundle.css";
 
 /* Tailwind source scanning */
-@source '../components/**/*.{svelte,js,ts}';
+@source "../components/**/*.{svelte,js,ts}";
 
 /* Internal styles */
-@import './base/tailwind-shadow.css';
-@import './global/editor-mode.css';
-@import './components.css';
+@import "./base/tailwind-shadow.css";
+@import "./global/editor-mode.css";
+@import "./components.css";

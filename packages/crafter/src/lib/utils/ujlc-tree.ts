@@ -12,8 +12,8 @@
  * - Node display formatting
  */
 
-import type { UJLCModuleObject } from '@ujl-framework/types';
-import { generateUid } from '@ujl-framework/core';
+import { generateUid } from "@ujl-framework/core";
+import type { UJLCModuleObject } from "@ujl-framework/types";
 
 // ============================================
 // Constants
@@ -22,12 +22,12 @@ import { generateUid } from '@ujl-framework/core';
 /**
  * Constant ID for the virtual root node
  */
-export const ROOT_NODE_ID = '__root__';
+export const ROOT_NODE_ID = "__root__";
 
 /**
  * Constant name for the root slot
  */
-export const ROOT_SLOT_NAME = 'root';
+export const ROOT_SLOT_NAME = "root";
 
 /**
  * Default length for generated node IDs.
@@ -95,7 +95,7 @@ export function findParentOfNode(
 	nodes: UJLCModuleObject[],
 	targetId: string,
 	parent: UJLCModuleObject | null = null,
-	slotName: string = ROOT_SLOT_NAME
+	slotName: string = ROOT_SLOT_NAME,
 ): { parent: UJLCModuleObject | null; slotName: string; index: number } | null {
 	for (let i = 0; i < nodes.length; i++) {
 		const node = nodes[i];
@@ -105,13 +105,13 @@ export function findParentOfNode(
 				return {
 					parent: createVirtualRootNode(nodes),
 					slotName: ROOT_SLOT_NAME,
-					index: i
+					index: i,
 				};
 			}
 			return {
 				parent,
 				slotName,
-				index: i
+				index: i,
 			};
 		}
 
@@ -166,7 +166,7 @@ export function isDescendant(node: UJLCModuleObject, targetId: string): boolean 
 export function findPathToNode(
 	nodes: UJLCModuleObject[],
 	targetId: string,
-	currentPath: string[] = []
+	currentPath: string[] = [],
 ): string[] | null {
 	for (const node of nodes) {
 		// Check if this is the target node
@@ -213,16 +213,16 @@ export function isRootNode(nodeId: string): boolean {
  */
 export function createVirtualRootNode(nodes: UJLCModuleObject[]): UJLCModuleObject {
 	return {
-		type: 'document',
+		type: "document",
 		meta: {
 			id: ROOT_NODE_ID,
 			updated_at: new Date().toISOString(),
-			_embedding: []
+			_embedding: [],
 		},
 		fields: {},
 		slots: {
-			[ROOT_SLOT_NAME]: nodes
-		}
+			[ROOT_SLOT_NAME]: nodes,
+		},
 	};
 }
 
@@ -240,7 +240,7 @@ export function createVirtualRootNode(nodes: UJLCModuleObject[]): UJLCModuleObje
  */
 export function removeNodeFromTree(
 	nodes: UJLCModuleObject[],
-	targetId: string
+	targetId: string,
 ): UJLCModuleObject[] {
 	return nodes
 		.filter((node) => node.meta.id !== targetId)
@@ -254,7 +254,7 @@ export function removeNodeFromTree(
 
 				return {
 					...node,
-					slots: newSlots
+					slots: newSlots,
 				};
 			}
 
@@ -276,7 +276,7 @@ export function insertNodeIntoSlot(
 	nodes: UJLCModuleObject[],
 	parentId: string,
 	slotName: string,
-	nodeToInsert: UJLCModuleObject
+	nodeToInsert: UJLCModuleObject,
 ): UJLCModuleObject[] {
 	return nodes.map((node) => {
 		if (node.meta.id === parentId) {
@@ -290,7 +290,7 @@ export function insertNodeIntoSlot(
 
 			return {
 				...node,
-				slots: newSlots
+				slots: newSlots,
 			};
 		}
 
@@ -302,13 +302,13 @@ export function insertNodeIntoSlot(
 					slotContent,
 					parentId,
 					slotName,
-					nodeToInsert
+					nodeToInsert,
 				);
 			}
 
 			return {
 				...node,
-				slots: newSlots
+				slots: newSlots,
 			};
 		}
 
@@ -332,7 +332,7 @@ export function insertNodeAtPosition(
 	parentId: string,
 	slotName: string,
 	nodeToInsert: UJLCModuleObject,
-	position: number
+	position: number,
 ): UJLCModuleObject[] {
 	return nodes.map((node) => {
 		if (node.meta.id === parentId) {
@@ -348,7 +348,7 @@ export function insertNodeAtPosition(
 
 			return {
 				...node,
-				slots: newSlots
+				slots: newSlots,
 			};
 		}
 
@@ -361,13 +361,13 @@ export function insertNodeAtPosition(
 					parentId,
 					slotName,
 					nodeToInsert,
-					position
+					position,
 				);
 			}
 
 			return {
 				...node,
-				slots: newSlots
+				slots: newSlots,
 			};
 		}
 
@@ -386,7 +386,7 @@ export function insertNodeAtPosition(
 export function updateNodeInTree(
 	nodes: UJLCModuleObject[],
 	targetId: string,
-	updateFn: (node: UJLCModuleObject) => UJLCModuleObject
+	updateFn: (node: UJLCModuleObject) => UJLCModuleObject,
 ): UJLCModuleObject[] {
 	return nodes.map((node) => {
 		if (node.meta.id === targetId) {
@@ -424,10 +424,10 @@ export function deepCloneModule(node: UJLCModuleObject): UJLCModuleObject {
 	const clonedNode: UJLCModuleObject = {
 		...node,
 		meta: {
-			...node.meta
+			...node.meta,
 		},
 		fields: { ...node.fields },
-		slots: {}
+		slots: {},
 	};
 
 	if (node.slots) {
@@ -459,10 +459,10 @@ export function deepCloneModuleWithNewIds(node: UJLCModuleObject): UJLCModuleObj
 		...node,
 		meta: {
 			...node.meta,
-			id: generateUid(DEFAULT_NODE_ID_LENGTH)
+			id: generateUid(DEFAULT_NODE_ID_LENGTH),
 		},
 		fields: { ...node.fields },
-		slots: {}
+		slots: {},
 	};
 
 	if (node.slots) {
@@ -583,20 +583,20 @@ export function canAcceptDrop(targetNode: UJLCModuleObject): boolean {
  */
 function extractTextFromProseMirror(doc: unknown): string {
 	if (
-		typeof doc === 'object' &&
+		typeof doc === "object" &&
 		doc !== null &&
-		'type' in doc &&
-		doc.type === 'doc' &&
-		'content' in doc &&
+		"type" in doc &&
+		doc.type === "doc" &&
+		"content" in doc &&
 		Array.isArray(doc.content)
 	) {
 		const textParts: string[] = [];
 		const extractText = (node: unknown): void => {
-			if (typeof node === 'object' && node !== null) {
-				if ('text' in node && typeof node.text === 'string') {
+			if (typeof node === "object" && node !== null) {
+				if ("text" in node && typeof node.text === "string") {
 					textParts.push(node.text);
 				}
-				if ('content' in node && Array.isArray(node.content)) {
+				if ("content" in node && Array.isArray(node.content)) {
 					for (const child of node.content) {
 						extractText(child);
 					}
@@ -606,9 +606,9 @@ function extractTextFromProseMirror(doc: unknown): string {
 		for (const node of doc.content) {
 			extractText(node);
 		}
-		return textParts.join(' ');
+		return textParts.join(" ");
 	}
-	return '';
+	return "";
 }
 
 /**
@@ -627,8 +627,8 @@ export function getDisplayName(node: UJLCModuleObject): string {
 	if (node.fields.headline) return `${typeName}: ${node.fields.headline}`;
 
 	if (node.fields.content) {
-		let contentText = '';
-		if (typeof node.fields.content === 'string') {
+		let contentText = "";
+		if (typeof node.fields.content === "string") {
 			contentText = node.fields.content.trim();
 		} else {
 			// Extract text from ProseMirror Document
@@ -636,7 +636,7 @@ export function getDisplayName(node: UJLCModuleObject): string {
 		}
 		if (contentText) {
 			const shortContent =
-				contentText.length > 40 ? contentText.substring(0, 40) + '...' : contentText;
+				contentText.length > 40 ? `${contentText.substring(0, 40)}...` : contentText;
 			return `${typeName}: ${shortContent}`;
 		}
 	}
@@ -655,7 +655,7 @@ export function formatTypeName(type: string): string {
 	return type
 		.split(/[-_]/)
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ');
+		.join(" ");
 }
 
 /**
@@ -669,7 +669,7 @@ export function formatSlotName(slotName: string): string {
 	return slotName
 		.split(/[-_]/)
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ');
+		.join(" ");
 }
 
 // ============================================
@@ -693,15 +693,15 @@ export function formatSlotName(slotName: string): string {
  * ```
  */
 export function parseSlotSelection(
-	selectedId: string | null
+	selectedId: string | null,
 ): { parentId: string; slotName: string } | null {
 	if (!selectedId) return null;
 
-	const parts = selectedId.split(':');
+	const parts = selectedId.split(":");
 	if (parts.length === 2) {
 		return {
 			parentId: parts[0],
-			slotName: parts[1]
+			slotName: parts[1],
 		};
 	}
 
@@ -720,8 +720,8 @@ export function canNodeAcceptPaste(
 	node: UJLCModuleObject,
 	clipboard:
 		| UJLCModuleObject
-		| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
-		| null
+		| { type: "slot"; slotName: string; content: UJLCModuleObject[] }
+		| null,
 ): boolean {
 	if (clipboard === null || !hasSlots(node)) return false;
 
@@ -729,7 +729,7 @@ export function canNodeAcceptPaste(
 		return true;
 	}
 
-	if (clipboard.type === 'slot' && node.slots) {
+	if (clipboard.type === "slot" && node.slots) {
 		return Object.keys(node.slots).includes(clipboard.slotName);
 	}
 
@@ -748,9 +748,9 @@ export function canNodeAcceptPaste(
 export function canSlotAcceptPaste(
 	clipboard:
 		| UJLCModuleObject
-		| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+		| { type: "slot"; slotName: string; content: UJLCModuleObject[] }
 		| null,
-	slotName: string
+	slotName: string,
 ): boolean {
 	if (!clipboard) return false;
 
@@ -758,7 +758,7 @@ export function canSlotAcceptPaste(
 		return true;
 	}
 
-	if (clipboard.type === 'slot') {
+	if (clipboard.type === "slot") {
 		return clipboard.slotName === slotName;
 	}
 
@@ -776,7 +776,7 @@ export function canSlotAcceptPaste(
  * @returns true if the item is a UJLCModuleObject, false otherwise
  */
 export function isModuleObject(
-	item: UJLCModuleObject | { type: 'slot'; slotName: string; content: UJLCModuleObject[] } | null
+	item: UJLCModuleObject | { type: "slot"; slotName: string; content: UJLCModuleObject[] } | null,
 ): item is UJLCModuleObject {
-	return item !== null && 'meta' in item;
+	return item !== null && "meta" in item;
 }

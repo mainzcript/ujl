@@ -4,47 +4,47 @@
 		UJLCDocument,
 		UJLTDocument,
 		UJLAbstractNode,
-		UJLTTokenSet
-	} from '@ujl-framework/types';
-	import { Composer } from '@ujl-framework/core';
-	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
+		UJLTTokenSet,
+	} from "@ujl-framework/types";
+	import { Composer } from "@ujl-framework/core";
+	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
 	// Note: Adapter styles are now bundled via Shadow DOM injection (see bundle.css)
-	import { getContext } from 'svelte';
+	import { getContext } from "svelte";
 	import {
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
 		type CrafterContext,
 		type ShadowRootContext,
-		type CrafterMode
-	} from '$lib/stores/index.js';
-	import { logger } from '$lib/utils/logger.js';
-	import { createScopedSelector } from '$lib/utils/scoped-dom.js';
-	import { generateThemeCSSVariables } from '@ujl-framework/ui/utils';
+		type CrafterMode,
+	} from "$lib/stores/index.js";
+	import { logger } from "$lib/utils/logger.js";
+	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
+	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
 	} {
-		return 'children' in node.props;
+		return "children" in node.props;
 	}
 
 	function isEditableModule(
-		node: UJLAbstractNode
+		node: UJLAbstractNode,
 	): node is UJLAbstractNode & { meta: { moduleId: string; isModuleRoot: true } } {
-		if (!('meta' in node)) return false;
+		if (!("meta" in node)) return false;
 		const meta = node.meta as { moduleId?: string; isModuleRoot?: boolean } | undefined;
-		return meta?.isModuleRoot === true && typeof meta?.moduleId === 'string';
+		return meta?.isModuleRoot === true && typeof meta?.moduleId === "string";
 	}
 
 	let {
 		ujlcDocument,
 		ujltDocument,
-		mode = 'system',
-		crafterMode = 'editor',
-		editorTokenSet
+		mode = "system",
+		crafterMode = "editor",
+		editorTokenSet,
 	}: {
 		ujlcDocument: UJLCDocument;
 		ujltDocument: UJLTDocument;
-		mode?: 'light' | 'dark' | 'system';
+		mode?: "light" | "dark" | "system";
 		crafterMode?: CrafterMode;
 		editorTokenSet?: UJLTTokenSet;
 	} = $props();
@@ -57,7 +57,7 @@
 	const dom = createScopedSelector(crafter.instanceId, shadowRootContext?.value);
 
 	const selectedNodeId = $derived.by(() => {
-		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
+		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
 
 	const composer = new Composer();
@@ -83,7 +83,7 @@
 	 */
 	function findEditableNodeByModuleId(
 		node: UJLAbstractNode,
-		targetModuleId: string
+		targetModuleId: string,
 	): (UJLAbstractNode & { meta: { moduleId: string; isModuleRoot: true } }) | null {
 		if (isEditableModule(node) && node.meta.moduleId === targetModuleId) {
 			return node;
@@ -96,7 +96,7 @@
 			}
 		}
 
-		if (node.type === 'call-to-action' && 'actionButtons' in node.props) {
+		if (node.type === "call-to-action" && "actionButtons" in node.props) {
 			const buttons = node.props.actionButtons;
 			if (buttons.primary) {
 				const found = findEditableNodeByModuleId(buttons.primary, targetModuleId);
@@ -117,16 +117,16 @@
 	 * Prevents default actions (like link navigation) in editor mode.
 	 */
 	function handlePreviewClick(event: MouseEvent) {
-		if (crafterMode !== 'editor' || crafter.mode !== 'editor') return;
+		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
 
-		const clickedElement = (event.target as HTMLElement).closest('[data-ujl-module-id]');
+		const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
 		if (!clickedElement) return;
 
 		// Prevent default actions (link navigation, form submission, etc.) in editor mode
 		event.preventDefault();
 		event.stopPropagation();
 
-		const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+		const moduleId = clickedElement.getAttribute("data-ujl-module-id");
 		if (!moduleId || !ast) return;
 
 		// Only editable nodes with isModuleRoot === true are selectable
@@ -143,9 +143,9 @@
 		setTimeout(() => {
 			const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
 			if (treeItem) {
-				treeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				treeItem.scrollIntoView({ behavior: "smooth", block: "center" });
 			} else {
-				logger.warn('Tree item not found after expansion:', nodeId);
+				logger.warn("Tree item not found after expansion:", nodeId);
 			}
 		}, 300);
 	}
@@ -184,7 +184,7 @@
 
 		container.scrollTo({
 			top: Math.max(0, targetScroll),
-			behavior: 'smooth'
+			behavior: "smooth",
 		});
 	}
 
@@ -196,25 +196,25 @@
 	function applySelection(moduleId: string, retries = 10) {
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		if (element) {
-			element.classList.add('ujl-selected');
+			element.classList.add("ujl-selected");
 			scrollToComponentInPreview(moduleId);
 			return true;
 		}
 		if (retries > 0) {
 			setTimeout(() => applySelection(moduleId, retries - 1), 50);
 		} else {
-			logger.warn('Could not find element for selection after retries:', moduleId);
+			logger.warn("Could not find element for selection after retries:", moduleId);
 		}
 		return false;
 	}
 
 	$effect(() => {
 		// Remove selection only from elements within this Crafter instance
-		dom.querySelectorAll('[data-ujl-module-id].ujl-selected').forEach((el) => {
-			el.classList.remove('ujl-selected');
+		dom.querySelectorAll("[data-ujl-module-id].ujl-selected").forEach((el) => {
+			el.classList.remove("ujl-selected");
 		});
 
-		if (crafterMode === 'editor' && selectedNodeId && ast) {
+		if (crafterMode === "editor" && selectedNodeId && ast) {
 			setTimeout(() => {
 				applySelection(selectedNodeId);
 			}, 0);
@@ -225,11 +225,11 @@
 <div
 	bind:this={scrollContainerRef}
 	class="h-full w-full"
-	class:ujl-editor-mode={crafterMode === 'editor'}
-	role={crafterMode === 'editor' ? 'application' : undefined}
+	class:ujl-editor-mode={crafterMode === "editor"}
+	role={crafterMode === "editor" ? "application" : undefined}
 	onclick={handlePreviewClick}
-	style={editorTokenSet && crafterMode === 'editor'
-		? `--editor-accent-light: ${editorCssVars['--accent-light'] ?? 'var(--accent-light)'}; --editor-accent-dark: ${editorCssVars['--accent-dark'] ?? 'var(--accent-dark)'};`
+	style={editorTokenSet && crafterMode === "editor"
+		? `--editor-accent-light: ${editorCssVars["--accent-light"] ?? "var(--accent-light)"}; --editor-accent-dark: ${editorCssVars["--accent-dark"] ?? "var(--accent-dark)"};`
 		: undefined}
 >
 	{#if ast}

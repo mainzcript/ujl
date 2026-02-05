@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Collapsible as CollapsiblePrimitive } from 'bits-ui';
-	import { cn, type WithoutChild } from '$lib/utils.js';
+	import { Collapsible as CollapsiblePrimitive } from "bits-ui";
+	import { cn, type WithoutChild } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),

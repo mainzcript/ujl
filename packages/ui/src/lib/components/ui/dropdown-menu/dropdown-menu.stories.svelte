@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		DropdownMenu,
 		DropdownMenuTrigger,
@@ -14,17 +14,17 @@
 		DropdownMenuRadioItem,
 		DropdownMenuLabel,
 		DropdownMenuShortcut,
-		DropdownMenuGroup
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Avatar, AvatarImage, AvatarFallback } from '../avatar/index.ts';
+		DropdownMenuGroup,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Avatar, AvatarImage, AvatarFallback } from "../avatar/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Complex/DropdownMenu',
+		title: "Components/Complex/DropdownMenu",
 		component: DropdownMenu,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {},
-		args: {}
+		args: {},
 	});
 </script>
 

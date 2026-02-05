@@ -1,9 +1,9 @@
-import type { UJLTShadeKey } from '@ujl-framework/types';
-import { colorShades } from '@ujl-framework/types';
-import Color from 'colorjs.io';
-import type { ColorShades, ShadesWithDistance, RefColorsWithDistance } from './types.ts';
-import { REF_COLORS } from './refColors.ts';
-import { ease } from './easing.ts';
+import type { UJLTShadeKey } from "@ujl-framework/types";
+import { colorShades } from "@ujl-framework/types";
+import Color from "colorjs.io";
+import { ease } from "./easing.ts";
+import { REF_COLORS } from "./refColors.ts";
+import type { ColorShades, RefColorsWithDistance, ShadesWithDistance } from "./types.ts";
 
 /**
  * Orders color shades by distance to a target color using CIEDE2000 color difference.
@@ -18,7 +18,7 @@ export function orderShadesByDistance(color: Color, shades: ColorShades): Shades
 		const shadeColor = shades[shade];
 		orderedShades.push({
 			key: shade,
-			distance: color.deltaE(shadeColor, '2000')
+			distance: color.deltaE(shadeColor, "2000"),
 		});
 	});
 	orderedShades.sort((a, b) => a.distance - b.distance);
@@ -34,7 +34,7 @@ export function orderShadesByDistance(color: Color, shades: ColorShades): Shades
  */
 function findClosestColorShade(
 	color: Color,
-	shades: ColorShades
+	shades: ColorShades,
 ): { key: UJLTShadeKey; distance: number } {
 	const orderedShades = orderShadesByDistance(color, shades);
 	return { key: orderedShades[0].key, distance: orderedShades[0].distance };
@@ -50,16 +50,16 @@ function findClosestColorShade(
  */
 function findClosestShadeByLightness(
 	color: Color,
-	shades: ColorShades
+	shades: ColorShades,
 ): { key: UJLTShadeKey; distance: number } {
-	const colorOklch = color.to('oklch');
+	const colorOklch = color.to("oklch");
 	const targetL = colorOklch.coords[0] ?? 0;
 
-	let closestKey: UJLTShadeKey = '500';
+	let closestKey: UJLTShadeKey = "500";
 	let minDistance = Infinity;
 
 	colorShades.forEach((shade: UJLTShadeKey) => {
-		const shadeOklch = shades[shade].to('oklch');
+		const shadeOklch = shades[shade].to("oklch");
 		const shadeL = shadeOklch.coords[0] ?? 0;
 		const distance = Math.abs(targetL - shadeL);
 
@@ -119,8 +119,8 @@ function orderRefColorsByDistance(color: Color): RefColorsWithDistance {
 		const { distance } = findClosestColorShade(color, shades);
 		orderedRefColors.push({
 			key: colorName,
-			shades: shades,
-			distance: distance
+			shades,
+			distance,
 		});
 	});
 	orderedRefColors.sort((a, b) => a.distance - b.distance);
@@ -140,11 +140,11 @@ function orderRefColorsByDistance(color: Color): RefColorsWithDistance {
 function mixColorShades(
 	shades1: ColorShades,
 	shades2: ColorShades,
-	ratio: number = 0.5
+	ratio: number = 0.5,
 ): ColorShades {
 	const mixedShades: ColorShades = {} as ColorShades;
 	colorShades.forEach((shade: UJLTShadeKey) => {
-		mixedShades[shade] = Color.mix(shades1[shade], shades2[shade], ratio, { space: 'oklch' });
+		mixedShades[shade] = Color.mix(shades1[shade], shades2[shade], ratio, { space: "oklch" });
 	});
 	return mixedShades;
 }
@@ -164,8 +164,8 @@ function mixColorShades(
 function blendColorShadesAroundCenter(
 	baseShades: ColorShades,
 	overlayShades: ColorShades,
-	center: UJLTShadeKey = '500',
-	radius: number = 5
+	center: UJLTShadeKey = "500",
+	radius: number = 5,
 ): ColorShades {
 	// Clamp radius to minimum 1 to prevent division by zero
 	const clampedRadius = Math.max(1, radius);
@@ -196,16 +196,16 @@ function blendColorShadesAroundCenter(
  * @returns Fine-tuned color shades (as Color objects)
  */
 function finetuneColorShades(color: Color, shades: ColorShades): ColorShades {
-	const colorOklch = color.to('oklch');
+	const colorOklch = color.to("oklch");
 	const c = colorOklch.coords[1];
 	const h = colorOklch.coords[2];
 
 	// Create naive shades: keep L from input shades, use target C/H
 	const naiveShades: ColorShades = {} as ColorShades;
 	colorShades.forEach((shade: UJLTShadeKey) => {
-		const shadeOklch = shades[shade].to('oklch');
+		const shadeOklch = shades[shade].to("oklch");
 		const shadeL = shadeOklch.coords[0];
-		naiveShades[shade] = new Color('oklch', [shadeL, c, Number.isNaN(h) ? 0 : (h ?? 0)]);
+		naiveShades[shade] = new Color("oklch", [shadeL, c, Number.isNaN(h) ? 0 : (h ?? 0)]);
 	});
 
 	// Find closest shade by lightness only (since all naive shades have same C/H as target)
@@ -236,11 +236,11 @@ export function generateColorShades(color: Color): ColorShades {
 	const d1 = orderedRefColors[0].distance;
 
 	// Get hues for constraint checking
-	const colorOklch = color.to('oklch');
+	const colorOklch = color.to("oklch");
 	const targetHue = colorOklch.coords[2] ?? 0;
 
 	// Get hue of first reference color (use shade 500 as representative)
-	const ref1Oklch = refShades1['500'].to('oklch');
+	const ref1Oklch = refShades1["500"].to("oklch");
 	const ref1Hue = ref1Oklch.coords[2] ?? 0;
 
 	// Find second reference color that:
@@ -251,7 +251,7 @@ export function generateColorShades(color: Color): ColorShades {
 
 	for (let i = 1; i < orderedRefColors.length; i++) {
 		const candidate = orderedRefColors[i];
-		const candidateOklch = candidate.shades['500'].to('oklch');
+		const candidateOklch = candidate.shades["500"].to("oklch");
 		const candidateHue = candidateOklch.coords[2] ?? 0;
 
 		// Check if candidate hue lies between ref1Hue and targetHue
@@ -294,8 +294,8 @@ export function generateColorShadesLightDark(lightColor: Color, darkColor: Color
 	const darkShades = generateColorShades(darkColor);
 
 	// Find indices for shade 100 and 900
-	const shade100Index = colorShades.indexOf('100');
-	const shade900Index = colorShades.indexOf('900');
+	const shade100Index = colorShades.indexOf("100");
+	const shade900Index = colorShades.indexOf("900");
 
 	const fadedShades: ColorShades = {} as ColorShades;
 

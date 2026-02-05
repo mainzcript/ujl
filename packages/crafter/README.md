@@ -19,8 +19,8 @@ pnpm add @ujl-framework/crafter
 The Crafter does not bundle fonts. To use the fonts available in Designer Mode, import them in your application (e.g., via [Fontsource](https://fontsource.org/)). A backend-based font service is planned for future versions.
 
 ```typescript
-import '@fontsource-variable/inter';
-import '@fontsource-variable/open-sans';
+import "@fontsource-variable/inter";
+import "@fontsource-variable/open-sans";
 // ... add more as needed
 ```
 
@@ -31,13 +31,13 @@ The Crafter is a self-contained ES module that bundles all dependencies includin
 ### Basic Example
 
 ```typescript
-import { UJLCrafter } from '@ujl-framework/crafter';
+import { UJLCrafter } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
-	target: '#editor-container',
+	target: "#editor-container",
 	document: myContentDocument, // Optional: Initial content
 	theme: myPreviewTheme, // Optional: Theme for preview content
-	editorTheme: myEditorTheme // Optional: Theme for Crafter UI
+	editorTheme: myEditorTheme, // Optional: Theme for Crafter UI
 });
 
 // Cleanup when done
@@ -48,14 +48,14 @@ crafter.destroy();
 
 ```typescript
 const crafter = new UJLCrafter({
-	target: '#editor-container',
+	target: "#editor-container",
 	document: myContentDocument,
 	theme: myPreviewTheme,
 	library: {
-		storage: 'backend',
-		url: 'http://localhost:3000',
-		apiKey: 'your-api-key'
-	}
+		storage: "backend",
+		url: "http://localhost:3000",
+		apiKey: "your-api-key",
+	},
 });
 ```
 
@@ -64,12 +64,12 @@ const crafter = new UJLCrafter({
 ```typescript
 // Listen for document changes
 const unsubscribe = crafter.onDocumentChange((doc) => {
-	console.log('Document changed:', doc);
+	console.log("Document changed:", doc);
 });
 
 // Listen for theme changes
 crafter.onThemeChange((theme) => {
-	console.log('Theme changed:', theme);
+	console.log("Theme changed:", theme);
 });
 
 // Enable Save button with callback
@@ -83,8 +83,8 @@ const currentTheme = crafter.getTheme();
 const mode = crafter.getMode(); // 'editor' | 'designer'
 
 // Programmatically control the editor
-crafter.setMode('designer');
-crafter.selectNode('module-123');
+crafter.setMode("designer");
+crafter.selectNode("module-123");
 ```
 
 ## Architecture
@@ -119,12 +119,12 @@ class UJLCrafter {
 	// State
 	getDocument(): UJLCDocument;
 	getTheme(): UJLTDocument;
-	getMode(): 'editor' | 'designer';
+	getMode(): "editor" | "designer";
 	getSelectedNodeId(): string | null;
 
 	setDocument(document: UJLCDocument): void;
 	setTheme(theme: UJLTDocument): void;
-	setMode(mode: 'editor' | 'designer'): void;
+	setMode(mode: "editor" | "designer"): void;
 	selectNode(nodeId: string | null): void;
 
 	// Events (return unsubscribe function)
@@ -142,7 +142,7 @@ interface UJLCrafterOptions {
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
-	library?: { storage: 'inline' } | { storage: 'backend'; url: string; apiKey: string };
+	library?: { storage: "inline" } | { storage: "backend"; url: string; apiKey: string };
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
 ```

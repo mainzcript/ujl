@@ -2,19 +2,24 @@
 	"$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
 	"changelog": "@changesets/cli/changelog",
 	"commit": false,
-	"fixed": [],
-	"linked": [
+	"fixed": [
 		[
-			"@ujl-framework/core",
-			"@ujl-framework/crafter",
-			"@ujl-framework/ui",
 			"@ujl-framework/adapter-svelte",
 			"@ujl-framework/adapter-web",
+			"@ujl-framework/core",
+			"@ujl-framework/crafter",
 			"@ujl-framework/examples",
-			"@ujl-framework/types"
+			"@ujl-framework/types",
+			"@ujl-framework/ui"
 		]
 	],
-	"access": "restricted",
+	"linked": [],
+	"ignore": [
+		"@ujl-framework/docs",
+		"@ujl-framework/dev-demo",
+		"@ujl-framework/library"
+	],
+	"access": "public",
 	"baseBranch": "develop",
 	"updateInternalDependencies": "patch"
 }

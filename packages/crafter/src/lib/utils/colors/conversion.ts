@@ -1,7 +1,7 @@
-import type { UJLTColorShades, UJLTShadeKey, UJLTOklch, UJLTColorSet } from '@ujl-framework/types';
-import { colorShades } from '@ujl-framework/types';
-import Color from 'colorjs.io';
-import type { ColorShades } from './types.ts';
+import type { UJLTColorSet, UJLTColorShades, UJLTOklch, UJLTShadeKey } from "@ujl-framework/types";
+import { colorShades } from "@ujl-framework/types";
+import Color from "colorjs.io";
+import type { ColorShades } from "./types.ts";
 
 /**
  * Converts a UJLTOklch color to a Color object.
@@ -10,7 +10,7 @@ import type { ColorShades } from './types.ts';
  * @returns Color object
  */
 export function toColor(ujltColor: UJLTOklch): Color {
-	return new Color('oklch', [ujltColor.l, ujltColor.c, ujltColor.h]);
+	return new Color("oklch", [ujltColor.l, ujltColor.c, ujltColor.h]);
 }
 
 /**
@@ -37,7 +37,7 @@ export function toColorShades(ujltShades: UJLTColorShades): ColorShades {
 export function toUJLTOklch(color: Color): UJLTOklch {
 	// Ensure the color is within the sRGB gamut before conversion
 	const gamutMapped = color.toGamut();
-	const [l, c, h] = gamutMapped.to('oklch').coords;
+	const [l, c, h] = gamutMapped.to("oklch").coords;
 
 	// Round lightness (0-1) to 4 decimal places for precision
 	const lRounded = Number(Math.max(0, Math.min(1, l ?? 0)).toFixed(4));
@@ -80,7 +80,7 @@ export function toUJLTColorShades(shades: ColorShades): UJLTColorShades {
 export function oklchToHex(ujltColor: UJLTOklch): string {
 	const color = toColor(ujltColor);
 	const gamutMapped = color.toGamut();
-	return gamutMapped.to('srgb').toString({ format: 'hex' });
+	return gamutMapped.to("srgb").toString({ format: "hex" });
 }
 
 /**
@@ -100,7 +100,7 @@ export function oklchToHex(ujltColor: UJLTOklch): string {
  */
 export function formatOklch(oklch: UJLTOklch): string {
 	const lPercent = oklch.l * 100;
-	const lFormatted = Math.max(0, Math.min(100, lPercent)).toFixed(1) + '%';
+	const lFormatted = `${Math.max(0, Math.min(100, lPercent)).toFixed(1)}%`;
 	const cFormatted = Math.max(0, Math.min(100, oklch.c)).toFixed(3);
 	// Achromatic colors (black, white, gray) have no hue - default to 0
 	const h = Number.isNaN(oklch.h) ? 0 : oklch.h;
@@ -123,5 +123,5 @@ export function formatOklch(oklch: UJLTOklch): string {
  * ```
  */
 export function getBaseHexFromColorSet(colorSet: UJLTColorSet): string {
-	return 'hex' in colorSet._original ? colorSet._original.hex : colorSet._original.lightHex;
+	return "hex" in colorSet._original ? colorSet._original.hex : colorSet._original.lightHex;
 }

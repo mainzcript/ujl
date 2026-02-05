@@ -4,11 +4,11 @@
  * Tests that verify the Crafter loads successfully and all main areas are visible.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Crafter Startup', () => {
-	test('should load successfully and display main layout areas', async ({ page }) => {
+test.describe("Crafter Startup", () => {
+	test("should load successfully and display main layout areas", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -21,7 +21,7 @@ test.describe('Crafter Startup', () => {
 		await expect(crafter.panel).toBeVisible();
 	});
 
-	test('should display navigation tree with Document header', async ({ page }) => {
+	test("should display navigation tree with Document header", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -32,7 +32,7 @@ test.describe('Crafter Startup', () => {
 		await expect(crafter.navTreeHeader).toBeVisible();
 	});
 
-	test('should load with showcase document by default', async ({ page }) => {
+	test("should load with showcase document by default", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -44,7 +44,7 @@ test.describe('Crafter Startup', () => {
 		expect(treeNodeIds.length).toBeGreaterThan(0);
 	});
 
-	test('should display header with mode selector', async ({ page }) => {
+	test("should display header with mode selector", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -53,23 +53,23 @@ test.describe('Crafter Startup', () => {
 
 		// Mode selector should show "Editor" by default
 		await expect(crafter.modeSelector).toBeVisible();
-		await expect(crafter.modeSelector).toContainText('Editor');
+		await expect(crafter.modeSelector).toContainText("Editor");
 	});
 
-	test('should start in editor mode with no selection', async ({ page }) => {
+	test("should start in editor mode with no selection", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Should be in editor mode
 		const mode = await crafter.getMode();
-		expect(mode).toBe('editor');
+		expect(mode).toBe("editor");
 
 		// Properties panel should show "No module selected"
 		const noSelectionVisible = await crafter.isNoModuleSelectedVisible();
 		expect(noSelectionVisible).toBe(true);
 	});
 
-	test('should render preview with content', async ({ page }) => {
+	test("should render preview with content", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -80,11 +80,11 @@ test.describe('Crafter Startup', () => {
 		expect(moduleIds.length).toBeGreaterThan(0);
 	});
 
-	test('should not have console errors on startup', async ({ page }) => {
+	test("should not have console errors on startup", async ({ page }) => {
 		const errors: string[] = [];
 
-		page.on('console', (msg) => {
-			if (msg.type() === 'error') {
+		page.on("console", (msg) => {
+			if (msg.type() === "error") {
 				errors.push(msg.text());
 			}
 		});
@@ -97,7 +97,7 @@ test.describe('Crafter Startup', () => {
 
 		// Filter out known acceptable errors (e.g., favicon, external resources)
 		const relevantErrors = errors.filter(
-			(error) => !error.includes('favicon') && !error.includes('Failed to load resource')
+			(error) => !error.includes("favicon") && !error.includes("Failed to load resource"),
 		);
 
 		expect(relevantErrors).toHaveLength(0);

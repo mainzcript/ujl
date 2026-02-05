@@ -1,19 +1,19 @@
-import '@testing-library/jest-dom/vitest';
-import { expect, afterEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/svelte';
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/svelte";
+import { afterEach, expect, vi } from "vitest";
 
 // Mock svelte-sonner to avoid timeout issues in tests
-vi.mock('svelte-sonner', () => ({
+vi.mock("svelte-sonner", () => ({
 	toast: {
 		error: vi.fn(),
 		success: vi.fn(),
 		info: vi.fn(),
-		warning: vi.fn()
-	}
+		warning: vi.fn(),
+	},
 }));
 
 // Custom matcher type declarations
-declare module 'vitest' {
+declare module "vitest" {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	interface Assertion<T> {
 		toBeValidNodeId(): this;
@@ -31,10 +31,10 @@ afterEach(() => {
 // Custom matchers
 expect.extend({
 	toBeValidNodeId(received: string) {
-		const pass = typeof received === 'string' && received.length === 10;
+		const pass = typeof received === "string" && received.length === 10;
 		return {
 			pass,
-			message: () => `expected ${received} to be a valid 10-character node ID`
+			message: () => `expected ${received} to be a valid 10-character node ID`,
 		};
-	}
+	},
 });

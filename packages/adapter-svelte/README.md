@@ -24,7 +24,7 @@ The package provides two style exports:
 
 - **`./bundle.css`** - Pre-built, minified CSS bundle ready for direct use. Use this when you need the processed CSS without Tailwind compilation (e.g., for Shadow DOM injection in Custom Elements):
   ```typescript
-  import bundleStylesUrl from '@ujl-framework/adapter-svelte/bundle.css?url';
+  import bundleStylesUrl from "@ujl-framework/adapter-svelte/bundle.css?url";
   ```
 
 We recommend using the `./styles` export in your Svelte application.
@@ -45,19 +45,19 @@ For Svelte components, use `AdapterRoot` directly. This approach is more idiomat
 
 ```svelte
 <script lang="ts">
-	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-	import { Composer } from '@ujl-framework/core';
-	import { AdapterRoot } from '@ujl-framework/adapter-svelte';
-	import '@ujl-framework/adapter-svelte/styles';
+	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+	import { Composer } from "@ujl-framework/core";
+	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
+	import "@ujl-framework/adapter-svelte/styles";
 
 	let {
 		ujlcDocument,
 		ujltDocument,
-		mode = 'system'
+		mode = "system",
 	}: {
 		ujlcDocument: UJLCDocument;
 		ujltDocument: UJLTDocument;
-		mode?: 'light' | 'dark' | 'system';
+		mode?: "light" | "dark" | "system";
 	} = $props();
 
 	// Compose document to AST (reactive)
@@ -99,17 +99,17 @@ The adapter supports optional metadata attributes for building visual editors:
 For programmatic mounting (e.g., in non-Svelte contexts), use the imperative API:
 
 ```typescript
-import { svelteAdapter } from '@ujl-framework/adapter-svelte';
-import { Composer } from '@ujl-framework/core';
+import { svelteAdapter } from "@ujl-framework/adapter-svelte";
+import { Composer } from "@ujl-framework/core";
 
 const composer = new Composer();
 const ast = composer.compose(ujlcDocument);
 const tokenSet = ujltDocument.ujlt.tokens;
 
 const mountedComponent = svelteAdapter(ast, tokenSet, {
-	target: '#my-container',
-	mode: 'system',
-	showMetadata: true
+	target: "#my-container",
+	mode: "system",
+	showMetadata: true,
 });
 
 // Cleanup
@@ -121,7 +121,7 @@ await mountedComponent.unmount();
 The adapter provides utility functions for working with AST nodes:
 
 ```typescript
-import { getModuleId } from '@ujl-framework/adapter-svelte';
+import { getModuleId } from "@ujl-framework/adapter-svelte";
 
 // Get the module ID from a node (which module it belongs to)
 const moduleId = getModuleId(node); // Returns node.meta?.moduleId ?? null
@@ -139,7 +139,7 @@ const moduleId = getModuleId(node); // Returns node.meta?.moduleId ?? null
 interface AdapterRootProps {
 	node: UJLAbstractNode;
 	tokenSet?: UJLTTokenSet;
-	mode?: 'light' | 'dark' | 'system';
+	mode?: "light" | "dark" | "system";
 	showMetadata?: boolean;
 }
 ```
@@ -150,7 +150,7 @@ interface AdapterRootProps {
 function svelteAdapter(
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: SvelteAdapterOptions
+	options: SvelteAdapterOptions,
 ): MountedComponent;
 ```
 
@@ -159,7 +159,7 @@ function svelteAdapter(
 ```typescript
 type SvelteAdapterOptions = {
 	target: string | HTMLElement;
-	mode?: 'light' | 'dark' | 'system';
+	mode?: "light" | "dark" | "system";
 	showMetadata?: boolean;
 };
 
@@ -176,13 +176,13 @@ The adapter focuses on pure rendering. For editor functionality (like click-to-s
 **Example: Implementing click handling in an editor:**
 
 ```typescript
-import { getModuleId } from '@ujl-framework/adapter-svelte';
+import { getModuleId } from "@ujl-framework/adapter-svelte";
 
 function handleClick(event: MouseEvent) {
-	const clickedElement = (event.target as HTMLElement).closest('[data-ujl-module-id]');
+	const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
 	if (!clickedElement) return;
 
-	const moduleId = clickedElement.getAttribute('data-ujl-module-id');
+	const moduleId = clickedElement.getAttribute("data-ujl-module-id");
 	if (!moduleId) return;
 
 	// Check if the clicked node is editable (isModuleRoot === true) in your AST
@@ -239,8 +239,8 @@ src/
 The adapter provides a synchronous, SSR-safe ProseMirror-to-HTML serializer:
 
 ```typescript
-import { prosemirrorToHtml } from '@ujl-framework/adapter-svelte';
-import type { ProseMirrorDocument } from '@ujl-framework/types';
+import { prosemirrorToHtml } from "@ujl-framework/adapter-svelte";
+import type { ProseMirrorDocument } from "@ujl-framework/types";
 
 const html = prosemirrorToHtml(doc);
 ```
@@ -253,8 +253,8 @@ For rendering ProseMirror documents in Svelte components, use the `RichText` com
 
 ```svelte
 <script>
-	import { RichText } from '@ujl-framework/adapter-svelte';
-	import type { ProseMirrorDocument } from '@ujl-framework/types';
+	import { RichText } from "@ujl-framework/adapter-svelte";
+	import type { ProseMirrorDocument } from "@ujl-framework/types";
 </script>
 
 <RichText document={doc} as="div" size="lg" intensity="muted" />

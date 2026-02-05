@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { Snippet } from "svelte";
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 
 	interface DrawerDescriptionProps extends WithElementRef<HTMLAttributes<HTMLParagraphElement>> {
 		class?: string;
@@ -19,7 +19,7 @@
 <p
 	bind:this={ref}
 	data-slot="drawer-description"
-	class={cn('text-sm text-muted-foreground', className)}
+	class={cn("text-sm text-muted-foreground", className)}
 	{...restProps}
 >
 	{@render children?.()}

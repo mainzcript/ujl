@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Text, Popover, PopoverTrigger, PopoverContent } from '@ujl-framework/ui';
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
-	import type { ImageEntry } from '@ujl-framework/types';
-	import ImageIcon from '@lucide/svelte/icons/image';
-	import { logger } from '$lib/utils/logger.js';
-	import { ImageLibraryPopover } from '../image-library-popover/index.js';
+	import { Text, Popover, PopoverTrigger, PopoverContent } from "@ujl-framework/ui";
+	import { getContext } from "svelte";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import type { ImageEntry } from "@ujl-framework/types";
+	import ImageIcon from "@lucide/svelte/icons/image";
+	import { logger } from "$lib/utils/logger.js";
+	import { ImageLibraryPopover } from "../image-library-popover/index.js";
 
 	let {
 		value,
-		onChange
+		onChange,
 	}: {
 		value: string | number | null | undefined;
 		onChange?: (value: string | number | null) => void;
@@ -26,13 +26,13 @@
 	}
 
 	let previewUrl = $state<string | null>(null);
-	let previewAlt = $state<string>('Selected image preview');
+	let previewAlt = $state<string>("Selected image preview");
 	let isLoadingPreview = $state(false);
 
 	$effect(() => {
 		if (!value) {
 			previewUrl = null;
-			previewAlt = 'Selected image preview';
+			previewAlt = "Selected image preview";
 			return;
 		}
 
@@ -43,12 +43,12 @@
 			.get(imageId)
 			.then((entry: ImageEntry | null) => {
 				previewUrl = entry?.src ?? null;
-				previewAlt = entry?.metadata?.filename ?? 'Selected image preview';
+				previewAlt = entry?.metadata?.filename ?? "Selected image preview";
 			})
 			.catch((err: unknown) => {
-				logger.error('[ImagePicker] Failed to load image preview:', err);
+				logger.error("[ImagePicker] Failed to load image preview:", err);
 				previewUrl = null;
-				previewAlt = 'Selected image preview';
+				previewAlt = "Selected image preview";
 			})
 			.finally(() => {
 				isLoadingPreview = false;

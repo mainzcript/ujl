@@ -297,7 +297,7 @@ const meta = $derived(_ujlcDocument.ujlc.meta);
 const images = $derived(_ujlcDocument.ujlc.images);
 
 const imageService = $derived.by(() =>
-	createImageService(meta._library, () => images, updateImages)
+	createImageService(meta._library, () => images, updateImages),
 );
 ```
 
@@ -345,21 +345,21 @@ interface CrafterContext {
 			node: UJLCModuleObject,
 			targetId: string,
 			slotName?: string,
-			position?: "before" | "after" | "into"
+			position?: "before" | "after" | "into",
 		): string | null;
 		deleteNode(nodeId: string): boolean;
 		moveNode(
 			nodeId: string,
 			targetId: string,
 			slotName?: string,
-			position?: "before" | "after" | "into"
+			position?: "before" | "after" | "into",
 		): boolean;
 		reorderNode(nodeId: string, targetId: string, position: "before" | "after"): boolean;
 		insertNode(
 			componentType: string,
 			targetId: string,
 			slotName?: string,
-			position?: "before" | "after" | "into"
+			position?: "before" | "after" | "into",
 		): string | null;
 	};
 }
@@ -372,7 +372,7 @@ interface CrafterContext {
 // ujlcDocument.ujlc.root.push(newModule);
 
 // Functional Update
-context.updateRootSlot(root => [...root, newModule]);
+context.updateRootSlot((root) => [...root, newModule]);
 ```
 
 ## 8.5 Theming und Styling
@@ -616,7 +616,7 @@ class CustomModule extends ModuleBase {
 
 	async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
 		const children = await Promise.all(
-			(moduleData.slots.content ?? []).map(child => composer.composeModule(child))
+			(moduleData.slots.content ?? []).map((child) => composer.composeModule(child)),
 		);
 
 		return {
@@ -723,7 +723,7 @@ export function resolveForegroundColor(
 	palette: UJLTColorPalette,
 	backgroundFlavor: UJLTFlavor,
 	foregroundFlavor: UJLTFlavor,
-	mode: "light" | "dark"
+	mode: "light" | "dark",
 ): UJLTOklch {
 	const backgroundSet = palette[backgroundFlavor];
 	const foregroundSet = palette[foregroundFlavor];

@@ -1,8 +1,8 @@
-import { mount, unmount } from 'svelte';
-import type { Component } from 'svelte';
-import type { UJLAdapter, UJLAbstractNode, UJLTTokenSet } from '@ujl-framework/types';
-import type { SvelteAdapterOptions, MountedComponent } from './types.js';
-import AdapterRoot from './components/AdapterRoot.svelte';
+import type { UJLAbstractNode, UJLAdapter, UJLTTokenSet } from "@ujl-framework/types";
+import type { Component } from "svelte";
+import { mount, unmount } from "svelte";
+import AdapterRoot from "./components/AdapterRoot.svelte";
+import type { MountedComponent, SvelteAdapterOptions } from "./types.js";
 
 /**
  * Svelte adapter for UJL Framework
@@ -29,12 +29,12 @@ import AdapterRoot from './components/AdapterRoot.svelte';
 export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> = (
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: SvelteAdapterOptions
+	options: SvelteAdapterOptions,
 ): MountedComponent => {
 	// Resolve target element
 	let targetElement: HTMLElement;
 
-	if (typeof options.target === 'string') {
+	if (typeof options.target === "string") {
 		const element = document.querySelector(options.target);
 		if (!element) {
 			throw new Error(`Target element not found: ${options.target}`);
@@ -45,7 +45,7 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 	}
 
 	// Clear target element
-	targetElement.innerHTML = '';
+	targetElement.innerHTML = "";
 
 	// Mount the AdapterRoot component (which handles theme and AST rendering)
 	const instance = mount(AdapterRoot, {
@@ -54,8 +54,8 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 			node,
 			tokenSet,
 			mode: options.mode,
-			showMetadata: options.showMetadata ?? false
-		}
+			showMetadata: options.showMetadata ?? false,
+		},
 	});
 
 	// Return mounted component with cleanup function
@@ -64,6 +64,6 @@ export const svelteAdapter: UJLAdapter<MountedComponent, SvelteAdapterOptions> =
 		instance: instance as Component,
 		unmount: async () => {
 			await unmount(instance);
-		}
+		},
 	};
 };

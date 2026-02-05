@@ -1,1 +1,1 @@
-export { RichText } from './rich-text/index.js';
+export { RichText } from "./rich-text/index.js";

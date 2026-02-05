@@ -3,7 +3,7 @@
 	Encapsulates the font selection pattern with internal state management for open/close and focus handling.
 -->
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick } from "svelte";
 	import {
 		Combobox,
 		ComboboxTrigger,
@@ -14,28 +14,28 @@
 		ComboboxEmpty,
 		ComboboxGroup,
 		ComboboxItem,
-		Label
-	} from '@ujl-framework/ui';
+		Label,
+	} from "@ujl-framework/ui";
 
 	const defaultFontOptions = [
-		{ value: 'Inter Variable', label: 'Inter' },
-		{ value: 'Open Sans Variable', label: 'Open Sans' },
-		{ value: 'Roboto Variable', label: 'Roboto' },
-		{ value: 'Montserrat Variable', label: 'Montserrat' },
-		{ value: 'Oswald Variable', label: 'Oswald' },
-		{ value: 'Raleway Variable', label: 'Raleway' },
-		{ value: 'Merriweather Variable', label: 'Merriweather' },
-		{ value: 'Noto Sans Variable', label: 'Noto Sans' },
-		{ value: 'Nunito Sans Variable', label: 'Nunito Sans' },
-		{ value: 'JetBrains Mono Variable', label: 'JetBrains Mono' }
+		{ value: "Inter Variable", label: "Inter" },
+		{ value: "Open Sans Variable", label: "Open Sans" },
+		{ value: "Roboto Variable", label: "Roboto" },
+		{ value: "Montserrat Variable", label: "Montserrat" },
+		{ value: "Oswald Variable", label: "Oswald" },
+		{ value: "Raleway Variable", label: "Raleway" },
+		{ value: "Merriweather Variable", label: "Merriweather" },
+		{ value: "Noto Sans Variable", label: "Noto Sans" },
+		{ value: "Nunito Sans Variable", label: "Nunito Sans" },
+		{ value: "JetBrains Mono Variable", label: "JetBrains Mono" },
 	];
 
 	let {
 		id,
-		label = 'Font',
+		label = "Font",
 		value = $bindable<string>(),
 		options = defaultFontOptions,
-		onchange
+		onchange,
 	}: {
 		id: string;
 		label?: string;
@@ -50,7 +50,7 @@
 
 	// Derived value for displaying selected font in trigger
 	const triggerContent = $derived(
-		options.find((opt) => opt.value === value)?.label ?? 'Select font'
+		options.find((opt) => opt.value === value)?.label ?? "Select font",
 	);
 
 	// Helper function to close and focus combobox

@@ -11,19 +11,19 @@ tags: [payload, plugins, architecture, patterns]
 Plugins are functions that receive configuration options and return a function that transforms the Payload config:
 
 ```typescript
-import type { Config, Plugin } from 'payload'
+import type { Config, Plugin } from "payload";
 
 interface MyPluginConfig {
-  enabled?: boolean
-  collections?: string[]
+	enabled?: boolean;
+	collections?: string[];
 }
 
 export const myPlugin =
-  (options: MyPluginConfig): Plugin =>
-  (config: Config): Config => ({
-    ...config,
-    // Transform config here
-  })
+	(options: MyPluginConfig): Plugin =>
+	(config: Config): Config => ({
+		...config,
+		// Transform config here
+	});
 ```
 
 **Key Pattern:** Double arrow function (currying)
@@ -35,251 +35,251 @@ export const myPlugin =
 
 ```typescript
 export const seoPlugin =
-  (options: { collections?: string[] }): Plugin =>
-  (config: Config): Config => {
-    const seoFields: Field[] = [
-      {
-        name: 'meta',
-        type: 'group',
-        fields: [
-          { name: 'title', type: 'text' },
-          { name: 'description', type: 'textarea' },
-        ],
-      },
-    ]
+	(options: { collections?: string[] }): Plugin =>
+	(config: Config): Config => {
+		const seoFields: Field[] = [
+			{
+				name: "meta",
+				type: "group",
+				fields: [
+					{ name: "title", type: "text" },
+					{ name: "description", type: "textarea" },
+				],
+			},
+		];
 
-    return {
-      ...config,
-      collections: config.collections?.map((collection) => {
-        if (options.collections?.includes(collection.slug)) {
-          return {
-            ...collection,
-            fields: [...(collection.fields || []), ...seoFields],
-          }
-        }
-        return collection
-      }),
-    }
-  }
+		return {
+			...config,
+			collections: config.collections?.map((collection) => {
+				if (options.collections?.includes(collection.slug)) {
+					return {
+						...collection,
+						fields: [...(collection.fields || []), ...seoFields],
+					};
+				}
+				return collection;
+			}),
+		};
+	};
 ```
 
 ## Adding New Collections
 
 ```typescript
 export const redirectsPlugin =
-  (options: { overrides?: Partial<CollectionConfig> }): Plugin =>
-  (config: Config): Config => {
-    const redirectsCollection: CollectionConfig = {
-      slug: 'redirects',
-      access: { read: () => true },
-      fields: [
-        { name: 'from', type: 'text', required: true, unique: true },
-        { name: 'to', type: 'text', required: true },
-      ],
-      ...options.overrides,
-    }
+	(options: { overrides?: Partial<CollectionConfig> }): Plugin =>
+	(config: Config): Config => {
+		const redirectsCollection: CollectionConfig = {
+			slug: "redirects",
+			access: { read: () => true },
+			fields: [
+				{ name: "from", type: "text", required: true, unique: true },
+				{ name: "to", type: "text", required: true },
+			],
+			...options.overrides,
+		};
 
-    return {
-      ...config,
-      collections: [...(config.collections || []), redirectsCollection],
-    }
-  }
+		return {
+			...config,
+			collections: [...(config.collections || []), redirectsCollection],
+		};
+	};
 ```
 
 ## Adding Hooks
 
 ```typescript
 const resaveChildrenHook: CollectionAfterChangeHook = async ({ doc, req, operation }) => {
-  if (operation === 'update') {
-    const children = await req.payload.find({
-      collection: 'pages',
-      where: { parent: { equals: doc.id } },
-    })
+	if (operation === "update") {
+		const children = await req.payload.find({
+			collection: "pages",
+			where: { parent: { equals: doc.id } },
+		});
 
-    for (const child of children.docs) {
-      await req.payload.update({
-        collection: 'pages',
-        id: child.id,
-        data: child,
-      })
-    }
-  }
-  return doc
-}
+		for (const child of children.docs) {
+			await req.payload.update({
+				collection: "pages",
+				id: child.id,
+				data: child,
+			});
+		}
+	}
+	return doc;
+};
 
 export const nestedDocsPlugin =
-  (options: { collections: string[] }): Plugin =>
-  (config: Config): Config => ({
-    ...config,
-    collections: (config.collections || []).map((collection) => {
-      if (options.collections.includes(collection.slug)) {
-        return {
-          ...collection,
-          hooks: {
-            ...(collection.hooks || {}),
-            afterChange: [resaveChildrenHook, ...(collection.hooks?.afterChange || [])],
-          },
-        }
-      }
-      return collection
-    }),
-  })
+	(options: { collections: string[] }): Plugin =>
+	(config: Config): Config => ({
+		...config,
+		collections: (config.collections || []).map((collection) => {
+			if (options.collections.includes(collection.slug)) {
+				return {
+					...collection,
+					hooks: {
+						...(collection.hooks || {}),
+						afterChange: [resaveChildrenHook, ...(collection.hooks?.afterChange || [])],
+					},
+				};
+			}
+			return collection;
+		}),
+	});
 ```
 
 ## Adding Root-Level Endpoints
 
 ```typescript
 export const seoPlugin =
-  (options: { generateTitle?: (doc: any) => string }): Plugin =>
-  (config: Config): Config => {
-    const generateTitleEndpoint: Endpoint = {
-      path: '/plugin-seo/generate-title',
-      method: 'post',
-      handler: async (req) => {
-        const data = await req.json?.()
-        const result = options.generateTitle ? options.generateTitle(data.doc) : ''
-        return Response.json({ result })
-      },
-    }
+	(options: { generateTitle?: (doc: any) => string }): Plugin =>
+	(config: Config): Config => {
+		const generateTitleEndpoint: Endpoint = {
+			path: "/plugin-seo/generate-title",
+			method: "post",
+			handler: async (req) => {
+				const data = await req.json?.();
+				const result = options.generateTitle ? options.generateTitle(data.doc) : "";
+				return Response.json({ result });
+			},
+		};
 
-    return {
-      ...config,
-      endpoints: [...(config.endpoints ?? []), generateTitleEndpoint],
-    }
-  }
+		return {
+			...config,
+			endpoints: [...(config.endpoints ?? []), generateTitleEndpoint],
+		};
+	};
 ```
 
 ## Field Overrides with Defaults
 
 ```typescript
-type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
+type FieldsOverride = (args: { defaultFields: Field[] }) => Field[];
 
 interface PluginConfig {
-  collections?: string[]
-  fields?: FieldsOverride
+	collections?: string[];
+	fields?: FieldsOverride;
 }
 
 export const myPlugin =
-  (options: PluginConfig): Plugin =>
-  (config: Config): Config => {
-    const defaultFields: Field[] = [
-      { name: 'title', type: 'text' },
-      { name: 'description', type: 'textarea' },
-    ]
+	(options: PluginConfig): Plugin =>
+	(config: Config): Config => {
+		const defaultFields: Field[] = [
+			{ name: "title", type: "text" },
+			{ name: "description", type: "textarea" },
+		];
 
-    const fields =
-      options.fields && typeof options.fields === 'function'
-        ? options.fields({ defaultFields })
-        : defaultFields
+		const fields =
+			options.fields && typeof options.fields === "function"
+				? options.fields({ defaultFields })
+				: defaultFields;
 
-    return {
-      ...config,
-      collections: config.collections?.map((collection) => {
-        if (options.collections?.includes(collection.slug)) {
-          return {
-            ...collection,
-            fields: [...(collection.fields || []), ...fields],
-          }
-        }
-        return collection
-      }),
-    }
-  }
+		return {
+			...config,
+			collections: config.collections?.map((collection) => {
+				if (options.collections?.includes(collection.slug)) {
+					return {
+						...collection,
+						fields: [...(collection.fields || []), ...fields],
+					};
+				}
+				return collection;
+			}),
+		};
+	};
 ```
 
 ## Disable Plugin Pattern
 
 ```typescript
 interface PluginConfig {
-  disabled?: boolean
-  collections?: string[]
+	disabled?: boolean;
+	collections?: string[];
 }
 
 export const myPlugin =
-  (options: PluginConfig): Plugin =>
-  (config: Config): Config => {
-    // Always add collections/fields for database schema consistency
-    if (!config.collections) {
-      config.collections = []
-    }
+	(options: PluginConfig): Plugin =>
+	(config: Config): Config => {
+		// Always add collections/fields for database schema consistency
+		if (!config.collections) {
+			config.collections = [];
+		}
 
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [{ name: 'title', type: 'text' }],
-    })
+		config.collections.push({
+			slug: "plugin-collection",
+			fields: [{ name: "title", type: "text" }],
+		});
 
-    // If disabled, return early but keep schema changes
-    if (options.disabled) {
-      return config
-    }
+		// If disabled, return early but keep schema changes
+		if (options.disabled) {
+			return config;
+		}
 
-    // Add endpoints, hooks, components only when enabled
-    config.endpoints = [
-      ...(config.endpoints ?? []),
-      {
-        path: '/my-endpoint',
-        method: 'get',
-        handler: async () => Response.json({ message: 'Hello' }),
-      },
-    ]
+		// Add endpoints, hooks, components only when enabled
+		config.endpoints = [
+			...(config.endpoints ?? []),
+			{
+				path: "/my-endpoint",
+				method: "get",
+				handler: async () => Response.json({ message: "Hello" }),
+			},
+		];
 
-    return config
-  }
+		return config;
+	};
 ```
 
 ## Admin Components
 
 ```typescript
 export const myPlugin =
-  (options: PluginConfig): Plugin =>
-  (config: Config): Config => {
-    if (!config.admin) config.admin = {}
-    if (!config.admin.components) config.admin.components = {}
-    if (!config.admin.components.beforeDashboard) {
-      config.admin.components.beforeDashboard = []
-    }
+	(options: PluginConfig): Plugin =>
+	(config: Config): Config => {
+		if (!config.admin) config.admin = {};
+		if (!config.admin.components) config.admin.components = {};
+		if (!config.admin.components.beforeDashboard) {
+			config.admin.components.beforeDashboard = [];
+		}
 
-    // Add client component
-    config.admin.components.beforeDashboard.push('my-plugin-name/client#BeforeDashboardClient')
+		// Add client component
+		config.admin.components.beforeDashboard.push("my-plugin-name/client#BeforeDashboardClient");
 
-    // Add server component (RSC)
-    config.admin.components.beforeDashboard.push('my-plugin-name/rsc#BeforeDashboardServer')
+		// Add server component (RSC)
+		config.admin.components.beforeDashboard.push("my-plugin-name/rsc#BeforeDashboardServer");
 
-    return config
-  }
+		return config;
+	};
 ```
 
 ## onInit Hook
 
 ```typescript
 export const myPlugin =
-  (options: PluginConfig): Plugin =>
-  (config: Config): Config => {
-    const incomingOnInit = config.onInit
+	(options: PluginConfig): Plugin =>
+	(config: Config): Config => {
+		const incomingOnInit = config.onInit;
 
-    config.onInit = async (payload) => {
-      // IMPORTANT: Call existing onInit first
-      if (incomingOnInit) await incomingOnInit(payload)
+		config.onInit = async (payload) => {
+			// IMPORTANT: Call existing onInit first
+			if (incomingOnInit) await incomingOnInit(payload);
 
-      // Plugin initialization
-      payload.logger.info('Plugin initialized')
+			// Plugin initialization
+			payload.logger.info("Plugin initialized");
 
-      // Example: Seed data
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: { id: { equals: 'seeded-by-plugin' } },
-      })
+			// Example: Seed data
+			const { totalDocs } = await payload.count({
+				collection: "plugin-collection",
+				where: { id: { equals: "seeded-by-plugin" } },
+			});
 
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: { id: 'seeded-by-plugin' },
-        })
-      }
-    }
+			if (totalDocs === 0) {
+				await payload.create({
+					collection: "plugin-collection",
+					data: { id: "seeded-by-plugin" },
+				});
+			}
+		};
 
-    return config
-  }
+		return config;
+	};
 ```
 
 ## Best Practices
@@ -288,20 +288,20 @@ export const myPlugin =
 
 ```typescript
 // ✅ Good
-collections: [...(config.collections || []), newCollection]
+collections: [...(config.collections || []), newCollection];
 
 // ❌ Bad
-collections: [newCollection]
+collections: [newCollection];
 ```
 
 ### Respect User Overrides
 
 ```typescript
 const collection: CollectionConfig = {
-  slug: 'redirects',
-  fields: defaultFields,
-  ...options.overrides, // User overrides last
-}
+	slug: "redirects",
+	fields: defaultFields,
+	...options.overrides, // User overrides last
+};
 ```
 
 ### Hook Composition
@@ -319,5 +319,5 @@ hooks: {
 ### Type Safety
 
 ```typescript
-import type { Config, Plugin, CollectionConfig, Field } from 'payload'
+import type { Config, Plugin, CollectionConfig, Field } from "payload";
 ```

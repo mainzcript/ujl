@@ -1,11 +1,11 @@
 // Main adapter export
-export { svelteAdapter } from './adapter.js';
+export { svelteAdapter } from "./adapter.js";
 
 // Type exports
-export type { SvelteNodeDescriptor, SvelteAdapterOptions, MountedComponent } from './types.js';
+export type { MountedComponent, SvelteAdapterOptions, SvelteNodeDescriptor } from "./types.js";
 
 // Component exports
-export { AdapterRoot } from './components/index.js';
+export { AdapterRoot } from "./components/index.js";
 
 // Utility exports
-export { getModuleId } from './utils/events.js';
+export { getModuleId } from "./utils/events.js";

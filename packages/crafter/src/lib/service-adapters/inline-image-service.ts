@@ -1,12 +1,12 @@
+import { generateUid } from "@ujl-framework/core";
 import type {
-	ImageMetadata,
 	ImageEntry,
+	ImageMetadata,
 	ImageSource,
-	UJLCImageLibrary
-} from '@ujl-framework/types';
-import type { ImageService, UploadResult } from './image-service.js';
-import { generateUid } from '@ujl-framework/core';
-import { compressImage } from '../utils/image-compression.js';
+	UJLCImageLibrary,
+} from "@ujl-framework/types";
+import { compressImage } from "../utils/image-compression.js";
+import type { ImageService, UploadResult } from "./image-service.js";
 
 /**
  * Inline Image Service
@@ -25,7 +25,7 @@ export class InlineImageService implements ImageService {
 	 */
 	constructor(
 		getImages: () => UJLCImageLibrary,
-		updateImages: (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void
+		updateImages: (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void,
 	) {
 		this.getImages = getImages;
 		this.updateImages = updateImages;
@@ -44,14 +44,14 @@ export class InlineImageService implements ImageService {
 		const reader = new FileReader();
 		const base64Url = await new Promise<string>((resolve, reject) => {
 			reader.onload = () => {
-				if (typeof reader.result === 'string') {
+				if (typeof reader.result === "string") {
 					resolve(reader.result);
 				} else {
-					reject(new Error('Failed to convert image to Base64'));
+					reject(new Error("Failed to convert image to Base64"));
 				}
 			};
 			reader.onerror = () => {
-				reject(new Error('Failed to read file'));
+				reject(new Error("Failed to read file"));
 			};
 			reader.readAsDataURL(compressedFile);
 		});
@@ -63,14 +63,14 @@ export class InlineImageService implements ImageService {
 			metadata: {
 				...metadata,
 				filesize: compressedFile.size, // Use compressed size
-				mimeType: compressedFile.type // Use compressed type
-			}
+				mimeType: compressedFile.type, // Use compressed type
+			},
 		};
 
 		// Store in image library
 		this.updateImages((currentImages) => ({
 			...currentImages,
-			[imageId]: entry
+			[imageId]: entry,
 		}));
 
 		return { imageId, entry };

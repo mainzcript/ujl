@@ -1,73 +1,73 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Button } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Button } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Button',
+		title: "Components/Base/Button",
 		component: Button,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			variant: {
-				control: { type: 'select' },
+				control: { type: "select" },
 				options: [
-					'default',
-					'ambient',
-					'primary',
-					'secondary',
-					'accent',
-					'success',
-					'warning',
-					'destructive',
-					'info',
-					'muted',
-					'outline',
-					'ghost'
+					"default",
+					"ambient",
+					"primary",
+					"secondary",
+					"accent",
+					"success",
+					"warning",
+					"destructive",
+					"info",
+					"muted",
+					"outline",
+					"ghost",
 				],
-				description: 'The visual style variant of the button',
+				description: "The visual style variant of the button",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			size: {
-				control: { type: 'select' },
-				options: ['default', 'sm', 'lg', 'icon'],
-				description: 'The size of the button',
+				control: { type: "select" },
+				options: ["default", "sm", "lg", "icon"],
+				description: "The size of the button",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the button is disabled',
+				control: "boolean",
+				description: "Whether the button is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			as: {
-				control: { type: 'select' },
-				options: ['button', 'a', 'div', 'span'],
-				description: 'The element type to render',
+				control: { type: "select" },
+				options: ["button", "a", "div", "span"],
+				description: "The element type to render",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'button' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "button" },
+				},
 			},
 			href: {
-				control: 'text',
+				control: "text",
 				description: 'URL for link buttons (automatically sets as="a")',
 				table: {
-					category: 'Behavior'
-				}
-			}
+					category: "Behavior",
+				},
+			},
 		},
 		args: {
-			variant: 'default',
-			size: 'default',
-			disabled: false
-		}
+			variant: "default",
+			size: "default",
+			disabled: false,
+		},
 	});
 </script>
 

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 
 	let {
 		ref = $bindable(null),
-		class: className = '',
+		class: className = "",
 		children,
-		as = 'code',
+		as = "code",
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLElement>> & {
 		as?: keyof HTMLElementTagNameMap;
-		children?: import('svelte').Snippet;
+		children?: import("svelte").Snippet;
 	} = $props();
 </script>
 
@@ -18,8 +18,8 @@
 	this={as}
 	bind:this={ref}
 	class={cn(
-		'font-mono leading-(--typography-code-line-height) font-(--typography-code-weight) tracking-(--typography-code-letter-spacing) text-foreground',
-		className
+		"font-mono leading-(--typography-code-line-height) font-(--typography-code-weight) tracking-(--typography-code-letter-spacing) text-foreground",
+		className,
 	)}
 	{...restProps}
 >

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button, Kbd, KbdGroup } from '@ujl-framework/ui';
-	import ScissorsIcon from '@lucide/svelte/icons/scissors';
-	import CopyIcon from '@lucide/svelte/icons/copy';
-	import ClipboardPasteIcon from '@lucide/svelte/icons/clipboard-paste';
-	import DeleteIcon from '@lucide/svelte/icons/trash-2';
-	import BackspaceIcon from '@lucide/svelte/icons/delete';
-	import PlusIcon from '@lucide/svelte/icons/plus';
-	import { getModifierKey } from '$lib/utils/platform.js';
+	import { Button, Kbd, KbdGroup } from "@ujl-framework/ui";
+	import ScissorsIcon from "@lucide/svelte/icons/scissors";
+	import CopyIcon from "@lucide/svelte/icons/copy";
+	import ClipboardPasteIcon from "@lucide/svelte/icons/clipboard-paste";
+	import DeleteIcon from "@lucide/svelte/icons/trash-2";
+	import BackspaceIcon from "@lucide/svelte/icons/delete";
+	import PlusIcon from "@lucide/svelte/icons/plus";
+	import { getModifierKey } from "$lib/utils/platform.js";
 
 	let {
 		nodeId,
@@ -20,7 +20,7 @@
 		canCut = false,
 		canPaste = false,
 		canInsert = false,
-		canDelete = false
+		canDelete = false,
 	}: {
 		nodeId: string;
 		onCopy: (nodeId: string) => void;

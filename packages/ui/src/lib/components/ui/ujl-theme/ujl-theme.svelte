@@ -1,25 +1,25 @@
 <script lang="ts">
-	import type { UJLTTokenSet } from '@ujl-framework/types';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { generateThemeCSSVariables } from '$lib/utils/index.js';
-	import { generateUid } from '@ujl-framework/core';
-	import { setUjlThemeContext, parentOwnsToaster } from './context.js';
-	import { mode } from 'mode-watcher';
-	import { cn } from '$lib/utils.js';
-	import { Toaster } from '../sonner/index.js';
+	import type { UJLTTokenSet } from "@ujl-framework/types";
+	import type { HTMLAttributes } from "svelte/elements";
+	import { generateThemeCSSVariables } from "$lib/utils/index.js";
+	import { generateUid } from "@ujl-framework/core";
+	import { setUjlThemeContext, parentOwnsToaster } from "./context.js";
+	import { mode } from "mode-watcher";
+	import { cn } from "$lib/utils.js";
+	import { Toaster } from "../sonner/index.js";
 
 	let {
 		tokens,
-		mode: modeProp = 'system',
-		class: className = '',
+		mode: modeProp = "system",
+		class: className = "",
 		children,
 		portalContainer,
 		...restProps
 	}: {
 		tokens?: UJLTTokenSet;
-		mode?: 'light' | 'dark' | 'system';
+		mode?: "light" | "dark" | "system";
 		class?: string;
-		children: import('svelte').Snippet;
+		children: import("svelte").Snippet;
 		as?: keyof HTMLElementTagNameMap;
 		/** Container element for portals (Shadow DOM support). When set, overlay components render here instead of document.body */
 		portalContainer?: HTMLElement;
@@ -31,7 +31,7 @@
 
 	// If modeProp is provided, it overrides mode-watcher's system detection
 	const isDark = $derived(
-		modeProp === 'dark' ? true : modeProp === 'light' ? false : mode.current === 'dark'
+		modeProp === "dark" ? true : modeProp === "light" ? false : mode.current === "dark",
 	);
 
 	// Determine if this theme instance should own the Toaster
@@ -47,15 +47,15 @@
 		ownsToaster,
 		get portalContainer() {
 			return portalContainer;
-		}
+		},
 	});
 
 	const themeCSS = $derived(
 		tokens
 			? `[data-ujl-theme="${themeId}"] {\n\t${Object.entries(cssVars)
 					.map(([key, value]) => `\t${key}: ${value};`)
-					.join('\n')}\n}`
-			: ''
+					.join("\n")}\n}`
+			: "",
 	);
 
 	function updateStyle(element: HTMLStyleElement, css: string) {
@@ -63,11 +63,11 @@
 		return {
 			update(css: string) {
 				element.textContent = css;
-			}
+			},
 		};
 	}
 
-	const darkModeClass = $derived(isDark ? ' dark' : '');
+	const darkModeClass = $derived(isDark ? " dark" : "");
 </script>
 
 <div data-ujl-theme={themeId} class={cn(className, darkModeClass)} {...restProps}>

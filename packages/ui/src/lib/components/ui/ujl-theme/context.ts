@@ -1,6 +1,6 @@
-import { getContext, hasContext, setContext } from 'svelte';
+import { getContext, hasContext, setContext } from "svelte";
 
-const UJL_THEME_CONTEXT = Symbol.for('ujl:theme-context');
+const UJL_THEME_CONTEXT = Symbol.for("ujl:theme-context");
 
 /**
  * Context type for UJL theme system.

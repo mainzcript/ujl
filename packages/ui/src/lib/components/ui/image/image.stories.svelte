@@ -1,33 +1,33 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Image } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Image } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Image',
+		title: "Components/Base/Image",
 		component: Image,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			src: {
-				control: 'text',
-				description: 'Image source URL',
-				table: { category: 'Content' }
+				control: "text",
+				description: "Image source URL",
+				table: { category: "Content" },
 			},
 			alt: {
-				control: 'text',
-				description: 'Alternative text for accessibility',
-				table: { category: 'Accessibility' }
+				control: "text",
+				description: "Alternative text for accessibility",
+				table: { category: "Accessibility" },
 			},
 			width: {
-				control: 'number',
-				description: 'Image width',
-				table: { category: 'Dimensions' }
+				control: "number",
+				description: "Image width",
+				table: { category: "Dimensions" },
 			},
 			height: {
-				control: 'number',
-				description: 'Image height',
-				table: { category: 'Dimensions' }
-			}
-		}
+				control: "number",
+				description: "Image height",
+				table: { category: "Dimensions" },
+			},
+		},
 	});
 </script>
 
@@ -37,8 +37,8 @@
 		<Image
 			{...args}
 			src={args.src ||
-				'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=300&fit=crop'}
-			alt={args.alt || 'Sample landscape'}
+				"https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=300&fit=crop"}
+			alt={args.alt || "Sample landscape"}
 			width={args.width || 400}
 			height={args.height || 300}
 		/>
@@ -90,12 +90,12 @@
 </Story>
 
 <!-- Responsive -->
-<Story name="Responsive" args={{ alt: 'Responsive image' }}>
+<Story name="Responsive" args={{ alt: "Responsive image" }}>
 	{#snippet template(args)}
 		<div class="max-w-md">
 			<Image
 				src={args.src ||
-					'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&h=400&fit=crop'}
+					"https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&h=400&fit=crop"}
 				alt={args.alt}
 				class="w-full"
 			/>
@@ -139,8 +139,8 @@
 		<Image
 			{...args}
 			src={args.src ||
-				'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=300&fit=crop'}
-			alt={args.alt || 'Sample image'}
+				"https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=300&fit=crop"}
+			alt={args.alt || "Sample image"}
 		/>
 	{/snippet}
 </Story>

@@ -52,7 +52,7 @@ export class GridModule extends ModuleBase {
 		return {
 			type: "grid",
 			props: {
-				children: children.map(child => ({
+				children: children.map((child) => ({
 					type: "grid-item",
 					props: {
 						children: [child],

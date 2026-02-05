@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import PositionSpy from '$lib/utils/positionSpy.js';
-	import { cn } from '$lib/utils.js';
+	import { getContext } from "svelte";
+	import PositionSpy from "$lib/utils/positionSpy.js";
+	import { cn } from "$lib/utils.js";
 
 	let {
-		class: className = '',
-		activeClass = '',
-		inactiveClass = '',
+		class: className = "",
+		activeClass = "",
+		inactiveClass = "",
 		children,
-		href = '#',
+		href = "#",
 		external = false,
 		underline = false,
 		currentUrl,
@@ -16,19 +16,19 @@
 		...restProps
 	} = $props();
 
-	const contextUrl = getContext<{ url: URL }>('ujl:url');
+	const contextUrl = getContext<{ url: URL }>("ujl:url");
 	const effectiveUrl = $derived(currentUrl ?? contextUrl?.url);
 
-	const browser = typeof window !== 'undefined';
+	const browser = typeof window !== "undefined";
 
 	const baseStyle =
-		'hover:opacity-80 duration-200 text-flavor-foreground-accent font-(--typography-link-weight)';
+		"hover:opacity-80 duration-200 text-flavor-foreground-accent font-(--typography-link-weight)";
 	const underlineStyle = $derived(
 		underline !== undefined
 			? underline
-				? 'underline underline-offset-4'
-				: ''
-			: '[text-decoration:var(--typography-link-decoration)]'
+				? "underline underline-offset-4"
+				: ""
+			: "[text-decoration:var(--typography-link-decoration)]",
 	);
 
 	let url = $derived(browser ? new URL(href, effectiveUrl ?? window.location.href) : null);
@@ -59,7 +59,7 @@
 				? url.host === effectiveUrl.host &&
 					url.pathname === effectiveUrl.pathname &&
 					(!url.hash || hashActive)
-				: false
+				: false,
 	);
 
 	const dynamicClass = $derived(computedActive ? activeClass : inactiveClass);
@@ -68,7 +68,7 @@
 <a
 	{href}
 	class={cn(baseStyle, underlineStyle, className, dynamicClass)}
-	{...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+	{...external ? { target: "_blank", rel: "noopener noreferrer" } : {}}
 	{...restProps}
 >
 	{@render children?.()}

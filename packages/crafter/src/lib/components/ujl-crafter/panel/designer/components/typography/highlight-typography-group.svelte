@@ -3,16 +3,16 @@
 	Receives UJLTTypographyHighlight props and forwards changes via onChange callback to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTTypographyHighlight, UJLTColorPalette } from '@ujl-framework/types';
-	import { FlavorSelect, StyleToggles } from '$lib/components/ui/index.js';
+	import { untrack } from "svelte";
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTTypographyHighlight, UJLTColorPalette } from "@ujl-framework/types";
+	import { FlavorSelect, StyleToggles } from "$lib/components/ui/index.js";
 
 	let {
 		typography,
 		palette,
-		onChange
+		onChange,
 	}: {
 		typography: UJLTTypographyHighlight;
 		palette: UJLTColorPalette;
@@ -65,7 +65,7 @@
 					{palette}
 					onchange={(value) => {
 						flavor = value;
-						handleUpdate('flavor', value);
+						handleUpdate("flavor", value);
 					}}
 				/>
 				<StyleToggles
@@ -79,15 +79,15 @@
 					showTextTransform={false}
 					onItalicChange={(v) => {
 						italic = v;
-						handleUpdate('italic', v);
+						handleUpdate("italic", v);
 					}}
 					onUnderlineChange={(v) => {
 						underline = v;
-						handleUpdate('underline', v);
+						handleUpdate("underline", v);
 					}}
 					onBoldChange={(v) => {
 						bold = v;
-						handleUpdate('bold', v);
+						handleUpdate("bold", v);
 					}}
 				/>
 			</div>

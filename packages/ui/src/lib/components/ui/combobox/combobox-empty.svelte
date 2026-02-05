@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { CommandEmpty } from '../command/index.js';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { CommandEmpty } from "../command/index.js";
 
 	let {
 		ref = $bindable(null),

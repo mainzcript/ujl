@@ -1,7 +1,7 @@
 <script lang="ts">
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import { cn, type WithElementRef } from '$lib/utils.js';
-	import type { HTMLLiAttributes } from 'svelte/elements';
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import { cn, type WithElementRef } from "$lib/utils.js";
+	import type { HTMLLiAttributes } from "svelte/elements";
 
 	let {
 		ref = $bindable(null),
@@ -16,7 +16,7 @@
 	data-slot="breadcrumb-separator"
 	role="presentation"
 	aria-hidden="true"
-	class={cn('text-foreground/70 [&>svg]:size-3.5', className)}
+	class={cn("text-foreground/70 [&>svg]:size-3.5", className)}
 	{...restProps}
 >
 	{#if children}

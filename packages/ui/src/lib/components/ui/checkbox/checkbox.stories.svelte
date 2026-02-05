@@ -1,43 +1,43 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Checkbox } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Checkbox } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/Checkbox',
+		title: "Components/Forms/Checkbox",
 		component: Checkbox,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			checked: {
-				control: 'boolean',
-				description: 'Whether the checkbox is checked',
+				control: "boolean",
+				description: "Whether the checkbox is checked",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			indeterminate: {
-				control: 'boolean',
-				description: 'Whether the checkbox is in an indeterminate state',
+				control: "boolean",
+				description: "Whether the checkbox is in an indeterminate state",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the checkbox is disabled',
+				control: "boolean",
+				description: "Whether the checkbox is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
 			checked: false,
 			indeterminate: false,
-			disabled: false
-		}
+			disabled: false,
+		},
 	});
 </script>
 

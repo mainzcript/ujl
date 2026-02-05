@@ -3,15 +3,15 @@
 	Receives UJLTTypographyLink props and forwards changes via onChange callback to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTTypographyLink } from '@ujl-framework/types';
-	import { StyleToggles } from '$lib/components/ui/index.js';
+	import { untrack } from "svelte";
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTTypographyLink } from "@ujl-framework/types";
+	import { StyleToggles } from "$lib/components/ui/index.js";
 
 	let {
 		typography,
-		onChange
+		onChange,
 	}: {
 		typography: UJLTTypographyLink;
 		onChange?: (updates: Partial<UJLTTypographyLink>) => void;
@@ -63,11 +63,11 @@
 					showTextTransform={false}
 					onUnderlineChange={(v) => {
 						underline = v;
-						handleUpdate('underline', v);
+						handleUpdate("underline", v);
 					}}
 					onBoldChange={(v) => {
 						bold = v;
-						handleUpdate('bold', v);
+						handleUpdate("bold", v);
 					}}
 				/>
 			</div>

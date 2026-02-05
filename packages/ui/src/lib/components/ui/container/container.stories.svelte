@@ -1,29 +1,29 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Container } from './index.ts';
-	import { Card, CardHeader, CardTitle, CardContent } from '../card/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Container } from "./index.ts";
+	import { Card, CardHeader, CardTitle, CardContent } from "../card/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/Container',
+		title: "Components/Layout/Container",
 		component: Container,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			class: ''
-		}
+			class: "",
+		},
 	});
 </script>
 
 <!-- Default -->
-<Story name="Default" args={{ class: 'bg-background py-8' }}>
+<Story name="Default" args={{ class: "bg-background py-8" }}>
 	{#snippet template(args)}
 		<div class="w-full bg-muted/30">
 			<Container class={args.class}>
@@ -37,7 +37,7 @@
 </Story>
 
 <!-- With Content -->
-<Story name="With Content" args={{ class: 'space-y-4 py-8' }}>
+<Story name="With Content" args={{ class: "space-y-4 py-8" }}>
 	{#snippet template(args)}
 		<div class="w-full bg-muted/30">
 			<Container class={args.class}>
@@ -72,7 +72,7 @@
 </Story>
 
 <!-- With Padding Variants -->
-<Story name="With Padding Variants" args={{ class: 'bg-background py-8' }}>
+<Story name="With Padding Variants" args={{ class: "bg-background py-8" }}>
 	{#snippet template(args)}
 		<div class="w-full space-y-4 bg-muted/30">
 			<Container class="bg-background py-4">
@@ -89,7 +89,7 @@
 </Story>
 
 <!-- Max Width Override -->
-<Story name="Max Width Override" args={{ class: 'bg-background py-4' }}>
+<Story name="Max Width Override" args={{ class: "bg-background py-4" }}>
 	{#snippet template(args)}
 		<div class="w-full space-y-4 bg-muted/30">
 			<Container class="max-w-md bg-background py-4">
@@ -112,7 +112,7 @@
 </Story>
 
 <!-- Hero Section -->
-<Story name="Hero Section" args={{ class: 'py-24 text-center' }}>
+<Story name="Hero Section" args={{ class: "py-24 text-center" }}>
 	{#snippet template(args)}
 		<div class="w-full bg-gradient-to-b from-primary/10 to-background">
 			<Container class={args.class}>
@@ -127,7 +127,7 @@
 </Story>
 
 <!-- Article Layout -->
-<Story name="Article Layout" args={{ class: 'max-w-prose bg-background py-8' }}>
+<Story name="Article Layout" args={{ class: "max-w-prose bg-background py-8" }}>
 	{#snippet template(args)}
 		<div class="w-full bg-muted/30">
 			<Container class={args.class}>
@@ -152,7 +152,7 @@
 <Story name="Playground">
 	{#snippet template(args)}
 		<div class="w-full bg-muted/30">
-			<Container class={args.class || 'bg-background py-8'}>
+			<Container class={args.class || "bg-background py-8"}>
 				<p>Customize the container using CSS classes.</p>
 			</Container>
 		</div>

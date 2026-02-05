@@ -9,18 +9,18 @@
 		DialogDescription,
 		DialogBody,
 		DialogFooter,
-		DialogCloseButton
-	} from '@ujl-framework/ui';
-	import { getContext } from 'svelte';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
-	import type { ImageMetadata, ImageEntry } from '@ujl-framework/types';
-	import ImageIcon from '@lucide/svelte/icons/image';
-	import TrashIcon from '@lucide/svelte/icons/trash-2';
-	import { logger } from '$lib/utils/logger.js';
+		DialogCloseButton,
+	} from "@ujl-framework/ui";
+	import { getContext } from "svelte";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import type { ImageMetadata, ImageEntry } from "@ujl-framework/types";
+	import ImageIcon from "@lucide/svelte/icons/image";
+	import TrashIcon from "@lucide/svelte/icons/trash-2";
+	import { logger } from "$lib/utils/logger.js";
 
 	let {
 		onSelect,
-		selectedImageId
+		selectedImageId,
 	}: {
 		onSelect?: (imageId: string) => void;
 		selectedImageId?: string | null;
@@ -43,10 +43,10 @@
 			imageEntries = entries.map(({ id, entry }: { id: string; entry: ImageEntry }) => ({
 				id,
 				src: entry.src,
-				metadata: entry.metadata
+				metadata: entry.metadata,
 			}));
 		} catch (err) {
-			logger.error('Failed to load image entries:', err);
+			logger.error("Failed to load image entries:", err);
 		} finally {
 			isLoading = false;
 		}
@@ -77,10 +77,10 @@
 			if (success) {
 				await loadImageEntries();
 			} else {
-				logger.error('Failed to delete image:', imageToDelete);
+				logger.error("Failed to delete image:", imageToDelete);
 			}
 		} catch (err) {
-			logger.error('Error deleting image:', err);
+			logger.error("Error deleting image:", err);
 		} finally {
 			deleteDialogOpen = false;
 			imageToDelete = null;

@@ -3,10 +3,10 @@
 	Receives UJLTColorSet props and forwards changes via on*Change callbacks to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTColorSet, UJLTColorPalette } from '@ujl-framework/types';
-	import { ColorPaletteInput } from '$lib/components/ui/index.js';
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTColorSet, UJLTColorPalette } from "@ujl-framework/types";
+	import { ColorPaletteInput } from "$lib/components/ui/index.js";
 
 	let {
 		palette,
@@ -17,7 +17,7 @@
 		onSuccessChange,
 		onWarningChange,
 		onDestructiveChange,
-		onInfoChange
+		onInfoChange,
 	}: {
 		palette: UJLTColorPalette;
 		successColorSet: UJLTColorSet | null;

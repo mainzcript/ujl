@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import { type WithElementRef } from '$lib/utils.js';
-	import { getDrawerContext } from './context.js';
+	import type { Snippet } from "svelte";
+	import type { HTMLButtonAttributes } from "svelte/elements";
+	import { type WithElementRef } from "$lib/utils.js";
+	import { getDrawerContext } from "./context.js";
 
 	interface DrawerTriggerProps extends WithElementRef<HTMLButtonAttributes> {
 		children?: Snippet;

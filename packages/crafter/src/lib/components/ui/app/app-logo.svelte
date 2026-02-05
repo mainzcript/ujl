@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { useAppRegistry } from './context.svelte.js';
+	import type { Snippet } from "svelte";
+	import { useAppRegistry } from "./context.svelte.js";
 
 	let { children }: { children?: Snippet } = $props();
 
@@ -9,7 +9,7 @@
 	// Register content so App can render it in the logo area
 	$effect(() => {
 		if (children) {
-			return registry.register('logo', children);
+			return registry.register("logo", children);
 		}
 	});
 </script>

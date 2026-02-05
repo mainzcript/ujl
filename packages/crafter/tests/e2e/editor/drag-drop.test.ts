@@ -6,17 +6,17 @@
  * as drag-drop behavior can be browser-specific and fragile.
  */
 
-import { test, expect } from '@playwright/test';
-import { CrafterPage } from '../fixtures/test-utils.js';
+import { expect, test } from "@playwright/test";
+import { CrafterPage } from "../fixtures/test-utils.js";
 
-test.describe('Drag and Drop', () => {
-	test('should not allow dropping parent into child', async ({ page }) => {
+test.describe("Drag and Drop", () => {
+	test("should not allow dropping parent into child", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
 		// Find a node with children (in Shadow DOM)
 		const nodesWithChevron = crafter.crafterElement.locator(
-			'[data-tree-node-id]:has([data-crafter="tree-chevron"])'
+			'[data-tree-node-id]:has([data-crafter="tree-chevron"])',
 		);
 		const count = await nodesWithChevron.count();
 
@@ -33,7 +33,7 @@ test.describe('Drag and Drop', () => {
 		await crafter.waitForAnimation();
 
 		// Get parent node ID
-		const parentId = await parentNode.getAttribute('data-tree-node-id');
+		const parentId = await parentNode.getAttribute("data-tree-node-id");
 
 		// Get all visible nodes after expansion
 		const expandedNodeIds = await crafter.getVisibleTreeNodeIds();
@@ -53,13 +53,13 @@ test.describe('Drag and Drop', () => {
 				// Manual drag
 				await page.mouse.move(
 					parentBox.x + parentBox.width / 2,
-					parentBox.y + parentBox.height / 2
+					parentBox.y + parentBox.height / 2,
 				);
 				await page.mouse.down();
 				await page.mouse.move(
 					targetBox.x + targetBox.width / 2,
 					targetBox.y + targetBox.height / 2,
-					{ steps: 5 }
+					{ steps: 5 },
 				);
 				await page.mouse.up();
 

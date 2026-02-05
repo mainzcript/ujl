@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { UJLAbstractImageNode } from '@ujl-framework/types';
-	import ImageIcon from '@lucide/svelte/icons/image';
+	import type { UJLAbstractImageNode } from "@ujl-framework/types";
+	import ImageIcon from "@lucide/svelte/icons/image";
 
 	interface Props {
 		node: UJLAbstractImageNode;
@@ -10,12 +10,12 @@
 	let { node, showMetadata = false }: Props = $props();
 
 	const hasImage = $derived(node.props.image !== null);
-	const imageUrl = $derived(node.props.image?.src ?? '');
-	const altText = $derived(node.props.alt || '');
+	const imageUrl = $derived(node.props.image?.src ?? "");
+	const altText = $derived(node.props.alt || "");
 </script>
 
 <svelte:element
-	this={'div'}
+	this={"div"}
 	data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
 	class="border-border bg-muted block w-full rounded-md border-2"
 >

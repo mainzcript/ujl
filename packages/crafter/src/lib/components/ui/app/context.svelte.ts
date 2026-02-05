@@ -1,6 +1,6 @@
-import { getContext, setContext } from 'svelte';
-import type { Snippet } from 'svelte';
-import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from './constants.js';
+import type { Snippet } from "svelte";
+import { getContext, setContext } from "svelte";
+import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from "./constants.js";
 
 export type AppInitOptions = {
 	initialSidebarOpen?: boolean;
@@ -150,10 +150,10 @@ class AppState {
 	}
 }
 
-const SYMBOL_KEY = 'crafter-app';
-const REGISTRY_KEY = 'crafter-app-registry';
+const SYMBOL_KEY = "crafter-app";
+const REGISTRY_KEY = "crafter-app-registry";
 
-export type AppSlot = 'logo' | 'header' | 'sidebar' | 'canvas' | 'panel';
+export type AppSlot = "logo" | "header" | "sidebar" | "canvas" | "panel";
 
 /**
  * Registry for App component slots.
@@ -166,7 +166,7 @@ class AppRegistry {
 		header: null,
 		sidebar: null,
 		canvas: null,
-		panel: null
+		panel: null,
 	});
 
 	/**

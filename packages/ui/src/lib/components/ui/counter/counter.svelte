@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy, tick } from "svelte";
 
 	// Declare props
-	export let className = '';
-	export let prefix = '';
-	export let suffix = '';
+	export let className = "";
+	export let prefix = "";
+	export let suffix = "";
 	export let end = 999;
 	export let start = 0;
 	export let duration = 0.5;
@@ -31,7 +31,7 @@
 						}
 					}
 				},
-				{ threshold: 0.75 }
+				{ threshold: 0.75 },
 			);
 			observer.observe(counterRef);
 		}

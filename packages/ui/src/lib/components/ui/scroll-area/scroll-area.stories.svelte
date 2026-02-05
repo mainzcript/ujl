@@ -1,53 +1,53 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { ScrollArea } from './index.ts';
-	import { Separator } from '../separator/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { ScrollArea } from "./index.ts";
+	import { Separator } from "../separator/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/ScrollArea',
+		title: "Components/Layout/ScrollArea",
 		component: ScrollArea,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			orientation: {
-				control: { type: 'select' },
-				options: ['vertical', 'horizontal', 'both'],
-				description: 'The scrollbar orientation to display',
+				control: { type: "select" },
+				options: ["vertical", "horizontal", "both"],
+				description: "The scrollbar orientation to display",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'vertical' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "vertical" },
+				},
 			},
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			orientation: 'vertical'
-		}
+			orientation: "vertical",
+		},
 	});
 
 	const tags = Array.from({ length: 50 }).map((_, i, a) => `Tag ${a.length - i}`);
 
 	const artworks = [
-		{ title: 'The Starry Night', artist: 'Vincent van Gogh', year: '1889' },
-		{ title: 'Mona Lisa', artist: 'Leonardo da Vinci', year: '1503-1519' },
-		{ title: 'The Persistence of Memory', artist: 'Salvador Dalí', year: '1931' },
-		{ title: 'The Scream', artist: 'Edvard Munch', year: '1893' },
-		{ title: 'Girl with a Pearl Earring', artist: 'Johannes Vermeer', year: '1665' },
-		{ title: 'The Birth of Venus', artist: 'Sandro Botticelli', year: '1485' },
-		{ title: 'Guernica', artist: 'Pablo Picasso', year: '1937' },
-		{ title: 'The Kiss', artist: 'Gustav Klimt', year: '1907-1908' },
-		{ title: 'A Sunday on La Grande Jatte', artist: 'Georges Seurat', year: '1884-1886' },
-		{ title: 'The Night Watch', artist: 'Rembrandt', year: '1642' }
+		{ title: "The Starry Night", artist: "Vincent van Gogh", year: "1889" },
+		{ title: "Mona Lisa", artist: "Leonardo da Vinci", year: "1503-1519" },
+		{ title: "The Persistence of Memory", artist: "Salvador Dalí", year: "1931" },
+		{ title: "The Scream", artist: "Edvard Munch", year: "1893" },
+		{ title: "Girl with a Pearl Earring", artist: "Johannes Vermeer", year: "1665" },
+		{ title: "The Birth of Venus", artist: "Sandro Botticelli", year: "1485" },
+		{ title: "Guernica", artist: "Pablo Picasso", year: "1937" },
+		{ title: "The Kiss", artist: "Gustav Klimt", year: "1907-1908" },
+		{ title: "A Sunday on La Grande Jatte", artist: "Georges Seurat", year: "1884-1886" },
+		{ title: "The Night Watch", artist: "Rembrandt", year: "1642" },
 	];
 </script>
 
 <!-- Default -->
-<Story name="Default" args={{ orientation: 'vertical' }}>
+<Story name="Default" args={{ orientation: "vertical" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-72 w-48 rounded-md border">
 			<div class="p-4">
@@ -62,7 +62,7 @@
 </Story>
 
 <!-- Horizontal -->
-<Story name="Horizontal" args={{ orientation: 'horizontal' }}>
+<Story name="Horizontal" args={{ orientation: "horizontal" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="w-96 rounded-md border whitespace-nowrap">
 			<div class="flex w-max space-x-4 p-4">
@@ -88,7 +88,7 @@
 </Story>
 
 <!-- Both Directions -->
-<Story name="Both Directions" args={{ orientation: 'both' }}>
+<Story name="Both Directions" args={{ orientation: "both" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-72 w-96 rounded-md border">
 			<div class="w-[600px] p-4">
@@ -121,21 +121,21 @@
 </Story>
 
 <!-- Chat Messages -->
-<Story name="Chat Messages" args={{ orientation: 'vertical' }}>
+<Story name="Chat Messages" args={{ orientation: "vertical" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-80 w-80 rounded-md border">
 			<div class="flex flex-col gap-4 p-4">
 				{#each [...Array(15).keys()] as i (i)}
-					<div class={i % 2 === 0 ? 'self-start' : 'self-end'}>
+					<div class={i % 2 === 0 ? "self-start" : "self-end"}>
 						<div
-							class={`max-w-[200px] rounded-lg px-3 py-2 text-sm ${i % 2 === 0 ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}
+							class={`max-w-[200px] rounded-lg px-3 py-2 text-sm ${i % 2 === 0 ? "bg-muted" : "bg-primary text-primary-foreground"}`}
 						>
 							{i % 2 === 0
-								? 'This is a message from the other person.'
-								: 'This is my reply to the message.'}
+								? "This is a message from the other person."
+								: "This is my reply to the message."}
 						</div>
 						<p class="mt-1 text-xs text-muted-foreground">
-							{i % 2 === 0 ? 'John' : 'You'} · {i + 1}m ago
+							{i % 2 === 0 ? "John" : "You"} · {i + 1}m ago
 						</p>
 					</div>
 				{/each}
@@ -145,7 +145,7 @@
 </Story>
 
 <!-- File List -->
-<Story name="File List" args={{ orientation: 'vertical' }}>
+<Story name="File List" args={{ orientation: "vertical" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-64 w-72 rounded-md border">
 			<div class="p-2">
@@ -175,7 +175,7 @@
 </Story>
 
 <!-- Code Block -->
-<Story name="Code Block" args={{ orientation: 'both' }}>
+<Story name="Code Block" args={{ orientation: "both" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-64 w-96 rounded-md border bg-zinc-950">
 			<pre class="p-4 text-sm text-zinc-100"><code
@@ -211,7 +211,7 @@ console.log("Sum:", results.reduce((a, b) => a + b.value, 0));`}</code
 </Story>
 
 <!-- Notification List -->
-<Story name="Notification List" args={{ orientation: 'vertical' }}>
+<Story name="Notification List" args={{ orientation: "vertical" }}>
 	{#snippet template(args)}
 		<ScrollArea {...args} class="h-80 w-80 rounded-md border">
 			<div class="p-4">

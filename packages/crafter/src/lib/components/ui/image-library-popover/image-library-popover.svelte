@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { ImageLibraryBrowser } from '../image-library-browser/index.js';
-	import { ImageLibraryUploader } from '../image-library-uploader/index.js';
+	import { ImageLibraryBrowser } from "../image-library-browser/index.js";
+	import { ImageLibraryUploader } from "../image-library-uploader/index.js";
 
 	let {
 		selectedImageId,
 		onSelect,
 		onUploadComplete,
-		onClose
+		onClose,
 	}: {
 		selectedImageId?: string | null;
 		onSelect?: (imageId: string) => void;
