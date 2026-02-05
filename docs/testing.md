@@ -144,7 +144,7 @@ pnpm rtc:lite
 
 ## CI/CD Integration
 
-The GitLab CI/CD pipeline runs tests automatically:
+The CI pipeline (GitHub Actions) runs tests automatically once configured:
 
 | Job | Stage | Description |
 |-----|-------|-------------|

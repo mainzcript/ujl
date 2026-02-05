@@ -120,7 +120,7 @@ export default withMermaid({
 			},
 		],
 
-		socialLinks: [{ icon: "gitlab", link: "https://gitlab.mainzcript.eu/ujl-framework/ujl" }],
+		socialLinks: [{ icon: "github", link: "https://github.com/mainzcript/ujl" }],
 
 		footer: {
 			message: "UJL Crafter - Der erste Open-Source WYSIWYG Editor ohne Design-Chaos",

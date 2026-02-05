@@ -245,7 +245,7 @@ Unentdeckte Regressionen treten bei Code-Änderungen häufiger auf, da automatis
 
 **Mitigationsmaßnahmen:**
 
-Coverage-Ziele von mindestens 70% für wichtige Code-Pfade werden angestrebt. Playwright E2E-Tests dienen als Fallback für Crafter-Workflows und kritische User-Journeys. Test-Driven Development wird für neue Features etabliert, um Coverage schrittweise zu erhöhen. CI-Integration mit Coverage-Reporting in GitLab CI macht Fortschritte transparent.
+Coverage-Ziele von mindestens 70% für wichtige Code-Pfade werden angestrebt. Playwright E2E-Tests dienen als Fallback für Crafter-Workflows und kritische User-Journeys. Test-Driven Development wird für neue Features etabliert, um Coverage schrittweise zu erhöhen. CI-Integration mit Coverage-Reporting macht Fortschritte transparent.
 
 **Status:** Aktiv in Bearbeitung
 

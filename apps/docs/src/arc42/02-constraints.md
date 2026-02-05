@@ -103,15 +103,18 @@ Verschiedene Adapter können das gleiche AST in unterschiedliche Ausgabeformate 
 | **Koordinierte Releases**    | Alle Packages zusammen releasen           | Versionsnummern synchron halten                           |
 | **Noch kein NPM-Publishing** | Aktuell nur interne Versionierung         | Vorbereitet für zukünftiges Public Publishing             |
 
-### 2.2.4 CI/CD Pipeline
+### 2.2.4 CI Pipeline (Build/Checks)
 
 | Stage       | Tools/Commands                    | Zweck                                   |
 | ----------- | --------------------------------- | --------------------------------------- |
 | **install** | `pnpm install --frozen-lockfile`  | Dependencies installieren, Cache nutzen |
 | **build**   | `pnpm run build`                  | Alle Packages + Docs builden            |
-| **test**    | `pnpm run test`                   | Vitest Unit Tests ausführen             |
+| **test**    | `pnpm run test`                   | Vitest Unit Tests ausfuehren            |
 | **quality** | `pnpm run lint`, `pnpm run check` | ESLint, TypeScript Type Checking        |
-| **deploy**  | GitLab Pages (nur main/develop)   | Automatische Dokumentations-Deployments |
+
+### 2.2.5 Auslieferung der Dokumentation
+
+Die Dokumentation ist eine statische Website. In CI wird sie gebaut (`apps/docs/dist/`) und anschliessend manuell auf den Webserver hochgeladen.
 
 ## 2.3 Konventionen
 
