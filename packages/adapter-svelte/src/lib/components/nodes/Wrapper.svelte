@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { UJLAbstractNode } from '@ujl-framework/types';
-	import ASTNode from '../ASTNode.svelte';
+	import type { UJLAbstractNode } from "@ujl-framework/types";
+	import ASTNode from "../ASTNode.svelte";
 
 	interface Props {
-		node: UJLAbstractNode & { type: 'wrapper' };
+		node: UJLAbstractNode & { type: "wrapper" };
 		showMetadata?: boolean;
 	}
 

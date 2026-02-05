@@ -1,1 +1,1 @@
-export { default as StyleToggles } from './style-toggles.svelte';
+export { default as StyleToggles } from "./style-toggles.svelte";

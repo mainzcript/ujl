@@ -1,42 +1,42 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Alert, AlertDescription, AlertTitle } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Alert, AlertDescription, AlertTitle } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Feedback/Alert',
+		title: "Components/Feedback/Alert",
 		component: Alert,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			variant: {
-				control: { type: 'select' },
+				control: { type: "select" },
 				options: [
-					'default',
-					'ambient',
-					'primary',
-					'secondary',
-					'accent',
-					'success',
-					'warning',
-					'destructive',
-					'info'
+					"default",
+					"ambient",
+					"primary",
+					"secondary",
+					"accent",
+					"success",
+					"warning",
+					"destructive",
+					"info",
 				],
-				description: 'The visual style variant of the alert',
+				description: "The visual style variant of the alert",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
+					category: "Appearance",
+				},
+			},
 		},
 		args: {
-			variant: 'default'
-		}
+			variant: "default",
+		},
 	});
 </script>
 
@@ -174,7 +174,7 @@
 </Story>
 
 <!-- Description Only -->
-<Story name="Description Only" args={{ variant: 'info' }}>
+<Story name="Description Only" args={{ variant: "info" }}>
 	{#snippet template(args)}
 		<div class="flex max-w-[500px] flex-col gap-4">
 			<Alert variant={args.variant}>
@@ -200,7 +200,7 @@
 </Story>
 
 <!-- With Action -->
-<Story name="With Action" args={{ variant: 'warning' }}>
+<Story name="With Action" args={{ variant: "warning" }}>
 	{#snippet template(args)}
 		<div class="flex max-w-[500px] flex-col gap-4">
 			<Alert {...args}>
@@ -233,7 +233,7 @@
 </Story>
 
 <!-- Rich Content -->
-<Story name="Rich Content" args={{ variant: 'info' }}>
+<Story name="Rich Content" args={{ variant: "info" }}>
 	{#snippet template(args)}
 		<div class="flex max-w-[500px] flex-col gap-4">
 			<Alert {...args}>
@@ -273,7 +273,7 @@
 </Story>
 
 <!-- Notification Style -->
-<Story name="Notification Style" args={{ variant: 'primary' }}>
+<Story name="Notification Style" args={{ variant: "primary" }}>
 	{#snippet template(args)}
 		<div class="flex max-w-[500px] flex-col gap-4">
 			<Alert {...args} class="flex items-start gap-4">

@@ -1,17 +1,16 @@
 import type {
+	UJLTAmbientColorSet,
 	UJLTColorPalette,
 	UJLTFlavor,
 	UJLTShadeRef,
-	UJLTAmbientColorSet,
-	UJLTStandardColorSet
-} from '@ujl-framework/types';
-import { resolveColorFromShades } from '@ujl-framework/types';
-import Color from 'colorjs.io';
-import { generateColorShades, generateColorShadesLightDark } from './shades.ts';
-import type { ColorShades } from './types.ts';
-import { toUJLTColorShades, toColorShades, toColor } from './conversion.ts';
-import { pickSimilarFgColor } from './contrast.ts';
-import { flavors } from '@ujl-framework/types';
+	UJLTStandardColorSet,
+} from "@ujl-framework/types";
+import { flavors, resolveColorFromShades } from "@ujl-framework/types";
+import Color from "colorjs.io";
+import { pickSimilarFgColor } from "./contrast.ts";
+import { toColor, toColorShades, toUJLTColorShades } from "./conversion.ts";
+import { generateColorShades, generateColorShadesLightDark } from "./shades.ts";
+import type { ColorShades } from "./types.ts";
 
 /**
  * Updates foreground palettes for all background/foreground flavor combinations.
@@ -34,20 +33,20 @@ function updateForegroundPalettes(colorPalette: UJLTColorPalette): UJLTColorPale
 		// Resolve background colors from shade references
 		const backgroundLightShade = resolveColorFromShades(
 			colorPalette[backgroundFlavor].shades,
-			colorPalette[backgroundFlavor].light
+			colorPalette[backgroundFlavor].light,
 		);
 		const backgroundDarkShade = resolveColorFromShades(
 			colorPalette[backgroundFlavor].shades,
-			colorPalette[backgroundFlavor].dark
+			colorPalette[backgroundFlavor].dark,
 		);
 		const backgroundLight = toColor(backgroundLightShade);
 		const backgroundDark = toColor(backgroundDarkShade);
 
 		const lightForeground = {
-			...newColorPalette[backgroundFlavor].lightForeground
+			...newColorPalette[backgroundFlavor].lightForeground,
 		} as Record<UJLTFlavor, UJLTShadeRef>;
 		const darkForeground = {
-			...newColorPalette[backgroundFlavor].darkForeground
+			...newColorPalette[backgroundFlavor].darkForeground,
 		} as Record<UJLTFlavor, UJLTShadeRef>;
 
 		flavors.forEach((foregroundFlavor) => {
@@ -56,18 +55,18 @@ function updateForegroundPalettes(colorPalette: UJLTColorPalette): UJLTColorPale
 			// Resolve foreground base colors from shade references
 			const foregroundLightShade = resolveColorFromShades(
 				colorPalette[foregroundFlavor].shades,
-				colorPalette[foregroundFlavor].light
+				colorPalette[foregroundFlavor].light,
 			);
 			const foregroundDarkShade = resolveColorFromShades(
 				colorPalette[foregroundFlavor].shades,
-				colorPalette[foregroundFlavor].dark
+				colorPalette[foregroundFlavor].dark,
 			);
 			let foregroundLightBase = toColor(foregroundLightShade);
 			let foregroundDarkBase = toColor(foregroundDarkShade);
 
 			// For the ambient flavor, swap light and dark base colors
 			// so that light text is based on the darker ambient shade and vice versa.
-			if (foregroundFlavor === 'ambient') {
+			if (foregroundFlavor === "ambient") {
 				[foregroundLightBase, foregroundDarkBase] = [foregroundDarkBase, foregroundLightBase];
 			}
 
@@ -75,13 +74,13 @@ function updateForegroundPalettes(colorPalette: UJLTColorPalette): UJLTColorPale
 				foregroundLightBase,
 				foregroundShades,
 				backgroundLight,
-				60
+				60,
 			);
 			const darkTextResult = pickSimilarFgColor(
 				foregroundDarkBase,
 				foregroundShades,
 				backgroundDark,
-				60
+				60,
 			);
 
 			// Use the shade keys directly from the result
@@ -110,8 +109,8 @@ function updateForegroundPalettes(colorPalette: UJLTColorPalette): UJLTColorPale
  */
 export function updateFlavorByOriginal(
 	colorPalette: UJLTColorPalette,
-	flavor: 'ambient',
-	original: UJLTAmbientColorSet['_original']
+	flavor: "ambient",
+	original: UJLTAmbientColorSet["_original"],
 ): UJLTColorPalette;
 /**
  * Updates a non-ambient flavor in a color palette based on a single input color.
@@ -127,22 +126,22 @@ export function updateFlavorByOriginal(
  */
 export function updateFlavorByOriginal(
 	colorPalette: UJLTColorPalette,
-	flavor: Exclude<UJLTFlavor, 'ambient'>,
-	original: UJLTStandardColorSet['_original']
+	flavor: Exclude<UJLTFlavor, "ambient">,
+	original: UJLTStandardColorSet["_original"],
 ): UJLTColorPalette;
 export function updateFlavorByOriginal(
 	colorPalette: UJLTColorPalette,
 	flavor: UJLTFlavor,
-	original: UJLTAmbientColorSet['_original'] | UJLTStandardColorSet['_original']
+	original: UJLTAmbientColorSet["_original"] | UJLTStandardColorSet["_original"],
 ): UJLTColorPalette {
 	let colorShades: ColorShades;
 	let referenceColorLight: Color;
 	let referenceColorDark: Color;
 
 	// Type-safe handling based on flavor
-	if (flavor === 'ambient') {
+	if (flavor === "ambient") {
 		// Ambient: always uses lightHex/darkHex
-		const ambientOriginal = original as UJLTAmbientColorSet['_original'];
+		const ambientOriginal = original as UJLTAmbientColorSet["_original"];
 		let lightColor: Color;
 		let darkColor: Color;
 		try {
@@ -160,7 +159,7 @@ export function updateFlavorByOriginal(
 		referenceColorDark = darkColor;
 	} else {
 		// Non-ambient: always uses hex
-		const standardOriginal = original as UJLTStandardColorSet['_original'];
+		const standardOriginal = original as UJLTStandardColorSet["_original"];
 		let parsedColor: Color;
 		try {
 			parsedColor = new Color(standardOriginal.hex);
@@ -179,19 +178,19 @@ export function updateFlavorByOriginal(
 	let lightShadeRef: UJLTShadeRef;
 	let darkShadeRef: UJLTShadeRef;
 
-	if (flavor === 'ambient') {
+	if (flavor === "ambient") {
 		// For ambient, use explicit shade keys
-		lightShadeRef = '50';
-		darkShadeRef = '950';
+		lightShadeRef = "50";
+		darkShadeRef = "950";
 	} else {
 		// Resolve ambient colors from shade references
 		const ambientLightShade = resolveColorFromShades(
 			colorPalette.ambient.shades,
-			colorPalette.ambient.light
+			colorPalette.ambient.light,
 		);
 		const ambientDarkShade = resolveColorFromShades(
 			colorPalette.ambient.shades,
-			colorPalette.ambient.dark
+			colorPalette.ambient.dark,
 		);
 		const ambientLight = toColor(ambientLightShade);
 		const ambientDark = toColor(ambientDarkShade);
@@ -200,7 +199,7 @@ export function updateFlavorByOriginal(
 			referenceColorLight,
 			colorShadesAsColor,
 			ambientLight,
-			5
+			5,
 		);
 		const darkResult = pickSimilarFgColor(referenceColorDark, colorShadesAsColor, ambientDark, 5);
 
@@ -216,8 +215,8 @@ export function updateFlavorByOriginal(
 			light: lightShadeRef,
 			dark: darkShadeRef,
 			shades: toUJLTColorShades(colorShades),
-			_original: original
-		}
+			_original: original,
+		},
 	};
 	return updateForegroundPalettes(newColorPalette);
 }

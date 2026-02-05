@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ProseMirrorDocument } from '@ujl-framework/types';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { Text, type TextSize, type TextWeight, type TextIntensity } from '@ujl-framework/ui';
-	import { prosemirrorToHtml } from './prosemirror.js';
+	import type { ProseMirrorDocument } from "@ujl-framework/types";
+	import type { HTMLAttributes } from "svelte/elements";
+	import { Text, type TextSize, type TextWeight, type TextIntensity } from "@ujl-framework/ui";
+	import { prosemirrorToHtml } from "./prosemirror.js";
 
 	let {
 		ref = $bindable(null),
@@ -10,7 +10,7 @@
 		size,
 		weight,
 		intensity,
-		class: className = '',
+		class: className = "",
 		...restProps
 	}: HTMLAttributes<HTMLElement> & {
 		ref?: HTMLElement | null;
@@ -21,8 +21,8 @@
 	} = $props();
 
 	const html = $derived.by(() => {
-		if (!document || document.type !== 'doc') {
-			return '';
+		if (!document || document.type !== "doc") {
+			return "";
 		}
 		return prosemirrorToHtml(document);
 	});

@@ -51,10 +51,10 @@ export class Button extends ModuleBase {
 	 * @returns Composed abstract syntax tree node
 	 */
 	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		const labelField = this.fields.find(field => field.key === "label");
+		const labelField = this.fields.find((field) => field.key === "label");
 		const label = labelField?.field.parse(moduleData.fields.label) || "Click me";
 
-		const hrefField = this.fields.find(field => field.key === "href");
+		const hrefField = this.fields.find((field) => field.key === "href");
 		const href = hrefField?.field.parse(moduleData.fields.href) || "#";
 
 		return {

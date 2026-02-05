@@ -1,1 +1,1 @@
-export { default as ImageLibraryUploader } from './image-library-uploader.svelte';
+export { default as ImageLibraryUploader } from "./image-library-uploader.svelte";

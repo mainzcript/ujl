@@ -1,11 +1,11 @@
-import { getContext, hasContext, setContext } from 'svelte';
+import { getContext, hasContext, setContext } from "svelte";
 
-const DRAWER_CONTEXT = Symbol.for('ujl:drawer-context');
+const DRAWER_CONTEXT = Symbol.for("ujl:drawer-context");
 
 /**
  * Direction of the drawer slide animation.
  */
-export type DrawerDirection = 'top' | 'bottom' | 'left' | 'right';
+export type DrawerDirection = "top" | "bottom" | "left" | "right";
 
 /**
  * Context type for Drawer component.

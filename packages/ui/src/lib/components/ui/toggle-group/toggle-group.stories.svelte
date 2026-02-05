@@ -1,46 +1,46 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { ToggleGroup, ToggleGroupItem } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { ToggleGroup, ToggleGroupItem } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/ToggleGroup',
+		title: "Components/Forms/ToggleGroup",
 		component: ToggleGroup,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			variant: {
-				control: { type: 'select' },
-				options: ['default', 'outline'],
-				description: 'The visual style variant',
+				control: { type: "select" },
+				options: ["default", "outline"],
+				description: "The visual style variant",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			size: {
-				control: { type: 'select' },
-				options: ['default', 'sm', 'lg'],
-				description: 'The size of the toggle items',
+				control: { type: "select" },
+				options: ["default", "sm", "lg"],
+				description: "The size of the toggle items",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'default' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "default" },
+				},
 			},
 			type: {
-				control: { type: 'select' },
-				options: ['single', 'multiple'],
-				description: 'Selection type: single or multiple',
+				control: { type: "select" },
+				options: ["single", "multiple"],
+				description: "Selection type: single or multiple",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: 'single' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "single" },
+				},
+			},
 		},
 		args: {
-			variant: 'default',
-			size: 'default',
-			type: 'single'
-		}
+			variant: "default",
+			size: "default",
+			type: "single",
+		},
 	});
 </script>
 
@@ -104,7 +104,7 @@
 </Story>
 
 <!-- Outline Variant -->
-<Story name="Outline Variant" args={{ variant: 'outline' }}>
+<Story name="Outline Variant" args={{ variant: "outline" }}>
 	{#snippet template(args)}
 		<ToggleGroup {...args}>
 			<ToggleGroupItem value="bold">
@@ -160,7 +160,7 @@
 </Story>
 
 <!-- Multiple Selection -->
-<Story name="Multiple Selection" args={{ type: 'multiple', variant: 'outline' }}>
+<Story name="Multiple Selection" args={{ type: "multiple", variant: "outline" }}>
 	{#snippet template(args)}
 		<ToggleGroup {...args}>
 			<ToggleGroupItem value="bold">
@@ -263,7 +263,7 @@
 </Story>
 
 <!-- With Text Labels -->
-<Story name="With Text Labels" args={{ variant: 'outline', type: 'single' }}>
+<Story name="With Text Labels" args={{ variant: "outline", type: "single" }}>
 	{#snippet template(args)}
 		<ToggleGroup {...args}>
 			<ToggleGroupItem value="daily">Daily</ToggleGroupItem>
@@ -274,7 +274,7 @@
 </Story>
 
 <!-- View Toggle -->
-<Story name="View Toggle" args={{ variant: 'outline', type: 'single', value: 'grid' }}>
+<Story name="View Toggle" args={{ variant: "outline", type: "single", value: "grid" }}>
 	{#snippet template(args)}
 		<ToggleGroup {...args}>
 			<ToggleGroupItem value="list">
@@ -339,7 +339,7 @@
 </Story>
 
 <!-- Disabled Items -->
-<Story name="Disabled Items" args={{ type: 'single', variant: 'outline' }}>
+<Story name="Disabled Items" args={{ type: "single", variant: "outline" }}>
 	{#snippet template(args)}
 		<ToggleGroup {...args}>
 			<ToggleGroupItem value="option1">Option 1</ToggleGroupItem>
@@ -350,7 +350,7 @@
 </Story>
 
 <!-- Pricing Toggle -->
-<Story name="Pricing Toggle" args={{ variant: 'outline', type: 'single', value: 'monthly' }}>
+<Story name="Pricing Toggle" args={{ variant: "outline", type: "single", value: "monthly" }}>
 	{#snippet template(args)}
 		<div class="flex flex-col items-center gap-4">
 			<ToggleGroup {...args}>

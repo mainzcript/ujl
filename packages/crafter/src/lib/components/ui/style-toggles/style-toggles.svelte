@@ -3,19 +3,19 @@
 	Flexible configuration to show/hide individual toggles based on use case.
 -->
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { Toggle, ToggleGroup, ToggleGroupItem, Label } from '@ujl-framework/ui';
-	import ItalicIcon from '@lucide/svelte/icons/italic';
-	import UnderlineIcon from '@lucide/svelte/icons/underline';
-	import BoldIcon from '@lucide/svelte/icons/bold';
-	import CaseSensitiveIcon from '@lucide/svelte/icons/case-sensitive';
-	import CaseUpperIcon from '@lucide/svelte/icons/case-upper';
-	import CaseLowerIcon from '@lucide/svelte/icons/case-lower';
+	import { untrack } from "svelte";
+	import { Toggle, ToggleGroup, ToggleGroupItem, Label } from "@ujl-framework/ui";
+	import ItalicIcon from "@lucide/svelte/icons/italic";
+	import UnderlineIcon from "@lucide/svelte/icons/underline";
+	import BoldIcon from "@lucide/svelte/icons/bold";
+	import CaseSensitiveIcon from "@lucide/svelte/icons/case-sensitive";
+	import CaseUpperIcon from "@lucide/svelte/icons/case-upper";
+	import CaseLowerIcon from "@lucide/svelte/icons/case-lower";
 
 	const textTransformOptions = [
-		{ value: 'capitalize', label: 'Capitalize', icon: CaseSensitiveIcon },
-		{ value: 'uppercase', label: 'Uppercase', icon: CaseUpperIcon },
-		{ value: 'lowercase', label: 'Lowercase', icon: CaseLowerIcon }
+		{ value: "capitalize", label: "Capitalize", icon: CaseSensitiveIcon },
+		{ value: "uppercase", label: "Uppercase", icon: CaseUpperIcon },
+		{ value: "lowercase", label: "Lowercase", icon: CaseLowerIcon },
 	];
 
 	let {
@@ -23,7 +23,7 @@
 		italic = $bindable<boolean | undefined>(),
 		underline = $bindable<boolean | undefined>(),
 		bold = $bindable<boolean | undefined>(),
-		textTransform = $bindable<'none' | 'capitalize' | 'uppercase' | 'lowercase' | undefined>(),
+		textTransform = $bindable<"none" | "capitalize" | "uppercase" | "lowercase" | undefined>(),
 		showItalic = true,
 		showUnderline = true,
 		showBold = false,
@@ -31,13 +31,13 @@
 		onItalicChange,
 		onUnderlineChange,
 		onBoldChange,
-		onTextTransformChange
+		onTextTransformChange,
 	}: {
 		id: string;
 		italic?: boolean;
 		underline?: boolean;
 		bold?: boolean;
-		textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase';
+		textTransform?: "none" | "capitalize" | "uppercase" | "lowercase";
 		showItalic?: boolean;
 		showUnderline?: boolean;
 		showBold?: boolean;
@@ -52,12 +52,12 @@
 	// Using $state + $effect instead of $derived because we need bidirectional binding with ToggleGroup
 	// eslint-disable-next-line svelte/prefer-writable-derived
 	let textTransformToggleValue = $state<string | undefined>(
-		untrack(() => (textTransform === 'none' ? undefined : textTransform))
+		untrack(() => (textTransform === "none" ? undefined : textTransform)),
 	);
 
 	// Sync textTransformToggleValue when textTransform prop changes externally
 	$effect(() => {
-		textTransformToggleValue = textTransform === 'none' ? undefined : textTransform;
+		textTransformToggleValue = textTransform === "none" ? undefined : textTransform;
 	});
 </script>
 
@@ -115,7 +115,7 @@
 				type="single"
 				bind:value={textTransformToggleValue}
 				onValueChange={(v) => {
-					const transformValue = (v || 'none') as 'none' | 'capitalize' | 'uppercase' | 'lowercase';
+					const transformValue = (v || "none") as "none" | "capitalize" | "uppercase" | "lowercase";
 					textTransform = transformValue;
 					onTextTransformChange?.(transformValue);
 				}}

@@ -13,8 +13,8 @@
 		TableFooter,
 		TableHead,
 		TableHeader,
-		TableRow
-	} from '$lib/index.js';
+		TableRow,
+	} from "$lib/index.js";
 </script>
 
 <Grid>

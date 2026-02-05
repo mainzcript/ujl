@@ -9,6 +9,6 @@
  * Must be imported explicitly by the consumer.
  */
 
-@import '@ujl-framework/ui/styles';
+@import "@ujl-framework/ui/styles";
 
-@source '../components/**/*.{svelte,js,ts}';
+@source "../components/**/*.{svelte,js,ts}";

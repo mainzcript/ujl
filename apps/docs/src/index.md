@@ -1,6 +1,8 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
+title: "UJL Crafter"
+description: "Garantiert markenkonforme und barrierefreie Websites mit KI erstellen"
 
 hero:
   name: "UJL Crafter"
@@ -8,17 +10,11 @@ hero:
   tagline: "Der erste Open-Source WYSIWYG Editor ohne Design-Chaos"
   actions:
     - theme: brand
-      text: Unsere Vision
-      link: /about/01-vision
+      text: Demo ausprobieren
+      link: /docs/01-demo
     - theme: alt
-      text: Dokumentation
-      link: /docs/01-getting-started
-    - theme: alt
-      text: Architektur
-      link: /arc42/01-introduction-and-goals
-    - theme: alt
-      text: Demo
-      link: /demo
+      text: Installation
+      link: /docs/02-installation
 
 features:
   - title: "Brand-Compliance by Design"

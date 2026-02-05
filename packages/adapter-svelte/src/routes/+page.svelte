@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { UJLCDocument, UJLTDocument } from '@ujl-framework/types';
-	import { Composer } from '@ujl-framework/core';
-	import { svelteAdapter } from '$lib/index.js';
-	import type { MountedComponent } from '$lib/index.js';
-	import showcaseDocument from '@ujl-framework/examples/documents/showcase' with { type: 'json' };
-	import defaultTheme from '@ujl-framework/examples/themes/default' with { type: 'json' };
+	import { onMount } from "svelte";
+	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+	import { Composer } from "@ujl-framework/core";
+	import { svelteAdapter } from "$lib/index.js";
+	import type { MountedComponent } from "$lib/index.js";
+	import showcaseDocument from "@ujl-framework/examples/documents/showcase" with { type: "json" };
+	import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 
 	// Use the showcase document from examples package
 	const ujlDocument = showcaseDocument as unknown as UJLCDocument;
@@ -27,13 +27,13 @@
 
 				// Use the Svelte adapter to render the AST with tokenSet
 				mountedComponent = svelteAdapter(ast, tokenSet, {
-					target: '#ujl-content'
+					target: "#ujl-content",
 				});
 
-				console.log('UJL document successfully rendered with Svelte adapter!');
+				console.log("UJL document successfully rendered with Svelte adapter!");
 			} catch (err) {
-				error = err instanceof Error ? err.message : 'Unknown error occurred';
-				console.error('Error rendering UJL document:', err);
+				error = err instanceof Error ? err.message : "Unknown error occurred";
+				console.error("Error rendering UJL document:", err);
 			}
 		};
 

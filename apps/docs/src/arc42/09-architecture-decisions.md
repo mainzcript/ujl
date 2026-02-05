@@ -143,7 +143,7 @@ class CustomModule extends ModuleBase {
 				title: this.fields[0].field.parse(moduleData.fields.title),
 				image: this.fields[1].field.parse(moduleData.fields.image),
 				children: await Promise.all(
-					(moduleData.slots.body ?? []).map(child => composer.composeModule(child))
+					(moduleData.slots.body ?? []).map((child) => composer.composeModule(child)),
 				),
 			},
 		};
@@ -403,7 +403,7 @@ export function validateUJLCDocument(data: unknown): UJLCDocument {
 }
 
 export function validateUJLCDocumentSafe(
-	data: unknown
+	data: unknown,
 ): SafeParseReturnType<unknown, UJLCDocument> {
 	return UJLCDocumentSchema.safeParse(data);
 }
@@ -916,11 +916,11 @@ Test-spezifische Attribute werden in Svelte-Komponenten gesetzt:
 
 ```svelte
 <div
-  data-testid="tree-node-{node.meta.id}"
-  data-ujl-module-id={node.meta.id}
-  class:selected={isSelected}
+	data-testid="tree-node-{node.meta.id}"
+	data-ujl-module-id={node.meta.id}
+	class:selected={isSelected}
 >
-  {node.type}
+	{node.type}
 </div>
 ```
 
@@ -946,7 +946,7 @@ Unit-Tests mit Vitest fokussieren auf Fields, Modules und Utils mit 70 Prozent A
 
 ### Metriken
 
-Die Test-Laufzeiten betragen circa 2s für Vitest Unit Tests (500 Tests), circa 5s für Vitest Integration (50 Tests) und circa 30s für Playwright E2E (15 Tests, 3 Browser).
+Die Test-Laufzeiten betragen circa 2s für Vitest Unit Tests (20 Test-Dateien mit ~100-150 Tests), circa 5s für Vitest Integration Tests und circa 30s für Playwright E2E (9 Test-Dateien mit ~25-30 Tests, 3 Browser).
 
 ### Verwandte Entscheidungen
 
@@ -964,7 +964,7 @@ UJL benötigt automatisierte CI/CD für Build mit TypeScript-Compilation und Sve
 
 ### Entscheidung
 
-UJL nutzt GitLab CI/CD. Die Pipeline definiert stages für install, build, test, quality und deploy. Variables setzen PNPM_CACHE_DIR auf .pnpm-store. Der install stage führt pnpm install --frozen-lockfile aus und cached .pnpm-store. Der build stage führt pnpm run build aus und erzeugt artifacts in packages/\*/dist und apps/docs/.vitepress/dist mit expire_in 1 day. Der test stage führt pnpm run test aus mit coverage regex für Prozent-Extraktion. Der quality stage führt pnpm run lint und pnpm run check aus. Der pages stage läuft nur auf main und develop, führt cp -r apps/docs/.vitepress/dist public aus und erzeugt artifacts in public.
+UJL nutzt GitLab CI/CD. Die Pipeline definiert stages für install, build, test, quality und deploy. Variables setzen NODE_VERSION auf "22", PNPM_VERSION auf "10.28.2" und PNPM_STORE_PATH auf .pnpm-store. Der install stage führt pnpm install --frozen-lockfile aus und cached .pnpm-store. Der build stage führt pnpm run build aus und erzeugt artifacts in packages/\*/dist und apps/docs/dist mit expire_in 1 week. Der test stage ist aufgeteilt in test_unit (führt pnpm test:unit aus) und test_e2e (führt pnpm test:e2e mit Playwright aus, nur auf MRs und main/develop branches). Der quality stage führt pnpm run lint und pnpm run check aus. Der pages stage läuft nur auf main und develop, führt cp -r apps/docs/dist/. public/ aus und erzeugt artifacts in public.
 
 ### Konsequenzen
 

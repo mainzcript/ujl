@@ -59,7 +59,7 @@ const UJLCModuleObjectSchema: z.ZodType<{
 		meta: UJLCModuleMetaSchema,
 		fields: z.record(z.string(), UJLCFieldObjectSchema),
 		slots: z.record(z.string(), z.array(UJLCModuleObjectSchema)),
-	})
+	}),
 );
 
 /**

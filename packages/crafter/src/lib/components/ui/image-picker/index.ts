@@ -1,1 +1,1 @@
-export { default as ImagePicker } from './image-picker.svelte';
+export { default as ImagePicker } from "./image-picker.svelte";

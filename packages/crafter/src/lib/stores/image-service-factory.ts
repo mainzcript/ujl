@@ -19,12 +19,12 @@
 // 4. Set meta._library to current configuration
 // Applies to all directions: Backend->Backend, Inline->Backend, Backend->Inline
 
-import type { UJLCImageLibrary, UJLCDocumentMeta } from '@ujl-framework/types';
-import { BackendImageService } from '../service-adapters/backend-image-service.js';
-import { InlineImageService } from '../service-adapters/inline-image-service.js';
-import type { ImageService } from '../service-adapters/image-service.js';
-import { logger } from '../utils/logger.js';
-import { toast } from 'svelte-sonner';
+import type { UJLCDocumentMeta, UJLCImageLibrary } from "@ujl-framework/types";
+import { toast } from "svelte-sonner";
+import { BackendImageService } from "../service-adapters/backend-image-service.js";
+import type { ImageService } from "../service-adapters/image-service.js";
+import { InlineImageService } from "../service-adapters/inline-image-service.js";
+import { logger } from "../utils/logger.js";
 
 // ============================================
 // TYPES
@@ -33,7 +33,7 @@ import { toast } from 'svelte-sonner';
 /**
  * Library configuration from document meta.
  */
-export type LibraryConfig = UJLCDocumentMeta['_library'];
+export type LibraryConfig = UJLCDocumentMeta["_library"];
 
 /**
  * Function type for immutable image library updates.
@@ -46,7 +46,7 @@ export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary
 export type ImageServiceFactoryFn = (
 	config: LibraryConfig,
 	getImages: () => UJLCImageLibrary,
-	updateImages: UpdateImagesFn
+	updateImages: UpdateImagesFn,
 ) => ImageService;
 
 /**
@@ -57,7 +57,7 @@ export type ImageServiceFactoryFn = (
  */
 export interface ImageServiceFactoryOptions {
 	/** Storage mode: 'inline' (default) or 'backend' */
-	preferredStorage?: 'inline' | 'backend';
+	preferredStorage?: "inline" | "backend";
 	/** Backend API URL (required when preferredStorage is 'backend') */
 	backendUrl?: string;
 	/** API key for backend storage (required when preferredStorage is 'backend') */
@@ -103,14 +103,14 @@ export interface ImageServiceFactoryOptions {
  * ```
  */
 export function createImageServiceFactory(
-	options: ImageServiceFactoryOptions = {}
+	options: ImageServiceFactoryOptions = {},
 ): ImageServiceFactoryFn {
 	const {
 		preferredStorage,
 		backendUrl,
 		backendApiKey,
 		onConnectionError,
-		showToasts = true
+		showToasts = true,
 	} = options;
 
 	// Document-level config is ignored - only options determine storage mode
@@ -118,17 +118,17 @@ export function createImageServiceFactory(
 	return function createImageService(
 		_config: LibraryConfig,
 		getImages: () => UJLCImageLibrary,
-		updateImages: UpdateImagesFn
+		updateImages: UpdateImagesFn,
 	): ImageService {
 		// Storage mode is determined solely by options (default: inline)
-		const storage = preferredStorage ?? 'inline';
+		const storage = preferredStorage ?? "inline";
 
 		// Backend storage
-		if (storage === 'backend') {
+		if (storage === "backend") {
 			// url and apiKey are guaranteed by UJLCrafter validation
 			if (!backendUrl || !backendApiKey) {
 				// This should never happen if UJLCrafter validation is correct
-				logger.error('Backend storage requires both url and apiKey');
+				logger.error("Backend storage requires both url and apiKey");
 				return new InlineImageService(getImages, updateImages);
 			}
 
@@ -137,8 +137,8 @@ export function createImageServiceFactory(
 			// Async connection check (non-blocking)
 			service.checkConnection().then((status) => {
 				if (!status.connected) {
-					const errorMessage = status.error ?? 'Unknown error';
-					logger.error('Backend Image Service is not reachable:', errorMessage);
+					const errorMessage = status.error ?? "Unknown error";
+					logger.error("Backend Image Service is not reachable:", errorMessage);
 
 					// Call custom error handler if provided
 					if (onConnectionError) {
@@ -147,8 +147,8 @@ export function createImageServiceFactory(
 
 					// Show toast notification if enabled
 					if (showToasts) {
-						toast.error('Image Library Backend Unavailable', {
-							description: `${errorMessage}\n\nPlease check:\n- Is the backend service running?\n- Is the URL correct? (${backendUrl})`
+						toast.error("Image Library Backend Unavailable", {
+							description: `${errorMessage}\n\nPlease check:\n- Is the backend service running?\n- Is the URL correct? (${backendUrl})`,
 						});
 					}
 				}

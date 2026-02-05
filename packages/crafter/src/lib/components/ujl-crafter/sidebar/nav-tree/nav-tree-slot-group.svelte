@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import MoreVerticalIcon from '@lucide/svelte/icons/more-vertical';
+	import type { UJLCModuleObject } from "@ujl-framework/types";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import MoreVerticalIcon from "@lucide/svelte/icons/more-vertical";
 	import {
 		Collapsible,
 		CollapsibleTrigger,
@@ -9,17 +9,17 @@
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuTrigger,
-		Button
-	} from '@ujl-framework/ui';
+		Button,
+	} from "@ujl-framework/ui";
 	import {
 		SidebarMenuSubItem,
 		SidebarMenuSubButton,
-		SidebarMenuSub
-	} from '$lib/components/ui/sidebar-menu/index.js';
-	import { cn } from '@ujl-framework/ui/utils';
-	import EditorToolbar from '../editor-toolbar.svelte';
-	import NavTreeItem from './nav-tree-item.svelte';
-	import { formatSlotName } from '$lib/utils/ujlc-tree.js';
+		SidebarMenuSub,
+	} from "$lib/components/ui/sidebar-menu/index.js";
+	import { cn } from "@ujl-framework/ui/utils";
+	import EditorToolbar from "../editor-toolbar.svelte";
+	import NavTreeItem from "./nav-tree-item.svelte";
+	import { formatSlotName } from "$lib/utils/ujlc-tree.js";
 
 	let {
 		parentNode,
@@ -51,16 +51,16 @@
 		onDragLeave,
 		onDrop,
 		onDragEnd,
-		onSlotClick
+		onSlotClick,
 	}: {
 		parentNode: UJLCModuleObject;
 		slotName: string;
 		slotChildren: UJLCModuleObject[];
 		clipboard:
 			| UJLCModuleObject
-			| { type: 'slot'; slotName: string; content: UJLCModuleObject[] }
+			| { type: "slot"; slotName: string; content: UJLCModuleObject[] }
 			| null;
-		dragType: 'node' | 'slot' | null;
+		dragType: "node" | "slot" | null;
 		draggedSlotParentId: string | null;
 		draggedSlotName: string | null;
 		onSlotCopy?: (parentId: string, slotName: string) => void;
@@ -74,7 +74,7 @@
 		onSlotDragLeave: () => void;
 		selectedNodeId: string | null;
 		draggedNodeId: string | null;
-		dropPosition: 'before' | 'after' | 'into' | null;
+		dropPosition: "before" | "after" | "into" | null;
 		onNodeClick: (nodeId: string) => void;
 		onCopy: (nodeId: string) => void;
 		onCut: (nodeId: string) => void;
@@ -92,9 +92,9 @@
 
 	const isDropTarget = $derived(dropTargetId === parentNode.meta.id && dropTargetSlot === slotName);
 	const isDragging = $derived(
-		dragType === 'slot' &&
+		dragType === "slot" &&
 			draggedSlotParentId === parentNode.meta.id &&
-			draggedSlotName === slotName
+			draggedSlotName === slotName,
 	);
 	const isEmpty = $derived(slotChildren.length === 0);
 
@@ -112,11 +112,11 @@
 							role="button"
 							tabindex="0"
 							class={cn(
-								'group/slot flex w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+								"group/slot flex w-full items-center justify-between rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
 								isDropTarget &&
-									'bg-accent/15 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed',
-								isDragging && 'opacity-50',
-								isSelected && 'bg-foreground/5 text-flavor-foreground-accent'
+									"bg-accent/15 outline-1 -outline-offset-2 outline-flavor-foreground outline-dashed",
+								isDragging && "opacity-50",
+								isSelected && "bg-foreground/5 text-flavor-foreground-accent",
 							)}
 							draggable="true"
 							ondragstart={(e) => {

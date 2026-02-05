@@ -13,10 +13,10 @@
 		Badge,
 		Progress,
 		Skeleton,
-		Button
-	} from '$lib/index.js';
-	import { flavors } from '@ujl-framework/types';
-	import { toast } from 'svelte-sonner';
+		Button,
+	} from "$lib/index.js";
+	import { flavors } from "@ujl-framework/types";
+	import { toast } from "svelte-sonner";
 </script>
 
 <Grid>
@@ -89,28 +89,28 @@
 					<div class="flex flex-wrap gap-2">
 						<Button
 							size="sm"
-							onclick={() => toast.success('Success! Your changes have been saved.')}
+							onclick={() => toast.success("Success! Your changes have been saved.")}
 						>
 							Success Toast
 						</Button>
 						<Button
 							size="sm"
 							variant="destructive"
-							onclick={() => toast.error('Error! Something went wrong.')}
+							onclick={() => toast.error("Error! Something went wrong.")}
 						>
 							Error Toast
 						</Button>
 						<Button
 							size="sm"
 							variant="info"
-							onclick={() => toast.info('Info: Here is some information.')}
+							onclick={() => toast.info("Info: Here is some information.")}
 						>
 							Info Toast
 						</Button>
 						<Button
 							size="sm"
 							variant="warning"
-							onclick={() => toast.warning('Warning: Please check your input.')}
+							onclick={() => toast.warning("Warning: Please check your input.")}
 						>
 							Warning Toast
 						</Button>

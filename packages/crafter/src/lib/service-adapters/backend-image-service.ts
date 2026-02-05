@@ -1,6 +1,6 @@
-import type { ImageMetadata, ImageEntry, ImageSource } from '@ujl-framework/types';
-import type { ImageService, UploadResult } from './image-service.js';
-import { logger } from '../utils/logger.js';
+import type { ImageEntry, ImageMetadata, ImageSource } from "@ujl-framework/types";
+import { logger } from "../utils/logger.js";
+import type { ImageService, UploadResult } from "./image-service.js";
 
 /**
  * Payload CMS Image Response (IPTC-oriented data model)
@@ -69,8 +69,8 @@ export class BackendImageService implements ImageService {
 	 * @param apiKey - Optional API key for authentication
 	 * @param collectionSlug - The Payload collection slug (default: 'images')
 	 */
-	constructor(url: string, apiKey?: string, collectionSlug: string = 'images') {
-		this.url = url.endsWith('/') ? url.slice(0, -1) : url;
+	constructor(url: string, apiKey?: string, collectionSlug: string = "images") {
+		this.url = url.endsWith("/") ? url.slice(0, -1) : url;
 		this.apiKey = apiKey;
 		this.collectionSlug = collectionSlug;
 		// Automatically append /api/{collectionSlug} for API calls
@@ -84,28 +84,28 @@ export class BackendImageService implements ImageService {
 	async checkConnection(): Promise<{ connected: boolean; error?: string }> {
 		try {
 			const response = await fetch(`${this.apiBase}?limit=1`, {
-				headers: this.getHeaders()
+				headers: this.getHeaders(),
 			});
 
 			if (!response.ok) {
 				if (response.status === 401) {
 					return {
 						connected: false,
-						error: 'Authentication failed. Check your API key in .env.local'
+						error: "Authentication failed. Check your API key in .env.local",
 					};
 				}
 				return {
 					connected: false,
-					error: `Backend returned status ${response.status}`
+					error: `Backend returned status ${response.status}`,
 				};
 			}
 
 			return { connected: true };
 		} catch (err) {
-			logger.error('Backend connection error:', err);
+			logger.error("Backend connection error:", err);
 			return {
 				connected: false,
-				error: `Cannot reach backend at ${this.url}. Is the service running?`
+				error: `Cannot reach backend at ${this.url}. Is the service running?`,
 			};
 		}
 	}
@@ -117,7 +117,7 @@ export class BackendImageService implements ImageService {
 	private getHeaders(): HeadersInit {
 		const headers: HeadersInit = {};
 		if (this.apiKey) {
-			headers['Authorization'] = `users API-Key ${this.apiKey}`;
+			headers["Authorization"] = `users API-Key ${this.apiKey}`;
 		}
 		return headers;
 	}
@@ -150,8 +150,8 @@ export class BackendImageService implements ImageService {
 				mimeType: doc.mimeType,
 				filesize: doc.filesize,
 				width: doc.width,
-				height: doc.height
-			}
+				height: doc.height,
+			},
 		};
 	}
 
@@ -162,21 +162,21 @@ export class BackendImageService implements ImageService {
 	 * @returns Upload result with image ID and library entry
 	 * @throws Error if upload fails
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 	async upload(file: File, _metadata: ImageMetadata): Promise<UploadResult> {
 		const formData = new FormData();
-		formData.append('file', file);
+		formData.append("file", file);
 
 		try {
 			const response = await fetch(`${this.apiBase}`, {
-				method: 'POST',
+				method: "POST",
 				headers: this.getHeaders(),
-				body: formData
+				body: formData,
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				throw new Error(error.errors?.[0]?.message || 'Upload failed');
+				throw new Error(error.errors?.[0]?.message || "Upload failed");
 			}
 
 			const result = await response.json();
@@ -184,10 +184,10 @@ export class BackendImageService implements ImageService {
 
 			return {
 				imageId: doc.id,
-				entry: this.payloadToEntry(doc)
+				entry: this.payloadToEntry(doc),
 			};
 		} catch (err) {
-			logger.error('Backend upload error:', err);
+			logger.error("Backend upload error:", err);
 			throw err;
 		}
 	}
@@ -200,20 +200,20 @@ export class BackendImageService implements ImageService {
 	async get(imageId: string): Promise<ImageEntry | null> {
 		try {
 			const response = await fetch(`${this.apiBase}/${imageId}`, {
-				headers: this.getHeaders()
+				headers: this.getHeaders(),
 			});
 
 			if (!response.ok) {
 				if (response.status === 404) {
 					return null;
 				}
-				throw new Error('Failed to fetch image');
+				throw new Error("Failed to fetch image");
 			}
 
 			const doc: PayloadImageDoc = await response.json();
 			return this.payloadToEntry(doc);
 		} catch (err) {
-			logger.error('Backend get error:', err);
+			logger.error("Backend get error:", err);
 			return null;
 		}
 	}
@@ -225,20 +225,20 @@ export class BackendImageService implements ImageService {
 	async list(): Promise<Array<{ id: string; entry: ImageEntry }>> {
 		try {
 			const response = await fetch(`${this.apiBase}?limit=100`, {
-				headers: this.getHeaders()
+				headers: this.getHeaders(),
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to list images');
+				throw new Error("Failed to list images");
 			}
 
 			const result: PayloadListResponse = await response.json();
 			return result.docs.map((doc) => ({
 				id: doc.id,
-				entry: this.payloadToEntry(doc)
+				entry: this.payloadToEntry(doc),
 			}));
 		} catch (err) {
-			logger.error('Backend list error:', err);
+			logger.error("Backend list error:", err);
 			return [];
 		}
 	}
@@ -251,20 +251,20 @@ export class BackendImageService implements ImageService {
 	async delete(imageId: string): Promise<boolean> {
 		try {
 			const response = await fetch(`${this.apiBase}/${imageId}`, {
-				method: 'DELETE',
-				headers: this.getHeaders()
+				method: "DELETE",
+				headers: this.getHeaders(),
 			});
 
 			if (!response.ok) {
 				if (response.status === 404) {
 					return false;
 				}
-				throw new Error('Failed to delete image');
+				throw new Error("Failed to delete image");
 			}
 
 			return true;
 		} catch (err) {
-			logger.error('Backend delete error:', err);
+			logger.error("Backend delete error:", err);
 			return false;
 		}
 	}

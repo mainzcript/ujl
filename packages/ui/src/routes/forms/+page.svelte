@@ -51,64 +51,64 @@
 		ComboboxEmpty,
 		ComboboxGroup,
 		ComboboxItem,
-		ComboboxSeparator
-	} from '$lib/index.js';
-	import { tick } from 'svelte';
-	import SearchIcon from '@lucide/svelte/icons/search';
-	import MailIcon from '@lucide/svelte/icons/mail';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
-	import PlusIcon from '@lucide/svelte/icons/plus';
-	import InfoIcon from '@lucide/svelte/icons/info';
-	import ItalicIcon from '@lucide/svelte/icons/italic';
-	import BoldIcon from '@lucide/svelte/icons/bold';
-	import UnderlineIcon from '@lucide/svelte/icons/underline';
-	import AlignLeftIcon from '@lucide/svelte/icons/align-left';
-	import AlignCenterIcon from '@lucide/svelte/icons/align-center';
-	import AlignRightIcon from '@lucide/svelte/icons/align-right';
-	import CalculatorIcon from '@lucide/svelte/icons/calculator';
-	import CalendarIcon from '@lucide/svelte/icons/calendar';
-	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
-	import SettingsIcon from '@lucide/svelte/icons/settings';
-	import SmileIcon from '@lucide/svelte/icons/smile';
-	import UserIcon from '@lucide/svelte/icons/user';
+		ComboboxSeparator,
+	} from "$lib/index.js";
+	import { tick } from "svelte";
+	import SearchIcon from "@lucide/svelte/icons/search";
+	import MailIcon from "@lucide/svelte/icons/mail";
+	import CheckIcon from "@lucide/svelte/icons/check";
+	import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
+	import PlusIcon from "@lucide/svelte/icons/plus";
+	import InfoIcon from "@lucide/svelte/icons/info";
+	import ItalicIcon from "@lucide/svelte/icons/italic";
+	import BoldIcon from "@lucide/svelte/icons/bold";
+	import UnderlineIcon from "@lucide/svelte/icons/underline";
+	import AlignLeftIcon from "@lucide/svelte/icons/align-left";
+	import AlignCenterIcon from "@lucide/svelte/icons/align-center";
+	import AlignRightIcon from "@lucide/svelte/icons/align-right";
+	import CalculatorIcon from "@lucide/svelte/icons/calculator";
+	import CalendarIcon from "@lucide/svelte/icons/calendar";
+	import CreditCardIcon from "@lucide/svelte/icons/credit-card";
+	import SettingsIcon from "@lucide/svelte/icons/settings";
+	import SmileIcon from "@lucide/svelte/icons/smile";
+	import UserIcon from "@lucide/svelte/icons/user";
 
 	// Form component state
 	const selectOptions = [
-		{ value: 'option1', label: 'Option 1' },
-		{ value: 'option2', label: 'Option 2' },
-		{ value: 'option3', label: 'Option 3' },
-		{ value: 'option4', label: 'Option 4' },
-		{ value: 'option5', label: 'Option 5' }
+		{ value: "option1", label: "Option 1" },
+		{ value: "option2", label: "Option 2" },
+		{ value: "option3", label: "Option 3" },
+		{ value: "option4", label: "Option 4" },
+		{ value: "option5", label: "Option 5" },
 	];
-	let selectValue = $state<string>('');
+	let selectValue = $state<string>("");
 	const selectTriggerContent = $derived(
-		selectOptions.find((opt) => opt.value === selectValue)?.label ?? 'Select an option'
+		selectOptions.find((opt) => opt.value === selectValue)?.label ?? "Select an option",
 	);
 	let sliderSingleValue = $state(50);
 	let sliderRangeValue = $state<number[]>([25, 75]);
-	let inputValue = $state<string>('');
-	let textareaValue = $state<string>('');
-	let colorValue = $state('#ff0000');
+	let inputValue = $state<string>("");
+	let textareaValue = $state<string>("");
+	let colorValue = $state("#ff0000");
 	let switchValue = $state(false);
 	let checkboxValue = $state(false);
 	let toggleValue = $state(false);
-	let toggleGroupValue = $state<string>('');
+	let toggleGroupValue = $state<string>("");
 
 	// Combobox state
 	const comboboxOptions = [
-		{ value: 'option1', label: 'Option 1' },
-		{ value: 'option2', label: 'Option 2' },
-		{ value: 'option3', label: 'Option 3' },
-		{ value: 'option4', label: 'Option 4' },
-		{ value: 'option5', label: 'Option 5' }
+		{ value: "option1", label: "Option 1" },
+		{ value: "option2", label: "Option 2" },
+		{ value: "option3", label: "Option 3" },
+		{ value: "option4", label: "Option 4" },
+		{ value: "option5", label: "Option 5" },
 	];
 	let comboboxOpen = $state(false);
-	let comboboxValue = $state<string>('');
+	let comboboxValue = $state<string>("");
 	let comboboxTriggerRef = $state<HTMLButtonElement | null>(null);
 
 	const comboboxTriggerContent = $derived(
-		comboboxOptions.find((opt) => opt.value === comboboxValue)?.label ?? 'Select an option'
+		comboboxOptions.find((opt) => opt.value === comboboxValue)?.label ?? "Select an option",
 	);
 
 	function closeAndFocusCombobox() {
@@ -293,7 +293,7 @@
 							<Label for="disabled-switch">Disabled Switch</Label>
 						</div>
 						{#if switchValue !== undefined}
-							<Text size="sm" intensity="muted">Airplane Mode: {switchValue ? 'On' : 'Off'}</Text>
+							<Text size="sm" intensity="muted">Airplane Mode: {switchValue ? "On" : "Off"}</Text>
 						{/if}
 					</div>
 				</div>
@@ -373,7 +373,7 @@
 							<Label for="disabled">Disabled checkbox</Label>
 						</div>
 						{#if checkboxValue !== undefined}
-							<Text size="sm" intensity="muted">Checked: {checkboxValue ? 'Yes' : 'No'}</Text>
+							<Text size="sm" intensity="muted">Checked: {checkboxValue ? "Yes" : "No"}</Text>
 						{/if}
 					</div>
 				</div>
@@ -397,7 +397,7 @@
 							</Toggle>
 						</div>
 						{#if toggleValue !== undefined}
-							<Text size="sm" intensity="muted">Pressed: {toggleValue ? 'Yes' : 'No'}</Text>
+							<Text size="sm" intensity="muted">Pressed: {toggleValue ? "Yes" : "No"}</Text>
 						{/if}
 					</div>
 				</div>

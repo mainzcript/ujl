@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Button, Sheet, SheetTriggerButton } from '@ujl-framework/ui';
-	import { cn } from '@ujl-framework/ui/utils';
-	import PanelLeftCloseIcon from '@lucide/svelte/icons/panel-left-close';
-	import PanelLeftOpenIcon from '@lucide/svelte/icons/panel-left-open';
-	import { useApp } from './context.svelte.js';
+	import { Button, Sheet, SheetTriggerButton } from "@ujl-framework/ui";
+	import { cn } from "@ujl-framework/ui/utils";
+	import PanelLeftCloseIcon from "@lucide/svelte/icons/panel-left-close";
+	import PanelLeftOpenIcon from "@lucide/svelte/icons/panel-left-open";
+	import { useApp } from "./context.svelte.js";
 
 	let {
-		class: className
+		class: className,
 	}: {
 		class?: string;
 	} = $props();
@@ -18,9 +18,9 @@
 	<Button
 		variant="ghost"
 		size="icon"
-		class={cn('size-8', className)}
+		class={cn("size-8", className)}
 		onclick={app.toggleSidebar}
-		title={app.sidebarDesktopOpen ? 'Collapse Sidebar' : 'Show Sidebar'}
+		title={app.sidebarDesktopOpen ? "Collapse Sidebar" : "Show Sidebar"}
 	>
 		{#if app.sidebarDesktopOpen}
 			<PanelLeftCloseIcon />

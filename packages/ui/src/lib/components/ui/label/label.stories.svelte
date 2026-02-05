@@ -1,20 +1,20 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Label } from './index.ts';
-	import { Input } from '../input/index.ts';
-	import { Checkbox } from '../checkbox/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Label } from "./index.ts";
+	import { Input } from "../input/index.ts";
+	import { Checkbox } from "../checkbox/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Label',
+		title: "Components/Base/Label",
 		component: Label,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			for: {
-				control: 'text',
-				description: 'The ID of the form element this label is for',
-				table: { category: 'Behavior' }
-			}
-		}
+				control: "text",
+				description: "The ID of the form element this label is for",
+				table: { category: "Behavior" },
+			},
+		},
 	});
 </script>
 

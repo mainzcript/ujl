@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from 'bits-ui';
-	import { CommandSeparator } from '../command/index.js';
+	import { Command as CommandPrimitive } from "bits-ui";
+	import { CommandSeparator } from "../command/index.js";
 
 	let {
 		ref = $bindable(null),

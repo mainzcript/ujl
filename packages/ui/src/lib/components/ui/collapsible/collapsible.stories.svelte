@@ -1,29 +1,29 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Collapsible,
 		CollapsibleTrigger,
 		CollapsibleContent,
-		CollapsibleTriggerButton
-	} from './index.ts';
+		CollapsibleTriggerButton,
+	} from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Layout/Collapsible',
+		title: "Components/Layout/Collapsible",
 		component: Collapsible,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			open: {
-				control: 'boolean',
-				description: 'Whether the collapsible is open',
+				control: "boolean",
+				description: "Whether the collapsible is open",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			open: false
-		}
+			open: false,
+		},
 	});
 </script>
 

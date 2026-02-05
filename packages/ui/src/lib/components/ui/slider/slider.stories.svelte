@@ -1,70 +1,70 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Slider } from './index.ts';
-	import { Label } from '../label/index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Slider } from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Slider',
+		title: "Components/Base/Slider",
 		component: Slider,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			value: {
-				control: 'object',
-				description: 'Current value(s) of the slider',
-				table: { category: 'State' },
-				defaultValue: { summary: '50' }
+				control: "object",
+				description: "Current value(s) of the slider",
+				table: { category: "State" },
+				defaultValue: { summary: "50" },
 			},
 			min: {
-				control: 'number',
-				description: 'Minimum value',
+				control: "number",
+				description: "Minimum value",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '0' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "0" },
+				},
 			},
 			max: {
-				control: 'number',
-				description: 'Maximum value',
+				control: "number",
+				description: "Maximum value",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '100' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "100" },
+				},
 			},
 			step: {
-				control: 'number',
-				description: 'Step increment',
+				control: "number",
+				description: "Step increment",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '1' }
-				}
+					category: "Behavior",
+					defaultValue: { summary: "1" },
+				},
 			},
 			orientation: {
-				control: { type: 'select' },
-				options: ['horizontal', 'vertical'],
-				description: 'Orientation of the slider',
+				control: { type: "select" },
+				options: ["horizontal", "vertical"],
+				description: "Orientation of the slider",
 				table: {
-					category: 'Appearance',
-					defaultValue: { summary: 'horizontal' }
-				}
+					category: "Appearance",
+					defaultValue: { summary: "horizontal" },
+				},
 			},
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the slider is disabled',
+				control: "boolean",
+				description: "Whether the slider is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			type: 'multiple' as const,
+			type: "multiple" as const,
 			value: [50],
 			min: 0,
 			max: 100,
 			step: 1,
-			orientation: 'horizontal' as const,
-			disabled: false
-		}
+			orientation: "horizontal" as const,
+			disabled: false,
+		},
 	});
 </script>
 
@@ -176,7 +176,7 @@
 </Story>
 
 <!-- Disabled -->
-<Story name="Disabled" args={{ value: [50], max: 100, disabled: true, type: 'multiple' }}>
+<Story name="Disabled" args={{ value: [50], max: 100, disabled: true, type: "multiple" }}>
 	{#snippet template(args)}
 		<div class="max-w-md space-y-4">
 			<div class="space-y-2">
@@ -227,7 +227,7 @@
 <!-- Playground -->
 <Story name="Playground">
 	{#snippet template(args)}
-		<div class={args.orientation === 'vertical' ? 'h-48' : 'max-w-md'}>
+		<div class={args.orientation === "vertical" ? "h-48" : "max-w-md"}>
 			<Slider {...args} />
 		</div>
 	{/snippet}

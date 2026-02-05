@@ -3,19 +3,19 @@
 	Receives UJLTColorSet props and forwards changes via onChange callback to designer-panel.svelte.
 -->
 <script lang="ts">
-	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@ujl-framework/ui';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import type { UJLTColorSet, UJLTColorPalette, UJLTAmbientColorSet } from '@ujl-framework/types';
-	import { ColorPaletteInput } from '$lib/components/ui/index.js';
+	import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@ujl-framework/ui";
+	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import type { UJLTColorSet, UJLTColorPalette, UJLTAmbientColorSet } from "@ujl-framework/types";
+	import { ColorPaletteInput } from "$lib/components/ui/index.js";
 
 	let {
 		palette,
 		ambientColorSet,
-		onAmbientChange
+		onAmbientChange,
 	}: {
 		palette: UJLTColorPalette;
 		ambientColorSet: UJLTColorSet | null;
-		onAmbientChange?: (original: UJLTAmbientColorSet['_original']) => void;
+		onAmbientChange?: (original: UJLTAmbientColorSet["_original"]) => void;
 	} = $props();
 </script>
 

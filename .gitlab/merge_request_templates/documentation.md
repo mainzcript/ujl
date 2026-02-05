@@ -22,7 +22,3 @@
 
 - [ ] I have performed a self-review of my changes
 - [ ] My changes generate no new warnings
-
----
-
-For detailed guidelines, see `docs/code-review.md` and `docs/testing.md`.

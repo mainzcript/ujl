@@ -1,4 +1,4 @@
-import type { ImageMetadata, ImageEntry, ImageSource, ImageProvider } from '@ujl-framework/types';
+import type { ImageEntry, ImageMetadata, ImageProvider, ImageSource } from "@ujl-framework/types";
 
 /**
  * Result of uploading an image

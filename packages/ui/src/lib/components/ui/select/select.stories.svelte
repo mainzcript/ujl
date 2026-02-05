@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Select,
 		SelectContent,
@@ -7,27 +7,27 @@
 		SelectTrigger,
 		SelectGroup,
 		SelectGroupHeading,
-		SelectSeparator
-	} from './index.ts';
-	import { Label } from '../label/index.ts';
+		SelectSeparator,
+	} from "./index.ts";
+	import { Label } from "../label/index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Forms/Select',
+		title: "Components/Forms/Select",
 		component: Select,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			disabled: {
-				control: 'boolean',
-				description: 'Whether the select is disabled',
+				control: "boolean",
+				description: "Whether the select is disabled",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			disabled: false
-		}
+			disabled: false,
+		},
 	});
 </script>
 

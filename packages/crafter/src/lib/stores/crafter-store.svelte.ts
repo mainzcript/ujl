@@ -13,19 +13,19 @@
  * @module crafter-store
  */
 
+import { generateUid, type Composer } from "@ujl-framework/core";
 import type {
 	UJLCDocument,
-	UJLTDocument,
-	UJLCSlotObject,
+	UJLCDocumentMeta,
 	UJLCImageLibrary,
+	UJLCSlotObject,
+	UJLTDocument,
 	UJLTTokenSet,
-	UJLCDocumentMeta
-} from '@ujl-framework/types';
-import { generateUid, type Composer } from '@ujl-framework/core';
-import { findPathToNode, isRootNode } from '../utils/ujlc-tree.js';
-import { createOperations } from './operations.js';
-import { logger } from '../utils/logger.js';
-import type { ImageService } from '../service-adapters/image-service.js';
+} from "@ujl-framework/types";
+import type { ImageService } from "../service-adapters/image-service.js";
+import { logger } from "../utils/logger.js";
+import { findPathToNode, isRootNode } from "../utils/ujlc-tree.js";
+import { createOperations } from "./operations.js";
 
 // ============================================
 // TYPES
@@ -36,7 +36,7 @@ import type { ImageService } from '../service-adapters/image-service.js';
  * 'editor' corresponds to the content editor (UJLC) view.
  * 'designer' corresponds to the theme designer (UJLT) view.
  */
-export type CrafterMode = 'editor' | 'designer';
+export type CrafterMode = "editor" | "designer";
 
 /**
  * Viewport size for preview simulation.
@@ -57,7 +57,7 @@ export type ImageLibraryContext = {
 /**
  * Library configuration from document meta.
  */
-export type LibraryConfig = UJLCDocumentMeta['_library'];
+export type LibraryConfig = UJLCDocumentMeta["_library"];
 
 /**
  * Function type for immutable image library updates.
@@ -78,7 +78,7 @@ export interface ImageServiceFactory {
 	(
 		config: LibraryConfig,
 		getImages: () => UJLCImageLibrary,
-		updateImages: UpdateImagesFn
+		updateImages: UpdateImagesFn,
 	): ImageService;
 }
 
@@ -106,7 +106,7 @@ export interface CrafterStoreDeps {
 const VIEWPORT_SIZES: Record<string, ViewportSize> = {
 	desktop: 1024,
 	tablet: 768,
-	mobile: 375
+	mobile: 375,
 };
 
 // ============================================
@@ -144,7 +144,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		initialUjltDocument,
 		composer,
 		createImageService,
-		testMode = false
+		testMode = false,
 	} = deps;
 
 	// ============================================
@@ -160,7 +160,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 	let _ujlcDocument = $state<UJLCDocument>(initialUjlcDocument);
 	let _ujltDocument = $state<UJLTDocument>(initialUjltDocument);
-	let _mode = $state<CrafterMode>('editor');
+	let _mode = $state<CrafterMode>("editor");
 	let _selectedNodeId = $state<string | null>(null);
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let _expandedNodeIds = $state<Set<string>>(new Set());
@@ -172,8 +172,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _isFullscreen = $state(false);
 	let _containerWidth = $state(0);
 	let _containerHeight = $state(0);
-	let _screenWidth = $state(typeof window !== 'undefined' ? window.innerWidth : 0);
-	let _screenHeight = $state(typeof window !== 'undefined' ? window.innerHeight : 0);
+	let _screenWidth = $state(typeof window !== "undefined" ? window.innerWidth : 0);
+	let _screenHeight = $state(typeof window !== "undefined" ? window.innerHeight : 0);
 
 	// Save callback (set via API, controls Save button visibility)
 	let _onSaveCallback = $state<SaveCallback | null>(null);
@@ -188,7 +188,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	const tokens = $derived(_ujltDocument.ujlt.tokens);
 
 	const viewportSize = $derived<ViewportSize>(
-		_viewportType ? (VIEWPORT_SIZES[_viewportType] ?? null) : null
+		_viewportType ? (VIEWPORT_SIZES[_viewportType] ?? null) : null,
 	);
 
 	/**
@@ -218,7 +218,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 */
 	function setMode(mode: CrafterMode): void {
 		_mode = mode;
-		if (mode === 'designer') {
+		if (mode === "designer") {
 			_selectedNodeId = null;
 		}
 	}
@@ -230,7 +230,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 * - Do not allow root node selection
 	 */
 	function setSelectedNodeId(nodeId: string | null): void {
-		if (nodeId && (_mode !== 'editor' || isRootNode(nodeId))) return;
+		if (nodeId && (_mode !== "editor" || isRootNode(nodeId))) return;
 		_selectedNodeId = nodeId;
 	}
 
@@ -254,7 +254,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function expandToNode(nodeId: string): void {
 		const path = findPathToNode(_ujlcDocument.ujlc.root, nodeId);
 		if (!path) {
-			logger.warn('Could not find path to node:', nodeId);
+			logger.warn("Could not find path to node:", nodeId);
 			return;
 		}
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
@@ -310,8 +310,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 */
 	function toggleFullscreen(): void {
 		_isFullscreen = !_isFullscreen;
-		if (typeof window !== 'undefined' && document.body) {
-			document.body.style.overflow = _isFullscreen ? 'hidden' : '';
+		if (typeof window !== "undefined" && document.body) {
+			document.body.style.overflow = _isFullscreen ? "hidden" : "";
 		}
 	}
 
@@ -335,7 +335,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function updateRootSlot(fn: (slot: UJLCSlotObject) => UJLCSlotObject): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, root: fn(_ujlcDocument.ujlc.root) }
+			ujlc: { ..._ujlcDocument.ujlc, root: fn(_ujlcDocument.ujlc.root) },
 		};
 	}
 
@@ -346,7 +346,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function updateTokenSet(fn: (tokens: UJLTTokenSet) => UJLTTokenSet): void {
 		_ujltDocument = {
 			..._ujltDocument,
-			ujlt: { ..._ujltDocument.ujlt, tokens: fn(_ujltDocument.ujlt.tokens) }
+			ujlt: { ..._ujltDocument.ujlt, tokens: fn(_ujltDocument.ujlt.tokens) },
 		};
 	}
 
@@ -357,7 +357,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) }
+			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) },
 		};
 	}
 
@@ -386,7 +386,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	const imageService = $derived.by(() =>
-		createImageService(meta._library, () => images, updateImages)
+		createImageService(meta._library, () => images, updateImages),
 	);
 
 	// ============================================
@@ -484,7 +484,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		setUjltDocument,
 
 		// Operations
-		operations
+		operations,
 	} as const;
 }
 
@@ -509,20 +509,20 @@ export type CrafterContext = CrafterStore;
  * Symbol for type-safe CrafterContext access.
  * Using Symbol.for() allows the same symbol to be retrieved across modules.
  */
-export const CRAFTER_CONTEXT = Symbol.for('ujl:crafter-context');
+export const CRAFTER_CONTEXT = Symbol.for("ujl:crafter-context");
 
 /**
  * Symbol for Composer context.
  * Used for direct Composer access in components.
  */
-export const COMPOSER_CONTEXT = Symbol.for('ujl:composer-context');
+export const COMPOSER_CONTEXT = Symbol.for("ujl:composer-context");
 
 /**
  * Symbol for Shadow Root context access.
  * Used to provide the Shadow Root reference to child components
  * for scoped DOM queries within the Shadow DOM.
  */
-export const SHADOW_ROOT_CONTEXT = Symbol.for('ujl:shadow-root-context');
+export const SHADOW_ROOT_CONTEXT = Symbol.for("ujl:shadow-root-context");
 
 /**
  * Context type for Shadow Root access.

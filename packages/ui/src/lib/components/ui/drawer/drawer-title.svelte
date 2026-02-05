@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { HTMLAttributes } from 'svelte/elements';
-	import { cn, type WithElementRef } from '$lib/utils.js';
+	import type { Snippet } from "svelte";
+	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils.js";
 
 	interface DrawerTitleProps extends WithElementRef<HTMLAttributes<HTMLHeadingElement>> {
 		class?: string;
@@ -19,7 +19,7 @@
 <h2
 	bind:this={ref}
 	data-slot="drawer-title"
-	class={cn('font-semibold text-foreground', className)}
+	class={cn("font-semibold text-foreground", className)}
 	{...restProps}
 >
 	{@render children?.()}

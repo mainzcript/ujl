@@ -14,13 +14,13 @@
 		Button,
 		Grid,
 		GridItem,
-		Badge
-	} from '$lib/index.js';
-	import { flavors } from '@ujl-framework/types';
-	import { getContext } from 'svelte';
+		Badge,
+	} from "$lib/index.js";
+	import { flavors } from "@ujl-framework/types";
+	import { getContext } from "svelte";
 
 	// Get selectedFlavor from layout context
-	const flavorContext = getContext<{ value: string }>('selectedFlavor');
+	const flavorContext = getContext<{ value: string }>("selectedFlavor");
 	const selectedFlavor = $derived.by(() => flavorContext.value);
 </script>
 

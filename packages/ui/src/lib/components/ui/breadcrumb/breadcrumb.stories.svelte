@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Breadcrumb,
 		BreadcrumbEllipsis,
@@ -7,22 +7,22 @@
 		BreadcrumbLink,
 		BreadcrumbList,
 		BreadcrumbPage,
-		BreadcrumbSeparator
-	} from './index.ts';
+		BreadcrumbSeparator,
+	} from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Navigation/Breadcrumb',
+		title: "Components/Navigation/Breadcrumb",
 		component: Breadcrumb,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			class: {
-				control: 'text',
-				description: 'Additional CSS classes to apply',
+				control: "text",
+				description: "Additional CSS classes to apply",
 				table: {
-					category: 'Appearance'
-				}
-			}
-		}
+					category: "Appearance",
+				},
+			},
+		},
 	});
 </script>
 

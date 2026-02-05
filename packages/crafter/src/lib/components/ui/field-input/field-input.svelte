@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Input, Label, Text } from '@ujl-framework/ui';
-	import type { FieldEntry } from '@ujl-framework/core';
-	import type { ProseMirrorDocument } from '@ujl-framework/types';
-	import { ImageField, NumberField } from '@ujl-framework/core';
-	import { ImagePicker } from '../image-picker/index.js';
-	import { RichTextInput } from '../richtext-input/index.js';
+	import { Input, Label, Text } from "@ujl-framework/ui";
+	import type { FieldEntry } from "@ujl-framework/core";
+	import type { ProseMirrorDocument } from "@ujl-framework/types";
+	import { ImageField, NumberField } from "@ujl-framework/core";
+	import { ImagePicker } from "../image-picker/index.js";
+	import { RichTextInput } from "../richtext-input/index.js";
 
 	let {
 		fieldName,
 		fieldEntry,
 		value,
-		onChange
+		onChange,
 	}: {
 		fieldName: string;
 		fieldEntry: FieldEntry;
@@ -24,23 +24,23 @@
 
 	// Type guard for NumberField
 	function isNumberField(field: typeof fieldEntry.field): field is NumberField {
-		return field.getFieldType() === 'number';
+		return field.getFieldType() === "number";
 	}
 
 	// Type guard for ImageField
 	function isImageField(field: typeof fieldEntry.field): field is ImageField {
-		return field.getFieldType() === 'image';
+		return field.getFieldType() === "image";
 	}
 
 	// Get number field config if applicable
 	const numberFieldConfig = $derived(
-		isNumberField(fieldEntry.field) ? fieldEntry.field.config : null
+		isNumberField(fieldEntry.field) ? fieldEntry.field.config : null,
 	);
 
 	// Type guard for image ID (string, number, or null)
 	// Backend services may return numeric IDs (e.g., Payload CMS returns numbers)
 	const isImageId = (val: unknown): val is string | number | null => {
-		return val === null || typeof val === 'string' || typeof val === 'number';
+		return val === null || typeof val === "string" || typeof val === "number";
 	};
 
 	// Refs to input elements for manual updates
@@ -60,20 +60,20 @@
 	// Normalizes input values (number conversion) before calling onChange
 	function handleChange(event: Event) {
 		const target = event.currentTarget as HTMLInputElement | HTMLTextAreaElement;
-		const newValue = target.type === 'number' ? Number(target.value) : target.value;
+		const newValue = target.type === "number" ? Number(target.value) : target.value;
 		onChange(newValue);
 	}
 
 	// Type guards
-	const isString = (val: unknown): val is string => typeof val === 'string';
-	const isNumber = (val: unknown): val is number => typeof val === 'number';
+	const isString = (val: unknown): val is string => typeof val === "string";
+	const isNumber = (val: unknown): val is number => typeof val === "number";
 	const isProseMirrorDocument = (val: unknown): val is ProseMirrorDocument => {
 		return (
-			typeof val === 'object' &&
+			typeof val === "object" &&
 			val !== null &&
-			'type' in val &&
-			val.type === 'doc' &&
-			'content' in val &&
+			"type" in val &&
+			val.type === "doc" &&
+			"content" in val &&
 			Array.isArray(val.content)
 		);
 	};
@@ -95,16 +95,16 @@
 	{/if}
 
 	<!-- Input Component -->
-	{#if fieldType === 'text'}
+	{#if fieldType === "text"}
 		<Input
 			bind:ref={textInputRef}
 			id={fieldName}
 			type="text"
-			defaultValue={isString(value) ? value : ''}
+			defaultValue={isString(value) ? value : ""}
 			oninput={handleChange}
 			placeholder={config.placeholder}
 		/>
-	{:else if fieldType === 'number'}
+	{:else if fieldType === "number"}
 		<Input
 			bind:ref={numberInputRef}
 			id={fieldName}
@@ -118,12 +118,12 @@
 				? Math.pow(10, -numberFieldConfig.decimals)
 				: undefined}
 		/>
-	{:else if fieldType === 'richtext'}
+	{:else if fieldType === "richtext"}
 		<RichTextInput
 			value={isProseMirrorDocument(value) ? value : undefined}
 			onChange={(newValue) => onChange(newValue)}
 		/>
-	{:else if fieldType === 'image'}
+	{:else if fieldType === "image"}
 		{@const imageValue = isImageId(value) ? value : null}
 		{#if isImageField(fieldEntry.field)}
 			{#key value}

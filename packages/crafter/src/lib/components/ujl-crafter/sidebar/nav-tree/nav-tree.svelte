@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { UJLCModuleObject } from '@ujl-framework/types';
-	import { getContext } from 'svelte';
-	import NavTreeItem from './nav-tree-item.svelte';
-	import { createDragHandler } from './nav-tree-drag-handler.svelte.ts';
-	import { createVirtualRootNode } from '$lib/utils/ujlc-tree.js';
-	import { CRAFTER_CONTEXT, type CrafterContext } from '$lib/stores/index.js';
+	import type { UJLCModuleObject } from "@ujl-framework/types";
+	import { getContext } from "svelte";
+	import NavTreeItem from "./nav-tree-item.svelte";
+	import { createDragHandler } from "./nav-tree-drag-handler.svelte.ts";
+	import { createVirtualRootNode } from "$lib/utils/ujlc-tree.js";
+	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 
 	let {
 		nodes,
@@ -19,13 +19,13 @@
 		onSlotCopy,
 		onSlotCut,
 		onSlotPaste,
-		onSlotClick
+		onSlotClick,
 	}: {
 		nodes: UJLCModuleObject[];
 		clipboard:
 			| UJLCModuleObject
 			| {
-					type: 'slot';
+					type: "slot";
 					slotName: string;
 					content: UJLCModuleObject[];
 			  }
@@ -39,13 +39,13 @@
 			nodeId: string,
 			targetId: string,
 			slotName?: string,
-			position?: 'before' | 'after' | 'into'
+			position?: "before" | "after" | "into",
 		) => boolean;
 		onSlotMove?: (
 			sourceParentId: string,
 			sourceSlotName: string,
 			targetParentId: string,
-			targetSlotName: string
+			targetSlotName: string,
 		) => boolean;
 		onSlotCopy?: (parentId: string, slotName: string) => void;
 		onSlotCut?: (parentId: string, slotName: string) => void;
@@ -58,7 +58,7 @@
 
 	// Selected node from Context (synchronized with editor.svelte)
 	const selectedNodeId = $derived.by(() => {
-		return crafter.mode === 'editor' ? crafter.selectedNodeId : null;
+		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
 
 	// Create drag handler with slot move support
@@ -82,7 +82,7 @@
 	 * Order: expand first (to make node visible), then select (consistent with preview.svelte)
 	 */
 	function handleNodeClick(nodeId: string) {
-		if (crafter.mode !== 'editor') return;
+		if (crafter.mode !== "editor") return;
 		// Expand to node first to ensure it's visible in the tree
 		crafter.expandToNode(nodeId);
 		crafter.setSelectedNodeId(nodeId);

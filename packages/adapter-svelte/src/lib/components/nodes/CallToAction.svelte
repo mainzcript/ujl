@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { UJLAbstractCallToActionModuleNode } from '@ujl-framework/types';
-	import { Heading, Card, CardContent, Button } from '@ujl-framework/ui';
-	import { RichText } from '../ui/index.js';
+	import type { UJLAbstractCallToActionModuleNode } from "@ujl-framework/types";
+	import { Heading, Card, CardContent, Button } from "@ujl-framework/ui";
+	import { RichText } from "../ui/index.js";
 
 	interface Props {
 		node: UJLAbstractCallToActionModuleNode;

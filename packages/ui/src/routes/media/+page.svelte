@@ -17,8 +17,8 @@
 		CarouselPrevious,
 		CarouselNext,
 		CarouselDots,
-		Image
-	} from '$lib/index.js';
+		Image,
+	} from "$lib/index.js";
 </script>
 
 <Grid>

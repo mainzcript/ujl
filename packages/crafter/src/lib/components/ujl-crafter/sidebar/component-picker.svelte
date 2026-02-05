@@ -6,15 +6,15 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandItem,
-		CommandSeparator
-	} from '@ujl-framework/ui';
-	import { getContext } from 'svelte';
-	import { Composer, type AnyModule, type ComponentCategory } from '@ujl-framework/core';
-	import { COMPOSER_CONTEXT } from '$lib/stores/index.js';
+		CommandSeparator,
+	} from "@ujl-framework/ui";
+	import { getContext } from "svelte";
+	import { Composer, type AnyModule, type ComponentCategory } from "@ujl-framework/core";
+	import { COMPOSER_CONTEXT } from "$lib/stores/index.js";
 
 	let {
 		open = $bindable(false),
-		onSelect
+		onSelect,
 	}: {
 		open?: boolean;
 		onSelect: (componentType: string) => void;
@@ -27,14 +27,14 @@
 	 * Get module label
 	 */
 	function getModuleLabel(module: AnyModule): string {
-		return module.label ?? '';
+		return module.label ?? "";
 	}
 
 	/**
 	 * Get module category
 	 */
 	function getModuleCategory(module: AnyModule): ComponentCategory {
-		return (module.category ?? 'content') as ComponentCategory;
+		return (module.category ?? "content") as ComponentCategory;
 	}
 
 	/**
@@ -68,7 +68,7 @@
 				acc[category].push(module);
 				return acc;
 			},
-			{} as Record<string, AnyModule[]>
+			{} as Record<string, AnyModule[]>,
 		);
 	});
 

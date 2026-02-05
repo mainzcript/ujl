@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
 	import {
 		Sheet,
 		SheetContent,
@@ -10,29 +10,29 @@
 		SheetDescription,
 		SheetTrigger,
 		SheetTriggerButton,
-		SheetCloseButton
-	} from './index.ts';
-	import { Button } from '../button/index.ts';
-	import { Input } from '../input/index.ts';
-	import { Label } from '../label/index.ts';
-	import { Separator } from '../separator/index.ts';
+		SheetCloseButton,
+	} from "./index.ts";
+	import { Button } from "../button/index.ts";
+	import { Input } from "../input/index.ts";
+	import { Label } from "../label/index.ts";
+	import { Separator } from "../separator/index.ts";
 	const { Story } = defineMeta({
-		title: 'Components/Overlays/Sheet',
+		title: "Components/Overlays/Sheet",
 		component: Sheet,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			open: {
-				control: 'boolean',
-				description: 'Whether the sheet is open',
+				control: "boolean",
+				description: "Whether the sheet is open",
 				table: {
-					category: 'State',
-					defaultValue: { summary: 'false' }
-				}
-			}
+					category: "State",
+					defaultValue: { summary: "false" },
+				},
+			},
 		},
 		args: {
-			open: false
-		}
+			open: false,
+		},
 	});
 </script>
 

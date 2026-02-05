@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, cleanup } from '@testing-library/svelte';
-import TestWrapper from './test-wrapper.svelte';
-import type { useApp } from './context.svelte.js';
-import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from './constants.js';
+import { cleanup, render } from "@testing-library/svelte";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from "./constants.js";
+import type { useApp } from "./context.svelte.js";
+import TestWrapper from "./test-wrapper.svelte";
 
 type AppState = ReturnType<typeof useApp>;
 type TestHelpers = {
@@ -25,14 +25,14 @@ async function renderApp(options: {
 		initialPanelOpen: options.initialPanelOpen ?? false,
 		onAppReady: (h) => {
 			helpers = h;
-		}
+		},
 	});
 
 	// Wait for effect to run
 	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	if (!helpers) {
-		throw new Error('App helpers not received');
+		throw new Error("App helpers not received");
 	}
 
 	return helpers;
@@ -48,34 +48,34 @@ function setMobileWidth(app: ReturnType<typeof useApp>, breakpoint: number) {
 	app.setContainerWidth(breakpoint - 1);
 }
 
-describe('AppState', () => {
+describe("AppState", () => {
 	afterEach(() => {
 		cleanup();
 		vi.restoreAllMocks();
 	});
 
-	describe('state initialization', () => {
-		it('should derive sidebarDesktopOpen from props', async () => {
+	describe("state initialization", () => {
+		it("should derive sidebarDesktopOpen from props", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: true });
 			expect(app.sidebarDesktopOpen).toBe(true);
 			expect(getSidebarOpen()).toBe(true);
 		});
 
-		it('should derive panelDesktopOpen from props', async () => {
+		it("should derive panelDesktopOpen from props", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			expect(app.panelDesktopOpen).toBe(false);
 			expect(getPanelOpen()).toBe(false);
 		});
 
-		it('should initialize sheet and drawer states as false', async () => {
+		it("should initialize sheet and drawer states as false", async () => {
 			const { app } = await renderApp({});
 			expect(app.sidebarSheetOpen).toBe(false);
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 	});
 
-	describe('preferSidebar', () => {
-		it('should open sidebar', async () => {
+	describe("preferSidebar", () => {
+		it("should open sidebar", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 
 			app.preferSidebar();
@@ -85,8 +85,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('requireSidebar', () => {
-		it('should open sidebar and close sheet when desktop mode', async () => {
+	describe("requireSidebar", () => {
+		it("should open sidebar and close sheet when desktop mode", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.sidebarSheetOpen = true;
@@ -97,7 +97,7 @@ describe('AppState', () => {
 			expect(app.sidebarSheetOpen).toBe(false);
 		});
 
-		it('should open sheet when mobile mode', async () => {
+		it("should open sheet when mobile mode", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 			setMobileWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.requireSidebar();
@@ -107,8 +107,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('hideSidebar', () => {
-		it('should close sidebar and sheet', async () => {
+	describe("hideSidebar", () => {
+		it("should close sidebar and sheet", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: true });
 
 			app.sidebarSheetOpen = true;
@@ -120,8 +120,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('toggleSidebar', () => {
-		it('should hide sidebar when sidebarDesktopOpen is true', async () => {
+	describe("toggleSidebar", () => {
+		it("should hide sidebar when sidebarDesktopOpen is true", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: true });
 			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 
@@ -132,7 +132,7 @@ describe('AppState', () => {
 			expect(app.sidebarSheetOpen).toBe(false);
 		});
 
-		it('should hide sidebar when sheet is open', async () => {
+		it("should hide sidebar when sheet is open", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 
 			app.sidebarSheetOpen = true;
@@ -143,7 +143,7 @@ describe('AppState', () => {
 			expect(app.sidebarSheetOpen).toBe(false);
 		});
 
-		it('should require sidebar when both closed', async () => {
+		it("should require sidebar when both closed", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.sidebarSheetOpen = false;
@@ -154,8 +154,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('preferPanel', () => {
-		it('should open panel when desktop mode', async () => {
+	describe("preferPanel", () => {
+		it("should open panel when desktop mode", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = true;
@@ -166,7 +166,7 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should not open panel when mobile mode', async () => {
+		it("should not open panel when mobile mode", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setMobileWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.preferPanel();
@@ -176,8 +176,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('requirePanel', () => {
-		it('should open panel and close drawer when desktop mode', async () => {
+	describe("requirePanel", () => {
+		it("should open panel and close drawer when desktop mode", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = true;
@@ -188,7 +188,7 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should open drawer when mobile mode', async () => {
+		it("should open drawer when mobile mode", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setMobileWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.requirePanel();
@@ -198,8 +198,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('hidePanel', () => {
-		it('should close panel and drawer', async () => {
+	describe("hidePanel", () => {
+		it("should close panel and drawer", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: true });
 
 			app.panelDrawerOpen = true;
@@ -211,8 +211,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('togglePanel', () => {
-		it('should hide panel when panelDesktopOpen is true', async () => {
+	describe("togglePanel", () => {
+		it("should hide panel when panelDesktopOpen is true", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: true });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 
@@ -223,7 +223,7 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should hide panel when drawer is open', async () => {
+		it("should hide panel when drawer is open", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 
 			app.panelDrawerOpen = true;
@@ -234,7 +234,7 @@ describe('AppState', () => {
 			expect(app.panelDrawerOpen).toBe(false);
 		});
 
-		it('should require panel when both closed', async () => {
+		it("should require panel when both closed", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.panelDrawerOpen = false;
@@ -245,8 +245,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('container width setter', () => {
-		it('should set container width and use it for sidebar visibility check', async () => {
+	describe("container width setter", () => {
+		it("should set container width and use it for sidebar visibility check", async () => {
 			const { app, getSidebarOpen } = await renderApp({ initialSidebarOpen: false });
 			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 			app.requireSidebar();
@@ -255,7 +255,7 @@ describe('AppState', () => {
 			expect(getSidebarOpen()).toBe(true);
 		});
 
-		it('should set container width and use it for panel visibility check', async () => {
+		it("should set container width and use it for panel visibility check", async () => {
 			const { app, getPanelOpen } = await renderApp({ initialPanelOpen: false });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 			app.requirePanel();
@@ -264,7 +264,7 @@ describe('AppState', () => {
 			expect(getPanelOpen()).toBe(true);
 		});
 
-		it('should handle mobile width gracefully', async () => {
+		it("should handle mobile width gracefully", async () => {
 			const { app } = await renderApp({ initialSidebarOpen: false, initialPanelOpen: false });
 
 			setMobileWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
@@ -278,8 +278,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('breakpoint detection', () => {
-		it('should detect desktop sidebar mode when width >= breakpoint', async () => {
+	describe("breakpoint detection", () => {
+		it("should detect desktop sidebar mode when width >= breakpoint", async () => {
 			const { app } = await renderApp({});
 			app.setContainerWidth(BREAKPOINT_SIDEBAR_DESKTOP);
 			expect(app.isDesktopSidebar).toBe(true);
@@ -288,7 +288,7 @@ describe('AppState', () => {
 			expect(app.isDesktopSidebar).toBe(false);
 		});
 
-		it('should detect desktop panel mode when width >= breakpoint', async () => {
+		it("should detect desktop panel mode when width >= breakpoint", async () => {
 			const { app } = await renderApp({});
 			app.setContainerWidth(BREAKPOINT_PANEL_DESKTOP);
 			expect(app.isDesktopPanel).toBe(true);
@@ -298,8 +298,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('isSidebarVisible', () => {
-		it('should return true when desktop sidebar is open and visible', async () => {
+	describe("isSidebarVisible", () => {
+		it("should return true when desktop sidebar is open and visible", async () => {
 			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: true });
 			setDesktopWidth(app, BREAKPOINT_SIDEBAR_DESKTOP);
 
@@ -307,7 +307,7 @@ describe('AppState', () => {
 			expect(getIsSidebarVisible()).toBe(true);
 		});
 
-		it('should return true when mobile sheet is open', async () => {
+		it("should return true when mobile sheet is open", async () => {
 			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: false });
 			app.sidebarSheetOpen = true;
 
@@ -315,7 +315,7 @@ describe('AppState', () => {
 			expect(getIsSidebarVisible()).toBe(true);
 		});
 
-		it('should return false when both desktop and mobile are closed', async () => {
+		it("should return false when both desktop and mobile are closed", async () => {
 			const { app, getIsSidebarVisible } = await renderApp({ initialSidebarOpen: false });
 			app.sidebarSheetOpen = false;
 
@@ -324,8 +324,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('isPanelVisible', () => {
-		it('should return true when desktop panel is open and visible', async () => {
+	describe("isPanelVisible", () => {
+		it("should return true when desktop panel is open and visible", async () => {
 			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: true });
 			setDesktopWidth(app, BREAKPOINT_PANEL_DESKTOP);
 
@@ -333,7 +333,7 @@ describe('AppState', () => {
 			expect(getIsPanelVisible()).toBe(true);
 		});
 
-		it('should return true when mobile drawer is open', async () => {
+		it("should return true when mobile drawer is open", async () => {
 			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: false });
 			app.panelDrawerOpen = true;
 
@@ -341,7 +341,7 @@ describe('AppState', () => {
 			expect(getIsPanelVisible()).toBe(true);
 		});
 
-		it('should return false when both desktop and mobile are closed', async () => {
+		it("should return false when both desktop and mobile are closed", async () => {
 			const { app, getIsPanelVisible } = await renderApp({ initialPanelOpen: false });
 			app.panelDrawerOpen = false;
 
@@ -350,8 +350,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('onPanelClose callback', () => {
-		it('should call callback when panel is closed', async () => {
+	describe("onPanelClose callback", () => {
+		it("should call callback when panel is closed", async () => {
 			const { app } = await renderApp({ initialPanelOpen: true });
 			let callbackCalled = false;
 
@@ -365,7 +365,7 @@ describe('AppState', () => {
 			expect(callbackCalled).toBe(true);
 		});
 
-		it('should not call callback if not set', async () => {
+		it("should not call callback if not set", async () => {
 			const { app } = await renderApp({ initialPanelOpen: true });
 
 			// Should not throw
@@ -375,7 +375,7 @@ describe('AppState', () => {
 			expect(app.panelDesktopOpen).toBe(false);
 		});
 
-		it('should return cleanup function', async () => {
+		it("should return cleanup function", async () => {
 			const { app } = await renderApp({ initialPanelOpen: true });
 			let callbackCalled = false;
 
@@ -391,8 +391,8 @@ describe('AppState', () => {
 		});
 	});
 
-	describe('onSidebarClose callback', () => {
-		it('should call callback when sidebar is closed', async () => {
+	describe("onSidebarClose callback", () => {
+		it("should call callback when sidebar is closed", async () => {
 			const { app } = await renderApp({ initialSidebarOpen: true });
 			let callbackCalled = false;
 
@@ -406,7 +406,7 @@ describe('AppState', () => {
 			expect(callbackCalled).toBe(true);
 		});
 
-		it('should not call callback if not set', async () => {
+		it("should not call callback if not set", async () => {
 			const { app } = await renderApp({ initialSidebarOpen: true });
 
 			// Should not throw
@@ -416,7 +416,7 @@ describe('AppState', () => {
 			expect(app.sidebarDesktopOpen).toBe(false);
 		});
 
-		it('should return cleanup function', async () => {
+		it("should return cleanup function", async () => {
 			const { app } = await renderApp({ initialSidebarOpen: true });
 			let callbackCalled = false;
 

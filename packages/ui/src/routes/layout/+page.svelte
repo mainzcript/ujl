@@ -32,9 +32,9 @@
 		ResizablePaneGroup,
 		ResizablePane,
 		ResizableHandle,
-		Heading
-	} from '$lib/index.js';
-	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+		Heading,
+	} from "$lib/index.js";
+	import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
 </script>
 
 <Grid>

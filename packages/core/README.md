@@ -167,7 +167,7 @@ class CustomModule extends ModuleBase {
 	readonly slots = [{ key: "content", slot: new Slot({ label: "Content Area", max: 5 }) }];
 
 	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-		const children = moduleData.slots.content.map(child => composer.composeModule(child));
+		const children = moduleData.slots.content.map((child) => composer.composeModule(child));
 
 		return {
 			type: "wrapper",
@@ -393,7 +393,7 @@ abstract class ModuleBase {
 type UJLAdapter<OutputType = string, OptionsType = undefined> = (
 	node: UJLAbstractNode,
 	tokenSet: UJLTTokenSet,
-	options: OptionsType
+	options: OptionsType,
 ) => OutputType;
 ```
 

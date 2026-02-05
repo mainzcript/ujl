@@ -10,10 +10,10 @@
 		InputGroupAddon,
 		InputGroupText,
 		Slider,
-		Label
-	} from '@ujl-framework/ui';
-	import { generateUid } from '@ujl-framework/core';
-	import type { ComponentProps } from 'svelte';
+		Label,
+	} from "@ujl-framework/ui";
+	import { generateUid } from "@ujl-framework/core";
+	import type { ComponentProps } from "svelte";
 
 	let {
 		value = $bindable<number | undefined>(),
@@ -50,12 +50,12 @@
 
 	// Local string state for the text input value. This keeps the DOM value
 	// independent from the numeric `value` prop so we can handle parsing manually.
-	let inputValue = $state('');
+	let inputValue = $state("");
 
 	// Sync the local text representation whenever the external numeric value changes.
 	$effect(() => {
 		if (value === undefined || Number.isNaN(value)) {
-			inputValue = '';
+			inputValue = "";
 		} else {
 			inputValue = String(value);
 		}
@@ -90,7 +90,7 @@
 		return v;
 	};
 
-	const numericStep = $derived(typeof step === 'string' ? Number(step) : step);
+	const numericStep = $derived(typeof step === "string" ? Number(step) : step);
 </script>
 
 <div class="space-y-2">
@@ -110,17 +110,17 @@
 						class="text-right text-[0.7rem]!"
 						{...restProps}
 						onchange={() => {
-							const normalized = inputValue.trim().replace(',', '.');
+							const normalized = inputValue.trim().replace(",", ".");
 							if (!normalized) {
 								// Revert to the last valid numeric value (or empty if undefined).
-								inputValue = value === undefined || Number.isNaN(value) ? '' : String(value);
+								inputValue = value === undefined || Number.isNaN(value) ? "" : String(value);
 								return;
 							}
 
 							const parsed = Number(normalized);
 							if (Number.isNaN(parsed)) {
 								// Invalid input: revert to the last valid numeric value.
-								inputValue = value === undefined || Number.isNaN(value) ? '' : String(value);
+								inputValue = value === undefined || Number.isNaN(value) ? "" : String(value);
 								return;
 							}
 

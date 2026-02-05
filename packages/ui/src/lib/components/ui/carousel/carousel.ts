@@ -1,4 +1,4 @@
-import { generateUid } from '@ujl-framework/core';
+import { generateUid } from "@ujl-framework/core";
 
 export type CarouselOptions = {
 	targetItemWidth: number;
@@ -13,7 +13,7 @@ export type CarouselRecord = {
 
 export const DEFAULT_OPTIONS: CarouselOptions = {
 	targetItemWidth: 350,
-	enableDrag: true
+	enableDrag: true,
 };
 
 export type CarouselState = {
@@ -55,7 +55,7 @@ export class Carousel {
 		canScrollNext: false,
 		firstActiveIndex: 0,
 		lastActiveIndex: 0,
-		currentIndex: 0
+		currentIndex: 0,
 	};
 
 	private rafId: number | null = null; // requested animation frame id
@@ -70,12 +70,12 @@ export class Carousel {
 
 		this.resizeObserver = new ResizeObserver(this.onResize);
 		this.resizeObserver.observe(this.wrapper);
-		this.wrapper.addEventListener('scroll', this.onScroll);
+		this.wrapper.addEventListener("scroll", this.onScroll);
 
-		this.wrapper.addEventListener('mousedown', this.onMouseDown);
-		window.addEventListener('mousemove', this.onMouseMove);
-		window.addEventListener('mouseup', this.dragEnd);
-		window.addEventListener('mouseleave', this.dragEnd);
+		this.wrapper.addEventListener("mousedown", this.onMouseDown);
+		window.addEventListener("mousemove", this.onMouseMove);
+		window.addEventListener("mouseup", this.dragEnd);
+		window.addEventListener("mouseleave", this.dragEnd);
 	}
 
 	public scrollTo(index: number): boolean {
@@ -91,7 +91,7 @@ export class Carousel {
 
 			this.wrapper.scrollTo({
 				left: leftIndex * this.itemWidth,
-				behavior: 'smooth'
+				behavior: "smooth",
 			});
 			return true;
 		}
@@ -112,7 +112,7 @@ export class Carousel {
 	}
 
 	private toggleSnap(enabled: boolean): void {
-		this.wrapper.style.scrollSnapType = enabled ? 'x mandatory' : 'none';
+		this.wrapper.style.scrollSnapType = enabled ? "x mandatory" : "none";
 	}
 
 	public registerItem(wrapper: HTMLElement, item: HTMLElement): string {
@@ -160,7 +160,7 @@ export class Carousel {
 		const target = event.target as Element;
 		const isInteractiveElement =
 			target.closest(
-				'a, button, input, textarea, select, [contenteditable], p, span, h1, h2, h3, h4, h5, h6'
+				"a, button, input, textarea, select, [contenteditable], p, span, h1, h2, h3, h4, h5, h6",
 			) !== null;
 
 		if (isInteractiveElement) {
@@ -180,7 +180,7 @@ export class Carousel {
 		const newScroll = this.dragStartScroll - deltaX;
 		this.wrapper.scrollLeft = Math.max(
 			0,
-			Math.min(newScroll, this.wrapper.scrollWidth - this.wrapper.clientWidth)
+			Math.min(newScroll, this.wrapper.scrollWidth - this.wrapper.clientWidth),
 		);
 	};
 
@@ -223,7 +223,7 @@ export class Carousel {
 
 	private calculateItemSizes(): void {
 		const placeholderStart = this.wrapper.querySelector(
-			'[data-slot="carousel-placeholder-start"]'
+			'[data-slot="carousel-placeholder-start"]',
 		) as HTMLElement;
 		const placeholder = placeholderStart ? placeholderStart.offsetWidth : 0;
 
@@ -256,14 +256,14 @@ export class Carousel {
 			...this.state,
 			itemCount: this.records.length,
 			perView: this.perView,
-			scroll: scroll,
-			maxScroll: maxScroll,
-			progress: progress,
-			canScrollPrev: canScrollPrev,
-			canScrollNext: canScrollNext,
-			firstActiveIndex: firstActiveIndex,
-			lastActiveIndex: lastActiveIndex,
-			currentIndex: currentIndex
+			scroll,
+			maxScroll,
+			progress,
+			canScrollPrev,
+			canScrollNext,
+			firstActiveIndex,
+			lastActiveIndex,
+			currentIndex,
 		};
 	}
 
@@ -289,13 +289,13 @@ export class Carousel {
 			cancelAnimationFrame(this.rafId);
 			this.rafId = null;
 		}
-		window.removeEventListener('resize', this.onResize);
-		this.wrapper.removeEventListener('scroll', this.onScroll);
+		window.removeEventListener("resize", this.onResize);
+		this.wrapper.removeEventListener("scroll", this.onScroll);
 
-		this.wrapper.removeEventListener('mousedown', this.onMouseDown);
-		window.removeEventListener('mousemove', this.onMouseMove);
-		window.removeEventListener('mouseup', this.dragEnd);
-		window.removeEventListener('mouseleave', this.dragEnd);
+		this.wrapper.removeEventListener("mousedown", this.onMouseDown);
+		window.removeEventListener("mousemove", this.onMouseMove);
+		window.removeEventListener("mouseup", this.dragEnd);
+		window.removeEventListener("mouseleave", this.dragEnd);
 
 		if (this.resizeObserver) {
 			this.resizeObserver.disconnect();

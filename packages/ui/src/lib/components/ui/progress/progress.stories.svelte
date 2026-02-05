@@ -1,33 +1,33 @@
 <script module>
-	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { Progress } from './index.ts';
+	import { defineMeta } from "@storybook/addon-svelte-csf";
+	import { Progress } from "./index.ts";
 
 	const { Story } = defineMeta({
-		title: 'Components/Base/Progress',
+		title: "Components/Base/Progress",
 		component: Progress,
-		tags: ['autodocs'],
+		tags: ["autodocs"],
 		argTypes: {
 			value: {
-				control: { type: 'range', min: 0, max: 100, step: 1 },
-				description: 'Current progress value',
+				control: { type: "range", min: 0, max: 100, step: 1 },
+				description: "Current progress value",
 				table: {
-					category: 'State',
-					defaultValue: { summary: '0' }
-				}
+					category: "State",
+					defaultValue: { summary: "0" },
+				},
 			},
 			max: {
-				control: 'number',
-				description: 'Maximum progress value',
+				control: "number",
+				description: "Maximum progress value",
 				table: {
-					category: 'Behavior',
-					defaultValue: { summary: '100' }
-				}
-			}
+					category: "Behavior",
+					defaultValue: { summary: "100" },
+				},
+			},
 		},
 		args: {
 			value: 33,
-			max: 100
-		}
+			max: 100,
+		},
 	});
 </script>
 
