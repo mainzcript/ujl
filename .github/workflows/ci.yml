@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload docs artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docs-dist
           path: apps/docs/dist/
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-artifacts
           path: |
