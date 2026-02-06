@@ -1,0 +1,319 @@
+/* Fonts use system defaults - custom font families can be configured via theme tokens */
+
+:root,
+[data-ujl-theme] {
+	/* Ambient color - Light mode */
+	--ambient-50: 98.5% 0 0;
+	--ambient-100: 96.7% 0.001 286.375;
+	--ambient-200: 92% 0.004 286.32;
+	--ambient-300: 87.1% 0.006 286.286;
+	--ambient-400: 70.5% 0.015 286.067;
+	--ambient-500: 55.2% 0.016 285.938;
+	--ambient-600: 44.2% 0.017 285.786;
+	--ambient-700: 37% 0.013 285.805;
+	--ambient-800: 27.4% 0.006 286.033;
+	--ambient-900: 21% 0.006 285.885;
+	--ambient-950: 14.1% 0.005 285.823;
+	--ambient-light: var(--ambient-50);
+	--ambient-light-foreground-ambient: var(--ambient-800);
+	--ambient-light-foreground-primary: var(--ambient-800);
+	--ambient-light-foreground-secondary: var(--ambient-800);
+	--ambient-light-foreground-accent: var(--ambient-800);
+	--ambient-light-foreground-success: var(--ambient-800);
+	--ambient-light-foreground-warning: var(--ambient-800);
+	--ambient-light-foreground-destructive: var(--ambient-800);
+	--ambient-light-foreground-info: var(--ambient-800);
+	--ambient-dark: var(--ambient-900);
+	--ambient-dark-foreground-ambient: var(--ambient-50);
+	--ambient-dark-foreground-primary: var(--ambient-50);
+	--ambient-dark-foreground-secondary: var(--ambient-50);
+	--ambient-dark-foreground-accent: var(--ambient-50);
+	--ambient-dark-foreground-success: var(--ambient-50);
+	--ambient-dark-foreground-warning: var(--ambient-50);
+	--ambient-dark-foreground-destructive: var(--ambient-50);
+	--ambient-dark-foreground-info: var(--ambient-50);
+
+	/* Primary color - Fallback to Ambient */
+	--primary-50: var(--ambient-50);
+	--primary-100: var(--ambient-100);
+	--primary-200: var(--ambient-200);
+	--primary-300: var(--ambient-300);
+	--primary-400: var(--ambient-400);
+	--primary-500: var(--ambient-500);
+	--primary-600: var(--ambient-600);
+	--primary-700: var(--ambient-700);
+	--primary-800: var(--ambient-800);
+	--primary-900: var(--ambient-900);
+	--primary-950: var(--ambient-950);
+	--primary-light: var(--primary-600);
+	--primary-light-foreground-ambient: var(--ambient-50);
+	--primary-light-foreground-primary: var(--ambient-50);
+	--primary-light-foreground-secondary: var(--ambient-50);
+	--primary-light-foreground-accent: var(--ambient-50);
+	--primary-light-foreground-success: var(--ambient-50);
+	--primary-light-foreground-warning: var(--ambient-50);
+	--primary-light-foreground-destructive: var(--ambient-50);
+	--primary-light-foreground-info: var(--ambient-50);
+	--primary-dark: var(--primary-400);
+	--primary-dark-foreground-ambient: var(--ambient-950);
+	--primary-dark-foreground-primary: var(--ambient-950);
+	--primary-dark-foreground-secondary: var(--ambient-950);
+	--primary-dark-foreground-accent: var(--ambient-950);
+	--primary-dark-foreground-success: var(--ambient-950);
+	--primary-dark-foreground-warning: var(--ambient-950);
+	--primary-dark-foreground-destructive: var(--ambient-950);
+	--primary-dark-foreground-info: var(--ambient-950);
+
+	/* Secondary color - Fallback to Ambient */
+	--secondary-50: var(--ambient-50);
+	--secondary-100: var(--ambient-100);
+	--secondary-200: var(--ambient-200);
+	--secondary-300: var(--ambient-300);
+	--secondary-400: var(--ambient-400);
+	--secondary-500: var(--ambient-500);
+	--secondary-600: var(--ambient-600);
+	--secondary-700: var(--ambient-700);
+	--secondary-800: var(--ambient-800);
+	--secondary-900: var(--ambient-900);
+	--secondary-950: var(--ambient-950);
+	--secondary-light: var(--secondary-600);
+	--secondary-light-foreground-ambient: var(--ambient-50);
+	--secondary-light-foreground-primary: var(--ambient-50);
+	--secondary-light-foreground-secondary: var(--ambient-50);
+	--secondary-light-foreground-accent: var(--ambient-50);
+	--secondary-light-foreground-success: var(--ambient-50);
+	--secondary-light-foreground-warning: var(--ambient-50);
+	--secondary-light-foreground-destructive: var(--ambient-50);
+	--secondary-light-foreground-info: var(--ambient-50);
+	--secondary-dark: var(--secondary-400);
+	--secondary-dark-foreground-ambient: var(--ambient-950);
+	--secondary-dark-foreground-primary: var(--ambient-950);
+	--secondary-dark-foreground-secondary: var(--ambient-950);
+	--secondary-dark-foreground-accent: var(--ambient-950);
+	--secondary-dark-foreground-success: var(--ambient-950);
+	--secondary-dark-foreground-warning: var(--ambient-950);
+	--secondary-dark-foreground-destructive: var(--ambient-950);
+	--secondary-dark-foreground-info: var(--ambient-950);
+
+	/* Accent color - Fallback to Ambient */
+	--accent-50: var(--ambient-50);
+	--accent-100: var(--ambient-100);
+	--accent-200: var(--ambient-200);
+	--accent-300: var(--ambient-300);
+	--accent-400: var(--ambient-400);
+	--accent-500: var(--ambient-500);
+	--accent-600: var(--ambient-600);
+	--accent-700: var(--ambient-700);
+	--accent-800: var(--ambient-800);
+	--accent-900: var(--ambient-900);
+	--accent-950: var(--ambient-950);
+	--accent-light: var(--accent-600);
+	--accent-light-foreground-ambient: var(--ambient-50);
+	--accent-light-foreground-primary: var(--ambient-50);
+	--accent-light-foreground-secondary: var(--ambient-50);
+	--accent-light-foreground-accent: var(--ambient-50);
+	--accent-light-foreground-success: var(--ambient-50);
+	--accent-light-foreground-warning: var(--ambient-50);
+	--accent-light-foreground-destructive: var(--ambient-50);
+	--accent-light-foreground-info: var(--ambient-50);
+	--accent-dark: var(--accent-400);
+	--accent-dark-foreground-ambient: var(--ambient-950);
+	--accent-dark-foreground-primary: var(--ambient-950);
+	--accent-dark-foreground-secondary: var(--ambient-950);
+	--accent-dark-foreground-accent: var(--ambient-950);
+	--accent-dark-foreground-success: var(--ambient-950);
+	--accent-dark-foreground-warning: var(--ambient-950);
+	--accent-dark-foreground-destructive: var(--ambient-950);
+	--accent-dark-foreground-info: var(--ambient-950);
+
+	/* Success color - Fallback to Ambient */
+	--success-50: var(--ambient-50);
+	--success-100: var(--ambient-100);
+	--success-200: var(--ambient-200);
+	--success-300: var(--ambient-300);
+	--success-400: var(--ambient-400);
+	--success-500: var(--ambient-500);
+	--success-600: var(--ambient-600);
+	--success-700: var(--ambient-700);
+	--success-800: var(--ambient-800);
+	--success-900: var(--ambient-900);
+	--success-950: var(--ambient-950);
+	--success-light: var(--success-600);
+	--success-light-foreground-ambient: var(--ambient-50);
+	--success-light-foreground-primary: var(--ambient-50);
+	--success-light-foreground-secondary: var(--ambient-50);
+	--success-light-foreground-accent: var(--ambient-50);
+	--success-light-foreground-success: var(--ambient-50);
+	--success-light-foreground-warning: var(--ambient-50);
+	--success-light-foreground-destructive: var(--ambient-50);
+	--success-light-foreground-info: var(--ambient-50);
+	--success-dark: var(--success-400);
+	--success-dark-foreground-ambient: var(--ambient-950);
+	--success-dark-foreground-primary: var(--ambient-950);
+	--success-dark-foreground-secondary: var(--ambient-950);
+	--success-dark-foreground-accent: var(--ambient-950);
+	--success-dark-foreground-success: var(--ambient-950);
+	--success-dark-foreground-warning: var(--ambient-950);
+	--success-dark-foreground-destructive: var(--ambient-950);
+	--success-dark-foreground-info: var(--ambient-950);
+
+	/* Warning color - Fallback to Ambient */
+	--warning-50: var(--ambient-50);
+	--warning-100: var(--ambient-100);
+	--warning-200: var(--ambient-200);
+	--warning-300: var(--ambient-300);
+	--warning-400: var(--ambient-400);
+	--warning-500: var(--ambient-500);
+	--warning-600: var(--ambient-600);
+	--warning-700: var(--ambient-700);
+	--warning-800: var(--ambient-800);
+	--warning-900: var(--ambient-900);
+	--warning-950: var(--ambient-950);
+	--warning-light: var(--warning-600);
+	--warning-light-foreground-ambient: var(--ambient-50);
+	--warning-light-foreground-primary: var(--ambient-50);
+	--warning-light-foreground-secondary: var(--ambient-50);
+	--warning-light-foreground-accent: var(--ambient-50);
+	--warning-light-foreground-success: var(--ambient-50);
+	--warning-light-foreground-warning: var(--ambient-50);
+	--warning-light-foreground-destructive: var(--ambient-50);
+	--warning-light-foreground-info: var(--ambient-50);
+	--warning-dark: var(--warning-400);
+	--warning-dark-foreground-ambient: var(--ambient-950);
+	--warning-dark-foreground-primary: var(--ambient-950);
+	--warning-dark-foreground-secondary: var(--ambient-950);
+	--warning-dark-foreground-accent: var(--ambient-950);
+	--warning-dark-foreground-success: var(--ambient-950);
+	--warning-dark-foreground-warning: var(--ambient-950);
+	--warning-dark-foreground-destructive: var(--ambient-950);
+	--warning-dark-foreground-info: var(--ambient-950);
+
+	/* Error color - Fallback to Ambient */
+	--destructive-50: var(--ambient-50);
+	--destructive-100: var(--ambient-100);
+	--destructive-200: var(--ambient-200);
+	--destructive-300: var(--ambient-300);
+	--destructive-400: var(--ambient-400);
+	--destructive-500: var(--ambient-500);
+	--destructive-600: var(--ambient-600);
+	--destructive-700: var(--ambient-700);
+	--destructive-800: var(--ambient-800);
+	--destructive-900: var(--ambient-900);
+	--destructive-950: var(--ambient-950);
+	--destructive-light: var(--destructive-600);
+	--destructive-light-foreground-ambient: var(--ambient-50);
+	--destructive-light-foreground-primary: var(--ambient-50);
+	--destructive-light-foreground-secondary: var(--ambient-50);
+	--destructive-light-foreground-accent: var(--ambient-50);
+	--destructive-light-foreground-success: var(--ambient-50);
+	--destructive-light-foreground-warning: var(--ambient-50);
+	--destructive-light-foreground-destructive: var(--ambient-50);
+	--destructive-light-foreground-info: var(--ambient-50);
+	--destructive-dark: var(--destructive-400);
+	--destructive-dark-foreground-ambient: var(--ambient-950);
+	--destructive-dark-foreground-primary: var(--ambient-950);
+	--destructive-dark-foreground-secondary: var(--ambient-950);
+	--destructive-dark-foreground-accent: var(--ambient-950);
+	--destructive-dark-foreground-success: var(--ambient-950);
+	--destructive-dark-foreground-warning: var(--ambient-950);
+	--destructive-dark-foreground-destructive: var(--ambient-950);
+	--destructive-dark-foreground-info: var(--ambient-950);
+
+	/* Info color - Fallback to Ambient */
+	--info-50: var(--ambient-50);
+	--info-100: var(--ambient-100);
+	--info-200: var(--ambient-200);
+	--info-300: var(--ambient-300);
+	--info-400: var(--ambient-400);
+	--info-500: var(--ambient-500);
+	--info-600: var(--ambient-600);
+	--info-700: var(--ambient-700);
+	--info-800: var(--ambient-800);
+	--info-900: var(--ambient-900);
+	--info-950: var(--ambient-950);
+	--info-light: var(--info-600);
+	--info-light-foreground-ambient: var(--ambient-50);
+	--info-light-foreground-primary: var(--ambient-50);
+	--info-light-foreground-secondary: var(--ambient-50);
+	--info-light-foreground-accent: var(--ambient-50);
+	--info-light-foreground-success: var(--ambient-50);
+	--info-light-foreground-warning: var(--ambient-50);
+	--info-light-foreground-destructive: var(--ambient-50);
+	--info-light-foreground-info: var(--ambient-50);
+	--info-dark: var(--info-400);
+	--info-dark-foreground-ambient: var(--ambient-950);
+	--info-dark-foreground-primary: var(--ambient-950);
+	--info-dark-foreground-secondary: var(--ambient-950);
+	--info-dark-foreground-accent: var(--ambient-950);
+	--info-dark-foreground-success: var(--ambient-950);
+	--info-dark-foreground-warning: var(--ambient-950);
+	--info-dark-foreground-destructive: var(--ambient-950);
+	--info-dark-foreground-info: var(--ambient-950);
+
+	/* Heading colors */
+	--primary-heading: var(--primary-foreground);
+	--secondary-heading: var(--secondary-foreground);
+	--accent-heading: var(--accent-foreground);
+	--ambient-heading: var(--ambient-foreground);
+	--success-heading: var(--success-foreground);
+	--warning-heading: var(--warning-foreground);
+	--destructive-heading: var(--destructive-foreground);
+	--info-heading: var(--info-foreground);
+
+	/* Highlight colors */
+	--primary-highlight: var(--primary-foreground);
+	--secondary-highlight: var(--secondary-foreground);
+	--accent-highlight: var(--accent-foreground);
+	--ambient-highlight: var(--ambient-foreground);
+	--success-highlight: var(--success-foreground);
+	--warning-highlight: var(--warning-foreground);
+	--destructive-highlight: var(--destructive-foreground);
+	--info-highlight: var(--info-foreground);
+
+	/* Radius for rounded corners */
+	--radius: 0.1rem;
+
+	/* Spacing unit */
+	--spacing: 0.25rem;
+
+	/* Base typography */
+	--font-base: system-ui, sans-serif;
+	--typography-base-font: system-ui, sans-serif;
+	--typography-base-size: 1rem;
+	--typography-base-line-height: 1.5em;
+	--typography-base-letter-spacing: 0em;
+	--typography-base-weight: 400;
+	--typography-bold-weight: 600;
+	--typography-base-style: normal;
+	--typography-base-decoration: none;
+	--typography-base-transform: none;
+
+	/* Heading typography */
+	--typography-heading-font: system-ui, sans-serif;
+	--typography-heading-size: 1rem;
+	--typography-heading-line-height: 1.2em;
+	--typography-heading-letter-spacing: 0em;
+	--typography-heading-weight: 700;
+	--typography-heading-style: normal;
+	--typography-heading-decoration: none;
+	--typography-heading-transform: none;
+	--typography-heading-flavor: ambient;
+
+	/* Highlight typography */
+	--typography-highlight-weight: 600;
+	--typography-highlight-style: normal;
+	--typography-highlight-decoration: none;
+	--typography-highlight-flavor: accent;
+
+	/* Link typography */
+	--typography-link-weight: 400;
+	--typography-link-decoration: none;
+
+	/* Code typography */
+	--font-mono: monospace;
+	--typography-code-font: monospace;
+	--typography-code-size: 0.95rem;
+	--typography-code-line-height: 1.5em;
+	--typography-code-letter-spacing: 0em;
+	--typography-code-weight: 400;
+}

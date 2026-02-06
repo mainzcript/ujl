@@ -1,0 +1,79 @@
+{
+	"name": "ujl-monorepo",
+	"version": "0.0.0",
+	"description": "Unified JSON Layout Framework - The Open-Source Web-Builder of the Future",
+	"license": "MIT",
+	"private": true,
+	"workspaces": [
+		"packages/*",
+		"apps/*",
+		"services/*"
+	],
+	"packageManager": "pnpm@10.28.2",
+	"scripts": {
+		"build": "pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm --filter @ujl-framework/crafter build && pnpm run docs:build",
+		"format": "pnpm -r run format",
+		"lint": "pnpm -r run lint",
+		"check": "pnpm -r run check",
+		"test:unit": "pnpm -r --if-present run test:unit",
+		"test:e2e": "pnpm -r --if-present run test:e2e",
+		"test": "pnpm run test:unit && pnpm run test:e2e",
+		"clean": "pnpm -r run clean && rimraf node_modules",
+		"types:build": "pnpm --filter @ujl-framework/types build",
+		"core:build": "pnpm types:build && pnpm --filter @ujl-framework/core build",
+		"ui:build": "pnpm run core:build && pnpm --filter @ujl-framework/ui build",
+		"adapter-svelte:build": "pnpm run ui:build && pnpm --filter @ujl-framework/adapter-svelte build",
+		"adapter-web:build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/adapter-web build",
+		"docs:build": "pnpm --filter @ujl-framework/docs build",
+		"changeset": "changeset",
+		"version-packages": "changeset version",
+		"release": "changeset publish",
+		"rtc": "pnpm run rtc:lite && pnpm run test",
+		"rtc:lite": "pnpm install && pnpm run format && pnpm run build && pnpm run lint && pnpm run check",
+		"size": "size-limit",
+		"size:check": "size-limit --why"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.29.8",
+		"@eslint/compat": "^2.0.2",
+		"@eslint/js": "^9.39.2",
+		"@next/eslint-plugin-next": "^16.1.6",
+		"@size-limit/preset-small-lib": "^12.0.0",
+		"@types/node": "^25.2.0",
+		"@typescript-eslint/eslint-plugin": "^8.54.0",
+		"@typescript-eslint/parser": "^8.54.0",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.14.0",
+		"globals": "^17.3.0",
+		"prettier": "^3.8.1",
+		"prettier-plugin-organize-imports": "^4.3.0",
+		"prettier-plugin-svelte": "^3.4.1",
+		"prettier-plugin-tailwindcss": "^0.7.2",
+		"rimraf": "^6.1.2",
+		"size-limit": "^12.0.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.54.0",
+		"vite": "^7.3.1"
+	},
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=10.0.0"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"sharp",
+			"unrs-resolver"
+		],
+		"ignoredBuiltDependencies": [
+			"@parcel/watcher"
+		]
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mainzcript/ujl.git"
+	}
+}

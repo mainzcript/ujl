@@ -1,0 +1,22 @@
+[
+	{
+		"name": "@ujl-framework/crafter",
+		"path": "packages/crafter/dist/index.js",
+		"limit": "2.5 MB"
+	},
+	{
+		"name": "@ujl-framework/adapter-web",
+		"path": "packages/adapter-web/dist/index.js",
+		"limit": "1 MB"
+	},
+	{
+		"name": "@ujl-framework/core",
+		"path": "packages/core/dist/index.js",
+		"limit": "200 KB"
+	},
+	{
+		"name": "@ujl-framework/types",
+		"path": "packages/types/dist/index.js",
+		"limit": "60 KB"
+	}
+]

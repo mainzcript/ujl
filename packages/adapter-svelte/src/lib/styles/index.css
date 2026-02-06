@@ -1,0 +1,14 @@
+/**
+ * Style bundle for @ujl-framework/adapter-svelte
+ *
+ * This file combines all required styles for the adapter:
+ * - UI component styles from @ujl-framework/ui
+ * - Adapter-specific Tailwind classes from adapter-svelte components
+ *
+ * The bundle is processed by Tailwind CSS during build time.
+ * Must be imported explicitly by the consumer.
+ */
+
+@import "@ujl-framework/ui/styles";
+
+@source "../components/**/*.{svelte,js,ts}";

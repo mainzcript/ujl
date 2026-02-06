@@ -1,0 +1,15 @@
+/**
+ * Component Styles Index
+ *
+ * This file imports all component-specific CSS files that need to work
+ * inside the Shadow DOM. When adding a new component CSS file, add the
+ * import here.
+ *
+ * Convention: CSS files are co-located with their Svelte components.
+ */
+
+@import "../components/ui/richtext-input/richtext-input.css";
+
+/* Add new component imports here:
+ * @import '../components/ui/example/example.css';
+ */

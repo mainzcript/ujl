@@ -1,0 +1,51 @@
+{
+	"name": "@ujl-framework/examples",
+	"version": "0.0.1",
+	"description": "UJL Examples - Example Material and Test Data",
+	"license": "MIT",
+	"type": "module",
+	"files": [
+		"src/"
+	],
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./documents/showcase": "./src/documents/showcase.ujlc.json",
+		"./themes/default": "./src/themes/default.ujlt.json"
+	},
+	"scripts": {
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"check": "echo 'No check script needed'",
+		"test:unit": "vitest run",
+		"test:unit:watch": "vitest",
+		"test:unit:ui": "vitest --ui",
+		"test:unit:coverage": "vitest run --coverage",
+		"test": "vitest run",
+		"clean": "echo 'No clean script needed'",
+		"validate": "pnpm exec ujl-validate ./src/themes/default.ujlt.json && pnpm exec ujl-validate ./src/documents/showcase.ujlc.json"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^2.0.2",
+		"@eslint/js": "^9.39.2",
+		"@types/node": "^25.2.0",
+		"@ujl-framework/types": "workspace:*",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.3.0",
+		"prettier": "^3.8.1",
+		"prettier-plugin-organize-imports": "^4.3.0",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.54.0",
+		"vitest": "^4.0.18"
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mainzcript/ujl.git",
+		"directory": "packages/examples"
+	}
+}

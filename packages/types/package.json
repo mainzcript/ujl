@@ -1,0 +1,60 @@
+{
+	"name": "@ujl-framework/types",
+	"version": "0.0.1",
+	"description": "UJL Types",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"bin": {
+		"ujl-validate": "./bin/ujl-validate.js"
+	},
+	"files": [
+		"dist",
+		"src",
+		"bin"
+	],
+	"scripts": {
+		"build": "pnpm run clean && tsc -b tsconfig.build.json",
+		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\"",
+		"check": "tsc --noEmit",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"validate": "node ./dist/validate.js",
+		"test:unit": "vitest run",
+		"test:unit:watch": "vitest",
+		"test:unit:ui": "vitest --ui",
+		"test:unit:coverage": "vitest run --coverage",
+		"test": "vitest run",
+		"prepare": "pnpm run build"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^2.0.2",
+		"@eslint/js": "^9.39.2",
+		"@types/node": "^25.2.0",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.3.0",
+		"prettier": "^3.8.1",
+		"prettier-plugin-organize-imports": "^4.3.0",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.54.0",
+		"vitest": "^4.0.18"
+	},
+	"dependencies": {
+		"zod": "^4.3.6"
+	},
+	"author": "mainzcript GbR",
+	"homepage": "https://ujl-framework.org",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mainzcript/ujl.git",
+		"directory": "packages/types"
+	}
+}

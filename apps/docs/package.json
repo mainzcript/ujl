@@ -1,0 +1,36 @@
+{
+	"name": "@ujl-framework/docs",
+	"private": true,
+	"description": "UJL Documentation - User and Architecture Documentation",
+	"type": "module",
+	"scripts": {
+		"dev": "vitepress dev",
+		"build": "vitepress build",
+		"preview": "vitepress preview",
+		"format": "prettier --write .",
+		"lint": "prettier --check .",
+		"clean": "rimraf dist .vitepress/cache"
+	},
+	"dependencies": {
+		"@fontsource-variable/inter": "^5.2.8",
+		"@fontsource-variable/jetbrains-mono": "^5.2.8",
+		"@fontsource-variable/merriweather": "^5.2.6",
+		"@fontsource-variable/montserrat": "^5.2.8",
+		"@fontsource-variable/noto-sans": "^5.2.10",
+		"@fontsource-variable/nunito-sans": "^5.2.7",
+		"@fontsource-variable/open-sans": "^5.2.7",
+		"@fontsource-variable/oswald": "^5.2.8",
+		"@fontsource-variable/raleway": "^5.2.8",
+		"@fontsource-variable/roboto": "^5.2.9",
+		"@ujl-framework/crafter": "workspace:*",
+		"@ujl-framework/examples": "workspace:*",
+		"mermaid": "^11.12.2"
+	},
+	"devDependencies": {
+		"prettier": "^3.8.1",
+		"rimraf": "^6.1.2",
+		"vitepress": "2.0.0-alpha.15",
+		"vitepress-plugin-mermaid": "^2.0.17",
+		"vue": "^3.5.27"
+	}
+}

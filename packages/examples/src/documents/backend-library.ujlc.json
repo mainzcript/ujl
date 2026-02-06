@@ -1,0 +1,94 @@
+{
+	"ujlc": {
+		"meta": {
+			"title": "Backend Library Test",
+			"description": "Minimal example to test backend library storage",
+			"tags": ["backend", "test", "library"],
+			"updated_at": "2025-01-20T00:00:00Z",
+			"_version": "0.0.1",
+			"_instance": "backend-test-001",
+			"_embedding_model_hash": "sha256:test",
+			"_library": {
+				"storage": "backend",
+				"url": "http://localhost:3000"
+			}
+		},
+		"images": {},
+		"root": [
+			{
+				"type": "container",
+				"meta": {
+					"id": "container-001",
+					"updated_at": "2025-01-20T00:00:00Z",
+					"_embedding": []
+				},
+				"fields": {},
+				"slots": {
+					"body": [
+						{
+							"type": "text",
+							"meta": {
+								"id": "instruction-001",
+								"updated_at": "2025-01-20T00:00:00Z",
+								"_embedding": []
+							},
+							"fields": {
+								"content": {
+									"type": "doc",
+									"content": [
+										{
+											"type": "paragraph",
+											"content": [
+												{
+													"type": "text",
+													"text": "Backend Library Test"
+												}
+											]
+										},
+										{
+											"type": "paragraph",
+											"content": [
+												{
+													"type": "text",
+													"text": "This document is configured to use backend library storage. To test if the backend is working correctly:"
+												}
+											]
+										},
+										{
+											"type": "paragraph",
+											"content": [
+												{
+													"type": "text",
+													"text": "1. Add a new Image module below this text"
+												}
+											]
+										},
+										{
+											"type": "paragraph",
+											"content": [
+												{
+													"type": "text",
+													"text": "2. Upload an image file"
+												}
+											]
+										},
+										{
+											"type": "paragraph",
+											"content": [
+												{
+													"type": "text",
+													"text": "3. If the image appears and is stored in the backend, the setup is working correctly!"
+												}
+											]
+										}
+									]
+								}
+							},
+							"slots": {}
+						}
+					]
+				}
+			}
+		]
+	}
+}

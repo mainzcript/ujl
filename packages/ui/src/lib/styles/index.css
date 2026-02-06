@@ -1,0 +1,666 @@
+@import "tailwindcss";
+
+@import "tw-animate-css";
+
+@import "./_defaults.css";
+
+@source "../components/**/*.{svelte,js,ts}";
+
+@custom-variant dark (&:is(.dark *));
+
+:root,
+:host,
+[data-ujl-theme] {
+	/* Light mode colors */
+	--primary: var(--primary-light);
+	--primary-foreground: var(--primary-foreground-ambient);
+	--primary-foreground-ambient: var(--primary-light-foreground-ambient);
+	--primary-foreground-primary: var(--primary-light-foreground-primary);
+	--primary-foreground-secondary: var(--primary-light-foreground-secondary);
+	--primary-foreground-accent: var(--primary-light-foreground-accent);
+	--primary-foreground-success: var(--primary-light-foreground-success);
+	--primary-foreground-warning: var(--primary-light-foreground-warning);
+	--primary-foreground-destructive: var(--primary-light-foreground-destructive);
+	--primary-foreground-info: var(--primary-light-foreground-info);
+	--secondary: var(--secondary-light);
+	--secondary-foreground: var(--secondary-foreground-ambient);
+	--secondary-foreground-ambient: var(--secondary-light-foreground-ambient);
+	--secondary-foreground-primary: var(--secondary-light-foreground-primary);
+	--secondary-foreground-secondary: var(--secondary-light-foreground-secondary);
+	--secondary-foreground-accent: var(--secondary-light-foreground-accent);
+	--secondary-foreground-success: var(--secondary-light-foreground-success);
+	--secondary-foreground-warning: var(--secondary-light-foreground-warning);
+	--secondary-foreground-destructive: var(--secondary-light-foreground-destructive);
+	--secondary-foreground-info: var(--secondary-light-foreground-info);
+	--accent: var(--accent-light);
+	--accent-foreground: var(--accent-foreground-ambient);
+	--accent-foreground-ambient: var(--accent-light-foreground-ambient);
+	--accent-foreground-primary: var(--accent-light-foreground-primary);
+	--accent-foreground-secondary: var(--accent-light-foreground-secondary);
+	--accent-foreground-accent: var(--accent-light-foreground-accent);
+	--accent-foreground-success: var(--accent-light-foreground-success);
+	--accent-foreground-warning: var(--accent-light-foreground-warning);
+	--accent-foreground-destructive: var(--accent-light-foreground-destructive);
+	--accent-foreground-info: var(--accent-light-foreground-info);
+	--ambient: var(--ambient-light);
+	--ambient-foreground: var(--ambient-foreground-ambient);
+	--ambient-foreground-ambient: var(--ambient-light-foreground-ambient);
+	--ambient-foreground-primary: var(--ambient-light-foreground-primary);
+	--ambient-foreground-secondary: var(--ambient-light-foreground-secondary);
+	--ambient-foreground-accent: var(--ambient-light-foreground-accent);
+	--ambient-foreground-success: var(--ambient-light-foreground-success);
+	--ambient-foreground-warning: var(--ambient-light-foreground-warning);
+	--ambient-foreground-destructive: var(--ambient-light-foreground-destructive);
+	--ambient-foreground-info: var(--ambient-light-foreground-info);
+	--success: var(--success-light);
+	--success-foreground: var(--success-foreground-ambient);
+	--success-foreground-ambient: var(--success-light-foreground-ambient);
+	--success-foreground-primary: var(--success-light-foreground-primary);
+	--success-foreground-secondary: var(--success-light-foreground-secondary);
+	--success-foreground-accent: var(--success-light-foreground-accent);
+	--success-foreground-success: var(--success-light-foreground-success);
+	--success-foreground-warning: var(--success-light-foreground-warning);
+	--success-foreground-destructive: var(--success-light-foreground-destructive);
+	--success-foreground-info: var(--success-light-foreground-info);
+	--warning: var(--warning-light);
+	--warning-foreground: var(--warning-foreground-ambient);
+	--warning-foreground-ambient: var(--warning-light-foreground-ambient);
+	--warning-foreground-primary: var(--warning-light-foreground-primary);
+	--warning-foreground-secondary: var(--warning-light-foreground-secondary);
+	--warning-foreground-accent: var(--warning-light-foreground-accent);
+	--warning-foreground-success: var(--warning-light-foreground-success);
+	--warning-foreground-warning: var(--warning-light-foreground-warning);
+	--warning-foreground-destructive: var(--warning-light-foreground-destructive);
+	--warning-foreground-info: var(--warning-light-foreground-info);
+	--destructive: var(--destructive-light);
+	--destructive-foreground: var(--destructive-foreground-ambient);
+	--destructive-foreground-ambient: var(--destructive-light-foreground-ambient);
+	--destructive-foreground-primary: var(--destructive-light-foreground-primary);
+	--destructive-foreground-secondary: var(--destructive-light-foreground-secondary);
+	--destructive-foreground-accent: var(--destructive-light-foreground-accent);
+	--destructive-foreground-success: var(--destructive-light-foreground-success);
+	--destructive-foreground-warning: var(--destructive-light-foreground-warning);
+	--destructive-foreground-destructive: var(--destructive-light-foreground-destructive);
+	--destructive-foreground-info: var(--destructive-light-foreground-info);
+	--info: var(--info-light);
+	--info-foreground: var(--info-foreground-ambient);
+	--info-foreground-ambient: var(--info-light-foreground-ambient);
+	--info-foreground-primary: var(--info-light-foreground-primary);
+	--info-foreground-secondary: var(--info-light-foreground-secondary);
+	--info-foreground-accent: var(--info-light-foreground-accent);
+	--info-foreground-success: var(--info-light-foreground-success);
+	--info-foreground-warning: var(--info-light-foreground-warning);
+	--info-foreground-destructive: var(--info-light-foreground-destructive);
+	--info-foreground-info: var(--info-light-foreground-info);
+
+	/* Fallback colors for default Shadcn in Light mode */
+	--chart-1: 0.646 0.222 41.116;
+	--chart-2: 0.6 0.118 184.704;
+	--chart-3: 0.398 0.07 227.392;
+	--chart-4: 0.828 0.189 84.429;
+	--chart-5: 0.769 0.188 70.08;
+
+	/* Typography */
+	--text-base: var(--typography-base-size);
+
+	font-family: var(--font-base);
+}
+
+[data-ujl-theme].dark,
+.dark [data-ujl-theme],
+[data-ujl-theme] .dark,
+.dark {
+	/* Dark mode colors */
+	--primary: var(--primary-dark);
+	--primary-foreground: var(--primary-foreground-ambient);
+	--primary-foreground-ambient: var(--primary-dark-foreground-ambient);
+	--primary-foreground-primary: var(--primary-dark-foreground-primary);
+	--primary-foreground-secondary: var(--primary-dark-foreground-secondary);
+	--primary-foreground-accent: var(--primary-dark-foreground-accent);
+	--primary-foreground-success: var(--primary-dark-foreground-success);
+	--primary-foreground-warning: var(--primary-dark-foreground-warning);
+	--primary-foreground-destructive: var(--primary-dark-foreground-destructive);
+	--primary-foreground-info: var(--primary-dark-foreground-info);
+	--secondary: var(--secondary-dark);
+	--secondary-foreground: var(--secondary-foreground-ambient);
+	--secondary-foreground-ambient: var(--secondary-dark-foreground-ambient);
+	--secondary-foreground-primary: var(--secondary-dark-foreground-primary);
+	--secondary-foreground-secondary: var(--secondary-dark-foreground-secondary);
+	--secondary-foreground-accent: var(--secondary-dark-foreground-accent);
+	--secondary-foreground-success: var(--secondary-dark-foreground-success);
+	--secondary-foreground-warning: var(--secondary-dark-foreground-warning);
+	--secondary-foreground-destructive: var(--secondary-dark-foreground-destructive);
+	--secondary-foreground-info: var(--secondary-dark-foreground-info);
+	--accent: var(--accent-dark);
+	--accent-foreground: var(--accent-foreground-ambient);
+	--accent-foreground-ambient: var(--accent-dark-foreground-ambient);
+	--accent-foreground-primary: var(--accent-dark-foreground-primary);
+	--accent-foreground-secondary: var(--accent-dark-foreground-secondary);
+	--accent-foreground-accent: var(--accent-dark-foreground-accent);
+	--accent-foreground-success: var(--accent-dark-foreground-success);
+	--accent-foreground-warning: var(--accent-dark-foreground-warning);
+	--accent-foreground-destructive: var(--accent-dark-foreground-destructive);
+	--accent-foreground-info: var(--accent-dark-foreground-info);
+	--ambient: var(--ambient-dark);
+	--ambient-foreground: var(--ambient-foreground-ambient);
+	--ambient-foreground-ambient: var(--ambient-dark-foreground-ambient);
+	--ambient-foreground-primary: var(--ambient-dark-foreground-primary);
+	--ambient-foreground-secondary: var(--ambient-dark-foreground-secondary);
+	--ambient-foreground-accent: var(--ambient-dark-foreground-accent);
+	--ambient-foreground-success: var(--ambient-dark-foreground-success);
+	--ambient-foreground-warning: var(--ambient-dark-foreground-warning);
+	--ambient-foreground-destructive: var(--ambient-dark-foreground-destructive);
+	--ambient-foreground-info: var(--ambient-dark-foreground-info);
+	--success: var(--success-dark);
+	--success-foreground: var(--success-foreground-ambient);
+	--success-foreground-ambient: var(--success-dark-foreground-ambient);
+	--success-foreground-primary: var(--success-dark-foreground-primary);
+	--success-foreground-secondary: var(--success-dark-foreground-secondary);
+	--success-foreground-accent: var(--success-dark-foreground-accent);
+	--success-foreground-success: var(--success-dark-foreground-success);
+	--success-foreground-warning: var(--success-dark-foreground-warning);
+	--success-foreground-destructive: var(--success-dark-foreground-destructive);
+	--success-foreground-info: var(--success-dark-foreground-info);
+	--warning: var(--warning-dark);
+	--warning-foreground: var(--warning-foreground-ambient);
+	--warning-foreground-ambient: var(--warning-dark-foreground-ambient);
+	--warning-foreground-primary: var(--warning-dark-foreground-primary);
+	--warning-foreground-secondary: var(--warning-dark-foreground-secondary);
+	--warning-foreground-accent: var(--warning-dark-foreground-accent);
+	--warning-foreground-success: var(--warning-dark-foreground-success);
+	--warning-foreground-warning: var(--warning-dark-foreground-warning);
+	--warning-foreground-destructive: var(--warning-dark-foreground-destructive);
+	--warning-foreground-info: var(--warning-dark-foreground-info);
+	--destructive: var(--destructive-dark);
+	--destructive-foreground: var(--destructive-foreground-ambient);
+	--destructive-foreground-ambient: var(--destructive-dark-foreground-ambient);
+	--destructive-foreground-primary: var(--destructive-dark-foreground-primary);
+	--destructive-foreground-secondary: var(--destructive-dark-foreground-secondary);
+	--destructive-foreground-accent: var(--destructive-dark-foreground-accent);
+	--destructive-foreground-success: var(--destructive-dark-foreground-success);
+	--destructive-foreground-warning: var(--destructive-dark-foreground-warning);
+	--destructive-foreground-destructive: var(--destructive-dark-foreground-destructive);
+	--destructive-foreground-info: var(--destructive-dark-foreground-info);
+	--info: var(--info-dark);
+	--info-foreground: var(--info-foreground-ambient);
+	--info-foreground-ambient: var(--info-dark-foreground-ambient);
+	--info-foreground-primary: var(--info-dark-foreground-primary);
+	--info-foreground-secondary: var(--info-dark-foreground-secondary);
+	--info-foreground-accent: var(--info-dark-foreground-accent);
+	--info-foreground-success: var(--info-dark-foreground-success);
+	--info-foreground-warning: var(--info-dark-foreground-warning);
+	--info-foreground-destructive: var(--info-dark-foreground-destructive);
+	--info-foreground-info: var(--info-dark-foreground-info);
+
+	/* Fallback colors for default Shadcn in Dark mode */
+	--chart-1: 0.488 0.243 264.376;
+	--chart-2: 0.696 0.17 162.48;
+	--chart-3: 0.769 0.188 70.08;
+	--chart-4: 0.627 0.265 303.9;
+	--chart-5: 0.645 0.246 16.439;
+}
+
+@utility flavor-ambient {
+	--flavor: var(--ambient);
+	--flavor-50: var(--ambient-50);
+	--flavor-100: var(--ambient-100);
+	--flavor-200: var(--ambient-200);
+	--flavor-300: var(--ambient-300);
+	--flavor-400: var(--ambient-400);
+	--flavor-500: var(--ambient-500);
+	--flavor-600: var(--ambient-600);
+	--flavor-700: var(--ambient-700);
+	--flavor-800: var(--ambient-800);
+	--flavor-900: var(--ambient-900);
+	--flavor-950: var(--ambient-950);
+	--flavor-heading: var(--ambient-heading);
+	--flavor-highlight: var(--ambient-highlight);
+	--flavor-foreground: var(--ambient-foreground);
+	--flavor-foreground-ambient: var(--ambient-foreground-ambient);
+	--flavor-foreground-primary: var(--ambient-foreground-primary);
+	--flavor-foreground-secondary: var(--ambient-foreground-secondary);
+	--flavor-foreground-accent: var(--ambient-foreground-accent);
+	--flavor-foreground-success: var(--ambient-foreground-success);
+	--flavor-foreground-warning: var(--ambient-foreground-warning);
+	--flavor-foreground-destructive: var(--ambient-foreground-destructive);
+	--flavor-foreground-info: var(--ambient-foreground-info);
+}
+
+.flavor-ambient,
+[data-ujl-theme] {
+	@apply flavor-ambient;
+}
+
+.flavor-primary {
+	--flavor: var(--primary);
+	--flavor-50: var(--primary-50);
+	--flavor-100: var(--primary-100);
+	--flavor-200: var(--primary-200);
+	--flavor-300: var(--primary-300);
+	--flavor-400: var(--primary-400);
+	--flavor-500: var(--primary-500);
+	--flavor-600: var(--primary-600);
+	--flavor-700: var(--primary-700);
+	--flavor-800: var(--primary-800);
+	--flavor-900: var(--primary-900);
+	--flavor-950: var(--primary-950);
+	--flavor-foreground: var(--primary-foreground);
+	--flavor-foreground-ambient: var(--primary-foreground-ambient);
+	--flavor-foreground-primary: var(--primary-foreground-primary);
+	--flavor-foreground-secondary: var(--primary-foreground-secondary);
+	--flavor-foreground-accent: var(--primary-foreground-accent);
+	--flavor-foreground-success: var(--primary-foreground-success);
+	--flavor-foreground-warning: var(--primary-foreground-warning);
+	--flavor-foreground-destructive: var(--primary-foreground-destructive);
+	--flavor-foreground-info: var(--primary-foreground-info);
+	--flavor-heading: var(--primary-heading);
+	--flavor-highlight: var(--primary-highlight);
+}
+
+.flavor-secondary {
+	--flavor: var(--secondary);
+	--flavor-50: var(--secondary-50);
+	--flavor-100: var(--secondary-100);
+	--flavor-200: var(--secondary-200);
+	--flavor-300: var(--secondary-300);
+	--flavor-400: var(--secondary-400);
+	--flavor-500: var(--secondary-500);
+	--flavor-600: var(--secondary-600);
+	--flavor-700: var(--secondary-700);
+	--flavor-800: var(--secondary-800);
+	--flavor-900: var(--secondary-900);
+	--flavor-950: var(--secondary-950);
+	--flavor-foreground: var(--secondary-foreground);
+	--flavor-foreground-ambient: var(--secondary-foreground-ambient);
+	--flavor-foreground-primary: var(--secondary-foreground-primary);
+	--flavor-foreground-secondary: var(--secondary-foreground-secondary);
+	--flavor-foreground-accent: var(--secondary-foreground-accent);
+	--flavor-foreground-success: var(--secondary-foreground-success);
+	--flavor-foreground-warning: var(--secondary-foreground-warning);
+	--flavor-foreground-destructive: var(--secondary-foreground-destructive);
+	--flavor-foreground-info: var(--secondary-foreground-info);
+	--flavor-heading: var(--secondary-heading);
+	--flavor-highlight: var(--secondary-highlight);
+}
+
+.flavor-accent {
+	--flavor: var(--accent);
+	--flavor-50: var(--accent-50);
+	--flavor-100: var(--accent-100);
+	--flavor-200: var(--accent-200);
+	--flavor-300: var(--accent-300);
+	--flavor-400: var(--accent-400);
+	--flavor-500: var(--accent-500);
+	--flavor-600: var(--accent-600);
+	--flavor-700: var(--accent-700);
+	--flavor-800: var(--accent-800);
+	--flavor-900: var(--accent-900);
+	--flavor-950: var(--accent-950);
+	--flavor-foreground: var(--accent-foreground);
+	--flavor-foreground-ambient: var(--accent-foreground-ambient);
+	--flavor-foreground-primary: var(--accent-foreground-primary);
+	--flavor-foreground-secondary: var(--accent-foreground-secondary);
+	--flavor-foreground-accent: var(--accent-foreground-accent);
+	--flavor-foreground-success: var(--accent-foreground-success);
+	--flavor-foreground-warning: var(--accent-foreground-warning);
+	--flavor-foreground-destructive: var(--accent-foreground-destructive);
+	--flavor-foreground-info: var(--accent-foreground-info);
+	--flavor-heading: var(--accent-heading);
+	--flavor-highlight: var(--accent-highlight);
+}
+
+.flavor-success {
+	--flavor: var(--success);
+	--flavor-50: var(--success-50);
+	--flavor-100: var(--success-100);
+	--flavor-200: var(--success-200);
+	--flavor-300: var(--success-300);
+	--flavor-400: var(--success-400);
+	--flavor-500: var(--success-500);
+	--flavor-600: var(--success-600);
+	--flavor-700: var(--success-700);
+	--flavor-800: var(--success-800);
+	--flavor-900: var(--success-900);
+	--flavor-950: var(--success-950);
+	--flavor-foreground: var(--success-foreground);
+	--flavor-foreground-ambient: var(--success-foreground-ambient);
+	--flavor-foreground-primary: var(--success-foreground-primary);
+	--flavor-foreground-secondary: var(--success-foreground-secondary);
+	--flavor-foreground-accent: var(--success-foreground-accent);
+	--flavor-foreground-success: var(--success-foreground-success);
+	--flavor-foreground-warning: var(--success-foreground-warning);
+	--flavor-foreground-destructive: var(--success-foreground-destructive);
+	--flavor-foreground-info: var(--success-foreground-info);
+	--flavor-heading: var(--success-heading);
+	--flavor-highlight: var(--success-highlight);
+}
+
+.flavor-warning {
+	--flavor: var(--warning);
+	--flavor-50: var(--warning-50);
+	--flavor-100: var(--warning-100);
+	--flavor-200: var(--warning-200);
+	--flavor-300: var(--warning-300);
+	--flavor-400: var(--warning-400);
+	--flavor-500: var(--warning-500);
+	--flavor-600: var(--warning-600);
+	--flavor-700: var(--warning-700);
+	--flavor-800: var(--warning-800);
+	--flavor-900: var(--warning-900);
+	--flavor-950: var(--warning-950);
+	--flavor-foreground: var(--warning-foreground);
+	--flavor-foreground-ambient: var(--warning-foreground-ambient);
+	--flavor-foreground-primary: var(--warning-foreground-primary);
+	--flavor-foreground-secondary: var(--warning-foreground-secondary);
+	--flavor-foreground-accent: var(--warning-foreground-accent);
+	--flavor-foreground-success: var(--warning-foreground-success);
+	--flavor-foreground-warning: var(--warning-foreground-warning);
+	--flavor-foreground-destructive: var(--warning-foreground-destructive);
+	--flavor-foreground-info: var(--warning-foreground-info);
+	--flavor-heading: var(--warning-heading);
+	--flavor-highlight: var(--warning-highlight);
+}
+
+.flavor-destructive {
+	--flavor: var(--destructive);
+	--flavor-50: var(--destructive-50);
+	--flavor-100: var(--destructive-100);
+	--flavor-200: var(--destructive-200);
+	--flavor-300: var(--destructive-300);
+	--flavor-400: var(--destructive-400);
+	--flavor-500: var(--destructive-500);
+	--flavor-600: var(--destructive-600);
+	--flavor-700: var(--destructive-700);
+	--flavor-800: var(--destructive-800);
+	--flavor-900: var(--destructive-900);
+	--flavor-950: var(--destructive-950);
+	--flavor-foreground: var(--destructive-foreground);
+	--flavor-foreground-ambient: var(--destructive-foreground-ambient);
+	--flavor-foreground-primary: var(--destructive-foreground-primary);
+	--flavor-foreground-secondary: var(--destructive-foreground-secondary);
+	--flavor-foreground-accent: var(--destructive-foreground-accent);
+	--flavor-foreground-success: var(--destructive-foreground-success);
+	--flavor-foreground-warning: var(--destructive-foreground-warning);
+	--flavor-foreground-destructive: var(--destructive-foreground-destructive);
+	--flavor-foreground-info: var(--destructive-foreground-info);
+	--flavor-heading: var(--destructive-heading);
+	--flavor-highlight: var(--destructive-highlight);
+}
+
+.flavor-info {
+	--flavor: var(--info);
+	--flavor-50: var(--info-50);
+	--flavor-100: var(--info-100);
+	--flavor-200: var(--info-200);
+	--flavor-300: var(--info-300);
+	--flavor-400: var(--info-400);
+	--flavor-500: var(--info-500);
+	--flavor-600: var(--info-600);
+	--flavor-700: var(--info-700);
+	--flavor-800: var(--info-800);
+	--flavor-900: var(--info-900);
+	--flavor-950: var(--info-950);
+	--flavor-foreground: var(--info-foreground);
+	--flavor-foreground-ambient: var(--info-foreground-ambient);
+	--flavor-foreground-primary: var(--info-foreground-primary);
+	--flavor-foreground-secondary: var(--info-foreground-secondary);
+	--flavor-foreground-accent: var(--info-foreground-accent);
+	--flavor-foreground-success: var(--info-foreground-success);
+	--flavor-foreground-warning: var(--info-foreground-warning);
+	--flavor-foreground-destructive: var(--info-foreground-destructive);
+	--flavor-foreground-info: var(--info-foreground-info);
+	--flavor-heading: var(--info-heading);
+	--flavor-highlight: var(--info-highlight);
+}
+
+@theme inline {
+	/* Typography - All sizes relative to text-base (calculated at runtime) */
+	--text-xs: calc(var(--text-base) * 0.75);
+	--text-sm: calc(var(--text-base) * 0.875);
+	--text-lg: calc(var(--text-base) * 1.125);
+	--text-xl: calc(var(--text-base) * 1.25);
+	--text-2xl: calc(var(--text-base) * 1.5);
+	--text-3xl: calc(var(--text-base) * 1.875);
+	--text-4xl: calc(var(--text-base) * 2.25);
+	--text-5xl: calc(var(--text-base) * 3);
+	--text-6xl: calc(var(--text-base) * 3.75);
+
+	/* Border radius */
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
+	--radius-5xl: calc(var(--radius) + 20px);
+	--radius-6xl: calc(var(--radius) + 24px);
+	--radius-7xl: calc(var(--radius) + 28px);
+
+	/* Background and foreground colors */
+	--color-background: oklch(var(--flavor));
+	--color-foreground: oklch(var(--flavor-foreground));
+	--color-heading: oklch(var(--flavor-heading));
+	--color-highlight: oklch(var(--flavor-highlight));
+
+	/* Flavor colors */
+	--color-flavor: oklch(var(--flavor));
+	--color-flavor-50: oklch(var(--flavor-50));
+	--color-flavor-100: oklch(var(--flavor-100));
+	--color-flavor-200: oklch(var(--flavor-200));
+	--color-flavor-300: oklch(var(--flavor-300));
+	--color-flavor-400: oklch(var(--flavor-400));
+	--color-flavor-500: oklch(var(--flavor-500));
+	--color-flavor-600: oklch(var(--flavor-600));
+	--color-flavor-700: oklch(var(--flavor-700));
+	--color-flavor-800: oklch(var(--flavor-800));
+	--color-flavor-900: oklch(var(--flavor-900));
+	--color-flavor-950: oklch(var(--flavor-950));
+	--color-flavor-foreground: oklch(var(--flavor-foreground));
+	--color-flavor-foreground-ambient: oklch(var(--flavor-foreground-ambient));
+	--color-flavor-foreground-primary: oklch(var(--flavor-foreground-primary));
+	--color-flavor-foreground-secondary: oklch(var(--flavor-foreground-secondary));
+	--color-flavor-foreground-accent: oklch(var(--flavor-foreground-accent));
+	--color-flavor-foreground-success: oklch(var(--flavor-foreground-success));
+	--color-flavor-foreground-warning: oklch(var(--flavor-foreground-warning));
+	--color-flavor-foreground-destructive: oklch(var(--flavor-foreground-destructive));
+	--color-flavor-foreground-info: oklch(var(--flavor-foreground-info));
+	--color-flavor-heading: oklch(var(--flavor-heading));
+	--color-flavor-highlight: oklch(var(--flavor-highlight));
+
+	/* Primary color */
+	--color-primary: oklch(var(--primary));
+	--color-primary-50: oklch(var(--primary-50));
+	--color-primary-100: oklch(var(--primary-100));
+	--color-primary-200: oklch(var(--primary-200));
+	--color-primary-300: oklch(var(--primary-300));
+	--color-primary-400: oklch(var(--primary-400));
+	--color-primary-500: oklch(var(--primary-500));
+	--color-primary-600: oklch(var(--primary-600));
+	--color-primary-700: oklch(var(--primary-700));
+	--color-primary-800: oklch(var(--primary-800));
+	--color-primary-900: oklch(var(--primary-900));
+	--color-primary-950: oklch(var(--primary-950));
+	--color-primary-foreground: oklch(var(--primary-foreground));
+	--color-primary-heading: oklch(var(--primary-heading));
+	--color-primary-highlight: oklch(var(--primary-highlight));
+
+	/* Secondary color */
+	--color-secondary: oklch(var(--secondary));
+	--color-secondary-50: oklch(var(--secondary-50));
+	--color-secondary-100: oklch(var(--secondary-100));
+	--color-secondary-200: oklch(var(--secondary-200));
+	--color-secondary-300: oklch(var(--secondary-300));
+	--color-secondary-400: oklch(var(--secondary-400));
+	--color-secondary-500: oklch(var(--secondary-500));
+	--color-secondary-600: oklch(var(--secondary-600));
+	--color-secondary-700: oklch(var(--secondary-700));
+	--color-secondary-800: oklch(var(--secondary-800));
+	--color-secondary-900: oklch(var(--secondary-900));
+	--color-secondary-950: oklch(var(--secondary-950));
+	--color-secondary-foreground: oklch(var(--secondary-foreground));
+	--color-secondary-heading: oklch(var(--secondary-heading));
+	--color-secondary-highlight: oklch(var(--secondary-highlight));
+
+	/* Accent color */
+	--color-accent: oklch(var(--accent));
+	--color-accent-50: oklch(var(--accent-50));
+	--color-accent-100: oklch(var(--accent-100));
+	--color-accent-200: oklch(var(--accent-200));
+	--color-accent-300: oklch(var(--accent-300));
+	--color-accent-400: oklch(var(--accent-400));
+	--color-accent-500: oklch(var(--accent-500));
+	--color-accent-600: oklch(var(--accent-600));
+	--color-accent-700: oklch(var(--accent-700));
+	--color-accent-800: oklch(var(--accent-800));
+	--color-accent-900: oklch(var(--accent-900));
+	--color-accent-950: oklch(var(--accent-950));
+	--color-accent-foreground: oklch(var(--accent-foreground));
+	--color-accent-heading: oklch(var(--accent-heading));
+	--color-accent-highlight: oklch(var(--accent-highlight));
+
+	/* Ambient color */
+	--color-ambient: oklch(var(--ambient));
+	--color-ambient-50: oklch(var(--ambient-50));
+	--color-ambient-100: oklch(var(--ambient-100));
+	--color-ambient-200: oklch(var(--ambient-200));
+	--color-ambient-300: oklch(var(--ambient-300));
+	--color-ambient-400: oklch(var(--ambient-400));
+	--color-ambient-500: oklch(var(--ambient-500));
+	--color-ambient-600: oklch(var(--ambient-600));
+	--color-ambient-700: oklch(var(--ambient-700));
+	--color-ambient-800: oklch(var(--ambient-800));
+	--color-ambient-900: oklch(var(--ambient-900));
+	--color-ambient-950: oklch(var(--ambient-950));
+	--color-ambient-foreground: oklch(var(--ambient-foreground));
+	--color-ambient-heading: oklch(var(--ambient-heading));
+	--color-ambient-highlight: oklch(var(--ambient-highlight));
+
+	/* Success color */
+	--color-success: oklch(var(--success));
+	--color-success-50: oklch(var(--success-50));
+	--color-success-100: oklch(var(--success-100));
+	--color-success-200: oklch(var(--success-200));
+	--color-success-300: oklch(var(--success-300));
+	--color-success-400: oklch(var(--success-400));
+	--color-success-500: oklch(var(--success-500));
+	--color-success-600: oklch(var(--success-600));
+	--color-success-700: oklch(var(--success-700));
+	--color-success-800: oklch(var(--success-800));
+	--color-success-900: oklch(var(--success-900));
+	--color-success-950: oklch(var(--success-950));
+	--color-success-foreground: oklch(var(--success-foreground));
+	--color-success-heading: oklch(var(--success-heading));
+	--color-success-highlight: oklch(var(--success-highlight));
+
+	/* Warning color */
+	--color-warning: oklch(var(--warning));
+	--color-warning-50: oklch(var(--warning-50));
+	--color-warning-100: oklch(var(--warning-100));
+	--color-warning-200: oklch(var(--warning-200));
+	--color-warning-300: oklch(var(--warning-300));
+	--color-warning-400: oklch(var(--warning-400));
+	--color-warning-500: oklch(var(--warning-500));
+	--color-warning-600: oklch(var(--warning-600));
+	--color-warning-700: oklch(var(--warning-700));
+	--color-warning-800: oklch(var(--warning-800));
+	--color-warning-900: oklch(var(--warning-900));
+	--color-warning-950: oklch(var(--warning-950));
+	--color-warning-foreground: oklch(var(--warning-foreground));
+	--color-warning-heading: oklch(var(--warning-heading));
+	--color-warning-highlight: oklch(var(--warning-highlight));
+
+	/* Destructive color */
+	--color-destructive: oklch(var(--destructive));
+	--color-destructive-50: oklch(var(--destructive-50));
+	--color-destructive-100: oklch(var(--destructive-100));
+	--color-destructive-200: oklch(var(--destructive-200));
+	--color-destructive-300: oklch(var(--destructive-300));
+	--color-destructive-400: oklch(var(--destructive-400));
+	--color-destructive-500: oklch(var(--destructive-500));
+	--color-destructive-600: oklch(var(--destructive-600));
+	--color-destructive-700: oklch(var(--destructive-700));
+	--color-destructive-800: oklch(var(--destructive-800));
+	--color-destructive-900: oklch(var(--destructive-900));
+	--color-destructive-950: oklch(var(--destructive-950));
+	--color-destructive-foreground: oklch(var(--destructive-foreground));
+	--color-destructive-heading: oklch(var(--destructive-heading));
+	--color-destructive-highlight: oklch(var(--destructive-highlight));
+
+	/* Info color */
+	--color-info: oklch(var(--info));
+	--color-info-50: oklch(var(--info-50));
+	--color-info-100: oklch(var(--info-100));
+	--color-info-200: oklch(var(--info-200));
+	--color-info-300: oklch(var(--info-300));
+	--color-info-400: oklch(var(--info-400));
+	--color-info-500: oklch(var(--info-500));
+	--color-info-600: oklch(var(--info-600));
+	--color-info-700: oklch(var(--info-700));
+	--color-info-800: oklch(var(--info-800));
+	--color-info-900: oklch(var(--info-900));
+	--color-info-950: oklch(var(--info-950));
+	--color-info-foreground: oklch(var(--info-foreground));
+	--color-info-heading: oklch(var(--info-heading));
+	--color-info-highlight: oklch(var(--info-highlight));
+
+	/* Other shadcn colors */
+	--color-popover: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);
+	--color-popover-foreground: var(--flavor-foreground);
+	--color-muted: color-mix(in srgb, oklch(var(--flavor)) 80%, oklch(var(--flavor-foreground)) 20%);
+	--color-muted-foreground: color-mix(
+		in srgb,
+		oklch(var(--flavor-foreground)) 80%,
+		oklch(var(--flavor)) 20%
+	);
+	--color-border: color-mix(in srgb, oklch(var(--flavor)) 80%, oklch(var(--flavor-foreground)) 20%);
+	--color-input: color-mix(in srgb, oklch(var(--flavor-foreground)) 20%, oklch(var(--flavor)) 80%);
+	--color-ring: color-mix(in srgb, oklch(var(--flavor-foreground)) 50%, oklch(var(--flavor)) 50%);
+	--color-chart-1: oklch(var(--chart-1));
+	--color-chart-2: oklch(var(--chart-2));
+	--color-chart-3: oklch(var(--chart-3));
+	--color-chart-4: oklch(var(--chart-4));
+	--color-chart-5: oklch(var(--chart-5));
+	--color-sidebar: color-mix(in srgb, oklch(var(--flavor)) 95%, oklch(var(--flavor-foreground)) 5%);
+	--color-sidebar-foreground: oklch(var(--flavor-foreground));
+	--color-sidebar-primary: oklch(var(--primary));
+	--color-sidebar-primary-foreground: oklch(var(--primary-foreground));
+	--color-sidebar-accent: color-mix(
+		in srgb,
+		oklch(var(--flavor)) 90%,
+		oklch(var(--flavor-foreground)) 10%
+	);
+	--color-sidebar-accent-foreground: oklch(var(--flavor-foreground));
+	--color-sidebar-border: var(--color-border);
+	--color-sidebar-ring: var(--color-ring);
+}
+
+@layer base {
+	* {
+		@apply outline-ring/50;
+	}
+
+	.elevation {
+		@apply relative isolate;
+		@apply bg-flavor/80;
+		@apply border border-flavor-foreground/10;
+		@apply shadow-lg inset-shadow-xs shadow-flavor-900/10 inset-shadow-flavor-100/15;
+		@apply backdrop-brightness-125 backdrop-saturate-125;
+		@apply after:absolute after:inset-0 after:-z-10;
+		@apply after:bg-ambient-500/5;
+	}
+
+	.elevation::before,
+	.elevation::after {
+		border-radius: inherit;
+	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+}
