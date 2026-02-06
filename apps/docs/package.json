@@ -29,7 +29,7 @@
 	"devDependencies": {
 		"prettier": "^3.8.1",
 		"rimraf": "^6.1.2",
-		"vitepress": "2.0.0-alpha.15",
+		"vitepress": "2.0.0-alpha.16",
 		"vitepress-plugin-mermaid": "^2.0.17",
 		"vue": "^3.5.27"
 	}
