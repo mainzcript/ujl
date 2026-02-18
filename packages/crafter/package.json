@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/crafter",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "UJL Crafter - Visual Editor for UJL Content",
 	"license": "MIT",
 	"scripts": {

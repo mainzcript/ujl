@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/ui",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "UJL UI - shadcn-svelte Component Library",
 	"license": "MIT",
 	"scripts": {
