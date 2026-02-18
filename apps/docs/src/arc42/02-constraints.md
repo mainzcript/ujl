@@ -87,12 +87,12 @@ Verschiedene Adapter können das gleiche AST in unterschiedliche Ausgabeformate 
 
 ### 2.2.2 Branching-Strategie & Git-Workflow
 
-| Constraint               | Beschreibung                           | Branches                                                 |
-| ------------------------ | -------------------------------------- | -------------------------------------------------------- |
-| **Gitflow**              | Feature-Branches → develop → main      | `main` (releases), `develop` (aktiv), `feat/*`, `fix/*`  |
-| **Protected Branches**   | main, develop (keine direkten Commits) | Merge nur via Merge Requests mit Reviews                 |
-| **Conventional Commits** | Commit Messages mit Präfix             | `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:` |
-| **Branch Naming**        | Lowercase mit Bindestrichen            | `feat/module-registry`, `fix/image-validation`           |
+| Constraint               | Beschreibung                  | Branches                                                 |
+| ------------------------ | ----------------------------- | -------------------------------------------------------- |
+| **Trunk-based**          | Feature-Branches → main       | `main` (trunk), `feat/*`, `fix/*`, `chore/*`             |
+| **Protected Branches**   | main (keine direkten Commits) | Merge nur via Pull Requests mit Reviews                  |
+| **Conventional Commits** | Commit Messages mit Präfix    | `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:` |
+| **Branch Naming**        | Lowercase mit Bindestrichen   | `feat/module-registry`, `fix/image-validation`           |
 
 ### 2.2.3 Release-Management
 

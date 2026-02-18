@@ -64,21 +64,13 @@ This launches the Crafter demo on `http://localhost:5174`.
 
 ## CI/CD & Releases
 
-**CI Pipeline** runs automatically on every push and pull request via GitHub Actions:
+**CI Pipeline** runs automatically on pull requests targeting `main` via GitHub Actions:
 - Build all packages
 - Run unit tests (Vitest)
 - Run E2E tests (Playwright)
 - Quality checks (ESLint, TypeScript)
 
-**Releases** are performed manually using Changesets:
-
-1. `develop` → `release/x.y.z`
-2. Run `pnpm changeset version` on the release branch
-3. Merge `release/*` → `main`
-4. Tag `main` (e.g., `v0.0.1`)
-5. Publish to npmjs.org
-6. Create a GitHub Release from the tag
-7. Merge `main` back into `develop`
+**Releases** are performed manually using Changesets. For the complete release process and version management, see the [Contributing Guide](./CONTRIBUTING.md#release-process).
 
 ## License
 

@@ -538,24 +538,22 @@ sequenceDiagram
     participant CI as CI Pipeline
     participant NPM as NPM Registry
 
-    Dev->>Changesets: pnpm changeset
+    Dev->>Changesets: pnpm run vc:changeset
     Changesets->>Dev: Select packages, enter changelog
     Dev->>Git: Commit .changeset/xyz.md
 
-    Dev->>Git: git push origin develop
+    Dev->>Git: Open PR → main
 
-    Note over CI: On develop branch merge
+    Note over CI: On PR (main)
 
-    CI->>Changesets: pnpm version-packages
-    Changesets->>CI: Update package.json versions
-    Changesets->>CI: Generate CHANGELOG.md
+    CI->>CI: Build + tests + quality checks
 
-    CI->>Git: Commit version bump
+    Dev->>Changesets: pnpm run vc:bump (on main)
+    Changesets->>Dev: Update versions + generate CHANGELOG.md
+    Dev->>Git: Commit + Tag main (vX.Y.Z)
 
-    Note over CI: Manual trigger for publish
-
-    CI->>NPM: pnpm publish -r --access public
-    NPM-->>CI: Packages published
+    Dev->>NPM: pnpm run vc:release
+    NPM-->>Dev: Packages published
 ```
 
 **Geplante Package-Struktur:**
