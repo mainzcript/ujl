@@ -20,6 +20,6 @@
 		"@ujl-framework/library"
 	],
 	"access": "public",
-	"baseBranch": "develop",
+	"baseBranch": "main",
 	"updateInternalDependencies": "patch"
 }

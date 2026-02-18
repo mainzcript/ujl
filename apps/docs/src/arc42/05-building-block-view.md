@@ -1136,7 +1136,7 @@ pnpm run build
 
 ### 5.9.1 Versionierung (Changesets)
 
-Die Versionierung nutzt **Changesets** mit **Fixed Versioning**: Alle Packages werden synchron versioniert, um Kompatibilitätsprobleme zwischen Framework-Teilen zu vermeiden. Der Workflow sieht vor, dass auf Feature Branches Changesets erstellt werden (mit Changelog-Einträgen), die dann auf dem develop Branch automatisch in Versions-Updates und CHANGELOG-Einträge umgewandelt werden. Das manuelle Publishing erfolgt über `pnpm publish -r --access public`. Die Konfiguration verknüpft alle `@ujl-framework/*` Packages als Fixed Group, sodass sie stets die gleiche Versionsnummer tragen.
+Die Versionierung nutzt **Changesets** mit **Fixed Versioning**: Alle Packages werden synchron versioniert, um Kompatibilitätsprobleme zwischen Framework-Teilen zu vermeiden. Der Workflow sieht vor, dass auf Feature Branches Changesets erstellt werden (mit Changelog-Einträgen) und nach `main` gemerged werden. Für ein Release werden auf `main` die Versionen angewandt (z.B. `pnpm run vc:bump`), wodurch Versions-Updates und CHANGELOG-Einträge erzeugt werden. Das Publishing erfolgt manuell von `main` (z.B. `pnpm run vc:release`). Die Konfiguration verknüpft alle `@ujl-framework/*` Packages als Fixed Group, sodass sie stets die gleiche Versionsnummer tragen.
 
 ### 5.9.2 Testing-Strategie
 

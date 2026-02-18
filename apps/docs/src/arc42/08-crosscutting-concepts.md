@@ -967,13 +967,13 @@ pnpm run build
 
 ```bash
 # Feature Branch: Changeset erstellen
-pnpm changeset
+pnpm run vc:changeset
 
-# Main Branch: Versionen anwenden
-pnpm version-packages
+# Release Branch: Versionen anwenden
+pnpm run vc:bump
 
-# Release: Packages veröffentlichen
-pnpm publish -r --access public
+# Release: Packages veröffentlichen (von main)
+pnpm run vc:release
 ```
 
 ## 8.13 Betrieb

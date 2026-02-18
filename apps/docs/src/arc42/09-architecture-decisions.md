@@ -835,7 +835,7 @@ Die pnpm Workspace-Konfiguration definiert packages für 'packages/_', 'apps/_' 
 }
 ```
 
-Der Changesets-Workflow umfasst drei Schritte. Erstens wird auf dem Feature Branch ein Changeset erstellt mit pnpm changeset, wobei interaktiv gewählt wird, welche Packages betroffen sind und ob Major, Minor oder Patch. Zweitens werden auf dem Main Branch Versionen angewandt mit pnpm version-packages, das Changesets liest, Versionen bumped und CHANGELOGs generiert. Drittens erfolgt das Release mit pnpm publish -r --access public, das alle geänderten Packages zu npm publiziert.
+Der Changesets-Workflow umfasst drei Schritte. Erstens wird auf dem Feature Branch ein Changeset erstellt (z.B. `pnpm run vc:changeset` bzw. `pnpm changeset`), wobei interaktiv gewählt wird, welche Packages betroffen sind und ob Major, Minor oder Patch. Zweitens werden auf `main` die Versionen angewandt (z.B. `pnpm run vc:bump`), wodurch Changesets verarbeitet, Versionen bumped und CHANGELOGs generiert werden. Drittens erfolgt das Release von `main` (z.B. `pnpm run vc:release`), das volle Quality Checks durchführt (install, format, build, lint, check, test) und anschließend die geänderten Packages zu npm publiziert (via `changeset publish --ignore-scripts`).
 
 Die Build-Reihenfolge ist dependency-aware. Das Root-Skript orchestriert den Build mit pnpm run build. Die interne Reihenfolge folgt: types, core, ui, adapter-svelte, adapter-web, crafter.
 
