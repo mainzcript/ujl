@@ -148,15 +148,13 @@ The CI pipeline (GitHub Actions) runs tests automatically once configured:
 
 | Job | Stage | Description |
 |-----|-------|-------------|
-| `test_unit` | test | Vitest tests across all packages |
-| `test_e2e` | test | Playwright E2E tests (crafter) |
-| `quality_check` | quality | Linting + Type checks |
+| `build_test_quality` | build/test/quality | Build all packages, run unit tests, lint, type checks |
+| `e2e` | test | Playwright E2E tests (crafter) |
 
 ### E2E Tests in CI
 
-- Run in a dedicated Playwright Docker image with pre-installed browsers
 - Test artifacts (screenshots, videos, reports) are stored for 1 week
-- Only run on merge requests and main/develop branches
+- Only run on pull requests targeting `main`
 
 ### Test Artifacts
 

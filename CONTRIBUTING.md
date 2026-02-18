@@ -5,7 +5,7 @@
 This repository is a **pnpm monorepo**. For the full setup guide (including the Crafter + dev-demo
 and Library service), see:
 
-- [Getting Started](./apps/docs/src/docs/01-getting-started.md)
+- [Installation & Integration](./apps/docs/src/docs/02-installation.md)
 
 ### Development Setup (Quick)
 
@@ -40,14 +40,12 @@ pnpm --filter @ujl-framework/dev-demo dev
 
 ### Branch Strategy
 
-We follow a **GitFlow-lean** branching strategy:
+We use a **trunk-based** branching strategy:
 
-- **`main`**: Production-ready releases only
-- **`develop`**: Active development branch
-- **`feat/*`**: Feature branches from `develop`
-- **`fix/*`**: Bug fix branches from `develop`
-- **`release/*`**: Release preparation from `develop`
-- **`hotfix/*`**: Urgent fixes from `main`
+- **`main`**: Primary development and release branch
+- **`feat/*`**: Feature branches from `main`
+- **`fix/*`**: Bug fix branches from `main`
+- **`chore/*`**: Maintenance branches from `main`
 
 Further **rules** for branch names:
 
@@ -55,11 +53,11 @@ Further **rules** for branch names:
 - Keep descriptions concise but descriptive
 - No special characters except hyphens
 
-> Note: `main` and `develop` are protected and cannot be pushed to directly. New branches are created from `develop` (except rare hotfixes from `main`).
+> Note: `main` is protected and cannot be pushed to directly. All changes go through pull requests.
 
 ### 1. Making Changes
 
-1. Create a feature branch from `develop` following our naming convention
+1. Create a feature branch from `main` following our naming convention
 2. Make your changes
 3. Test your changes thoroughly
 4. Run linting and type checking:
@@ -73,12 +71,13 @@ Further **rules** for branch names:
 For any changes that should be released, add a changeset:
 
 ```bash
-pnpm changeset
+pnpm run vc:changeset
 ```
 
 This will guide you through creating a changeset file that describes your changes.
 
-> **Note:** Changesets are created on feature branches and merged to `develop`. They will be processed during the release process.
+> **Note:** Changesets are created on feature branches and merged to `main`. They will be processed during the release process.
+> You can also run `pnpm changeset` directly - `vc:changeset` is a thin wrapper.
 
 ### 3. Committing Changes
 
@@ -95,10 +94,10 @@ We follow conventional commits:
 ### 4. Pull Request
 
 1. Push your branch
-2. Create a pull request targeting `develop` (except hotfixes targeting `main`)
+2. Create a pull request targeting `main`
 3. Ensure all checks pass
 4. Request review from maintainers
-5. Merge using **squash** (squash-only history)
+5. Merge using **squash**
 
 ## Release Process
 
@@ -108,24 +107,22 @@ We use Changesets for version management:
 
 ```bash
 # Add a changeset
-pnpm changeset
+pnpm run vc:changeset
 
 # Update versions and changelogs (version bump)
-pnpm version-packages
+pnpm run vc:bump
 
 # Publish packages (manual, from main)
-pnpm release
+pnpm run vc:release
 ```
 
-**Current Process:**
+**Release Workflow:**
 
-1. Changesets are created on `feature/*`/`fix/*` branches and merged to `develop`
-2. Create a release branch from `develop` (e.g., `release/0.0.1`)
-3. Run `pnpm version-packages` on the release branch (generates version bumps + `CHANGELOG.md`)
-4. Merge `release/*` → `main`
-5. Tag `main` (e.g., `v0.0.1`)
-6. Publish from `main` using `pnpm release`
-7. Merge `main` back into `develop`
+1. **During development:** Changesets are created on `feature/*`/`fix/*` branches and merged to `main`
+2. **When ready to release:** Run `pnpm run vc:bump` on `main` (generates version bumps + `CHANGELOG.md`)
+3. **Commit and tag:** Commit the version changes and create a git tag (e.g., `git tag v0.0.2`)
+4. **Publish to npm:** Run `pnpm run vc:release` (runs full quality checks, builds, tests, then publishes to npmjs.org)
+5. **Document the release:** Create a GitHub Release from the tag
 
 > **Note:** The first public release `0.0.1` uses a single consolidated Changeset that summarizes the current state of the framework.
 
