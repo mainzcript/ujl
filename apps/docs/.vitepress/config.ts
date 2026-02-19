@@ -24,6 +24,15 @@ export default withMermaid({
 		["meta", { property: "og:site_name", content: "UJL Framework" }],
 		["meta", { property: "og:type", content: "website" }],
 		["meta", { name: "twitter:card", content: "summary_large_image" }],
+		["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+		["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
+		[
+			"link",
+			{
+				href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@700&display=swap",
+				rel: "stylesheet",
+			},
+		],
 	],
 	transformPageData(pageData) {
 		const head = pageData.frontmatter.head ?? [];
