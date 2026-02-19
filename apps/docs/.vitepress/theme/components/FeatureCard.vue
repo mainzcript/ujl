@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, type Component } from "vue";
 import * as icons from "lucide-vue-next";
 
 const props = defineProps<{
@@ -9,7 +9,7 @@ const props = defineProps<{
 }>();
 
 const IconComponent = computed(() => {
-	return icons[props.icon as keyof typeof icons] || icons.HelpCircle;
+	return (icons[props.icon as keyof typeof icons] || icons.HelpCircle) as Component;
 });
 </script>
 
