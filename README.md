@@ -56,13 +56,13 @@ The Crafter is stateless. Pass it a document and theme, it calls you back on cha
 import { UJLCrafter } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
-  target: "#app",
-  content: ujlcDocument,    // your .ujlc.json document
-  tokenSet: ujltTokenSet,   // your .ujlt.json theme
-  onChange: (updatedDoc) => {
-    // persist however you like
-    saveDocument(updatedDoc);
-  },
+	target: "#app",
+	content: ujlcDocument, // your .ujlc.json document
+	tokenSet: ujltTokenSet, // your .ujlt.json theme
+	onChange: (updatedDoc) => {
+		// persist however you like
+		saveDocument(updatedDoc);
+	},
 });
 ```
 
@@ -152,12 +152,6 @@ For AI assistants working on this project, see [AGENTS.md](AGENTS.md) for a high
 - [Website](https://ujl-framework.org) – Full documentation and guides
 
 ## Built by
-
-<div align="center">
-
-**[mainzcript](https://mainzcript.eu)** – Growing. Own. IT.
-
-</div>
 
 UJL is developed and maintained by [mainzcript GbR](https://mainzcript.eu), a young software studio based in Mainz, Germany.
 
