@@ -11,7 +11,7 @@ An AI-native framework that generates accessible, on-brand UI from structured co
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/@ujl-framework/crafter.svg)](https://www.npmjs.com/package/@ujl-framework/crafter)
 
-[Documentation](https://ujl-framework.org) · [Getting Started](https://ujl-framework.org/guide/quickstart) · [Live Demo](https://ujl-framework.org/guide/quickstart#demo)
+[Documentation](https://ujl-framework.org) · [Getting Started](https://ujl-framework.org/guide/quickstart.html#install) · [Live Demo](https://ujl-framework.org/guide/quickstart.html#demo)
 
 </div>
 
@@ -110,10 +110,10 @@ ujl/
 ## Documentation
 
 - [**Full Documentation**](https://ujl-framework.org) – Architecture, guides, and API reference
-- [**Getting Started**](https://ujl-framework.org/guide/quickstart) – Installation and first steps
-- [**Live Demo**](https://ujl-framework.org/guide/quickstart#demo) – Try the Crafter in your browser
-- [**Packages Overview**](https://ujl-framework.org/reference/packages) – What each package does
-- [**Roadmap**](https://ujl-framework.org/about/roadmap) – Where UJL is going
+- [**Getting Started**](https://ujl-framework.org/guide/quickstart.html#install) – Installation and first steps
+- [**Live Demo**](https://ujl-framework.org/guide/quickstart.html#demo) – Try the Crafter in your browser
+- [**Packages Overview**](https://ujl-framework.org/reference/packages.html) – What each package does
+- [**Roadmap**](https://ujl-framework.org/about/roadmap.html) – Where UJL is going
 
 ## Core Concepts
 
@@ -169,6 +169,6 @@ MIT – see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**[Documentation](https://ujl-framework.org)** · **[Getting Started](https://ujl-framework.org/guide/quickstart)** · **[GitHub](https://github.com/mainzcript/ujl)**
+**[Documentation](https://ujl-framework.org)** · **[Getting Started](https://ujl-framework.org/guide/quickstart.html#install)** · **[GitHub](https://github.com/mainzcript/ujl)**
 
 </div>
