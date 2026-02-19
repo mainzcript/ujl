@@ -8,7 +8,8 @@ build/
 .next/
 .turbo/
 .svelte-kit/
-.vitepress/
+.vitepress/cache/
+.vitepress/dist/
 
 # Environment variables
 .env
