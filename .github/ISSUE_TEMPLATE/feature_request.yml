@@ -1,0 +1,104 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in improving UJL! Please describe the feature you'd like to see.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm before submitting
+      options:
+        - label: I have searched existing issues and discussions to avoid duplicates
+          required: true
+        - label: I have checked the roadmap to see if this is already planned
+          required: true
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Target Package
+      description: Which package would this feature affect?
+      options:
+        - "@ujl-framework/crafter"
+        - "@ujl-framework/adapter-web"
+        - "@ujl-framework/adapter-svelte"
+        - "@ujl-framework/core"
+        - "@ujl-framework/types"
+        - "@ujl-framework/ui"
+        - "Documentation"
+        - "New package"
+        - "Multiple packages"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Describe the problem or pain point this feature would address.
+        Example: "As a content editor, I find it difficult to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: |
+        Describe your ideal solution.
+        Example: "I would like to be able to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe any alternative solutions or features you've considered
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe a concrete use case where this feature would be valuable
+      placeholder: |
+        Example scenario:
+        "When creating a landing page for a product launch, I need to..."
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Breaking Change?
+      description: Would this feature require breaking changes?
+      options:
+        - "No breaking changes"
+        - "Potentially breaking"
+        - "Definitely breaking"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or references
+      placeholder: Links to similar features in other tools, mockups, design ideas, etc.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
