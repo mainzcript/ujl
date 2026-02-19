@@ -627,13 +627,11 @@ export function getDisplayName(node: UJLCModuleObject): string {
 	if (node.fields.headline) return `${typeName}: ${node.fields.headline}`;
 
 	if (node.fields.content) {
-		let contentText = "";
-		if (typeof node.fields.content === "string") {
-			contentText = node.fields.content.trim();
-		} else {
-			// Extract text from ProseMirror Document
-			contentText = extractTextFromProseMirror(node.fields.content).trim();
-		}
+		const contentText =
+			typeof node.fields.content === "string"
+				? node.fields.content.trim()
+				: // Extract text from ProseMirror Document
+					extractTextFromProseMirror(node.fields.content).trim();
 		if (contentText) {
 			const shortContent =
 				contentText.length > 40 ? `${contentText.substring(0, 40)}...` : contentText;

@@ -38,7 +38,7 @@ const requireExtensionRule = {
 		]
 	},
 	create(context) {
-		const sc = context.getSourceCode();
+		const sc = context.sourceCode;
 		const options = context.options?.[0] ?? {};
 		const defaultExtension = options.extension ?? 'js';
 		const allowTs = options.allowTs ?? defaultExtension === 'ts';
@@ -94,7 +94,7 @@ const requireExtensionRule = {
 
 		function check(node) {
 			const source = node.source?.value;
-			const extension = resolveExtension(context.getFilename());
+			const extension = resolveExtension(context.filename);
 			const allowTsForFile = allowTs || extension === 'ts';
 			if (!shouldCheck(node, source, allowTsForFile)) return;
 			if (!extension) return;
@@ -218,6 +218,13 @@ export default defineConfig(
 				}
 			],
 			'require-extension/require-extension': 'off'
+		}
+	},
+	{
+		// $bindable() rune assignments are managed by the Svelte compiler, not visible to ESLint
+		files: ['**/*.svelte'],
+		rules: {
+			'no-useless-assignment': 'off'
 		}
 	},
 	{
