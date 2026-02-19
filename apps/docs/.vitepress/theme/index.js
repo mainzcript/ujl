@@ -1,14 +1,23 @@
 import DefaultTheme from "vitepress/theme";
 import { onMounted, onUnmounted } from "vue";
 import CrafterDemo from "./components/CrafterDemo.vue";
+import CustomHero from "./components/CustomHero.vue";
+import FeatureCard from "./components/FeatureCard.vue";
+import FeatureGrid from "./components/FeatureGrid.vue";
+import InstallCommand from "./components/InstallCommand.vue";
 import "./custom.css";
 
 export default {
 	...DefaultTheme,
+
 	enhanceApp({ app }) {
-		// Register global components
 		app.component("CrafterDemo", CrafterDemo);
+		app.component("CustomHero", CustomHero);
+		app.component("FeatureCard", FeatureCard);
+		app.component("FeatureGrid", FeatureGrid);
+		app.component("InstallCommand", InstallCommand);
 	},
+
 	setup() {
 		const openLightbox = (mermaidEl) => {
 			const svg = mermaidEl.querySelector("svg");
@@ -24,7 +33,7 @@ export default {
 			lightbox.setAttribute("aria-label", "Mermaid diagram zoom view");
 			lightbox.innerHTML = `
 				<div class="mermaid-lightbox-content">${svg.outerHTML}</div>
-				<div class="mermaid-lightbox-hint">Klicken oder ESC zum Schließen</div>
+				<div class="mermaid-lightbox-hint">Click or press Esc to close</div>
 			`;
 
 			const handleKeydown = (e) => {

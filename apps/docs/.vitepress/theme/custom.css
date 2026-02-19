@@ -1,14 +1,51 @@
-/* UJL-Framework Brand Colors for VitePress */
+/* UJL-Framework Brand Colors & Typography for VitePress */
 :root {
 	/* Primary brand color (from UI variables) */
 	--vp-c-brand-1: oklch(54.6% 0.245 262.881);
 	--vp-c-brand-2: oklch(65% 0.245 262.881);
 	--vp-c-brand-3: var(--vp-c-brand-1);
+
+	/* Consistent container width */
+	--vp-doc-max-width: 1152px;
+
+	/* Brand border radius */
+	--vp-doc-border-radius: 0.75rem;
+
+	/* Brand typography */
+	--vp-font-family-base: "Inter", ui-sans-serif, system-ui, sans-serif;
+	--vp-font-family-mono:
+		"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
 :root.dark {
 	--vp-c-brand-1: oklch(65% 0.245 262.881);
 	--vp-c-brand-2: oklch(54.6% 0.245 262.881);
+}
+
+/* Apply JetBrains Mono Bold to all headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.VPNavBarTitle,
+.VPSidebarItem .text {
+	font-family: "JetBrains Mono", var(--vp-font-family-mono);
+	font-weight: 900;
+}
+
+/* Consistent container for all content sections */
+.vp-doc-container {
+	margin: 0 auto;
+	padding: 0 24px;
+	max-width: var(--vp-doc-max-width);
+}
+
+@media (min-width: 768px) {
+	.vp-doc-container {
+		padding: 0 48px;
+	}
 }
 
 /* Mermaid Chart Zoom/Lightbox */
@@ -48,7 +85,7 @@
 	height: 90vh;
 	overflow: auto;
 	background: var(--vp-c-bg);
-	border-radius: 8px;
+	border-radius: var(--vp-doc-border-radius);
 	padding: 2rem;
 	display: flex;
 	align-items: center;

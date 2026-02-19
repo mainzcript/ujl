@@ -10,8 +10,9 @@ export default withMermaid({
 
 	title: "UJL Framework",
 	titleTemplate: ":title | UJL Framework",
-	description: "Garantiert markenkonforme und barrierefreie Websites mit KI erstellen",
-	lang: "de",
+	description:
+		"UJL is an AI-native framework that generates accessible, on-brand UI from structured content and design rules.",
+	lang: "en",
 	base: "/",
 	lastUpdated: true,
 	sitemap: {
@@ -23,6 +24,15 @@ export default withMermaid({
 		["meta", { property: "og:site_name", content: "UJL Framework" }],
 		["meta", { property: "og:type", content: "website" }],
 		["meta", { name: "twitter:card", content: "summary_large_image" }],
+		["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+		["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
+		[
+			"link",
+			{
+				href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@700&display=swap",
+				rel: "stylesheet",
+			},
+		],
 	],
 	transformPageData(pageData) {
 		const head = pageData.frontmatter.head ?? [];
@@ -32,7 +42,7 @@ export default withMermaid({
 		const description =
 			pageData.frontmatter.description ??
 			pageData.description ??
-			"Garantiert markenkonforme und barrierefreie Websites mit KI erstellen";
+			"UJL is an AI-native framework that generates accessible, on-brand UI from structured content and design rules.";
 
 		let canonicalPath = pageData.relativePath ?? "";
 		if (canonicalPath.endsWith("index.md")) {
@@ -60,62 +70,88 @@ export default withMermaid({
 	},
 
 	themeConfig: {
-		// https://vitepress.dev/reference/default-theme-config
 		logo: "/assets/logo-icon.png",
 
 		nav: [
-			{ text: "Vision", link: "/about/01-vision" },
-			{ text: "Demo", link: "/docs/01-demo" },
-			{ text: "Installation", link: "/docs/02-installation" },
-			{ text: "Architektur", link: "/arc42/01-introduction-and-goals" },
+			{ text: "Getting Started", link: "/guide/quickstart" },
+			{ text: "Reference", link: "/reference/overview" },
+			{ text: "About", link: "/about/vision" },
 		],
 
 		sidebar: [
 			{
-				text: "Über UJL",
+				text: "How to ...",
 				collapsed: false,
 				items: [
-					{ text: "Vision & Wertversprechen", link: "/about/01-vision" },
-					{ text: "Use Cases", link: "/about/02-use-cases" },
-					{ text: "Team", link: "/about/03-team" },
+					{ text: "Get Started", link: "/guide/quickstart" },
+					{ text: "Install & Integrate", link: "/guide/installation" },
+					{ text: "Understand UJL", link: "/guide/concepts" },
+					{ text: "Optimize Bundle Size", link: "/guide/optimize-bundle-size" },
 				],
 			},
 			{
-				text: "Dokumentation",
+				text: "Reference",
 				collapsed: false,
 				items: [
-					{ text: "Live Demo", link: "/docs/01-demo" },
-					{ text: "Installation & Integration", link: "/docs/02-installation" },
-					{ text: "Roadmap", link: "/docs/03-roadmap" },
-				],
-			},
-			{
-				text: "Architektur (arc42)",
-				collapsed: false,
-				items: [
-					{ text: "1. Einführung und Ziele", link: "/arc42/01-introduction-and-goals" },
-					{ text: "2. Randbedingungen", link: "/arc42/02-constraints" },
-					{ text: "3. Kontext und Abgrenzung", link: "/arc42/03-context-and-scope" },
-					{ text: "4. Lösungsstrategie", link: "/arc42/04-solution-strategy" },
-					{ text: "5. Bausteinsicht", link: "/arc42/05-building-block-view" },
-					{ text: "6. Laufzeitsicht", link: "/arc42/06-runtime-view" },
-					{ text: "7. Verteilungssicht", link: "/arc42/07-deployment-view" },
-					{ text: "8. Querschnittliche Konzepte", link: "/arc42/08-crosscutting-concepts" },
-					{ text: "9. Architekturentscheidungen", link: "/arc42/09-architecture-decisions" },
-					{ text: "10. Qualitätsanforderungen", link: "/arc42/10-quality-requirements" },
+					{ text: "Overview", link: "/reference/overview" },
+					{ text: "Packages", link: "/reference/packages" },
 					{
-						text: "11. Risiken und technische Schulden",
-						link: "/arc42/11-risks-and-technical-debt",
+						text: "Decisions (ADRs)",
+						collapsed: true,
+						items: [
+							{
+								text: "ADR-001 Content/Design Separation",
+								link: "/reference/decisions/0001-content-design-separation",
+							},
+							{
+								text: "ADR-002 Registry & Plugin System",
+								link: "/reference/decisions/0002-registry-plugin-system",
+							},
+							{
+								text: "ADR-003 AST Adapter Pattern",
+								link: "/reference/decisions/0003-ast-adapter-pattern",
+							},
+							{
+								text: "ADR-004 Dual Image Storage",
+								link: "/reference/decisions/0004-dual-image-storage",
+							},
+							{
+								text: "ADR-005 Zod Schema Validation",
+								link: "/reference/decisions/0005-zod-schema-validation",
+							},
+							{
+								text: "ADR-009 OKLCH Color Space",
+								link: "/reference/decisions/0009-oklch-color-space",
+							},
+							{
+								text: "ADR-019 Structured Content",
+								link: "/reference/decisions/0019-structured-content-over-html",
+							},
+							{
+								text: "ADR-020 Foreground Mapping",
+								link: "/reference/decisions/0020-foreground-mapping-wcag",
+							},
+						],
 					},
-					{ text: "12. Glossar", link: "/arc42/12-glossary" },
+					{ text: "Glossary", link: "/reference/glossary" },
 				],
 			},
 			{
-				text: "Rechtliches",
+				text: "About",
 				collapsed: false,
 				items: [
-					{ text: "Impressum", link: "/legal/imprint" },
-					{ text: "Datenschutz", link: "/legal/privacy" },
+					{ text: "Vision", link: "/about/vision" },
+					{ text: "Use Cases", link: "/about/use-cases" },
+					{ text: "Team", link: "/about/team" },
+					{ text: "Roadmap", link: "/about/roadmap" },
+				],
+			},
+			{
+				text: "Legal",
+				collapsed: false,
+				items: [
+					{ text: "Imprint", link: "/legal/imprint" },
+					{ text: "Privacy", link: "/legal/privacy" },
 				],
 			},
 		],
@@ -123,9 +159,9 @@ export default withMermaid({
 		socialLinks: [{ icon: "github", link: "https://github.com/mainzcript/ujl" }],
 
 		footer: {
-			message: "UJL Crafter - Der erste Open-Source WYSIWYG Editor ohne Design-Chaos",
-			copyright:
-				"© 2025 UJL-Framework Team | <a href='/legal/imprint'>Impressum</a> | <a href='/legal/privacy'>Datenschutz</a>",
+			message:
+				'Released under the MIT License. Built by <a href="https://mainzcript.eu" target="_blank" rel="noopener">mainzcript</a>. Growing. Own. IT. | <a href="/legal/imprint">Imprint</a> · <a href="/legal/privacy">Privacy</a>',
+			copyright: `© ${new Date().getFullYear()} mainzcript GbR`,
 		},
 
 		search: {
@@ -133,21 +169,22 @@ export default withMermaid({
 		},
 	},
 
-	// Plugin configuration: mermaid and mermaidPlugin are optional
-	// See https://emersonbottero.github.io/vitepress-plugin-mermaid/guide/getting-started.html
+	mermaid: {
+		// Allow <br/> for line breaks in node labels
+		securityLevel: "loose",
+	},
+
 	mermaidPlugin: {
 		class: "mermaid",
 	},
 
 	vite: {
-		publicDir: "public",
 		assetsInclude: ["**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg"],
 		optimizeDeps: {
 			include: ["mermaid"],
 		},
 		resolve: {
 			alias: {
-				// Required for Mermaid ESM compatibility
 				dayjs: "dayjs/",
 			},
 		},

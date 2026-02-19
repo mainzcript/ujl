@@ -1,11 +1,89 @@
 # Contributing to UJL Framework
 
+We welcome contributions of all kinds, bug fixes, new modules, adapter implementations, documentation improvements, and feedback. Thank you for taking the time.
+
+## Two Types of Contributors
+
+There are two workflows depending on your relationship to the project:
+
+- **External contributors** (no write access to the repo) → fork the repository, work on your fork, open a Pull Request
+- **Core team** (write access) → create a branch directly on the repo, open a Pull Request
+
+If you're contributing for the first time, use the external contributor flow below.
+
+## External Contributor Flow (Fork & Pull Request)
+
+### 1. Fork the repository
+
+Click **Fork** in the top-right corner of [github.com/mainzcript/ujl](https://github.com/mainzcript/ujl). This creates your own copy of the repository under your GitHub account (e.g., `your-username/ujl`).
+
+### 2. Clone your fork
+
+```bash
+git clone git@github.com:your-username/ujl.git
+cd ujl
+```
+
+### 3. Add the original repository as `upstream`
+
+This lets you pull in future changes from the main project:
+
+```bash
+git remote add upstream git@github.com:mainzcript/ujl.git
+```
+
+Verify your remotes:
+
+```bash
+git remote -v
+# origin    git@github.com:your-username/ujl.git (your fork)
+# upstream  git@github.com:mainzcript/ujl.git    (original)
+```
+
+### 4. Keep your fork up to date
+
+Before starting work, make sure your `main` is in sync with the original:
+
+```bash
+git fetch upstream
+git checkout main
+git merge upstream/main
+```
+
+### 5. Create a feature branch
+
+Never work directly on `main`. Create a branch from `main`:
+
+```bash
+git checkout -b feat/my-feature
+```
+
+### 6. Make your changes and commit
+
+Follow the commit conventions below (conventional commits). Run checks before pushing:
+
+```bash
+pnpm lint
+pnpm check
+```
+
+### 7. Push to your fork and open a Pull Request
+
+```bash
+git push origin feat/my-feature
+```
+
+Then go to your fork on GitHub, you'll see a prompt to open a Pull Request against `mainzcript/ujl`. Click it, fill in the description, and submit.
+
+We'll review it, leave feedback if needed, and merge when ready.
+
+---
+
+## Core Team Flow (Direct Branch)
+
 ## Getting Started
 
-This repository is a **pnpm monorepo**. For the full setup guide (including the Crafter + dev-demo
-and Library service), see:
-
-- [Installation & Integration](./apps/docs/src/docs/02-installation.md)
+This repository is a **pnpm monorepo**. For the full setup guide, see the [Installation Guide](./apps/docs/src/guide/installation.md).
 
 ### Development Setup (Quick)
 
@@ -47,19 +125,15 @@ We use a **trunk-based** branching strategy:
 - **`fix/*`**: Bug fix branches from `main`
 - **`chore/*`**: Maintenance branches from `main`
 
-Further **rules** for branch names:
+Branch name rules: lowercase letters and hyphens, concise but descriptive, no special characters except hyphens.
 
-- Use lowercase letters and hyphens
-- Keep descriptions concise but descriptive
-- No special characters except hyphens
-
-> Note: `main` is protected and cannot be pushed to directly. All changes go through pull requests.
+> `main` is protected. All changes go through pull requests.
 
 ### 1. Making Changes
 
-1. Create a feature branch from `main` following our naming convention
+1. Create a feature branch from `main`
 2. Make your changes
-3. Test your changes thoroughly
+3. Test thoroughly
 4. Run linting and type checking:
    ```bash
    pnpm lint
@@ -68,28 +142,25 @@ Further **rules** for branch names:
 
 ### 2. Adding Changesets
 
-For any changes that should be released, add a changeset:
+For any changes that should be released:
 
 ```bash
 pnpm run vc:changeset
 ```
 
-This will guide you through creating a changeset file that describes your changes.
-
-> **Note:** Changesets are created on feature branches and merged to `main`. They will be processed during the release process.
-> You can also run `pnpm changeset` directly - `vc:changeset` is a thin wrapper.
+This guides you through creating a changeset describing your changes. Changesets are created on feature branches and processed during the release.
 
 ### 3. Committing Changes
 
 We follow conventional commits:
 
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `style:` for formatting changes
-- `refactor:` for code refactoring
-- `test:` for adding tests
-- `chore:` for maintenance tasks
+- `feat:` new features
+- `fix:` bug fixes
+- `docs:` documentation changes
+- `style:` formatting changes
+- `refactor:` code refactoring
+- `test:` adding or updating tests
+- `chore:` maintenance tasks
 
 ### 4. Pull Request
 
@@ -101,34 +172,28 @@ We follow conventional commits:
 
 ## Release Process
 
-### Version Management
-
-We use Changesets for version management:
-
 ```bash
 # Add a changeset
 pnpm run vc:changeset
 
-# Update versions and changelogs (version bump)
+# Update versions and changelogs
 pnpm run vc:bump
 
-# Publish packages (manual, from main)
+# Publish packages (from main, after bump commit)
 pnpm run vc:release
 ```
 
-**Release Workflow:**
+**Release workflow:**
 
-1. **During development:** Changesets are created on `feature/*`/`fix/*` branches and merged to `main`
-2. **When ready to release:** Run `pnpm run vc:bump` on `main` (generates version bumps + `CHANGELOG.md`)
-3. **Commit and tag:** Commit the version changes and create a git tag (e.g., `git tag v0.0.2`)
-4. **Publish to npm:** Run `pnpm run vc:release` (runs full quality checks, builds, tests, then publishes to npmjs.org)
-5. **Document the release:** Create a GitHub Release from the tag
+1. During development: changesets created on feature branches and merged to `main`
+2. When ready to release: `pnpm run vc:bump` on `main` (generates version bumps + `CHANGELOG.md`)
+3. Commit the version changes and create a git tag (e.g., `git tag v0.1.0`)
+4. `pnpm run vc:release`, runs full quality checks, builds, tests, then publishes to npm
+5. Create a GitHub Release from the tag
 
-> **Note:** The first public release `0.0.1` uses a single consolidated Changeset that summarizes the current state of the framework.
+### Package Versioning
 
-### Package Linking
-
-The following packages are versioned together (fixed):
+The following packages are versioned together:
 
 - `@ujl-framework/core`
 - `@ujl-framework/crafter`
@@ -140,7 +205,34 @@ The following packages are versioned together (fixed):
 
 ## Development Guidelines
 
-For detailed guidelines, see the [docs/](./docs/) directory:
+- [Testing Guidelines](./docs/testing.md), test infrastructure and best practices
+- [Code Review Process](./docs/code-review.md), code review standards and workflow
+- [Bundle Strategy](./docs/bundle-strategy.md), bundle architecture and performance decisions
 
-- [Testing Guidelines](./docs/testing.md) - Test infrastructure and best practices
-- [Code Review Process](./docs/code-review.md) - Code review standards and workflow
+## How We Work, Tooling Decisions
+
+These are the internal technical choices that define how the project is built and tested. They're recorded here rather than in the public documentation because they're relevant to contributors, not to users of the framework.
+
+**Language and type safety:** TypeScript with strict mode enabled across all packages (`strict: true`, `noUncheckedIndexedAccess`, `noImplicitReturns`). Zod schemas are the source of truth for runtime validation and TypeScript types.
+
+**UI framework:** Svelte 5 with Runes (`$state`, `$derived`) for the Crafter editor and the primary adapter. Chosen for its first-class Web Components support, compiler-optimized bundle size, and fine-grained reactivity.
+
+**Package management:** pnpm workspaces. pnpm was chosen over Bun (better stability, full npm compatibility) and npm (disk space, workspace protocol). Package dependency layers are strict: types → core → ui → adapters → crafter.
+
+**Version management:** Changesets. Chosen over Lerna for better DX, built-in changelog generation, and active maintenance.
+
+**Unit and integration testing:** Vitest. Chosen for native Vite/ESM support and Jest-compatible API.
+
+**E2E testing:** Playwright across Chrome, Firefox, and Safari. Required for testing real browser interactions (drag-and-drop, clipboard, keyboard shortcuts) that unit tests cannot cover reliably. Tests use `data-testid` attributes; these are stripped from production builds via Svelte's `dev` conditional.
+
+**Documentation:** VitePress (this site). Chosen for Markdown-first authoring, fast HMR, and static output suitable for self-hosting.
+
+**Rich text:** TipTap (ProseMirror wrapper). Content is stored as ProseMirror JSON, not HTML strings. A shared SSR-safe serializer ensures WYSIWYG fidelity between editor and renderer.
+
+## Credits
+
+UJL was initiated by **Marius Klein** and is maintained by [mainzcript GbR](https://mainzcript.eu).
+
+**Founding contributor:** [Nadine Denkhaus](https://github.com/ndnk27) co-developed the initial version of UJL, contributing significantly to the technical foundation of the framework, including the Crafter editor, module system, and adapter architecture. Her work shaped the core of what UJL is today.
+
+**Community contributors:** Lukas Antoine, Leon Scherer, Philipp Oehl, Ulla Suhare, Jannik Seus.

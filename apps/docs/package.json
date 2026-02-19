@@ -24,6 +24,7 @@
 		"@fontsource-variable/roboto": "^5.2.9",
 		"@ujl-framework/crafter": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
+		"lucide-vue-next": "^0.574.0",
 		"mermaid": "^11.12.2"
 	},
 	"devDependencies": {

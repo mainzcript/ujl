@@ -1,77 +1,174 @@
-# UJL-Framework
+<div align="center">
 
-**Unified JSON Layout (UJL)** - The Open-Source Web-Builder of the Future
+<img src="apps/docs/src/public/assets/logo-icon.png" alt="UJL Framework" width="120" />
 
-## About UJL
+# UJL Framework
 
-**Unified JSON Layout (UJL)** is a building block system for digital content with a core promise:
+**No more off-brand websites.**
 
-> **Create and maintain brand-compliant and accessible websites with AI.**
+An AI-native framework that generates accessible, on-brand UI from structured content and design rules.
 
-UJL comes with an editor – the UJL **Crafter** – that enables content teams to work autonomously while guaranteeing brand compliance and accessibility. Unlike traditional solutions where design rules can be broken, UJL enforces them architecturally through strict separation of content and design.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@ujl-framework/crafter.svg)](https://www.npmjs.com/package/@ujl-framework/crafter)
 
-A central concept of UJL is the strict separation of content and design. Unlike HTML and CSS, where content and styling are technically separated, UJL works at a higher abstraction level. Content is structured and described through modules as reusable building blocks in a JSON format (`.ujlc.json`), while design specifications are centrally stored in a `.ujlt.json` file. The UJL Renderer combines both elements and generates a **ContentFrame** (HTML/CSS/JS) that consistently adheres to the corporate design.
+[Documentation](https://ujl-framework.org) · [Getting Started](https://ujl-framework.org/guide/quickstart) · [Live Demo](https://ujl-framework.org/guide/quickstart#demo)
 
-### Core Concepts
+</div>
 
-- **Brand-Compliance by Design**: Design rules are technically enforced, not optional. Editors cannot break brand guidelines.
-- **Accessibility Guaranteed**: WCAG compliance is built into the architecture, not added as an afterthought.
-- **Separation of Content and Design**: Content in `.ujlc.json` files, design in `.ujlt.json` theme files
-- **AI-native**: JSON structure optimized for language models. AI generates structured data validated against schemas.
-- **Modular & Open Source**: Fully open source (MIT license) and extensible
-- **Easy Integration**: Adapts to existing systems (CMS, SaaS platforms)
-- **Framework-Agnostic**: Works with any framework via adapters (Svelte, Web Components, and more)
+---
+
+## What is UJL?
+
+UJL (Unified JSON Layout) is an open-source framework for building web content with **brand compliance and WCAG accessibility built in, not bolted on**. Unlike traditional page builders where design rules can be broken, UJL enforces them architecturally through strict separation of content and design.
+
+**The problem:** Editors want to create content quickly. Designers need brand guidelines to hold. Developers get caught in the middle. Reviews, approvals, and fixes eat time.
+
+**The solution:** UJL moves enforcement into the architecture. Content and design rules are described in a way that the system can only produce valid, compliant results. Not by convention. Not by process. **By construction.**
+
+## Key Features
+
+- **Brand Compliance by Design** – Design changes apply globally and instantly. Editors compose freely within guardrails they cannot override.
+- **Accessibility Guaranteed** – WCAG contrast ratios and semantic HTML are enforced architecturally, not verified after the fact.
+- **AI-Native** – Structured JSON optimized for language models. Schema validation ensures AI-generated content is always compliant.
+- **Open Source & Integrable** – MIT licensed and framework-agnostic. Embed the full editor anywhere, or use the lean Svelte adapter inside your own stack.
+
+## Quick Start
+
+### Install
+
+```bash
+npm install @ujl-framework/crafter
+```
+
+### Minimal Example
+
+```javascript
+import { UJLCrafter } from "@ujl-framework/crafter";
+
+new UJLCrafter({ target: "#app" });
+```
+
+### With Document and Theme
+
+The Crafter is stateless. Pass it a document and theme, it calls you back on changes. How and where you persist data is entirely up to you.
+
+```javascript
+import { UJLCrafter } from "@ujl-framework/crafter";
+
+const crafter = new UJLCrafter({
+  target: "#app",
+  content: ujlcDocument,    // your .ujlc.json document
+  tokenSet: ujltTokenSet,   // your .ujlt.json theme
+  onChange: (updatedDoc) => {
+    // persist however you like
+    saveDocument(updatedDoc);
+  },
+});
+```
+
+### Try the Demo
+
+Clone this repository and run the included demo:
+
+```bash
+git clone https://github.com/mainzcript/ujl.git
+cd ujl
+pnpm install
+pnpm --filter @ujl-framework/dev-demo dev
+```
+
+Open `http://localhost:5174` to see the Crafter in action.
 
 ## Project Structure
 
 ```
 ujl/
 ├── packages/
-│   ├── core/           # Schemas, Validator, Renderer, Image Library System
+│   ├── core/           # Schemas, Validator, Renderer, Composer
 │   ├── types/          # TypeScript types and Zod schemas
 │   ├── ui/             # Shadcn-svelte UI Components
-│   ├── crafter/        # Visual UJL Editor with Image Library Integration
-│   ├── adapter-svelte/ # Svelte Adapter (Svelte 5)
-│   ├── adapter-web/    # Web Adapter (Custom Elements)
-│   └── examples/       # Example Material and Test Data
+│   ├── crafter/        # Visual UJL Editor (~600 KB gzip)
+│   ├── adapter-svelte/ # Svelte 5 Adapter (~120 KB gzip)
+│   ├── adapter-web/    # Web Components Adapter (~280 KB gzip)
+│   └── examples/       # Example Content & Test Data
 ├── services/
 │   └── library/        # UJL Library – Asset Management API (Payload CMS)
 └── apps/
-    └── docs/           # Documentation Website
+    └── docs/           # Documentation Website (VitePress)
 ```
+
+## Packages
+
+| Package                         | Purpose                                 | Size (gzip) | npm                                                                                                                           |
+| ------------------------------- | --------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `@ujl-framework/crafter`        | Full visual editor, embed anywhere      | ~600 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/crafter)](https://npmjs.com/package/@ujl-framework/crafter)               |
+| `@ujl-framework/adapter-web`    | Web Components rendering, no editor     | ~280 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/adapter-web)](https://npmjs.com/package/@ujl-framework/adapter-web)       |
+| `@ujl-framework/adapter-svelte` | Svelte 5 native rendering for SvelteKit | ~120 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/adapter-svelte)](https://npmjs.com/package/@ujl-framework/adapter-svelte) |
+| `@ujl-framework/core`           | Composition utilities                   | ~50 KB      | [![npm](https://img.shields.io/npm/v/@ujl-framework/core)](https://npmjs.com/package/@ujl-framework/core)                     |
+| `@ujl-framework/types`          | TypeScript definitions                  | ~10 KB      | [![npm](https://img.shields.io/npm/v/@ujl-framework/types)](https://npmjs.com/package/@ujl-framework/types)                   |
 
 ## Documentation
 
-- [Contributing Guide](./CONTRIBUTING.md) - How to contribute to the project
-- [Developer Guidelines](./docs/) - Testing, code review, and more
-- [AI Agent Context](./AGENTS.md) - High-level overview for AI assistants
-- [User Documentation](./apps/docs/) - Architecture and getting started
+- [**Full Documentation**](https://ujl-framework.org) – Architecture, guides, and API reference
+- [**Getting Started**](https://ujl-framework.org/guide/quickstart) – Installation and first steps
+- [**Live Demo**](https://ujl-framework.org/guide/quickstart#demo) – Try the Crafter in your browser
+- [**Packages Overview**](https://ujl-framework.org/reference/packages) – What each package does
+- [**Roadmap**](https://ujl-framework.org/about/roadmap) – Where UJL is going
 
-## Getting Started
+## Core Concepts
 
-For a full setup walkthrough, see the VitePress docs:
+### Strict Content/Design Separation
 
-- [Installation & Integration](./apps/docs/src/docs/02-installation.md)
+Content lives in **`.ujlc.json`** files (UJL Content Document). Design rules live in **`.ujlt.json`** files (UJL Theme Document). The Composer combines them into an Abstract Syntax Tree (AST), which Adapters render into your target framework.
 
-If you want a minimal local demo first:
-
-```bash
-pnpm install
-pnpm --filter @ujl-framework/dev-demo dev
+```
+.ujlc.json (content) + .ujlt.json (theme) → Composer → AST → Adapter → Output
 ```
 
-This launches the Crafter demo on `http://localhost:5174`.
+Because design rules aren't embedded in content, a theme update propagates everywhere instantly. Because editors only touch `.ujlc`, they literally cannot change colors or typography—the data model doesn't allow it.
 
-## CI/CD & Releases
+### AI-Native Architecture
 
-**CI Pipeline** runs automatically on pull requests targeting `main` via GitHub Actions:
-- Build all packages
-- Run unit tests (Vitest)
-- Run E2E tests (Playwright)
-- Quality checks (ESLint, TypeScript)
+Structured JSON is optimized for language models. Schema validation ensures AI-generated content is always compliant. Small models, big results.
 
-**Releases** are performed manually using Changesets. For the complete release process and version management, see the [Contributing Guide](./CONTRIBUTING.md#release-process).
+### Not a CMS
+
+UJL is a **visual layout layer**, not a content management system. It doesn't handle routing, user accounts, publishing workflows, or content storage. It integrates with existing CMS and frontend stacks—it doesn't replace them.
+
+## Contributing
+
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Development setup
+- Testing and code review
+- Release process
+- Pull request guidelines
+
+For AI assistants working on this project, see [AGENTS.md](AGENTS.md) for a high-level overview.
+
+## Community
+
+- [Issues](https://github.com/mainzcript/ujl/issues) – Report bugs or request features
+- [Website](https://ujl-framework.org) – Full documentation and guides
+
+## Built by
+
+<div align="center">
+
+**[mainzcript](https://mainzcript.eu)** – Growing. Own. IT.
+
+</div>
+
+UJL is developed and maintained by [mainzcript GbR](https://mainzcript.eu), a young software studio based in Mainz, Germany.
 
 ## License
 
-MIT
+MIT – see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**[Documentation](https://ujl-framework.org)** · **[Getting Started](https://ujl-framework.org/guide/quickstart)** · **[GitHub](https://github.com/mainzcript/ujl)**
+
+</div>
