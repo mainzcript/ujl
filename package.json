@@ -1,6 +1,5 @@
 {
 	"name": "ujl-monorepo",
-	"version": "0.0.0",
 	"description": "Unified JSON Layout Framework - The Open-Source Web-Builder of the Future",
 	"license": "MIT",
 	"private": true,
