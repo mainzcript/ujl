@@ -6,11 +6,12 @@
 		UJLAbstractNode,
 		UJLTTokenSet,
 	} from "@ujl-framework/types";
-	import { Composer } from "@ujl-framework/core";
+	import type { Composer } from "@ujl-framework/core";
 	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
 	// Note: Adapter styles are now bundled via Shadow DOM injection (see bundle.css)
 	import { getContext } from "svelte";
 	import {
+		COMPOSER_CONTEXT,
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
 		type CrafterContext,
@@ -60,7 +61,7 @@
 		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
 
-	const composer = new Composer();
+	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 
 	let ast = $state<UJLAbstractNode | null>(null);
 

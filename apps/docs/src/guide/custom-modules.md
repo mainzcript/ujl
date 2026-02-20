@@ -7,7 +7,7 @@ description: "Step-by-step guide to creating your own UJL modules with fields, s
 
 UJL's module system is open by design. You add your own modules without touching the framework source, and the Crafter's component picker picks them up automatically. This guide walks through every step.
 
-**Prerequisites:** Install `@ujl-framework/core` (or use the Crafter, which bundles it).
+**Prerequisites:** Install `@ujl-framework/core`. You will need it to create your module class, define fields and slots, and implement the composition logic.
 
 ```bash
 pnpm add @ujl-framework/core
@@ -273,6 +273,8 @@ Two types work out of the box with every adapter, no extra setup needed:
 - **`"wrapper"`**: iterates over `props.children` (an array of `UJLAbstractNode`) and renders each child in order. Use this when your module composes child modules from slots.
 
 If you use a custom type, you need to add a corresponding rendering component to `adapter-svelte` or `adapter-web`.
+
+For theme-aware spacing inside `"raw-html"` content, use the `--spacing` CSS variable instead of hardcoded values: `padding: calc(var(--spacing) * 1.5)`. This variable is generated from the active token set and scales with the user's theme.
 :::
 
 ---

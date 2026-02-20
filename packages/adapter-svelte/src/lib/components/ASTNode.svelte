@@ -35,7 +35,7 @@
 {:else if node.type === NODE_TYPES.WRAPPER}
 	<Wrapper {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.RAW_HTML}
-	<Raw {node} />
+	<Raw {node} {showMetadata} />
 {:else if node.type === NODE_TYPES.ERROR}
 	<Error {node} />
 {:else if node.type === NODE_TYPES.TEXT}

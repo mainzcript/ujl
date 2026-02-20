@@ -107,6 +107,9 @@ importers:
       '@fontsource-variable/roboto':
         specifier: ^5.2.9
         version: 5.2.9
+      '@ujl-framework/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@ujl-framework/crafter':
         specifier: workspace:*
         version: link:../../packages/crafter

@@ -27,6 +27,7 @@ import "@fontsource-variable/roboto";
 import { UJLCrafter, type LibraryOptions } from "@ujl-framework/crafter";
 import { backendLibraryDocument, defaultTheme, showcaseDocument } from "@ujl-framework/examples";
 import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+import { TestimonialModule } from "./modules/testimonial.js";
 
 // ============================================
 // ENVIRONMENT CONFIGURATION
@@ -109,6 +110,7 @@ const crafter = new UJLCrafter({
 	document,
 	theme: defaultTheme as unknown as UJLTDocument,
 	library,
+	modules: [new TestimonialModule()],
 });
 
 // ============================================
