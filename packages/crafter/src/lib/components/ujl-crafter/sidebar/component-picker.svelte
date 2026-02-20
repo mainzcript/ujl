@@ -25,9 +25,9 @@
 	let modules: AnyModule[] = $state(composer.getRegistry().getAllModules());
 
 	$effect(() => {
-		if (open) {
+		return composer.getRegistry().onChanged(() => {
 			modules = composer.getRegistry().getAllModules();
-		}
+		});
 	});
 
 	/**

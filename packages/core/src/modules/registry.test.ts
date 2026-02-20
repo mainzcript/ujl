@@ -1,5 +1,5 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Composer } from "../composer.js";
 import { TextField } from "../fields/concretes/text-field.js";
 import { ModuleBase } from "./base.js";
@@ -231,6 +231,63 @@ describe("ModuleRegistry", () => {
 			expect(() => registry.createModuleFromType("nonexistent", "id-x")).toThrowError(
 				'Module type "nonexistent" not found in registry',
 			);
+		});
+	});
+
+	describe("onChanged", () => {
+		it("should notify listeners when a module is registered", () => {
+			const registry = createRegistry();
+			const listener = vi.fn();
+			registry.onChanged(listener);
+
+			registry.registerModule(new MockModule());
+
+			expect(listener).toHaveBeenCalledOnce();
+		});
+
+		it("should notify listeners when a module is unregistered", () => {
+			const registry = createRegistry();
+			registry.registerModule(new MockModule("alpha"));
+			const listener = vi.fn();
+			registry.onChanged(listener);
+
+			registry.unregisterModule("alpha");
+
+			expect(listener).toHaveBeenCalledOnce();
+		});
+
+		it("should not notify when unregistering an unknown module", () => {
+			const registry = createRegistry();
+			const listener = vi.fn();
+			registry.onChanged(listener);
+
+			registry.unregisterModule("nonexistent");
+
+			expect(listener).not.toHaveBeenCalled();
+		});
+
+		it("should support multiple listeners", () => {
+			const registry = createRegistry();
+			const listenerA = vi.fn();
+			const listenerB = vi.fn();
+			registry.onChanged(listenerA);
+			registry.onChanged(listenerB);
+
+			registry.registerModule(new MockModule());
+
+			expect(listenerA).toHaveBeenCalledOnce();
+			expect(listenerB).toHaveBeenCalledOnce();
+		});
+
+		it("should stop notifying after unsubscribe", () => {
+			const registry = createRegistry();
+			const listener = vi.fn();
+			const unsubscribe = registry.onChanged(listener);
+
+			unsubscribe();
+			registry.registerModule(new MockModule());
+
+			expect(listener).not.toHaveBeenCalled();
 		});
 	});
 
