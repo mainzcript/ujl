@@ -31,7 +31,7 @@
 		"@types/node": "^25.3.0",
 		"@ujl-framework/adapter-svelte": "workspace:*",
 		"@ujl-framework/types": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "^10.0.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.15.0",
 		"globals": "^17.3.0",
