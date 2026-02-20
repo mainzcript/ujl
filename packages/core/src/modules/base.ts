@@ -1,6 +1,7 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../composer.js";
 import { Field } from "../fields/index.js";
+import { generateUid } from "../utils.js";
 import { Slot } from "./slot.js";
 import type { ComponentCategory } from "./types.js";
 
@@ -115,5 +116,29 @@ export abstract class ModuleBase {
 		if (!entry) return fallback;
 		const parsed = entry.field.parse(moduleData.fields[key]);
 		return (parsed ?? fallback) as T;
+	}
+
+	/**
+	 * Helper to create an AST node with the required id and meta fields.
+	 * @param type - Node type string matched by the adapter
+	 * @param props - Type-specific props for the adapter
+	 * @param moduleData - The module data from the UJL document (provides moduleId)
+	 * @param isModuleRoot - true for the root node of a module, false for internal child nodes
+	 */
+	protected createNode(
+		type: UJLAbstractNode["type"],
+		props: Record<string, unknown>,
+		moduleData: UJLCModuleObject,
+		isModuleRoot = true,
+	): UJLAbstractNode {
+		return {
+			type,
+			props,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot,
+			},
+		} as UJLAbstractNode;
 	}
 }

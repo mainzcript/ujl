@@ -1,7 +1,6 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { TextField } from "../../fields/concretes/text-field.js";
-import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -57,17 +56,6 @@ export class Button extends ModuleBase {
 		const hrefField = this.fields.find((field) => field.key === "href");
 		const href = hrefField?.field.parse(moduleData.fields.href) || "#";
 
-		return {
-			type: "button",
-			props: {
-				label,
-				href,
-			},
-			id: generateUid(),
-			meta: {
-				moduleId: moduleData.meta.id,
-				isModuleRoot: true,
-			},
-		};
+		return this.createNode("button", { label, href }, moduleData);
 	}
 }

@@ -20,7 +20,7 @@ pnpm add @ujl-framework/core
 Every module is a class that extends `ModuleBase`. TypeScript enforces all required properties at compile time.
 
 ```typescript
-import { ModuleBase, TextField, Slot, generateUid } from "@ujl-framework/core";
+import { ModuleBase, TextField, Slot } from "@ujl-framework/core";
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "@ujl-framework/core";
 
@@ -74,15 +74,16 @@ export class TestimonialModule extends ModuleBase {
 		const author = this.parseField(moduleData, "author", "");
 		const role = this.parseField(moduleData, "role", "");
 
-		return {
-			type: "wrapper",
-			props: { quote, author, role },
-			id: generateUid(),
-			meta: {
-				moduleId: moduleData.meta.id,
-				isModuleRoot: true,
+		return this.createNode(
+			"raw-html",
+			{
+				content: `<figure>
+				<blockquote>${quote}</blockquote>
+				<figcaption>${author}${role ? ` · ${role}` : ""}</figcaption>
+			</figure>`,
 			},
-		};
+			moduleData,
+		);
 	}
 }
 ```
@@ -154,7 +155,7 @@ const value = this.parseField(moduleData, "fieldKey", fallbackValue);
 | `TextField`     | `string`                   | `maxLength`, `placeholder` |
 | `NumberField`   | `number`                   | `min`, `max`               |
 | `RichTextField` | `ProseMirrorDocument`      | `default` (full document)  |
-| `ImageField`    | `string \| number \| null` | —                          |
+| `ImageField`    | `string \| number \| null` | (none)                     |
 
 All fields share the base config:
 
@@ -206,12 +207,9 @@ async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbst
     ? await imageLibrary.resolve(imageId)
     : null;
 
-  return {
-    type: "wrapper",
-    props: { image },
-    id: generateUid(),
-    meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
-  };
+  return this.createNode("raw-html", {
+    content: image ? `<img src="${image.src}" alt="${image.alt ?? ""}">` : "",
+  }, moduleData);
 }
 ```
 
@@ -246,12 +244,7 @@ async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbst
     children.push(await composer.composeModule(child));
   }
 
-  return {
-    type: "wrapper",
-    props: { children },
-    id: generateUid(),
-    meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
-  };
+  return this.createNode("wrapper", { children }, moduleData);
 }
 ```
 
@@ -263,27 +256,27 @@ async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbst
 
 **Rules:**
 
-- Always generate a fresh `id` with `generateUid()` – IDs are unique per AST build, not per document
-- Always set `meta.moduleId = moduleData.meta.id` – this links the AST node back to the UJLC document
-- Always set `meta.isModuleRoot = true` on the root node of your module – the Crafter uses this to identify editable modules
+- Use `this.createNode(type, props, moduleData)` to build the root node. It generates a fresh `id`, sets `meta.moduleId`, and marks the node as `isModuleRoot: true` automatically
+- For internal child nodes (e.g., a button inside a card), pass `false` as the fourth argument: `this.createNode(type, props, moduleData, false)`
 - Return `Promise<UJLAbstractNode>` if you need `async` (e.g., image resolution); return `UJLAbstractNode` synchronously otherwise
 
 ```typescript
 compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-  return {
-    type: "my-type",     // matched by your adapter
-    props: { /* ... */ }, // whatever the adapter needs
-    id: generateUid(),
-    meta: {
-      moduleId: moduleData.meta.id, // required: links to UJLC document
-      isModuleRoot: true,           // required on root node
-    },
-  };
+  return this.createNode(
+    "my-type",      // matched by your adapter
+    { /* ... */ },  // whatever the adapter needs
+    moduleData,
+  );
 }
 ```
 
-::: tip Adapter types
-The `type` string in your AST node must be handled by your adapter. If you're using `adapter-svelte`, you need to add a corresponding rendering component for your custom type.
+::: tip Built-in node types
+Two types work out of the box with every adapter, no extra setup needed:
+
+- **`"raw-html"`**: renders `props.content` as raw HTML. Use this when your module produces fields (text, images) without child modules.
+- **`"wrapper"`**: iterates over `props.children` (an array of `UJLAbstractNode`) and renders each child in order. Use this when your module composes child modules from slots.
+
+If you use a custom type, you need to add a corresponding rendering component to `adapter-svelte` or `adapter-web`.
 :::
 
 ---
@@ -306,14 +299,28 @@ crafter.registerModule(new AnotherModule());
 
 ### Via the Composer (for rendering without the editor)
 
+Install the rendering adapter alongside `@ujl-framework/core`:
+
+```bash
+pnpm add @ujl-framework/core @ujl-framework/adapter-web
+```
+
+Register your modules on the `Composer`, compose the document, then pass the AST to the adapter:
+
 ```typescript
 import { Composer } from "@ujl-framework/core";
+import { webAdapter } from "@ujl-framework/adapter-web";
 
 const composer = new Composer();
 composer.registerModule(new TestimonialModule());
 
-const ast = await composer.compose(ujlcDocument);
+const ast = await composer.compose(ujlcDocument, ujltDocument);
+webAdapter(ast, tokenSet, { target: "#app" });
 ```
+
+::: tip Zero-config rendering types
+Use `"raw-html"` for modules with fields, `"wrapper"` for modules with slots. Both render out of the box. Only add a custom adapter type when you need purpose-built rendering logic that neither covers.
+:::
 
 Both paths use the same `ModuleRegistry` under the hood. Registering a module with the same `name` twice throws an error – use `registry.hasModule(name)` to check first if needed.
 
@@ -324,7 +331,7 @@ Both paths use the same `ModuleRegistry` under the hood. Registering a module wi
 A `PricingCard` module with two text fields and a slot for feature list items:
 
 ```typescript
-import { ModuleBase, TextField, Slot, generateUid } from "@ujl-framework/core";
+import { ModuleBase, TextField, Slot } from "@ujl-framework/core";
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "@ujl-framework/core";
 
@@ -369,17 +376,22 @@ export class PricingCardModule extends ModuleBase {
 		const planName = this.parseField(moduleData, "planName", "");
 		const price = this.parseField(moduleData, "price", "");
 
+		// Header as a raw-html child node (fields → HTML string)
+		const header = this.createNode(
+			"raw-html",
+			{ content: `<div><h2>${planName}</h2><p>${price}</p></div>` },
+			moduleData,
+			false,
+		);
+
+		// Feature items as composed child nodes (slot → UJLAbstractNode[])
 		const features: UJLAbstractNode[] = [];
 		for (const child of moduleData.slots.features ?? []) {
 			features.push(await composer.composeModule(child));
 		}
 
-		return {
-			type: "wrapper",
-			props: { planName, price, features },
-			id: generateUid(),
-			meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
-		};
+		// wrapper renders children in order
+		return this.createNode("wrapper", { children: [header, ...features] }, moduleData);
 	}
 }
 ```

@@ -108,12 +108,8 @@ class HeroModule extends ModuleBase {
 	readonly slots = [];
 
 	compose(moduleData) {
-		return {
-			type: "wrapper",
-			props: { headline: this.parseField(moduleData, "headline", "") },
-			id: crypto.randomUUID(),
-			meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
-		};
+		const headline = this.parseField(moduleData, "headline", "");
+		return this.createNode("raw-html", { content: `<section><h1>${headline}</h1></section>` }, moduleData);
 	}
 }
 
