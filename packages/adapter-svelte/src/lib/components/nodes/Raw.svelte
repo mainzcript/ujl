@@ -9,7 +9,12 @@
 	let { node, showMetadata = false }: Props = $props();
 </script>
 
-<div data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}>
+{#if showMetadata}
+	<div data-ujl-module-id={node.meta?.moduleId ?? undefined}>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html node.props.content}
+	</div>
+{:else}
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html node.props.content}
-</div>
+{/if}

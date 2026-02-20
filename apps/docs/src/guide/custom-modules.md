@@ -70,9 +70,10 @@ export class TestimonialModule extends ModuleBase {
 
 	// --- Composition ---
 	compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		const quote = this.parseField(moduleData, "quote", "");
-		const author = this.parseField(moduleData, "author", "");
-		const role = this.parseField(moduleData, "role", "");
+		// Always escape user text before interpolating into raw HTML
+		const quote = esc(this.parseField(moduleData, "quote", ""));
+		const author = esc(this.parseField(moduleData, "author", ""));
+		const role = esc(this.parseField(moduleData, "role", ""));
 
 		return this.createNode(
 			"raw-html",
@@ -86,7 +87,20 @@ export class TestimonialModule extends ModuleBase {
 		);
 	}
 }
+
+function esc(text: string): string {
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
 ```
+
+::: warning Always escape user text in raw-html
+`raw-html` renders content via `{@html}` without sanitization. Any user-provided text (field values) interpolated directly into the HTML string is a potential XSS vector. Escape all field values before interpolating them, as shown above with `esc()`.
+:::
 
 ---
 
