@@ -79,8 +79,6 @@ We'll review it, leave feedback if needed, and merge when ready.
 
 ---
 
-## Core Team Flow (Direct Branch)
-
 ## Getting Started
 
 This repository is a **pnpm monorepo**. For the full setup guide, see the [Installation Guide](./apps/docs/src/guide/installation.md).
@@ -124,6 +122,7 @@ We use a **trunk-based** branching strategy:
 - **`feat/*`**: Feature branches from `main`
 - **`fix/*`**: Bug fix branches from `main`
 - **`chore/*`**: Maintenance branches from `main`
+- **`release/*`**: Release branches from `main` (named after Mainz landmarks, e.g. `release/gutenberg`, `release/rhein`, `release/dom`)
 
 Branch name rules: lowercase letters and hyphens, concise but descriptive, no special characters except hyphens.
 
@@ -172,24 +171,38 @@ We follow conventional commits:
 
 ## Release Process
 
-```bash
-# Add a changeset
-pnpm run vc:changeset
-
-# Update versions and changelogs
-pnpm run vc:bump
-
-# Publish packages (from main, after bump commit)
-pnpm run vc:release
-```
-
 **Release workflow:**
 
-1. During development: changesets created on feature branches and merged to `main`
-2. When ready to release: `pnpm run vc:bump` on `main` (generates version bumps + `CHANGELOG.md`)
-3. Commit the version changes and create a git tag (e.g., `git tag v0.1.0`)
-4. `pnpm run vc:release`, runs full quality checks, builds, tests, then publishes to npm
-5. Create a GitHub Release from the tag
+1. Create a release branch from `main` using a Mainz landmark as the name:
+
+   ```bash
+   git checkout -b release/gutenberg
+   ```
+
+2. Create a changeset describing the release:
+
+   ```bash
+   pnpm run vc:changeset
+   ```
+
+3. Bump versions and generate changelogs:
+
+   ```bash
+   pnpm run vc:bump
+   ```
+
+   Commit the result: `git commit -m "chore: release vX.X.X"`
+
+4. Open a pull request from the release branch into `main` and merge it.
+
+5. From `main`, publish the packages:
+   ```bash
+   pnpm run vc:release
+   ```
+   This runs the full quality gate (install, format, build, lint, check, test) and then publishes all packages to npm. Push the generated tags afterwards:
+   ```bash
+   git push && git push --tags
+   ```
 
 ### Package Versioning
 
@@ -231,8 +244,12 @@ These are the internal technical choices that define how the project is built an
 
 ## Credits
 
-UJL was initiated by **Marius Klein** and is maintained by [mainzcript GbR](https://mainzcript.eu).
+UJL is built and maintained by [**mainzcript GbR**](https://mainzcript.eu), a software studio founded by **Marius Klein** and **Lukas Antoine**.
 
-**Founding contributor:** [Nadine Denkhaus](https://github.com/ndnk27) co-developed the initial version of UJL, contributing significantly to the technical foundation of the framework, including the Crafter editor, module system, and adapter architecture. Her work shaped the core of what UJL is today.
+**Core team:**
 
-**Community contributors:** Lukas Antoine, Leon Scherer, Philipp Oehl, Ulla Suhare, Jannik Seus.
+- [Marius Klein](https://github.com/KLEINformat) — Co-Founder, Product & Architecture
+- [Lukas Antoine](https://github.com/lantoine16) — Co-Founder, Infrastructure & Enablement
+- [Nadine Denkhaus](https://github.com/ndnk27) — Founding Contributor. Co-developed the initial version of UJL, contributing significantly to the Crafter editor, module system, and adapter architecture.
+
+**Community contributors:** Leon Scherer, Philipp Oehl, Ulla Suhare, Jannik Seus.
