@@ -42,6 +42,20 @@ composer.registerModule(new CustomModule());
 
 Fields encapsulate validation and normalization, `parse()` applies type checking, constraint fitting, and default fallback in one call.
 
+**Integration via the Crafter:** When using the visual editor, `UJLCrafter` is the official entry point for module registration. Modules passed at initialization are available in the component picker before the first render:
+
+```typescript
+import { UJLCrafter } from "@ujl-framework/crafter";
+
+const crafter = new UJLCrafter({
+	target: "#editor",
+	modules: [new CustomModule()],
+});
+
+// Dynamic registration after initialization is also supported
+crafter.registerModule(new AnotherModule());
+```
+
 ## Rationale
 
 Runtime registration means new modules don't require changes to core packages. The UJLC schema remains stable because it's defined at the field and slot level within each module, not globally. Module isolation makes individual testing straightforward.

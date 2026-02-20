@@ -373,7 +373,11 @@ class Composer {
 class ModuleRegistry {
 	registerModule(module: ModuleBase): void;
 	unregisterModule(module: AnyModule | string): void;
+	hasModule(name: string): boolean;
 	getModule(name: string): ModuleBase | undefined;
+	getAllModules(): AnyModule[];
+	createModuleFromType(type: string, id: string): UJLCModuleObject;
+	static generateLabelFromName(name: string): string;
 }
 
 abstract class FieldBase<ValueT, ConfigT> {

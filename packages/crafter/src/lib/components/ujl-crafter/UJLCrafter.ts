@@ -5,7 +5,7 @@ import {
 	type SaveCallback,
 } from "$lib/stores/index.js";
 import { logger } from "$lib/utils/logger.js";
-import { Composer } from "@ujl-framework/core";
+import { Composer, type ModuleBase } from "@ujl-framework/core";
 import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 import CrafterElement from "./ujl-crafter-element.svelte";
@@ -68,6 +68,12 @@ export interface UJLCrafterOptions {
 	library?: LibraryOptions;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
+	/**
+	 * Custom modules to register alongside the built-in modules.
+	 * Modules are registered before the editor mounts, so they are
+	 * immediately available in the component picker.
+	 */
+	modules?: ModuleBase[];
 }
 
 /**
@@ -120,6 +126,12 @@ export class UJLCrafter {
 	constructor(options: UJLCrafterOptions) {
 		this.target = this.resolveTarget(options.target);
 		this.composer = new Composer();
+
+		if (options.modules) {
+			for (const module of options.modules) {
+				this.composer.registerModule(module);
+			}
+		}
 
 		this.editorTheme = options.editorTheme
 			? validateUJLTDocument(options.editorTheme)
@@ -304,6 +316,41 @@ export class UJLCrafter {
 	onSave(callback: SaveCallback): () => void {
 		this.store.setOnSaveCallback(callback);
 		return () => this.store.setOnSaveCallback(null);
+	}
+
+	// ============================================
+	// PUBLIC API: MODULE REGISTRY
+	// ============================================
+
+	/**
+	 * Register a custom module in the editor's module registry.
+	 * The module becomes available in the component picker immediately.
+	 *
+	 * @throws {Error} if a module with the same name is already registered
+	 *
+	 * @example
+	 * ```typescript
+	 * crafter.registerModule(new MyCustomModule());
+	 * ```
+	 */
+	registerModule(module: ModuleBase): void {
+		this.composer.registerModule(module);
+	}
+
+	/**
+	 * Unregister a module from the editor's module registry.
+	 * The module will no longer appear in the component picker.
+	 *
+	 * @param module - Module instance or module name string
+	 *
+	 * @example
+	 * ```typescript
+	 * crafter.unregisterModule('my-custom-module');
+	 * crafter.unregisterModule(moduleInstance);
+	 * ```
+	 */
+	unregisterModule(module: ModuleBase | string): void {
+		this.composer.unregisterModule(module);
 	}
 
 	// ============================================

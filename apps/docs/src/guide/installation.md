@@ -52,12 +52,19 @@ import { UJLCrafter } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
 	target: "#app",
-	content: ujlcDocument, // your .ujlc.json document
-	tokenSet: ujltTokenSet, // your .ujlt.json theme
-	onChange: (updatedDoc) => {
-		// persist however you like
-		saveDocument(updatedDoc);
-	},
+	document: ujlcDocument, // your .ujlc.json document
+	theme: ujltDocument, // your .ujlt.json theme
+});
+
+// Listen for document changes
+crafter.onDocumentChange((updatedDoc) => {
+	// persist however you like
+	saveDocument(updatedDoc);
+});
+
+// Show a Save button and react to it
+crafter.onSave((doc, theme) => {
+	saveDocument(doc);
 });
 ```
 
@@ -68,14 +75,60 @@ To use the UJL Library Service for image management (responsive variants, metada
 ```javascript
 const crafter = new UJLCrafter({
 	target: "#app",
-	content: ujlcDocument,
-	tokenSet: ujltTokenSet,
-	imageStorage: "backend",
-	libraryServiceUrl: "https://your-library.example.com",
+	document: ujlcDocument,
+	theme: ujltDocument,
+	library: {
+		storage: "backend",
+		url: "https://your-library.example.com",
+		apiKey: "your-api-key",
+	},
 });
 ```
 
 See the [Library Service README](https://github.com/mainzcript/ujl/tree/main/services/library) for setup instructions (Docker + PostgreSQL).
+
+### With custom modules
+
+Register your own modules alongside the built-in ones. Custom modules appear immediately in the component picker.
+
+```javascript
+import { UJLCrafter } from "@ujl-framework/crafter";
+import { ModuleBase, TextField } from "@ujl-framework/core";
+
+class HeroModule extends ModuleBase {
+	readonly name = "hero";
+	readonly label = "Hero";
+	readonly description = "Full-width hero section";
+	readonly category = "layout";
+	readonly tags = ["hero", "banner"];
+	readonly icon = '<rect width="20" height="12" x="2" y="6" rx="2"/>';
+	readonly fields = [
+		{ key: "headline", field: new TextField({ label: "Headline", description: "", default: "" }) },
+	];
+	readonly slots = [];
+
+	compose(moduleData) {
+		return {
+			type: "wrapper",
+			props: { headline: this.parseField(moduleData, "headline", "") },
+			id: crypto.randomUUID(),
+			meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
+		};
+	}
+}
+
+// Register at initialization (recommended – modules are ready before first render)
+const crafter = new UJLCrafter({
+	target: "#app",
+	modules: [new HeroModule()],
+});
+
+// Or dynamically at runtime
+crafter.registerModule(new AnotherModule());
+crafter.unregisterModule("hero");
+```
+
+For a complete module implementation guide, see [`@ujl-framework/core` – Creating Custom Modules](https://github.com/mainzcript/ujl/tree/main/packages/core#creating-custom-modules).
 
 ## Rendering Without the Editor
 

@@ -6,7 +6,7 @@ import type {
 } from "@ujl-framework/types";
 import { ImageLibrary } from "./image/index.js";
 import { createDefaultRegistry } from "./modules/default-registry.js";
-import { ModuleRegistry, type AnyModule } from "./modules/index.js";
+import { ModuleRegistry, type ModuleBase } from "./modules/index.js";
 import { generateUid } from "./utils.js";
 
 /**
@@ -28,11 +28,11 @@ export class Composer {
 		this._module_registry = registry ?? createDefaultRegistry();
 	}
 
-	public registerModule(module: AnyModule) {
+	public registerModule(module: ModuleBase) {
 		this._module_registry.registerModule(module);
 	}
 
-	public unregisterModule(module: AnyModule | string) {
+	public unregisterModule(module: ModuleBase | string) {
 		this._module_registry.unregisterModule(module);
 	}
 

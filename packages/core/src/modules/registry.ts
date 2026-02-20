@@ -18,12 +18,16 @@ export class ModuleRegistry {
 		this._modules.push(module);
 	}
 
-	public unregisterModule(module: AnyModule | string) {
+	public unregisterModule(module: ModuleBase | string) {
 		if (typeof module === "string") {
 			this._modules = this._modules.filter((m) => m.name !== module);
 		} else {
 			this._modules = this._modules.filter((m) => m !== module);
 		}
+	}
+
+	public hasModule(name: string): boolean {
+		return this._modules.some((m) => m.name === name);
 	}
 
 	public getModule(name: string): AnyModule | undefined {
