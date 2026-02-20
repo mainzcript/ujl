@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vitepress dev",
 		"build": "vitepress build",
+		"postbuild": "cp public/.htaccess dist/.htaccess",
 		"preview": "vitepress preview",
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
