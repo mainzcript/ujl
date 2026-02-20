@@ -1,4 +1,4 @@
-import { ModuleBase } from "./base.js";
+import type { ModuleBase } from "./base.js";
 import { Button } from "./concretes/button.js";
 import { CallToActionModule } from "./concretes/call-to-action.js";
 import { CardModule } from "./concretes/card.js";
@@ -27,6 +27,7 @@ export type { ComponentCategory } from "./types.js";
 /**
  * Export module base classes and implementations
  */
+export { ModuleBase } from "./base.js";
 export {
 	Button,
 	CallToActionModule,

@@ -21,7 +21,14 @@
 	} = $props();
 
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
-	const modules = $derived(composer.getRegistry().getAllModules());
+
+	let modules: AnyModule[] = $state(composer.getRegistry().getAllModules());
+
+	$effect(() => {
+		return composer.getRegistry().onChanged(() => {
+			modules = composer.getRegistry().getAllModules();
+		});
+	});
 
 	/**
 	 * Get module label

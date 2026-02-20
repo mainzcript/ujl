@@ -89,14 +89,16 @@ Now when you upload images in the Crafter, they'll be stored in the Library.
 ```
 apps/dev-demo/
 ├── src/
-│   └── main.ts          # Crafter initialization with ENV config
-├── index.html           # Minimal HTML shell
-├── .env.example         # Environment configuration template
-├── .prettierrc          # Prettier configuration
+│   ├── main.ts              # Crafter initialization with ENV config
+│   └── modules/
+│       └── testimonial.ts   # Example custom module (TestimonialModule)
+├── index.html               # Minimal HTML shell
+├── .env.example             # Environment configuration template
+├── .prettierrc              # Prettier configuration
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
-└── README.md            # This file
+└── README.md                # This file
 ```
 
 ## Configuration

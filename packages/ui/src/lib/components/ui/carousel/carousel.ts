@@ -245,12 +245,10 @@ export class Carousel {
 		const canScrollPrev = firstActiveIndex > 0;
 		const canScrollNext = lastActiveIndex < this.records.length - 1;
 
-		let currentIndex = 0;
-		if (this.records.length % 2 === 0) {
-			currentIndex = Math.floor((firstActiveIndex + lastActiveIndex) / 2);
-		} else {
-			currentIndex = Math.round((firstActiveIndex + lastActiveIndex) / 2);
-		}
+		const currentIndex =
+			this.records.length % 2 === 0
+				? Math.floor((firstActiveIndex + lastActiveIndex) / 2)
+				: Math.round((firstActiveIndex + lastActiveIndex) / 2);
 
 		this.state = {
 			...this.state,

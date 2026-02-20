@@ -2,7 +2,6 @@ import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@uj
 import type { Composer } from "../../composer.js";
 import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/concretes/text-field.js";
-import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -121,43 +120,27 @@ export class CallToActionModule extends ModuleBase {
 		const secondaryButtonLabel = this.parseField(moduleData, "actionButtonSecondaryLabel", "");
 		const secondaryButtonHref = this.parseField(moduleData, "actionButtonSecondaryUrl", "");
 
-		return {
-			type: "call-to-action",
-			props: {
+		return this.createNode(
+			"call-to-action",
+			{
 				headline,
 				description,
 				actionButtons: {
-					primary: {
-						type: "button",
-						props: {
-							label: primaryButtonLabel,
-							href: primaryButtonHref,
-						},
-						id: generateUid(),
-						meta: {
-							moduleId: moduleData.meta.id,
-							isModuleRoot: false,
-						},
-					},
-					secondary: {
-						type: "button",
-						props: {
-							label: secondaryButtonLabel,
-							href: secondaryButtonHref,
-						},
-						id: generateUid(),
-						meta: {
-							moduleId: moduleData.meta.id,
-							isModuleRoot: false,
-						},
-					},
+					primary: this.createNode(
+						"button",
+						{ label: primaryButtonLabel, href: primaryButtonHref },
+						moduleData,
+						false,
+					),
+					secondary: this.createNode(
+						"button",
+						{ label: secondaryButtonLabel, href: secondaryButtonHref },
+						moduleData,
+						false,
+					),
 				},
 			},
-			id: generateUid(),
-			meta: {
-				moduleId: moduleData.meta.id,
-				isModuleRoot: true,
-			},
-		};
+			moduleData,
+		);
 	}
 }

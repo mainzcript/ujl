@@ -1,6 +1,7 @@
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../composer.js";
 import { Field } from "../fields/index.js";
+import { generateUid } from "../utils.js";
 import { Slot } from "./slot.js";
 import type { ComponentCategory } from "./types.js";
 
@@ -115,5 +116,34 @@ export abstract class ModuleBase {
 		if (!entry) return fallback;
 		const parsed = entry.field.parse(moduleData.fields[key]);
 		return (parsed ?? fallback) as T;
+	}
+
+	/**
+	 * Helper to create an AST node with the required id and meta fields.
+	 *
+	 * The generic parameter `T` is inferred from `type` and constrains `props` to the
+	 * exact shape defined in the discriminated union — callers get a compile-time error
+	 * if the wrong props are passed for a given node type.
+	 *
+	 * @param type - Node type string (must be a member of `UJLAbstractNode["type"]`)
+	 * @param props - Props for the given node type (enforced by the discriminated union)
+	 * @param moduleData - The module data from the UJL document (provides moduleId)
+	 * @param isModuleRoot - true for the root node of a module, false for internal child nodes
+	 */
+	protected createNode<T extends UJLAbstractNode["type"]>(
+		type: T,
+		props: Extract<UJLAbstractNode, { type: T }>["props"],
+		moduleData: UJLCModuleObject,
+		isModuleRoot = true,
+	): Extract<UJLAbstractNode, { type: T }> {
+		return {
+			type,
+			props,
+			id: generateUid(),
+			meta: {
+				moduleId: moduleData.meta.id,
+				isModuleRoot,
+			},
+		} as Extract<UJLAbstractNode, { type: T }>;
 	}
 }

@@ -44,6 +44,43 @@ const crafter = new UJLCrafter({
 crafter.destroy();
 ```
 
+### With Custom Modules
+
+Custom modules extend `ModuleBase` from `@ujl-framework/core` and can be registered
+at initialization or dynamically at runtime.
+
+```typescript
+import { UJLCrafter } from "@ujl-framework/crafter";
+import { ModuleBase } from "@ujl-framework/core";
+
+class HeroModule extends ModuleBase {
+	readonly name = "hero";
+	readonly label = "Hero";
+	readonly description = "Full-width hero section";
+	readonly category = "layout" as const;
+	readonly tags = ["hero", "banner", "header"];
+	readonly icon = '<rect width="20" height="12" x="2" y="6" rx="2"/>';
+	readonly fields = [];
+	readonly slots = [];
+
+	compose(moduleData) {
+		return this.createNode("wrapper", {}, moduleData);
+	}
+}
+
+// Register at initialization (recommended)
+const crafter = new UJLCrafter({
+	target: "#editor-container",
+	modules: [new HeroModule()],
+});
+
+// Or register dynamically after initialization
+crafter.registerModule(new AnotherModule());
+
+// Unregister a module by name or instance
+crafter.unregisterModule("hero");
+```
+
 ### With Backend Image Storage
 
 ```typescript
@@ -121,11 +158,16 @@ class UJLCrafter {
 	getTheme(): UJLTDocument;
 	getMode(): "editor" | "designer";
 	getSelectedNodeId(): string | null;
+	getShadowRoot(): ShadowRoot | null;
 
 	setDocument(document: UJLCDocument): void;
 	setTheme(theme: UJLTDocument): void;
 	setMode(mode: "editor" | "designer"): void;
 	selectNode(nodeId: string | null): void;
+
+	// Module Registry
+	registerModule(module: ModuleBase): void;
+	unregisterModule(module: ModuleBase | string): void;
 
 	// Events (return unsubscribe function)
 	onDocumentChange(callback: (doc: UJLCDocument) => void): () => void;
@@ -143,6 +185,7 @@ interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
 	library?: { storage: "inline" } | { storage: "backend"; url: string; apiKey: string };
+	modules?: ModuleBase[]; // Custom modules to register alongside built-in modules
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
 ```

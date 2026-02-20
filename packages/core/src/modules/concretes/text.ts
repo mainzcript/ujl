@@ -1,7 +1,6 @@
 import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { RichTextField } from "../../fields/concretes/richtext-field.js";
-import { generateUid } from "../../utils.js";
 import { ModuleBase } from "../base.js";
 
 /**
@@ -70,16 +69,6 @@ export class TextModule extends ModuleBase {
 	public compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
 		const content = this.parseField(moduleData, "content", this.EMPTY_DOCUMENT);
 
-		return {
-			type: "text",
-			props: {
-				content,
-			},
-			id: generateUid(),
-			meta: {
-				moduleId: moduleData.meta.id,
-				isModuleRoot: true,
-			},
-		};
+		return this.createNode("text", { content }, moduleData);
 	}
 }

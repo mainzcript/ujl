@@ -10,20 +10,43 @@ import type { AnyModule } from "./index.js";
  */
 export class ModuleRegistry {
 	protected _modules: AnyModule[] = [];
+	private _changeListeners: Set<() => void> = new Set();
 
 	public registerModule(module: ModuleBase) {
 		if (this._modules.some((m) => m.name === module.name)) {
 			throw new Error(`Module ${module.name} already registered`);
 		}
 		this._modules.push(module);
+		this._notifyChanged();
 	}
 
-	public unregisterModule(module: AnyModule | string) {
+	public unregisterModule(module: ModuleBase | string) {
+		const before = this._modules.length;
 		if (typeof module === "string") {
 			this._modules = this._modules.filter((m) => m.name !== module);
 		} else {
 			this._modules = this._modules.filter((m) => m !== module);
 		}
+		if (this._modules.length !== before) {
+			this._notifyChanged();
+		}
+	}
+
+	/**
+	 * Subscribe to registry changes (module added or removed).
+	 * @returns Unsubscribe function
+	 */
+	public onChanged(listener: () => void): () => void {
+		this._changeListeners.add(listener);
+		return () => this._changeListeners.delete(listener);
+	}
+
+	private _notifyChanged(): void {
+		this._changeListeners.forEach((fn) => fn());
+	}
+
+	public hasModule(name: string): boolean {
+		return this._modules.some((m) => m.name === name);
 	}
 
 	public getModule(name: string): AnyModule | undefined {
