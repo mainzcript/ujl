@@ -120,17 +120,22 @@ export abstract class ModuleBase {
 
 	/**
 	 * Helper to create an AST node with the required id and meta fields.
-	 * @param type - Node type string matched by the adapter
-	 * @param props - Type-specific props for the adapter
+	 *
+	 * The generic parameter `T` is inferred from `type` and constrains `props` to the
+	 * exact shape defined in the discriminated union — callers get a compile-time error
+	 * if the wrong props are passed for a given node type.
+	 *
+	 * @param type - Node type string (must be a member of `UJLAbstractNode["type"]`)
+	 * @param props - Props for the given node type (enforced by the discriminated union)
 	 * @param moduleData - The module data from the UJL document (provides moduleId)
 	 * @param isModuleRoot - true for the root node of a module, false for internal child nodes
 	 */
-	protected createNode(
-		type: UJLAbstractNode["type"],
-		props: Record<string, unknown>,
+	protected createNode<T extends UJLAbstractNode["type"]>(
+		type: T,
+		props: Extract<UJLAbstractNode, { type: T }>["props"],
 		moduleData: UJLCModuleObject,
 		isModuleRoot = true,
-	): UJLAbstractNode {
+	): Extract<UJLAbstractNode, { type: T }> {
 		return {
 			type,
 			props,
@@ -139,6 +144,6 @@ export abstract class ModuleBase {
 				moduleId: moduleData.meta.id,
 				isModuleRoot,
 			},
-		} as UJLAbstractNode;
+		} as Extract<UJLAbstractNode, { type: T }>;
 	}
 }

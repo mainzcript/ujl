@@ -262,11 +262,7 @@ async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbst
 
 ```typescript
 compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-  return this.createNode(
-    "my-type",      // matched by your adapter
-    { /* ... */ },  // whatever the adapter needs
-    moduleData,
-  );
+  return this.createNode("raw-html", { content: "<p>Hello world</p>" }, moduleData);
 }
 ```
 
@@ -314,8 +310,8 @@ import { webAdapter } from "@ujl-framework/adapter-web";
 const composer = new Composer();
 composer.registerModule(new TestimonialModule());
 
-const ast = await composer.compose(ujlcDocument, ujltDocument);
-webAdapter(ast, tokenSet, { target: "#app" });
+const ast = await composer.compose(ujlcDocument);
+webAdapter(ast, ujltTokenSet, { target: "#app" });
 ```
 
 ::: tip Zero-config rendering types

@@ -63,13 +63,8 @@ class HeroModule extends ModuleBase {
 	readonly fields = [];
 	readonly slots = [];
 
-	compose(moduleData, composer) {
-		return {
-			type: "wrapper",
-			props: {},
-			id: "hero",
-			meta: { moduleId: moduleData.meta.id, isModuleRoot: true },
-		};
+	compose(moduleData) {
+		return this.createNode("wrapper", {}, moduleData);
 	}
 }
 
