@@ -3,19 +3,6 @@ import { ModuleBase, TextField } from "@ujl-framework/core";
 import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
 
 /**
- * Escapes HTML special characters to prevent XSS when interpolating
- * user-provided text into raw-html content.
- */
-function esc(text: string): string {
-	return text
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
-}
-
-/**
  * Example custom module for the UJL dev-demo.
  *
  * Demonstrates the standard pattern for field-only modules:
@@ -67,9 +54,9 @@ export class TestimonialModule extends ModuleBase {
 	readonly slots = [];
 
 	compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		const quote = esc(this.parseField(moduleData, "quote", ""));
-		const author = esc(this.parseField(moduleData, "author", ""));
-		const role = esc(this.parseField(moduleData, "role", ""));
+		const quote = this.escapeHtml(this.parseField(moduleData, "quote", ""));
+		const author = this.escapeHtml(this.parseField(moduleData, "author", ""));
+		const role = this.escapeHtml(this.parseField(moduleData, "role", ""));
 
 		return this.createNode(
 			"raw-html",

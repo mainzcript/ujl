@@ -166,15 +166,16 @@ class CustomModule extends ModuleBase {
 
 	readonly slots = [{ key: "content", slot: new Slot({ label: "Content Area", max: 5 }) }];
 
-	compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode {
-		const children = moduleData.slots.content.map((child) => composer.composeModule(child));
+	async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+		const title = this.escapeHtml(this.parseField(moduleData, "title", ""));
+		const children: UJLAbstractNode[] = [];
 
-		return {
-			type: "wrapper",
-			props: {
-				children: [{ type: "text", props: { content: moduleData.fields.title } }, ...children],
-			},
-		};
+		for (const child of moduleData.slots.content ?? []) {
+			children.push(await composer.composeModule(child));
+		}
+
+		const header = this.createNode("raw-html", { content: `<h2>${title}</h2>` }, moduleData, false);
+		return this.createNode("wrapper", { children: [header, ...children] }, moduleData);
 	}
 }
 ```
@@ -366,8 +367,8 @@ class Composer {
 	constructor(registry?: ModuleRegistry);
 	registerModule(module: AnyModule): void;
 	unregisterModule(module: AnyModule | string): void;
-	compose(doc: UJLCDocument): UJLAbstractNode;
-	composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
+	compose(doc: UJLCDocument): Promise<UJLAbstractNode>;
+	composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode>;
 }
 
 class ModuleRegistry {
@@ -391,7 +392,12 @@ abstract class ModuleBase {
 	abstract readonly name: string;
 	abstract readonly fields: FieldSet;
 	abstract readonly slots: SlotSet;
-	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
+	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode | Promise<UJLAbstractNode>;
+
+	// Protected helpers available in compose():
+	protected parseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T;
+	protected escapeHtml(value: string): string;
+	protected createNode<T>(type: T, props: ..., moduleData: UJLCModuleObject, isModuleRoot?: boolean): ...;
 }
 
 type UJLAdapter<OutputType = string, OptionsType = undefined> = (

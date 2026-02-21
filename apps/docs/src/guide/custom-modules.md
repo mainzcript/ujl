@@ -70,10 +70,10 @@ export class TestimonialModule extends ModuleBase {
 
 	// --- Composition ---
 	compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
-		// Always escape user text before interpolating into raw HTML
-		const quote = esc(this.parseField(moduleData, "quote", ""));
-		const author = esc(this.parseField(moduleData, "author", ""));
-		const role = esc(this.parseField(moduleData, "role", ""));
+		// escapeHtml() is required here: values are interpolated directly into a raw HTML string.
+		const quote = this.escapeHtml(this.parseField(moduleData, "quote", ""));
+		const author = this.escapeHtml(this.parseField(moduleData, "author", ""));
+		const role = this.escapeHtml(this.parseField(moduleData, "role", ""));
 
 		return this.createNode(
 			"raw-html",
@@ -87,19 +87,10 @@ export class TestimonialModule extends ModuleBase {
 		);
 	}
 }
-
-function esc(text: string): string {
-	return text
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
-}
 ```
 
 ::: warning Always escape user text in raw-html
-`raw-html` renders content via `{@html}` without sanitization. Any user-provided text (field values) interpolated directly into the HTML string is a potential XSS vector. Escape all field values before interpolating them, as shown above with `esc()`.
+`raw-html` renders content without sanitization. Any user-provided text interpolated directly into the HTML string is a potential XSS vector. Call `this.escapeHtml()` on every field value before interpolating it, as shown above. Values that go through standard adapter bindings (text nodes, attributes) are escaped automatically — only raw HTML interpolation requires manual escaping.
 :::
 
 ---
@@ -160,6 +151,13 @@ Fields are typed inputs with built-in validation and normalization. Use `parseFi
 
 ```typescript
 const value = this.parseField(moduleData, "fieldKey", fallbackValue);
+```
+
+`parseField` returns values as-is. If the value will be interpolated into a raw HTML string (i.e., used in a `"raw-html"` node), wrap it with `this.escapeHtml()`:
+
+```typescript
+// Escaped value — required when interpolating into raw HTML
+const title = this.escapeHtml(this.parseField(moduleData, "title", ""));
 ```
 
 ### Available field types
@@ -385,8 +383,9 @@ export class PricingCardModule extends ModuleBase {
 	];
 
 	async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
-		const planName = this.parseField(moduleData, "planName", "");
-		const price = this.parseField(moduleData, "price", "");
+		// escapeHtml() required: both values are interpolated into a raw HTML string below
+		const planName = this.escapeHtml(this.parseField(moduleData, "planName", ""));
+		const price = this.escapeHtml(this.parseField(moduleData, "price", ""));
 
 		// Header as a raw-html child node (fields → HTML string)
 		const header = this.createNode(

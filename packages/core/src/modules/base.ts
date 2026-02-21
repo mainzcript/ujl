@@ -105,11 +105,42 @@ export abstract class ModuleBase {
 	}
 
 	/**
-	 * Helper method to parse a field value from module data
+	 * Escapes HTML special characters in a string to prevent XSS.
+	 *
+	 * Use this explicitly in `compose()` when a field value will be
+	 * interpolated into raw HTML (e.g. in a custom adapter or SSR context).
+	 * Adapters like Svelte handle escaping automatically for text nodes and
+	 * attributes, so escaping is only needed when using `{@html ...}` or
+	 * an equivalent pattern.
+	 *
+	 * Handles: & < > " '
+	 *
+	 * @param value - The string to escape
+	 * @returns The HTML-escaped string
+	 */
+	protected escapeHtml(value: string): string {
+		return value
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	}
+
+	/**
+	 * Helper method to parse a field value from module data.
+	 *
+	 * Returns the parsed value as-is. If the value will be interpolated into
+	 * raw HTML, wrap the result with {@link escapeHtml} explicitly — the
+	 * decision belongs to the module author who knows the rendering context.
+	 *
 	 * @param moduleData - The module data from UJL document
 	 * @param key - The field key to parse
-	 * @param fallback - Fallback value if field is not found or parsing fails
-	 * @returns Parsed field value or fallback
+	 * @param fallback - Value returned when the field key is unknown to this module,
+	 *   or when `field.parse()` returns nullish. Note: most built-in fields return
+	 *   their own configured default on invalid input, so `fallback` is typically
+	 *   only reached for missing or unregistered keys.
+	 * @returns Parsed field value, or fallback if the key is unknown or parse returns nullish
 	 */
 	protected parseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T {
 		const entry = this.fields.find((f) => f.key === key);
