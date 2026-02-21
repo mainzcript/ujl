@@ -195,14 +195,32 @@ We follow conventional commits:
 
 4. Open a pull request from the release branch into `main` and merge it.
 
-5. From `main`, publish the packages:
+5. Make sure you are logged in to npm before publishing:
+
+   ```bash
+   npm whoami   # should print your npm username
+   # if not: npm login
+   ```
+
+6. From `main`, publish the packages:
+
    ```bash
    pnpm run vc:release
    ```
-   This runs the full quality gate (install, format, build, lint, check, test) and then publishes all packages to npm. Push the generated tags afterwards:
+
+   This script will:
+   - Verify your npm login (`npm:check-auth`)
+   - Run the full quality gate: install, format, build, lint, check, test (`rtc`)
+   - Publish all packages to npm (`changeset publish`)
+   - Replace the per-package git tags with a single unified `vX.X.X` tag (`vc:retag`)
+
+   Push the tag afterwards:
+
    ```bash
    git push && git push --tags
    ```
+
+7. Create a GitHub Release from the tag.
 
 ### Package Versioning
 
