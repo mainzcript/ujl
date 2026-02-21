@@ -136,8 +136,11 @@ export abstract class ModuleBase {
 	 *
 	 * @param moduleData - The module data from UJL document
 	 * @param key - The field key to parse
-	 * @param fallback - Fallback value if field is not found or parsing fails
-	 * @returns Parsed field value or fallback
+	 * @param fallback - Value returned when the field key is unknown to this module,
+	 *   or when `field.parse()` returns nullish. Note: most built-in fields return
+	 *   their own configured default on invalid input, so `fallback` is typically
+	 *   only reached for missing or unregistered keys.
+	 * @returns Parsed field value, or fallback if the key is unknown or parse returns nullish
 	 */
 	protected parseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T {
 		const entry = this.fields.find((f) => f.key === key);

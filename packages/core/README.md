@@ -367,8 +367,8 @@ class Composer {
 	constructor(registry?: ModuleRegistry);
 	registerModule(module: AnyModule): void;
 	unregisterModule(module: AnyModule | string): void;
-	compose(doc: UJLCDocument): UJLAbstractNode;
-	composeModule(moduleData: UJLCModuleObject): UJLAbstractNode;
+	compose(doc: UJLCDocument): Promise<UJLAbstractNode>;
+	composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode>;
 }
 
 class ModuleRegistry {
@@ -392,7 +392,7 @@ abstract class ModuleBase {
 	abstract readonly name: string;
 	abstract readonly fields: FieldSet;
 	abstract readonly slots: SlotSet;
-	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode;
+	abstract compose(moduleData: UJLCModuleObject, composer: Composer): UJLAbstractNode | Promise<UJLAbstractNode>;
 
 	// Protected helpers available in compose():
 	protected parseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T;
