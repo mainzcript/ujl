@@ -108,7 +108,8 @@ class HeroModule extends ModuleBase {
 	readonly slots = [];
 
 	compose(moduleData) {
-		const headline = this.parseField(moduleData, "headline", "");
+		// escapeHtml() required: headline is interpolated into a raw HTML string
+		const headline = this.escapeHtml(this.parseField(moduleData, "headline", ""));
 		return this.createNode("raw-html", { content: `<section><h1>${headline}</h1></section>` }, moduleData);
 	}
 }
