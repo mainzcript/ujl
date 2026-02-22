@@ -81,17 +81,27 @@ crafter.registerModule(new AnotherModule());
 crafter.unregisterModule("hero");
 ```
 
-### With Backend Image Storage
+### With Backend Asset Storage
 
 ```typescript
+// Direct mode: API key held server-side (local dev, SSR)
 const crafter = new UJLCrafter({
 	target: "#editor-container",
 	document: myContentDocument,
 	theme: myPreviewTheme,
 	library: {
-		storage: "backend",
+		provider: "backend",
 		url: "http://localhost:3000",
 		apiKey: "your-api-key",
+	},
+});
+
+// Proxy mode: requests forwarded via a BFF (deployed browser setups)
+const crafter = new UJLCrafter({
+	target: "#editor-container",
+	library: {
+		provider: "backend",
+		proxyUrl: "/api/library-proxy",
 	},
 });
 ```
@@ -136,14 +146,14 @@ The Crafter also distinguishes between two independent themes: the **Editor Them
 
 In **Editor Mode**, the Crafter provides module tree navigation, click-to-select in the preview, drag & drop reordering, a property panel with type-safe inputs, and an image library for image management. In **Designer Mode**, you can edit design tokens (colors, typography, spacing) with live preview. The editor also includes viewport simulation (Desktop/Tablet/Mobile) and import/export for `.ujlc.json` and `.ujlt.json` files.
 
-## Image Library
+## Asset Library
 
-The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
+The Crafter supports two provider modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
 
-| Storage Mode | Required Options | Description                         |
-| ------------ | ---------------- | ----------------------------------- |
-| `inline`     | None             | Images stored as Base64 in document |
-| `backend`    | `url`, `apiKey`  | Images stored on Payload CMS server |
+| Provider  | Required Options               | Description                         |
+| --------- | ------------------------------ | ----------------------------------- |
+| `inline`  | None                           | Assets stored as Base64 in document |
+| `backend` | `url` + `apiKey` or `proxyUrl` | Assets stored on Payload CMS server |
 
 For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
@@ -184,7 +194,10 @@ interface UJLCrafterOptions {
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
-	library?: { storage: "inline" } | { storage: "backend"; url: string; apiKey: string };
+	library?:
+		| { provider: "inline" }
+		| { provider: "backend"; url: string; apiKey: string }
+		| { provider: "backend"; proxyUrl: string };
 	modules?: ModuleBase[]; // Custom modules to register alongside built-in modules
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }

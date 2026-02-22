@@ -9,7 +9,7 @@ import { createDefaultLibraryRegistry, LibraryRegistry } from "./registry.js";
 // TEST HELPERS
 // ============================================
 
-class MockAdapter extends LibraryBase {
+class MockProvider extends LibraryBase {
 	public readonly name: string;
 
 	constructor(name: string) {
@@ -50,133 +50,133 @@ class MockAdapter extends LibraryBase {
 // ============================================
 
 describe("LibraryRegistry", () => {
-	describe("registerAdapter", () => {
-		it("should register an adapter successfully", () => {
+	describe("registerProvider", () => {
+		it("should register a provider successfully", () => {
 			const registry = new LibraryRegistry();
-			const adapter = new MockAdapter("inline");
+			const provider = new MockProvider("inline");
 
-			registry.registerAdapter(adapter);
+			registry.registerProvider(provider);
 
-			expect(registry.getAdapter("inline")).toBe(adapter);
+			expect(registry.getProvider("inline")).toBe(provider);
 		});
 
-		it("should throw when registering a duplicate adapter name", () => {
+		it("should throw when registering a duplicate provider name", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
+			registry.registerProvider(new MockProvider("inline"));
 
-			expect(() => registry.registerAdapter(new MockAdapter("inline"))).toThrowError(
-				'Library adapter "inline" is already registered',
+			expect(() => registry.registerProvider(new MockProvider("inline"))).toThrowError(
+				'Library provider "inline" is already registered',
 			);
 		});
 
-		it("should allow registering multiple adapters with different names", () => {
+		it("should allow registering multiple providers with different names", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
-			registry.registerAdapter(new MockAdapter("backend"));
+			registry.registerProvider(new MockProvider("inline"));
+			registry.registerProvider(new MockProvider("backend"));
 
-			expect(registry.getAllAdapters()).toHaveLength(2);
+			expect(registry.getAllProviders()).toHaveLength(2);
 		});
 	});
 
-	describe("unregisterAdapter", () => {
-		it("should remove an adapter by instance", () => {
+	describe("unregisterProvider", () => {
+		it("should remove a provider by instance", () => {
 			const registry = new LibraryRegistry();
-			const adapter = new MockAdapter("inline");
-			registry.registerAdapter(adapter);
+			const provider = new MockProvider("inline");
+			registry.registerProvider(provider);
 
-			registry.unregisterAdapter(adapter);
+			registry.unregisterProvider(provider);
 
-			expect(registry.getAdapter("inline")).toBeUndefined();
+			expect(registry.getProvider("inline")).toBeUndefined();
 		});
 
-		it("should remove an adapter by name string", () => {
+		it("should remove a provider by name string", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
+			registry.registerProvider(new MockProvider("inline"));
 
-			registry.unregisterAdapter("inline");
+			registry.unregisterProvider("inline");
 
-			expect(registry.getAdapter("inline")).toBeUndefined();
+			expect(registry.getProvider("inline")).toBeUndefined();
 		});
 
-		it("should not throw when unregistering an unknown adapter name", () => {
+		it("should not throw when unregistering an unknown provider name", () => {
 			const registry = new LibraryRegistry();
 
-			expect(() => registry.unregisterAdapter("nonexistent")).not.toThrow();
+			expect(() => registry.unregisterProvider("nonexistent")).not.toThrow();
 		});
 
-		it("should not throw when unregistering an unknown adapter instance", () => {
+		it("should not throw when unregistering an unknown provider instance", () => {
 			const registry = new LibraryRegistry();
-			const orphan = new MockAdapter("orphan");
+			const orphan = new MockProvider("orphan");
 
-			expect(() => registry.unregisterAdapter(orphan)).not.toThrow();
+			expect(() => registry.unregisterProvider(orphan)).not.toThrow();
 		});
 
-		it("should only remove the targeted adapter", () => {
+		it("should only remove the targeted provider", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
-			registry.registerAdapter(new MockAdapter("backend"));
+			registry.registerProvider(new MockProvider("inline"));
+			registry.registerProvider(new MockProvider("backend"));
 
-			registry.unregisterAdapter("inline");
+			registry.unregisterProvider("inline");
 
-			expect(registry.getAdapter("inline")).toBeUndefined();
-			expect(registry.getAdapter("backend")).toBeDefined();
-		});
-	});
-
-	describe("hasAdapter", () => {
-		it("should return true for a registered adapter", () => {
-			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
-
-			expect(registry.hasAdapter("inline")).toBe(true);
-		});
-
-		it("should return false for an unknown adapter", () => {
-			const registry = new LibraryRegistry();
-
-			expect(registry.hasAdapter("nonexistent")).toBe(false);
-		});
-
-		it("should return false after an adapter has been unregistered", () => {
-			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
-			registry.unregisterAdapter("inline");
-
-			expect(registry.hasAdapter("inline")).toBe(false);
+			expect(registry.getProvider("inline")).toBeUndefined();
+			expect(registry.getProvider("backend")).toBeDefined();
 		});
 	});
 
-	describe("getAdapter", () => {
-		it("should return the adapter for a known name", () => {
+	describe("hasProvider", () => {
+		it("should return true for a registered provider", () => {
 			const registry = new LibraryRegistry();
-			const adapter = new MockAdapter("inline");
-			registry.registerAdapter(adapter);
+			registry.registerProvider(new MockProvider("inline"));
 
-			expect(registry.getAdapter("inline")).toBe(adapter);
+			expect(registry.hasProvider("inline")).toBe(true);
+		});
+
+		it("should return false for an unknown provider", () => {
+			const registry = new LibraryRegistry();
+
+			expect(registry.hasProvider("nonexistent")).toBe(false);
+		});
+
+		it("should return false after a provider has been unregistered", () => {
+			const registry = new LibraryRegistry();
+			registry.registerProvider(new MockProvider("inline"));
+			registry.unregisterProvider("inline");
+
+			expect(registry.hasProvider("inline")).toBe(false);
+		});
+	});
+
+	describe("getProvider", () => {
+		it("should return the provider for a known name", () => {
+			const registry = new LibraryRegistry();
+			const provider = new MockProvider("inline");
+			registry.registerProvider(provider);
+
+			expect(registry.getProvider("inline")).toBe(provider);
 		});
 
 		it("should return undefined for an unknown name", () => {
 			const registry = new LibraryRegistry();
 
-			expect(registry.getAdapter("nonexistent")).toBeUndefined();
+			expect(registry.getProvider("nonexistent")).toBeUndefined();
 		});
 	});
 
-	describe("getAllAdapters", () => {
+	describe("getAllProviders", () => {
 		it("should return an empty array for an empty registry", () => {
 			const registry = new LibraryRegistry();
 
-			expect(registry.getAllAdapters()).toEqual([]);
+			expect(registry.getAllProviders()).toEqual([]);
 		});
 
-		it("should return all registered adapters", () => {
+		it("should return all registered providers", () => {
 			const registry = new LibraryRegistry();
-			const inline = new MockAdapter("inline");
-			const backend = new MockAdapter("backend");
-			registry.registerAdapter(inline);
-			registry.registerAdapter(backend);
+			const inline = new MockProvider("inline");
+			const backend = new MockProvider("backend");
+			registry.registerProvider(inline);
+			registry.registerProvider(backend);
 
-			const all = registry.getAllAdapters();
+			const all = registry.getAllProviders();
 
 			expect(all).toContain(inline);
 			expect(all).toContain(backend);
@@ -185,25 +185,25 @@ describe("LibraryRegistry", () => {
 
 		it("should return an independent copy that does not affect the registry", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
+			registry.registerProvider(new MockProvider("inline"));
 
-			const copy = registry.getAllAdapters();
-			copy.push(new MockAdapter("injected"));
+			const copy = registry.getAllProviders();
+			copy.push(new MockProvider("injected"));
 
-			expect(registry.getAllAdapters()).toHaveLength(1);
+			expect(registry.getAllProviders()).toHaveLength(1);
 		});
 	});
 
 	describe("re-registration after unregistration", () => {
-		it("should allow re-registering an adapter after it has been removed", () => {
+		it("should allow re-registering a provider after it has been removed", () => {
 			const registry = new LibraryRegistry();
-			registry.registerAdapter(new MockAdapter("inline"));
-			registry.unregisterAdapter("inline");
+			registry.registerProvider(new MockProvider("inline"));
+			registry.unregisterProvider("inline");
 
-			const newAdapter = new MockAdapter("inline");
-			registry.registerAdapter(newAdapter);
+			const newProvider = new MockProvider("inline");
+			registry.registerProvider(newProvider);
 
-			expect(registry.getAdapter("inline")).toBe(newAdapter);
+			expect(registry.getProvider("inline")).toBe(newProvider);
 		});
 	});
 });
@@ -233,26 +233,26 @@ describe("createDefaultLibraryRegistry", () => {
 		const { getLibrary, updateLibrary } = makeLibraryStore();
 		const registry = createDefaultLibraryRegistry(getLibrary, updateLibrary);
 
-		expect(registry.hasAdapter("inline")).toBe(true);
-		expect(registry.getAdapter("inline")).toBeInstanceOf(InlineLibraryProvider);
+		expect(registry.hasProvider("inline")).toBe(true);
+		expect(registry.getProvider("inline")).toBeInstanceOf(InlineLibraryProvider);
 	});
 
-	it("should allow registering additional adapters on top", () => {
+	it("should allow registering additional providers on top", () => {
 		const { getLibrary, updateLibrary } = makeLibraryStore();
 		const registry = createDefaultLibraryRegistry(getLibrary, updateLibrary);
 
-		registry.registerAdapter(new MockAdapter("backend"));
+		registry.registerProvider(new MockProvider("backend"));
 
-		expect(registry.hasAdapter("backend")).toBe(true);
-		expect(registry.getAllAdapters()).toHaveLength(2);
+		expect(registry.hasProvider("backend")).toBe(true);
+		expect(registry.getAllProviders()).toHaveLength(2);
 	});
 
 	it("should throw if 'inline' is registered again", () => {
 		const { getLibrary, updateLibrary } = makeLibraryStore();
 		const registry = createDefaultLibraryRegistry(getLibrary, updateLibrary);
 
-		expect(() => registry.registerAdapter(new MockAdapter("inline"))).toThrowError(
-			'Library adapter "inline" is already registered',
+		expect(() => registry.registerProvider(new MockProvider("inline"))).toThrowError(
+			'Library provider "inline" is already registered',
 		);
 	});
 });

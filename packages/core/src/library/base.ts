@@ -23,41 +23,41 @@ export type ConnectionStatus = {
 export type UpdateLibraryFn = (fn: (library: UJLCLibrary) => UJLCLibrary) => void;
 
 /**
- * Abstract base class for UJL library adapters
+ * Abstract base class for UJL library providers
  *
- * Defines the common interface that all library adapters must implement.
+ * Defines the common interface that all library providers must implement.
  * A provider manages asset storage and retrieval for a specific backend
  * (inline Base64, Payload CMS, S3, CDN, …).
  *
- * Extend this class to build a custom adapter:
+ * Extend this class to build a custom provider:
  *
  * ```typescript
  * import { LibraryBase } from "@ujl-framework/core";
  *
- * export class MyS3Adapter extends LibraryBase {
+ * export class MyS3Provider extends LibraryBase {
  *   readonly name = "s3";
  *   // … implement abstract methods
  * }
  * ```
  *
- * Register the adapter with the LibraryRegistry before passing it to the Composer:
+ * Register the provider with the LibraryRegistry before passing it to the Composer:
  *
  * ```typescript
  * const libraryRegistry = new LibraryRegistry();
- * libraryRegistry.registerAdapter(new MyS3Adapter(...));
+ * libraryRegistry.registerProvider(new MyS3Provider(...));
  * const composer = new Composer(undefined, libraryRegistry);
  * ```
  */
 export abstract class LibraryBase {
 	/**
-	 * Unique adapter identifier.
-	 * Must match `doc.ujlc.meta._library.adapter` for the Composer to auto-select this provider.
+	 * Unique provider identifier.
+	 * Must match `doc.ujlc.meta._library.provider` for the Composer to auto-select this provider.
 	 * Use lowercase kebab-case (e.g. `"inline"`, `"backend"`, `"s3"`).
 	 */
 	public abstract readonly name: string;
 
 	/**
-	 * Check if the adapter is reachable and properly configured.
+	 * Check if the provider is reachable and properly configured.
 	 * @returns Connection status with optional error message
 	 */
 	public abstract checkConnection(): Promise<ConnectionStatus>;
@@ -78,7 +78,7 @@ export abstract class LibraryBase {
 	public abstract get(assetId: string): Promise<AssetEntry | null>;
 
 	/**
-	 * List all asset entries managed by this adapter.
+	 * List all asset entries managed by this provider.
 	 * @returns Array of asset entries with their IDs
 	 */
 	public abstract list(): Promise<Array<{ id: string; entry: AssetEntry }>>;

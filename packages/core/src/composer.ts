@@ -13,8 +13,8 @@ import { generateUid } from "./utils.js";
  * by various adapters.
  *
  * The Composer automatically selects the correct library provider for the
- * document being composed by reading `doc.ujlc.meta._library.adapter` and
- * looking it up in the LibraryRegistry. No manual adapter passing is needed.
+ * document being composed by reading `doc.ujlc.meta._library.provider` and
+ * looking it up in the LibraryRegistry. No manual provider passing is needed.
  */
 export class Composer {
 	protected _module_registry: ModuleRegistry;
@@ -78,7 +78,7 @@ export class Composer {
 	public async compose(doc: UJLCDocument): Promise<UJLAbstractNode> {
 		// Select the library provider based on the document's _library.provider config
 		const adapterName = doc.ujlc.meta._library.provider;
-		this._active_library = this._library_registry.getAdapter(adapterName) ?? null;
+		this._active_library = this._library_registry.getProvider(adapterName) ?? null;
 
 		const children: UJLAbstractNode[] = [];
 
@@ -116,7 +116,7 @@ export class Composer {
 	/**
 	 * Get the active library provider for the document currently being composed.
 	 * Only available during composition (between `compose()` start and finish).
-	 * @returns The active library provider, or null if not composing or no adapter found
+	 * @returns The active library provider, or null if not composing or no provider found
 	 */
 	public getLibrary(): LibraryBase | null {
 		return this._active_library;

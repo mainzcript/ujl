@@ -9,11 +9,12 @@ const UJLCFieldObjectSchema = z.unknown();
 
 /**
  * Asset metadata schema
+ *
+ * mimeType and filesize are intentionally omitted — providers read them
+ * directly from the File object or from the backend response.
  */
 const AssetMetadataSchema = z.object({
 	filename: z.string(),
-	mimeType: z.string(),
-	filesize: z.number(),
 	width: z.number(),
 	height: z.number(),
 });
@@ -68,7 +69,14 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
- * Library provider configuration schema
+ * Library provider configuration schema.
+ *
+ * Only routing information is stored in the document — credentials (apiKey)
+ * are never persisted and are passed at runtime via LibraryOptions instead.
+ *
+ *   - inline:  no extra fields
+ *   - backend: optional `url` (direct mode) or optional `proxyUrl` (proxy mode);
+ *              both may be absent when the Crafter is configured externally at runtime.
  */
 const LibraryProviderConfigSchema = z.discriminatedUnion("provider", [
 	z.object({
@@ -76,7 +84,8 @@ const LibraryProviderConfigSchema = z.discriminatedUnion("provider", [
 	}),
 	z.object({
 		provider: z.literal("backend"),
-		url: z.url(),
+		url: z.url().optional(),
+		proxyUrl: z.string().optional(),
 	}),
 ]);
 

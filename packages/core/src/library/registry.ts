@@ -2,18 +2,19 @@ import type { LibraryBase } from "./base.js";
 import { InlineLibraryProvider } from "./inline-provider.js";
 
 /**
- * Registry for managing UJL library adapters
+ * Registry for managing UJL library providers
  *
- * Holds named adapters that the Composer uses to resolve asset IDs during
- * composition. The Composer reads `doc.ujlc.meta._library.adapter` and
- * calls `getAdapter(name)` to find the right adapter automatically.
+ * Holds named providers that the Composer uses to resolve asset IDs during
+ * composition. The Composer reads `doc.ujlc.meta._library.provider` and
+ * calls `getProvider(name)` to find the right provider automatically.
  *
- * By default the registry is pre-populated with the `"inline"` adapter.
- * Register additional adapters before passing the registry to the Composer:
+ * By default the registry is empty. Use `createDefaultLibraryRegistry()` to
+ * get an instance pre-populated with the `InlineLibraryProvider`.
+ * Register additional providers before passing the registry to the Composer:
  *
  * ```typescript
  * const libraryRegistry = new LibraryRegistry();
- * libraryRegistry.registerAdapter(new BackendLibraryProvider({ url, apiKey }));
+ * libraryRegistry.registerProvider(new BackendLibraryProvider({ url, apiKey }));
  *
  * const composer = new Composer(undefined, libraryRegistry);
  * ```
@@ -21,57 +22,57 @@ import { InlineLibraryProvider } from "./inline-provider.js";
  * The Composer and the Crafter share one registry instance via dependency injection.
  */
 export class LibraryRegistry {
-	private _adapters: LibraryBase[] = [];
+	private _providers: LibraryBase[] = [];
 
 	/**
-	 * Register an adapter.
-	 * @throws Error if an adapter with the same name is already registered
+	 * Register a provider.
+	 * @throws Error if a provider with the same name is already registered
 	 */
-	public registerAdapter(adapter: LibraryBase): void {
-		if (this._adapters.some((a) => a.name === adapter.name)) {
-			throw new Error(`Library adapter "${adapter.name}" is already registered`);
+	public registerProvider(provider: LibraryBase): void {
+		if (this._providers.some((p) => p.name === provider.name)) {
+			throw new Error(`Library provider "${provider.name}" is already registered`);
 		}
-		this._adapters.push(adapter);
+		this._providers.push(provider);
 	}
 
 	/**
-	 * Unregister an adapter by instance or name.
+	 * Unregister a provider by instance or name.
 	 */
-	public unregisterAdapter(adapter: LibraryBase | string): void {
-		if (typeof adapter === "string") {
-			this._adapters = this._adapters.filter((a) => a.name !== adapter);
+	public unregisterProvider(provider: LibraryBase | string): void {
+		if (typeof provider === "string") {
+			this._providers = this._providers.filter((p) => p.name !== provider);
 		} else {
-			this._adapters = this._adapters.filter((a) => a !== adapter);
+			this._providers = this._providers.filter((p) => p !== provider);
 		}
 	}
 
 	/**
-	 * Check whether an adapter with the given name is registered.
+	 * Check whether a provider with the given name is registered.
 	 */
-	public hasAdapter(name: string): boolean {
-		return this._adapters.some((a) => a.name === name);
+	public hasProvider(name: string): boolean {
+		return this._providers.some((p) => p.name === name);
 	}
 
 	/**
-	 * Look up an adapter by name.
-	 * @returns The adapter instance, or undefined if not found
+	 * Look up a provider by name.
+	 * @returns The provider instance, or undefined if not found
 	 */
-	public getAdapter(name: string): LibraryBase | undefined {
-		return this._adapters.find((a) => a.name === name);
+	public getProvider(name: string): LibraryBase | undefined {
+		return this._providers.find((p) => p.name === name);
 	}
 
 	/**
-	 * Get all registered adapters (immutable copy).
+	 * Get all registered providers (immutable copy).
 	 */
-	public getAllAdapters(): LibraryBase[] {
-		return [...this._adapters];
+	public getAllProviders(): LibraryBase[] {
+		return [...this._providers];
 	}
 }
 
 /**
  * Create a default LibraryRegistry pre-populated with the InlineLibraryProvider.
  *
- * The inline adapter requires `getLibrary` / `updateLibrary` accessors which
+ * The inline provider requires `getLibrary` / `updateLibrary` accessors which
  * are provided by the Crafter store. When using the Composer standalone
  * (outside the Crafter), pass a registry configured for your use case.
  *
@@ -82,8 +83,8 @@ export function createDefaultLibraryRegistry(
 	updateLibrary: (fn: (lib: Record<string, unknown>) => Record<string, unknown>) => void,
 ): LibraryRegistry {
 	const registry = new LibraryRegistry();
-	// Cast through unknown — the inline adapter only reads/writes the record;
+	// Cast through unknown — the inline provider only reads/writes the record;
 	// the generic shape is compatible at runtime even without the full AssetEntry type.
-	registry.registerAdapter(new InlineLibraryProvider(getLibrary as never, updateLibrary as never));
+	registry.registerProvider(new InlineLibraryProvider(getLibrary as never, updateLibrary as never));
 	return registry;
 }

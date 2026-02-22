@@ -45,11 +45,11 @@ export type { SaveCallback } from "$lib/stores/index.js";
  * Configuration options for the library.
  * Determines how library assets are stored and retrieved.
  *
- * Two adapter modes are available:
+ * Two provider modes are available:
  * - `inline`: Assets stored as Base64 in the UJLC document (no additional config needed)
  * - `backend`: Assets stored on a Payload CMS server (requires url and apiKey or proxyUrl)
  *
- * The Composer will automatically select the adapter that matches the
+ * The Composer will automatically select the provider that matches the
  * `_library.provider` field in the document being composed.
  */
 export type LibraryOptions =
@@ -180,9 +180,9 @@ export class UJLCrafter {
 			);
 		}
 
-		// Build library registry for the Composer (auto-selects based on doc._library.adapter)
+		// Build library registry for the Composer (auto-selects based on doc._library.provider)
 		const libraryRegistry = new LibraryRegistry();
-		libraryRegistry.registerAdapter(libraryProvider);
+		libraryRegistry.registerProvider(libraryProvider);
 
 		this.composer = new Composer(undefined, libraryRegistry);
 

@@ -61,26 +61,26 @@ const validatedSlot = validateSlot(slotData);
 
 ### Features
 
-Das Validierungs-System erkennt automatisch den Dokumenttyp aus der JSON-Struktur (`ujlt` oder `ujlc` Root-Property) und liefert detaillierte Statistiken und Warnungen. TypeScript-Typen werden aus Zod-Schemas generiert, was vollständige Type-Safety gewährleistet. Intelligente Checks validieren Farbkontraste, ID-Eindeutigkeit und Verschachtelungstiefe. Das CLI-Tool `ujl-validate` ermöglicht die Integration in CI/CD-Pipelines.
+The validation system automatically detects the document type from the JSON structure (`ujlt` or `ujlc` root property) and provides detailed statistics and warnings. TypeScript types are inferred from Zod schemas, ensuring full type safety. Smart checks validate color contrasts, ID uniqueness, and nesting depth. The `ujl-validate` CLI tool enables integration into CI/CD pipelines.
 
 ## Library Types
 
-This package includes comprehensive type definitions for the library system. Currently, only image types are defined, with additional asset types planned for future releases.
+This package includes type definitions for the asset library system.
 
-### Image Entry Types
+### Asset Entry Types
 
 ```typescript
-// Image entry with URL and metadata
-type ImageEntry = {
-	src: string; // Image URL (HTTP or Base64 Data-URL)
-	metadata: ImageMetadata; // Technical metadata about the image
+// Asset entry with URL and metadata
+type AssetEntry = {
+	src: string; // Asset URL (HTTP or Base64 Data-URL)
+	metadata: AssetMetadata; // Descriptive metadata about the asset
 };
 
-// Image metadata
-type ImageMetadata = {
+// Asset metadata
+// mimeType and filesize are intentionally omitted — providers read them
+// directly from the File object or from the backend response.
+type AssetMetadata = {
 	filename: string;
-	mimeType: string;
-	filesize: number;
 	width: number;
 	height: number;
 };
@@ -91,17 +91,17 @@ type ImageSource = {
 };
 ```
 
-### Image Library Configuration
+### Library Provider Configuration
 
-The `UJLCMeta` type includes optional image library configuration:
+The `UJLCMeta` type includes optional library provider configuration:
 
 ```typescript
 type UJLCMeta = {
 	title: string;
 	// ... other meta fields
 	_library?: {
-		storage: "inline" | "backend";
-		url?: string; // Required for backend storage
+		provider: "inline" | "backend";
+		url?: string; // Required for backend provider (direct mode)
 	};
 };
 ```
@@ -112,20 +112,20 @@ The `UJLImageData` type is used by the ImageField:
 
 ```typescript
 type UJLImageData = {
-	imageId: string | number; // References entry in ujlc.images
+	imageId: string | number; // References entry in ujlc.library
 	alt: string;
 };
 ```
 
 ### UJLC Document Structure
 
-Image entries are stored in the document at `ujlc.images`:
+Asset entries are stored in the document at `ujlc.library`:
 
 ```typescript
 type UJLCDocument = {
 	ujlc: {
 		meta: UJLCMeta;
-		images: Record<string, ImageEntry>; // Library entries (currently images)
+		library: Record<string, AssetEntry>; // Library entries (assets)
 		root: UJLCModuleObject[];
 	};
 };

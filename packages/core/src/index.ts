@@ -10,7 +10,7 @@ export type { ComponentCategory } from "./modules/index.js";
 export { Composer } from "./composer.js";
 
 /**
- * Re-export library adapters and registry
+ * Re-export library providers and registry
  */
 export {
 	BackendLibraryProvider,
