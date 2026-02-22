@@ -238,7 +238,7 @@ src/
 │   │       ├── UJLCrafter.ts   # Public API class
 │   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
 │   │       └── ujl-crafter.svelte          # Main UI component
-│   ├── service-adapters/       # Image service adapter implementations
+│   ├── service-adapters/       # Legacy placeholder (adapters live in @ujl-framework/core)
 │   ├── stores/                 # CrafterStore (Svelte 5 runes)
 │   ├── styles/                 # CSS architecture (see below)
 │   └── utils/                  # Helpers (clipboard, colors, DOM utilities)

@@ -213,14 +213,14 @@ import { ImageField } from "@ujl-framework/core";
 // In compose() – note: must be async
 async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
   const imageId = this.parseField(moduleData, "cover", null);
-  const imageLibrary = composer.getImageLibrary();
+  const library = composer.getLibrary();
 
-  const image = imageId && imageLibrary
-    ? await imageLibrary.resolve(imageId)
+  const image = imageId && library
+    ? await library.resolve(imageId)
     : null;
 
   return this.createNode("raw-html", {
-    content: image ? `<img src="${image.src}" alt="${image.alt ?? ""}">` : "",
+    content: image ? `<img src="${image.src}" alt="">` : "",
   }, moduleData);
 }
 ```

@@ -66,7 +66,7 @@
 	let ast = $state<UJLAbstractNode | null>(null);
 
 	$effect(() => {
-		// Composer auto-selects the library provider via doc._library.adapter + LibraryRegistry
+		// Composer auto-selects the library provider via doc._library.provider + LibraryRegistry
 		composer.compose(ujlcDocument).then((composedAst) => {
 			ast = composedAst;
 		});

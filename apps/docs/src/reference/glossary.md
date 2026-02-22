@@ -31,9 +31,11 @@ Terms used consistently throughout UJL documentation and code.
 
 **ModuleRegistry**, Manages available modules. Custom modules are registered here, making them available for composition and the editor.
 
-**Image Library**, Core abstraction that resolves image IDs to concrete image data. Supports Inline Storage (Base64 in UJLC) and Backend Storage (via a Provider).
+**LibraryBase**, Abstract base class for UJL library providers. Defines the common interface for asset storage and retrieval (upload, get, list, delete, resolve). Extend this class to build a custom provider.
 
-**ImageProvider**, Interface through which the Image Library resolves images from external sources (e.g., the Library Service).
+**LibraryRegistry**, Manages registered library providers. The Composer reads `doc.ujlc.meta._library.provider` and looks up the matching provider in the registry automatically.
+
+**LibraryProvider**, A concrete implementation of `LibraryBase`. UJL ships `InlineLibraryProvider` (Base64 in UJLC document) and `BackendLibraryProvider` (Payload CMS via REST API).
 
 ## Modules and Fields
 
