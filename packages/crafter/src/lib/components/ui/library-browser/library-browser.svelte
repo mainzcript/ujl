@@ -13,7 +13,7 @@
 	} from "@ujl-framework/ui";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import type { ImageMetadata, ImageEntry } from "@ujl-framework/types";
+	import type { AssetMetadata, AssetEntry } from "@ujl-framework/types";
 	import ImageIcon from "@lucide/svelte/icons/image";
 	import TrashIcon from "@lucide/svelte/icons/trash-2";
 	import { logger } from "$lib/utils/logger.js";
@@ -27,20 +27,24 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const imageService = $derived(crafter.imageService);
+	const library = $derived(crafter.library);
 
-	let imageEntries = $state<Array<{ id: string; src: string; metadata: ImageMetadata }>>([]);
+	let imageEntries = $state<Array<{ id: string; src: string; metadata: AssetMetadata }>>([]);
 	let isLoading = $state(true);
 
 	$effect(() => {
+		// Track libraryData so Svelte re-runs this effect whenever the document's
+		// library object changes (e.g. after an import or setUjlcDocument call).
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		crafter.libraryData;
 		loadImageEntries();
 	});
 
 	async function loadImageEntries() {
 		isLoading = true;
 		try {
-			const entries = await imageService.list();
-			imageEntries = entries.map(({ id, entry }: { id: string; entry: ImageEntry }) => ({
+			const entries = await library.list();
+			imageEntries = entries.map(({ id, entry }: { id: string; entry: AssetEntry }) => ({
 				id,
 				src: entry.src,
 				metadata: entry.metadata,
@@ -73,7 +77,7 @@
 		if (!imageToDelete) return;
 
 		try {
-			const success = await imageService.delete(imageToDelete);
+			const success = await library.delete(imageToDelete);
 			if (success) {
 				await loadImageEntries();
 			} else {

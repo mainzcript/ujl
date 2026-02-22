@@ -1,3 +1,4 @@
-export { BackendImageService } from "./backend-image-service.js";
-export type { ConnectionStatus, ImageService, UploadResult } from "./image-service.js";
-export { InlineImageService } from "./inline-image-service.js";
+// Library adapters are now exported from @ujl-framework/core.
+// This file is kept as a placeholder to avoid breaking internal imports.
+// Import directly from @ujl-framework/core:
+//   import { InlineLibraryProvider, BackendLibraryProvider, LibraryBase } from "@ujl-framework/core";

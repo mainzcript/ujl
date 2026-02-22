@@ -10,9 +10,20 @@ export type { ComponentCategory } from "./modules/index.js";
 export { Composer } from "./composer.js";
 
 /**
- * Re-export image library for managing image entries
+ * Re-export library adapters and registry
  */
-export { ImageLibrary } from "./image/index.js";
+export {
+	BackendLibraryProvider,
+	InlineLibraryProvider,
+	LibraryBase,
+	LibraryRegistry,
+} from "./library/index.js";
+export type {
+	BackendLibraryProviderConfig,
+	ConnectionStatus,
+	UpdateLibraryFn,
+	UploadResult,
+} from "./library/index.js";
 
 /**
  * Re-export utility functions

@@ -18,13 +18,12 @@
 	import { Badge, UJLTheme } from "@ujl-framework/ui";
 	import { setContext } from "svelte";
 	import { toast } from "svelte-sonner";
-	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+	import type { UJLCDocument, UJLCLibrary, UJLTDocument } from "@ujl-framework/types";
 	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
-	import { Composer } from "@ujl-framework/core";
+	import { Composer, InlineLibraryProvider } from "@ujl-framework/core";
 
 	import {
 		createCrafterStore,
-		createImageServiceFactory,
 		type CrafterStore,
 		type CrafterStoreDeps,
 		CRAFTER_CONTEXT,
@@ -98,21 +97,30 @@
 
 			const composer = new Composer();
 
-			const imageServiceFactory = createImageServiceFactory({
-				showToasts: true,
-				onConnectionError: (error, url) => {
-					logger.error("Image backend connection error:", error, url);
-				},
-			});
+			// Bridged library accessors: the InlineLibraryProvider needs to read/write
+			// the Store's reactive state. Since the Store is created after the provider,
+			// we use indirect references that start pointing at the initial document data
+			// and get wired to the Store after creation.
+			let getLibraryBridge: () => UJLCLibrary = () => validatedContent.ujlc.library;
+			let updateLibraryBridge: (fn: (lib: UJLCLibrary) => UJLCLibrary) => void = () => {};
+
+			const libraryProvider = new InlineLibraryProvider(
+				() => getLibraryBridge(),
+				(fn) => updateLibraryBridge(fn),
+			);
 
 			const storeDeps: CrafterStoreDeps = {
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				createImageService: imageServiceFactory,
+				library: libraryProvider,
 			};
 
 			const store = createCrafterStore(storeDeps);
+
+			// Wire up the bridge: from now on the provider reads/writes via the Store
+			getLibraryBridge = () => store.libraryData;
+			updateLibraryBridge = (fn) => store.updateLibrary(fn);
 
 			return { store, composer };
 		}

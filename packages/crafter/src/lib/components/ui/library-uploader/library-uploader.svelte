@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from "@ujl-framework/ui";
-	import type { ImageMetadata } from "@ujl-framework/types";
+	import type { AssetMetadata } from "@ujl-framework/types";
 	import { logger } from "$lib/utils/logger.js";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
@@ -17,7 +17,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const imageService = $derived(crafter.imageService);
+	const library = $derived(crafter.library);
 
 	const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(",");
@@ -78,22 +78,21 @@
 			// Get original dimensions
 			const { width, height } = await getImageDimensions(file);
 
-			// Create metadata for image library
-			const metadata: ImageMetadata = {
+			// Create metadata — only fields the provider cannot determine itself.
+			// mimeType and filesize are read by the provider from the File object directly.
+			const metadata: AssetMetadata = {
 				filename: file.name,
-				mimeType: file.type,
-				filesize: file.size,
 				width,
 				height,
 			};
 
-			// Use ImageService to upload (handles compression and storage)
-			const result = await imageService.upload(file, metadata);
+			// Use library adapter to upload (handles compression and storage)
+			const result = await library.upload(file, metadata);
 
-			logger.info("Image uploaded successfully:", result.imageId);
+			logger.info("Image uploaded successfully:", result.assetId);
 
 			// Notify parent component
-			onUploadComplete?.(result.imageId);
+			onUploadComplete?.(result.assetId);
 			toast.success("Image uploaded successfully");
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";

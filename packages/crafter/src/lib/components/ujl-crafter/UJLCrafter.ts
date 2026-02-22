@@ -1,12 +1,13 @@
-import {
-	createCrafterStore,
-	createImageServiceFactory,
-	type CrafterStore,
-	type SaveCallback,
-} from "$lib/stores/index.js";
+import { createCrafterStore, type CrafterStore, type SaveCallback } from "$lib/stores/index.js";
 import { logger } from "$lib/utils/logger.js";
-import { Composer, type ModuleBase } from "@ujl-framework/core";
-import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+import {
+	BackendLibraryProvider,
+	Composer,
+	InlineLibraryProvider,
+	LibraryRegistry,
+	type ModuleBase,
+} from "@ujl-framework/core";
+import type { UJLCDocument, UJLCLibrary, UJLTDocument } from "@ujl-framework/types";
 import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 import CrafterElement from "./ujl-crafter-element.svelte";
 
@@ -44,16 +45,17 @@ export type { SaveCallback } from "$lib/stores/index.js";
  * Configuration options for the library.
  * Determines how library assets are stored and retrieved.
  *
- * Two storage modes are available:
- * - `inline`: Library stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Library stored on a Payload CMS server (requires url and apiKey)
+ * Two adapter modes are available:
+ * - `inline`: Assets stored as Base64 in the UJLC document (no additional config needed)
+ * - `backend`: Assets stored on a Payload CMS server (requires url and apiKey or proxyUrl)
  *
- * Note: Document-level _library configuration is ignored.
- * Only this options-based configuration is used.
+ * The Composer will automatically select the adapter that matches the
+ * `_library.provider` field in the document being composed.
  */
 export type LibraryOptions =
-	| { storage: "inline" }
-	| { storage: "backend"; url: string; apiKey: string };
+	| { provider: "inline" }
+	| { provider: "backend"; url: string; apiKey: string }
+	| { provider: "backend"; proxyUrl: string };
 
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
@@ -125,7 +127,64 @@ export class UJLCrafter {
 
 	constructor(options: UJLCrafterOptions) {
 		this.target = this.resolveTarget(options.target);
-		this.composer = new Composer();
+
+		// Library configuration (defaults to inline)
+		const libraryOptions = options.library ?? { provider: "inline" as const };
+
+		// Validate documents upfront so they can be shared between provider and store
+		const initialDoc = options.document
+			? validateUJLCDocument(options.document)
+			: this.getDefaultDocument();
+		const initialTheme = options.theme
+			? validateUJLTDocument(options.theme)
+			: this.getDefaultTheme();
+
+		// Bridged library accessors: the InlineLibraryProvider needs getLibrary/updateLibrary
+		// closures that read from the Store's reactive state. Since the Store is created after
+		// the provider (chicken-and-egg), we use indirect references that start pointing at the
+		// initial document and get wired to the Store after creation.
+		let getLibraryBridge: () => UJLCLibrary = () => initialDoc.ujlc.library;
+		let updateLibraryBridge: (fn: (lib: UJLCLibrary) => UJLCLibrary) => void = () => {};
+
+		// Build the library provider
+		let libraryProvider;
+		if (libraryOptions.provider === "backend") {
+			if ("proxyUrl" in libraryOptions) {
+				libraryProvider = new BackendLibraryProvider({ proxyUrl: libraryOptions.proxyUrl });
+			} else if ("url" in libraryOptions && "apiKey" in libraryOptions) {
+				libraryProvider = new BackendLibraryProvider({
+					url: libraryOptions.url,
+					apiKey: libraryOptions.apiKey,
+				});
+
+				// Async connection check (non-blocking)
+				libraryProvider.checkConnection().then((status) => {
+					if (!status.connected) {
+						logger.error("Library backend connection error:", status.error);
+						this.notify(
+							"error",
+							"Library backend connection error",
+							`Failed to connect to ${libraryOptions.url}`,
+						);
+					}
+				});
+			} else {
+				throw new Error(
+					"UJLCrafter: Backend library requires either { url, apiKey } or { proxyUrl }",
+				);
+			}
+		} else {
+			libraryProvider = new InlineLibraryProvider(
+				() => getLibraryBridge(),
+				(fn) => updateLibraryBridge(fn),
+			);
+		}
+
+		// Build library registry for the Composer (auto-selects based on doc._library.adapter)
+		const libraryRegistry = new LibraryRegistry();
+		libraryRegistry.registerAdapter(libraryProvider);
+
+		this.composer = new Composer(undefined, libraryRegistry);
 
 		if (options.modules) {
 			for (const module of options.modules) {
@@ -137,39 +196,17 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
-		// Library configuration from options (defaults to inline storage)
-		// Note: Document-level _library configuration is ignored - only options are used
-		const library = options.library ?? { storage: "inline" as const };
-
-		// Runtime validation for backend storage
-		if (library.storage === "backend") {
-			if (!library.url || !library.apiKey) {
-				throw new Error("UJLCrafter: Backend storage requires both url and apiKey");
-			}
-		}
-
-		const imageServiceFactory = createImageServiceFactory({
-			preferredStorage: library.storage,
-			backendUrl: library.storage === "backend" ? library.url : undefined,
-			backendApiKey: library.storage === "backend" ? library.apiKey : undefined,
-			showToasts: false,
-			onConnectionError: (error, url) => {
-				logger.error("Image backend connection error:", error, url);
-				this.notify("error", "Image backend connection error", `Failed to connect to ${url}`);
-			},
-		});
-
 		this.store = createCrafterStore({
-			initialUjlcDocument: options.document
-				? validateUJLCDocument(options.document)
-				: this.getDefaultDocument(),
-			initialUjltDocument: options.theme
-				? validateUJLTDocument(options.theme)
-				: this.getDefaultTheme(),
+			initialUjlcDocument: initialDoc,
+			initialUjltDocument: initialTheme,
 			composer: this.composer,
-			createImageService: imageServiceFactory,
+			library: libraryProvider,
 			testMode: options.testMode ?? false,
 		});
+
+		// Wire up the bridge: from now on the provider reads/writes via the Store
+		getLibraryBridge = () => this.store.libraryData;
+		updateLibraryBridge = (fn) => this.store.updateLibrary(fn);
 
 		this.mount();
 	}

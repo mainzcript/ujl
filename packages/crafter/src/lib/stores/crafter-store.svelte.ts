@@ -13,16 +13,15 @@
  * @module crafter-store
  */
 
+import type { LibraryBase } from "@ujl-framework/core";
 import { generateUid, type Composer } from "@ujl-framework/core";
 import type {
 	UJLCDocument,
-	UJLCDocumentMeta,
-	UJLCImageLibrary,
+	UJLCLibrary,
 	UJLCSlotObject,
 	UJLTDocument,
 	UJLTTokenSet,
 } from "@ujl-framework/types";
-import type { ImageService } from "../service-adapters/image-service.js";
 import { logger } from "../utils/logger.js";
 import { findPathToNode, isRootNode } from "../utils/ujlc-tree.js";
 import { createOperations } from "./operations.js";
@@ -45,42 +44,20 @@ export type CrafterMode = "editor" | "designer";
 export type ViewportSize = 1024 | 768 | 375 | null;
 
 /**
- * Image library context for field editing.
+ * Library context for field editing.
  * Stores which field is currently being edited in the image library.
  */
-export type ImageLibraryContext = {
+export type LibraryContext = {
 	fieldName: string;
 	nodeId: string;
 	currentValue: string | number | null;
 } | null;
 
 /**
- * Library configuration from document meta.
- */
-export type LibraryConfig = UJLCDocumentMeta["_library"];
-
-/**
- * Function type for immutable image library updates.
- */
-export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void;
-
-/**
  * Callback type for save action.
  * Receives both documents so the developer can decide what to persist.
  */
 export type SaveCallback = (document: UJLCDocument, theme: UJLTDocument) => void;
-
-/**
- * Factory interface for creating image services.
- * Allows dependency injection of different storage implementations.
- */
-export interface ImageServiceFactory {
-	(
-		config: LibraryConfig,
-		getImages: () => UJLCImageLibrary,
-		updateImages: UpdateImagesFn,
-	): ImageService;
-}
 
 /**
  * Dependencies required for creating a CrafterStore.
@@ -93,8 +70,8 @@ export interface CrafterStoreDeps {
 	initialUjltDocument: UJLTDocument;
 	/** Composer instance for AST generation and module registry */
 	composer: Composer;
-	/** Factory function to create image services */
-	createImageService: ImageServiceFactory;
+	/** Library adapter for asset storage and retrieval */
+	library: LibraryBase;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -128,7 +105,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  *   initialUjlcDocument: myDocument,
  *   initialUjltDocument: myTheme,
  *   composer: new Composer(),
- *   createImageService: createImageServiceFactory()
+ *   library: new InlineLibraryProvider(getLibrary, updateLibrary),
  * });
  *
  * // Read state
@@ -139,13 +116,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  * ```
  */
 export function createCrafterStore(deps: CrafterStoreDeps) {
-	const {
-		initialUjlcDocument,
-		initialUjltDocument,
-		composer,
-		createImageService,
-		testMode = false,
-	} = deps;
+	const { initialUjlcDocument, initialUjltDocument, composer, library, testMode = false } = deps;
 
 	// ============================================
 	// INSTANCE IDENTITY (for DOM scoping)
@@ -164,8 +135,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _selectedNodeId = $state<string | null>(null);
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let _expandedNodeIds = $state<Set<string>>(new Set());
-	let _isImageLibraryViewActive = $state(false);
-	let _imageLibraryContext = $state<ImageLibraryContext>(null);
+	let _isLibraryViewActive = $state(false);
+	let _libraryContext = $state<LibraryContext>(null);
 	let _viewportType = $state<string | undefined>(undefined);
 
 	// Fullscreen state
@@ -183,7 +154,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
-	const images = $derived(_ujlcDocument.ujlc.images);
+	const libraryData = $derived(_ujlcDocument.ujlc.library);
 	const meta = $derived(_ujlcDocument.ujlc.meta);
 	const tokens = $derived(_ujltDocument.ujlt.tokens);
 
@@ -262,17 +233,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Toggle image library view.
-	 * @param active - Whether to show the image library
+	 * Toggle library view.
+	 * @param active - Whether to show the library
 	 * @param context - Optional context for which field is being edited
 	 */
-	function setImageLibraryViewActive(active: boolean, context?: ImageLibraryContext): void {
-		_isImageLibraryViewActive = active;
+	function setLibraryViewActive(active: boolean, context?: LibraryContext): void {
+		_isLibraryViewActive = active;
 		if (context !== undefined) {
-			_imageLibraryContext = context;
+			_libraryContext = context;
 		}
 		if (!active) {
-			_imageLibraryContext = null;
+			_libraryContext = null;
 		}
 	}
 
@@ -351,13 +322,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Update image library with immutable function.
-	 * @param fn - Function that receives current images and returns new images
+	 * Update library with immutable function.
+	 * @param fn - Function that receives current library and returns new library
 	 */
-	function updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void {
+	function updateLibrary(fn: (library: UJLCLibrary) => UJLCLibrary): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) },
+			ujlc: { ..._ujlcDocument.ujlc, library: fn(_ujlcDocument.ujlc.library) },
 		};
 	}
 
@@ -380,14 +351,6 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function setUjltDocument(doc: UJLTDocument): void {
 		_ujltDocument = doc;
 	}
-
-	// ============================================
-	// SERVICES (Lazy Initialization via $derived.by)
-	// ============================================
-
-	const imageService = $derived.by(() =>
-		createImageService(meta._library, () => images, updateImages),
-	);
 
 	// ============================================
 	// OPERATIONS (High-Level Document Manipulation)
@@ -422,11 +385,11 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get expandedNodeIds() {
 			return _expandedNodeIds;
 		},
-		get isImageLibraryViewActive() {
-			return _isImageLibraryViewActive;
+		get isLibraryViewActive() {
+			return _isLibraryViewActive;
 		},
-		get imageLibraryContext() {
-			return _imageLibraryContext;
+		get libraryContext() {
+			return _libraryContext;
 		},
 		get viewportType() {
 			return _viewportType;
@@ -442,8 +405,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get rootSlot() {
 			return rootSlot;
 		},
-		get images() {
-			return images;
+		get libraryData() {
+			return libraryData;
 		},
 		get meta() {
 			return meta;
@@ -458,10 +421,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 			return _shouldShowFullscreenButton;
 		},
 
-		// Services
-		get imageService() {
-			return imageService;
-		},
+		// Library adapter (direct access for Crafter UI components)
+		library,
 		composer,
 
 		// Actions
@@ -469,7 +430,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		setSelectedNodeId,
 		setNodeExpanded,
 		expandToNode,
-		setImageLibraryViewActive,
+		setLibraryViewActive,
 		setViewportType,
 		setContainerSize,
 		setScreenSize,
@@ -479,7 +440,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		// Functional Updates
 		updateRootSlot,
 		updateTokenSet,
-		updateImages,
+		updateLibrary,
 		setUjlcDocument,
 		setUjltDocument,
 

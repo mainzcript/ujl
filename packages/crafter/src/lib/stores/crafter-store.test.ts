@@ -4,11 +4,11 @@
  * Tests the centralized state management store.
  */
 
+import type { LibraryBase } from "@ujl-framework/core";
 import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 import { describe, expect, it, vi } from "vitest";
 import { createMockTokenSet, createMockTree } from "../../../tests/mockData.js";
-import type { ImageService } from "../service-adapters/image-service.js";
-import type { CrafterStoreDeps, ImageServiceFactory } from "./crafter-store.svelte.js";
+import type { CrafterStoreDeps } from "./crafter-store.svelte.js";
 
 // ============================================
 // MOCK DATA
@@ -25,9 +25,9 @@ function createMockUjlcDocument(): UJLCDocument {
 				_version: "0.0.1",
 				_instance: "test-001",
 				_embedding_model_hash: "test-hash",
-				_library: { storage: "inline" },
+				_library: { provider: "inline" },
 			},
-			images: {},
+			library: {},
 			root: createMockTree(),
 		},
 	};
@@ -44,15 +44,16 @@ function createMockUjltDocument(): UJLTDocument {
 	};
 }
 
-function createMockImageService(): ImageService {
+function createMockLibrary(): LibraryBase {
 	return {
+		name: "inline",
 		checkConnection: vi.fn().mockResolvedValue({ connected: true }),
 		upload: vi.fn(),
 		get: vi.fn().mockResolvedValue(null),
 		list: vi.fn().mockResolvedValue([]),
 		delete: vi.fn().mockResolvedValue(true),
 		resolve: vi.fn().mockResolvedValue(null),
-	};
+	} as unknown as LibraryBase;
 }
 
 function createMockComposer() {
@@ -70,13 +71,11 @@ function createMockComposer() {
 }
 
 function createMockDeps(overrides?: Partial<CrafterStoreDeps>): CrafterStoreDeps {
-	const mockImageService = createMockImageService();
-
 	return {
 		initialUjlcDocument: createMockUjlcDocument(),
 		initialUjltDocument: createMockUjltDocument(),
 		composer: createMockComposer(),
-		createImageService: vi.fn(() => mockImageService) as unknown as ImageServiceFactory,
+		library: createMockLibrary(),
 		...overrides,
 	};
 }
@@ -97,7 +96,7 @@ describe("CrafterStore Types", () => {
 		expect(deps).toHaveProperty("initialUjlcDocument");
 		expect(deps).toHaveProperty("initialUjltDocument");
 		expect(deps).toHaveProperty("composer");
-		expect(deps).toHaveProperty("createImageService");
+		expect(deps).toHaveProperty("library");
 	});
 
 	it("should create valid mock UJLC document", () => {
@@ -105,7 +104,8 @@ describe("CrafterStore Types", () => {
 
 		expect(doc.ujlc.meta.title).toBe("Test Document");
 		expect(doc.ujlc.root).toHaveLength(1);
-		expect(doc.ujlc.images).toEqual({});
+		expect(doc.ujlc.library).toEqual({});
+		expect(doc.ujlc.meta._library.provider).toBe("inline");
 	});
 
 	it("should create valid mock UJLT document", () => {
@@ -118,15 +118,16 @@ describe("CrafterStore Types", () => {
 });
 
 describe("CrafterStore Mock Dependencies", () => {
-	it("should create mock image service", () => {
-		const service = createMockImageService();
+	it("should create mock library provider", () => {
+		const library = createMockLibrary();
 
-		expect(service.checkConnection).toBeDefined();
-		expect(service.upload).toBeDefined();
-		expect(service.get).toBeDefined();
-		expect(service.list).toBeDefined();
-		expect(service.delete).toBeDefined();
-		expect(service.resolve).toBeDefined();
+		expect(library.name).toBe("inline");
+		expect(library.checkConnection).toBeDefined();
+		expect(library.upload).toBeDefined();
+		expect(library.get).toBeDefined();
+		expect(library.list).toBeDefined();
+		expect(library.delete).toBeDefined();
+		expect(library.resolve).toBeDefined();
 	});
 
 	it("should create mock composer", () => {
@@ -170,23 +171,5 @@ describe("Operations", () => {
 		};
 
 		expect(operations).toBeDefined();
-	});
-});
-
-describe("ImageServiceFactory", () => {
-	it("should export createImageServiceFactory function", async () => {
-		const { createImageServiceFactory } = await import("./image-service-factory.js");
-		expect(typeof createImageServiceFactory).toBe("function");
-	});
-
-	it("should create factory with options", async () => {
-		const { createImageServiceFactory } = await import("./image-service-factory.js");
-
-		const factory = createImageServiceFactory({
-			backendApiKey: "test-key",
-			showToasts: false,
-		});
-
-		expect(typeof factory).toBe("function");
 	});
 });
