@@ -72,14 +72,14 @@ function getLibraryConfig(): LibraryOptions {
 
 		console.log(`[dev-demo] Using backend storage: ${BACKEND_URL}`);
 		return {
-			storage: "backend",
+			provider: "backend",
 			url: BACKEND_URL,
 			apiKey: BACKEND_API_KEY,
 		};
 	}
 
 	console.log("[dev-demo] Using inline storage (library embedded in document)");
-	return { storage: "inline" };
+	return { provider: "inline" };
 }
 
 // ============================================

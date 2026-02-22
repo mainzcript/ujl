@@ -2,10 +2,10 @@
 	import { Text, Popover, PopoverTrigger, PopoverContent } from "@ujl-framework/ui";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import type { ImageEntry } from "@ujl-framework/types";
+	import type { AssetEntry } from "@ujl-framework/types";
 	import ImageIcon from "@lucide/svelte/icons/image";
 	import { logger } from "$lib/utils/logger.js";
-	import { ImageLibraryPopover } from "../image-library-popover/index.js";
+	import { LibraryPopover } from "../library-popover/index.js";
 
 	let {
 		value,
@@ -16,7 +16,7 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const imageService = $derived(crafter.imageService);
+	const library = $derived(crafter.library);
 
 	let popoverOpen = $state(false);
 
@@ -39,9 +39,9 @@
 		// Convert numeric IDs to strings (backend services like Payload return numbers)
 		const imageId = String(value);
 		isLoadingPreview = true;
-		imageService
+		library
 			.get(imageId)
-			.then((entry: ImageEntry | null) => {
+			.then((entry: AssetEntry | null) => {
 				previewUrl = entry?.src ?? null;
 				previewAlt = entry?.metadata?.filename ?? "Selected image preview";
 			})
@@ -79,7 +79,7 @@
 		</PopoverTrigger>
 	{/if}
 	<PopoverContent class="max-h-[80vh] w-sm max-w-[80vw]">
-		<ImageLibraryPopover
+		<LibraryPopover
 			selectedImageId={value != null ? String(value) : null}
 			onSelect={handleImageSelect}
 			onClose={() => (popoverOpen = false)}

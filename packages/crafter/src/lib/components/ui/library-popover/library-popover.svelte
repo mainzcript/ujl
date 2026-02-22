@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ImageLibraryBrowser } from "../image-library-browser/index.js";
-	import { ImageLibraryUploader } from "../image-library-uploader/index.js";
+	import { LibraryBrowser } from "../library-browser/index.js";
+	import { LibraryUploader } from "../library-uploader/index.js";
 
 	let {
 		selectedImageId,
@@ -14,19 +14,19 @@
 		onClose?: () => void;
 	} = $props();
 
-	let imageReloadTrigger = $state(0);
+	let libraryReloadTrigger = $state(0);
 
 	function handleUploadComplete(imageId: string) {
-		imageReloadTrigger++;
+		libraryReloadTrigger++;
 		onUploadComplete?.(imageId);
 	}
 </script>
 
 <div class="flex flex-col gap-4">
-	<ImageLibraryUploader onUploadComplete={handleUploadComplete} {onClose} />
+	<LibraryUploader onUploadComplete={handleUploadComplete} {onClose} />
 	<div class="max-h-[60vh] overflow-y-auto">
-		{#key imageReloadTrigger}
-			<ImageLibraryBrowser {selectedImageId} {onSelect} />
+		{#key libraryReloadTrigger}
+			<LibraryBrowser {selectedImageId} {onSelect} />
 		{/key}
 	</div>
 </div>

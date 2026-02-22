@@ -1,4 +1,4 @@
-import type { ImageSource } from "./image.js";
+import type { ImageSource } from "./asset.js";
 import type { ProseMirrorDocument } from "./prosemirror.js";
 import type { UJLTTokenSet } from "./ujl-theme.js";
 

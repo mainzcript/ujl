@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ImageEntry } from "./image.js";
+import type { AssetEntry } from "./asset.js";
 
 /**
  * Raw field value schema
@@ -8,28 +8,29 @@ import type { ImageEntry } from "./image.js";
 const UJLCFieldObjectSchema = z.unknown();
 
 /**
- * Image metadata schema
+ * Asset metadata schema
+ *
+ * mimeType and filesize are intentionally omitted — providers read them
+ * directly from the File object or from the backend response.
  */
-const ImageMetadataSchema = z.object({
+const AssetMetadataSchema = z.object({
 	filename: z.string(),
-	mimeType: z.string(),
-	filesize: z.number(),
 	width: z.number(),
 	height: z.number(),
 });
 
 /**
- * Image entry schema
+ * Asset entry schema
  */
-const ImageEntrySchema = z.object({
+const AssetEntrySchema = z.object({
 	src: z.string(),
-	metadata: ImageMetadataSchema,
+	metadata: AssetMetadataSchema,
 });
 
 /**
- * Image library object schema (record of image entries)
+ * Library object schema (record of asset entries)
  */
-const ImageLibraryObjectSchema = z.record(z.string(), ImageEntrySchema);
+const LibraryObjectSchema = z.record(z.string(), AssetEntrySchema);
 
 /**
  * Module metadata schema
@@ -68,15 +69,23 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
- * Library storage configuration schema
+ * Library provider configuration schema.
+ *
+ * Only routing information is stored in the document — credentials (apiKey)
+ * are never persisted and are passed at runtime via LibraryOptions instead.
+ *
+ *   - inline:  no extra fields
+ *   - backend: optional `url` (direct mode) or optional `proxyUrl` (proxy mode);
+ *              both may be absent when the Crafter is configured externally at runtime.
  */
-const LibraryStorageConfigSchema = z.discriminatedUnion("storage", [
+const LibraryProviderConfigSchema = z.discriminatedUnion("provider", [
 	z.object({
-		storage: z.literal("inline"),
+		provider: z.literal("inline"),
 	}),
 	z.object({
-		storage: z.literal("backend"),
-		url: z.url(),
+		provider: z.literal("backend"),
+		url: z.url().optional(),
+		proxyUrl: z.string().optional(),
 	}),
 ]);
 
@@ -91,7 +100,7 @@ const UJLCDocumentMetaSchema = z.object({
 	_version: z.string(),
 	_instance: z.string(),
 	_embedding_model_hash: z.string(),
-	_library: LibraryStorageConfigSchema.optional().default({ storage: "inline" }),
+	_library: LibraryProviderConfigSchema.optional().default({ provider: "inline" }),
 });
 
 /**
@@ -99,7 +108,7 @@ const UJLCDocumentMetaSchema = z.object({
  */
 const UJLCObjectSchema = z.object({
 	meta: UJLCDocumentMetaSchema,
-	images: ImageLibraryObjectSchema.default({}),
+	library: LibraryObjectSchema.default({}),
 	root: UJLCSlotObjectSchema,
 });
 
@@ -119,8 +128,8 @@ export type UJLCModuleMeta = z.infer<typeof UJLCModuleMetaSchema>;
 export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 export type UJLCSlotObject = z.infer<typeof UJLCSlotObjectSchema>;
 export type UJLCDocumentMeta = z.infer<typeof UJLCDocumentMetaSchema>;
-export type UJLCImageLibrary = Record<string, ImageEntry>;
-export type LibraryStorageConfig = z.infer<typeof LibraryStorageConfigSchema>;
+export type UJLCLibrary = Record<string, AssetEntry>;
+export type LibraryProviderConfig = z.infer<typeof LibraryProviderConfigSchema>;
 export type UJLCObject = z.infer<typeof UJLCObjectSchema>;
 export type UJLCDocument = z.infer<typeof UJLCDocumentSchema>;
 

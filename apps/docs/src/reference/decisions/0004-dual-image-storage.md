@@ -3,13 +3,13 @@ title: "ADR-004: Dual Image Storage (Inline vs. Backend)"
 description: "Why UJL supports two image storage modes and how they differ."
 ---
 
-# ADR-004: Dual Image Storage (Inline vs. Backend)
+# ADR-004: Dual Asset Storage (Inline vs. Backend)
 
 **Status:** Accepted, evolved iteratively
 
 ## Context
 
-Images are central to UJL documents, but use cases differ fundamentally.
+Assets (images today, other media soon) are central to UJL documents, but use cases differ fundamentally.
 
 **Standalone documents** need to work without a backend, for demos, offline use, or simple deployments. A small number of images embedded directly in the document is acceptable.
 
@@ -19,16 +19,16 @@ Inline storage was implemented first. Backend storage was added when CMS integra
 
 ## Decision
 
-UJL supports two storage modes, selected at the Crafter configuration level:
+UJL supports two library providers, selected at the Crafter configuration level:
 
-**Inline storage**, images are embedded as Base64 in the UJLC document:
+**Inline provider**, assets are embedded as Base64 in the UJLC document:
 
 ```json
 {
 	"ujlc": {
-		"meta": { "_library": { "storage": "inline" } },
-		"images": {
-			"img-001": {
+		"meta": { "_library": { "provider": "inline" } },
+		"library": {
+			"asset-001": {
 				"src": "data:image/jpeg;base64,/9j/...",
 				"metadata": { "filename": "hero.jpg", "width": 1920, "height": 1080 }
 			}
@@ -37,14 +37,14 @@ UJL supports two storage modes, selected at the Crafter configuration level:
 }
 ```
 
-**Backend storage**, images are referenced by URL, resolved via the Library Service:
+**Backend provider**, assets are referenced by URL, resolved via the Library Service:
 
 ```json
 {
 	"ujlc": {
-		"meta": { "_library": { "storage": "backend", "url": "https://library.example.com" } },
-		"images": {
-			"img-001": {
+		"meta": { "_library": { "provider": "backend", "url": "https://library.example.com" } },
+		"library": {
+			"asset-001": {
 				"src": "https://library.example.com/api/images/abc123",
 				"metadata": { "filename": "hero.jpg", "width": 1920, "height": 1080 }
 			}
@@ -53,7 +53,7 @@ UJL supports two storage modes, selected at the Crafter configuration level:
 }
 ```
 
-The Image Library abstraction provides a unified `resolve(id)` API to both Composer and adapters, the storage mode is transparent to them.
+The Library abstraction provides a unified `resolve(id)` API to Composer and adapters; the provider choice is transparent to them.
 
 ## Rationale
 

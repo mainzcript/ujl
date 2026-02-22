@@ -9,11 +9,11 @@
 			"_instance": "backend-test-001",
 			"_embedding_model_hash": "sha256:test",
 			"_library": {
-				"storage": "backend",
-				"url": "http://localhost:3000"
+				"url": "http://localhost:3000",
+				"provider": "backend"
 			}
 		},
-		"images": {},
+		"library": {},
 		"root": [
 			{
 				"type": "container",

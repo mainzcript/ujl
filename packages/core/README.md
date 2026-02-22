@@ -307,20 +307,18 @@ Library configuration is stored in the document metadata at `ujlc.meta._library`
 }
 ```
 
-**Image Entry Types:**
+**Asset Entry Types:**
 
-The `ImageEntry` type contains the image URL and metadata:
+The `AssetEntry` type contains the asset URL and metadata:
 
 ```typescript
-type ImageEntry = {
-	src: string; // Image URL (HTTP or Base64 Data-URL)
-	metadata: ImageMetadata; // Technical metadata
+type AssetEntry = {
+	src: string; // Asset URL (HTTP or Base64 Data-URL)
+	metadata: AssetMetadata; // Technical metadata
 };
 
-type ImageMetadata = {
+type AssetMetadata = {
 	filename: string;
-	mimeType: string;
-	filesize: number;
 	width: number;
 	height: number;
 };
@@ -328,11 +326,11 @@ type ImageMetadata = {
 
 **ImageField Integration:**
 
-The `ImageField` uses library entries (currently images) via the `UJLImageData` type:
+The `ImageField` uses library entries via the `UJLImageData` type:
 
 ```typescript
 type UJLImageData = {
-	imageId: string | number; // References entry in ujlc.images
+	imageId: string | number; // References entry in ujlc.library
 	alt: string;
 };
 ```
