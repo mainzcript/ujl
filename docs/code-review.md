@@ -49,6 +49,7 @@ Do **not** block a merge for low-impact aesthetic improvements.
   - Public APIs?
   - AST / schemas?
   - Adapters?
+- Does it require updates to user-facing docs (`apps/docs`) to keep terminology/APIs consistent?
 - Assign **Risk Level**: Low / Medium / High
 
 ### Step B — Reality Check

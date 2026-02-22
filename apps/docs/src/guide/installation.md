@@ -68,9 +68,9 @@ crafter.onSave((doc, theme) => {
 });
 ```
 
-### With backend image storage
+### With backend asset storage
 
-To use the UJL Library Service for image management (responsive variants, metadata, i18n):
+To use the UJL Library Service for asset management (responsive variants, metadata, i18n):
 
 ```javascript
 const crafter = new UJLCrafter({
@@ -78,9 +78,11 @@ const crafter = new UJLCrafter({
 	document: ujlcDocument,
 	theme: ujltDocument,
 	library: {
-		storage: "backend",
-		url: "https://your-library.example.com",
+		provider: "backend",
+		url: "https://your-library.example.com", // direct mode
 		apiKey: "your-api-key",
+		// OR proxy mode (no apiKey in the browser):
+		// proxyUrl: "/api/library-proxy",
 	},
 });
 ```

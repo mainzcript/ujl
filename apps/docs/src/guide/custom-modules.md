@@ -202,7 +202,7 @@ import { RichTextField } from "@ujl-framework/core";
 
 ### Image fields
 
-`ImageField` stores an image ID (string for inline storage, number for backend). Resolve the ID to actual image data during composition:
+`ImageField` stores an asset ID (string for inline provider, number for backend). Resolve the ID to actual image data during composition:
 
 ```typescript
 import { ImageField } from "@ujl-framework/core";
