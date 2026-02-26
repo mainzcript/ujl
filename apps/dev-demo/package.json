@@ -21,7 +21,7 @@
 		"@fontsource-variable/open-sans": "^5.2.7",
 		"@fontsource-variable/oswald": "^5.2.8",
 		"@fontsource-variable/raleway": "^5.2.8",
-		"@fontsource-variable/roboto": "^5.2.9",
+		"@fontsource-variable/roboto": "^5.2.10",
 		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/crafter": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
