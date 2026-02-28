@@ -87,7 +87,6 @@ export default withMermaid({
 					{ text: "Install & Integrate", link: "/guide/installation" },
 					{ text: "Understand UJL", link: "/guide/concepts" },
 					{ text: "Implement Custom Modules", link: "/guide/custom-modules" },
-					{ text: "Optimize Bundle Size", link: "/guide/optimize-bundle-size" },
 				],
 			},
 			{
