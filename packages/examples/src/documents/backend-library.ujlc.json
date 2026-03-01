@@ -5,7 +5,7 @@
 			"description": "Minimal example to test backend library storage",
 			"tags": ["backend", "test", "library"],
 			"updated_at": "2025-01-20T00:00:00Z",
-			"_version": "0.0.1",
+			"_version": "0.0.2",
 			"_instance": "backend-test-001",
 			"_embedding_model_hash": "sha256:test",
 			"_library": {

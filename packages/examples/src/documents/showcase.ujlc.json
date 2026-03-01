@@ -5,7 +5,7 @@
 			"description": "You shouldn't have to choose between moving fast and protecting your brand. With UJL, you get both: launch professional websites in minutes instead of weeks, while your brand guidelines stay locked in.",
 			"tags": ["brand-compliance", "accessibility", "ai-native", "marketing", "demo", "ujl"],
 			"updated_at": "2024-01-15T10:30:00Z",
-			"_version": "0.0.1",
+			"_version": "0.0.2",
 			"_instance": "example-001",
 			"_embedding_model_hash": "sha256:abc123def456",
 			"_library": {
