@@ -30,7 +30,7 @@ corepack enable
 pnpm add @ujl-framework/crafter
 
 # For rendering only
-pnpm add @ujl-framework/adapter-web
+pnpm add @ujl-framework/core @ujl-framework/adapter-web
 ```
 
 ## Embedding the Crafter

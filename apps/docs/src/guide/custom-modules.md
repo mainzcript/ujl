@@ -325,7 +325,7 @@ const composer = new Composer();
 composer.registerModule(new TestimonialModule());
 
 const ast = await composer.compose(ujlcDocument);
-webAdapter(ast, ujltTokenSet, { target: "#app" });
+webAdapter(ast, tokenSet, { target: "#app" });
 ```
 
 ::: tip Zero-config rendering types
