@@ -71,12 +71,12 @@ const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 /**
  * Library provider configuration schema.
  *
- * Only routing information is stored in the document — credentials (apiKey)
- * are never persisted and are passed at runtime via LibraryOptions instead.
+ * Only routing information is stored in the document — credentials
+ * are never persisted and are passed at runtime via LibraryOptions (e.g. requestAccessToken).
  *
  *   - inline:  no extra fields
- *   - backend: optional `url` (direct mode) or optional `proxyUrl` (proxy mode);
- *              both may be absent when the Crafter is configured externally at runtime.
+ *   - backend: requires `url`; authentication is handled at runtime via
+ *              the `requestAccessToken` callback (not persisted).
  */
 const LibraryProviderConfigSchema = z.discriminatedUnion("provider", [
 	z.object({
@@ -84,8 +84,7 @@ const LibraryProviderConfigSchema = z.discriminatedUnion("provider", [
 	}),
 	z.object({
 		provider: z.literal("backend"),
-		url: z.url().optional(),
-		proxyUrl: z.string().optional(),
+		url: z.url(),
 	}),
 ]);
 

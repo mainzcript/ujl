@@ -20,12 +20,25 @@ export const Images: CollectionConfig = {
 	},
 
 	access: {
-		// Public read access for frontend display
+		/**
+		 * Access control configuration for the Images collection.
+		 *
+		 * CURRENT LIMITATION: Any authenticated user (via API key or Bearer token)
+		 * can currently create, update, and delete images. There is no per-user
+		 * ownership or role-based access control (RBAC) yet.
+		 *
+		 * PLANNED: Implement user ownership and roles:
+		 * - Track which user uploaded each image (addedBy field)
+		 * - Allow users to only modify their own images
+		 * - Support admin/editor/viewer roles with different permissions
+		 */
+		// Public read access for frontend display (images are served directly)
 		read: () => true,
 		// Write operations require authentication
-		create: ({ req: { user } }) => !!user,
-		update: ({ req: { user } }) => !!user,
-		delete: ({ req: { user } }) => !!user,
+		// TODO: Add per-user ownership and RBAC instead of allowing all authenticated users
+		create: ({ req: { user } }) => Boolean(user),
+		update: ({ req: { user } }) => Boolean(user),
+		delete: ({ req: { user } }) => Boolean(user),
 	},
 
 	hooks: {

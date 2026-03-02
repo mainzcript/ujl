@@ -32,11 +32,13 @@ The UJL Framework separates content from design, and the Library extends this pr
 
    Open `.env` and configure the required variables:
 
-   | Variable            | Required | Description                                              |
-   | ------------------- | -------- | -------------------------------------------------------- |
-   | `PAYLOAD_SECRET`    | Yes      | Min. 32 characters. Generate with `openssl rand -hex 32` |
-   | `POSTGRES_PASSWORD` | Yes      | Password for PostgreSQL database                         |
-   | `DATABASE_URL`      | Yes      | PostgreSQL connection string                             |
+   | Variable                      | Required | Description                                                                         |
+   | ----------------------------- | -------- | ----------------------------------------------------------------------------------- |
+   | `PAYLOAD_SECRET`              | Yes      | Min. 32 characters. Generate with `openssl rand -hex 32`                            |
+   | `POSTGRES_PASSWORD`           | Yes      | Password for PostgreSQL database                                                    |
+   | `DATABASE_URL`                | Yes      | PostgreSQL connection string                                                        |
+   | `ACCESS_TOKEN_TTL_MINUTES`    | No       | Lifetime of issued Bearer tokens in minutes (default: 15)                           |
+   | `ACCESS_TOKEN_CLEANUP_SECRET` | No       | Secret for `POST /api/access-tokens/cleanup` (cron); if unset, endpoint returns 503 |
 
    Example `.env`:
 
@@ -82,14 +84,18 @@ const crafter = new UJLCrafter({
 	document: myDocument,
 	theme: myTheme,
 	library: {
-		storage: "backend",
+		provider: "backend",
 		url: "http://localhost:3000",
-		apiKey: "your-api-key-here",
+		requestAccessToken: async () => {
+			const res = await fetch("/api/library-token");
+			const { token } = await res.json();
+			return token;
+		},
 	},
 });
 ```
 
-When configured this way, images uploaded through the Crafter's image library will be sent to the Library service. The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
+When configured this way, images uploaded through the Crafter's image library will be sent to the Library service. Authentication uses **session-key**: the Crafter receives short-lived tokens from your app backend (which holds the API key server-side). The Crafter stores only a reference (the image ID and URL) in the document, not the image data itself.
 
 ## API Reference
 
@@ -97,21 +103,69 @@ The Library exposes a REST API at `http://localhost:3000/api`. All endpoints fol
 
 ### Endpoints
 
-| Method | Endpoint      | Auth Required | Description                 |
-| ------ | ------------- | ------------- | --------------------------- |
-| GET    | `/images`     | No            | List images with pagination |
-| GET    | `/images/:id` | No            | Get a single image by ID    |
-| POST   | `/images`     | Yes           | Upload a new image          |
-| PATCH  | `/images/:id` | Yes           | Update image metadata       |
-| DELETE | `/images/:id` | Yes           | Delete an image             |
+| Method | Endpoint                 | Auth Required | Description                        |
+| ------ | ------------------------ | ------------- | ---------------------------------- |
+| GET    | `/images`                | No            | List images with pagination        |
+| GET    | `/images/:id`            | No            | Get a single image by ID           |
+| POST   | `/images`                | Yes (Bearer)  | Upload a new image                 |
+| PATCH  | `/images/:id`            | Yes (Bearer)  | Update image metadata              |
+| DELETE | `/images/:id`            | Yes (Bearer)  | Delete an image                    |
+| POST   | `/access-tokens/issue`   | API Key       | Issue a short-lived Bearer token   |
+| POST   | `/access-tokens/cleanup` | Secret header | Cron: delete expired tokens (opt.) |
 
-### Authentication
+### Session-Key Authentication (Bearer Tokens)
 
-For write operations (POST, PATCH, DELETE), include the API key in the Authorization header:
+The Library uses **short-lived Bearer tokens** for write access from the browser. API keys stay on your app backend; the frontend only receives a token with a limited lifetime (default 15 minutes).
+
+**Flow:**
+
+1. **App backend** (e.g. SvelteKit `POST /api/library-token`) authenticates to the Library with an API key and requests a token.
+2. **Library** validates the API key and creates a record in `access_tokens` with an expiry (e.g. 15 min), then returns `{ token, expiresAt }`.
+3. **App backend** returns `{ token }` to the frontend (e.g. Crafter).
+4. **Frontend** sends `Authorization: Bearer <token>` on every request to the Library (upload, update, delete images).
+
+```mermaid
+sequenceDiagram
+  participant Crafter as Crafter (Browser)
+  participant App as App Backend
+  participant Library as Library Service
+
+  Crafter->>App: request token
+  App->>Library: POST /api/access-tokens/issue<br/>Authorization: users API-Key <key>
+  Library->>App: { token, expiresAt }
+  App->>Crafter: { token }
+  Crafter->>Library: POST /api/images<br/>Authorization: Bearer <token>
+  Library->>Crafter: 201 / image data
+```
+
+### Token-Issue Endpoint
+
+**POST** `/api/access-tokens/issue`
+
+- **Auth:** `Authorization: users API-Key <your-api-key>` (required).
+- **Body (optional):** `{}` or `{ "requestedBy": "..." }` for auditing.
+- **Response:** `{ "token": "<base64url-string>", "expiresAt": "<ISO-date>" }`.
+- **TTL:** Configurable via `ACCESS_TOKEN_TTL_MINUTES` (default 15).
+
+Call this only from your **server** (e.g. SvelteKit API route). Never expose the API key to the browser.
+
+### Bearer Token Usage
+
+For write operations (POST/PATCH/DELETE on images), the client must send the short-lived token:
 
 ```
-Authorization: users API-Key YOUR_API_KEY
+Authorization: Bearer <token>
 ```
+
+The token is validated against the `access_tokens` collection (must exist and not be expired). If missing or invalid, the API returns `401 Unauthorized`.
+
+### Authentication (summary)
+
+| Context               | Method                   | Use case                         |
+| --------------------- | ------------------------ | -------------------------------- |
+| App backend → Library | `users API-Key <key>`    | Issuing tokens only              |
+| Browser → Library     | `Bearer <token>`         | Upload/update/delete images      |
+| Admin / server-only   | API key or admin session | Admin panel, server-side scripts |
 
 ### Query Parameters
 
@@ -150,17 +204,23 @@ To change the default language for the admin panel, set `PAYLOAD_DEFAULT_LOCALE`
 
 ## Security & CORS
 
-The Library is designed as a **self-hosted service**. By default, CORS is open (`*`) to allow any frontend application to access the API.
+The Library is designed as a **self-hosted service**. By default, CORS is open (`*`) so that browser clients (e.g. Crafter) can call the API with `Authorization: Bearer <token>` from your app’s origin.
 
 ### API Authentication
 
-Write operations (upload, update, delete) require an API key:
+- **Read operations** (GET images): no auth; images are intended for public display.
+- **Write operations** (POST/PATCH/DELETE images): require `Authorization: Bearer <token>`. The token is obtained via your app backend from `POST /api/access-tokens/issue` (using the API key server-side only).
 
-```
-Authorization: users API-Key YOUR_API_KEY
+### Token cleanup (optional cron)
+
+Expired tokens are removed when new tokens are issued. For standalone cleanup (e.g. every 5 minutes), set `ACCESS_TOKEN_CLEANUP_SECRET` and call:
+
+```http
+POST /api/access-tokens/cleanup
+X-Access-Token-Cleanup-Secret: <ACCESS_TOKEN_CLEANUP_SECRET>
 ```
 
-Read operations are public by design – the Library serves images that are meant to be displayed on websites.
+Response: `{ "deleted": <number> }`. If the env var is not set, the endpoint returns 503.
 
 ### Restricting CORS (optional)
 

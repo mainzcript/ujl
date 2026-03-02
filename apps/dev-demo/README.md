@@ -2,10 +2,10 @@
 
 Minimal integration demo for the UJL Crafter – a visual editor for UJL documents.
 
-This app demonstrates how to embed the UJL Crafter into a vanilla TypeScript application with two library storage modes:
+This app is a **SvelteKit** application that demonstrates how to embed the Crafter with two library storage modes:
 
 - **Inline** (default): Library stored as Base64 directly in the document
-- **Backend**: Library stored on a Payload CMS server (`services/library`)
+- **Backend**: Library stored on a Payload CMS server (`services/library`). The API key stays server-side; the frontend receives short-lived tokens via `/api/library-token`.
 
 ## Quick Start (Inline Mode)
 
@@ -21,12 +21,11 @@ This starts the Crafter at [http://localhost:5174](http://localhost:5174) with i
 
 ## Backend Mode Setup
 
-To use persistent library storage via the Library service, follow these steps:
+To use persistent library storage via the Library service:
 
 ### Step 1: Configure the Library Service
 
 ```bash
-# In a separate terminal
 cd services/library
 cp .env.example .env
 ```
@@ -36,119 +35,108 @@ Open `.env` and set at least `PAYLOAD_SECRET`, `POSTGRES_PASSWORD`, and `DATABAS
 ### Step 2: Start the Library Service
 
 ```bash
-# In a separate terminal
 cd services/library
 pnpm run dev
 ```
 
-This starts:
+PostgreSQL (Docker) and Payload CMS run at [http://localhost:3000](http://localhost:3000).
 
-- PostgreSQL database (via Docker)
-- Payload CMS server at [http://localhost:3000](http://localhost:3000)
+### Step 3: Create an Admin User and API Key
 
-### Step 3: Create an Admin User
+1. Open [http://localhost:3000/admin](http://localhost:3000/admin), create the first user (admin).
+2. In **Users** → your user, enable **API Key** and save. Copy the key.
 
-1. Open [http://localhost:3000/admin](http://localhost:3000/admin)
-2. Fill in the registration form (first user becomes admin), you can use any email - it will not be verified.
-3. Click "Create Account"
-
-### Step 4: Enable API Key
-
-1. In the Admin UI, go to **Users** in the sidebar
-2. Click on your user
-3. Scroll down to **Enable API Key**
-4. Toggle it on
-5. Click **Save**
-6. **Copy the generated API Key** (you'll need it in the next step)
-
-### Step 5: Configure Environment
+### Step 4: Configure dev-demo environment
 
 ```bash
-# In apps/dev-demo directory
+cd apps/dev-demo
 cp .env.example .env
 ```
 
 Edit `.env`:
 
 ```bash
-VITE_LIBRARY_STORAGE=backend
-VITE_BACKEND_URL=http://localhost:3000
-VITE_BACKEND_API_KEY=your-api-key-here  # Paste the key from Step 3
+LIBRARY_STORAGE=backend
+LIBRARY_URL=http://localhost:3000
+LIBRARY_API_KEY=your-copied-api-key
 ```
 
-### Step 6: Start the Demo
+The SvelteKit route `/api/library-token` uses `LIBRARY_API_KEY` to return a token to the frontend (no token URL config needed).
+
+### Step 5: Start the demo
 
 ```bash
 pnpm --filter @ujl-framework/dev-demo dev
 ```
 
-Now when you upload images in the Crafter, they'll be stored in the Library.
+Images uploaded in the Crafter are stored in the Library.
 
 ## Project Structure
 
 ```
 apps/dev-demo/
 ├── src/
-│   ├── main.ts              # Crafter initialization with ENV config
-│   └── modules/
-│       └── testimonial.ts   # Example custom module (TestimonialModule)
-├── index.html               # Minimal HTML shell
-├── .env.example             # Environment configuration template
-├── .prettierrc              # Prettier configuration
+│   ├── app.html
+│   ├── app.d.ts
+│   ├── routes/
+│   │   ├── +layout.svelte      # Fonts, global styles
+│   │   ├── +layout.server.ts   # Library config from env
+│   │   ├── +page.svelte        # Crafter mount
+│   │   └── api/
+│   │       └── library-token/
+│   │           └── +server.ts   # Token endpoint (uses LIBRARY_API_KEY)
+│   └── lib/
+│       └── modules/
+│           └── testimonial.ts  # Example custom module
+├── .env.example
 ├── package.json
+├── svelte.config.js
 ├── tsconfig.json
 ├── vite.config.ts
-└── README.md                # This file
+└── README.md
 ```
 
 ## Configuration
 
-| Variable               | Default  | Description                                      |
-| ---------------------- | -------- | ------------------------------------------------ |
-| `VITE_LIBRARY_STORAGE` | `inline` | Library storage mode: `inline` or `backend`      |
-| `VITE_BACKEND_URL`     | –        | Library base URL (e.g., `http://localhost:3000`) |
-| `VITE_BACKEND_API_KEY` | –        | API key for Library authentication               |
+| Variable          | Default  | Description                                               |
+| ----------------- | -------- | --------------------------------------------------------- |
+| `LIBRARY_STORAGE` | `inline` | Library storage mode: `inline` or `backend`               |
+| `LIBRARY_URL`     | –        | Library base URL (e.g. `http://localhost:3000`)           |
+| `LIBRARY_API_KEY` | –        | API key from Library admin (server-only, for token route) |
+
+All variables are server-only (no `VITE_` prefix). The token endpoint is fixed at `/api/library-token`.
 
 ## Debugging
 
-The Crafter instance is exposed globally for debugging:
+The Crafter instance is exposed on `window.crafter`:
 
 ```javascript
-// In browser console
-window.crafter.getDocument(); // Get current document
-window.crafter.getTheme(); // Get current theme
-window.crafter.getMode(); // Get editor mode ('editor' or 'designer')
+window.crafter.getDocument();
+window.crafter.getTheme();
+window.crafter.getMode();
 ```
 
 ## Troubleshooting
 
-### "Backend mode requires VITE_BACKEND_URL"
+### Backend mode shows inline or error
 
-You set `VITE_LIBRARY_STORAGE=backend` but didn't configure the URL. Either:
-
-- Set `VITE_BACKEND_URL` in your `.env` file, or
-- Change `VITE_LIBRARY_STORAGE` back to `inline`
+Set `LIBRARY_STORAGE=backend`, `LIBRARY_URL`, and `LIBRARY_API_KEY` in `.env`. Restart the dev server.
 
 ### "Image backend connection error"
 
-The Library service is not running or not reachable. Check:
-
 1. Is `services/library` running? (`pnpm run dev`)
-2. Is the endpoint correct? (default: `http://localhost:3000/api`)
-3. Is the API key valid?
+2. Is `LIBRARY_URL` correct?
+3. Does `/api/library-token` return `{ token: "..." }`? (Check Network tab.)
 
-### CORS Errors
+The Library service must accept `Authorization: Bearer <token>`. If it only supports API-Key headers, the token route may need to pass the key as the token until the Library adds Bearer support.
 
-The Library has open CORS by default. If you still see CORS errors:
+### CORS
 
-1. Check that you're using `http://localhost:3000/api` (not just `/api`)
-2. Restart the Library service
+The Library has open CORS by default. Use the full URL (e.g. `http://localhost:3000`) for `LIBRARY_URL`.
 
 ## Fonts
 
-This demo includes all fonts used by the Crafter UI (via Fontsource). They are imported in `main.ts` and required for proper font rendering in the Designer Mode.
-
-If you're integrating the Crafter into your own app, you'll need to import these fonts yourself – see `main.ts` for the list.
+Fonts used by the Crafter UI are imported in `src/routes/+layout.svelte`. When integrating the Crafter elsewhere, import the same fonts as needed.
 
 ## Related Documentation
 

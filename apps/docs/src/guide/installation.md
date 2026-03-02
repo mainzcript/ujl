@@ -70,7 +70,34 @@ crafter.onSave((doc, theme) => {
 
 ### With backend asset storage
 
-To use the UJL Library Service for asset management (responsive variants, metadata, i18n):
+To use the UJL Library Service for asset management (responsive variants, metadata, i18n), use **session-key authentication**. The browser never receives a permanent API key; instead, your App Backend issues short-lived tokens after validating the user session.
+
+**Step 1: App Backend** (e.g. SvelteKit `+server.ts`, Next.js API route)
+
+Your backend validates the user session, then requests a temporary token from the Library Service using the **server-side only** API key. The API key never reaches the client.
+
+```javascript
+// Example: App Backend endpoint that issues a short-lived token
+export async function POST({ request }) {
+	const session = await getSession(request);
+	if (!session?.userId) return new Response(null, { status: 401 });
+
+	const res = await fetch("https://your-library.example.com/api/access-tokens/issue", {
+		method: "POST",
+		headers: {
+			Authorization: `users API-Key ${process.env.LIBRARY_API_KEY}`, // Server-side only!
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ requestedBy: session.userId }),
+	});
+	const { token } = await res.json();
+	return Response.json({ token });
+}
+```
+
+**Step 2: Crafter (frontend)**
+
+The frontend calls your backend (not the Library directly) to get a temporary token:
 
 ```javascript
 const crafter = new UJLCrafter({
@@ -79,15 +106,19 @@ const crafter = new UJLCrafter({
 	theme: ujltDocument,
 	library: {
 		provider: "backend",
-		url: "https://your-library.example.com", // direct mode
-		apiKey: "your-api-key",
-		// OR proxy mode (no apiKey in the browser):
-		// proxyUrl: "/api/library-proxy",
+		url: "https://your-library.example.com",
+		// Calls YOUR backend endpoint, which holds the API key server-side
+		requestAccessToken: async () => {
+			const response = await fetch("/api/library-token"); // Your endpoint, not Library
+			if (!response.ok) throw new Error("Failed to get library token");
+			const { token } = await response.json();
+			return token;
+		},
 	},
 });
 ```
 
-See the [Library Service README](https://github.com/mainzcript/ujl/tree/main/services/library) for setup instructions (Docker + PostgreSQL).
+See the [Library Service README](https://github.com/mainzcript/ujl/tree/main/services/library) for setup instructions (Docker + PostgreSQL) and session-token configuration.
 
 ### With custom modules
 

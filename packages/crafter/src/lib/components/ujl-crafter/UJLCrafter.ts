@@ -47,15 +47,27 @@ export type { SaveCallback } from "$lib/stores/index.js";
  *
  * Two provider modes are available:
  * - `inline`: Assets stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Assets stored on a Payload CMS server (requires url and apiKey or proxyUrl)
+ * - `backend`: Assets stored on a Payload CMS server using session-key authentication
+ *
+ * **Security:** The backend mode uses short-lived tokens (typically 15 minutes) obtained
+ * via the `requestAccessToken` callback. No permanent API key is stored in the browser.
  *
  * The Composer will automatically select the provider that matches the
  * `_library.provider` field in the document being composed.
  */
 export type LibraryOptions =
 	| { provider: "inline" }
-	| { provider: "backend"; url: string; apiKey: string }
-	| { provider: "backend"; proxyUrl: string };
+	| {
+			provider: "backend";
+			/** Base URL of the Payload CMS instance */
+			url: string;
+			/**
+			 * Callback to request a temporary access token.
+			 * Called lazily when needed and cached internally with automatic refresh.
+			 * The App Backend should validate the user session before issuing the token.
+			 */
+			requestAccessToken: () => Promise<string>;
+	  };
 
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
@@ -149,30 +161,22 @@ export class UJLCrafter {
 		// Build the library provider
 		let libraryProvider;
 		if (libraryOptions.provider === "backend") {
-			if ("proxyUrl" in libraryOptions) {
-				libraryProvider = new BackendLibraryProvider({ proxyUrl: libraryOptions.proxyUrl });
-			} else if ("url" in libraryOptions && "apiKey" in libraryOptions) {
-				libraryProvider = new BackendLibraryProvider({
-					url: libraryOptions.url,
-					apiKey: libraryOptions.apiKey,
-				});
+			libraryProvider = new BackendLibraryProvider({
+				url: libraryOptions.url,
+				requestAccessToken: libraryOptions.requestAccessToken,
+			});
 
-				// Async connection check (non-blocking)
-				libraryProvider.checkConnection().then((status) => {
-					if (!status.connected) {
-						logger.error("Library backend connection error:", status.error);
-						this.notify(
-							"error",
-							"Library backend connection error",
-							`Failed to connect to ${libraryOptions.url}`,
-						);
-					}
-				});
-			} else {
-				throw new Error(
-					"UJLCrafter: Backend library requires either { url, apiKey } or { proxyUrl }",
-				);
-			}
+			// Async connection check (non-blocking)
+			libraryProvider.checkConnection().then((status) => {
+				if (!status.connected) {
+					logger.error("Library backend connection error:", status.error);
+					this.notify(
+						"error",
+						"Library backend connection error",
+						`Failed to connect to ${libraryOptions.url}`,
+					);
+				}
+			});
 		} else {
 			libraryProvider = new InlineLibraryProvider(
 				() => getLibraryBridge(),

@@ -84,24 +84,22 @@ crafter.unregisterModule("hero");
 ### With Backend Asset Storage
 
 ```typescript
-// Direct mode: API key held server-side (local dev, SSR)
+// Session-key auth: short-lived tokens from your App Backend (no API key in browser)
+// NOTE: You must implement the /api/library-token endpoint in your backend.
+//       It should use the server-side LIBRARY_API_KEY to call the Library Service
+//       and return a short-lived token. See apps/docs/src/guide/installation.md for a full example.
 const crafter = new UJLCrafter({
 	target: "#editor-container",
 	document: myContentDocument,
 	theme: myPreviewTheme,
 	library: {
 		provider: "backend",
-		url: "http://localhost:3000",
-		apiKey: "your-api-key",
-	},
-});
-
-// Proxy mode: requests forwarded via a BFF (deployed browser setups)
-const crafter = new UJLCrafter({
-	target: "#editor-container",
-	library: {
-		provider: "backend",
-		proxyUrl: "/api/library-proxy",
+		url: "https://your-library.example.com",
+		requestAccessToken: async () => {
+			const res = await fetch("/api/library-token"); // Your backend endpoint
+			const { token } = await res.json();
+			return token;
+		},
 	},
 });
 ```
@@ -150,10 +148,10 @@ In **Editor Mode**, the Crafter provides module tree navigation, click-to-select
 
 The Crafter supports two provider modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
 
-| Provider  | Required Options               | Description                         |
-| --------- | ------------------------------ | ----------------------------------- |
-| `inline`  | None                           | Assets stored as Base64 in document |
-| `backend` | `url` + `apiKey` or `proxyUrl` | Assets stored on Payload CMS server |
+| Provider  | Required Options             | Description                                              |
+| --------- | ---------------------------- | -------------------------------------------------------- |
+| `inline`  | None                         | Assets stored as Base64 in document                      |
+| `backend` | `url` + `requestAccessToken` | Assets on Payload CMS; auth via short-lived session keys |
 
 For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
 
@@ -196,8 +194,7 @@ interface UJLCrafterOptions {
 	editorTheme?: UJLTDocument;
 	library?:
 		| { provider: "inline" }
-		| { provider: "backend"; url: string; apiKey: string }
-		| { provider: "backend"; proxyUrl: string };
+		| { provider: "backend"; url: string; requestAccessToken: () => Promise<string> };
 	modules?: ModuleBase[]; // Custom modules to register alongside built-in modules
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }

@@ -7,17 +7,19 @@ import { BackendLibraryProvider } from "./backend-provider.js";
 // ============================================
 
 const BASE_URL = "http://localhost:3000";
-const API_KEY = "test-api-key";
 const COLLECTION = "images";
 const API_BASE = `${BASE_URL}/api/${COLLECTION}`;
-
-const PROXY_URL = "/api/library";
+const TEST_TOKEN = "test-session-token";
 
 const SAMPLE_METADATA: AssetMetadata = {
 	filename: "photo.jpg",
 	width: 1920,
 	height: 1080,
 };
+
+function createRequestAccessTokenMock() {
+	return vi.fn().mockResolvedValue(TEST_TOKEN);
+}
 
 /** Minimal PayloadImageDoc fixture */
 function makePayloadDoc(overrides: Record<string, unknown> = {}) {
@@ -55,14 +57,19 @@ function makeFile(name = "photo.jpg", type = "image/jpeg"): File {
 }
 
 // ============================================
-// TESTS — Direct mode
+// TESTS — Session-key mode
 // ============================================
 
-describe("BackendLibraryProvider (direct mode)", () => {
+describe("BackendLibraryProvider (session-key)", () => {
 	let adapter: BackendLibraryProvider;
+	let requestAccessToken: ReturnType<typeof createRequestAccessTokenMock>;
 
 	beforeEach(() => {
-		adapter = new BackendLibraryProvider({ url: BASE_URL, apiKey: API_KEY });
+		requestAccessToken = createRequestAccessTokenMock();
+		adapter = new BackendLibraryProvider({
+			url: BASE_URL,
+			requestAccessToken,
+		});
 		vi.stubGlobal("fetch", vi.fn());
 	});
 
@@ -77,18 +84,19 @@ describe("BackendLibraryProvider (direct mode)", () => {
 	});
 
 	describe("checkConnection", () => {
-		it("should return connected: true on 200 response", async () => {
+		it("should call requestAccessToken then return connected: true on 200 response", async () => {
 			vi.mocked(fetch).mockResolvedValueOnce(
 				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
 			);
 
 			const status = await adapter.checkConnection();
 
+			expect(requestAccessToken).toHaveBeenCalled();
 			expect(status.connected).toBe(true);
 			expect(fetch).toHaveBeenCalledWith(`${API_BASE}?limit=1`, expect.any(Object));
 		});
 
-		it("should include Authorization header in direct mode", async () => {
+		it("should include Authorization Bearer header", async () => {
 			vi.mocked(fetch).mockResolvedValueOnce(
 				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
 			);
@@ -97,7 +105,16 @@ describe("BackendLibraryProvider (direct mode)", () => {
 
 			const [, init] = vi.mocked(fetch).mock.calls[0];
 			const headers = (init as RequestInit).headers as Record<string, string>;
-			expect(headers["Authorization"]).toBe(`users API-Key ${API_KEY}`);
+			expect(headers["Authorization"]).toBe(`Bearer ${TEST_TOKEN}`);
+		});
+
+		it("should return connected: false when requestAccessToken throws", async () => {
+			requestAccessToken.mockRejectedValueOnce(new Error("Session expired"));
+
+			const status = await adapter.checkConnection();
+
+			expect(status.connected).toBe(false);
+			expect(status.error).toMatch(/Failed to obtain access token|Session expired/);
 		});
 
 		it("should return connected: false with auth error on 401", async () => {
@@ -106,7 +123,7 @@ describe("BackendLibraryProvider (direct mode)", () => {
 			const status = await adapter.checkConnection();
 
 			expect(status.connected).toBe(false);
-			expect(status.error).toMatch(/authentication/i);
+			expect(status.error).toMatch(/authentication|Token/i);
 		});
 
 		it("should return connected: false with status message on non-200", async () => {
@@ -124,12 +141,12 @@ describe("BackendLibraryProvider (direct mode)", () => {
 			const status = await adapter.checkConnection();
 
 			expect(status.connected).toBe(false);
-			expect(status.error).toContain(API_BASE);
+			expect(status.error).toMatch(/Network error|Cannot reach backend/);
 		});
 	});
 
 	describe("upload", () => {
-		it("should POST to API base and return assetId from doc.id", async () => {
+		it("should POST to API base with Bearer token and return assetId from doc.id", async () => {
 			const doc = makePayloadDoc();
 			vi.mocked(fetch).mockResolvedValueOnce(
 				new Response(JSON.stringify({ doc }), { status: 201 }),
@@ -141,6 +158,8 @@ describe("BackendLibraryProvider (direct mode)", () => {
 			const [url, init] = vi.mocked(fetch).mock.calls[0];
 			expect(url).toBe(API_BASE);
 			expect((init as RequestInit).method).toBe("POST");
+			const headers = (init as RequestInit).headers as Record<string, string>;
+			expect(headers["Authorization"]).toBe(`Bearer ${TEST_TOKEN}`);
 		});
 
 		it("should resolve the best responsive image size for the entry src", async () => {
@@ -157,12 +176,11 @@ describe("BackendLibraryProvider (direct mode)", () => {
 
 			const result = await adapter.upload(makeFile(), SAMPLE_METADATA);
 
-			// max is highest priority
 			expect(result.entry.src).toBe(`${BASE_URL}/media/photo-max.jpg`);
 		});
 
 		it("should fall back to doc.url when no sizes are present", async () => {
-			const doc = makePayloadDoc(); // no sizes
+			const doc = makePayloadDoc();
 			vi.mocked(fetch).mockResolvedValueOnce(
 				new Response(JSON.stringify({ doc }), { status: 201 }),
 			);
@@ -311,7 +329,7 @@ describe("BackendLibraryProvider (direct mode)", () => {
 		it("should use a custom collection slug in the API base", async () => {
 			const customAdapter = new BackendLibraryProvider({
 				url: BASE_URL,
-				apiKey: API_KEY,
+				requestAccessToken,
 				collectionSlug: "assets",
 			});
 			vi.mocked(fetch).mockResolvedValueOnce(
@@ -329,7 +347,7 @@ describe("BackendLibraryProvider (direct mode)", () => {
 		it("should strip a trailing slash from the base URL", async () => {
 			const slashAdapter = new BackendLibraryProvider({
 				url: `${BASE_URL}/`,
-				apiKey: API_KEY,
+				requestAccessToken,
 			});
 			vi.mocked(fetch).mockResolvedValueOnce(
 				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
@@ -338,133 +356,7 @@ describe("BackendLibraryProvider (direct mode)", () => {
 			await slashAdapter.checkConnection();
 
 			const [url] = vi.mocked(fetch).mock.calls[0];
-			// Must not contain double slashes
 			expect(url).not.toContain("//api/");
-		});
-	});
-});
-
-// ============================================
-// TESTS — Proxy mode
-// ============================================
-
-describe("BackendLibraryProvider (proxy mode)", () => {
-	let adapter: BackendLibraryProvider;
-
-	beforeEach(() => {
-		adapter = new BackendLibraryProvider({ proxyUrl: PROXY_URL });
-		vi.stubGlobal("fetch", vi.fn());
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
-	describe("name", () => {
-		it("should expose name 'backend'", () => {
-			expect(adapter.name).toBe("backend");
-		});
-	});
-
-	describe("headers", () => {
-		it("should NOT include an Authorization header in proxy mode", async () => {
-			vi.mocked(fetch).mockResolvedValueOnce(
-				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
-			);
-
-			await adapter.checkConnection();
-
-			const [, init] = vi.mocked(fetch).mock.calls[0];
-			const headers = (init as RequestInit).headers as Record<string, string>;
-			expect(headers?.["Authorization"]).toBeUndefined();
-		});
-	});
-
-	describe("checkConnection", () => {
-		it("should call proxyUrl?limit=1", async () => {
-			vi.mocked(fetch).mockResolvedValueOnce(
-				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
-			);
-
-			const status = await adapter.checkConnection();
-
-			expect(status.connected).toBe(true);
-			expect(fetch).toHaveBeenCalledWith(`${PROXY_URL}?limit=1`, expect.any(Object));
-		});
-	});
-
-	describe("trailing slash normalisation", () => {
-		it("should strip a trailing slash from the proxy URL", async () => {
-			const trailingAdapter = new BackendLibraryProvider({ proxyUrl: `${PROXY_URL}/` });
-			vi.mocked(fetch).mockResolvedValueOnce(
-				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
-			);
-
-			await trailingAdapter.checkConnection();
-
-			const [url] = vi.mocked(fetch).mock.calls[0];
-			expect(url).toBe(`${PROXY_URL}?limit=1`);
-		});
-	});
-
-	describe("get", () => {
-		it("should call proxyUrl/{id}", async () => {
-			const doc = makePayloadDoc({ id: "p1" });
-			vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify(doc), { status: 200 }));
-
-			await adapter.get("p1");
-
-			expect(fetch).toHaveBeenCalledWith(`${PROXY_URL}/p1`, expect.any(Object));
-		});
-
-		it("should use the URL returned by the proxy as-is (no prefix applied)", async () => {
-			// In proxy mode baseUrl is null so no prefix is added to relative URLs
-			const doc = makePayloadDoc({ url: "/media/photo.jpg" });
-			vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify(doc), { status: 200 }));
-
-			const entry = await adapter.get("p1");
-
-			expect(entry!.src).toBe("/media/photo.jpg");
-		});
-	});
-
-	describe("upload", () => {
-		it("should POST to proxyUrl", async () => {
-			const doc = makePayloadDoc();
-			vi.mocked(fetch).mockResolvedValueOnce(
-				new Response(JSON.stringify({ doc }), { status: 201 }),
-			);
-
-			await adapter.upload(makeFile(), SAMPLE_METADATA);
-
-			const [url, init] = vi.mocked(fetch).mock.calls[0];
-			expect(url).toBe(PROXY_URL);
-			expect((init as RequestInit).method).toBe("POST");
-		});
-	});
-
-	describe("list", () => {
-		it("should call proxyUrl?limit=100", async () => {
-			vi.mocked(fetch).mockResolvedValueOnce(
-				new Response(JSON.stringify(makePayloadListResponse([])), { status: 200 }),
-			);
-
-			await adapter.list();
-
-			expect(fetch).toHaveBeenCalledWith(`${PROXY_URL}?limit=100`, expect.any(Object));
-		});
-	});
-
-	describe("delete", () => {
-		it("should DELETE proxyUrl/{id}", async () => {
-			vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
-
-			const result = await adapter.delete("p1");
-
-			expect(result).toBe(true);
-			const [url, init] = vi.mocked(fetch).mock.calls[0];
-			expect(url).toBe(`${PROXY_URL}/p1`);
-			expect((init as RequestInit).method).toBe("DELETE");
 		});
 	});
 });

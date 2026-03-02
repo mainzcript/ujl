@@ -7,8 +7,10 @@ import { fileURLToPath } from "url";
 // Type assertion needed due to sharp 0.34.x type mismatch with Payload's SharpDependency
 const sharpInstance = sharp as unknown as SanitizedConfig["sharp"];
 
+import { AccessTokens } from "./collections/AccessTokens";
 import { Images } from "./collections/Images";
 import { Users } from "./collections/Users";
+import { cleanupAccessTokensEndpoint, issueAccessToken } from "./endpoints/accessTokens";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -33,7 +35,8 @@ export default buildConfig({
 		},
 	},
 	cors,
-	collections: [Users, Images],
+	collections: [Users, Images, AccessTokens],
+	endpoints: [issueAccessToken, cleanupAccessTokensEndpoint],
 	// Localization: Pre-configured for common European languages
 	// Add/remove locales requires migration + rebuild
 	localization: {

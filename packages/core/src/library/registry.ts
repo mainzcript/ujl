@@ -14,7 +14,7 @@ import { InlineLibraryProvider } from "./inline-provider.js";
  *
  * ```typescript
  * const libraryRegistry = new LibraryRegistry();
- * libraryRegistry.registerProvider(new BackendLibraryProvider({ url, apiKey }));
+ * libraryRegistry.registerProvider(new BackendLibraryProvider({ url, requestAccessToken }));
  *
  * const composer = new Composer(undefined, libraryRegistry);
  * ```

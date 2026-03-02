@@ -37,7 +37,9 @@ UJL supports two library providers, selected at the Crafter configuration level:
 }
 ```
 
-**Backend provider**, assets are referenced by URL, resolved via the Library Service:
+**Backend provider**, assets are referenced by URL, resolved via the Library Service. Authentication uses **session-key**: the frontend receives short-lived tokens from the App Backend (which holds the permanent API key server-side). No API key is ever sent to the browser.
+
+The Library Service exposes `POST /api/access-tokens/issue` (requires API key) to issue short-lived Bearer tokens. Client applications should proxy this through their own backend endpoint (e.g., `/api/library-token` in SvelteKit/Next.js) to keep the API key server-side.
 
 ```json
 {
@@ -65,6 +67,6 @@ A single mode would force a trade-off. Inline-only doesn't scale to large librar
 
 Simple documents (demos, prototypes) work without any infrastructure. Production projects can use the Library Service for full asset management. The Composer and adapters are agnostic to the storage mode.
 
-Trade-off: inline documents grow large quickly with many images. Backend storage requires the Library Service (Docker + PostgreSQL). Storage-mode migration (inline ↔ backend) is planned but not yet implemented.
+Trade-off: inline documents grow large quickly with many images. Backend storage requires the Library Service (Docker + PostgreSQL) and an App Backend endpoint that issues short-lived tokens. Storage-mode migration (inline ↔ backend) is planned but not yet implemented.
 
 **Related:** [ADR-005](/reference/decisions/0005-zod-schema-validation) (image schemas validated via Zod)

@@ -1,10 +1,12 @@
 import type { CollectionConfig } from "payload";
+import { bearerTokenStrategy } from "../auth/bearerTokenStrategy";
 
 /**
  * Users collection for UJL Library
  *
  * Manages authentication and API key access for the Library service.
- * API keys are used by the Crafter and other UJL applications to authenticate.
+ * Supports: (1) API key via useAPIKey, (2) Bearer tokens via bearerTokenStrategy
+ * (short-lived tokens from POST /access-tokens/issue).
  */
 export const Users: CollectionConfig = {
 	slug: "users",
@@ -12,8 +14,8 @@ export const Users: CollectionConfig = {
 		useAsTitle: "email",
 	},
 	auth: {
-		// Enable API key generation for programmatic access
 		useAPIKey: true,
+		strategies: [bearerTokenStrategy],
 	},
 	fields: [],
 };
