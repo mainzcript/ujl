@@ -131,6 +131,17 @@ export class InlineLibraryProvider {
 		return updated;
 	}
 
+	/**
+	 * Delete asset hook for capability parity with other providers.
+	 *
+	 * Inline provider does not manage external storage, so deletion itself
+	 * is handled by the Crafter store when it removes the asset from
+	 * `doc.ujlc.library` after this method resolves.
+	 */
+	async delete(_id: string): Promise<void> {
+		return;
+	}
+
 	// Helper methods
 
 	private arrayBufferToBase64(buffer: ArrayBuffer, type: string): string {

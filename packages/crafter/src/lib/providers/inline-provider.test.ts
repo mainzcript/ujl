@@ -160,6 +160,12 @@ describe("InlineLibraryProvider", () => {
 		});
 	});
 
+	describe("delete", () => {
+		it("should resolve successfully (store removes inline asset state)", async () => {
+			await expect(provider.delete("img-1")).resolves.toBeUndefined();
+		});
+	});
+
 	describe("getImageDimensions", () => {
 		it("should extract dimensions when Image loads successfully", async () => {
 			class ImageSuccessMock {
