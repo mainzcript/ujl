@@ -14,7 +14,7 @@ import { LibraryError } from "@ujl-framework/types";
  * No external service needed - assets are embedded as Base64.
  *
  * Note: Base64 increases file size by ~33%.
- * The Crafter automatically compresses (target: ≤100 KB).
+ * The Crafter automatically compresses (target: <=100 KB).
  *
  * This is a stateless provider - it only processes data and returns results.
  * The Crafter/Store manages all document storage.
@@ -82,7 +82,7 @@ export class InlineLibraryProvider {
 		// Base64 conversion
 		const base64 = this.arrayBufferToBase64(data, options.type);
 
-		// Get dimensions (always 0,0 in Node.js/test environment without DOM)
+		// Get dimensions (falls back to 0,0 when Image loading is unavailable/fails)
 		const { width, height } = await this.getImageDimensions(base64);
 
 		// Create new LibraryAssetImage format
@@ -136,6 +136,7 @@ export class InlineLibraryProvider {
 	private arrayBufferToBase64(buffer: ArrayBuffer, type: string): string {
 		const bytes = new Uint8Array(buffer);
 		let binary = "";
+		// Chunk conversion avoids very large argument lists in fromCharCode.
 		for (let i = 0; i < bytes.length; i += 1024) {
 			binary += String.fromCharCode(...bytes.slice(i, i + 1024));
 		}
@@ -143,9 +144,7 @@ export class InlineLibraryProvider {
 	}
 
 	private async getImageDimensions(url: string): Promise<{ width: number; height: number }> {
-		// In Node.js/test environment without DOM: return default dimensions
-		// Check for browser globals safely using globalThis
-		// We cast globalThis to access optional browser globals
+		// In environments without Image constructor support, return default dimensions.
 		const globalWithWindow = globalThis as typeof globalThis & {
 			window?: {
 				Image?: new () => {
@@ -162,7 +161,7 @@ export class InlineLibraryProvider {
 			return { width: 0, height: 0 };
 		}
 
-		// Browser environment: load image to get natural dimensions
+		// Browser-like environment: load image to get natural dimensions.
 		const img = new globalWithWindow.window.Image();
 
 		return new Promise((resolve) => {
@@ -170,7 +169,6 @@ export class InlineLibraryProvider {
 				resolve({ width: img.naturalWidth, height: img.naturalHeight });
 			};
 			img.onerror = () => {
-				// Fallback to zero on error to maintain backward compatibility
 				resolve({ width: 0, height: 0 });
 			};
 			img.src = url;

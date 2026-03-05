@@ -121,7 +121,7 @@ type UJLAbstractCallToActionModuleNode = {
 type UJLAbstractImageNode = {
 	type: "image";
 	props: {
-		asset: LibraryAssetImage | null; // Direct reference from document library
+		asset: LibraryAssetImage | null; // The selected library asset for rendering
 		alt?: string; // From module field, overrides asset.meta.alt
 	};
 	id: string;

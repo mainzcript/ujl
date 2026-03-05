@@ -1,11 +1,12 @@
 import type { LibraryAsset, LibraryAssetImage } from "@ujl-framework/types";
 import { LibraryError } from "@ujl-framework/types";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { InlineLibraryProvider } from "./inline-provider.js";
 
 describe("InlineLibraryProvider", () => {
 	let provider: InlineLibraryProvider;
 	let mockLibrary: Record<string, LibraryAsset>;
+	let originalImage: typeof window.Image;
 
 	beforeEach(() => {
 		provider = new InlineLibraryProvider();
@@ -21,6 +22,23 @@ describe("InlineLibraryProvider", () => {
 				meta: { filename: "photo.jpg", caption: "Vacation photo" },
 			} as LibraryAssetImage,
 		};
+		originalImage = window.Image;
+		// Default to an immediate error path so upload tests stay deterministic in jsdom.
+		class ImageDefaultMock {
+			naturalWidth = 0;
+			naturalHeight = 0;
+			onload: (() => void) | null = null;
+			onerror: (() => void) | null = null;
+
+			set src(_value: string) {
+				setTimeout(() => this.onerror?.(), 0);
+			}
+		}
+		window.Image = ImageDefaultMock as unknown as typeof window.Image;
+	});
+
+	afterEach(() => {
+		window.Image = originalImage;
 	});
 
 	describe("list", () => {
@@ -120,7 +138,6 @@ describe("InlineLibraryProvider", () => {
 		});
 
 		it("should throw LibraryError for unknown asset", async () => {
-			// Should throw with correct error code - verify error properties
 			await expect(
 				provider.updateMetadata(mockLibrary, "unknown", { alt: "test" }),
 			).rejects.toSatisfy((error: LibraryError) => {
@@ -137,7 +154,6 @@ describe("InlineLibraryProvider", () => {
 				alt: "New alt",
 			});
 
-			// Existing fields should be preserved
 			expect(updated.img.width).toBe(800);
 			expect(updated.img.height).toBe(600);
 			expect(updated.img.src).toBe("data:image/png;base64,abc123");
@@ -145,12 +161,55 @@ describe("InlineLibraryProvider", () => {
 	});
 
 	describe("getImageDimensions", () => {
-		// Note: In Node.js/test environment without DOM, dimensions will always be 0,0
-		// The actual browser implementation is tested separately in integration tests
+		it("should extract dimensions when Image loads successfully", async () => {
+			class ImageSuccessMock {
+				naturalWidth = 640;
+				naturalHeight = 480;
+				onload: (() => void) | null = null;
+				onerror: (() => void) | null = null;
 
-		it("should return zero dimensions in test environment", async () => {
-			// In test environment (Node.js), Image is not available
-			// So upload should return 0,0 for dimensions
+				set src(_value: string) {
+					setTimeout(() => this.onload?.(), 0);
+				}
+			}
+
+			window.Image = ImageSuccessMock as unknown as typeof window.Image;
+
+			const data = new ArrayBuffer(8);
+			const result = await provider.upload(data, { filename: "test.png", type: "image/png" });
+
+			expect(result.img.width).toBe(640);
+			expect(result.img.height).toBe(480);
+		});
+
+		it("should fall back to zero dimensions when Image loading fails", async () => {
+			class ImageErrorMock {
+				naturalWidth = 0;
+				naturalHeight = 0;
+				onload: (() => void) | null = null;
+				onerror: (() => void) | null = null;
+
+				set src(_value: string) {
+					setTimeout(() => this.onerror?.(), 0);
+				}
+			}
+
+			window.Image = ImageErrorMock as unknown as typeof window.Image;
+
+			const data = new ArrayBuffer(8);
+			const result = await provider.upload(data, { filename: "test.png", type: "image/png" });
+
+			expect(result.img.width).toBe(0);
+			expect(result.img.height).toBe(0);
+		});
+
+		it("should return zero dimensions without Image constructor", async () => {
+			Object.defineProperty(window, "Image", {
+				value: undefined,
+				configurable: true,
+				writable: true,
+			});
+
 			const data = new ArrayBuffer(8);
 			const result = await provider.upload(data, { filename: "test.png", type: "image/png" });
 

@@ -440,4 +440,19 @@ describe("CrafterStore Library Operations - Integration", () => {
 			expect(store.libraryItems[0]?.meta?.alt).toBe("New alt");
 		});
 	});
+
+	describe("setUjlcDocument", () => {
+		it("should reset expanded node set with a new reactive Set instance", async () => {
+			const store = await renderStore(createMockDeps());
+
+			store.setNodeExpanded("node-a", true);
+			expect(store.expandedNodeIds.has("node-a")).toBe(true);
+			const expandedBeforeReset = store.expandedNodeIds;
+
+			store.setUjlcDocument(createMockUjlcDocument());
+
+			expect(store.expandedNodeIds.size).toBe(0);
+			expect(store.expandedNodeIds).not.toBe(expandedBeforeReset);
+		});
+	});
 });

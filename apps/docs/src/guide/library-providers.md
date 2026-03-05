@@ -22,11 +22,10 @@ const crafter = new UJLCrafter({
 });
 ```
 
-To be explicit, you can pass the inline provider from core:
+To be explicit, you can pass the inline provider from crafter:
 
 ```javascript
-import { UJLCrafter } from "@ujl-framework/crafter";
-import { InlineLibraryProvider } from "@ujl-framework/core";
+import { UJLCrafter, InlineLibraryProvider } from "@ujl-framework/crafter";
 
 const crafter = new UJLCrafter({
 	target: "#app",

@@ -165,12 +165,12 @@ if (module) {
 
 ### Fields
 
-| Field           | Purpose         | Config                             |
-| --------------- | --------------- | ---------------------------------- |
-| `TextField`     | Text input      | `maxLength`, `default`             |
-| `NumberField`   | Numeric input   | `min`, `max`, `default`            |
-| `RichTextField` | Rich text       | `default` (ProseMirror)            |
-| `ImageField`    | Image reference | `default` (`UJLImageData \| null`) |
+| Field           | Purpose         | Config                                 |
+| --------------- | --------------- | -------------------------------------- |
+| `TextField`     | Text input      | `maxLength`, `default`                 |
+| `NumberField`   | Numeric input   | `min`, `max`, `default`                |
+| `RichTextField` | Rich text       | `default` (ProseMirror)                |
+| `ImageField`    | Image reference | `default` (`string \| number \| null`) |
 
 ## Library System
 
@@ -194,10 +194,10 @@ Assets are stored as `LibraryAssetImage` objects with:
 - `meta` - Alt, caption, credits
 - `sources` - Art direction
 
-**Providers** (stateless):
+**Providers** (Crafter concern):
 
-- `InlineLibraryProvider` - Base64 images in document
-- Custom providers for backend storage
+- `InlineLibraryProvider` is provided by `@ujl-framework/crafter`
+- Custom providers implement the `LibraryProvider` interface from `@ujl-framework/types`
 
 See `@ujl-framework/types` for complete type definitions.
 

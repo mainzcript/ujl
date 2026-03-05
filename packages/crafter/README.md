@@ -83,11 +83,11 @@ crafter.unregisterModule("hero");
 
 ### With a custom library provider
 
-By default the Crafter uses `InlineLibraryProvider` from `@ujl-framework/core` (assets stored in the document). To use a different storage (e.g. your own API), pass a **libraryProvider** that implements the UJL `LibraryProvider` interface. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs for details.
+By default the Crafter uses `InlineLibraryProvider` from `@ujl-framework/crafter` (assets stored in the document). To use a different storage (e.g. your own API), pass a **libraryProvider** that implements the UJL `LibraryProvider` interface. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs for details.
 
 ```typescript
 import { UJLCrafter } from "@ujl-framework/crafter";
-import { InlineLibraryProvider } from "@ujl-framework/core"; // optional: explicit default
+import { InlineLibraryProvider } from "@ujl-framework/crafter"; // optional: explicit default
 
 const crafter = new UJLCrafter({
 	target: "#editor-container",
@@ -222,7 +222,8 @@ src/
 │   │       ├── UJLCrafter.ts   # Public API class
 │   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
 │   │       └── ujl-crafter.svelte          # Main UI component
-│   ├── service-adapters/       # Legacy placeholder (adapters live in @ujl-framework/core)
+│   ├── service-adapters/       # Legacy compatibility layer (providers live in src/lib/providers)
+│   ├── providers/              # Built-in library providers (e.g. InlineLibraryProvider)
 │   ├── stores/                 # CrafterStore (Svelte 5 runes)
 │   ├── styles/                 # CSS architecture (see below)
 │   └── utils/                  # Helpers (clipboard, colors, DOM utilities)

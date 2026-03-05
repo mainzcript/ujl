@@ -60,7 +60,7 @@ The full visual editor, bundled with all dependencies including the Svelte runti
 
 ## Optional backend for assets
 
-The Crafter can use a **libraryProvider** (e.g. `InlineLibraryProvider` from `@ujl-framework/core`, or a custom/backend-backed provider) for asset upload and storage during editing. Rendering reads image data from the document's `doc.ujlc.library`; no separate "Library Service" is required for rendering. See the [Crafter README](https://github.com/mainzcript/ujl/tree/main/packages/crafter) for configuration.
+The Crafter can use a **libraryProvider** (e.g. `InlineLibraryProvider` from `@ujl-framework/crafter`, or a custom/backend-backed provider) for asset upload and storage during editing. Rendering reads image data from the document's `doc.ujlc.library`; no separate "Library Service" is required for rendering. See the [Crafter README](https://github.com/mainzcript/ujl/tree/main/packages/crafter) for configuration.
 
 ## Dependency Layers
 

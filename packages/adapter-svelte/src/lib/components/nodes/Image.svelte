@@ -12,6 +12,31 @@
 	const hasImage = $derived(node.props.asset !== null);
 	const asset = $derived(node.props.asset);
 
+	type SrcsetValue = NonNullable<NonNullable<typeof asset>["img"]["srcset"]>;
+
+	function serializeSrcset(srcset: SrcsetValue): string {
+		if (typeof srcset === "string") return srcset;
+		return srcset.candidates
+			.map((candidate) => {
+				if (srcset.kind === "w") {
+					return `${candidate.url} ${(candidate as { url: string; w: number }).w}w`;
+				}
+				return `${candidate.url} ${(candidate as { url: string; x: number }).x}x`;
+			})
+			.join(", ");
+	}
+
+	function buildImgSrcsetInfo(srcset: SrcsetValue | undefined) {
+		if (!srcset) return null;
+		if (typeof srcset === "string") {
+			return { srcset };
+		}
+		return {
+			srcset: serializeSrcset(srcset),
+			sizes: srcset.kind === "w" ? srcset.sizes : undefined,
+		};
+	}
+
 	// Alt text priority: module field (even if empty string) > asset metadata > empty
 	// null/undefined in module field means "use asset metadata", empty string means "no alt (decorative)"
 	const altText = $derived(
@@ -30,24 +55,7 @@
 	const sources = $derived(asset?.sources);
 
 	// Derived values for img srcset processing
-	const imgSrcsetInfo = $derived(
-		typeof imgSrcset === "string"
-			? { srcset: imgSrcset }
-			: imgSrcset
-				? {
-						srcset: imgSrcset.candidates
-							.map((s) => {
-								if (imgSrcset.kind === "w") {
-									return `${s.url} ${(s as { url: string; w: number }).w}w`;
-								} else {
-									return `${s.url} ${(s as { url: string; x: number }).x}x`;
-								}
-							})
-							.join(", "),
-						sizes: imgSrcset.kind === "w" ? imgSrcset.sizes : undefined,
-					}
-				: null,
-	);
+	const imgSrcsetInfo = $derived(buildImgSrcsetInfo(imgSrcset));
 </script>
 
 <svelte:element
@@ -64,17 +72,7 @@
 					{@const isStringSrcset = typeof srcset === "string"}
 					{@const isWDescriptor = !isStringSrcset && srcset.kind === "w"}
 					<source
-						srcset={isStringSrcset
-							? srcset
-							: srcset.candidates
-									.map((s) => {
-										if (srcset.kind === "w") {
-											return `${s.url} ${(s as { url: string; w: number }).w}w`;
-										} else {
-											return `${s.url} ${(s as { url: string; x: number }).x}x`;
-										}
-									})
-									.join(", ")}
+						srcset={serializeSrcset(srcset)}
 						sizes={isWDescriptor ? srcset.sizes : undefined}
 						type={source.type}
 						media={source.media}

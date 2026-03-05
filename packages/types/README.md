@@ -69,14 +69,15 @@ interface LibraryAssetImage {
 	meta?: ImageMetadata; // Alt, caption, credits
 	sources?: PictureSource[]; // Art direction
 }
-
-type UJLImageData = {
-	imageId: string; // References ujlc.library
-	alt: string; // Module-level override
-};
 ```
 
 Stored in `ujlc.library` as `Record<string, LibraryAssetImage>`.
+
+Terminology mapping:
+
+- `LibraryAssetImage.img` = transport-level image payload (`src`, optional `srcset`, dimensions)
+- AST image nodes (`UJLAbstractImageNode`) use `props.asset` to hold the selected `LibraryAssetImage`
+- `ImageSource` / `ImageSrcSetType` are helper types used inside `LibraryAssetImage` (not a separate asset model)
 
 **For full type definitions, see:**
 

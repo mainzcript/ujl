@@ -18,6 +18,10 @@ export type {
 export type { ProseMirrorDocument, ProseMirrorMark, ProseMirrorNode } from "./prosemirror.js";
 
 // Re-export document types from ujl-content.ts
+// Canonical asset model:
+// - `UJLCLibrary` stores `Record<string, LibraryAssetImage>`
+// - `ImageSource` and `ImageSrcSetType` are nested helper types used by
+//   `LibraryAssetImage` (not a competing top-level asset model)
 export type {
 	ImageSource,
 	ImageSrcSetType,

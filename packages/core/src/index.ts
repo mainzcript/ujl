@@ -4,9 +4,6 @@ export * from "./modules/index.js";
 // Explicitly export ComponentCategory for better TypeScript resolution
 export type { ComponentCategory } from "./modules/index.js";
 
-// Re-export library provider
-export * from "./library/index.js";
-
 /**
  * Re-export composer for easy access
  */

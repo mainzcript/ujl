@@ -31,7 +31,7 @@ Terms used consistently throughout UJL documentation and code.
 
 **ModuleRegistry**, Manages available modules. Custom modules are registered here, making them available for composition and the editor.
 
-**LibraryProvider**, Interface used by the Crafter for asset upload and storage during editing (e.g. `InlineLibraryProvider` from `@ujl-framework/core`). Not used by the Composer; at render time, image data is read from the document's `doc.ujlc.library`.
+**LibraryProvider**, Interface used by the Crafter for asset upload and storage during editing (e.g. `InlineLibraryProvider` from `@ujl-framework/crafter`). Not used by the Composer; at render time, image data is read from the document's `doc.ujlc.library`.
 
 ## Modules and Fields
 

@@ -4,8 +4,8 @@ import type { FieldType } from "../types.js";
 
 /**
  * Value type for image fields in UJLC documents (Image ID)
- * Can be string (inline storage) or number (backend storage like Payload CMS)
- * Resolved to UJLImageData during composition
+ * Can be string (document/library IDs) or number (legacy/external IDs)
+ * Resolved against doc.ujlc.library during composition
  */
 export type ImageFieldValue = string | number | null;
 
@@ -17,8 +17,8 @@ export type ImageFieldConfig = BaseFieldConfig<ImageFieldValue>;
 /**
  * Image field implementation for UJL
  *
- * Stores Image IDs (strings) in UJLC documents.
- * Composer resolves Image IDs to UJLImageData during composition.
+ * Stores asset IDs in UJLC documents.
+ * The Composer resolves IDs against the document's library during composition.
  */
 export class ImageField extends FieldBase<ImageFieldValue, ImageFieldConfig> {
 	/** Default configuration for image fields */

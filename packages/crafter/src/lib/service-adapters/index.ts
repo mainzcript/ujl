@@ -1,6 +1,6 @@
 // This file is kept for backwards compatibility.
-// Library adapters are exported from @ujl-framework/core.
-// Import directly from @ujl-framework/core:
-//   import { InlineLibraryProvider } from "@ujl-framework/core";
+// Library adapters are exported from @ujl-framework/crafter.
+// Import directly from @ujl-framework/crafter:
+//   import { InlineLibraryProvider } from "@ujl-framework/crafter";
 
-export { InlineLibraryProvider } from "@ujl-framework/core";
+export { InlineLibraryProvider } from "$lib/providers/index.js";

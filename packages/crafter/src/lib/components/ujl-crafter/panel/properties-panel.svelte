@@ -6,6 +6,7 @@
 	import { CRAFTER_CONTEXT, COMPOSER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 	import { Composer, type AnyModule } from "@ujl-framework/core";
 	import { findNodeById } from "$lib/utils/ujlc-tree.js";
+	import { buildImageFieldUpdatesWithAutofill } from "$lib/utils/image-field-autofill.js";
 	import { FieldInput } from "$lib/components/ui/index.js";
 	import { logger } from "$lib/utils/logger.js";
 
@@ -57,7 +58,22 @@
 	function handleFieldUpdate(fieldName: string, newValue: unknown) {
 		if (!selectedNodeId || isSlotSelected()) return;
 
-		const success = crafter.operations.updateNodeField(selectedNodeId, fieldName, newValue);
+		const node = selectedNode();
+		const currentModule = module();
+		if (!node || !currentModule) return;
+
+		const updates = buildImageFieldUpdatesWithAutofill({
+			moduleType: currentModule.name,
+			fieldName,
+			newValue,
+			currentFields: node.fields,
+			library: crafter.libraryData,
+		});
+
+		const success =
+			Object.keys(updates).length === 1
+				? crafter.operations.updateNodeField(selectedNodeId, fieldName, newValue)
+				: crafter.operations.updateNodeFields(selectedNodeId, updates);
 
 		if (!success) {
 			logger.error("Failed to update field:", fieldName);

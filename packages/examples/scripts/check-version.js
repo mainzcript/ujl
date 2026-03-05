@@ -71,29 +71,29 @@ try {
 				metaObj = data.ujlt.meta;
 				versionPath = "ujlt.meta._version";
 			} else {
-				console.warn(`⚠ ${filePath}: missing ujlc.meta or ujlt.meta structure`);
+				console.warn(`WARN ${filePath}: missing ujlc.meta or ujlt.meta structure`);
 				errorCount++;
 				continue;
 			}
 
 			// Check if _version field exists
 			if (!("_version" in metaObj)) {
-				console.warn(`⚠ ${filePath}: missing _version field at ${versionPath}`);
+				console.warn(`WARN ${filePath}: missing _version field at ${versionPath}`);
 				errorCount++;
 				continue;
 			}
 
 			if (metaObj._version !== expectedVersion) {
-				console.error(`✗ ${filePath}: version mismatch`);
+				console.error(`ERROR ${filePath}: version mismatch`);
 				console.error(`  Expected: ${expectedVersion}`);
 				console.error(`  Got:      ${metaObj._version}`);
 				mismatchCount++;
 			} else {
-				console.log(`✓ ${filePath}: OK`);
+				console.log(`OK ${filePath}: OK`);
 				okCount++;
 			}
 		} catch (err) {
-			console.error(`✗ Error reading ${filePath}: ${err.message}`);
+			console.error(`ERROR reading ${filePath}: ${err.message}`);
 			errorCount++;
 		}
 	}

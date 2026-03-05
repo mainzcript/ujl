@@ -107,7 +107,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  *   initialUjlcDocument: myDocument,
  *   initialUjltDocument: myTheme,
  *   composer: new Composer(),
- *   library: new InlineLibraryProvider(getLibrary, updateLibrary),
+ *   libraryProvider: new InlineLibraryProvider(),
  * });
  *
  * // Read state
@@ -377,7 +377,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function setUjlcDocument(doc: UJLCDocument): void {
 		_ujlcDocument = doc;
 		_selectedNodeId = null;
-		_expandedNodeIds.clear();
+		// Reassign to trigger Svelte reactivity for Set consumers.
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
+		_expandedNodeIds = new Set();
 
 		// Reset library state to force reload from new document's library/provider
 		_libraryItems.splice(0, _libraryItems.length);

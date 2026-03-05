@@ -4,4 +4,4 @@
 "@ujl-framework/crafter": minor
 ---
 
-Introduce the `LibraryBase` provider system for asset management.
+Introduce the Library provider system for asset management.

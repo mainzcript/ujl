@@ -1,5 +1,6 @@
+import { InlineLibraryProvider } from "$lib/providers/index.js";
 import { createCrafterStore, type CrafterStore, type SaveCallback } from "$lib/stores/index.js";
-import { Composer, InlineLibraryProvider, type ModuleBase } from "@ujl-framework/core";
+import { Composer, type ModuleBase } from "@ujl-framework/core";
 import type { LibraryProvider, UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 import CrafterElement from "./ujl-crafter-element.svelte";
