@@ -32,7 +32,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^10.0.1",
-		"@types/node": "^25.3.3",
+		"@types/node": "^25.3.4",
 		"@ujl-framework/examples": "workspace:*",
 		"eslint": "^10.0.2",
 		"eslint-config-prettier": "^10.1.8",

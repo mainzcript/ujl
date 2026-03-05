@@ -70,7 +70,7 @@
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.2.1",
-		"@types/node": "^25.3.3",
+		"@types/node": "^25.3.4",
 		"@ujl-framework/core": "workspace:*",
 		"@ujl-framework/examples": "workspace:*",
 		"eslint": "^10.0.2",
