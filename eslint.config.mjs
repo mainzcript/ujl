@@ -284,9 +284,9 @@ export default defineConfig(
 			},
 		},
 	},
-	// Dev/Demo apps - relaxed rules for development code
+	// Demo apps - relaxed rules for development code
 	{
-		files: ["apps/dev-demo/**/*.{ts,tsx,js,jsx,svelte}"],
+		files: ["apps/demo/**/*.{ts,tsx,js,jsx}"],
 		rules: {
 			"no-console": "off",
 			"@typescript-eslint/no-non-null-assertion": "off",

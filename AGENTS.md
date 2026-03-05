@@ -59,7 +59,7 @@ Quick reference for agents:
 
 **Services**: `library` (Payload CMS for asset management – images, fonts, documents)
 
-**Apps**: `docs` (VitePress), `dev-demo` (integration demo)
+**Apps**: `docs` (VitePress), `demo` (minimal integration demo)
 
 ## Navigation Tips for Agents
 

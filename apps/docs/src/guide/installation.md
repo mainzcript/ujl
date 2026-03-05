@@ -172,11 +172,11 @@ Skip lazy-loading when the editor is always visible on page load or your app is 
 
 ## Local Development
 
-To run the included dev demo locally:
+To run the included demo locally:
 
 ```bash
 pnpm install
-pnpm --filter @ujl-framework/dev-demo dev
+pnpm --filter @ujl-framework/demo dev
 ```
 
 This starts the Crafter demo at `http://localhost:5174`.

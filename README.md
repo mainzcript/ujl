@@ -74,7 +74,7 @@ Clone this repository and run the included demo:
 git clone https://github.com/mainzcript/ujl.git
 cd ujl
 pnpm install
-pnpm --filter @ujl-framework/dev-demo dev
+pnpm --filter @ujl-framework/demo dev
 ```
 
 Open `http://localhost:5174` to see the Crafter in action.
@@ -92,6 +92,7 @@ ujl/
 │   ├── adapter-web/    # Web Components Adapter (~280 KB gzip)
 │   └── examples/       # Example Content & Test Data
 └── apps/
+    ├── demo/           # Minimal Crafter integration demo (Vite)
     └── docs/           # Documentation Website (VitePress)
 ```
 

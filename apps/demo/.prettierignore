@@ -1,9 +1,5 @@
-# SvelteKit build output
-.svelte-kit/
-
 # Build artefacts
 dist/
-build/
 
 # Dependencies
 node_modules/
