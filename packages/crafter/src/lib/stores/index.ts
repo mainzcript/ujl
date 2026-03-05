@@ -16,22 +16,11 @@ export {
 	type CrafterMode,
 	type CrafterStore,
 	type CrafterStoreDeps,
-	type ImageLibraryContext,
-	type ImageServiceFactory,
-	type LibraryConfig,
+	type LibraryContext,
 	type SaveCallback,
 	type ShadowRootContext,
-	type UpdateImagesFn,
 	type ViewportSize,
 } from "./crafter-store.svelte.js";
 
 // Operations
 export { createOperations, type CrafterOperations } from "./operations.js";
-
-// Image Service Factory
-export {
-	createImageServiceFactory,
-	getDefaultImageServiceFactory,
-	type ImageServiceFactoryFn,
-	type ImageServiceFactoryOptions,
-} from "./image-service-factory.js";

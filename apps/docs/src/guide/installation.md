@@ -30,7 +30,7 @@ corepack enable
 pnpm add @ujl-framework/crafter
 
 # For rendering only
-pnpm add @ujl-framework/adapter-web
+pnpm add @ujl-framework/core @ujl-framework/adapter-web
 ```
 
 ## Embedding the Crafter
@@ -68,24 +68,7 @@ crafter.onSave((doc, theme) => {
 });
 ```
 
-### With backend image storage
-
-To use the UJL Library Service for image management (responsive variants, metadata, i18n):
-
-```javascript
-const crafter = new UJLCrafter({
-	target: "#app",
-	document: ujlcDocument,
-	theme: ujltDocument,
-	library: {
-		storage: "backend",
-		url: "https://your-library.example.com",
-		apiKey: "your-api-key",
-	},
-});
-```
-
-See the [Library Service README](https://github.com/mainzcript/ujl/tree/main/services/library) for setup instructions (Docker + PostgreSQL).
+By default the Crafter stores image assets inline in the document. To use a different storage strategy (e.g. a backend), pass a **libraryProvider** when creating the Crafter. See [Library Providers](/guide/library-providers) for details.
 
 ### With custom modules
 
@@ -107,7 +90,7 @@ class HeroModule extends ModuleBase {
 	];
 	readonly slots = [];
 
-	compose(moduleData) {
+	compose(moduleData, _composer, _doc) {
 		// escapeHtml() required: headline is interpolated into a raw HTML string
 		const headline = this.escapeHtml(this.parseField(moduleData, "headline", ""));
 		return this.createNode("raw-html", { content: `<section><h1>${headline}</h1></section>` }, moduleData);
@@ -129,17 +112,22 @@ For a complete module implementation guide, see [`@ujl-framework/core` – Creat
 
 ## Rendering Without the Editor
 
-Use `@ujl-framework/adapter-web` to render UJL documents as Web Components, no editing functionality, much smaller bundle:
+Use `@ujl-framework/adapter-web` to render UJL documents as Web Components without editing functionality (smaller bundle than the Crafter).
 
-```html
-<script type="module" src="node_modules/@ujl-framework/adapter-web/dist/index.js"></script>
+### Via the webAdapter function (recommended)
 
-<ujl-renderer id="my-renderer"></ujl-renderer>
+Compose the document with the Composer, then pass the AST and token set to the adapter:
 
-<script>
-	const renderer = document.getElementById("my-renderer");
-	renderer.setDocument(ujlcDocument, ujltTokenSet);
-</script>
+```typescript
+import { Composer } from "@ujl-framework/core";
+import { webAdapter } from "@ujl-framework/adapter-web";
+
+const composer = new Composer();
+// ujlcDocument = your .ujlc.json, tokenSet = from your .ujlt.json theme
+const ast = await composer.compose(ujlcDocument);
+
+const mounted = webAdapter(ast, tokenSet, { target: "#app" });
+// Cleanup when needed: mounted.unmount();
 ```
 
 ## SvelteKit Integration
@@ -147,13 +135,20 @@ Use `@ujl-framework/adapter-web` to render UJL documents as Web Components, no e
 For SvelteKit projects, use `@ujl-framework/adapter-svelte` directly to keep Svelte as a peer dependency and enable tree-shaking:
 
 ```bash
-pnpm add @ujl-framework/adapter-svelte
+pnpm add @ujl-framework/adapter-svelte @ujl-framework/core
 ```
+
+Compose the document in your load function or onMount, then pass the AST and token set to `AdapterRoot`:
 
 ```svelte
 <script>
+	import { Composer } from "@ujl-framework/core";
 	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
 	import "@ujl-framework/adapter-svelte/styles";
+
+	// In +page.server.js load() or +page.svelte: fetch ujlcDocument and build tokenSet from theme
+	const composer = new Composer();
+	const ast = await composer.compose(ujlcDocument);
 </script>
 
 <AdapterRoot node={ast} {tokenSet} mode="system" />
@@ -171,17 +166,17 @@ document.querySelector("#edit-btn")?.addEventListener("click", async () => {
 });
 ```
 
-**Impact:** -600 KB from initial bundle, -30-50% time to interactive on non-editor pages. The editor loads in ~200-300 ms when requested, imperceptible for most workflows.
+**Impact:** -600 KB from initial bundle, -30-50% time to interactive on non-editor pages. The editor loads in ~200-300 ms when requested, imperceptible for most workflows. Use your framework's code-splitting (e.g. dynamic import on an "Edit" route or button) for SvelteKit, React, or Vue.
 
-For SvelteKit, React, and Vue lazy-loading patterns, see [How to Optimize Bundle Size](/guide/optimize-bundle-size).
+Skip lazy-loading when the editor is always visible on page load or your app is a single-purpose editor—then a normal synchronous import is fine.
 
 ## Local Development
 
-To run the included dev demo locally:
+To run the included demo locally:
 
 ```bash
 pnpm install
-pnpm --filter @ujl-framework/dev-demo dev
+pnpm --filter @ujl-framework/demo dev
 ```
 
 This starts the Crafter demo at `http://localhost:5174`.

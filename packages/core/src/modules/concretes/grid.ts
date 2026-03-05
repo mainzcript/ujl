@@ -1,4 +1,4 @@
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { ModuleBase } from "../base.js";
 import { Slot } from "../slot.js";
@@ -39,13 +39,17 @@ export class GridModule extends ModuleBase {
 	 * @param composer - Composer instance for composing child modules
 	 * @returns Composed abstract syntax tree node
 	 */
-	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+	public async compose(
+		moduleData: UJLCModuleObject,
+		composer: Composer,
+		doc: UJLCDocument,
+	): Promise<UJLAbstractNode> {
 		const children: UJLAbstractNode[] = [];
 
 		// Compose child modules in the items slot
 		const itemsSlot = moduleData.slots.items;
 		for (const childModule of itemsSlot) {
-			children.push(await composer.composeModule(childModule));
+			children.push(await composer.composeModule(childModule, doc));
 		}
 
 		return this.createNode(

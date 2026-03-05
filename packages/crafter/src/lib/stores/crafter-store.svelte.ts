@@ -15,14 +15,15 @@
 
 import { generateUid, type Composer } from "@ujl-framework/core";
 import type {
+	LibraryAsset,
+	LibraryProvider,
 	UJLCDocument,
-	UJLCDocumentMeta,
-	UJLCImageLibrary,
+	UJLCLibrary,
 	UJLCSlotObject,
 	UJLTDocument,
 	UJLTTokenSet,
 } from "@ujl-framework/types";
-import type { ImageService } from "../service-adapters/image-service.js";
+import { LibraryError } from "@ujl-framework/types";
 import { logger } from "../utils/logger.js";
 import { findPathToNode, isRootNode } from "../utils/ujlc-tree.js";
 import { createOperations } from "./operations.js";
@@ -45,42 +46,20 @@ export type CrafterMode = "editor" | "designer";
 export type ViewportSize = 1024 | 768 | 375 | null;
 
 /**
- * Image library context for field editing.
+ * Library context for field editing.
  * Stores which field is currently being edited in the image library.
  */
-export type ImageLibraryContext = {
+export type LibraryContext = {
 	fieldName: string;
 	nodeId: string;
 	currentValue: string | number | null;
 } | null;
 
 /**
- * Library configuration from document meta.
- */
-export type LibraryConfig = UJLCDocumentMeta["_library"];
-
-/**
- * Function type for immutable image library updates.
- */
-export type UpdateImagesFn = (fn: (images: UJLCImageLibrary) => UJLCImageLibrary) => void;
-
-/**
  * Callback type for save action.
  * Receives both documents so the developer can decide what to persist.
  */
 export type SaveCallback = (document: UJLCDocument, theme: UJLTDocument) => void;
-
-/**
- * Factory interface for creating image services.
- * Allows dependency injection of different storage implementations.
- */
-export interface ImageServiceFactory {
-	(
-		config: LibraryConfig,
-		getImages: () => UJLCImageLibrary,
-		updateImages: UpdateImagesFn,
-	): ImageService;
-}
 
 /**
  * Dependencies required for creating a CrafterStore.
@@ -93,8 +72,8 @@ export interface CrafterStoreDeps {
 	initialUjltDocument: UJLTDocument;
 	/** Composer instance for AST generation and module registry */
 	composer: Composer;
-	/** Factory function to create image services */
-	createImageService: ImageServiceFactory;
+	/** Library provider for asset storage and retrieval */
+	libraryProvider: LibraryProvider;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 }
@@ -128,7 +107,7 @@ const VIEWPORT_SIZES: Record<string, ViewportSize> = {
  *   initialUjlcDocument: myDocument,
  *   initialUjltDocument: myTheme,
  *   composer: new Composer(),
- *   createImageService: createImageServiceFactory()
+ *   libraryProvider: new InlineLibraryProvider(),
  * });
  *
  * // Read state
@@ -143,7 +122,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		initialUjlcDocument,
 		initialUjltDocument,
 		composer,
-		createImageService,
+		libraryProvider,
 		testMode = false,
 	} = deps;
 
@@ -164,8 +143,37 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _selectedNodeId = $state<string | null>(null);
 	// eslint-disable-next-line svelte/prefer-svelte-reactivity
 	let _expandedNodeIds = $state<Set<string>>(new Set());
-	let _isImageLibraryViewActive = $state(false);
-	let _imageLibraryContext = $state<ImageLibraryContext>(null);
+	let _isLibraryViewActive = $state(false);
+	let _libraryContext = $state<LibraryContext>(null);
+
+	// Library State for Infinite Scroll
+	let _libraryItems = $state<Array<{ id: string } & LibraryAsset>>([]);
+	let _libraryCursor = $state<string | undefined>(undefined);
+	let _libraryHasMore = $state(true);
+	let _libraryLoading = $state(false);
+	let _providerInitialized = $state(false);
+
+	function mergeLibraryItemsById(
+		existing: Array<{ id: string } & LibraryAsset>,
+		incoming: Array<{ id: string } & LibraryAsset>,
+	): Array<{ id: string } & LibraryAsset> {
+		const seen: Record<string, true> = {};
+		const merged: Array<{ id: string } & LibraryAsset> = [];
+
+		for (const item of existing) {
+			if (seen[item.id]) continue;
+			seen[item.id] = true;
+			merged.push(item);
+		}
+
+		for (const item of incoming) {
+			if (seen[item.id]) continue;
+			seen[item.id] = true;
+			merged.push(item);
+		}
+
+		return merged;
+	}
 	let _viewportType = $state<string | undefined>(undefined);
 
 	// Fullscreen state
@@ -183,7 +191,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// ============================================
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
-	const images = $derived(_ujlcDocument.ujlc.images);
+	const libraryData = $derived(_ujlcDocument.ujlc.library);
 	const meta = $derived(_ujlcDocument.ujlc.meta);
 	const tokens = $derived(_ujltDocument.ujlt.tokens);
 
@@ -262,17 +270,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Toggle image library view.
-	 * @param active - Whether to show the image library
+	 * Toggle library view.
+	 * @param active - Whether to show the library
 	 * @param context - Optional context for which field is being edited
 	 */
-	function setImageLibraryViewActive(active: boolean, context?: ImageLibraryContext): void {
-		_isImageLibraryViewActive = active;
+	function setLibraryViewActive(active: boolean, context?: LibraryContext): void {
+		_isLibraryViewActive = active;
 		if (context !== undefined) {
-			_imageLibraryContext = context;
+			_libraryContext = context;
 		}
 		if (!active) {
-			_imageLibraryContext = null;
+			_libraryContext = null;
 		}
 	}
 
@@ -351,26 +359,36 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Update image library with immutable function.
-	 * @param fn - Function that receives current images and returns new images
+	 * Update library with immutable function.
+	 * @param fn - Function that receives current library and returns new library
 	 */
-	function updateImages(fn: (images: UJLCImageLibrary) => UJLCImageLibrary): void {
+	function updateLibrary(fn: (library: UJLCLibrary) => UJLCLibrary): void {
 		_ujlcDocument = {
 			..._ujlcDocument,
-			ujlc: { ..._ujlcDocument.ujlc, images: fn(_ujlcDocument.ujlc.images) },
+			ujlc: { ..._ujlcDocument.ujlc, library: fn(_ujlcDocument.ujlc.library) },
 		};
 	}
 
 	/**
 	 * Replace entire UJLC document (for import).
-	 * Resets selection on document change.
+	 * Resets selection and library state on document change.
 	 * @param doc - The new UJLC document
 	 */
 	function setUjlcDocument(doc: UJLCDocument): void {
 		_ujlcDocument = doc;
 		_selectedNodeId = null;
+		// Reassign to trigger Svelte reactivity for Set consumers.
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		_expandedNodeIds = new Set();
+
+		// Reset library state to force reload from new document's library/provider
+		_libraryItems.splice(0, _libraryItems.length);
+		_libraryCursor = undefined;
+		_libraryHasMore = true;
+		_libraryLoading = false;
+		_providerInitialized = false;
+		_isLibraryViewActive = false;
+		_libraryContext = null;
 	}
 
 	/**
@@ -382,12 +400,199 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	// ============================================
-	// SERVICES (Lazy Initialization via $derived.by)
+	// LIBRARY OPERATIONS (Provider Integration)
 	// ============================================
 
-	const imageService = $derived.by(() =>
-		createImageService(meta._library, () => images, updateImages),
-	);
+	/**
+	 * Initialize the library provider (called automatically before first use)
+	 */
+	async function initLibraryProvider(): Promise<void> {
+		if (_providerInitialized || !libraryProvider.init) return;
+		await libraryProvider.init();
+		_providerInitialized = true;
+	}
+
+	/**
+	 * Load more library assets (Infinite Scroll)
+	 * @param limit - Number of items to load
+	 */
+	async function loadMoreLibraryItems(limit = 50): Promise<void> {
+		if (_libraryLoading || !_libraryHasMore) return;
+
+		await initLibraryProvider();
+		_libraryLoading = true;
+
+		try {
+			const result = await libraryProvider.list(libraryData, {
+				limit,
+				cursor: _libraryCursor,
+			});
+
+			_libraryItems = mergeLibraryItemsById(_libraryItems, result.items);
+			_libraryCursor = result.nextCursor;
+			_libraryHasMore = result.hasMore;
+		} finally {
+			_libraryLoading = false;
+		}
+	}
+
+	/**
+	 * Search library assets (resets pagination)
+	 * @param query - Search query
+	 * @param limit - Number of items to load
+	 */
+	async function searchLibraryItems(query: string, limit = 50): Promise<void> {
+		_libraryItems = [];
+		_libraryCursor = undefined;
+		_libraryHasMore = true;
+
+		await initLibraryProvider();
+		_libraryLoading = true;
+
+		try {
+			const result = await libraryProvider.list(libraryData, {
+				limit,
+				search: query,
+			});
+
+			_libraryItems = mergeLibraryItemsById([], result.items);
+			_libraryCursor = result.nextCursor;
+			_libraryHasMore = result.hasMore;
+		} finally {
+			_libraryLoading = false;
+		}
+	}
+
+	/**
+	 * Get a single library asset by ID
+	 * @param id - Asset ID
+	 * @returns The asset or null if not found
+	 */
+	async function getLibraryAsset(id: string): Promise<LibraryAsset | null> {
+		await initLibraryProvider();
+		return libraryProvider.get(libraryData, id);
+	}
+
+	/**
+	 * Upload a file to the library
+	 * @param file - File to upload
+	 * @returns The uploaded asset with ID
+	 */
+	async function uploadLibraryAsset(file: File): Promise<{ id: string } & LibraryAsset> {
+		if (!libraryProvider.upload) {
+			throw new LibraryError("Upload not supported", "NOT_SUPPORTED");
+		}
+
+		await initLibraryProvider();
+		const buffer = await file.arrayBuffer();
+		const asset = await libraryProvider.upload(buffer, {
+			filename: file.name,
+			type: file.type,
+		});
+
+		// Generate ID and update document library
+		const id = crypto.randomUUID();
+		updateLibrary((lib) => ({ ...lib, [id]: asset }));
+
+		// Add to local cache with ID (deduplicated)
+		const assetWithId = { id, ...asset };
+		_libraryItems = mergeLibraryItemsById([assetWithId], _libraryItems);
+
+		return assetWithId;
+	}
+
+	/**
+	 * Delete a library asset
+	 * @param id - Asset ID
+	 */
+	async function deleteLibraryAsset(id: string): Promise<void> {
+		await initLibraryProvider();
+
+		// Check if delete is supported by provider
+		if (!libraryProvider.delete) {
+			throw new LibraryError("Delete not supported by this provider", "NOT_SUPPORTED");
+		}
+
+		// Delete from external storage
+		await libraryProvider.delete(id);
+
+		// Remove from document library
+		updateLibrary((lib) => {
+			const { [id]: _, ...rest } = lib;
+			return rest;
+		});
+
+		// Update local cache
+		_libraryItems = _libraryItems.filter((item) => item.id !== id);
+	}
+
+	/**
+	 * Update asset metadata
+	 * @param id - Asset ID
+	 * @param metadata - Metadata to update
+	 */
+	async function updateLibraryMetadata(
+		id: string,
+		metadata: Record<string, unknown>,
+	): Promise<void> {
+		await initLibraryProvider();
+
+		if (!libraryProvider.updateMetadata) {
+			throw new LibraryError("Metadata update not supported", "NOT_SUPPORTED");
+		}
+
+		// Update via provider (returns new asset)
+		const updated = await libraryProvider.updateMetadata(libraryData, id, metadata);
+
+		// Update document library
+		updateLibrary((lib) => ({ ...lib, [id]: updated }));
+
+		// Update local list
+		const index = _libraryItems.findIndex((item) => item.id === id);
+		if (index !== -1) {
+			_libraryItems[index] = { id, ...updated };
+		}
+	}
+
+	/**
+	 * Select a library asset for use in a module.
+	 * Ensures the asset is persisted in the document library before returning its ID.
+	 * @param id - Asset ID from _libraryItems
+	 * @returns The asset ID (guaranteed to be in doc.ujlc.library after this call)
+	 */
+	async function selectLibraryAsset(id: string): Promise<string> {
+		// Check if asset is already in document library
+		if (libraryData[id]) {
+			return id;
+		}
+
+		// Find asset in local cache (loaded from provider)
+		const asset = _libraryItems.find((item) => item.id === id);
+		if (!asset) {
+			throw new LibraryError(`Asset ${id} not found in library items`, "NOT_FOUND");
+		}
+
+		// Persist to document library
+		const { id: _, ...assetData } = asset;
+		updateLibrary((lib) => ({ ...lib, [id]: assetData }));
+
+		return id;
+	}
+
+	/**
+	 * Capability checks
+	 */
+	function canUploadLibrary(): boolean {
+		return !!libraryProvider.upload;
+	}
+
+	function canDeleteLibrary(): boolean {
+		return !!libraryProvider.delete;
+	}
+
+	function canUpdateLibraryMetadata(): boolean {
+		return !!libraryProvider.updateMetadata;
+	}
 
 	// ============================================
 	// OPERATIONS (High-Level Document Manipulation)
@@ -422,11 +627,11 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get expandedNodeIds() {
 			return _expandedNodeIds;
 		},
-		get isImageLibraryViewActive() {
-			return _isImageLibraryViewActive;
+		get isLibraryViewActive() {
+			return _isLibraryViewActive;
 		},
-		get imageLibraryContext() {
-			return _imageLibraryContext;
+		get libraryContext() {
+			return _libraryContext;
 		},
 		get viewportType() {
 			return _viewportType;
@@ -442,8 +647,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		get rootSlot() {
 			return rootSlot;
 		},
-		get images() {
-			return images;
+		get libraryData() {
+			return libraryData;
 		},
 		get meta() {
 			return meta;
@@ -458,10 +663,19 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 			return _shouldShowFullscreenButton;
 		},
 
-		// Services
-		get imageService() {
-			return imageService;
+		// Library State (readonly via getters)
+		get libraryItems() {
+			return _libraryItems;
 		},
+		get libraryLoading() {
+			return _libraryLoading;
+		},
+		get libraryHasMore() {
+			return _libraryHasMore;
+		},
+
+		// Library Provider (direct access)
+		libraryProvider,
 		composer,
 
 		// Actions
@@ -469,7 +683,7 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		setSelectedNodeId,
 		setNodeExpanded,
 		expandToNode,
-		setImageLibraryViewActive,
+		setLibraryViewActive,
 		setViewportType,
 		setContainerSize,
 		setScreenSize,
@@ -479,9 +693,21 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		// Functional Updates
 		updateRootSlot,
 		updateTokenSet,
-		updateImages,
+		updateLibrary,
 		setUjlcDocument,
 		setUjltDocument,
+
+		// Library Operations
+		loadMoreLibraryItems,
+		searchLibraryItems,
+		getLibraryAsset,
+		selectLibraryAsset,
+		uploadLibraryAsset,
+		deleteLibraryAsset,
+		updateLibraryMetadata,
+		canUploadLibrary,
+		canDeleteLibrary,
+		canUpdateLibraryMetadata,
 
 		// Operations
 		operations,

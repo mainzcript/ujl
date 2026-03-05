@@ -30,7 +30,7 @@ The foundation. Contains all TypeScript type definitions and Zod schemas for UJL
 
 ### `@ujl-framework/core`
 
-The engine. Contains the `Composer` (which transforms UJLC + UJLT into an AST), the `ModuleRegistry` (which manages available modules), and the `FieldBase` and `ModuleBase` classes for building custom modules.
+The engine. Contains the `Composer` (which transforms a UJLC document into an AST), the `ModuleRegistry` (which manages available modules), and the `FieldBase` and `ModuleBase` classes for building custom modules.
 
 → [README](https://github.com/mainzcript/ujl/tree/main/packages/core)
 
@@ -58,13 +58,9 @@ The full visual editor, bundled with all dependencies including the Svelte runti
 
 → [README](https://github.com/mainzcript/ujl/tree/main/packages/crafter)
 
-## Services
+## Optional backend for assets
 
-### `services/library`
-
-The UJL Library Service, an optional Payload CMS-based backend for image asset management. Provides upload, responsive variant generation (WebP), metadata, i18n alt text, and a REST API. Required only when using `imageStorage: "backend"`.
-
-→ [README](https://github.com/mainzcript/ujl/tree/main/services/library)
+The Crafter can use a **libraryProvider** (e.g. `InlineLibraryProvider` from `@ujl-framework/crafter`, or a custom/backend-backed provider) for asset upload and storage during editing. Rendering reads image data from the document's `doc.ujlc.library`; no separate "Library Service" is required for rendering. See the [Crafter README](https://github.com/mainzcript/ujl/tree/main/packages/crafter) for configuration.
 
 ## Dependency Layers
 

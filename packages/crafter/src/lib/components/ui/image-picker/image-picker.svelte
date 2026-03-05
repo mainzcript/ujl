@@ -2,10 +2,10 @@
 	import { Text, Popover, PopoverTrigger, PopoverContent } from "@ujl-framework/ui";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import type { ImageEntry } from "@ujl-framework/types";
+	import type { LibraryAssetImage } from "@ujl-framework/types";
 	import ImageIcon from "@lucide/svelte/icons/image";
 	import { logger } from "$lib/utils/logger.js";
-	import { ImageLibraryPopover } from "../image-library-popover/index.js";
+	import { LibraryPopover } from "../library-popover/index.js";
 
 	let {
 		value,
@@ -16,7 +16,6 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const imageService = $derived(crafter.imageService);
 
 	let popoverOpen = $state(false);
 
@@ -39,11 +38,24 @@
 		// Convert numeric IDs to strings (backend services like Payload return numbers)
 		const imageId = String(value);
 		isLoadingPreview = true;
-		imageService
-			.get(imageId)
-			.then((entry: ImageEntry | null) => {
-				previewUrl = entry?.src ?? null;
-				previewAlt = entry?.metadata?.filename ?? "Selected image preview";
+
+		// Try to find image in loaded items first
+		const cachedAsset = crafter.libraryItems.find((item) => item.id === imageId);
+		if (cachedAsset) {
+			previewUrl = cachedAsset.img.src;
+			previewAlt = cachedAsset.meta?.filename ?? "Selected image preview";
+			isLoadingPreview = false;
+			return;
+		}
+
+		// Otherwise fetch from provider
+		crafter
+			.getLibraryAsset(imageId)
+			.then((asset: LibraryAssetImage | null) => {
+				if (asset?.kind === "image") {
+					previewUrl = asset.img.src ?? null;
+					previewAlt = asset.meta?.filename ?? "Selected image preview";
+				}
 			})
 			.catch((err: unknown) => {
 				logger.error("[ImagePicker] Failed to load image preview:", err);
@@ -79,7 +91,7 @@
 		</PopoverTrigger>
 	{/if}
 	<PopoverContent class="max-h-[80vh] w-sm max-w-[80vw]">
-		<ImageLibraryPopover
+		<LibraryPopover
 			selectedImageId={value != null ? String(value) : null}
 			onSelect={handleImageSelect}
 			onClose={() => (popoverOpen = false)}

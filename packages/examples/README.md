@@ -4,6 +4,18 @@ This package contains example UJL content files (`.ujlc.json`), theme files (`.u
 
 ---
 
+## Version Synchronization
+
+Example files include a `_version` field that must match the package version. To synchronize after bumping the package version:
+
+```bash
+pnpm run version:sync
+```
+
+This is automatically run before publishing via `prepublishOnly`. The `lint` script includes `version:check`, ensuring CI fails if versions are out of sync.
+
+---
+
 ## Installation
 
 ```bash

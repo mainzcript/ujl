@@ -22,14 +22,8 @@ The fastest way to see UJL in action is the live demo below. To integrate UJL in
 
 ## Install {#install}
 
-UJL has two main packages depending on your use case:
-
 ```bash
-# Full visual editor, embed anywhere (framework-agnostic)
 npm install @ujl-framework/crafter
-
-# Rendering only, display UJL documents without an editor
-npm install @ujl-framework/adapter-web
 ```
 
 ## Minimal example

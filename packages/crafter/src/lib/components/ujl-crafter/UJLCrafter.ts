@@ -1,12 +1,7 @@
-import {
-	createCrafterStore,
-	createImageServiceFactory,
-	type CrafterStore,
-	type SaveCallback,
-} from "$lib/stores/index.js";
-import { logger } from "$lib/utils/logger.js";
+import { InlineLibraryProvider } from "$lib/providers/index.js";
+import { createCrafterStore, type CrafterStore, type SaveCallback } from "$lib/stores/index.js";
 import { Composer, type ModuleBase } from "@ujl-framework/core";
-import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+import type { LibraryProvider, UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 import CrafterElement from "./ujl-crafter-element.svelte";
 
@@ -40,21 +35,6 @@ export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 // Re-export SaveCallback from store for API consistency
 export type { SaveCallback } from "$lib/stores/index.js";
 
-/**
- * Configuration options for the library.
- * Determines how library assets are stored and retrieved.
- *
- * Two storage modes are available:
- * - `inline`: Library stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Library stored on a Payload CMS server (requires url and apiKey)
- *
- * Note: Document-level _library configuration is ignored.
- * Only this options-based configuration is used.
- */
-export type LibraryOptions =
-	| { storage: "inline" }
-	| { storage: "backend"; url: string; apiKey: string };
-
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
 	target: string | HTMLElement;
@@ -64,8 +44,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
-	/** Library configuration (default: inline storage) */
-	library?: LibraryOptions;
+	/** Custom library provider (default: InlineLibraryProvider) */
+	libraryProvider?: LibraryProvider;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 	/**
@@ -125,6 +105,20 @@ export class UJLCrafter {
 
 	constructor(options: UJLCrafterOptions) {
 		this.target = this.resolveTarget(options.target);
+
+		// Validate documents upfront
+		const initialDoc = options.document
+			? validateUJLCDocument(options.document)
+			: this.getDefaultDocument();
+		const initialTheme = options.theme
+			? validateUJLTDocument(options.theme)
+			: this.getDefaultTheme();
+
+		// Build the library provider (defaults to InlineLibraryProvider)
+		// Stateless - no closures needed. Crafter/Store manages all document storage.
+		const libraryProvider = options.libraryProvider ?? new InlineLibraryProvider();
+
+		// Composer is now stateless - library lives only in the document
 		this.composer = new Composer();
 
 		if (options.modules) {
@@ -137,37 +131,11 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.editorTheme)
 			: this.getDefaultTheme();
 
-		// Library configuration from options (defaults to inline storage)
-		// Note: Document-level _library configuration is ignored - only options are used
-		const library = options.library ?? { storage: "inline" as const };
-
-		// Runtime validation for backend storage
-		if (library.storage === "backend") {
-			if (!library.url || !library.apiKey) {
-				throw new Error("UJLCrafter: Backend storage requires both url and apiKey");
-			}
-		}
-
-		const imageServiceFactory = createImageServiceFactory({
-			preferredStorage: library.storage,
-			backendUrl: library.storage === "backend" ? library.url : undefined,
-			backendApiKey: library.storage === "backend" ? library.apiKey : undefined,
-			showToasts: false,
-			onConnectionError: (error, url) => {
-				logger.error("Image backend connection error:", error, url);
-				this.notify("error", "Image backend connection error", `Failed to connect to ${url}`);
-			},
-		});
-
 		this.store = createCrafterStore({
-			initialUjlcDocument: options.document
-				? validateUJLCDocument(options.document)
-				: this.getDefaultDocument(),
-			initialUjltDocument: options.theme
-				? validateUJLTDocument(options.theme)
-				: this.getDefaultTheme(),
+			initialUjlcDocument: initialDoc,
+			initialUjltDocument: initialTheme,
 			composer: this.composer,
-			createImageService: imageServiceFactory,
+			libraryProvider,
 			testMode: options.testMode ?? false,
 		});
 

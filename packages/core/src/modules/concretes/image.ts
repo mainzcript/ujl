@@ -1,4 +1,9 @@
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type {
+	LibraryAssetImage,
+	UJLAbstractNode,
+	UJLCDocument,
+	UJLCModuleObject,
+} from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { ImageField } from "../../fields/concretes/image-field.js";
 import { TextField } from "../../fields/index.js";
@@ -47,22 +52,39 @@ export class ImageModule extends ModuleBase {
 	/**
 	 * Compose an image module into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
-	 * @param composer - Composer instance for composing child modules and resolving image IDs
+	 * @param _composer - Composer instance (unused for image modules)
+	 * @param doc - The UJLC document containing the library
 	 * @returns Composed abstract syntax tree node
 	 */
-	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
-		const imageId = this.parseField(moduleData, "image", null);
-		const alt = this.parseField(moduleData, "alt", "");
+	public async compose(
+		moduleData: UJLCModuleObject,
+		_composer: Composer,
+		doc: UJLCDocument,
+	): Promise<UJLAbstractNode> {
+		const imageId = this.parseField<string | null>(moduleData, "image", null);
 
-		// Resolve image ID to ImageSource via ImageLibrary
-		let imageSource = null;
-		if (imageId) {
-			const imageLibrary = composer.getImageLibrary();
-			if (imageLibrary) {
-				imageSource = await imageLibrary.resolve(imageId);
-			}
-		}
+		// Read asset directly from document library
+		const asset = imageId
+			? (doc.ujlc.library[imageId] as LibraryAssetImage | undefined)
+			: undefined;
 
-		return this.createNode("image", { image: imageSource, alt }, moduleData);
+		// Alt text resolution:
+		// - field not present (undefined) → use asset's alt metadata
+		// - field is "" → decorative image (no alt)
+		// - field is "text" → use the provided text
+		const rawAlt = moduleData.fields["alt"] as string | null | undefined;
+		const altText =
+			rawAlt === undefined || rawAlt === null
+				? (asset?.meta?.alt ?? "") // Use asset alt when module field not set
+				: rawAlt; // Use module value (empty string = decorative)
+
+		return this.createNode(
+			"image",
+			{
+				asset: asset ?? null,
+				alt: altText,
+			},
+			moduleData,
+		);
 	}
 }

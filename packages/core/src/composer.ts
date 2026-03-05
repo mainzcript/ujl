@@ -1,10 +1,4 @@
-import type {
-	ImageProvider,
-	UJLAbstractNode,
-	UJLCDocument,
-	UJLCModuleObject,
-} from "@ujl-framework/types";
-import { ImageLibrary } from "./image/index.js";
+import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-framework/types";
 import { createDefaultRegistry } from "./modules/default-registry.js";
 import { ModuleRegistry, type ModuleBase } from "./modules/index.js";
 import { generateUid } from "./utils.js";
@@ -15,17 +9,20 @@ import { generateUid } from "./utils.js";
  * The composer handles the composition phase of the UJL pipeline,
  * converting UJL documents into AST nodes that can then be rendered
  * by various adapters.
+ *
+ * The Composer is completely stateless and performs pure transformations
+ * from UJLC documents to AST. Asset resolution happens synchronously
+ * from the document's library object.
  */
 export class Composer {
 	protected _module_registry: ModuleRegistry;
-	protected _image_library: ImageLibrary | null = null;
 
 	/**
-	 * Create a new composer instance
-	 * @param registry - Optional module registry (defaults to built-in modules)
+	 * Create a new composer instance.
+	 * @param moduleRegistry - Optional module registry (defaults to built-in modules)
 	 */
-	constructor(registry?: ModuleRegistry) {
-		this._module_registry = registry ?? createDefaultRegistry();
+	constructor(moduleRegistry?: ModuleRegistry) {
+		this._module_registry = moduleRegistry ?? createDefaultRegistry();
 	}
 
 	public registerModule(module: ModuleBase) {
@@ -37,14 +34,17 @@ export class Composer {
 	}
 
 	/**
-	 * Compose a single module into an abstract syntax tree node
+	 * Compose a single module into an abstract syntax tree node.
 	 * @param moduleData - The module data to compose
-	 * @returns Composed abstract syntax tree node (async for image resolution)
+	 * @returns Composed abstract syntax tree node (async for potential future extensibility)
 	 */
-	public async composeModule(moduleData: UJLCModuleObject): Promise<UJLAbstractNode> {
+	public async composeModule(
+		moduleData: UJLCModuleObject,
+		doc: UJLCDocument,
+	): Promise<UJLAbstractNode> {
 		const module = this._module_registry.getModule(moduleData.type);
 		if (module) {
-			return await module.compose(moduleData, this);
+			return await module.compose(moduleData, this, doc);
 		} else {
 			// Fallback for unknown modules
 			return {
@@ -54,7 +54,7 @@ export class Composer {
 				},
 				id: generateUid(),
 				meta: {
-					moduleId: moduleData.meta.id, // Error node represents a failed module
+					moduleId: moduleData.meta.id,
 					isModuleRoot: true,
 				},
 			};
@@ -62,19 +62,16 @@ export class Composer {
 	}
 
 	/**
-	 * Compose a UJL document into an abstract syntax tree
+	 * Compose a UJL document into an abstract syntax tree.
+	 *
 	 * @param doc - The UJL document to compose
-	 * @param imageProvider - Optional provider for backend image storage
-	 * @returns Composed abstract syntax tree node (async for image resolution)
+	 * @returns Composed abstract syntax tree node
 	 */
-	public async compose(doc: UJLCDocument, imageProvider?: ImageProvider): Promise<UJLAbstractNode> {
-		// Initialize image library from document with optional provider
-		this._image_library = new ImageLibrary(doc.ujlc.images ?? {}, imageProvider);
-
+	public async compose(doc: UJLCDocument): Promise<UJLAbstractNode> {
 		const children: UJLAbstractNode[] = [];
 
 		for (const rawModule of doc.ujlc.root) {
-			children.push(await this.composeModule(rawModule));
+			children.push(await this.composeModule(rawModule, doc));
 		}
 
 		// Return a root wrapper node
@@ -87,25 +84,16 @@ export class Composer {
 	}
 
 	/**
-	 * Get the module registry instance
-	 * Useful for accessing registry methods and modules directly
+	 * Get the module registry instance.
+	 * Useful for accessing registry methods and modules directly.
 	 */
 	public getRegistry(): ModuleRegistry {
 		return this._module_registry;
 	}
 
 	/**
-	 * Get the image library instance
-	 * Only available during composition
-	 * @returns The image library instance or null if not composing
-	 */
-	public getImageLibrary(): ImageLibrary | null {
-		return this._image_library;
-	}
-
-	/**
-	 * Create a new module instance from type with default values
-	 * Convenience method that delegates to registry
+	 * Create a new module instance from type with default values.
+	 * Convenience method that delegates to registry.
 	 */
 	public createModuleFromType(type: string, id: string): UJLCModuleObject {
 		return this._module_registry.createModuleFromType(type, id);

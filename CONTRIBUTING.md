@@ -103,8 +103,8 @@ pnpm run build
 # Crafter (visual editor)
 pnpm --filter @ujl-framework/crafter dev
 
-# Dev demo (integration example)
-pnpm --filter @ujl-framework/dev-demo dev
+# Demo (minimal integration example)
+pnpm --filter @ujl-framework/demo dev
 ```
 
 ### Tooling Notes

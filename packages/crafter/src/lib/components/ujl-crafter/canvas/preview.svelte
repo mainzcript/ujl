@@ -66,8 +66,8 @@
 	let ast = $state<UJLAbstractNode | null>(null);
 
 	$effect(() => {
-		// ImageService implements ImageProvider, so it can be passed directly
-		composer.compose(ujlcDocument, crafter.imageService).then((composedAst) => {
+		// Composer composes the document into an AST
+		composer.compose(ujlcDocument).then((composedAst) => {
 			ast = composedAst;
 		});
 	});

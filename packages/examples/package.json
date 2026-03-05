@@ -16,7 +16,7 @@
 	},
 	"scripts": {
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
+		"lint": "prettier --check . && eslint . && pnpm run version:check",
 		"check": "echo 'No check script needed'",
 		"test:unit": "vitest run",
 		"test:unit:watch": "vitest",
@@ -24,21 +24,24 @@
 		"test:unit:coverage": "vitest run --coverage",
 		"test": "vitest run",
 		"clean": "echo 'No clean script needed'",
-		"validate": "pnpm exec ujl-validate ./src/themes/default.ujlt.json && pnpm exec ujl-validate ./src/documents/showcase.ujlc.json"
+		"validate": "pnpm exec ujl-validate ./src/themes/default.ujlt.json && pnpm exec ujl-validate ./src/documents/showcase.ujlc.json",
+		"version:sync": "node scripts/sync-version.js",
+		"version:check": "node scripts/check-version.js",
+		"prepublishOnly": "pnpm run version:sync"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^10.0.1",
-		"@types/node": "^25.3.0",
+		"@types/node": "^25.3.3",
 		"@ujl-framework/types": "workspace:*",
-		"eslint": "^10.0.1",
+		"eslint": "^10.0.2",
 		"eslint-config-prettier": "^10.1.8",
-		"globals": "^17.3.0",
+		"globals": "^17.4.0",
 		"prettier": "^3.8.1",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.56.0",
+		"typescript-eslint": "^8.56.1",
 		"vitest": "^4.0.18"
 	},
 	"author": "mainzcript GbR",

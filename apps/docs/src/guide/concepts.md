@@ -41,10 +41,10 @@ Modules are registered in a **ModuleRegistry**. You can add your own custom modu
 
 ## The Composer
 
-The **Composer** is the engine that takes a UJLC document and a UJLT theme, runs all modules through their `compose()` method, and produces an **Abstract Syntax Tree (AST)**.
+The **Composer** is the engine that takes a UJLC document, runs all modules through their `compose()` method, and produces an **Abstract Syntax Tree (AST)**. Theme/tokens are applied when rendering the AST (e.g. by the adapter).
 
 ```typescript
-const ast = await composer.compose(ujlcDocument, ujltDocument);
+const ast = await composer.compose(ujlcDocument);
 ```
 
 The AST is a framework-agnostic tree of `UJLAbstractNode` objects. It knows nothing about Svelte, React, or the DOM, it's pure structured data describing what to render and with what properties.

@@ -11,7 +11,7 @@ Terms used consistently throughout UJL documentation and code.
 
 **Unified JSON Layout (UJL)**, A JSON-based, modular open-source framework for structured visual authoring on the web, with strict separation of content and design.
 
-**UJLC (UJL Content Document)**, The content document format (`.ujlc.json`). Contains metadata (`meta`), an image library (`images`), and the module structure (`root`). No design values.
+**UJLC (UJL Content Document)**, The content document format (`.ujlc.json`). Contains metadata (`meta`), an asset library (`library`), and the module structure (`root`). No design values.
 
 **UJLT (UJL Theme Document)**, The theme document format (`.ujlt.json`). Contains metadata and design tokens (`tokens`), colors, typography, spacing, radius. No content.
 
@@ -19,7 +19,7 @@ Terms used consistently throughout UJL documentation and code.
 
 **ContentFrame**, The rendered output of a UJL layout, HTML/CSS/JS ready for display.
 
-**Library Service** (`services/library`), Optional backend for image asset management (upload, responsive variants, metadata, i18n alt text) built on Payload CMS and PostgreSQL.
+**Library (asset library)**, The UJLC document's `library` object: a record of asset IDs to `LibraryAssetImage` entries. At render time, modules and adapters read image data from `doc.ujlc.library[imageId]`. The Crafter can use an optional **LibraryProvider** (e.g. `InlineLibraryProvider`) for upload and storage during editing.
 
 ## Architecture
 
@@ -27,13 +27,11 @@ Terms used consistently throughout UJL documentation and code.
 
 **AST (Abstract Syntax Tree)**, A framework-agnostic tree of `UJLAbstractNode` objects produced by the Composer. The intermediate representation between content/theme and rendered output.
 
-**Composer**, Orchestrates the composition process using the ModuleRegistry. Transforms a UJLC document + UJLT theme into an AST.
+**Composer**, Orchestrates the composition process using the ModuleRegistry. Takes a single UJLC document and produces an AST. Stateless; no theme parameter. Theme/tokens are applied at adapter level.
 
 **ModuleRegistry**, Manages available modules. Custom modules are registered here, making them available for composition and the editor.
 
-**Image Library**, Core abstraction that resolves image IDs to concrete image data. Supports Inline Storage (Base64 in UJLC) and Backend Storage (via a Provider).
-
-**ImageProvider**, Interface through which the Image Library resolves images from external sources (e.g., the Library Service).
+**LibraryProvider**, Interface used by the Crafter for asset upload and storage during editing (e.g. `InlineLibraryProvider` from `@ujl-framework/crafter`). Not used by the Composer; at render time, image data is read from the document's `doc.ujlc.library`.
 
 ## Modules and Fields
 

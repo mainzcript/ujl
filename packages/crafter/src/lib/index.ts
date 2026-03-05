@@ -8,9 +8,11 @@
 export {
 	UJLCrafter,
 	type DocumentChangeCallback,
-	type LibraryOptions,
 	type NotificationCallback,
 	type NotificationType,
 	type ThemeChangeCallback,
 	type UJLCrafterOptions,
 } from "./components/ujl-crafter/index.js";
+
+// Library providers
+export { InlineLibraryProvider } from "./providers/index.js";

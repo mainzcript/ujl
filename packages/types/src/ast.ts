@@ -1,4 +1,4 @@
-import type { ImageSource } from "./image.js";
+import type { LibraryAssetImage } from "./library.js";
 import type { ProseMirrorDocument } from "./prosemirror.js";
 import type { UJLTTokenSet } from "./ujl-theme.js";
 
@@ -121,8 +121,8 @@ type UJLAbstractCallToActionModuleNode = {
 type UJLAbstractImageNode = {
 	type: "image";
 	props: {
-		image: ImageSource | null; // null when no image is selected (shows placeholder)
-		alt: string; // From module field
+		asset: LibraryAssetImage | null; // The selected library asset for rendering
+		alt?: string; // From module field, overrides asset.meta.alt
 	};
 	id: string;
 	meta?: UJLAbstractNodeMeta;

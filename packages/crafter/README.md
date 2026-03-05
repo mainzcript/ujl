@@ -2,7 +2,7 @@
 
 **Visual Editor for UJL Content** - A Svelte based visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
 
-The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend image storage.
+The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and inline image storage by default (with optional custom library providers).
 
 ---
 
@@ -81,18 +81,20 @@ crafter.registerModule(new AnotherModule());
 crafter.unregisterModule("hero");
 ```
 
-### With Backend Image Storage
+### With a custom library provider
+
+By default the Crafter uses `InlineLibraryProvider` from `@ujl-framework/crafter` (assets stored in the document). To use a different storage (e.g. your own API), pass a **libraryProvider** that implements the UJL `LibraryProvider` interface. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs for details.
 
 ```typescript
+import { UJLCrafter } from "@ujl-framework/crafter";
+import { InlineLibraryProvider } from "@ujl-framework/crafter"; // optional: explicit default
+
 const crafter = new UJLCrafter({
 	target: "#editor-container",
 	document: myContentDocument,
 	theme: myPreviewTheme,
-	library: {
-		storage: "backend",
-		url: "http://localhost:3000",
-		apiKey: "your-api-key",
-	},
+	// libraryProvider: new InlineLibraryProvider(), // default when omitted
+	// libraryProvider: myCustomProvider, // your implementation of LibraryProvider
 });
 ```
 
@@ -136,16 +138,11 @@ The Crafter also distinguishes between two independent themes: the **Editor Them
 
 In **Editor Mode**, the Crafter provides module tree navigation, click-to-select in the preview, drag & drop reordering, a property panel with type-safe inputs, and an image library for image management. In **Designer Mode**, you can edit design tokens (colors, typography, spacing) with live preview. The editor also includes viewport simulation (Desktop/Tablet/Mobile) and import/export for `.ujlc.json` and `.ujlt.json` files.
 
-## Image Library
+## Asset Library
 
-The Crafter supports two storage modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
+The Crafter uses a stateless `LibraryProvider` for asset operations. The provider handles upload, metadata management, and asset listing, but **does not store state**—all asset data lives in the document's `ujlc.library` object.
 
-| Storage Mode | Required Options | Description                         |
-| ------------ | ---------------- | ----------------------------------- |
-| `inline`     | None             | Images stored as Base64 in document |
-| `backend`    | `url`, `apiKey`  | Images stored on Payload CMS server |
-
-For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
+**Key Principle:** The Composer (used for rendering) is completely stateless and reads assets directly from `doc.ujlc.library`. The `LibraryProvider` is only used for Crafter operations (upload, list, delete, metadata update). UJL ships only `InlineLibraryProvider`; for other storage you implement the `LibraryProvider` interface yourself. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs.
 
 ## API Reference
 
@@ -184,7 +181,7 @@ interface UJLCrafterOptions {
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
-	library?: { storage: "inline" } | { storage: "backend"; url: string; apiKey: string };
+	libraryProvider?: LibraryProvider; // Provider for Crafter operations (upload, list, etc.)
 	modules?: ModuleBase[]; // Custom modules to register alongside built-in modules
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
@@ -225,7 +222,8 @@ src/
 │   │       ├── UJLCrafter.ts   # Public API class
 │   │       ├── ujl-crafter-element.svelte  # Custom Element wrapper (Shadow DOM)
 │   │       └── ujl-crafter.svelte          # Main UI component
-│   ├── service-adapters/       # Image service adapter implementations
+│   ├── service-adapters/       # Legacy compatibility layer (providers live in src/lib/providers)
+│   ├── providers/              # Built-in library providers (e.g. InlineLibraryProvider)
 │   ├── stores/                 # CrafterStore (Svelte 5 runes)
 │   ├── styles/                 # CSS architecture (see below)
 │   └── utils/                  # Helpers (clipboard, colors, DOM utilities)
@@ -243,4 +241,3 @@ See [src/lib/styles/README.md](src/lib/styles/README.md) for details.
 ## Related
 
 - [UJL Framework README](../../README.md)
-- [UJL Library](../../services/library/README.md)

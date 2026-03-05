@@ -87,7 +87,7 @@ export default withMermaid({
 					{ text: "Install & Integrate", link: "/guide/installation" },
 					{ text: "Understand UJL", link: "/guide/concepts" },
 					{ text: "Implement Custom Modules", link: "/guide/custom-modules" },
-					{ text: "Optimize Bundle Size", link: "/guide/optimize-bundle-size" },
+					{ text: "Use Library Providers", link: "/guide/library-providers" },
 				],
 			},
 			{
@@ -113,8 +113,8 @@ export default withMermaid({
 								link: "/reference/decisions/0003-ast-adapter-pattern",
 							},
 							{
-								text: "ADR-004 Dual Image Storage",
-								link: "/reference/decisions/0004-dual-image-storage",
+								text: "ADR-004 Library Provider Pattern",
+								link: "/reference/decisions/0004-library-provider-pattern",
 							},
 							{
 								text: "ADR-005 Zod Schema Validation",

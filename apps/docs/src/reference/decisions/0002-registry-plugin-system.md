@@ -23,14 +23,14 @@ class CustomModule extends ModuleBase {
 	readonly fields = [{ key: "title", field: new TextField({ label: "Title", default: "" }) }];
 	readonly slots = [{ key: "body", slot: new Slot({ label: "Body", max: 5 }) }];
 
-	async compose(moduleData, composer): Promise<UJLAbstractNode> {
+	async compose(moduleData, composer, doc): Promise<UJLAbstractNode> {
 		return {
 			type: "custom-card",
 			id: generateUid(),
 			props: {
 				title: this.fields[0].field.parse(moduleData.fields.title),
 				children: await Promise.all(
-					(moduleData.slots.body ?? []).map((m) => composer.composeModule(m)),
+					(moduleData.slots.body ?? []).map((m) => composer.composeModule(m, doc)),
 				),
 			},
 		};

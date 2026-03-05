@@ -21,10 +21,10 @@
 	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 	import { Composer } from "@ujl-framework/core";
+	import { InlineLibraryProvider } from "$lib/providers/index.js";
 
 	import {
 		createCrafterStore,
-		createImageServiceFactory,
 		type CrafterStore,
 		type CrafterStoreDeps,
 		CRAFTER_CONTEXT,
@@ -98,18 +98,15 @@
 
 			const composer = new Composer();
 
-			const imageServiceFactory = createImageServiceFactory({
-				showToasts: true,
-				onConnectionError: (error, url) => {
-					logger.error("Image backend connection error:", error, url);
-				},
-			});
+			// Build the library provider (defaults to InlineLibraryProvider)
+			// Stateless - no closures needed. Crafter/Store manages all document storage.
+			const libraryProvider = new InlineLibraryProvider();
 
 			const storeDeps: CrafterStoreDeps = {
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				createImageService: imageServiceFactory,
+				libraryProvider,
 			};
 
 			const store = createCrafterStore(storeDeps);

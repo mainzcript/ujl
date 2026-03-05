@@ -10,11 +10,6 @@ export type { ComponentCategory } from "./modules/index.js";
 export { Composer } from "./composer.js";
 
 /**
- * Re-export image library for managing image entries
- */
-export { ImageLibrary } from "./image/index.js";
-
-/**
  * Re-export utility functions
  */
 export { generateUid } from "./utils.js";
