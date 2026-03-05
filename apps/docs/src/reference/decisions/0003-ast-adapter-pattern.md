@@ -42,7 +42,7 @@ New adapters (React, Vue, static HTML, PDF) can be added without changing core o
 
 ## Rationale
 
-The AST is the right boundary because it's the point at which framework-specific knowledge begins. Everything before it (reading UJLC/UJLT, running modules, resolving images) is pure data transformation. Everything after it is framework-specific rendering.
+The AST is the right boundary because it's the point at which framework-specific knowledge begins. Everything before it (reading UJLC, running modules, reading image data from the document's library) is pure data transformation. Everything after it is framework-specific rendering.
 
 The `meta.moduleId` concept enables the editor's click-to-select feature without coupling the editor to any specific adapter.
 

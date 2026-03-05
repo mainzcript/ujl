@@ -18,12 +18,8 @@ pnpm add @ujl-framework/types
 # Auto-detect type from JSON structure
 pnpm run validate ./path/to/file.json
 
-# Or use the CLI tool directly (after installation)
+# Use the CLI tool directly
 ujl-validate ./path/to/file.json
-
-# Validate specific files
-pnpm run validate ./default.ujlt.json
-pnpm run validate ./showcase.ujlc.json
 ```
 
 ### Programmatic Usage
@@ -36,97 +32,55 @@ import {
 	validateSlot,
 } from "@ujl-framework/types";
 
-// Validate complete documents (safe - returns result object)
-const themeResult = validateUJLTDocumentSafe(theme);
-if (themeResult.success) {
-	console.log("Valid:", themeResult.data);
+// Validate documents (safe - returns result object)
+const result = validateUJLCDocumentSafe(document);
+if (result.success) {
+	console.log("Valid:", result.data);
 } else {
-	console.error("Invalid:", themeResult.error.issues);
+	console.error("Invalid:", result.error.issues);
 }
 
-// Validate partial structures (throws on error)
-const validatedModule = validateModule(moduleData);
-const validatedSlot = validateSlot(slotData);
+// Validate partial structures
+const module = validateModule(moduleData);
+const slot = validateSlot(slotData);
 ```
 
 **Available Functions:**
 
-- `validateUJLTDocumentSafe(data)` - Safe validation for theme documents
-- `validateUJLCDocumentSafe(data)` - Safe validation for content documents
-- `validateUJLTDocument(data)` - Throwing validation for theme documents
-- `validateUJLCDocument(data)` - Throwing validation for content documents
-- `validateModule(data)` - Validate a single module
-- `validateSlot(data)` - Validate a slot (array of modules)
-- `validateTokenSet(data)` - Validate theme token set only
-
-### Features
-
-The validation system automatically detects the document type from the JSON structure (`ujlt` or `ujlc` root property) and provides detailed statistics and warnings. TypeScript types are inferred from Zod schemas, ensuring full type safety. Smart checks validate color contrasts, ID uniqueness, and nesting depth. The `ujl-validate` CLI tool enables integration into CI/CD pipelines.
+- `validateUJLCDocumentSafe(data)` / `validateUJLCDocument(data)` - Content validation
+- `validateUJLTDocumentSafe(data)` / `validateUJLTDocument(data)` - Theme validation
+- `validateModule(data)` - Single module validation
+- `validateSlot(data)` - Slot validation
+- `validateTokenSet(data)` - Token set validation
 
 ## Library Types
 
-This package includes type definitions for the asset library system.
-
-### Asset Entry Types
+Image assets use the `LibraryAssetImage` type:
 
 ```typescript
-// Asset entry with URL and metadata
-type AssetEntry = {
-	src: string; // Asset URL (HTTP or Base64 Data-URL)
-	metadata: AssetMetadata; // Descriptive metadata about the asset
-};
-
-// Asset metadata
-// mimeType and filesize are intentionally omitted — providers read them
-// directly from the File object or from the backend response.
-type AssetMetadata = {
-	filename: string;
-	width: number;
-	height: number;
-};
-
-// Image source for AST rendering
-type ImageSource = {
-	src: string; // Image URL (HTTP or Base64 Data-URL)
-};
-```
-
-### Library Provider Configuration
-
-The `UJLCMeta` type includes optional library provider configuration:
-
-```typescript
-type UJLCMeta = {
-	title: string;
-	// ... other meta fields
-	_library?: {
-		provider: "inline" | "backend";
-		url?: string; // Required for backend provider (direct mode)
+interface LibraryAssetImage {
+	kind: "image";
+	img: {
+		src: string;
+		width?: number;
+		height?: number;
+		srcset?: ImageSrcSet;
 	};
-};
-```
+	meta?: ImageMetadata; // Alt, caption, credits
+	sources?: PictureSource[]; // Art direction
+}
 
-### Image Field Types
-
-The `UJLImageData` type is used by the ImageField:
-
-```typescript
 type UJLImageData = {
-	imageId: string | number; // References entry in ujlc.library
-	alt: string;
+	imageId: string; // References ujlc.library
+	alt: string; // Module-level override
 };
 ```
 
-### UJLC Document Structure
+Stored in `ujlc.library` as `Record<string, LibraryAssetImage>`.
 
-Asset entries are stored in the document at `ujlc.library`:
+**For full type definitions, see:**
 
-```typescript
-type UJLCDocument = {
-	ujlc: {
-		meta: UJLCMeta;
-		library: Record<string, AssetEntry>; // Library entries (assets)
-		root: UJLCModuleObject[];
-	};
-};
-```
+- `library.ts` - Asset types and provider interfaces
+- `ujl-content.ts` - Document and module types
+- `ujl-theme.ts` - Theme and token types
+- `ast.ts` - AST node types

@@ -21,10 +21,10 @@ UJL separates content and design into two distinct document formats at the data 
 
 **UJLT** (`.ujlt.json`), design only: tokens for colors (OKLCH), typography, spacing, and radius. No content.
 
-The Composer combines both at runtime:
+The Composer takes the content document and produces an AST; theme/tokens are applied when rendering:
 
 ```typescript
-const ast = await composer.compose(ujlcDocument, ujltDocument);
+const ast = await composer.compose(ujlcDocument);
 ```
 
 Because design values don't exist in the content format, editors have no mechanism to change them, not as a UI restriction, but as a data model constraint.

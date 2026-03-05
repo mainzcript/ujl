@@ -40,7 +40,6 @@ onMounted(async () => {
 			target: "#ujl-crafter-container",
 			document,
 			theme,
-			library: { storage: "inline" },
 		});
 	} catch (error) {
 		console.error("Failed to initialize UJL Crafter:", error);

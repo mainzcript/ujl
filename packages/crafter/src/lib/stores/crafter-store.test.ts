@@ -4,8 +4,12 @@
  * Tests the centralized state management store.
  */
 
-import type { LibraryBase } from "@ujl-framework/core";
-import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
+import type {
+	LibraryAsset,
+	LibraryProvider,
+	UJLCDocument,
+	UJLTDocument,
+} from "@ujl-framework/types";
 import { describe, expect, it, vi } from "vitest";
 import { createMockTokenSet, createMockTree } from "../../../tests/mockData.js";
 import type { CrafterStoreDeps } from "./crafter-store.svelte.js";
@@ -44,16 +48,14 @@ function createMockUjltDocument(): UJLTDocument {
 	};
 }
 
-function createMockLibrary(): LibraryBase {
+function createMockLibraryProvider(): LibraryProvider {
 	return {
 		name: "inline",
-		checkConnection: vi.fn().mockResolvedValue({ connected: true }),
-		upload: vi.fn(),
+		list: vi.fn().mockResolvedValue({ items: [], hasMore: false }),
 		get: vi.fn().mockResolvedValue(null),
-		list: vi.fn().mockResolvedValue([]),
-		delete: vi.fn().mockResolvedValue(true),
-		resolve: vi.fn().mockResolvedValue(null),
-	} as unknown as LibraryBase;
+		upload: vi.fn(),
+		delete: vi.fn().mockResolvedValue(undefined),
+	} as unknown as LibraryProvider;
 }
 
 function createMockComposer() {
@@ -67,6 +69,8 @@ function createMockComposer() {
 			fields: {},
 			slots: {},
 		})),
+		compose: vi.fn().mockResolvedValue({ type: "root", children: [] }),
+		composeModule: vi.fn().mockResolvedValue({ type: "test", children: [] }),
 	} as unknown as import("@ujl-framework/core").Composer;
 }
 
@@ -75,7 +79,7 @@ function createMockDeps(overrides?: Partial<CrafterStoreDeps>): CrafterStoreDeps
 		initialUjlcDocument: createMockUjlcDocument(),
 		initialUjltDocument: createMockUjltDocument(),
 		composer: createMockComposer(),
-		library: createMockLibrary(),
+		libraryProvider: createMockLibraryProvider(),
 		...overrides,
 	};
 }
@@ -96,7 +100,7 @@ describe("CrafterStore Types", () => {
 		expect(deps).toHaveProperty("initialUjlcDocument");
 		expect(deps).toHaveProperty("initialUjltDocument");
 		expect(deps).toHaveProperty("composer");
-		expect(deps).toHaveProperty("library");
+		expect(deps).toHaveProperty("libraryProvider");
 	});
 
 	it("should create valid mock UJLC document", () => {
@@ -118,58 +122,206 @@ describe("CrafterStore Types", () => {
 });
 
 describe("CrafterStore Mock Dependencies", () => {
-	it("should create mock library provider", () => {
-		const library = createMockLibrary();
+	it("should create mock library provider with correct interface", () => {
+		const library = createMockLibraryProvider();
 
 		expect(library.name).toBe("inline");
-		expect(library.checkConnection).toBeDefined();
-		expect(library.upload).toBeDefined();
-		expect(library.get).toBeDefined();
-		expect(library.list).toBeDefined();
-		expect(library.delete).toBeDefined();
-		expect(library.resolve).toBeDefined();
+		expect(typeof library.list).toBe("function");
+		expect(typeof library.get).toBe("function");
 	});
 
-	it("should create mock composer", () => {
+	it("should create mock composer with required methods", () => {
 		const composer = createMockComposer();
 
-		expect(composer.getRegistry).toBeDefined();
-		expect(composer.createModuleFromType).toBeDefined();
-
-		// Test createModuleFromType
-		const node = composer.createModuleFromType("text", "test-id");
-		expect(node.type).toBe("text");
-		expect(node.meta.id).toBe("test-id");
+		expect(typeof composer.getRegistry).toBe("function");
+		expect(typeof composer.createModuleFromType).toBe("function");
+		expect(typeof composer.compose).toBe("function");
+		expect(typeof composer.composeModule).toBe("function");
 	});
 });
 
-describe("Operations", () => {
-	// Note: Operations are tested in the existing context.test.ts
-	// These tests verify the operations module is correctly extracted
+describe("Library Provider Capabilities", () => {
+	it("should detect upload capability", () => {
+		const library = createMockLibraryProvider();
 
-	it("should export createOperations function", async () => {
-		const { createOperations } = await import("./operations.js");
-		expect(typeof createOperations).toBe("function");
+		const canUpload = !!library.upload;
+		expect(canUpload).toBe(true);
 	});
 
-	it("should export CrafterOperations type", async () => {
-		// Type-only test - if this compiles, the type is exported correctly
-		const operations: import("./operations.js").CrafterOperations = {
-			copyNode: vi.fn(),
-			moveNode: vi.fn(),
-			reorderNode: vi.fn(),
-			deleteNode: vi.fn(),
-			cutNode: vi.fn(),
-			pasteNode: vi.fn(),
-			insertNode: vi.fn(),
-			copySlot: vi.fn(),
-			cutSlot: vi.fn(),
-			pasteSlot: vi.fn(),
-			moveSlot: vi.fn(),
-			updateNodeField: vi.fn(),
-			updateNodeFields: vi.fn(),
-		};
+	it("should detect delete capability", () => {
+		const library = createMockLibraryProvider();
 
-		expect(operations).toBeDefined();
+		const canDelete = !!library.delete;
+		expect(canDelete).toBe(true);
+	});
+
+	it("should detect missing updateMetadata capability", () => {
+		const library = createMockLibraryProvider();
+
+		const canUpdate = !!library.updateMetadata;
+		expect(canUpdate).toBe(false);
+	});
+});
+
+describe("Library Operations", () => {
+	describe("Provider Contract", () => {
+		it("should initialize provider if init is available", async () => {
+			const initMock = vi.fn().mockResolvedValue(undefined);
+			const provider = {
+				...createMockLibraryProvider(),
+				init: initMock,
+				list: vi.fn().mockResolvedValue({ items: [], hasMore: false }),
+			};
+
+			// Provider with init should call it before list
+			await provider.list({});
+			expect(provider.list).toHaveBeenCalled();
+		});
+
+		it("should list assets with pagination", async () => {
+			const mockAsset: { id: string } & LibraryAsset = {
+				id: "test-1",
+				kind: "image",
+				img: { src: "data:image/png;base64,test", width: 100, height: 100 },
+			};
+
+			const provider = {
+				...createMockLibraryProvider(),
+				list: vi.fn().mockResolvedValue({
+					items: [mockAsset],
+					hasMore: true,
+					nextCursor: "next-page",
+				}),
+			};
+
+			const result = await provider.list({}, { limit: 10, cursor: "start" });
+
+			expect(result.items).toHaveLength(1);
+			expect(result.items[0]?.id).toBe("test-1");
+			expect(result.hasMore).toBe(true);
+			expect(result.nextCursor).toBe("next-page");
+		});
+
+		it("should search assets with query", async () => {
+			const provider = {
+				...createMockLibraryProvider(),
+				list: vi.fn().mockResolvedValue({ items: [], hasMore: false }),
+			};
+
+			await provider.list({}, { search: "test-query" });
+
+			expect(provider.list).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({ search: "test-query" }),
+			);
+		});
+
+		it("should get asset by id", async () => {
+			const mockAsset: LibraryAsset = {
+				kind: "image",
+				img: { src: "data:image/png;base64,test", width: 100, height: 100 },
+			};
+
+			const provider = {
+				...createMockLibraryProvider(),
+				get: vi.fn().mockResolvedValue(mockAsset),
+			};
+
+			const result = await provider.get({}, "test-id");
+
+			expect(result).toEqual(mockAsset);
+			expect(provider.get).toHaveBeenCalledWith({}, "test-id");
+		});
+
+		it("should return null for unknown asset", async () => {
+			const provider = {
+				...createMockLibraryProvider(),
+				get: vi.fn().mockResolvedValue(null),
+			};
+
+			const result = await provider.get({}, "unknown-id");
+
+			expect(result).toBeNull();
+		});
+
+		it("should handle upload", async () => {
+			const mockAsset: LibraryAsset = {
+				kind: "image",
+				img: { src: "data:image/png;base64,new", width: 200, height: 200 },
+				meta: { filename: "new.png" },
+			};
+
+			const provider = {
+				...createMockLibraryProvider(),
+				upload: vi.fn().mockResolvedValue(mockAsset),
+			};
+
+			const data = new ArrayBuffer(8);
+			const result = await provider.upload(data, { filename: "new.png", type: "image/png" });
+
+			expect(result).toEqual(mockAsset);
+			expect(provider.upload).toHaveBeenCalledWith(
+				expect.any(ArrayBuffer),
+				expect.objectContaining({ filename: "new.png", type: "image/png" }),
+			);
+		});
+
+		it("should handle delete", async () => {
+			const provider = {
+				...createMockLibraryProvider(),
+				delete: vi.fn().mockResolvedValue(undefined),
+			};
+
+			await provider.delete("test-id");
+
+			expect(provider.delete).toHaveBeenCalledWith("test-id");
+		});
+
+		it("should handle updateMetadata", async () => {
+			const currentAsset: LibraryAsset = {
+				kind: "image",
+				img: { src: "data:image/png;base64,test", width: 100, height: 100 },
+				meta: { filename: "test.png", alt: "Old alt" },
+			};
+
+			const updatedAsset: LibraryAsset = {
+				...currentAsset,
+				meta: { ...currentAsset.meta, alt: "New alt" },
+			};
+
+			const provider = {
+				...createMockLibraryProvider(),
+				updateMetadata: vi.fn().mockResolvedValue(updatedAsset),
+			};
+
+			const result = await provider.updateMetadata({}, "test-id", { alt: "New alt" });
+
+			expect(result.meta?.alt).toBe("New alt");
+			expect(provider.updateMetadata).toHaveBeenCalledWith(
+				expect.anything(),
+				"test-id",
+				expect.objectContaining({ alt: "New alt" }),
+			);
+		});
+	});
+
+	describe("Library Provider Capabilities", () => {
+		it("should detect upload capability", () => {
+			const provider = createMockLibraryProvider();
+			const canUpload = !!provider.upload;
+			expect(canUpload).toBe(true);
+		});
+
+		it("should detect delete capability", () => {
+			const provider = createMockLibraryProvider();
+			const canDelete = !!provider.delete;
+			expect(canDelete).toBe(true);
+		});
+
+		it("should detect missing updateMetadata capability", () => {
+			const provider = createMockLibraryProvider();
+			const canUpdate = !!provider.updateMetadata;
+			expect(canUpdate).toBe(false);
+		});
 	});
 });

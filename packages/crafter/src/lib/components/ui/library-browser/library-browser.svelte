@@ -13,7 +13,6 @@
 	} from "@ujl-framework/ui";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import type { AssetMetadata, AssetEntry } from "@ujl-framework/types";
 	import ImageIcon from "@lucide/svelte/icons/image";
 	import TrashIcon from "@lucide/svelte/icons/trash-2";
 	import { logger } from "$lib/utils/logger.js";
@@ -27,43 +26,34 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const library = $derived(crafter.library);
 
-	let imageEntries = $state<Array<{ id: string; src: string; metadata: AssetMetadata }>>([]);
-	let isLoading = $state(true);
+	// Use store state directly - reactive updates when items change
+	let imageEntries = $derived(crafter.libraryItems);
+	let isLoading = $derived(crafter.libraryLoading);
+	let initialLoadRequested = $state(false);
 
+	// Capability checks for conditional UI
+	let canDelete = $derived(crafter.canDeleteLibrary());
+
+	// Initial load on mount
 	$effect(() => {
-		// Track libraryData so Svelte re-runs this effect whenever the document's
-		// library object changes (e.g. after an import or setUjlcDocument call).
-		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-		crafter.libraryData;
-		loadImageEntries();
-	});
-
-	async function loadImageEntries() {
-		isLoading = true;
-		try {
-			const entries = await library.list();
-			imageEntries = entries.map(({ id, entry }: { id: string; entry: AssetEntry }) => ({
-				id,
-				src: entry.src,
-				metadata: entry.metadata,
-			}));
-		} catch (err) {
-			logger.error("Failed to load image entries:", err);
-		} finally {
-			isLoading = false;
+		if (!initialLoadRequested && crafter.libraryItems.length === 0 && !crafter.libraryLoading) {
+			initialLoadRequested = true;
+			crafter.loadMoreLibraryItems(50).catch((err) => {
+				logger.error("[LibraryBrowser] Initial load failed:", err);
+			});
 		}
-	}
+	});
 
 	const hasImages = $derived(imageEntries.length > 0);
 
 	let imageToDelete: string | null = $state(null);
 	let deleteDialogOpen = $state(false);
 
-	function handleSelect(imageId: string) {
+	async function handleSelect(imageId: string) {
+		const persistedId = await crafter.selectLibraryAsset(imageId);
 		if (onSelect) {
-			onSelect(imageId);
+			onSelect(persistedId);
 		}
 	}
 
@@ -77,17 +67,27 @@
 		if (!imageToDelete) return;
 
 		try {
-			const success = await library.delete(imageToDelete);
-			if (success) {
-				await loadImageEntries();
-			} else {
-				logger.error("Failed to delete image:", imageToDelete);
-			}
+			await crafter.deleteLibraryAsset(imageToDelete);
+			// Update local list
+			imageEntries = crafter.libraryItems;
 		} catch (err) {
 			logger.error("Error deleting image:", err);
 		} finally {
 			deleteDialogOpen = false;
 			imageToDelete = null;
+		}
+	}
+
+	// Load more on scroll
+	async function handleScroll(e: Event) {
+		const container = e.target as HTMLElement;
+		if (
+			container.scrollHeight - container.scrollTop <= container.clientHeight + 100 &&
+			crafter.libraryHasMore &&
+			!crafter.libraryLoading
+		) {
+			await crafter.loadMoreLibraryItems();
+			imageEntries = crafter.libraryItems;
 		}
 	}
 </script>
@@ -115,7 +115,7 @@
 	</div>
 {:else}
 	<div class="p-3">
-		<div class="grid grid-cols-3 gap-3">
+		<div class="grid max-h-[400px] grid-cols-3 gap-3 overflow-y-auto" onscroll={handleScroll}>
 			{#each imageEntries as image (image.id)}
 				<button
 					type="button"
@@ -125,24 +125,31 @@
 						: 'border-border'}"
 					onclick={() => handleSelect(image.id)}
 				>
-					<img src={image.src} alt={image.metadata.filename} class="h-full w-full object-cover" />
+					<img
+						src={image.img.src}
+						alt={image.meta?.filename ?? "Image"}
+						loading="lazy"
+						class="h-full w-full object-cover"
+					/>
 
-					<!-- Overlay with actions -->
-					<div
-						class="absolute inset-0 flex items-end bg-linear-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
-					>
-						<div class="flex w-full items-center justify-end p-2">
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								class="h-6 w-6 bg-destructive/80 text-white hover:bg-destructive"
-								onclick={(e) => openDeleteDialog(image.id, e)}
-							>
-								<TrashIcon class="h-3 w-3" />
-							</Button>
+					<!-- Overlay with actions (only when delete is supported) -->
+					{#if canDelete}
+						<div
+							class="absolute inset-0 flex items-end bg-linear-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+						>
+							<div class="flex w-full items-center justify-end p-2">
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									class="h-6 w-6 bg-destructive/80 text-white hover:bg-destructive"
+									onclick={(e) => openDeleteDialog(image.id, e)}
+								>
+									<TrashIcon class="h-3 w-3" />
+								</Button>
+							</div>
 						</div>
-					</div>
+					{/if}
 
 					<!-- Selected indicator -->
 					{#if selectedImageId === image.id}
@@ -160,6 +167,11 @@
 					{/if}
 				</button>
 			{/each}
+			{#if crafter.libraryLoading}
+				<div class="col-span-3 flex justify-center py-4">
+					<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -178,10 +190,10 @@
 				{@const image = imageEntries.find((m) => m.id === imageToDelete)}
 				{#if image}
 					<div class="space-y-2">
-						<Text size="sm" intensity="muted">Image: {image.metadata.filename}</Text>
+						<Text size="sm" intensity="muted">Image: {image.meta?.filename ?? "Unknown"}</Text>
 						<img
-							src={image.src}
-							alt={image.metadata.filename}
+							src={image.img.src}
+							alt={image.meta?.filename ?? "Image"}
 							class="h-32 w-32 rounded-md border border-border object-cover"
 						/>
 					</div>

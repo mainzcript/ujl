@@ -4,26 +4,13 @@ export * from "./modules/index.js";
 // Explicitly export ComponentCategory for better TypeScript resolution
 export type { ComponentCategory } from "./modules/index.js";
 
+// Re-export library provider
+export * from "./library/index.js";
+
 /**
  * Re-export composer for easy access
  */
 export { Composer } from "./composer.js";
-
-/**
- * Re-export library providers and registry
- */
-export {
-	BackendLibraryProvider,
-	InlineLibraryProvider,
-	LibraryBase,
-	LibraryRegistry,
-} from "./library/index.js";
-export type {
-	BackendLibraryProviderConfig,
-	ConnectionStatus,
-	UpdateLibraryFn,
-	UploadResult,
-} from "./library/index.js";
 
 /**
  * Re-export utility functions

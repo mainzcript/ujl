@@ -5,7 +5,7 @@
  */
 
 // Only public API
-export { UJLCrafter, type LibraryOptions, type UJLCrafterOptions } from "./UJLCrafter.js";
+export { UJLCrafter, type UJLCrafterOptions } from "./UJLCrafter.js";
 
 // Callback types (only relevant for API consumers)
 export type {

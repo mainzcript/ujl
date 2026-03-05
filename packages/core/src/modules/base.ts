@@ -1,4 +1,4 @@
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLAbstractNode, UJLCDocument, UJLCModuleObject } from "@ujl-framework/types";
 import type { Composer } from "../composer.js";
 import { Field } from "../fields/index.js";
 import { generateUid } from "../utils.js";
@@ -70,11 +70,13 @@ export abstract class ModuleBase {
 	 * Compose a module instance into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
 	 * @param composer - Composer instance for composing child modules
+	 * @param doc - The UJLC document containing the library
 	 * @returns Composed abstract syntax tree node (can be async for image resolution)
 	 */
 	public abstract compose(
 		moduleData: UJLCModuleObject,
 		composer: Composer,
+		doc: UJLCDocument,
 	): UJLAbstractNode | Promise<UJLAbstractNode>;
 
 	/** Human-readable display name */

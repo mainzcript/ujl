@@ -1,4 +1,9 @@
-import type { ProseMirrorDocument, UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type {
+	ProseMirrorDocument,
+	UJLAbstractNode,
+	UJLCDocument,
+	UJLCModuleObject,
+} from "@ujl-framework/types";
 import type { Composer } from "../../composer.js";
 import { RichTextField } from "../../fields/concretes/richtext-field.js";
 import { TextField } from "../../fields/index.js";
@@ -74,9 +79,14 @@ export class CardModule extends ModuleBase {
 	 * Compose a feature card module into an abstract syntax tree node
 	 * @param moduleData - The module data from UJL document
 	 * @param composer - Composer instance for composing child modules
+	 * @param doc - The UJLC document containing the library
 	 * @returns Composed abstract syntax tree node
 	 */
-	public async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+	public async compose(
+		moduleData: UJLCModuleObject,
+		composer: Composer,
+		doc: UJLCDocument,
+	): Promise<UJLAbstractNode> {
 		const title = this.parseField(moduleData, "title", "Card Title");
 		const description = this.parseField(moduleData, "description", this.EMPTY_DOCUMENT);
 
@@ -84,7 +94,7 @@ export class CardModule extends ModuleBase {
 		const contentSlot = moduleData.slots.content;
 		const children: UJLAbstractNode[] = [];
 		for (const childModule of contentSlot) {
-			children.push(await composer.composeModule(childModule));
+			children.push(await composer.composeModule(childModule, doc));
 		}
 
 		return this.createNode("card", { title, description, children }, moduleData);

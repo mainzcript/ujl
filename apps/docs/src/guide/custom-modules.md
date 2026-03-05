@@ -21,7 +21,7 @@ Every module is a class that extends `ModuleBase`. TypeScript enforces all requi
 
 ```typescript
 import { ModuleBase, TextField, Slot } from "@ujl-framework/core";
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLAbstractNode, UJLCModuleObject, UJLCDocument } from "@ujl-framework/types";
 import type { Composer } from "@ujl-framework/core";
 
 export class TestimonialModule extends ModuleBase {
@@ -69,7 +69,7 @@ export class TestimonialModule extends ModuleBase {
 	readonly slots = []; // no nested modules needed here
 
 	// --- Composition ---
-	compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
+	compose(moduleData: UJLCModuleObject, _composer: Composer, _doc: UJLCDocument): UJLAbstractNode {
 		// escapeHtml() is required here: values are interpolated directly into a raw HTML string.
 		const quote = this.escapeHtml(this.parseField(moduleData, "quote", ""));
 		const author = this.escapeHtml(this.parseField(moduleData, "author", ""));
@@ -202,25 +202,24 @@ import { RichTextField } from "@ujl-framework/core";
 
 ### Image fields
 
-`ImageField` stores an asset ID (string for inline provider, number for backend). Resolve the ID to actual image data during composition:
+`ImageField` stores an asset ID (string). The document's asset library (`doc.ujlc.library`) holds the actual image data. Read the asset from the document during composition:
 
 ```typescript
 import { ImageField } from "@ujl-framework/core";
+import type { LibraryAssetImage, UJLCDocument } from "@ujl-framework/types";
 
 // In fields:
 { key: "cover", field: new ImageField({ label: "Cover Image", description: "", default: null }) }
 
-// In compose() – note: must be async
-async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
-  const imageId = this.parseField(moduleData, "cover", null);
-  const library = composer.getLibrary();
-
-  const image = imageId && library
-    ? await library.resolve(imageId)
-    : null;
+// In compose() – read asset from doc.ujlc.library
+compose(moduleData: UJLCModuleObject, _composer: Composer, doc: UJLCDocument): UJLAbstractNode {
+  const imageId = this.parseField(moduleData, "cover", null) as string | null;
+  const asset = (imageId && doc?.ujlc?.library?.[imageId]) as LibraryAssetImage | undefined;
+  const src = asset?.img?.src ?? "";
+  const alt = asset?.meta?.alt ?? "";
 
   return this.createNode("raw-html", {
-    content: image ? `<img src="${image.src}" alt="">` : "",
+    content: src ? `<img src="${this.escapeHtml(src)}" alt="${this.escapeHtml(alt)}">` : "",
   }, moduleData);
 }
 ```
@@ -246,14 +245,14 @@ readonly slots = [
 ];
 ```
 
-In `compose()`, iterate over the slot and delegate each child to the `Composer`:
+In `compose()`, iterate over the slot and delegate each child to the Composer, passing the document so the Composer can resolve module data and library references:
 
 ```typescript
-async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+async compose(moduleData: UJLCModuleObject, composer: Composer, doc: UJLCDocument): Promise<UJLAbstractNode> {
   const children: UJLAbstractNode[] = [];
 
   for (const child of moduleData.slots.content ?? []) {
-    children.push(await composer.composeModule(child));
+    children.push(await composer.composeModule(child, doc));
   }
 
   return this.createNode("wrapper", { children }, moduleData);
@@ -270,10 +269,10 @@ async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbst
 
 - Use `this.createNode(type, props, moduleData)` to build the root node. It generates a fresh `id`, sets `meta.moduleId`, and marks the node as `isModuleRoot: true` automatically
 - For internal child nodes (e.g., a button inside a card), pass `false` as the fourth argument: `this.createNode(type, props, moduleData, false)`
-- Return `Promise<UJLAbstractNode>` if you need `async` (e.g., image resolution); return `UJLAbstractNode` synchronously otherwise
+- Return `Promise<UJLAbstractNode>` if you need `async`; return `UJLAbstractNode` synchronously otherwise. Image data is read from `doc.ujlc.library[imageId]` (no async resolution).
 
 ```typescript
-compose(moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
+compose(moduleData: UJLCModuleObject, _composer: Composer, _doc: UJLCDocument): UJLAbstractNode {
   return this.createNode("raw-html", { content: "<p>Hello world</p>" }, moduleData);
 }
 ```
@@ -324,7 +323,7 @@ import { webAdapter } from "@ujl-framework/adapter-web";
 const composer = new Composer();
 composer.registerModule(new TestimonialModule());
 
-const ast = await composer.compose(ujlcDocument);
+const ast = await composer.compose(doc); // doc = UJLCDocument
 webAdapter(ast, tokenSet, { target: "#app" });
 ```
 
@@ -342,7 +341,7 @@ A `PricingCard` module with two text fields and a slot for feature list items:
 
 ```typescript
 import { ModuleBase, TextField, Slot } from "@ujl-framework/core";
-import type { UJLAbstractNode, UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLAbstractNode, UJLCModuleObject, UJLCDocument } from "@ujl-framework/types";
 import type { Composer } from "@ujl-framework/core";
 
 export class PricingCardModule extends ModuleBase {
@@ -382,7 +381,11 @@ export class PricingCardModule extends ModuleBase {
 		},
 	];
 
-	async compose(moduleData: UJLCModuleObject, composer: Composer): Promise<UJLAbstractNode> {
+	async compose(
+		moduleData: UJLCModuleObject,
+		composer: Composer,
+		doc: UJLCDocument,
+	): Promise<UJLAbstractNode> {
 		// escapeHtml() required: both values are interpolated into a raw HTML string below
 		const planName = this.escapeHtml(this.parseField(moduleData, "planName", ""));
 		const price = this.escapeHtml(this.parseField(moduleData, "price", ""));
@@ -398,7 +401,7 @@ export class PricingCardModule extends ModuleBase {
 		// Feature items as composed child nodes (slot → UJLAbstractNode[])
 		const features: UJLAbstractNode[] = [];
 		for (const child of moduleData.slots.features ?? []) {
-			features.push(await composer.composeModule(child));
+			features.push(await composer.composeModule(child, doc));
 		}
 
 		// wrapper renders children in order

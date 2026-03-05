@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Button } from "@ujl-framework/ui";
-	import type { AssetMetadata } from "@ujl-framework/types";
 	import { logger } from "$lib/utils/logger.js";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
@@ -17,42 +16,16 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const library = $derived(crafter.library);
 
 	const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 	const ACCEPT_STRING = ACCEPTED_IMAGE_TYPES.join(",");
 
 	let fileInputRef: HTMLInputElement | null = $state(null);
-	let isCompressing = $state(false);
-
-	/**
-	 * Extracts the width and height dimensions from an image file
-	 * @param file - The image file to analyze
-	 * @returns Promise resolving to the image dimensions
-	 * @throws Error if the image fails to load
-	 */
-	async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			const objectUrl = URL.createObjectURL(file);
-
-			img.onload = () => {
-				URL.revokeObjectURL(objectUrl);
-				resolve({ width: img.width, height: img.height });
-			};
-
-			img.onerror = () => {
-				URL.revokeObjectURL(objectUrl);
-				reject(new Error("Failed to load image"));
-			};
-
-			img.src = objectUrl;
-		});
-	}
+	let isUploading = $state(false);
 
 	/**
 	 * Handles file selection from the input element
-	 * Validates file type, extracts metadata, and uploads to image service
+	 * Validates file type and uploads via the Crafter store
 	 * @param event - The change event from the file input
 	 */
 	async function handleFileSelect(event: Event) {
@@ -72,27 +45,25 @@
 			return;
 		}
 
-		isCompressing = true;
+		// Check if upload is supported
+		if (!crafter.canUploadLibrary()) {
+			toast.error("Upload not supported", {
+				description: "This library provider does not support uploads.",
+			});
+			target.value = "";
+			return;
+		}
+
+		isUploading = true;
 
 		try {
-			// Get original dimensions
-			const { width, height } = await getImageDimensions(file);
+			// Upload via Crafter store
+			const result = await crafter.uploadLibraryAsset(file);
 
-			// Create metadata — only fields the provider cannot determine itself.
-			// mimeType and filesize are read by the provider from the File object directly.
-			const metadata: AssetMetadata = {
-				filename: file.name,
-				width,
-				height,
-			};
-
-			// Use library adapter to upload (handles compression and storage)
-			const result = await library.upload(file, metadata);
-
-			logger.info("Image uploaded successfully:", result.assetId);
+			logger.info("Image uploaded successfully:", result.id);
 
 			// Notify parent component
-			onUploadComplete?.(result.assetId);
+			onUploadComplete?.(result.id);
 			toast.success("Image uploaded successfully");
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
@@ -101,7 +72,7 @@
 				description: errorMessage,
 			});
 		} finally {
-			isCompressing = false;
+			isUploading = false;
 			// Reset input to allow selecting the same file again
 			if (target) {
 				target.value = "";
@@ -125,10 +96,10 @@
 		variant="muted"
 		size="sm"
 		onclick={handleFileInputClick}
-		disabled={isCompressing}
+		disabled={isUploading}
 		class="flex-1"
 	>
-		{#if isCompressing}
+		{#if isUploading}
 			<div class="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-current"></div>
 			Uploading...
 		{:else}
@@ -144,19 +115,21 @@
 			size="icon"
 			class="size-8 shrink-0"
 			onclick={onClose}
-			disabled={isCompressing}
+			disabled={isUploading}
 		>
 			<XIcon class="h-4 w-4" />
 		</Button>
 	{/if}
 </div>
 
-<!-- Hidden File Input -->
-<input
-	bind:this={fileInputRef}
-	type="file"
-	accept={ACCEPT_STRING}
-	class="hidden"
-	onchange={handleFileSelect}
-	disabled={isCompressing}
-/>
+{#if crafter.canUploadLibrary()}
+	<!-- Hidden File Input -->
+	<input
+		bind:this={fileInputRef}
+		type="file"
+		accept={ACCEPT_STRING}
+		class="hidden"
+		onchange={handleFileSelect}
+		disabled={isUploading}
+	/>
+{/if}

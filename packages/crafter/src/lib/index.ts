@@ -8,7 +8,6 @@
 export {
 	UJLCrafter,
 	type DocumentChangeCallback,
-	type LibraryOptions,
 	type NotificationCallback,
 	type NotificationType,
 	type ThemeChangeCallback,

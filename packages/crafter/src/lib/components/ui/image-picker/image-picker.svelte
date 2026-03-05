@@ -2,7 +2,7 @@
 	import { Text, Popover, PopoverTrigger, PopoverContent } from "@ujl-framework/ui";
 	import { getContext } from "svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import type { AssetEntry } from "@ujl-framework/types";
+	import type { LibraryAssetImage } from "@ujl-framework/types";
 	import ImageIcon from "@lucide/svelte/icons/image";
 	import { logger } from "$lib/utils/logger.js";
 	import { LibraryPopover } from "../library-popover/index.js";
@@ -16,7 +16,6 @@
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
-	const library = $derived(crafter.library);
 
 	let popoverOpen = $state(false);
 
@@ -39,11 +38,24 @@
 		// Convert numeric IDs to strings (backend services like Payload return numbers)
 		const imageId = String(value);
 		isLoadingPreview = true;
-		library
-			.get(imageId)
-			.then((entry: AssetEntry | null) => {
-				previewUrl = entry?.src ?? null;
-				previewAlt = entry?.metadata?.filename ?? "Selected image preview";
+
+		// Try to find image in loaded items first
+		const cachedAsset = crafter.libraryItems.find((item) => item.id === imageId);
+		if (cachedAsset) {
+			previewUrl = cachedAsset.img.src;
+			previewAlt = cachedAsset.meta?.filename ?? "Selected image preview";
+			isLoadingPreview = false;
+			return;
+		}
+
+		// Otherwise fetch from provider
+		crafter
+			.getLibraryAsset(imageId)
+			.then((asset: LibraryAssetImage | null) => {
+				if (asset?.kind === "image") {
+					previewUrl = asset.img.src ?? null;
+					previewAlt = asset.meta?.filename ?? "Selected image preview";
+				}
 			})
 			.catch((err: unknown) => {
 				logger.error("[ImagePicker] Failed to load image preview:", err);

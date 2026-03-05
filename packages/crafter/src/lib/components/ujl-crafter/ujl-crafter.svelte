@@ -18,7 +18,7 @@
 	import { Badge, UJLTheme } from "@ujl-framework/ui";
 	import { setContext } from "svelte";
 	import { toast } from "svelte-sonner";
-	import type { UJLCDocument, UJLCLibrary, UJLTDocument } from "@ujl-framework/types";
+	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 	import { Composer, InlineLibraryProvider } from "@ujl-framework/core";
 
@@ -97,30 +97,18 @@
 
 			const composer = new Composer();
 
-			// Bridged library accessors: the InlineLibraryProvider needs to read/write
-			// the Store's reactive state. Since the Store is created after the provider,
-			// we use indirect references that start pointing at the initial document data
-			// and get wired to the Store after creation.
-			let getLibraryBridge: () => UJLCLibrary = () => validatedContent.ujlc.library;
-			let updateLibraryBridge: (fn: (lib: UJLCLibrary) => UJLCLibrary) => void = () => {};
-
-			const libraryProvider = new InlineLibraryProvider(
-				() => getLibraryBridge(),
-				(fn) => updateLibraryBridge(fn),
-			);
+			// Build the library provider (defaults to InlineLibraryProvider)
+			// Stateless - no closures needed. Crafter/Store manages all document storage.
+			const libraryProvider = new InlineLibraryProvider();
 
 			const storeDeps: CrafterStoreDeps = {
 				initialUjlcDocument: validatedContent,
 				initialUjltDocument: validatedTheme,
 				composer,
-				library: libraryProvider,
+				libraryProvider,
 			};
 
 			const store = createCrafterStore(storeDeps);
-
-			// Wire up the bridge: from now on the provider reads/writes via the Store
-			getLibraryBridge = () => store.libraryData;
-			updateLibraryBridge = (fn) => store.updateLibrary(fn);
 
 			return { store, composer };
 		}

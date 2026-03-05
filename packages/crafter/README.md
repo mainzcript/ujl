@@ -2,7 +2,7 @@
 
 **Visual Editor for UJL Content** - A Svelte based visual editor for creating and editing UJL content documents (`.ujlc.json`) and theme documents (`.ujlt.json`).
 
-The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and support for both inline and backend image storage.
+The Crafter provides a WYSIWYG editing experience with two distinct modes: **Editor** for content editing and **Designer** for theme customization. It features a modular architecture with centralized state management, dependency injection, and inline image storage by default (with optional custom library providers).
 
 ---
 
@@ -81,26 +81,20 @@ crafter.registerModule(new AnotherModule());
 crafter.unregisterModule("hero");
 ```
 
-### With Backend Asset Storage
+### With a custom library provider
+
+By default the Crafter uses `InlineLibraryProvider` from `@ujl-framework/core` (assets stored in the document). To use a different storage (e.g. your own API), pass a **libraryProvider** that implements the UJL `LibraryProvider` interface. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs for details.
 
 ```typescript
-// Session-key auth: short-lived tokens from your App Backend (no API key in browser)
-// NOTE: You must implement the /api/library-token endpoint in your backend.
-//       It should use the server-side LIBRARY_API_KEY to call the Library Service
-//       and return a short-lived token. See apps/docs/src/guide/installation.md for a full example.
+import { UJLCrafter } from "@ujl-framework/crafter";
+import { InlineLibraryProvider } from "@ujl-framework/core"; // optional: explicit default
+
 const crafter = new UJLCrafter({
 	target: "#editor-container",
 	document: myContentDocument,
 	theme: myPreviewTheme,
-	library: {
-		provider: "backend",
-		url: "https://your-library.example.com",
-		requestAccessToken: async () => {
-			const res = await fetch("/api/library-token"); // Your backend endpoint
-			const { token } = await res.json();
-			return token;
-		},
-	},
+	// libraryProvider: new InlineLibraryProvider(), // default when omitted
+	// libraryProvider: myCustomProvider, // your implementation of LibraryProvider
 });
 ```
 
@@ -146,14 +140,9 @@ In **Editor Mode**, the Crafter provides module tree navigation, click-to-select
 
 ## Asset Library
 
-The Crafter supports two provider modes: **Inline** (default, Base64 in document) and **Backend** (Payload CMS server). Configuration is passed via `UJLCrafterOptions.library`.
+The Crafter uses a stateless `LibraryProvider` for asset operations. The provider handles upload, metadata management, and asset listing, but **does not store state**—all asset data lives in the document's `ujlc.library` object.
 
-| Provider  | Required Options             | Description                                              |
-| --------- | ---------------------------- | -------------------------------------------------------- |
-| `inline`  | None                         | Assets stored as Base64 in document                      |
-| `backend` | `url` + `requestAccessToken` | Assets on Payload CMS; auth via short-lived session keys |
-
-For backend storage setup and troubleshooting, see the [UJL Library README](../../services/library/README.md).
+**Key Principle:** The Composer (used for rendering) is completely stateless and reads assets directly from `doc.ujlc.library`. The `LibraryProvider` is only used for Crafter operations (upload, list, delete, metadata update). UJL ships only `InlineLibraryProvider`; for other storage you implement the `LibraryProvider` interface yourself. See the [Library Providers guide](https://ujl-framework.org/guide/library-providers) in the docs.
 
 ## API Reference
 
@@ -192,9 +181,7 @@ interface UJLCrafterOptions {
 	document?: UJLCDocument;
 	theme?: UJLTDocument;
 	editorTheme?: UJLTDocument;
-	library?:
-		| { provider: "inline" }
-		| { provider: "backend"; url: string; requestAccessToken: () => Promise<string> };
+	libraryProvider?: LibraryProvider; // Provider for Crafter operations (upload, list, etc.)
 	modules?: ModuleBase[]; // Custom modules to register alongside built-in modules
 	testMode?: boolean; // Enable data-testid attributes for E2E testing (default: false)
 }
@@ -253,4 +240,3 @@ See [src/lib/styles/README.md](src/lib/styles/README.md) for details.
 ## Related
 
 - [UJL Framework README](../../README.md)
-- [UJL Library](../../services/library/README.md)

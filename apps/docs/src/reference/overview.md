@@ -28,7 +28,9 @@ flowchart TD
     UJL -->|"produces governed HTML/CSS/JS"| Consumer
     UJL <-->|"documents stored and retrieved"| CMS
     UJL -->|"rendered into"| Frontend
-    UJL <-->|"image upload and resolve"| LibSvc
+    AuthoringProvider["LibraryProvider<br/>(Inline or custom backend)"]
+    Editor -->|"asset ops via provider"| AuthoringProvider
+    AuthoringProvider -->|"returns assets"| Editor
 ```
 
 **The three roles that interact with UJL:**
@@ -91,7 +93,7 @@ The significant decisions behind this architecture are documented individually:
 - [ADR-001: Content/Design Separation](/reference/decisions/0001-content-design-separation)
 - [ADR-002: Registry & Plugin System](/reference/decisions/0002-registry-plugin-system)
 - [ADR-003: AST Adapter Pattern](/reference/decisions/0003-ast-adapter-pattern)
-- [ADR-004: Dual Image Storage](/reference/decisions/0004-dual-image-storage)
+- [ADR-004: Library Provider Pattern](/reference/decisions/0004-library-provider-pattern)
 - [ADR-005: Zod Schema Validation](/reference/decisions/0005-zod-schema-validation)
 - [ADR-009: OKLCH Color Space](/reference/decisions/0009-oklch-color-space)
 - [ADR-019: Structured Content over HTML](/reference/decisions/0019-structured-content-over-html)

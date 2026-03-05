@@ -1,13 +1,6 @@
 import { createCrafterStore, type CrafterStore, type SaveCallback } from "$lib/stores/index.js";
-import { logger } from "$lib/utils/logger.js";
-import {
-	BackendLibraryProvider,
-	Composer,
-	InlineLibraryProvider,
-	LibraryRegistry,
-	type ModuleBase,
-} from "@ujl-framework/core";
-import type { UJLCDocument, UJLCLibrary, UJLTDocument } from "@ujl-framework/types";
+import { Composer, InlineLibraryProvider, type ModuleBase } from "@ujl-framework/core";
+import type { LibraryProvider, UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 import CrafterElement from "./ujl-crafter-element.svelte";
 
@@ -41,34 +34,6 @@ export type ThemeChangeCallback = (theme: UJLTDocument) => void;
 // Re-export SaveCallback from store for API consistency
 export type { SaveCallback } from "$lib/stores/index.js";
 
-/**
- * Configuration options for the library.
- * Determines how library assets are stored and retrieved.
- *
- * Two provider modes are available:
- * - `inline`: Assets stored as Base64 in the UJLC document (no additional config needed)
- * - `backend`: Assets stored on a Payload CMS server using session-key authentication
- *
- * **Security:** The backend mode uses short-lived tokens (typically 15 minutes) obtained
- * via the `requestAccessToken` callback. No permanent API key is stored in the browser.
- *
- * The Composer will automatically select the provider that matches the
- * `_library.provider` field in the document being composed.
- */
-export type LibraryOptions =
-	| { provider: "inline" }
-	| {
-			provider: "backend";
-			/** Base URL of the Payload CMS instance */
-			url: string;
-			/**
-			 * Callback to request a temporary access token.
-			 * Called lazily when needed and cached internally with automatic refresh.
-			 * The App Backend should validate the user session before issuing the token.
-			 */
-			requestAccessToken: () => Promise<string>;
-	  };
-
 export interface UJLCrafterOptions {
 	/** DOM element or CSS selector where the Crafter should be mounted */
 	target: string | HTMLElement;
@@ -78,8 +43,8 @@ export interface UJLCrafterOptions {
 	theme?: UJLTDocument;
 	/** Editor theme document (optional) - used for Crafter UI styling */
 	editorTheme?: UJLTDocument;
-	/** Library configuration (default: inline storage) */
-	library?: LibraryOptions;
+	/** Custom library provider (default: InlineLibraryProvider) */
+	libraryProvider?: LibraryProvider;
 	/** Enable data-testid attributes for E2E testing (default: false) */
 	testMode?: boolean;
 	/**
@@ -140,10 +105,7 @@ export class UJLCrafter {
 	constructor(options: UJLCrafterOptions) {
 		this.target = this.resolveTarget(options.target);
 
-		// Library configuration (defaults to inline)
-		const libraryOptions = options.library ?? { provider: "inline" as const };
-
-		// Validate documents upfront so they can be shared between provider and store
+		// Validate documents upfront
 		const initialDoc = options.document
 			? validateUJLCDocument(options.document)
 			: this.getDefaultDocument();
@@ -151,44 +113,12 @@ export class UJLCrafter {
 			? validateUJLTDocument(options.theme)
 			: this.getDefaultTheme();
 
-		// Bridged library accessors: the InlineLibraryProvider needs getLibrary/updateLibrary
-		// closures that read from the Store's reactive state. Since the Store is created after
-		// the provider (chicken-and-egg), we use indirect references that start pointing at the
-		// initial document and get wired to the Store after creation.
-		let getLibraryBridge: () => UJLCLibrary = () => initialDoc.ujlc.library;
-		let updateLibraryBridge: (fn: (lib: UJLCLibrary) => UJLCLibrary) => void = () => {};
+		// Build the library provider (defaults to InlineLibraryProvider)
+		// Stateless - no closures needed. Crafter/Store manages all document storage.
+		const libraryProvider = options.libraryProvider ?? new InlineLibraryProvider();
 
-		// Build the library provider
-		let libraryProvider;
-		if (libraryOptions.provider === "backend") {
-			libraryProvider = new BackendLibraryProvider({
-				url: libraryOptions.url,
-				requestAccessToken: libraryOptions.requestAccessToken,
-			});
-
-			// Async connection check (non-blocking)
-			libraryProvider.checkConnection().then((status) => {
-				if (!status.connected) {
-					logger.error("Library backend connection error:", status.error);
-					this.notify(
-						"error",
-						"Library backend connection error",
-						`Failed to connect to ${libraryOptions.url}`,
-					);
-				}
-			});
-		} else {
-			libraryProvider = new InlineLibraryProvider(
-				() => getLibraryBridge(),
-				(fn) => updateLibraryBridge(fn),
-			);
-		}
-
-		// Build library registry for the Composer (auto-selects based on doc._library.provider)
-		const libraryRegistry = new LibraryRegistry();
-		libraryRegistry.registerProvider(libraryProvider);
-
-		this.composer = new Composer(undefined, libraryRegistry);
+		// Composer is now stateless - library lives only in the document
+		this.composer = new Composer();
 
 		if (options.modules) {
 			for (const module of options.modules) {
@@ -204,13 +134,9 @@ export class UJLCrafter {
 			initialUjlcDocument: initialDoc,
 			initialUjltDocument: initialTheme,
 			composer: this.composer,
-			library: libraryProvider,
+			libraryProvider,
 			testMode: options.testMode ?? false,
 		});
-
-		// Wire up the bridge: from now on the provider reads/writes via the Store
-		getLibraryBridge = () => this.store.libraryData;
-		updateLibraryBridge = (fn) => this.store.updateLibrary(fn);
 
 		this.mount();
 	}

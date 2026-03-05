@@ -26,7 +26,7 @@ packages/<package>/               # Core packages
     │   └── **/*.test.ts
     └── mockData.ts               # Shared test utilities
 
-services/<service>/               # Backend services (e.g., services/library)
+services/<service>/               # Backend services (when present)
 ├── src/                          # Source code + Unit tests
 │   └── **/*.test.ts
 └── tests/                        # E2E/Integration tests if present
@@ -115,8 +115,8 @@ From the repo root, use pnpm filters to target a single workspace:
 # Example: Crafter package
 pnpm --filter @ujl-framework/crafter test
 
-# Example: Library service
-pnpm --filter @ujl-framework/library test
+# Example: Types package
+pnpm --filter @ujl-framework/types test
 ```
 
 ## RTC (Ready to Commit)
