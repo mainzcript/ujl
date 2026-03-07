@@ -15,4 +15,4 @@ export {
 } from "./components/ujl-crafter/index.js";
 
 // Library providers
-export { InlineLibraryProvider } from "./providers/index.js";
+export { InlineLibraryProvider } from "./library-providers/index.js";

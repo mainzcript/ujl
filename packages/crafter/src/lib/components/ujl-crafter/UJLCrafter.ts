@@ -1,4 +1,4 @@
-import { InlineLibraryProvider } from "$lib/providers/index.js";
+import { InlineLibraryProvider } from "$lib/library-providers/index.js";
 import { createCrafterStore, type CrafterStore, type SaveCallback } from "$lib/stores/index.js";
 import { Composer, type ModuleBase } from "@ujl-framework/core";
 import type { LibraryProvider, UJLCDocument, UJLTDocument } from "@ujl-framework/types";

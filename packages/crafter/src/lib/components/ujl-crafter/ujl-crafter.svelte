@@ -21,7 +21,7 @@
 	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 	import { Composer } from "@ujl-framework/core";
-	import { InlineLibraryProvider } from "$lib/providers/index.js";
+	import { InlineLibraryProvider } from "$lib/library-providers/index.js";
 
 	import {
 		createCrafterStore,
