@@ -38,12 +38,28 @@
 	import PropertiesPanel from "./panel/properties-panel.svelte";
 	import DesignerPanel from "./panel/designer-panel.svelte";
 	import CrafterEffects from "./crafter-effects.svelte";
+	import ComponentPicker from "./sidebar/component-picker.svelte";
 
 	import showcaseDocument from "@ujl-framework/examples/documents/showcase" with { type: "json" };
 	import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 
 	import { downloadJsonFile, readJsonFile } from "$lib/utils/files.js";
 	import { logger } from "$lib/utils/logger.js";
+	import {
+		writeToBrowserClipboard,
+		readFromBrowserClipboard,
+		writeToClipboardEvent,
+		readFromClipboardEvent,
+		type UJLClipboardData,
+	} from "$lib/utils/clipboard.js";
+	import {
+		findNodeById,
+		ROOT_NODE_ID,
+		ROOT_SLOT_NAME,
+		parseSlotSelection,
+		isRootNode,
+		isModuleObject,
+	} from "$lib/utils/ujlc-tree.js";
 
 	// ============================================
 	// PROPS
@@ -277,6 +293,418 @@
 	function handleViewportTypeChange(type: string | undefined) {
 		store.setViewportType(type);
 	}
+
+	// ============================================
+	// KEYBOARD SHORTCUTS - Always active, even when sidebar is hidden
+	// ============================================
+
+	// Synchronized with browser clipboard for cross-tab support
+	let clipboard = $state<UJLClipboardData | null>(null);
+	let isHandlingKeyboardShortcut = $state(false);
+
+	// Component Picker state
+	let showComponentPicker = $state(false);
+	let insertTargetNodeId = $state<string | null>(null);
+
+	const selectedNodeId = $derived.by(() => {
+		return store.mode === "editor" ? store.selectedNodeId : null;
+	});
+
+	// Slot selection uses format: parentId:slotName
+	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
+
+	const selectedNode = $derived.by(() => {
+		if (!selectedNodeId) return null;
+
+		if (selectedSlotInfo) {
+			return findNodeById(store.rootSlot, selectedSlotInfo.parentId);
+		}
+
+		return findNodeById(store.rootSlot, selectedNodeId);
+	});
+
+	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canDelete = $derived(
+		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
+	);
+	const canPaste = $derived.by(() => {
+		if (!clipboard) return false;
+
+		if (selectedNodeId === ROOT_NODE_ID) {
+			return (
+				isModuleObject(clipboard) ||
+				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
+			);
+		}
+
+		if (!selectedNodeId) return false;
+
+		if (selectedSlotInfo) {
+			const parentNode = findNodeById(store.rootSlot, selectedSlotInfo.parentId);
+			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
+
+			if (isModuleObject(clipboard)) {
+				return true;
+			}
+
+			if (clipboard.type === "slot") {
+				if (isRootNode(selectedSlotInfo.parentId)) {
+					return clipboard.slotName === ROOT_SLOT_NAME;
+				}
+				if (parentNode?.slots) {
+					return Object.keys(parentNode.slots).includes(clipboard.slotName);
+				}
+			}
+
+			return false;
+		}
+
+		if (isRootNode(selectedNodeId)) {
+			return (
+				isModuleObject(clipboard) ||
+				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
+			);
+		}
+
+		if (!selectedNode) return false;
+
+		if (isModuleObject(clipboard)) {
+			return true;
+		}
+
+		if (clipboard.type === "slot" && selectedNode.slots) {
+			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
+		}
+
+		return false;
+	});
+
+	async function handleCopy(nodeId: string) {
+		const copiedNode = store.operations.copyNode(nodeId);
+		if (copiedNode) {
+			clipboard = copiedNode;
+			await writeToBrowserClipboard(copiedNode);
+		}
+	}
+
+	async function handleCut(nodeId: string) {
+		const cutNode = store.operations.cutNode(nodeId);
+		if (cutNode) {
+			clipboard = cutNode;
+			await writeToBrowserClipboard(cutNode);
+		}
+	}
+
+	async function handlePaste(nodeIdOrSlot: string) {
+		const browserClipboard = await readFromBrowserClipboard();
+		const pasteData = browserClipboard || clipboard;
+
+		if (!pasteData) return;
+
+		if (browserClipboard && browserClipboard !== clipboard) {
+			clipboard = browserClipboard;
+		}
+
+		performPaste(pasteData, nodeIdOrSlot);
+	}
+
+	function performPaste(pasteData: UJLClipboardData, nodeIdOrSlot: string) {
+		const slotInfo = parseSlotSelection(nodeIdOrSlot);
+		const isSlotSelection = slotInfo !== null;
+
+		if (isModuleObject(pasteData)) {
+			let newNodeId: string | null = null;
+			if (isSlotSelection && slotInfo) {
+				newNodeId = store.operations.pasteNode(
+					pasteData,
+					slotInfo.parentId,
+					slotInfo.slotName,
+					"into",
+				);
+			} else {
+				newNodeId = store.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, "after");
+			}
+			if (newNodeId) {
+				store.setSelectedNodeId(newNodeId);
+			}
+			return;
+		}
+
+		if (pasteData.type === "slot") {
+			if (isSlotSelection && slotInfo) {
+				store.operations.pasteSlot(pasteData, slotInfo.parentId);
+			} else {
+				store.operations.pasteSlot(pasteData, nodeIdOrSlot);
+			}
+		}
+	}
+
+	function handleDelete(nodeId: string) {
+		const success = store.operations.deleteNode(nodeId);
+		if (success) {
+			store.setSelectedNodeId(null);
+		}
+	}
+
+	function handleInsert(nodeIdOrSlot: string) {
+		insertTargetNodeId = nodeIdOrSlot;
+		showComponentPicker = true;
+	}
+
+	function handleNodeInsert(componentType: string, nodeId: string): boolean {
+		let newNodeId: string | null = null;
+		if (isRootNode(nodeId)) {
+			// Root: insert at end of document
+			newNodeId = store.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, "into");
+		} else {
+			// Regular module: insert after current module (consistent with paste)
+			const targetNode = findNodeById(store.rootSlot, nodeId);
+			if (!targetNode) {
+				return false;
+			}
+
+			newNodeId = store.operations.insertNode(componentType, nodeId, undefined, "after");
+		}
+		if (newNodeId) {
+			store.setSelectedNodeId(newNodeId);
+			return true;
+		}
+		return false;
+	}
+
+	function handleSlotInsert(componentType: string, parentId: string, slotName: string): boolean {
+		let newNodeId: string | null = null;
+		if (isRootNode(parentId)) {
+			newNodeId = store.operations.insertNode(componentType, ROOT_NODE_ID, slotName, "into");
+		} else {
+			const targetNode = findNodeById(store.rootSlot, parentId);
+			if (!targetNode) {
+				return false;
+			}
+			newNodeId = store.operations.insertNode(componentType, parentId, slotName, "into");
+		}
+		if (newNodeId) {
+			store.setSelectedNodeId(newNodeId);
+			return true;
+		}
+		return false;
+	}
+
+	function handleComponentSelect(componentType: string) {
+		if (!insertTargetNodeId) return;
+
+		const slotInfo = parseSlotSelection(insertTargetNodeId);
+
+		if (slotInfo) {
+			const { parentId, slotName } = slotInfo;
+			handleSlotInsert(componentType, parentId, slotName);
+		} else {
+			handleNodeInsert(componentType, insertTargetNodeId);
+		}
+
+		insertTargetNodeId = null;
+		showComponentPicker = false;
+	}
+
+	/**
+	 * Checks if the keyboard event originated from an editable element.
+	 * Uses composedPath() for Shadow DOM compatibility - event.target is
+	 * retargeted to the shadow host when events bubble outside Shadow DOM.
+	 */
+	function isEditableElement(event: KeyboardEvent | ClipboardEvent): boolean {
+		const path = event.composedPath();
+		const actualTarget = path[0];
+
+		if (!actualTarget || !(actualTarget instanceof HTMLElement)) {
+			return false;
+		}
+
+		const tagName = actualTarget.tagName.toLowerCase();
+
+		if (tagName === "input" || tagName === "textarea") {
+			return true;
+		}
+
+		if (actualTarget.isContentEditable) {
+			return true;
+		}
+
+		if (tagName === "select") {
+			return true;
+		}
+
+		return false;
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (isEditableElement(event)) return;
+
+		if (event.key === "Escape") {
+			if (selectedNodeId) {
+				event.preventDefault();
+				store.setSelectedNodeId(null);
+			}
+			return;
+		}
+
+		// Ctrl+I (Add) should always work, even without selection
+		if ((event.ctrlKey || event.metaKey) && event.key === "i") {
+			event.preventDefault();
+			if (selectedSlotInfo && selectedNodeId) {
+				// Slot selected: insert into slot
+				handleInsert(selectedNodeId);
+			} else if (selectedNodeId) {
+				// Module selected: insert after module (consistent with paste)
+				handleInsert(selectedNodeId);
+			} else {
+				// Nothing selected: insert at end of document
+				handleInsert(ROOT_NODE_ID);
+			}
+			return;
+		}
+
+		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
+		if (!selectedNodeId && !clipboard) return;
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
+			if (canPaste) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				const targetId = selectedNodeId || ROOT_NODE_ID;
+				handlePaste(targetId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
+			}
+			return;
+		}
+
+		if (event.key === "Delete" || event.key === "Backspace") {
+			if (canDelete && selectedNodeId) {
+				event.preventDefault();
+				handleDelete(selectedNodeId);
+			}
+			return;
+		}
+
+		if (selectedSlotInfo || !selectedNodeId) return;
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "c") {
+			if (canCopy) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				handleCopy(selectedNodeId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
+			}
+		}
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "x") {
+			if (canCut) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				isHandlingKeyboardShortcut = true;
+				handleCut(selectedNodeId).finally(() => {
+					setTimeout(() => {
+						isHandlingKeyboardShortcut = false;
+					}, 0);
+				});
+			}
+		}
+	}
+
+	function handleCopyEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCopy) return;
+
+		const copiedNode = store.operations.copyNode(selectedNodeId);
+		if (copiedNode) {
+			clipboard = copiedNode;
+			writeToClipboardEvent(event, copiedNode);
+			writeToBrowserClipboard(copiedNode);
+		}
+	}
+
+	function handleCutEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCut) return;
+
+		const cutNode = store.operations.cutNode(selectedNodeId);
+		if (cutNode) {
+			clipboard = cutNode;
+			writeToClipboardEvent(event, cutNode);
+			writeToBrowserClipboard(cutNode);
+		}
+	}
+
+	function handlePasteEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!canPaste) return;
+
+		const eventData = readFromClipboardEvent(event);
+		const pasteData = eventData || clipboard;
+		if (!pasteData) return;
+
+		if (eventData && eventData !== clipboard) {
+			clipboard = eventData;
+		}
+
+		const targetId = selectedNodeId || ROOT_NODE_ID;
+		performPaste(pasteData, targetId);
+	}
+
+	// Setup global keyboard shortcuts in $effect
+	$effect(() => {
+		if (typeof window === "undefined") return;
+
+		window.addEventListener("keydown", handleKeyDown);
+		window.addEventListener("copy", handleCopyEvent);
+		window.addEventListener("cut", handleCutEvent);
+		window.addEventListener("paste", handlePasteEvent);
+
+		// Initialize clipboard from browser on mount
+		readFromBrowserClipboard().then((data) => {
+			if (data) {
+				clipboard = data;
+			}
+		});
+
+		// Sync clipboard on focus (for cross-tab support)
+		const handleFocus = () => {
+			readFromBrowserClipboard().then((data) => {
+				if (data && data !== clipboard) {
+					clipboard = data;
+				}
+			});
+		};
+
+		window.addEventListener("focus", handleFocus);
+
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+			window.removeEventListener("copy", handleCopyEvent);
+			window.removeEventListener("cut", handleCutEvent);
+			window.removeEventListener("paste", handlePasteEvent);
+			window.removeEventListener("focus", handleFocus);
+		};
+	});
 </script>
 
 <UJLTheme
@@ -312,7 +740,7 @@
 		</AppHeader>
 
 		<AppSidebar>
-			<Editor rootSlot={store.rootSlot} />
+			<Editor rootSlot={store.rootSlot} externalClipboard={clipboard} />
 		</AppSidebar>
 
 		<AppCanvas>
@@ -339,6 +767,8 @@
 			{/if}
 		</AppPanel>
 	</App>
+
+	<ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />
 
 	<!-- Portal container for overlay components (dropdowns, dialogs, tooltips, etc.) -->
 	<!-- Must be inside UJLTheme to inherit theme styles and CSS variables -->

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { UJLCSlotObject } from "@ujl-framework/types";
-	import { onMount, getContext } from "svelte";
+	import { getContext } from "svelte";
 	import NavTree from "./nav-tree/nav-tree.svelte";
-	import ComponentPicker from "./component-picker.svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 	import {
 		findNodeById,
@@ -15,136 +14,32 @@
 	import {
 		writeToBrowserClipboard,
 		readFromBrowserClipboard,
-		writeToClipboardEvent,
-		readFromClipboardEvent,
 		type UJLClipboardData,
 	} from "$lib/utils/clipboard.js";
+	import ComponentPicker from "./component-picker.svelte";
 
 	let {
 		rootSlot,
+		externalClipboard = null,
 	}: {
 		rootSlot: UJLCSlotObject;
+		externalClipboard?: UJLClipboardData | null;
 	} = $props();
 
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 
 	// Synchronized with browser clipboard for cross-tab support
-	let clipboard = $state<UJLClipboardData | null>(null);
+	// Can be overridden by externalClipboard from parent (ujl-crafter.svelte)
+	let internalClipboard = $state<UJLClipboardData | null>(null);
+	const clipboard = $derived(externalClipboard ?? internalClipboard);
 
 	let showComponentPicker = $state(false);
 	let insertTargetNodeId = $state<string | null>(null);
 
-	// Prevents duplicate execution when keyboard shortcuts trigger clipboard events
-	let isHandlingKeyboardShortcut = $state(false);
-
-	const selectedNodeId = $derived.by(() => {
-		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
-	});
-
-	// Slot selection uses format: parentId:slotName
-	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
-
-	const selectedNode = $derived.by(() => {
-		if (!selectedNodeId) return null;
-
-		if (selectedSlotInfo) {
-			return findNodeById(rootSlot, selectedSlotInfo.parentId);
-		}
-
-		return findNodeById(rootSlot, selectedNodeId);
-	});
-
-	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
-	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo);
-	const canDelete = $derived(
-		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
-	);
-	const canPaste = $derived.by(() => {
-		if (!clipboard) return false;
-
-		if (selectedNodeId === ROOT_NODE_ID) {
-			return (
-				isModuleObject(clipboard) ||
-				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
-			);
-		}
-
-		if (!selectedNodeId) return false;
-
-		if (selectedSlotInfo) {
-			const parentNode = findNodeById(rootSlot, selectedSlotInfo.parentId);
-			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
-
-			if (isModuleObject(clipboard)) {
-				return true;
-			}
-
-			if (clipboard.type === "slot") {
-				if (isRootNode(selectedSlotInfo.parentId)) {
-					return clipboard.slotName === ROOT_SLOT_NAME;
-				}
-				if (parentNode?.slots) {
-					return Object.keys(parentNode.slots).includes(clipboard.slotName);
-				}
-			}
-
-			return false;
-		}
-
-		if (isRootNode(selectedNodeId)) {
-			return (
-				isModuleObject(clipboard) ||
-				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
-			);
-		}
-
-		if (!selectedNode) return false;
-
-		if (isModuleObject(clipboard)) {
-			return true;
-		}
-
-		if (clipboard.type === "slot" && selectedNode.slots) {
-			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
-		}
-
-		return false;
-	});
-
-	/**
-	 * Checks if the keyboard event originated from an editable element.
-	 * Uses composedPath() for Shadow DOM compatibility - event.target is
-	 * retargeted to the shadow host when events bubble outside Shadow DOM.
-	 */
-	function isEditableElement(event: KeyboardEvent | ClipboardEvent): boolean {
-		const path = event.composedPath();
-		const actualTarget = path[0];
-
-		if (!actualTarget || !(actualTarget instanceof HTMLElement)) {
-			return false;
-		}
-
-		const tagName = actualTarget.tagName.toLowerCase();
-
-		if (tagName === "input" || tagName === "textarea") {
-			return true;
-		}
-
-		if (actualTarget.isContentEditable) {
-			return true;
-		}
-
-		if (tagName === "select") {
-			return true;
-		}
-
-		return false;
-	}
-
 	async function handleCopy(nodeId: string) {
 		const copiedNode = crafter.operations.copyNode(nodeId);
 		if (copiedNode) {
-			clipboard = copiedNode;
+			internalClipboard = copiedNode;
 			await writeToBrowserClipboard(copiedNode);
 		}
 	}
@@ -152,7 +47,7 @@
 	async function handleCut(nodeId: string) {
 		const cutNode = crafter.operations.cutNode(nodeId);
 		if (cutNode) {
-			clipboard = cutNode;
+			internalClipboard = cutNode;
 			await writeToBrowserClipboard(cutNode);
 		}
 	}
@@ -160,12 +55,13 @@
 	async function handlePaste(nodeIdOrSlot: string) {
 		// May fail in Safari without user interaction
 		const browserClipboard = await readFromBrowserClipboard();
-		const pasteData = browserClipboard || clipboard;
+		const currentClipboard = clipboard; // Use derived value
+		const pasteData = browserClipboard || currentClipboard;
 
 		if (!pasteData) return;
 
-		if (browserClipboard && browserClipboard !== clipboard) {
-			clipboard = browserClipboard;
+		if (browserClipboard && browserClipboard !== currentClipboard) {
+			internalClipboard = browserClipboard;
 		}
 
 		performPaste(pasteData, nodeIdOrSlot);
@@ -279,170 +175,6 @@
 		crafter.setSelectedNodeId(`${parentId}:${slotName}`);
 	}
 
-	function handleKeyDown(event: KeyboardEvent) {
-		if (isEditableElement(event)) return;
-
-		if (event.key === "Escape") {
-			if (selectedNodeId) {
-				event.preventDefault();
-				crafter.setSelectedNodeId(null);
-			}
-			return;
-		}
-
-		// Ctrl+I (Add) should always work, even without selection
-		if ((event.ctrlKey || event.metaKey) && event.key === "i") {
-			event.preventDefault();
-			if (selectedSlotInfo && selectedNodeId) {
-				// Slot selected: insert into slot
-				handleInsert(selectedNodeId);
-			} else if (selectedNodeId) {
-				// Module selected: insert after module (consistent with paste)
-				handleInsert(selectedNodeId);
-			} else {
-				// Nothing selected: insert at end of document
-				handleInsert(ROOT_NODE_ID);
-			}
-			return;
-		}
-
-		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
-		if (!selectedNodeId && !clipboard) return;
-
-		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
-			if (canPaste) {
-				event.preventDefault();
-				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
-				const targetId = selectedNodeId || ROOT_NODE_ID;
-				handlePaste(targetId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
-			}
-			return;
-		}
-
-		if (event.key === "Delete" || event.key === "Backspace") {
-			if (canDelete && selectedNodeId) {
-				event.preventDefault();
-				handleDelete(selectedNodeId);
-			}
-			return;
-		}
-
-		if (selectedSlotInfo || !selectedNodeId) return;
-
-		if ((event.ctrlKey || event.metaKey) && event.key === "c") {
-			if (canCopy) {
-				event.preventDefault();
-				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
-				handleCopy(selectedNodeId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
-			}
-		}
-
-		if ((event.ctrlKey || event.metaKey) && event.key === "x") {
-			if (canCut) {
-				event.preventDefault();
-				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
-				handleCut(selectedNodeId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
-			}
-		}
-	}
-
-	function handleCopyEvent(event: ClipboardEvent) {
-		if (isHandlingKeyboardShortcut) return;
-
-		if (isEditableElement(event)) return;
-
-		if (!selectedNodeId || selectedSlotInfo) return;
-		if (!canCopy) return;
-
-		const copiedNode = crafter.operations.copyNode(selectedNodeId);
-		if (copiedNode) {
-			clipboard = copiedNode;
-			writeToClipboardEvent(event, copiedNode);
-			writeToBrowserClipboard(copiedNode);
-		}
-	}
-
-	function handleCutEvent(event: ClipboardEvent) {
-		if (isHandlingKeyboardShortcut) return;
-
-		if (isEditableElement(event)) return;
-
-		if (!selectedNodeId || selectedSlotInfo) return;
-		if (!canCut) return;
-
-		const cutNode = crafter.operations.cutNode(selectedNodeId);
-		if (cutNode) {
-			clipboard = cutNode;
-			writeToClipboardEvent(event, cutNode);
-			writeToBrowserClipboard(cutNode);
-		}
-	}
-
-	function handlePasteEvent(event: ClipboardEvent) {
-		if (isHandlingKeyboardShortcut) return;
-
-		if (isEditableElement(event)) return;
-
-		if (!canPaste) return;
-
-		const eventData = readFromClipboardEvent(event);
-		const pasteData = eventData || clipboard;
-		if (!pasteData) return;
-
-		if (eventData && eventData !== clipboard) {
-			clipboard = eventData;
-		}
-
-		const targetId = selectedNodeId || ROOT_NODE_ID;
-		performPaste(pasteData, targetId);
-	}
-
-	onMount(() => {
-		window.addEventListener("keydown", handleKeyDown);
-		window.addEventListener("copy", handleCopyEvent);
-		window.addEventListener("cut", handleCutEvent);
-		window.addEventListener("paste", handlePasteEvent);
-
-		readFromBrowserClipboard().then((data) => {
-			if (data) {
-				clipboard = data;
-			}
-		});
-
-		const handleFocus = () => {
-			readFromBrowserClipboard().then((data) => {
-				if (data && data !== clipboard) {
-					clipboard = data;
-				}
-			});
-		};
-
-		window.addEventListener("focus", handleFocus);
-
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-			window.removeEventListener("copy", handleCopyEvent);
-			window.removeEventListener("cut", handleCutEvent);
-			window.removeEventListener("paste", handlePasteEvent);
-			window.removeEventListener("focus", handleFocus);
-		};
-	});
-
 	/**
 	 * Handles node move operation for drag & drop.
 	 * @returns true if move was successful, false if rejected
@@ -459,7 +191,7 @@
 	async function handleSlotCopy(parentId: string, slotName: string) {
 		const slotData = crafter.operations.copySlot(parentId, slotName);
 		if (slotData) {
-			clipboard = slotData;
+			internalClipboard = slotData;
 			await writeToBrowserClipboard(slotData);
 		}
 	}
@@ -467,7 +199,7 @@
 	async function handleSlotCut(parentId: string, slotName: string) {
 		const slotData = crafter.operations.cutSlot(parentId, slotName);
 		if (slotData) {
-			clipboard = slotData;
+			internalClipboard = slotData;
 			await writeToBrowserClipboard(slotData);
 		}
 	}
