@@ -12,7 +12,6 @@ describe("UJLC Schema Validation", () => {
 						tags: ["test"],
 						updated_at: "2024-01-01T00:00:00Z",
 						_version: "0.0.1",
-						_instance: "test-001",
 						_embedding_model_hash: "sha256:test",
 					},
 					root: [
@@ -57,8 +56,47 @@ describe("UJLC Schema Validation", () => {
 						tags: [],
 						updated_at: "2024-01-01",
 						_version: "0.0.1",
-						_instance: "test",
 						_embedding_model_hash: "hash",
+					},
+					root: [],
+				},
+			};
+
+			const result = validateUJLCDocumentSafe(invalid);
+			expect(result.success).toBe(false);
+		});
+
+		it("should reject legacy _library provider metadata", () => {
+			const invalid = {
+				ujlc: {
+					meta: {
+						title: "Test",
+						description: "Test",
+						tags: [],
+						updated_at: "2024-01-01",
+						_version: "0.0.1",
+						_embedding_model_hash: "hash",
+						_library: { provider: "inline" },
+					},
+					root: [],
+				},
+			};
+
+			const result = validateUJLCDocumentSafe(invalid);
+			expect(result.success).toBe(false);
+		});
+
+		it("should reject legacy _instance metadata", () => {
+			const invalid = {
+				ujlc: {
+					meta: {
+						title: "Test",
+						description: "Test",
+						tags: [],
+						updated_at: "2024-01-01",
+						_version: "0.0.1",
+						_embedding_model_hash: "hash",
+						_instance: "test-001",
 					},
 					root: [],
 				},
@@ -77,7 +115,6 @@ describe("UJLC Schema Validation", () => {
 						tags: [],
 						updated_at: "2024-01-01",
 						_version: "0.0.1",
-						_instance: "test",
 						_embedding_model_hash: "hash",
 					},
 					root: [
@@ -108,7 +145,6 @@ describe("UJLC Schema Validation", () => {
 						tags: [],
 						updated_at: "2024-01-01",
 						_version: "0.0.1",
-						_instance: "test",
 						_embedding_model_hash: "hash",
 					},
 					root: [
@@ -139,7 +175,6 @@ describe("UJLC Schema Validation", () => {
 						tags: [],
 						updated_at: "2024-01-01",
 						_version: "0.0.1",
-						_instance: "test",
 						_embedding_model_hash: "hash",
 					},
 					root: [
@@ -170,7 +205,6 @@ describe("UJLC Schema Validation", () => {
 						tags: [],
 						updated_at: "2024-01-01",
 						_version: "0.0.1",
-						_instance: "test",
 						_embedding_model_hash: "hash",
 					},
 					root: [
@@ -267,7 +301,6 @@ describe("UJLC Schema Validation", () => {
 						tags: ["test"],
 						updated_at: "2024-01-01T00:00:00Z",
 						_version: "0.0.1",
-						_instance: "test-001",
 						_embedding_model_hash: "sha256:test",
 					},
 					root: [
@@ -307,7 +340,6 @@ describe("UJLC Schema Validation", () => {
 						tags: ["test"],
 						updated_at: "2024-01-01T00:00:00Z",
 						_version: "0.0.1",
-						_instance: "deep-001",
 						_embedding_model_hash: "sha256:test",
 					},
 					root: [

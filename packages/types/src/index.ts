@@ -26,7 +26,6 @@ export type {
 	ImageSource,
 	ImageSrcSetType,
 	LibraryAssetMeta,
-	LibraryProviderConfig,
 	UJLCDocument,
 	UJLCDocumentMeta,
 	UJLCFieldObject,
