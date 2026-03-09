@@ -1,0 +1,83 @@
+---
+description: Clean Code standards and English language requirement
+globs: ""
+alwaysApply: true
+---
+
+# Clean Code and Language Standards
+
+## Code Must Be in English
+
+- All code identifiers (variables, functions, classes, constants): English only
+- All comments: English only
+- All documentation strings: English only
+- No German or other languages in code
+
+```typescript
+// ❌ BAD
+const benutzerName = 'Max';
+// User data
+
+// ✅ GOOD
+const userName = 'Max';
+// User data
+```
+
+## Clean Code Principles
+
+**Naming**
+- Use descriptive, intention-revealing names
+- Avoid abbreviations that aren't universally understood
+- Use verb-noun for functions (e.g., `getUserData`, `validateEmail`)
+
+```typescript
+// ❌ BAD
+const d = new Date();
+const usr = getUsr(123);
+
+// ✅ GOOD
+const publishedAt = new Date();
+const user = getUserById(123);
+```
+
+**Functions**
+- Single responsibility — functions should do one thing
+- Small, focused functions (aim for <20 lines)
+- Maximum 2–3 parameters; use objects for more
+
+```typescript
+// ❌ BAD
+function process(data, flag, mode, config) { /* 50 lines */ }
+
+// ✅ GOOD
+interface ProcessingConfig {
+  data: Data;
+  shouldValidate: boolean;
+  renderMode: 'fast' | 'accurate';
+}
+
+function processData(config: ProcessingConfig) {
+  if (config.shouldValidate) validate(config.data);
+  return render(config.data, config.renderMode);
+}
+```
+
+**Comments**
+- Prefer self-documenting code over comments
+- Comments explain *why*, not *what*
+- Keep comments current — outdated comments are worse than none
+
+```typescript
+// ❌ BAD
+// Increment counter
+counter++;
+
+// ✅ GOOD
+// Retry limit exceeded, back off to prevent rate limiting
+counter++;
+```
+
+**Formatting & Consistency**
+- Follow existing project patterns
+- Consistent indentation and spacing
+- Group related code; separate unrelated concerns with blank lines

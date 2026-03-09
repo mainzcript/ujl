@@ -1,0 +1,31 @@
+---
+description:
+alwaysApply: true
+---
+
+# No Automatic Test Execution
+
+**NEVER** run tests, linting, type checking, or any verification commands automatically.
+
+## Forbidden Actions
+
+Do **NOT** run:
+
+- `pnpm run lint` / `npm run lint`
+- `pnpm run rtc` / type checking commands
+- `pnpm test` / `npm test`
+- `pnpm run check` / validation commands
+- Any other test/verification scripts
+
+## When to Run Tests
+
+Only run tests when the user **explicitly** requests it with phrases like:
+
+- "Bitte führe die Tests aus"
+- "Run the tests"
+- "Check if everything passes"
+- "Validate the changes"
+
+## Reason
+
+The user runs these commands manually in the normal workflow. Automatic execution takes too long and interrupts the development flow.
