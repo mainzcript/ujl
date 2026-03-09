@@ -161,11 +161,37 @@
 		const elementRect = element.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
 
-		const targetScroll =
-			container.scrollTop +
-			(elementRect.top - containerRect.top) -
-			containerRect.height / 2 +
-			elementRect.height / 2;
+		// Calculate visibility ratio
+		const visibleTop = Math.max(elementRect.top, containerRect.top);
+		const visibleBottom = Math.min(elementRect.bottom, containerRect.bottom);
+		const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+		const elementVisibilityRatio = visibleHeight / elementRect.height; // 0-1
+
+		// Calculate how much of the preview the element fills
+		const previewFillRatio = elementRect.height / containerRect.height;
+
+		// Determine if scrolling is needed
+		const needsScroll = elementVisibilityRatio < 0.9;
+
+		if (!needsScroll) {
+			return; // Element is sufficiently visible, don't scroll
+		}
+
+		// Determine scroll target based on element size
+		let targetScroll: number;
+
+		if (previewFillRatio > 0.5) {
+			// Large element: scroll to show top edge
+			targetScroll = container.scrollTop + (elementRect.top - containerRect.top) - 100;
+		} else {
+			// Normal element: scroll to center
+			targetScroll =
+				container.scrollTop +
+				(elementRect.top - containerRect.top) -
+				containerRect.height / 2 +
+				elementRect.height / 2 -
+				100;
+		}
 
 		container.scrollTo({
 			top: Math.max(0, targetScroll),

@@ -77,8 +77,8 @@
 		const containerRect = containerElement.getBoundingClientRect();
 		const islandRect = islandElement.getBoundingClientRect();
 
-		const margin = -5;
-		const minEdgeMargin = 8;
+		const margin = -islandRect.height / 2 + 7.5;
+		const minEdgeMargin = 2;
 
 		// Check if module is COMPLETELY out of viewport
 		const isModuleCompletelyOut =
@@ -208,7 +208,7 @@
 
 <div
 	bind:this={islandElement}
-	class="absolute top-0 left-0 z-50 flex items-center gap-1 rounded-lg border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1.5 shadow-lg"
+	class="absolute top-0 left-0 z-50 flex items-center gap-1 rounded-2xl border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1 shadow-lg"
 	style="opacity: 0; pointer-events: none; will-change: opacity;"
 	data-crafter="module-island"
 >
