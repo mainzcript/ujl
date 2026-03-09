@@ -59,8 +59,10 @@ export class CrafterPage {
 		this.menuButton = shadowHost.getByTitle("More Actions");
 
 		// Component Picker (Dialog - in portal inside Shadow DOM)
-		this.componentPicker = shadowHost.locator('[data-crafter="component-picker"]');
-		this.componentPickerSearch = this.componentPicker.getByPlaceholder("Search");
+		this.componentPicker = shadowHost.locator('[data-crafter="component-picker"]').last();
+		this.componentPickerSearch = shadowHost
+			.locator('[data-crafter="component-picker-search"]')
+			.last();
 	}
 
 	/**
@@ -98,7 +100,7 @@ export class CrafterPage {
 	 * Get the currently selected module in the preview.
 	 */
 	getSelectedPreviewModule(): Locator {
-		return this.crafterElement.locator("[data-ujl-module-id].ujl-selected");
+		return this.crafterElement.locator('[data-crafter="module-overlay"][data-variant="selection"]');
 	}
 
 	/**
@@ -110,7 +112,7 @@ export class CrafterPage {
 		// Click directly on the node - the onclick handler on the element will trigger selection
 		// This works for both nodes with and without children
 		await node.click();
-		// Wait for selection state to update (including async ujl-selected class)
+		// Wait for selection state to update (including async overlay positioning)
 		await this.page.waitForTimeout(500);
 	}
 

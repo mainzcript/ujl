@@ -3,7 +3,6 @@
 	import { getContext } from "svelte";
 	import NavTree from "./nav-tree/nav-tree.svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
-	import ComponentPicker from "./component-picker.svelte";
 
 	let {
 		rootSlot,
@@ -46,11 +45,3 @@
 		}}
 	/>
 </div>
-
-<ComponentPicker
-	open={crafter.showComponentPicker}
-	onSelect={crafter.handleComponentSelect}
-	onOpenChange={(open) => {
-		if (!open) crafter.closeComponentPicker();
-	}}
-/>

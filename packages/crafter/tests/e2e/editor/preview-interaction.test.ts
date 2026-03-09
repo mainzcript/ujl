@@ -35,7 +35,7 @@ test.describe("Preview Interaction", () => {
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 	});
 
-	test("should add ujl-selected class to selected module", async ({ page }) => {
+	test("should show selection overlay for selected module", async ({ page }) => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
@@ -46,8 +46,7 @@ test.describe("Preview Interaction", () => {
 		// Click to select
 		await crafter.selectModuleInPreview(moduleId!);
 
-		// Some module should have the selected class
-		// (may be the clicked module or a child if click propagated)
+		// Selection overlay should be rendered for the selected module
 		const selectedModule = crafter.getSelectedPreviewModule();
 		await expect(selectedModule).toBeVisible();
 	});
@@ -167,7 +166,7 @@ test.describe("Preview Interaction", () => {
 		await expect(selectedModule).toBeVisible();
 
 		// The corresponding tree node for the selected module should exist
-		const selectedId = await selectedModule.getAttribute("data-ujl-module-id");
+		const selectedId = await selectedModule.getAttribute("data-module-id");
 		expect(selectedId).not.toBeNull();
 
 		const treeNode = crafter.getTreeNode(selectedId!);

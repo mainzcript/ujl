@@ -46,6 +46,7 @@
 		style="will-change: transform, width, height, opacity;"
 		data-crafter="module-overlay"
 		data-variant={variant}
+		data-module-id={moduleId}
 		use:overlayPositioning={actionParams}
 	></div>
 {/if}
