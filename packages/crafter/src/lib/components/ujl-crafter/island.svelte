@@ -10,8 +10,8 @@
 	import { ModuleActions } from "../ui/module-actions/index.js";
 
 	interface Props {
-		moduleRect: DOMRect;
-		containerRect: DOMRect;
+		moduleId: string;
+		containerElement: HTMLElement;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 		onSelect: () => void;
@@ -29,8 +29,8 @@
 	}
 
 	let {
-		moduleRect,
-		containerRect,
+		moduleId,
+		containerElement,
 		canMoveUp,
 		canMoveDown,
 		onSelect,
@@ -51,28 +51,127 @@
 	const showSettingsButton = $derived(!app.isDesktopPanel);
 	const isSettingsDisabled = $derived(app.isPanelVisible);
 
-	// Island element reference for measurement
+	// Island element reference
 	let islandElement: HTMLElement | undefined = $state(undefined);
 
 	// Dropdown state for closing after action
 	let dropdownOpen = $state(false);
 
-	// Calculate position based on actual island height
-	let top = $state(0);
-	let left = $state(0);
+	// Track last position for change detection
+	let lastTop = -9999;
+	let lastLeft = -9999;
 
-	// Update position when element mounts or props change
-	$effect(() => {
+	function positionIsland() {
 		if (!islandElement) return;
 
-		// Measure actual island height
-		const islandRect = islandElement.getBoundingClientRect();
-		const margin = 10;
+		// Find module in the scrolled container
+		const moduleEl = containerElement.querySelector(
+			`[data-ujl-module-id="${moduleId}"]`,
+		) as HTMLElement | null;
 
-		// Position directly above the module
-		top = moduleRect.top - containerRect.top - islandRect.height - margin;
-		// Position centered horizontally over the module
-		left = moduleRect.left - containerRect.left + (moduleRect.width - islandRect.width) / 2;
+		if (!moduleEl) {
+			islandElement.style.opacity = "0";
+			islandElement.style.pointerEvents = "none";
+			return;
+		}
+
+		// Get rects
+		const moduleRect = moduleEl.getBoundingClientRect();
+		const containerRect = containerElement.getBoundingClientRect();
+		const islandRect = islandElement.getBoundingClientRect();
+
+		const margin = 10;
+		const minEdgeMargin = 8;
+
+		// Check if module is COMPLETELY out of viewport
+		const isModuleCompletelyOut =
+			moduleRect.bottom <= containerRect.top || moduleRect.top >= containerRect.bottom;
+
+		// Hide island when module is completely out of view
+		if (isModuleCompletelyOut) {
+			islandElement.style.opacity = "0";
+			islandElement.style.pointerEvents = "none";
+			return;
+		}
+
+		// IDEAL position: directly above the module (in viewport coordinates)
+		let idealTop = moduleRect.top - islandRect.height - margin;
+		let idealLeft = moduleRect.left + (moduleRect.width - islandRect.width) / 2;
+
+		// CLAMP to visible container area (the "sticky" behavior)
+		// Min Y: if module is scrolled up, island sticks to top of container
+		const minY = containerRect.top + minEdgeMargin;
+		// Max Y: if module is scrolled down, island sticks to module top (over the module)
+		const maxY = containerRect.bottom - islandRect.height - minEdgeMargin;
+
+		let finalTop = Math.max(minY, Math.min(idealTop, maxY));
+
+		// Clamp X horizontally to container bounds
+		const minX = containerRect.left + minEdgeMargin;
+		const maxX = containerRect.right - islandRect.width - minEdgeMargin;
+		let finalLeft = Math.max(minX, Math.min(idealLeft, maxX));
+
+		// Convert to Preview-relative coordinates (where the Island actually lives)
+		// The Island is inside the Preview div, which moves with the scroll
+		// But we calculated in viewport coordinates, so subtract container's offset
+		const previewRect = islandElement.parentElement?.getBoundingClientRect();
+		if (!previewRect) return;
+
+		let targetTop = finalTop - previewRect.top;
+		let targetLeft = finalLeft - previewRect.left;
+
+		// Ensure island is visible
+		islandElement.style.opacity = "1";
+		islandElement.style.pointerEvents = "auto";
+
+		// Set transition consistently for smooth movement
+		// Using very short duration for responsive feel during scroll
+		islandElement.style.transition = "transform 0.1s ease-out, opacity 0.2s ease-out";
+
+		// Update position
+		if (targetTop !== lastTop || targetLeft !== lastLeft) {
+			lastTop = targetTop;
+			lastLeft = targetLeft;
+			islandElement.style.transform = `translate(${targetLeft}px, ${targetTop}px)`;
+		}
+	}
+
+	// Set up scroll tracking
+	$effect(() => {
+		if (!islandElement || !containerElement || !moduleId) return;
+
+		lastTop = -9999;
+		lastLeft = -9999;
+
+		let ticking = false;
+		function onScroll() {
+			if (!ticking) {
+				requestAnimationFrame(() => {
+					positionIsland();
+					ticking = false;
+				});
+				ticking = true;
+			}
+		}
+
+		// Initial position
+		positionIsland();
+
+		// Add scroll listener to actual scroll container
+		containerElement.addEventListener("scroll", onScroll, { passive: true });
+
+		// Periodic fallback
+		const interval = setInterval(positionIsland, 500);
+
+		// Handle resize
+		const resizeObserver = new ResizeObserver(positionIsland);
+		resizeObserver.observe(containerElement);
+
+		return () => {
+			containerElement.removeEventListener("scroll", onScroll);
+			clearInterval(interval);
+			resizeObserver.disconnect();
+		};
 	});
 
 	function handleSettings() {
@@ -90,7 +189,6 @@
 		onMoveDown();
 	}
 
-	// Wrapper functions that close dropdown after action
 	function handleCopy() {
 		onCopy();
 		dropdownOpen = false;
@@ -119,8 +217,8 @@
 
 <div
 	bind:this={islandElement}
-	class="absolute z-50 flex items-center gap-1 rounded-lg border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1.5 shadow-lg"
-	style="top: {top}px; left: {left}px;"
+	class="absolute top-0 left-0 z-50 flex items-center gap-1 rounded-lg border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1.5 shadow-lg"
+	style="opacity: 0; pointer-events: none; will-change: transform, opacity;"
 	data-crafter="module-island"
 >
 	{#if showSettingsButton}

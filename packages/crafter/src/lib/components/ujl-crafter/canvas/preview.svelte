@@ -55,8 +55,6 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const shadowRootContext = getContext<ShadowRootContext | undefined>(SHADOW_ROOT_CONTEXT);
 
-	// Scoped DOM queries - ensures multi-instance isolation
-	// Uses Shadow Root when available for proper Shadow DOM support
 	const dom = createScopedSelector(crafter.instanceId, shadowRootContext?.value);
 
 	const selectedNodeId = $derived.by(() => {
@@ -68,7 +66,6 @@
 	let ast = $state<UJLAbstractNode | null>(null);
 
 	$effect(() => {
-		// Composer composes the document into an AST
 		composer.compose(ujlcDocument).then((composedAst) => {
 			ast = composedAst;
 		});
@@ -78,12 +75,6 @@
 
 	const editorCssVars = $derived(editorTokenSet ? generateThemeCSSVariables(editorTokenSet) : {});
 
-	/**
-	 * Find an editable node in the AST by its moduleId
-	 * @param node - The AST node to search in
-	 * @param targetModuleId - The moduleId to find
-	 * @returns The found editable node or null
-	 */
 	function findEditableNodeByModuleId(
 		node: UJLAbstractNode,
 		targetModuleId: string,
@@ -114,25 +105,18 @@
 		return null;
 	}
 
-	/**
-	 * Handle click events on the preview container.
-	 * Extracts moduleId from DOM and checks editability in AST.
-	 * Prevents default actions (like link navigation) in editor mode.
-	 */
 	function handlePreviewClick(event: MouseEvent) {
 		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
 
 		const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
 		if (!clickedElement) return;
 
-		// Prevent default actions (link navigation, form submission, etc.) in editor mode
 		event.preventDefault();
 		event.stopPropagation();
 
 		const moduleId = clickedElement.getAttribute("data-ujl-module-id");
 		if (!moduleId || !ast) return;
 
-		// Only editable nodes with isModuleRoot === true are selectable
 		const editableNode = findEditableNodeByModuleId(ast, moduleId);
 		if (!editableNode) return;
 
@@ -142,7 +126,6 @@
 	}
 
 	function scrollToNodeInTree(nodeId: string) {
-		// Timeout allows tree expansion animation to complete before scrolling
 		setTimeout(() => {
 			const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
 			if (treeItem) {
@@ -153,18 +136,16 @@
 		}, 300);
 	}
 
-	let scrollContainerRef: HTMLDivElement;
+	let scrollContainerRef: HTMLDivElement | undefined = $state(undefined);
 
 	function getScrollContainer(): HTMLDivElement | null {
 		return (
 			dom.querySelector<HTMLDivElement>('[data-ujl-scroll-container="canvas"]') ??
-			scrollContainerRef
+			scrollContainerRef ??
+			null
 		);
 	}
 
-	/**
-	 * Scroll to component in preview; retry if DOM or ref is not ready.
-	 */
 	function scrollToComponentInPreview(moduleId: string, retries = 3) {
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		const container = getScrollContainer();
@@ -191,11 +172,6 @@
 		});
 	}
 
-	/**
-	 * Apply selection to a module element with retry mechanism.
-	 * This is needed because when a new module is created, the AST update
-	 * is asynchronous, so the element might not be in the DOM yet.
-	 */
 	function applySelection(moduleId: string, retries = 10) {
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		if (element) {
@@ -212,7 +188,6 @@
 	}
 
 	$effect(() => {
-		// Remove selection only from elements within this Crafter instance
 		dom.querySelectorAll("[data-ujl-module-id].ujl-selected").forEach((el) => {
 			el.classList.remove("ujl-selected");
 		});
@@ -232,15 +207,20 @@
 		moduleId: string;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
-		// DOM rects for positioning (Island calculates its own position)
-		moduleRect: DOMRect;
-		containerRect: DOMRect;
 	}
 
 	let islandState = $state<IslandState | null>(null);
 
+	// Get the actual scroll container (the parent with overflow-auto, not the Preview root)
+	let scrollContainer = $derived(
+		scrollContainerRef
+			? ((dom.querySelector('[data-ujl-scroll-container="canvas"]') as HTMLElement | null) ??
+					scrollContainerRef)
+			: null,
+	);
+
 	/**
-	 * Update Island position when selection changes
+	 * Update Island state when selection changes
 	 */
 	$effect(() => {
 		if (crafterMode !== "editor" || !selectedNodeId || !ast || !scrollContainerRef) {
@@ -248,59 +228,41 @@
 			return;
 		}
 
-		// Find the module element for the selected node
 		const moduleId = getModuleIdFromNodeId(selectedNodeId);
 		if (!moduleId) {
 			islandState = null;
 			return;
 		}
 
-		// Find element in DOM
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`) as HTMLElement | null;
 		if (!element) {
 			islandState = null;
 			return;
 		}
 
-		// Find editable node for label
 		const editableNode = findEditableNodeByModuleId(ast, moduleId);
 		if (!editableNode) {
 			islandState = null;
 			return;
 		}
 
-		// Calculate move capabilities
 		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
-
-		// Calculate position relative to container
-		const containerRect = scrollContainerRef.getBoundingClientRect();
-		const moduleRect = element.getBoundingClientRect();
 
 		islandState = {
 			moduleId,
 			canMoveUp,
 			canMoveDown,
-			moduleRect,
-			containerRect,
 		};
 	});
 
-	/**
-	 * Extract module ID from a node ID (handles module IDs and slot paths)
-	 */
 	function getModuleIdFromNodeId(nodeId: string): string | null {
-		// If it's a module ID directly
 		if (!nodeId.includes(".")) {
 			return nodeId;
 		}
-		// If it's a slot path like "moduleId.children.0", return "moduleId"
 		const parts = nodeId.split(".");
 		return parts[0] || null;
 	}
 
-	/**
-	 * Check if a module can be moved up or down in its parent slot
-	 */
 	function getModuleMoveCapabilities(moduleId: string): {
 		canMoveUp: boolean;
 		canMoveDown: boolean;
@@ -310,7 +272,6 @@
 
 		const { slotName, index } = parentInfo;
 
-		// Get the slot content (works for root and nested slots)
 		let slotContent: UJLCModuleObject[];
 		if (parentInfo.parent && parentInfo.parent.slots && parentInfo.parent.slots[slotName]) {
 			slotContent = parentInfo.parent.slots[slotName];
@@ -326,11 +287,7 @@
 		};
 	}
 
-	/**
-	 * Island action handlers
-	 */
 	function handleIslandSelect() {
-		// Panel öffnen / Fokus auf selektiertes Modul
 		const state = islandState;
 		if (!state) return;
 		crafter.expandToNode(state.moduleId);
@@ -342,14 +299,12 @@
 		if (!state) return;
 		const moduleId = state.moduleId;
 
-		// Find parent and slot containing this module
 		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
 		if (!parentInfo) return;
 
 		const { parent, slotName, index } = parentInfo;
 		if (index <= 0) return;
 
-		// Get the slot content
 		let slotContent: UJLCModuleObject[];
 		let parentId: string;
 		if (parent && parent.slots && parent.slots[slotName]) {
@@ -362,7 +317,6 @@
 			return;
 		}
 
-		// Get target (previous module in same slot)
 		const targetId = slotContent[index - 1]?.meta.id;
 		if (targetId) {
 			crafter.operations.moveNode(
@@ -379,13 +333,11 @@
 		if (!state) return;
 		const moduleId = state.moduleId;
 
-		// Find parent and slot containing this module
 		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
 		if (!parentInfo) return;
 
 		const { parent, slotName, index } = parentInfo;
 
-		// Get the slot content
 		let slotContent: UJLCModuleObject[];
 		let parentId: string;
 		if (parent && parent.slots && parent.slots[slotName]) {
@@ -400,7 +352,6 @@
 
 		if (index === -1 || index >= slotContent.length - 1) return;
 
-		// Get target (next module in same slot)
 		const targetId = slotContent[index + 1]?.meta.id;
 		if (targetId) {
 			crafter.operations.moveNode(
@@ -458,10 +409,10 @@
 	{/if}
 
 	<!-- Module Island - Selection based -->
-	{#if islandState && crafterMode === "editor"}
+	{#if islandState && crafterMode === "editor" && scrollContainer}
 		<Island
-			moduleRect={islandState.moduleRect}
-			containerRect={islandState.containerRect}
+			moduleId={islandState.moduleId}
+			containerElement={scrollContainer}
 			canMoveUp={islandState.canMoveUp}
 			canMoveDown={islandState.canMoveDown}
 			onSelect={handleIslandSelect}
