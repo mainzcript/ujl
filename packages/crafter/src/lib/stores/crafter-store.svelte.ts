@@ -24,8 +24,18 @@ import type {
 	UJLTTokenSet,
 } from "@ujl-framework/types";
 import { LibraryError } from "@ujl-framework/types";
+import {
+	readFromBrowserClipboard,
+	writeToBrowserClipboard,
+	type UJLClipboardData,
+} from "../utils/clipboard.js";
 import { logger } from "../utils/logger.js";
-import { findPathToNode, isRootNode } from "../utils/ujlc-tree.js";
+import {
+	findPathToNode,
+	isModuleObject,
+	isRootNode,
+	parseSlotSelection,
+} from "../utils/ujlc-tree.js";
 import { createOperations } from "./operations.js";
 
 // ============================================
@@ -186,6 +196,12 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	// Save callback (set via API, controls Save button visibility)
 	let _onSaveCallback = $state<SaveCallback | null>(null);
 
+	// Unified Action Handlers State
+	let _showComponentPicker = $state(false);
+	let _insertTargetNodeId = $state<string | null>(null);
+	let _clipboard = $state<UJLClipboardData | null>(null);
+	const _hasClipboardContent = $derived(!!_clipboard);
+
 	// ============================================
 	// COMPUTED STATE (Derived - Automatic Reactivity)
 	// ============================================
@@ -330,6 +346,152 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	 */
 	function setOnSaveCallback(callback: SaveCallback | null): void {
 		_onSaveCallback = callback;
+	}
+
+	// ============================================
+	// UNIFIED ACTION HANDLERS (DRY Implementation)
+	// ============================================
+
+	/**
+	 * Unified delete handler - deletes node and clears selection if needed.
+	 * @param nodeId - The node ID to delete
+	 * @returns true if successful
+	 */
+	function deleteNode(nodeId: string): boolean {
+		const success = operations.deleteNode(nodeId);
+		if (success && _selectedNodeId === nodeId) {
+			setSelectedNodeId(null);
+		}
+		return success;
+	}
+
+	/**
+	 * Set clipboard data (used by event handlers)
+	 * @param data - The clipboard data
+	 */
+	function setClipboard(data: UJLClipboardData | null): void {
+		_clipboard = data;
+	}
+
+	/**
+	 * Unified copy handler - copies node to clipboard and browser API.
+	 * @param nodeId - The node ID to copy
+	 */
+	async function copyNode(nodeId: string): Promise<void> {
+		const copied = operations.copyNode(nodeId);
+		if (copied) {
+			_clipboard = copied;
+			await writeToBrowserClipboard(copied);
+		}
+	}
+
+	/**
+	 * Unified cut handler - cuts node to clipboard and browser API.
+	 * @param nodeId - The node ID to cut
+	 */
+	async function cutNode(nodeId: string): Promise<void> {
+		await copyNode(nodeId);
+		deleteNode(nodeId);
+	}
+
+	/**
+	 * Performs paste logic (shared between paste and handleComponentSelect).
+	 * Handles both module and slot paste, with slot vs module detection.
+	 * @param pasteData - The data to paste
+	 * @param targetId - The target ID (node or slot)
+	 */
+	function performPaste(pasteData: UJLClipboardData, targetId: string): void {
+		const slotInfo = parseSlotSelection(targetId);
+		const isSlotSelection = slotInfo !== null;
+
+		if (isModuleObject(pasteData)) {
+			let newNodeId: string | null;
+			if (isSlotSelection && slotInfo) {
+				newNodeId = operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, "into");
+			} else {
+				newNodeId = operations.pasteNode(pasteData, targetId, undefined, "after");
+			}
+			if (newNodeId) {
+				setSelectedNodeId(newNodeId);
+			}
+			return;
+		}
+
+		if (pasteData.type === "slot") {
+			if (isSlotSelection && slotInfo) {
+				operations.pasteSlot(pasteData, slotInfo.parentId);
+			} else {
+				operations.pasteSlot(pasteData, targetId);
+			}
+		}
+	}
+
+	/**
+	 * Unified paste handler - reads from clipboard and pastes at target.
+	 * @param targetId - The target ID (node or slot)
+	 */
+	async function pasteNode(targetId: string): Promise<void> {
+		// Read from browser clipboard
+		const browserClipboard = await readFromBrowserClipboard();
+		const pasteData = browserClipboard || _clipboard;
+
+		if (!pasteData) return;
+
+		// Update internal clipboard if browser has newer data
+		if (browserClipboard && browserClipboard !== _clipboard) {
+			_clipboard = browserClipboard;
+		}
+
+		performPaste(pasteData, targetId);
+	}
+
+	/**
+	 * Request insert - shows ComponentPicker for target.
+	 * Unified between Island and NavTree.
+	 * @param targetId - The target ID (node or slot)
+	 */
+	function requestInsert(targetId: string): void {
+		_insertTargetNodeId = targetId;
+		_showComponentPicker = true;
+	}
+
+	/**
+	 * Close ComponentPicker and reset target.
+	 */
+	function closeComponentPicker(): void {
+		_showComponentPicker = false;
+		_insertTargetNodeId = null;
+	}
+
+	/**
+	 * Handle ComponentPicker selection - insert new component.
+	 * @param componentType - The component type to insert
+	 */
+	function handleComponentSelect(componentType: string): void {
+		if (!_insertTargetNodeId) return;
+
+		const targetId = _insertTargetNodeId;
+		const slotInfo = parseSlotSelection(targetId);
+		let newNodeId: string | null;
+
+		if (slotInfo) {
+			// Slot insertion
+			newNodeId = operations.insertNode(
+				componentType,
+				slotInfo.parentId,
+				slotInfo.slotName,
+				"into",
+			);
+		} else {
+			// Node insertion (after target)
+			newNodeId = operations.insertNode(componentType, targetId, undefined, "after");
+		}
+
+		if (newNodeId) {
+			setSelectedNodeId(newNodeId);
+		}
+
+		closeComponentPicker();
 	}
 
 	// ============================================
@@ -711,6 +873,33 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 		// Operations
 		operations,
+
+		// Unified Action Handlers (DRY)
+		deleteNode,
+		copyNode,
+		cutNode,
+		pasteNode,
+		requestInsert,
+		closeComponentPicker,
+		handleComponentSelect,
+		performPaste,
+
+		// Clipboard State
+		setClipboard,
+		get clipboard() {
+			return _clipboard;
+		},
+		get hasClipboardContent() {
+			return _hasClipboardContent;
+		},
+
+		// Component Picker State
+		get showComponentPicker() {
+			return _showComponentPicker;
+		},
+		get insertTargetNodeId() {
+			return _insertTargetNodeId;
+		},
 	} as const;
 }
 

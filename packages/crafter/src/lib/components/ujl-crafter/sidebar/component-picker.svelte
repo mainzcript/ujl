@@ -15,9 +15,11 @@
 	let {
 		open = $bindable(false),
 		onSelect,
+		onOpenChange,
 	}: {
 		open?: boolean;
 		onSelect: (componentType: string) => void;
+		onOpenChange?: (open: boolean) => void;
 	} = $props();
 
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
@@ -28,6 +30,15 @@
 		return composer.getRegistry().onChanged(() => {
 			modules = composer.getRegistry().getAllModules();
 		});
+	});
+
+	/**
+	 * Handle open state changes to notify parent
+	 */
+	$effect(() => {
+		if (onOpenChange) {
+			onOpenChange(open);
+		}
 	});
 
 	/**

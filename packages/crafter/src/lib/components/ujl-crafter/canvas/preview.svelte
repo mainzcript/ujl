@@ -5,10 +5,10 @@
 		UJLTDocument,
 		UJLAbstractNode,
 		UJLTTokenSet,
+		UJLCModuleObject,
 	} from "@ujl-framework/types";
 	import type { Composer } from "@ujl-framework/core";
 	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
-	// Note: Adapter styles are now bundled via Shadow DOM injection (see bundle.css)
 	import { getContext } from "svelte";
 	import {
 		COMPOSER_CONTEXT,
@@ -21,6 +21,8 @@
 	import { logger } from "$lib/utils/logger.js";
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
+	import Island from "../island.svelte";
+	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -221,11 +223,230 @@
 			}, 0);
 		}
 	});
+
+	// ============================================
+	// ISLAND STATE (Selection-based)
+	// ============================================
+
+	interface IslandState {
+		moduleId: string;
+		canMoveUp: boolean;
+		canMoveDown: boolean;
+		// Position für die Island (relativ zum Container)
+		top: number;
+		left: number;
+	}
+
+	let islandState = $state<IslandState | null>(null);
+
+	/**
+	 * Update Island position when selection changes
+	 */
+	$effect(() => {
+		if (crafterMode !== "editor" || !selectedNodeId || !ast || !scrollContainerRef) {
+			islandState = null;
+			return;
+		}
+
+		// Find the module element for the selected node
+		const moduleId = getModuleIdFromNodeId(selectedNodeId);
+		if (!moduleId) {
+			islandState = null;
+			return;
+		}
+
+		// Find element in DOM
+		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`) as HTMLElement | null;
+		if (!element) {
+			islandState = null;
+			return;
+		}
+
+		// Find editable node for label
+		const editableNode = findEditableNodeByModuleId(ast, moduleId);
+		if (!editableNode) {
+			islandState = null;
+			return;
+		}
+
+		// Calculate move capabilities
+		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
+
+		// Calculate position relative to container
+		const containerRect = scrollContainerRef.getBoundingClientRect();
+		const moduleRect = element.getBoundingClientRect();
+		const islandHeight = 36;
+		const margin = 4;
+
+		const top = moduleRect.top - containerRect.top - islandHeight - margin;
+		const left = moduleRect.right - containerRect.left - 220;
+
+		islandState = {
+			moduleId,
+			canMoveUp,
+			canMoveDown,
+			top,
+			left,
+		};
+	});
+
+	/**
+	 * Extract module ID from a node ID (handles module IDs and slot paths)
+	 */
+	function getModuleIdFromNodeId(nodeId: string): string | null {
+		// If it's a module ID directly
+		if (!nodeId.includes(".")) {
+			return nodeId;
+		}
+		// If it's a slot path like "moduleId.children.0", return "moduleId"
+		const parts = nodeId.split(".");
+		return parts[0] || null;
+	}
+
+	/**
+	 * Check if a module can be moved up or down in its parent slot
+	 */
+	function getModuleMoveCapabilities(moduleId: string): {
+		canMoveUp: boolean;
+		canMoveDown: boolean;
+	} {
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return { canMoveUp: false, canMoveDown: false };
+
+		const { slotName, index } = parentInfo;
+
+		// Get the slot content (works for root and nested slots)
+		let slotContent: UJLCModuleObject[];
+		if (parentInfo.parent && parentInfo.parent.slots && parentInfo.parent.slots[slotName]) {
+			slotContent = parentInfo.parent.slots[slotName];
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+		} else {
+			return { canMoveUp: false, canMoveDown: false };
+		}
+
+		return {
+			canMoveUp: index > 0,
+			canMoveDown: index < slotContent.length - 1,
+		};
+	}
+
+	/**
+	 * Island action handlers
+	 */
+	function handleIslandSelect() {
+		// Panel öffnen / Fokus auf selektiertes Modul
+		const state = islandState;
+		if (!state) return;
+		crafter.expandToNode(state.moduleId);
+		crafter.setSelectedNodeId(state.moduleId);
+	}
+
+	function handleIslandMoveUp() {
+		const state = islandState;
+		if (!state) return;
+		const moduleId = state.moduleId;
+
+		// Find parent and slot containing this module
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return;
+
+		const { parent, slotName, index } = parentInfo;
+		if (index <= 0) return;
+
+		// Get the slot content
+		let slotContent: UJLCModuleObject[];
+		let parentId: string;
+		if (parent && parent.slots && parent.slots[slotName]) {
+			slotContent = parent.slots[slotName];
+			parentId = parent.meta.id;
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+			parentId = "__root__";
+		} else {
+			return;
+		}
+
+		// Get target (previous module in same slot)
+		const targetId = slotContent[index - 1]?.meta.id;
+		if (targetId) {
+			crafter.operations.moveNode(
+				moduleId,
+				targetId,
+				parentId === "__root__" ? undefined : parentId,
+				"before",
+			);
+		}
+	}
+
+	function handleIslandMoveDown() {
+		const state = islandState;
+		if (!state) return;
+		const moduleId = state.moduleId;
+
+		// Find parent and slot containing this module
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return;
+
+		const { parent, slotName, index } = parentInfo;
+
+		// Get the slot content
+		let slotContent: UJLCModuleObject[];
+		let parentId: string;
+		if (parent && parent.slots && parent.slots[slotName]) {
+			slotContent = parent.slots[slotName];
+			parentId = parent.meta.id;
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+			parentId = "__root__";
+		} else {
+			return;
+		}
+
+		if (index === -1 || index >= slotContent.length - 1) return;
+
+		// Get target (next module in same slot)
+		const targetId = slotContent[index + 1]?.meta.id;
+		if (targetId) {
+			crafter.operations.moveNode(
+				moduleId,
+				targetId,
+				parentId === "__root__" ? undefined : parentId,
+				"after",
+			);
+		}
+	}
+
+	async function handleIslandCopy() {
+		if (!islandState) return;
+		await crafter.copyNode(islandState.moduleId);
+	}
+
+	async function handleIslandCut() {
+		if (!islandState) return;
+		await crafter.cutNode(islandState.moduleId);
+	}
+
+	async function handleIslandPaste() {
+		if (!islandState) return;
+		await crafter.pasteNode(islandState.moduleId);
+	}
+
+	function handleIslandInsert() {
+		if (!islandState) return;
+		crafter.requestInsert(islandState.moduleId);
+	}
+
+	function handleIslandDelete() {
+		if (!islandState) return;
+		crafter.deleteNode(islandState.moduleId);
+		islandState = null;
+	}
 </script>
 
 <div
 	bind:this={scrollContainerRef}
-	class="h-full w-full"
+	class="relative h-full w-full"
 	class:ujl-editor-mode={crafterMode === "editor"}
 	role={crafterMode === "editor" ? "application" : undefined}
 	onclick={handlePreviewClick}
@@ -239,5 +460,27 @@
 		<div class="flex h-full w-full items-center justify-center">
 			<div class="text-sm text-muted-foreground">Loading preview...</div>
 		</div>
+	{/if}
+
+	<!-- Module Island - Selection based -->
+	{#if islandState && crafterMode === "editor"}
+		<Island
+			top={islandState.top}
+			left={islandState.left}
+			canMoveUp={islandState.canMoveUp}
+			canMoveDown={islandState.canMoveDown}
+			onSelect={handleIslandSelect}
+			onMoveUp={handleIslandMoveUp}
+			onMoveDown={handleIslandMoveDown}
+			onCopy={handleIslandCopy}
+			onCut={handleIslandCut}
+			onPaste={handleIslandPaste}
+			onDelete={handleIslandDelete}
+			onInsert={handleIslandInsert}
+			canCopy={true}
+			canCut={true}
+			canPaste={crafter.hasClipboardContent}
+			canInsert={true}
+		/>
 	{/if}
 </div>

@@ -50,7 +50,6 @@
 		readFromBrowserClipboard,
 		writeToClipboardEvent,
 		readFromClipboardEvent,
-		type UJLClipboardData,
 	} from "$lib/utils/clipboard.js";
 	import {
 		findNodeById,
@@ -299,12 +298,7 @@
 	// ============================================
 
 	// Synchronized with browser clipboard for cross-tab support
-	let clipboard = $state<UJLClipboardData | null>(null);
 	let isHandlingKeyboardShortcut = $state(false);
-
-	// Component Picker state
-	let showComponentPicker = $state(false);
-	let insertTargetNodeId = $state<string | null>(null);
 
 	const selectedNodeId = $derived.by(() => {
 		return store.mode === "editor" ? store.selectedNodeId : null;
@@ -329,12 +323,12 @@
 		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
 	);
 	const canPaste = $derived.by(() => {
-		if (!clipboard) return false;
+		if (!store.clipboard) return false;
 
 		if (selectedNodeId === ROOT_NODE_ID) {
 			return (
-				isModuleObject(clipboard) ||
-				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
+				isModuleObject(store.clipboard) ||
+				(store.clipboard.type === "slot" && store.clipboard.slotName === ROOT_SLOT_NAME)
 			);
 		}
 
@@ -344,16 +338,16 @@
 			const parentNode = findNodeById(store.rootSlot, selectedSlotInfo.parentId);
 			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
 
-			if (isModuleObject(clipboard)) {
+			if (isModuleObject(store.clipboard)) {
 				return true;
 			}
 
-			if (clipboard.type === "slot") {
+			if (store.clipboard.type === "slot") {
 				if (isRootNode(selectedSlotInfo.parentId)) {
-					return clipboard.slotName === ROOT_SLOT_NAME;
+					return store.clipboard.slotName === ROOT_SLOT_NAME;
 				}
 				if (parentNode?.slots) {
-					return Object.keys(parentNode.slots).includes(clipboard.slotName);
+					return Object.keys(parentNode.slots).includes(store.clipboard.slotName);
 				}
 			}
 
@@ -362,19 +356,19 @@
 
 		if (isRootNode(selectedNodeId)) {
 			return (
-				isModuleObject(clipboard) ||
-				(clipboard.type === "slot" && clipboard.slotName === ROOT_SLOT_NAME)
+				isModuleObject(store.clipboard) ||
+				(store.clipboard.type === "slot" && store.clipboard.slotName === ROOT_SLOT_NAME)
 			);
 		}
 
 		if (!selectedNode) return false;
 
-		if (isModuleObject(clipboard)) {
+		if (isModuleObject(store.clipboard)) {
 			return true;
 		}
 
-		if (clipboard.type === "slot" && selectedNode.slots) {
-			return Object.keys(selectedNode.slots).includes(clipboard.slotName);
+		if (store.clipboard.type === "slot" && selectedNode.slots) {
+			return Object.keys(selectedNode.slots).includes(store.clipboard.slotName);
 		}
 
 		return false;
@@ -383,7 +377,7 @@
 	async function handleCopy(nodeId: string) {
 		const copiedNode = store.operations.copyNode(nodeId);
 		if (copiedNode) {
-			clipboard = copiedNode;
+			store.setClipboard(copiedNode);
 			await writeToBrowserClipboard(copiedNode);
 		}
 	}
@@ -391,53 +385,22 @@
 	async function handleCut(nodeId: string) {
 		const cutNode = store.operations.cutNode(nodeId);
 		if (cutNode) {
-			clipboard = cutNode;
+			store.setClipboard(cutNode);
 			await writeToBrowserClipboard(cutNode);
 		}
 	}
 
 	async function handlePaste(nodeIdOrSlot: string) {
 		const browserClipboard = await readFromBrowserClipboard();
-		const pasteData = browserClipboard || clipboard;
+		const pasteData = browserClipboard || store.clipboard;
 
 		if (!pasteData) return;
 
-		if (browserClipboard && browserClipboard !== clipboard) {
-			clipboard = browserClipboard;
+		if (browserClipboard && browserClipboard !== store.clipboard) {
+			store.setClipboard(browserClipboard);
 		}
 
-		performPaste(pasteData, nodeIdOrSlot);
-	}
-
-	function performPaste(pasteData: UJLClipboardData, nodeIdOrSlot: string) {
-		const slotInfo = parseSlotSelection(nodeIdOrSlot);
-		const isSlotSelection = slotInfo !== null;
-
-		if (isModuleObject(pasteData)) {
-			let newNodeId: string | null = null;
-			if (isSlotSelection && slotInfo) {
-				newNodeId = store.operations.pasteNode(
-					pasteData,
-					slotInfo.parentId,
-					slotInfo.slotName,
-					"into",
-				);
-			} else {
-				newNodeId = store.operations.pasteNode(pasteData, nodeIdOrSlot, undefined, "after");
-			}
-			if (newNodeId) {
-				store.setSelectedNodeId(newNodeId);
-			}
-			return;
-		}
-
-		if (pasteData.type === "slot") {
-			if (isSlotSelection && slotInfo) {
-				store.operations.pasteSlot(pasteData, slotInfo.parentId);
-			} else {
-				store.operations.pasteSlot(pasteData, nodeIdOrSlot);
-			}
-		}
+		store.performPaste(pasteData, nodeIdOrSlot);
 	}
 
 	function handleDelete(nodeId: string) {
@@ -448,63 +411,17 @@
 	}
 
 	function handleInsert(nodeIdOrSlot: string) {
-		insertTargetNodeId = nodeIdOrSlot;
-		showComponentPicker = true;
-	}
-
-	function handleNodeInsert(componentType: string, nodeId: string): boolean {
-		let newNodeId: string | null = null;
-		if (isRootNode(nodeId)) {
-			// Root: insert at end of document
-			newNodeId = store.operations.insertNode(componentType, ROOT_NODE_ID, ROOT_SLOT_NAME, "into");
-		} else {
-			// Regular module: insert after current module (consistent with paste)
-			const targetNode = findNodeById(store.rootSlot, nodeId);
-			if (!targetNode) {
-				return false;
-			}
-
-			newNodeId = store.operations.insertNode(componentType, nodeId, undefined, "after");
-		}
-		if (newNodeId) {
-			store.setSelectedNodeId(newNodeId);
-			return true;
-		}
-		return false;
-	}
-
-	function handleSlotInsert(componentType: string, parentId: string, slotName: string): boolean {
-		let newNodeId: string | null = null;
-		if (isRootNode(parentId)) {
-			newNodeId = store.operations.insertNode(componentType, ROOT_NODE_ID, slotName, "into");
-		} else {
-			const targetNode = findNodeById(store.rootSlot, parentId);
-			if (!targetNode) {
-				return false;
-			}
-			newNodeId = store.operations.insertNode(componentType, parentId, slotName, "into");
-		}
-		if (newNodeId) {
-			store.setSelectedNodeId(newNodeId);
-			return true;
-		}
-		return false;
+		store.requestInsert(nodeIdOrSlot);
 	}
 
 	function handleComponentSelect(componentType: string) {
-		if (!insertTargetNodeId) return;
+		store.handleComponentSelect(componentType);
+	}
 
-		const slotInfo = parseSlotSelection(insertTargetNodeId);
-
-		if (slotInfo) {
-			const { parentId, slotName } = slotInfo;
-			handleSlotInsert(componentType, parentId, slotName);
-		} else {
-			handleNodeInsert(componentType, insertTargetNodeId);
+	function handleComponentPickerOpenChange(open: boolean) {
+		if (!open) {
+			store.closeComponentPicker();
 		}
-
-		insertTargetNodeId = null;
-		showComponentPicker = false;
 	}
 
 	/**
@@ -565,7 +482,7 @@
 		}
 
 		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
-		if (!selectedNodeId && !clipboard) return;
+		if (!selectedNodeId && !store.clipboard) return;
 
 		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
 			if (canPaste) {
@@ -629,7 +546,7 @@
 
 		const copiedNode = store.operations.copyNode(selectedNodeId);
 		if (copiedNode) {
-			clipboard = copiedNode;
+			store.setClipboard(copiedNode);
 			writeToClipboardEvent(event, copiedNode);
 			writeToBrowserClipboard(copiedNode);
 		}
@@ -645,7 +562,7 @@
 
 		const cutNode = store.operations.cutNode(selectedNodeId);
 		if (cutNode) {
-			clipboard = cutNode;
+			store.setClipboard(cutNode);
 			writeToClipboardEvent(event, cutNode);
 			writeToBrowserClipboard(cutNode);
 		}
@@ -659,15 +576,15 @@
 		if (!canPaste) return;
 
 		const eventData = readFromClipboardEvent(event);
-		const pasteData = eventData || clipboard;
+		const pasteData = eventData || store.clipboard;
 		if (!pasteData) return;
 
-		if (eventData && eventData !== clipboard) {
-			clipboard = eventData;
+		if (eventData && eventData !== store.clipboard) {
+			store.setClipboard(eventData);
 		}
 
 		const targetId = selectedNodeId || ROOT_NODE_ID;
-		performPaste(pasteData, targetId);
+		store.performPaste(pasteData, targetId);
 	}
 
 	// Setup global keyboard shortcuts in $effect
@@ -682,15 +599,15 @@
 		// Initialize clipboard from browser on mount
 		readFromBrowserClipboard().then((data) => {
 			if (data) {
-				clipboard = data;
+				store.setClipboard(data);
 			}
 		});
 
 		// Sync clipboard on focus (for cross-tab support)
 		const handleFocus = () => {
 			readFromBrowserClipboard().then((data) => {
-				if (data && data !== clipboard) {
-					clipboard = data;
+				if (data && data !== store.clipboard) {
+					store.setClipboard(data);
 				}
 			});
 		};
@@ -740,7 +657,7 @@
 		</AppHeader>
 
 		<AppSidebar>
-			<Editor rootSlot={store.rootSlot} externalClipboard={clipboard} />
+			<Editor rootSlot={store.rootSlot} />
 		</AppSidebar>
 
 		<AppCanvas>
@@ -768,7 +685,11 @@
 		</AppPanel>
 	</App>
 
-	<ComponentPicker bind:open={showComponentPicker} onSelect={handleComponentSelect} />
+	<ComponentPicker
+		open={store.showComponentPicker}
+		onSelect={handleComponentSelect}
+		onOpenChange={handleComponentPickerOpenChange}
+	/>
 
 	<!-- Portal container for overlay components (dropdowns, dialogs, tooltips, etc.) -->
 	<!-- Must be inside UJLTheme to inherit theme styles and CSS variables -->

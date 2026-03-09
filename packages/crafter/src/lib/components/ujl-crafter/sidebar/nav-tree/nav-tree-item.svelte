@@ -18,7 +18,7 @@
 		SidebarMenuSubItem,
 		SidebarMenuSubButton,
 	} from "$lib/components/ui/sidebar-menu/index.js";
-	import EditorToolbar from "../editor-toolbar.svelte";
+	import { ModuleActions } from "$lib/components/ui/module-actions/index.js";
 	import NavTreeSlotGroup from "./nav-tree-slot-group.svelte";
 	import NavTreeItem from "./nav-tree-item.svelte";
 	import {
@@ -141,15 +141,28 @@
 	const canInsertRoot = $derived(isRootNode ? true : canInsert);
 </script>
 
-{#snippet editorToolbar(canCopy: boolean, canCut: boolean, canInsert: boolean, canDelete: boolean)}
-	<EditorToolbar
-		nodeId={node.meta.id}
-		{onCopy}
-		{onCut}
-		{onPaste}
-		{onDelete}
-		{onInsert}
-		onClose={() => (dropdownOpen = false)}
+{#snippet actionMenu(canCopy: boolean, canCut: boolean, canInsert: boolean, canDelete: boolean)}
+	<ModuleActions
+		onInsert={() => {
+			onInsert(node.meta.id);
+			dropdownOpen = false;
+		}}
+		onCopy={() => {
+			onCopy(node.meta.id);
+			dropdownOpen = false;
+		}}
+		onCut={() => {
+			onCut(node.meta.id);
+			dropdownOpen = false;
+		}}
+		onPaste={() => {
+			onPaste(node.meta.id);
+			dropdownOpen = false;
+		}}
+		onDelete={() => {
+			onDelete(node.meta.id);
+			dropdownOpen = false;
+		}}
 		{canCopy}
 		{canCut}
 		{canPaste}
@@ -304,7 +317,7 @@
 											{/snippet}
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="end">
-											{@render editorToolbar(canCopyRoot, canCutRoot, canInsertRoot, canDeleteRoot)}
+											{@render actionMenu(canCopyRoot, canCutRoot, canInsertRoot, canDeleteRoot)}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</div>
@@ -387,7 +400,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								{@render editorToolbar(canCopyRoot, canCutRoot, canInsert, canDeleteRoot)}
+								{@render actionMenu(canCopyRoot, canCutRoot, canInsert, canDeleteRoot)}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</button>
@@ -468,7 +481,7 @@
 										{/snippet}
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
-										{@render editorToolbar(true, true, canInsert, true)}
+										{@render actionMenu(true, true, canInsert, true)}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>
@@ -556,7 +569,7 @@
 						{/snippet}
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						{@render editorToolbar(true, true, canInsert, true)}
+						{@render actionMenu(true, true, canInsert, true)}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
