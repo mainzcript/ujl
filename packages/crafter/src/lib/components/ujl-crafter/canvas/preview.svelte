@@ -232,9 +232,9 @@
 		moduleId: string;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
-		// Position für die Island (relativ zum Container)
-		top: number;
-		left: number;
+		// DOM rects for positioning (Island calculates its own position)
+		moduleRect: DOMRect;
+		containerRect: DOMRect;
 	}
 
 	let islandState = $state<IslandState | null>(null);
@@ -275,18 +275,13 @@
 		// Calculate position relative to container
 		const containerRect = scrollContainerRef.getBoundingClientRect();
 		const moduleRect = element.getBoundingClientRect();
-		const islandHeight = 36;
-		const margin = 4;
-
-		const top = moduleRect.top - containerRect.top - islandHeight - margin;
-		const left = moduleRect.right - containerRect.left - 220;
 
 		islandState = {
 			moduleId,
 			canMoveUp,
 			canMoveDown,
-			top,
-			left,
+			moduleRect,
+			containerRect,
 		};
 	});
 
@@ -465,8 +460,8 @@
 	<!-- Module Island - Selection based -->
 	{#if islandState && crafterMode === "editor"}
 		<Island
-			top={islandState.top}
-			left={islandState.left}
+			moduleRect={islandState.moduleRect}
+			containerRect={islandState.containerRect}
 			canMoveUp={islandState.canMoveUp}
 			canMoveDown={islandState.canMoveDown}
 			onSelect={handleIslandSelect}

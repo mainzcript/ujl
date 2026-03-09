@@ -10,8 +10,8 @@
 	import { ModuleActions } from "../ui/module-actions/index.js";
 
 	interface Props {
-		top: number;
-		left: number;
+		moduleRect: DOMRect;
+		containerRect: DOMRect;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 		onSelect: () => void;
@@ -29,8 +29,8 @@
 	}
 
 	let {
-		top,
-		left,
+		moduleRect,
+		containerRect,
 		canMoveUp,
 		canMoveDown,
 		onSelect,
@@ -51,8 +51,29 @@
 	const showSettingsButton = $derived(!app.isDesktopPanel);
 	const isSettingsDisabled = $derived(app.isPanelVisible);
 
+	// Island element reference for measurement
+	let islandElement: HTMLElement | undefined = $state(undefined);
+
 	// Dropdown state for closing after action
 	let dropdownOpen = $state(false);
+
+	// Calculate position based on actual island height
+	let top = $state(0);
+	let left = $state(0);
+
+	// Update position when element mounts or props change
+	$effect(() => {
+		if (!islandElement) return;
+
+		// Measure actual island height
+		const islandRect = islandElement.getBoundingClientRect();
+		const margin = 10;
+
+		// Position directly above the module
+		top = moduleRect.top - containerRect.top - islandRect.height - margin;
+		// Position centered horizontally over the module
+		left = moduleRect.left - containerRect.left + (moduleRect.width - islandRect.width) / 2;
+	});
 
 	function handleSettings() {
 		app.requirePanel();
@@ -97,7 +118,8 @@
 </script>
 
 <div
-	class="absolute z-[50] flex items-center gap-1 rounded-lg border border-sidebar-border bg-sidebar px-2 py-1.5 shadow-lg"
+	bind:this={islandElement}
+	class="absolute z-50 flex items-center gap-1 rounded-lg border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1.5 shadow-lg"
 	style="top: {top}px; left: {left}px;"
 	data-crafter="module-island"
 >
