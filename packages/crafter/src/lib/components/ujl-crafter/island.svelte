@@ -57,10 +57,6 @@
 	// Dropdown state for closing after action
 	let dropdownOpen = $state(false);
 
-	// Track last position for change detection
-	let lastTop = -9999;
-	let lastLeft = -9999;
-
 	function positionIsland() {
 		if (!islandElement) return;
 
@@ -70,6 +66,7 @@
 		) as HTMLElement | null;
 
 		if (!moduleEl) {
+			// Fade out when module not found
 			islandElement.style.opacity = "0";
 			islandElement.style.pointerEvents = "none";
 			return;
@@ -80,7 +77,7 @@
 		const containerRect = containerElement.getBoundingClientRect();
 		const islandRect = islandElement.getBoundingClientRect();
 
-		const margin = 10;
+		const margin = -5;
 		const minEdgeMargin = 8;
 
 		// Check if module is COMPLETELY out of viewport
@@ -88,6 +85,7 @@
 			moduleRect.bottom <= containerRect.top || moduleRect.top >= containerRect.bottom;
 
 		// Hide island when module is completely out of view
+		// With transition on opacity, this will fade out smoothly
 		if (isModuleCompletelyOut) {
 			islandElement.style.opacity = "0";
 			islandElement.style.pointerEvents = "none";
@@ -124,24 +122,17 @@
 		islandElement.style.opacity = "1";
 		islandElement.style.pointerEvents = "auto";
 
-		// Set transition consistently for smooth movement
-		// Using very short duration for responsive feel during scroll
-		islandElement.style.transition = "transform 0.1s ease-out, opacity 0.2s ease-out";
+		// Set transition only for opacity (not transform) for butter-smooth scrolling
+		// Transform updates immediately (no transition), opacity fades smoothly
+		islandElement.style.transition = "opacity 0.2s ease-out";
 
-		// Update position
-		if (targetTop !== lastTop || targetLeft !== lastLeft) {
-			lastTop = targetTop;
-			lastLeft = targetLeft;
-			islandElement.style.transform = `translate(${targetLeft}px, ${targetTop}px)`;
-		}
+		// Update position immediately (no transition lag)
+		islandElement.style.transform = `translate(${targetLeft}px, ${targetTop}px)`;
 	}
 
 	// Set up scroll tracking
 	$effect(() => {
 		if (!islandElement || !containerElement || !moduleId) return;
-
-		lastTop = -9999;
-		lastLeft = -9999;
 
 		let ticking = false;
 		function onScroll() {
@@ -218,7 +209,7 @@
 <div
 	bind:this={islandElement}
 	class="absolute top-0 left-0 z-50 flex items-center gap-1 rounded-lg border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1.5 shadow-lg"
-	style="opacity: 0; pointer-events: none; will-change: transform, opacity;"
+	style="opacity: 0; pointer-events: none; will-change: opacity;"
 	data-crafter="module-island"
 >
 	{#if showSettingsButton}

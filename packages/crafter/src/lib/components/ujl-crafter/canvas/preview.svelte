@@ -22,6 +22,7 @@
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
 	import Island from "../island.svelte";
+	import { ModuleOverlay, HoverOverlay } from "../overlay/index.js";
 	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
@@ -172,29 +173,12 @@
 		});
 	}
 
-	function applySelection(moduleId: string, retries = 10) {
-		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
-		if (element) {
-			element.classList.add("ujl-selected");
-			scrollToComponentInPreview(moduleId);
-			return true;
-		}
-		if (retries > 0) {
-			setTimeout(() => applySelection(moduleId, retries - 1), 50);
-		} else {
-			logger.warn("Could not find element for selection after retries:", moduleId);
-		}
-		return false;
-	}
-
+	// Selection is now handled by ModuleOverlay component
+	// Scroll to selected component in preview
 	$effect(() => {
-		dom.querySelectorAll("[data-ujl-module-id].ujl-selected").forEach((el) => {
-			el.classList.remove("ujl-selected");
-		});
-
-		if (crafterMode === "editor" && selectedNodeId && ast) {
+		if (crafterMode === "editor" && selectedNodeId && ast && scrollContainer) {
 			setTimeout(() => {
-				applySelection(selectedNodeId);
+				scrollToComponentInPreview(selectedNodeId);
 			}, 0);
 		}
 	});
@@ -408,25 +392,43 @@
 		</div>
 	{/if}
 
-	<!-- Module Island - Selection based -->
-	{#if islandState && crafterMode === "editor" && scrollContainer}
-		<Island
-			moduleId={islandState.moduleId}
-			containerElement={scrollContainer}
-			canMoveUp={islandState.canMoveUp}
-			canMoveDown={islandState.canMoveDown}
-			onSelect={handleIslandSelect}
-			onMoveUp={handleIslandMoveUp}
-			onMoveDown={handleIslandMoveDown}
-			onCopy={handleIslandCopy}
-			onCut={handleIslandCut}
-			onPaste={handleIslandPaste}
-			onDelete={handleIslandDelete}
-			onInsert={handleIslandInsert}
-			canCopy={true}
-			canCut={true}
-			canPaste={crafter.hasClipboardContent}
-			canInsert={true}
-		/>
+	<!-- Selection Overlay with {#key} Pattern -->
+	{#key selectedNodeId}
+		{#if crafterMode === "editor" && selectedNodeId && scrollContainer}
+			<ModuleOverlay
+				variant="selection"
+				moduleId={selectedNodeId}
+				containerElement={scrollContainer}
+			/>
+		{/if}
+	{/key}
+
+	<!-- Hover Overlay (not keyed, tracks mouse events) -->
+	{#if crafterMode === "editor" && scrollContainer}
+		<HoverOverlay containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
 	{/if}
+
+	<!-- Module Island with {#key} Pattern -->
+	{#key selectedNodeId}
+		{#if islandState && crafterMode === "editor" && scrollContainer}
+			<Island
+				moduleId={islandState.moduleId}
+				containerElement={scrollContainer}
+				canMoveUp={islandState.canMoveUp}
+				canMoveDown={islandState.canMoveDown}
+				onSelect={handleIslandSelect}
+				onMoveUp={handleIslandMoveUp}
+				onMoveDown={handleIslandMoveDown}
+				onCopy={handleIslandCopy}
+				onCut={handleIslandCut}
+				onPaste={handleIslandPaste}
+				onDelete={handleIslandDelete}
+				onInsert={handleIslandInsert}
+				canCopy={true}
+				canCut={true}
+				canPaste={crafter.hasClipboardContent}
+				canInsert={true}
+			/>
+		{/if}
+	{/key}
 </div>
