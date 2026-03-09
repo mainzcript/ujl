@@ -13,52 +13,42 @@ import { type Locator, type Page, expect } from "@playwright/test";
 export class CrafterPage {
 	readonly page: Page;
 
-	// Main layout areas
 	readonly crafterElement: Locator;
 	readonly sidebar: Locator;
 	readonly canvas: Locator;
 	readonly panel: Locator;
 
-	// Navigation tree
 	readonly navTree: Locator;
 	readonly navTreeHeader: Locator;
 
-	// Header elements
 	readonly header: Locator;
 	readonly modeSelector: Locator;
 	readonly viewportToggles: Locator;
 	readonly saveButton: Locator;
 	readonly menuButton: Locator;
 
-	// Component Picker
 	readonly componentPicker: Locator;
 	readonly componentPickerSearch: Locator;
 
 	constructor(page: Page) {
 		this.page = page;
 
-		// Shadow DOM root - all elements inside the Crafter are in Shadow DOM
 		const shadowHost = page.locator("ujl-crafter-internal");
 
-		// Main layout - routed through Shadow DOM
 		this.crafterElement = shadowHost;
 		this.sidebar = shadowHost.locator('[data-slot="app-sidebar"]');
 		this.canvas = shadowHost.locator('[data-ujl-scroll-container="canvas"]');
 		this.panel = shadowHost.locator('[data-slot="app-panel"]');
 
-		// Navigation tree
 		this.navTree = shadowHost.locator('[data-crafter="nav-tree"]');
-		// Use first() to avoid strict mode violation (Document appears twice)
 		this.navTreeHeader = this.navTree.locator("> div").first();
 
-		// Header (in app-provider, uses <header> element)
 		this.header = shadowHost.locator("header");
 		this.modeSelector = shadowHost.locator('[data-crafter="mode-selector"]');
 		this.viewportToggles = shadowHost.locator('[data-crafter="viewport-toggles"]');
 		this.saveButton = shadowHost.getByRole("button", { name: "Save" });
 		this.menuButton = shadowHost.getByTitle("More Actions");
 
-		// Component Picker (Dialog - in portal inside Shadow DOM)
 		this.componentPicker = shadowHost.locator('[data-crafter="component-picker"]').last();
 		this.componentPickerSearch = shadowHost
 			.locator('[data-crafter="component-picker-search"]')
@@ -78,7 +68,6 @@ export class CrafterPage {
 	 */
 	async waitForReady() {
 		await expect(this.crafterElement).toBeVisible();
-		// Wait for the nav tree to be visible (indicates content is loaded)
 		await expect(this.navTree).toBeVisible({ timeout: 10000 });
 	}
 
@@ -109,10 +98,7 @@ export class CrafterPage {
 	 */
 	async selectNodeInTree(nodeId: string) {
 		const node = this.getTreeNode(nodeId);
-		// Click directly on the node - the onclick handler on the element will trigger selection
-		// This works for both nodes with and without children
 		await node.click();
-		// Wait for selection state to update (including async overlay positioning)
 		await this.page.waitForTimeout(500);
 	}
 
@@ -123,7 +109,6 @@ export class CrafterPage {
 	async selectModuleInPreview(moduleId: string) {
 		const module = this.getPreviewModule(moduleId);
 		await module.click();
-		// Wait for selection state to update (async DOM operations)
 		await this.page.waitForTimeout(500);
 	}
 
@@ -174,7 +159,6 @@ export class CrafterPage {
 	async insertComponent(componentName: string) {
 		await this.openComponentPicker();
 		await this.componentPickerSearch.fill(componentName);
-		// CommandItem renders as role="option", not button
 		await this.page.getByRole("option", { name: componentName, exact: false }).first().click();
 	}
 
@@ -218,7 +202,6 @@ export class CrafterPage {
 	 */
 	async setViewport(type: "desktop" | "tablet" | "mobile" | null) {
 		if (type === null) {
-			// Click active toggle to deselect
 			const activeToggle = this.viewportToggles.locator('[data-state="on"]');
 			if (await activeToggle.isVisible()) {
 				await activeToggle.click();
@@ -253,7 +236,6 @@ export class CrafterPage {
 		const ids = await nodes.evaluateAll((elements) =>
 			elements.map((el) => el.getAttribute("data-tree-node-id") ?? ""),
 		);
-		// Filter out empty IDs and virtual nodes (starting with __)
 		return ids.filter((id) => id !== "" && !id.startsWith("__"));
 	}
 
@@ -274,11 +256,8 @@ export class CrafterPage {
 	 * These correspond to tree nodes that have the same ID.
 	 */
 	async getSelectableModuleIds(): Promise<string[]> {
-		// Get tree node IDs (which represent selectable modules)
 		const treeNodeIds = await this.getVisibleTreeNodeIds();
-		// Get all preview module IDs
 		const moduleIds = await this.getPreviewModuleIds();
-		// Return intersection - modules that are both in tree and preview
 		return moduleIds.filter((id) => treeNodeIds.includes(id));
 	}
 
@@ -290,7 +269,6 @@ export class CrafterPage {
 	 */
 	async getFirstSelectableModuleId(): Promise<string | null> {
 		const treeNodeIds = await this.getVisibleTreeNodeIds();
-		// Prefer second element (first is often a container)
 		if (treeNodeIds.length >= 2) {
 			return treeNodeIds[1];
 		}
@@ -301,7 +279,6 @@ export class CrafterPage {
 	 * Check if the properties panel shows "No module selected".
 	 */
 	async isNoModuleSelectedVisible(): Promise<boolean> {
-		// Panel must be visible first
 		if (!(await this.panel.isVisible())) return false;
 		return this.panel.getByText("No module selected").isVisible();
 	}

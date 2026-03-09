@@ -1,8 +1,7 @@
 /**
  * Editor mode base styles.
  *
- * Visual feedback for selection and hover is now handled by
- * SelectionOverlay and HoverOverlay components in the crafter.
+ * Selection and hover visuals are rendered via overlay components.
  *
  * @see packages/crafter/src/lib/components/ujl-crafter/overlay/
  */

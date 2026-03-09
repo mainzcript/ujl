@@ -199,8 +199,7 @@
 		});
 	}
 
-	// Selection is now handled by ModuleOverlay component
-	// Scroll to selected component in preview
+	// Keep the selected module in view after selection changes.
 	$effect(() => {
 		if (crafterMode === "editor" && selectedNodeId && ast && scrollContainer) {
 			setTimeout(() => {

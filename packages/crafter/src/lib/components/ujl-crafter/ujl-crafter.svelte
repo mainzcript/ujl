@@ -1,18 +1,3 @@
-<!--
-	UJL Crafter - Main Component
-	
-	This is the root component for the Crafter visual editor.
-	It creates the CrafterStore and provides it via Svelte context.
-	
-	Architecture:
-	- Single Source of Truth: All state managed by CrafterStore
-	- Dependency Injection: Store receives all dependencies via factory
-	- Unidirectional Data Flow: State flows down, actions flow up
-	- Context-based API: Child components access store via context
-	
-	Note: This component is rendered inside the ujl-crafter-element Custom Element,
-	which handles Shadow DOM creation and style injection.
--->
 <script lang="ts">
 	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from "../ui/app/index.js";
 	import { Badge, UJLTheme } from "@ujl-framework/ui";
@@ -60,10 +45,6 @@
 		isModuleObject,
 	} from "$lib/utils/ujlc-tree.js";
 
-	// ============================================
-	// PROPS
-	// ============================================
-
 	interface Props {
 		/** External store (from UJLCrafter class via Custom Element) */
 		store?: CrafterStore;
@@ -88,10 +69,6 @@
 		shadowRoot,
 	}: Props = $props();
 
-	// ============================================
-	// STORE CREATION
-	// ============================================
-
 	const { store, composer } = (() => {
 		if (externalStore) {
 			return {
@@ -99,7 +76,6 @@
 				composer: externalComposer ?? new Composer(),
 			};
 		} else {
-			// Capture initial props in a closure - we intentionally don't react to prop changes
 			const { validatedContent, validatedTheme } = (() => {
 				const content = initialContent;
 				const theme = initialTheme;
@@ -113,8 +89,6 @@
 
 			const composer = new Composer();
 
-			// Build the library provider (defaults to InlineLibraryProvider)
-			// Stateless - no closures needed. Crafter/Store manages all document storage.
 			const libraryProvider = new InlineLibraryProvider();
 
 			const storeDeps: CrafterStoreDeps = {
@@ -132,29 +106,16 @@
 
 	setContext(CRAFTER_CONTEXT, store);
 	setContext(COMPOSER_CONTEXT, composer);
-	// Use getter to avoid Svelte warning about capturing initial value
 	setContext(SHADOW_ROOT_CONTEXT, {
 		get value() {
 			return shadowRoot;
 		},
 	});
 
-	// ============================================
-	// PORTAL CONTAINER
-	// ============================================
-
-	// Portal container for overlay components (dropdowns, dialogs, etc.)
-	// This ensures overlays render inside Shadow DOM and inherit styles
 	let portalContainerRef: HTMLDivElement | undefined = $state();
 
-	// ============================================
-	// FULLSCREEN TRACKING
-	// ============================================
-
-	// Reference to App container for size tracking
 	let appContainerRef: HTMLElement | null = $state(null);
 
-	// ResizeObserver for container size tracking
 	$effect(() => {
 		if (!appContainerRef) return;
 
@@ -169,7 +130,6 @@
 
 		observer.observe(appContainerRef);
 
-		// Measure initial size on mount
 		store.setContainerSize(appContainerRef.offsetWidth, appContainerRef.offsetHeight);
 
 		return () => {
@@ -177,7 +137,6 @@
 		};
 	});
 
-	// Window resize listener for screen size tracking
 	$effect(() => {
 		if (typeof window === "undefined") return;
 
@@ -193,7 +152,6 @@
 		};
 	});
 
-	// ESC key handler to exit fullscreen
 	$effect(() => {
 		if (typeof window === "undefined") return;
 
@@ -210,20 +168,12 @@
 		};
 	});
 
-	// ============================================
-	// EDITOR THEME
-	// ============================================
-
 	const editorTokenSet = $derived(
 		(editorTheme
 			? validateUJLTDocument(editorTheme)
 			: validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
 		).ujlt.tokens,
 	);
-
-	// ============================================
-	// IMPORT / EXPORT HANDLERS
-	// ============================================
 
 	function handleExportTheme() {
 		downloadJsonFile(store.ujltDocument, "theme.ujlt.json");
@@ -275,36 +225,22 @@
 		}
 	}
 
-	// ============================================
-	// MODE CHANGE HANDLER
-	// ============================================
-
 	function handleModeChange(newMode: string | undefined) {
 		if (newMode === "editor" || newMode === "designer") {
 			store.setMode(newMode);
 		}
 	}
 
-	// ============================================
-	// VIEWPORT CHANGE HANDLER
-	// ============================================
-
 	function handleViewportTypeChange(type: string | undefined) {
 		store.setViewportType(type);
 	}
 
-	// ============================================
-	// KEYBOARD SHORTCUTS - Always active, even when sidebar is hidden
-	// ============================================
-
-	// Synchronized with browser clipboard for cross-tab support
 	let isHandlingKeyboardShortcut = $state(false);
 
 	const selectedNodeId = $derived.by(() => {
 		return store.mode === "editor" ? store.selectedNodeId : null;
 	});
 
-	// Slot selection uses format: parentId:slotName
 	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
 
 	const selectedNode = $derived.by(() => {
@@ -465,23 +401,18 @@
 			return;
 		}
 
-		// Ctrl+I (Add) should always work, even without selection
 		if ((event.ctrlKey || event.metaKey) && event.key === "i") {
 			event.preventDefault();
 			if (selectedSlotInfo && selectedNodeId) {
-				// Slot selected: insert into slot
 				handleInsert(selectedNodeId);
 			} else if (selectedNodeId) {
-				// Module selected: insert after module (consistent with paste)
 				handleInsert(selectedNodeId);
 			} else {
-				// Nothing selected: insert at end of document
 				handleInsert(ROOT_NODE_ID);
 			}
 			return;
 		}
 
-		// For other shortcuts (Copy, Paste, Cut, Delete) we need a selection or clipboard
 		if (!selectedNodeId && !store.clipboard) return;
 
 		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
@@ -587,7 +518,6 @@
 		store.performPaste(pasteData, targetId);
 	}
 
-	// Setup global keyboard shortcuts in $effect
 	$effect(() => {
 		if (typeof window === "undefined") return;
 
@@ -596,14 +526,12 @@
 		window.addEventListener("cut", handleCutEvent);
 		window.addEventListener("paste", handlePasteEvent);
 
-		// Initialize clipboard from browser on mount
 		readFromBrowserClipboard().then((data) => {
 			if (data) {
 				store.setClipboard(data);
 			}
 		});
 
-		// Sync clipboard on focus (for cross-tab support)
 		const handleFocus = () => {
 			readFromBrowserClipboard().then((data) => {
 				if (data && data !== store.clipboard) {
@@ -631,7 +559,6 @@
 	portalContainer={portalContainerRef}
 >
 	<App bind:ref={appContainerRef}>
-		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects
 			mode={store.mode}
 			setSelectedNodeId={store.setSelectedNodeId}
@@ -690,8 +617,5 @@
 		onSelect={handleComponentSelect}
 		onOpenChange={handleComponentPickerOpenChange}
 	/>
-
-	<!-- Portal container for overlay components (dropdowns, dialogs, tooltips, etc.) -->
-	<!-- Must be inside UJLTheme to inherit theme styles and CSS variables -->
 	<div bind:this={portalContainerRef} data-ujl-portal-container class="contents"></div>
 </UJLTheme>

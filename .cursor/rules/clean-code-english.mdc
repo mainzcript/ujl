@@ -14,11 +14,11 @@ alwaysApply: true
 - No German or other languages in code
 
 ```typescript
-// ❌ BAD
+// BAD
 const benutzerName = 'Max';
 // User data
 
-// ✅ GOOD
+// GOOD
 const userName = 'Max';
 // User data
 ```
@@ -31,11 +31,11 @@ const userName = 'Max';
 - Use verb-noun for functions (e.g., `getUserData`, `validateEmail`)
 
 ```typescript
-// ❌ BAD
+// BAD
 const d = new Date();
 const usr = getUsr(123);
 
-// ✅ GOOD
+// GOOD
 const publishedAt = new Date();
 const user = getUserById(123);
 ```
@@ -46,10 +46,10 @@ const user = getUserById(123);
 - Maximum 2–3 parameters; use objects for more
 
 ```typescript
-// ❌ BAD
+// BAD
 function process(data, flag, mode, config) { /* 50 lines */ }
 
-// ✅ GOOD
+// GOOD
 interface ProcessingConfig {
   data: Data;
   shouldValidate: boolean;
@@ -68,11 +68,11 @@ function processData(config: ProcessingConfig) {
 - Keep comments current — outdated comments are worse than none
 
 ```typescript
-// ❌ BAD
+// BAD
 // Increment counter
 counter++;
 
-// ✅ GOOD
+// GOOD
 // Retry limit exceeded, back off to prevent rate limiting
 counter++;
 ```
