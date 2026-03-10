@@ -149,6 +149,8 @@ pnpm run vc:changeset
 
 This guides you through creating a changeset describing your changes. Changesets are created on feature branches and processed during the release.
 
+> Pre-0.1 policy: while release packages are on `0.0.x`, use `patch` bumps only (`minor`/`major` are blocked by CI).
+
 ### 3. Committing Changes
 
 We follow conventional commits:

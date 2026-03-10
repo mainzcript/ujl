@@ -49,9 +49,8 @@ The script:
 2. Computes range (`<baseBranch>...HEAD`, fallback `HEAD~1..HEAD`)
 3. Detects changed release packages from `packages/*/package.json`
 4. Derives bump type automatically:
-   - `major` for breaking markers (`BREAKING CHANGE`, `!:`)
-   - `minor` for feature commits (`feat:`)
-   - `patch` otherwise
+   - while all release packages are on `0.0.x`: always `patch` (pre-0.1 patch-only policy)
+   - otherwise: `major` for breaking markers (`BREAKING CHANGE`, `!:`), `minor` for `feat:`, `patch` otherwise
 5. Generates a concise one-line summary from commit subjects (prefers `feat`/`fix`/`refactor`, downweights `docs`/`chore` and agent/meta commits)
 6. Writes a unique `NN-<branch-name>.md` file:
    - `NN` is a two-digit sequence (`01`, `02`, ...)

@@ -70,6 +70,7 @@ function readWorkspacePackages(ignoreList) {
 			if (!data.name || ignoreList.includes(data.name)) continue;
 			packages.push({
 				name: data.name,
+				version: data.version || "0.0.0",
 				relativePrefix: `packages/${folder.name}/`,
 			});
 		} catch {
@@ -79,7 +80,13 @@ function readWorkspacePackages(ignoreList) {
 	return packages;
 }
 
-function determineBump(cliBump, subjects) {
+function isPatchOnlyPreZeroOnePolicy(workspacePackages) {
+	if (workspacePackages.length === 0) return false;
+	return workspacePackages.every((pkg) => /^0\.0\./.test(pkg.version));
+}
+
+function determineBump(cliBump, subjects, patchOnlyPreZeroOne) {
+	if (patchOnlyPreZeroOne) return "patch";
 	if (cliBump !== "auto") return cliBump;
 	const text = subjects.join("\n");
 	if (/(BREAKING CHANGE|!:\s)/i.test(text)) return "major";
@@ -189,6 +196,7 @@ function run() {
 		.filter(Boolean);
 
 	const packageInfo = readWorkspacePackages(config.ignore || []);
+	const patchOnlyPreZeroOne = isPatchOnlyPreZeroOnePolicy(packageInfo);
 	const changedPackages = packageInfo
 		.filter((pkg) => changedFiles.some((file) => file.startsWith(pkg.relativePrefix)))
 		.map((pkg) => pkg.name);
@@ -198,7 +206,7 @@ function run() {
 		.map((line) => line.trim())
 		.filter(Boolean);
 
-	const bump = determineBump(args.bump, subjects);
+	const bump = determineBump(args.bump, subjects, patchOnlyPreZeroOne);
 	const summary =
 		args.message.trim() ||
 		selectSummaryFromSubjects(subjects) ||
@@ -222,6 +230,9 @@ function run() {
 	console.log(`packages=${changedPackages.join(",") || "(none)"}`);
 	console.log(`bump=${bump}`);
 	console.log(`summary=${summary}`);
+	if (patchOnlyPreZeroOne) {
+		console.log("policy=pre-0.1 patch-only policy active (all release packages are 0.0.x)");
+	}
 	if (changedPackages.length === 0) {
 		console.log("note=No release package changes detected; generated changeset has empty frontmatter.");
 	}

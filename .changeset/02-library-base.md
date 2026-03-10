@@ -1,7 +1,7 @@
 ---
-"@ujl-framework/core": minor
-"@ujl-framework/types": minor
-"@ujl-framework/crafter": minor
+"@ujl-framework/core": patch
+"@ujl-framework/types": patch
+"@ujl-framework/crafter": patch
 ---
 
 Introduce the Library provider system for asset management.
