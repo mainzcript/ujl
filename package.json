@@ -11,7 +11,7 @@
 	"packageManager": "pnpm@10.30.3",
 	"scripts": {
 		"postinstall": "pnpm run instructions:sync",
-		"instructions:sync": "cp AGENTS.md CLAUDE.md && rm -rf .cursor/rules && mkdir -p .cursor/rules && if [ -d .agents/rules ]; then cp -r .agents/rules/. .cursor/rules/; else echo 'No .agents/rules to sync'; fi",
+		"instructions:sync": "rm -rf .cursor/rules && mkdir -p .cursor/rules && if [ -d .agents/rules ]; then cp -r .agents/rules/. .cursor/rules/; else echo 'No .agents/rules to sync'; fi",
 		"build": "pnpm run adapter-svelte:build && pnpm run adapter-web:build && pnpm run crafter:build && pnpm run docs:build",
 		"format": "pnpm -r run format",
 		"lint": "pnpm -r run lint",
