@@ -46,6 +46,13 @@ jobs:
           restore-keys: |
             pnpm-store-${{ runner.os }}-
 
+      - name: Enforce changeset bump policy
+        run: |
+          if grep -R -nE ':\s*(minor|major)\s*$' .changeset --include='*.md' --exclude='README.md'; then
+            echo "Only patch changesets are allowed before 0.1.0."
+            exit 1
+          fi
+
       - name: Install
         run: pnpm install --frozen-lockfile
 

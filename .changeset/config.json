@@ -16,8 +16,7 @@
 	"linked": [],
 	"ignore": [
 		"@ujl-framework/docs",
-		"@ujl-framework/demo",
-		"@ujl-framework/library"
+		"@ujl-framework/demo"
 	],
 	"access": "public",
 	"baseBranch": "main",

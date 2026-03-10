@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/examples",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "UJL Examples - Example Material and Test Data",
 	"license": "MIT",
 	"type": "module",

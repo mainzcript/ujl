@@ -1,5 +1,12 @@
 # @ujl-framework/crafter
 
+## 0.0.3
+
+### Patch Changes
+
+- b837c68: Introduce the Library provider system for asset management.
+- b837c68: Introduce island-based module actions and overlay interaction improvements in Crafter, and remove legacy UJLC meta keys (`_instance`, `_library`) in types/examples.
+
 ## 0.0.2
 
 ### Patch Changes
