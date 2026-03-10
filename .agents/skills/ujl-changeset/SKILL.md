@@ -12,7 +12,7 @@ Create exactly one compact Changeset entry for the current branch, based on git 
 Primary output:
 
 ```
-.changeset/<generated>.md
+.changeset/NN-<branch-name>.md
 ```
 
 The default body should be a one-liner suitable for changelog output.
@@ -53,7 +53,10 @@ The script:
    - `minor` for feature commits (`feat:`)
    - `patch` otherwise
 5. Generates a concise one-line summary from commit subjects
-6. Writes a unique `.changeset/*.md` file
+6. Writes a unique `NN-<branch-name>.md` file:
+   - `NN` is a two-digit sequence (`01`, `02`, ...)
+   - if numeric files already exist, use max prefix + 1
+   - otherwise, start from count of existing changeset markdown files + 1
 
 ## Output Rules
 

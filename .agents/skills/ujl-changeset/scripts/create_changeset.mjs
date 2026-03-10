@@ -106,23 +106,27 @@ function defaultSummary(changedPackages, bump) {
 	return `Improve ${labels || "UJL packages"}.`;
 }
 
+function readExistingChangesetFiles() {
+	return fs
+		.readdirSync(changesetDir, { withFileTypes: true })
+		.filter((entry) => entry.isFile())
+		.map((entry) => entry.name)
+		.filter((name) => name.endsWith(".md") && name !== "README.md");
+}
+
 function nextFilename(branch) {
-	const now = new Date();
-	const stamp = [
-		now.getUTCFullYear(),
-		String(now.getUTCMonth() + 1).padStart(2, "0"),
-		String(now.getUTCDate()).padStart(2, "0"),
-		"-",
-		String(now.getUTCHours()).padStart(2, "0"),
-		String(now.getUTCMinutes()).padStart(2, "0"),
-		String(now.getUTCSeconds()).padStart(2, "0"),
-	].join("");
-	const base = `${stamp}-${branch || "branch"}`;
-	let candidate = `${base}.md`;
-	let counter = 1;
-	while (fs.existsSync(path.join(changesetDir, candidate))) {
-		counter += 1;
-		candidate = `${base}-${counter}.md`;
+	const existing = readExistingChangesetFiles();
+	const numericPrefixes = existing
+		.map((name) => /^(\d+)-/.exec(name)?.[1])
+		.filter(Boolean)
+		.map((value) => Number.parseInt(value, 10))
+		.filter((value) => Number.isFinite(value));
+
+	let nextNumber = numericPrefixes.length > 0 ? Math.max(...numericPrefixes) + 1 : existing.length + 1;
+	let candidate = `${String(nextNumber).padStart(2, "0")}-${branch || "branch"}.md`;
+	while (existing.includes(candidate) || fs.existsSync(path.join(changesetDir, candidate))) {
+		nextNumber += 1;
+		candidate = `${String(nextNumber).padStart(2, "0")}-${branch || "branch"}.md`;
 	}
 	return candidate;
 }
