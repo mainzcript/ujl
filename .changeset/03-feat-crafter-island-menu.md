@@ -4,4 +4,4 @@
 "@ujl-framework/types": minor
 ---
 
-Introduce island-based module actions and overlay interaction improvements in Crafter, with aligned types/examples updates.
+Introduce island-based module actions and overlay interaction improvements in Crafter, and remove legacy UJLC meta keys (`_instance`, `_library`) in types/examples.

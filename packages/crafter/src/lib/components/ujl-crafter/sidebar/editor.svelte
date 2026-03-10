@@ -3,6 +3,7 @@
 	import { getContext } from "svelte";
 	import NavTree from "./nav-tree/nav-tree.svelte";
 	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import { writeToBrowserClipboard } from "$lib/utils/clipboard.js";
 
 	let {
 		rootSlot,
@@ -29,11 +30,15 @@
 			crafter.operations.moveNode(nodeId, targetId, slotName, position)}
 		onSlotCopy={(parentId, slotName) => {
 			const slotData = crafter.operations.copySlot(parentId, slotName);
-			if (slotData) crafter.performPaste(slotData, parentId);
+			if (!slotData) return;
+			crafter.setClipboard(slotData);
+			void writeToBrowserClipboard(slotData);
 		}}
 		onSlotCut={(parentId, slotName) => {
 			const slotData = crafter.operations.cutSlot(parentId, slotName);
-			if (slotData) crafter.performPaste(slotData, parentId);
+			if (!slotData) return;
+			crafter.setClipboard(slotData);
+			void writeToBrowserClipboard(slotData);
 		}}
 		onSlotPaste={(parentId, slotName) => crafter.pasteNode(`${parentId}:${slotName}`)}
 		onSlotMove={(sourceParentId, sourceSlotName, targetParentId, targetSlotName) =>
