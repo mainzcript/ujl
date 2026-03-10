@@ -88,12 +88,55 @@ function determineBump(cliBump, subjects) {
 }
 
 function normalizeSummary(subject) {
-	const stripped = subject
-		.replace(/^(feat|fix|refactor|chore|docs|test|perf)(\([^)]+\))?!?:\s*/i, "")
-		.replace(/^merge\b.*$/i, "")
-		.trim();
-	if (!stripped || /^(wip|tmp|fixup|squash)/i.test(stripped)) return "";
+	const stripped = subject.replace(/^(feat|fix|refactor|chore|docs|test|perf)(\([^)]+\))?!?:\s*/i, "").trim();
+	if (!stripped) return "";
 	return stripped.charAt(0).toUpperCase() + stripped.slice(1).replace(/\.*$/, ".");
+}
+
+function parseSubject(subject) {
+	const trimmed = subject.trim();
+	const matched = /^(feat|fix|refactor|perf|test|docs|chore)(\([^)]+\))?!?:\s*(.+)$/i.exec(trimmed);
+	if (!matched) return { type: "other", description: trimmed };
+	return { type: matched[1].toLowerCase(), description: matched[3].trim() };
+}
+
+function selectSummaryFromSubjects(subjects) {
+	const typeScore = {
+		feat: 50,
+		fix: 40,
+		refactor: 30,
+		perf: 30,
+		test: 15,
+		docs: 5,
+		chore: 0,
+		other: 10,
+	};
+
+	const scored = subjects
+		.map((subject, index) => {
+			const { type, description } = parseSubject(subject);
+			if (!description || /^merge\b/i.test(description) || /^(wip|tmp|fixup|squash)\b/i.test(description)) {
+				return null;
+			}
+
+			let score = typeScore[type] ?? typeScore.other;
+			if (/(changeset|agent|claude\.md|cursor\/rules|instructions:sync|postinstall)/i.test(description)) {
+				score -= 20;
+			}
+
+			return {
+				score,
+				index,
+				summary: normalizeSummary(description),
+			};
+		})
+		.filter(Boolean)
+		.filter((entry) => entry.summary);
+
+	if (scored.length === 0) return "";
+
+	scored.sort((left, right) => right.score - left.score || left.index - right.index);
+	return scored[0]?.summary ?? "";
 }
 
 function defaultSummary(changedPackages, bump) {
@@ -158,7 +201,7 @@ function run() {
 	const bump = determineBump(args.bump, subjects);
 	const summary =
 		args.message.trim() ||
-		subjects.map(normalizeSummary).find(Boolean) ||
+		selectSummaryFromSubjects(subjects) ||
 		defaultSummary(changedPackages, bump);
 
 	const frontmatterLines = ["---"];

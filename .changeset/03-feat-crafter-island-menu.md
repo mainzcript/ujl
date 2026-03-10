@@ -4,4 +4,4 @@
 "@ujl-framework/types": minor
 ---
 
-Add ujl-changeset skill for generating compact changesets from branch diffs and commit messages.
+Introduce island-based module actions and overlay interaction improvements in Crafter, with aligned types/examples updates.

@@ -52,7 +52,7 @@ The script:
    - `major` for breaking markers (`BREAKING CHANGE`, `!:`)
    - `minor` for feature commits (`feat:`)
    - `patch` otherwise
-5. Generates a concise one-line summary from commit subjects
+5. Generates a concise one-line summary from commit subjects (prefers `feat`/`fix`/`refactor`, downweights `docs`/`chore` and agent/meta commits)
 6. Writes a unique `NN-<branch-name>.md` file:
    - `NN` is a two-digit sequence (`01`, `02`, ...)
    - if numeric files already exist, use max prefix + 1
