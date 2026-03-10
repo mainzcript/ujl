@@ -122,7 +122,7 @@ export function overlayPositioning(
 		};
 	}
 
-	const cleanup = setupTracking();
+	let cleanup = setupTracking();
 
 	return {
 		update(newParams: OverlayPositionParams) {
@@ -132,7 +132,7 @@ export function overlayPositioning(
 			padding = newParams.padding ?? 0;
 			onVisibilityChange = newParams.onVisibilityChange;
 			onPositionUpdate = newParams.onPositionUpdate;
-			setupTracking();
+			cleanup = setupTracking();
 		},
 		destroy() {
 			cleanup();

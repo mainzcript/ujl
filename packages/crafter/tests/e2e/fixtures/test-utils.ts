@@ -99,7 +99,7 @@ export class CrafterPage {
 	async selectNodeInTree(nodeId: string) {
 		const node = this.getTreeNode(nodeId);
 		await node.click();
-		await this.page.waitForTimeout(500);
+		await expect(this.getSelectedPreviewModule()).toBeVisible({ timeout: 2000 });
 	}
 
 	/**
@@ -109,7 +109,7 @@ export class CrafterPage {
 	async selectModuleInPreview(moduleId: string) {
 		const module = this.getPreviewModule(moduleId);
 		await module.click();
-		await this.page.waitForTimeout(500);
+		await expect(this.getSelectedPreviewModule()).toBeVisible({ timeout: 2000 });
 	}
 
 	/**
@@ -298,11 +298,11 @@ export class CrafterPage {
 		await input.fill(value);
 	}
 
-	/**
-	 * Wait for animation to complete (e.g., tree expansion).
-	 */
-	async waitForAnimation(ms = 350) {
-		await this.page.waitForTimeout(ms);
+	async waitForAnimation() {
+		await this.page.evaluate(async () => {
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+		});
 	}
 }
 

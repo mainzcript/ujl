@@ -126,15 +126,21 @@
 		scrollToNodeInTree(editableNode.meta.moduleId);
 	}
 
-	function scrollToNodeInTree(nodeId: string) {
-		setTimeout(() => {
-			const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
-			if (treeItem) {
-				treeItem.scrollIntoView({ behavior: "smooth", block: "center" });
-			} else {
-				logger.warn("Tree item not found after expansion:", nodeId);
-			}
-		}, 300);
+	function scrollToNodeInTree(nodeId: string, remainingFrames = 10) {
+		const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
+		if (treeItem) {
+			treeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+			return;
+		}
+
+		if (remainingFrames <= 0) {
+			logger.warn("Tree item not found after expansion:", nodeId);
+			return;
+		}
+
+		requestAnimationFrame(() => {
+			scrollToNodeInTree(nodeId, remainingFrames - 1);
+		});
 	}
 
 	let scrollContainerRef: HTMLDivElement | undefined = $state(undefined);
@@ -153,7 +159,9 @@
 
 		if (!element || !container) {
 			if (retries > 0) {
-				setTimeout(() => scrollToComponentInPreview(moduleId, retries - 1), 100);
+				requestAnimationFrame(() => {
+					scrollToComponentInPreview(moduleId, retries - 1);
+				});
 			}
 			return;
 		}
@@ -202,9 +210,9 @@
 	// Keep the selected module in view after selection changes.
 	$effect(() => {
 		if (crafterMode === "editor" && selectedNodeId && ast && scrollContainer) {
-			setTimeout(() => {
+			requestAnimationFrame(() => {
 				scrollToComponentInPreview(selectedNodeId);
-			}, 0);
+			});
 		}
 	});
 

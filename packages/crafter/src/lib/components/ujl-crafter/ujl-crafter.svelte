@@ -30,6 +30,7 @@
 
 	import { downloadJsonFile, readJsonFile } from "$lib/utils/files.js";
 	import { logger } from "$lib/utils/logger.js";
+	import { canPasteIntoSelection } from "$lib/utils/editor-commands.js";
 	import {
 		writeToBrowserClipboard,
 		readFromBrowserClipboard,
@@ -39,10 +40,8 @@
 	import {
 		findNodeById,
 		ROOT_NODE_ID,
-		ROOT_SLOT_NAME,
 		parseSlotSelection,
 		isRootNode,
-		isModuleObject,
 	} from "$lib/utils/ujlc-tree.js";
 
 	interface Props {
@@ -259,91 +258,30 @@
 		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
 	);
 	const canPaste = $derived.by(() => {
-		if (!store.clipboard) return false;
-
-		if (selectedNodeId === ROOT_NODE_ID) {
-			return (
-				isModuleObject(store.clipboard) ||
-				(store.clipboard.type === "slot" && store.clipboard.slotName === ROOT_SLOT_NAME)
-			);
-		}
-
-		if (!selectedNodeId) return false;
-
-		if (selectedSlotInfo) {
-			const parentNode = findNodeById(store.rootSlot, selectedSlotInfo.parentId);
-			if (!parentNode && !isRootNode(selectedSlotInfo.parentId)) return false;
-
-			if (isModuleObject(store.clipboard)) {
-				return true;
-			}
-
-			if (store.clipboard.type === "slot") {
-				if (isRootNode(selectedSlotInfo.parentId)) {
-					return store.clipboard.slotName === ROOT_SLOT_NAME;
-				}
-				if (parentNode?.slots) {
-					return Object.keys(parentNode.slots).includes(store.clipboard.slotName);
-				}
-			}
-
-			return false;
-		}
-
-		if (isRootNode(selectedNodeId)) {
-			return (
-				isModuleObject(store.clipboard) ||
-				(store.clipboard.type === "slot" && store.clipboard.slotName === ROOT_SLOT_NAME)
-			);
-		}
-
-		if (!selectedNode) return false;
-
-		if (isModuleObject(store.clipboard)) {
-			return true;
-		}
-
-		if (store.clipboard.type === "slot" && selectedNode.slots) {
-			return Object.keys(selectedNode.slots).includes(store.clipboard.slotName);
-		}
-
-		return false;
+		return canPasteIntoSelection({
+			selectedNodeId,
+			selectedSlotInfo,
+			selectedNode,
+			rootSlot: store.rootSlot,
+			clipboard: store.clipboard,
+			findNodeById,
+		});
 	});
 
 	async function handleCopy(nodeId: string) {
-		const copiedNode = store.operations.copyNode(nodeId);
-		if (copiedNode) {
-			store.setClipboard(copiedNode);
-			await writeToBrowserClipboard(copiedNode);
-		}
+		await store.copyNode(nodeId);
 	}
 
 	async function handleCut(nodeId: string) {
-		const cutNode = store.operations.cutNode(nodeId);
-		if (cutNode) {
-			store.setClipboard(cutNode);
-			await writeToBrowserClipboard(cutNode);
-		}
+		await store.cutNode(nodeId);
 	}
 
 	async function handlePaste(nodeIdOrSlot: string) {
-		const browserClipboard = await readFromBrowserClipboard();
-		const pasteData = browserClipboard || store.clipboard;
-
-		if (!pasteData) return;
-
-		if (browserClipboard && browserClipboard !== store.clipboard) {
-			store.setClipboard(browserClipboard);
-		}
-
-		store.performPaste(pasteData, nodeIdOrSlot);
+		await store.pasteNode(nodeIdOrSlot);
 	}
 
 	function handleDelete(nodeId: string) {
-		const success = store.operations.deleteNode(nodeId);
-		if (success) {
-			store.setSelectedNodeId(null);
-		}
+		store.deleteNode(nodeId);
 	}
 
 	function handleInsert(nodeIdOrSlot: string) {
@@ -419,13 +357,8 @@
 			if (canPaste) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
 				const targetId = selectedNodeId || ROOT_NODE_ID;
-				handlePaste(targetId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
+				runKeyboardShortcut(() => handlePaste(targetId));
 			}
 			return;
 		}
@@ -444,12 +377,7 @@
 			if (canCopy) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
-				handleCopy(selectedNodeId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
+				runKeyboardShortcut(() => handleCopy(selectedNodeId));
 			}
 		}
 
@@ -457,14 +385,18 @@
 			if (canCut) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-				isHandlingKeyboardShortcut = true;
-				handleCut(selectedNodeId).finally(() => {
-					setTimeout(() => {
-						isHandlingKeyboardShortcut = false;
-					}, 0);
-				});
+				runKeyboardShortcut(() => handleCut(selectedNodeId));
 			}
 		}
+	}
+
+	function runKeyboardShortcut(task: () => Promise<void>) {
+		isHandlingKeyboardShortcut = true;
+		task().finally(() => {
+			queueMicrotask(() => {
+				isHandlingKeyboardShortcut = false;
+			});
+		});
 	}
 
 	function handleCopyEvent(event: ClipboardEvent) {

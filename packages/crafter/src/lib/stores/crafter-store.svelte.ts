@@ -23,12 +23,7 @@ import type {
 	UJLTDocument,
 	UJLTTokenSet,
 } from "@ujl-framework/types";
-import { LibraryError } from "@ujl-framework/types";
-import {
-	readFromBrowserClipboard,
-	writeToBrowserClipboard,
-	type UJLClipboardData,
-} from "../utils/clipboard.js";
+import { readFromBrowserClipboard, writeToBrowserClipboard } from "../utils/clipboard.js";
 import { logger } from "../utils/logger.js";
 import {
 	findPathToNode,
@@ -36,6 +31,8 @@ import {
 	isRootNode,
 	parseSlotSelection,
 } from "../utils/ujlc-tree.js";
+import { createClipboardFeature, type ClipboardFeatureState } from "./features/clipboard.js";
+import { createLibraryFeature, type LibraryFeatureState } from "./features/library.js";
 import { createOperations } from "./operations.js";
 
 /**
@@ -136,11 +133,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _isLibraryViewActive = $state(false);
 	let _libraryContext = $state<LibraryContext>(null);
 
-	let _libraryItems = $state<Array<{ id: string } & LibraryAsset>>([]);
-	let _libraryCursor = $state<string | undefined>(undefined);
-	let _libraryHasMore = $state(true);
-	let _libraryLoading = $state(false);
-	let _providerInitialized = $state(false);
+	const libraryState = $state<LibraryFeatureState>({
+		libraryItems: [],
+		libraryCursor: undefined,
+		libraryHasMore: true,
+		libraryLoading: false,
+		providerInitialized: false,
+	});
 
 	function mergeLibraryItemsById(
 		existing: Array<{ id: string } & LibraryAsset>,
@@ -173,10 +172,12 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 	let _onSaveCallback = $state<SaveCallback | null>(null);
 
-	let _showComponentPicker = $state(false);
-	let _insertTargetNodeId = $state<string | null>(null);
-	let _clipboard = $state<UJLClipboardData | null>(null);
-	const _hasClipboardContent = $derived(!!_clipboard);
+	const clipboardState = $state<ClipboardFeatureState>({
+		showComponentPicker: false,
+		insertTargetNodeId: null,
+		clipboard: null,
+	});
+	const _hasClipboardContent = $derived(!!clipboardState.clipboard);
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
 	const libraryData = $derived(_ujlcDocument.ujlc.library);
@@ -317,144 +318,6 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 
 	/**
-	 * Unified delete handler - deletes node and clears selection if needed.
-	 * @param nodeId - The node ID to delete
-	 * @returns true if successful
-	 */
-	function deleteNode(nodeId: string): boolean {
-		const success = operations.deleteNode(nodeId);
-		if (success && _selectedNodeId === nodeId) {
-			setSelectedNodeId(null);
-		}
-		return success;
-	}
-
-	/**
-	 * Set clipboard data (used by event handlers)
-	 * @param data - The clipboard data
-	 */
-	function setClipboard(data: UJLClipboardData | null): void {
-		_clipboard = data;
-	}
-
-	/**
-	 * Unified copy handler - copies node to clipboard and browser API.
-	 * @param nodeId - The node ID to copy
-	 */
-	async function copyNode(nodeId: string): Promise<void> {
-		const copied = operations.copyNode(nodeId);
-		if (copied) {
-			_clipboard = copied;
-			await writeToBrowserClipboard(copied);
-		}
-	}
-
-	/**
-	 * Unified cut handler - cuts node to clipboard and browser API.
-	 * @param nodeId - The node ID to cut
-	 */
-	async function cutNode(nodeId: string): Promise<void> {
-		await copyNode(nodeId);
-		deleteNode(nodeId);
-	}
-
-	/**
-	 * Performs paste logic (shared between paste and handleComponentSelect).
-	 * Handles both module and slot paste, with slot vs module detection.
-	 * @param pasteData - The data to paste
-	 * @param targetId - The target ID (node or slot)
-	 */
-	function performPaste(pasteData: UJLClipboardData, targetId: string): void {
-		const slotInfo = parseSlotSelection(targetId);
-		const isSlotSelection = slotInfo !== null;
-
-		if (isModuleObject(pasteData)) {
-			let newNodeId: string | null;
-			if (isSlotSelection && slotInfo) {
-				newNodeId = operations.pasteNode(pasteData, slotInfo.parentId, slotInfo.slotName, "into");
-			} else {
-				newNodeId = operations.pasteNode(pasteData, targetId, undefined, "after");
-			}
-			if (newNodeId) {
-				setSelectedNodeId(newNodeId);
-			}
-			return;
-		}
-
-		if (pasteData.type === "slot") {
-			if (isSlotSelection && slotInfo) {
-				operations.pasteSlot(pasteData, slotInfo.parentId);
-			} else {
-				operations.pasteSlot(pasteData, targetId);
-			}
-		}
-	}
-
-	/**
-	 * Unified paste handler - reads from clipboard and pastes at target.
-	 * @param targetId - The target ID (node or slot)
-	 */
-	async function pasteNode(targetId: string): Promise<void> {
-		const browserClipboard = await readFromBrowserClipboard();
-		const pasteData = browserClipboard || _clipboard;
-
-		if (!pasteData) return;
-
-		if (browserClipboard && browserClipboard !== _clipboard) {
-			_clipboard = browserClipboard;
-		}
-
-		performPaste(pasteData, targetId);
-	}
-
-	/**
-	 * Request insert - shows ComponentPicker for target.
-	 * Unified between Island and NavTree.
-	 * @param targetId - The target ID (node or slot)
-	 */
-	function requestInsert(targetId: string): void {
-		_insertTargetNodeId = targetId;
-		_showComponentPicker = true;
-	}
-
-	/**
-	 * Close ComponentPicker and reset target.
-	 */
-	function closeComponentPicker(): void {
-		_showComponentPicker = false;
-		_insertTargetNodeId = null;
-	}
-
-	/**
-	 * Handle ComponentPicker selection - insert new component.
-	 * @param componentType - The component type to insert
-	 */
-	function handleComponentSelect(componentType: string): void {
-		if (!_insertTargetNodeId) return;
-
-		const targetId = _insertTargetNodeId;
-		const slotInfo = parseSlotSelection(targetId);
-		let newNodeId: string | null;
-
-		if (slotInfo) {
-			newNodeId = operations.insertNode(
-				componentType,
-				slotInfo.parentId,
-				slotInfo.slotName,
-				"into",
-			);
-		} else {
-			newNodeId = operations.insertNode(componentType, targetId, undefined, "after");
-		}
-
-		if (newNodeId) {
-			setSelectedNodeId(newNodeId);
-		}
-
-		closeComponentPicker();
-	}
-
-	/**
 	 * Update root slot with immutable function.
 	 * @param fn - Function that receives current slot and returns new slot
 	 */
@@ -498,13 +361,15 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		_expandedNodeIds = new Set();
 
-		_libraryItems.splice(0, _libraryItems.length);
-		_libraryCursor = undefined;
-		_libraryHasMore = true;
-		_libraryLoading = false;
-		_providerInitialized = false;
+		libraryState.libraryItems = [];
+		libraryState.libraryCursor = undefined;
+		libraryState.libraryHasMore = true;
+		libraryState.libraryLoading = false;
+		libraryState.providerInitialized = false;
 		_isLibraryViewActive = false;
 		_libraryContext = null;
+		clipboardState.showComponentPicker = false;
+		clipboardState.insertTargetNodeId = null;
 	}
 
 	/**
@@ -515,186 +380,48 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		_ujltDocument = doc;
 	}
 
-	/**
-	 * Initialize the library provider (called automatically before first use)
-	 */
-	async function initLibraryProvider(): Promise<void> {
-		if (_providerInitialized || !libraryProvider.init) return;
-		await libraryProvider.init();
-		_providerInitialized = true;
-	}
-
-	/**
-	 * Load more library assets (Infinite Scroll)
-	 * @param limit - Number of items to load
-	 */
-	async function loadMoreLibraryItems(limit = 50): Promise<void> {
-		if (_libraryLoading || !_libraryHasMore) return;
-
-		await initLibraryProvider();
-		_libraryLoading = true;
-
-		try {
-			const result = await libraryProvider.list(libraryData, {
-				limit,
-				cursor: _libraryCursor,
-			});
-
-			_libraryItems = mergeLibraryItemsById(_libraryItems, result.items);
-			_libraryCursor = result.nextCursor;
-			_libraryHasMore = result.hasMore;
-		} finally {
-			_libraryLoading = false;
-		}
-	}
-
-	/**
-	 * Search library assets (resets pagination)
-	 * @param query - Search query
-	 * @param limit - Number of items to load
-	 */
-	async function searchLibraryItems(query: string, limit = 50): Promise<void> {
-		_libraryItems = [];
-		_libraryCursor = undefined;
-		_libraryHasMore = true;
-
-		await initLibraryProvider();
-		_libraryLoading = true;
-
-		try {
-			const result = await libraryProvider.list(libraryData, {
-				limit,
-				search: query,
-			});
-
-			_libraryItems = mergeLibraryItemsById([], result.items);
-			_libraryCursor = result.nextCursor;
-			_libraryHasMore = result.hasMore;
-		} finally {
-			_libraryLoading = false;
-		}
-	}
-
-	/**
-	 * Get a single library asset by ID
-	 * @param id - Asset ID
-	 * @returns The asset or null if not found
-	 */
-	async function getLibraryAsset(id: string): Promise<LibraryAsset | null> {
-		await initLibraryProvider();
-		return libraryProvider.get(libraryData, id);
-	}
-
-	/**
-	 * Upload a file to the library
-	 * @param file - File to upload
-	 * @returns The uploaded asset with ID
-	 */
-	async function uploadLibraryAsset(file: File): Promise<{ id: string } & LibraryAsset> {
-		if (!libraryProvider.upload) {
-			throw new LibraryError("Upload not supported", "NOT_SUPPORTED");
-		}
-
-		await initLibraryProvider();
-		const buffer = await file.arrayBuffer();
-		const asset = await libraryProvider.upload(buffer, {
-			filename: file.name,
-			type: file.type,
-		});
-
-		const id = crypto.randomUUID();
-		updateLibrary((lib) => ({ ...lib, [id]: asset }));
-
-		const assetWithId = { id, ...asset };
-		_libraryItems = mergeLibraryItemsById([assetWithId], _libraryItems);
-
-		return assetWithId;
-	}
-
-	/**
-	 * Delete a library asset
-	 * @param id - Asset ID
-	 */
-	async function deleteLibraryAsset(id: string): Promise<void> {
-		await initLibraryProvider();
-
-		if (!libraryProvider.delete) {
-			throw new LibraryError("Delete not supported by this provider", "NOT_SUPPORTED");
-		}
-
-		await libraryProvider.delete(id);
-
-		updateLibrary((lib) => {
-			const { [id]: _, ...rest } = lib;
-			return rest;
-		});
-
-		_libraryItems = _libraryItems.filter((item) => item.id !== id);
-	}
-
-	/**
-	 * Update asset metadata
-	 * @param id - Asset ID
-	 * @param metadata - Metadata to update
-	 */
-	async function updateLibraryMetadata(
-		id: string,
-		metadata: Record<string, unknown>,
-	): Promise<void> {
-		await initLibraryProvider();
-
-		if (!libraryProvider.updateMetadata) {
-			throw new LibraryError("Metadata update not supported", "NOT_SUPPORTED");
-		}
-
-		const updated = await libraryProvider.updateMetadata(libraryData, id, metadata);
-
-		updateLibrary((lib) => ({ ...lib, [id]: updated }));
-
-		const index = _libraryItems.findIndex((item) => item.id === id);
-		if (index !== -1) {
-			_libraryItems[index] = { id, ...updated };
-		}
-	}
-
-	/**
-	 * Select a library asset for use in a module.
-	 * Ensures the asset is persisted in the document library before returning its ID.
-	 * @param id - Asset ID from _libraryItems
-	 * @returns The asset ID (guaranteed to be in doc.ujlc.library after this call)
-	 */
-	async function selectLibraryAsset(id: string): Promise<string> {
-		if (libraryData[id]) {
-			return id;
-		}
-
-		const asset = _libraryItems.find((item) => item.id === id);
-		if (!asset) {
-			throw new LibraryError(`Asset ${id} not found in library items`, "NOT_FOUND");
-		}
-
-		const { id: _, ...assetData } = asset;
-		updateLibrary((lib) => ({ ...lib, [id]: assetData }));
-
-		return id;
-	}
-
-	/**
-	 * Capability checks
-	 */
-	function canUploadLibrary(): boolean {
-		return !!libraryProvider.upload;
-	}
-
-	function canDeleteLibrary(): boolean {
-		return !!libraryProvider.delete;
-	}
-
-	function canUpdateLibraryMetadata(): boolean {
-		return !!libraryProvider.updateMetadata;
-	}
-
 	const operations = createOperations(() => rootSlot, updateRootSlot, composer);
+	const clipboardFeature = createClipboardFeature({
+		operations,
+		state: clipboardState,
+		setSelectedNodeId,
+		parseSlotSelection,
+		isModuleObject,
+		readFromBrowserClipboard,
+		writeToBrowserClipboard,
+	});
+	const libraryFeature = createLibraryFeature({
+		libraryProvider,
+		state: libraryState,
+		getLibraryData: () => libraryData,
+		updateLibrary,
+		mergeLibraryItemsById,
+	});
+
+	const {
+		setClipboard,
+		copyNode,
+		cutNode,
+		deleteNode,
+		performPaste,
+		pasteNode,
+		requestInsert,
+		closeComponentPicker,
+		handleComponentSelect,
+	} = clipboardFeature;
+
+	const {
+		loadMoreLibraryItems,
+		searchLibraryItems,
+		getLibraryAsset,
+		selectLibraryAsset,
+		uploadLibraryAsset,
+		deleteLibraryAsset,
+		updateLibraryMetadata,
+		canUploadLibrary,
+		canDeleteLibrary,
+		canUpdateLibraryMetadata,
+	} = libraryFeature;
 
 	return {
 		instanceId,
@@ -752,13 +479,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		},
 
 		get libraryItems() {
-			return _libraryItems;
+			return libraryState.libraryItems;
 		},
 		get libraryLoading() {
-			return _libraryLoading;
+			return libraryState.libraryLoading;
 		},
 		get libraryHasMore() {
-			return _libraryHasMore;
+			return libraryState.libraryHasMore;
 		},
 
 		libraryProvider,
@@ -805,17 +532,17 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 		setClipboard,
 		get clipboard() {
-			return _clipboard;
+			return clipboardState.clipboard;
 		},
 		get hasClipboardContent() {
 			return _hasClipboardContent;
 		},
 
 		get showComponentPicker() {
-			return _showComponentPicker;
+			return clipboardState.showComponentPicker;
 		},
 		get insertTargetNodeId() {
-			return _insertTargetNodeId;
+			return clipboardState.insertTargetNodeId;
 		},
 	} as const;
 }

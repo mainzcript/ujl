@@ -115,9 +115,7 @@ test.describe("Preview Interaction", () => {
 
 			await links.first().click();
 
-			await page.waitForTimeout(500);
-
-			expect(page.url()).toBe(currentUrl);
+			await expect.poll(() => page.url()).toBe(currentUrl);
 		}
 	});
 

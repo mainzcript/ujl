@@ -208,6 +208,82 @@ export function createOperations(
 	updateRootSlot: (fn: (slot: UJLCSlotObject) => UJLCSlotObject) => void,
 	composer: Composer,
 ): CrafterOperations {
+	function insertPreparedNode(
+		node: UJLCModuleObject,
+		targetId: string,
+		slotName?: string,
+		position?: "before" | "after" | "into",
+	): string | null {
+		const slot = getSlot();
+
+		if (isRootNode(targetId)) {
+			updateRootSlot((currentSlot) => [...currentSlot, node]);
+			return node.meta.id;
+		}
+
+		const targetNode = findNodeById(slot, targetId);
+		if (!targetNode) {
+			logger.warn("Target node not found");
+			return null;
+		}
+
+		if (position === "before" || position === "after") {
+			const targetParentInfo = findParentOfNode(slot, targetId);
+
+			if (!targetParentInfo || !targetParentInfo.parent) {
+				logger.warn("Cannot find parent of target node");
+				return null;
+			}
+
+			const targetParentId = targetParentInfo.parent.meta.id;
+			let insertPosition = targetParentInfo.index;
+			if (position === "after") {
+				insertPosition += 1;
+			}
+
+			if (isRootNode(targetParentId)) {
+				updateRootSlot((currentSlot) => {
+					const newArray = [...currentSlot];
+					newArray.splice(insertPosition, 0, node);
+					return newArray;
+				});
+				return node.meta.id;
+			}
+
+			updateRootSlot((currentSlot) =>
+				insertNodeAtPosition(
+					currentSlot,
+					targetParentId,
+					targetParentInfo.slotName,
+					node,
+					insertPosition,
+				),
+			);
+			return node.meta.id;
+		}
+
+		if (!hasSlots(targetNode)) {
+			logger.warn("Target node has no slots - cannot accept children");
+			return null;
+		}
+
+		const targetSlotName = slotName ?? getFirstSlotName(targetNode);
+		if (!targetSlotName) {
+			logger.warn("Target node has no valid slot");
+			return null;
+		}
+
+		if (!targetNode.slots?.[targetSlotName]) {
+			logger.warn("Specified slot does not exist on target node", targetSlotName);
+			return null;
+		}
+
+		updateRootSlot((currentSlot) =>
+			insertNodeIntoSlot(currentSlot, targetId, targetSlotName, node),
+		);
+		return node.meta.id;
+	}
+
 	return {
 		copyNode(nodeId: string): UJLCModuleObject | null {
 			const slot = getSlot();
@@ -450,92 +526,10 @@ export function createOperations(
 			slotName?: string,
 			position?: "before" | "after" | "into",
 		): string | null {
-			const slot = getSlot();
-
 			// Assign new IDs at paste time (ensures uniqueness, enables multiple pastes)
 			const clonedNode = deepCloneModuleWithNewIds(node);
-
 			const pastePosition = position ?? "after";
-
-			if (isRootNode(targetId)) {
-				updateRootSlot((currentSlot) => {
-					return [...currentSlot, clonedNode];
-				});
-				return clonedNode.meta.id;
-			}
-
-			const targetNode = findNodeById(slot, targetId);
-			if (!targetNode) {
-				logger.warn("Target node not found");
-				return null;
-			}
-
-			if (pastePosition === "before" || pastePosition === "after") {
-				const targetParentInfo = findParentOfNode(slot, targetId);
-
-				if (!targetParentInfo) {
-					logger.warn("Cannot find parent of target node");
-					return null;
-				}
-
-				if (!targetParentInfo.parent) {
-					logger.warn("Cannot find parent of target node");
-					return null;
-				}
-
-				const targetParentId = targetParentInfo.parent.meta.id;
-				if (isRootNode(targetParentId)) {
-					let insertPosition = targetParentInfo.index;
-					if (pastePosition === "after") {
-						insertPosition += 1;
-					}
-
-					updateRootSlot((currentSlot) => {
-						const newArray = [...currentSlot];
-						newArray.splice(insertPosition, 0, clonedNode);
-						return newArray;
-					});
-				} else {
-					let insertPosition = targetParentInfo.index;
-					if (pastePosition === "after") {
-						insertPosition += 1;
-					}
-
-					updateRootSlot((currentSlot) => {
-						return insertNodeAtPosition(
-							currentSlot,
-							targetParentId,
-							targetParentInfo.slotName,
-							clonedNode,
-							insertPosition,
-						);
-					});
-				}
-				return clonedNode.meta.id;
-			}
-
-			if (!hasSlots(targetNode)) {
-				logger.warn("Target node has no slots");
-				return null;
-			}
-
-			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
-
-			if (!targetSlotName) {
-				logger.warn("Target node has no valid slot");
-				return null;
-			}
-
-			if (!targetNode.slots?.[targetSlotName]) {
-				logger.warn("Specified slot does not exist on target node", targetSlotName);
-				return null;
-			}
-
-			const validSlotName = targetSlotName;
-			updateRootSlot((currentSlot) => {
-				return insertNodeIntoSlot(currentSlot, targetId, validSlotName, clonedNode);
-			});
-			return clonedNode.meta.id;
+			return insertPreparedNode(clonedNode, targetId, slotName, pastePosition);
 		},
 
 		insertNode(
@@ -544,8 +538,6 @@ export function createOperations(
 			slotName?: string,
 			position?: "before" | "after" | "into",
 		): string | null {
-			const slot = getSlot();
-
 			let newNode: UJLCModuleObject;
 			try {
 				newNode = composer.createModuleFromType(componentType, generateNodeId());
@@ -553,86 +545,7 @@ export function createOperations(
 				logger.warn("Component type not found in registry", componentType);
 				return null;
 			}
-
-			if (isRootNode(targetId)) {
-				updateRootSlot((currentSlot) => {
-					return [...currentSlot, newNode];
-				});
-				return newNode.meta.id;
-			}
-
-			const targetNode = findNodeById(slot, targetId);
-
-			if (!targetNode) {
-				logger.warn("Target node not found");
-				return null;
-			}
-
-			if (position === "before" || position === "after") {
-				const targetParentInfo = findParentOfNode(slot, targetId);
-
-				if (!targetParentInfo) {
-					logger.warn("Cannot find parent of target node");
-					return null;
-				}
-
-				if (!targetParentInfo.parent) {
-					logger.warn("Cannot find parent of target node");
-					return null;
-				}
-
-				const targetParentId = targetParentInfo.parent.meta.id;
-				if (isRootNode(targetParentId)) {
-					let insertPosition = targetParentInfo.index;
-					if (position === "after") {
-						insertPosition += 1;
-					}
-
-					updateRootSlot((currentSlot) => {
-						const newArray = [...currentSlot];
-						newArray.splice(insertPosition, 0, newNode);
-						return newArray;
-					});
-				} else {
-					let insertPosition = targetParentInfo.index;
-					if (position === "after") {
-						insertPosition += 1;
-					}
-
-					updateRootSlot((currentSlot) => {
-						return insertNodeAtPosition(
-							currentSlot,
-							targetParentId,
-							targetParentInfo.slotName,
-							newNode,
-							insertPosition,
-						);
-					});
-				}
-				return newNode.meta.id;
-			}
-
-			if (!hasSlots(targetNode)) {
-				logger.warn("Target node has no slots - cannot accept children");
-				return null;
-			}
-
-			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
-
-			if (!targetSlotName) {
-				logger.warn("Target node has no valid slot");
-				return null;
-			}
-
-			if (!targetNode.slots?.[targetSlotName]) {
-				logger.warn("Specified slot does not exist on target node", targetSlotName);
-				return null;
-			}
-			const validSlotName = targetSlotName;
-			updateRootSlot((currentSlot) => {
-				return insertNodeIntoSlot(currentSlot, targetId, validSlotName, newNode);
-			});
-			return newNode.meta.id;
+			return insertPreparedNode(newNode, targetId, slotName, position);
 		},
 
 		copySlot(

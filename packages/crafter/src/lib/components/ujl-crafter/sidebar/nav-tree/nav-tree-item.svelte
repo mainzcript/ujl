@@ -400,7 +400,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								{@render actionMenu(canCopyRoot, canCutRoot, canInsert, canDeleteRoot)}
+								{@render actionMenu(canCopyRoot, canCutRoot, canInsertRoot, canDeleteRoot)}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</button>
