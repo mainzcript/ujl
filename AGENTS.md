@@ -74,6 +74,7 @@ Quick reference for agents:
 - `AGENTS.md`: stable, high-level project context and navigation.
 - `.agents/rules/*`: normative, always-on implementation rules.
 - `.agents/skills/*`: reusable multi-step workflows and automations.
+- `CONTRIBUTING.md` (`release-process:start/end` block): single source of truth for release process steps.
 - `.support/*`: temporary outputs (reviews, PR drafts, reports), not versioned.
 
 ## Currency & Notes

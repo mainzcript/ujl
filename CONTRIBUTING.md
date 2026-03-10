@@ -169,9 +169,13 @@ We follow conventional commits:
 4. Request review from maintainers
 5. Merge using **squash**
 
+<!-- release-process:start -->
 ## Release Process
 
 **Release workflow:**
+
+This section is the single source of truth for the release workflow.
+Agents may guide and validate state, but release/publish commands must be executed consciously by a human.
 
 1. Create a release branch from `main` using a Mainz landmark as the name:
 
@@ -233,6 +237,7 @@ The following packages are versioned together:
 - `@ujl-framework/adapter-web`
 - `@ujl-framework/examples`
 - `@ujl-framework/types`
+<!-- release-process:end -->
 
 ## Development Guidelines
 

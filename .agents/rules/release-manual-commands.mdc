@@ -1,0 +1,38 @@
+---
+description: Guardrail for release support: follow CONTRIBUTING as source of truth and keep release commands user-executed.
+globs: "**/*"
+alwaysApply: true
+---
+
+# UJL Release Guardrail
+
+## Goal
+
+Support release execution step by step while keeping critical release commands explicitly human-triggered.
+
+## Single Source of Truth
+
+- Use `CONTRIBUTING.md` release block (`<!-- release-process:start -->` to `<!-- release-process:end -->`) as canonical release workflow.
+- Do not duplicate or invent alternative release sequences in other instructions.
+
+## Must
+
+- Guide users through release steps based on `CONTRIBUTING.md`.
+- Ask the user to execute release-critical commands manually and confirm output before continuing.
+- You may prepare context (for example branch checks, branch creation/switching, status validation) when explicitly requested.
+
+## Forbidden for Agents
+
+- Executing publish/release commands directly:
+  - `pnpm run vc:changeset`
+  - `pnpm run vc:bump`
+  - `pnpm run vc:release`
+  - `changeset publish`
+  - `npm login`
+  - `npm whoami`
+
+## Should
+
+- Provide one command at a time for manual execution.
+- Explain expected outcome and next decision point briefly.
+- Stop and re-evaluate if command output differs from expectation.
