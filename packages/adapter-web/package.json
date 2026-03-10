@@ -1,6 +1,6 @@
 {
 	"name": "@ujl-framework/adapter-web",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"scripts": {
 		"build": "vite build",
 		"prepack": "vite build && publint",

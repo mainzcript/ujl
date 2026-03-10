@@ -1,5 +1,15 @@
 # @ujl-framework/core
 
+## 0.0.3
+
+### Patch Changes
+
+- b837c68: Add `escapeHtml` utility method to `ModuleBase` and refactor `Button` module to use `parseField`.
+- b837c68: Introduce the Library provider system for asset management.
+- Updated dependencies [b837c68]
+- Updated dependencies [b837c68]
+  - @ujl-framework/types@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

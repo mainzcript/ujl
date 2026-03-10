@@ -1,5 +1,14 @@
 # @ujl-framework/adapter-svelte
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [b837c68]
+- Updated dependencies [b837c68]
+  - @ujl-framework/types@0.0.3
+  - @ujl-framework/ui@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

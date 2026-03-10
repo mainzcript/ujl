@@ -28,7 +28,7 @@
 		"crafter:build": "pnpm run adapter-svelte:build && pnpm --filter @ujl-framework/crafter build",
 		"docs:build": "pnpm --filter @ujl-framework/docs build",
 		"vc:changeset": "changeset",
-		"vc:bump": "changeset version",
+		"vc:bump": "changeset version && pnpm --filter @ujl-framework/examples run version:sync && pnpm run format",
 		"vc:release": "pnpm run npm:check-auth && pnpm run rtc && changeset publish --ignore-scripts && pnpm run vc:retag",
 		"vc:retag": "git tag -l '@ujl-framework*' | xargs git tag -d && git tag v$(node -p \"require('./packages/core/package.json').version\") && echo 'Tagged as v'$(node -p \"require('./packages/core/package.json').version\")",
 		"npm:check-auth": "npm whoami || (echo '\\nError: Not logged in to npm. Run: npm login\\n' && exit 1)",

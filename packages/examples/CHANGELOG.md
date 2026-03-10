@@ -1,5 +1,11 @@
 # @ujl-framework/examples
 
+## 0.0.3
+
+### Patch Changes
+
+- b837c68: Introduce island-based module actions and overlay interaction improvements in Crafter, and remove legacy UJLC meta keys (`_instance`, `_library`) in types/examples.
+
 ## 0.0.2
 
 ### Patch Changes
