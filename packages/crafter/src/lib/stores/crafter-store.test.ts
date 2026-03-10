@@ -27,9 +27,7 @@ function createMockUjlcDocument(): UJLCDocument {
 				tags: ["test"],
 				updated_at: "2024-01-01T00:00:00Z",
 				_version: "0.0.1",
-				_instance: "test-001",
 				_embedding_model_hash: "test-hash",
-				_library: { provider: "inline" },
 			},
 			library: {},
 			root: createMockTree(),
@@ -109,7 +107,6 @@ describe("CrafterStore Types", () => {
 		expect(doc.ujlc.meta.title).toBe("Test Document");
 		expect(doc.ujlc.root).toHaveLength(1);
 		expect(doc.ujlc.library).toEqual({});
-		expect(doc.ujlc.meta._library.provider).toBe("inline");
 	});
 
 	it("should create valid mock UJLT document", () => {

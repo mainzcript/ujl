@@ -92,8 +92,7 @@ test.describe("Crafter Startup", () => {
 		const crafter = new CrafterPage(page);
 		await crafter.goto();
 
-		// Allow some time for async operations
-		await page.waitForTimeout(1000);
+		await page.waitForLoadState("networkidle");
 
 		// Filter out known acceptable errors (e.g., favicon, external resources)
 		const relevantErrors = errors.filter(

@@ -112,8 +112,7 @@ test.describe("Designer Mode", () => {
 			// Change the color
 			await colorInput.fill("#ff0000");
 
-			// Wait for update
-			await page.waitForTimeout(500);
+			await crafter.waitForAnimation();
 
 			// Preview should have updated styles
 			// (Difficult to assert without knowing exact CSS variable names)

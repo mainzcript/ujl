@@ -23,14 +23,17 @@ import type {
 	UJLTDocument,
 	UJLTTokenSet,
 } from "@ujl-framework/types";
-import { LibraryError } from "@ujl-framework/types";
+import { readFromBrowserClipboard, writeToBrowserClipboard } from "../utils/clipboard.js";
 import { logger } from "../utils/logger.js";
-import { findPathToNode, isRootNode } from "../utils/ujlc-tree.js";
+import {
+	findPathToNode,
+	isModuleObject,
+	isRootNode,
+	parseSlotSelection,
+} from "../utils/ujlc-tree.js";
+import { createClipboardFeature, type ClipboardFeatureState } from "./features/clipboard.js";
+import { createLibraryFeature, type LibraryFeatureState } from "./features/library.js";
 import { createOperations } from "./operations.js";
-
-// ============================================
-// TYPES
-// ============================================
 
 /**
  * Crafter mode identifier.
@@ -78,19 +81,11 @@ export interface CrafterStoreDeps {
 	testMode?: boolean;
 }
 
-// ============================================
-// CONSTANTS
-// ============================================
-
 const VIEWPORT_SIZES: Record<string, ViewportSize> = {
 	desktop: 1024,
 	tablet: 768,
 	mobile: 375,
 };
-
-// ============================================
-// STORE FACTORY
-// ============================================
 
 /**
  * Creates a new CrafterStore instance with injected dependencies.
@@ -126,16 +121,8 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		testMode = false,
 	} = deps;
 
-	// ============================================
-	// INSTANCE IDENTITY (for DOM scoping)
-	// ============================================
-
 	/** Unique instance ID for scoping DOM queries to this Crafter instance */
 	const instanceId = `crafter-${generateUid(8)}`;
-
-	// ============================================
-	// PRIVATE STATE (Single Source of Truth)
-	// ============================================
 
 	let _ujlcDocument = $state<UJLCDocument>(initialUjlcDocument);
 	let _ujltDocument = $state<UJLTDocument>(initialUjltDocument);
@@ -146,12 +133,13 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	let _isLibraryViewActive = $state(false);
 	let _libraryContext = $state<LibraryContext>(null);
 
-	// Library State for Infinite Scroll
-	let _libraryItems = $state<Array<{ id: string } & LibraryAsset>>([]);
-	let _libraryCursor = $state<string | undefined>(undefined);
-	let _libraryHasMore = $state(true);
-	let _libraryLoading = $state(false);
-	let _providerInitialized = $state(false);
+	const libraryState = $state<LibraryFeatureState>({
+		libraryItems: [],
+		libraryCursor: undefined,
+		libraryHasMore: true,
+		libraryLoading: false,
+		providerInitialized: false,
+	});
 
 	function mergeLibraryItemsById(
 		existing: Array<{ id: string } & LibraryAsset>,
@@ -176,19 +164,20 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	}
 	let _viewportType = $state<string | undefined>(undefined);
 
-	// Fullscreen state
 	let _isFullscreen = $state(false);
 	let _containerWidth = $state(0);
 	let _containerHeight = $state(0);
 	let _screenWidth = $state(typeof window !== "undefined" ? window.innerWidth : 0);
 	let _screenHeight = $state(typeof window !== "undefined" ? window.innerHeight : 0);
 
-	// Save callback (set via API, controls Save button visibility)
 	let _onSaveCallback = $state<SaveCallback | null>(null);
 
-	// ============================================
-	// COMPUTED STATE (Derived - Automatic Reactivity)
-	// ============================================
+	const clipboardState = $state<ClipboardFeatureState>({
+		showComponentPicker: false,
+		insertTargetNodeId: null,
+		clipboard: null,
+	});
+	const _hasClipboardContent = $derived(!!clipboardState.clipboard);
 
 	const rootSlot = $derived(_ujlcDocument.ujlc.root);
 	const libraryData = $derived(_ujlcDocument.ujlc.library);
@@ -215,10 +204,6 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 
 		return percentage < 80;
 	});
-
-	// ============================================
-	// ACTIONS (Command Pattern - Single Responsibility)
-	// ============================================
 
 	/**
 	 * Set editor/designer mode.
@@ -332,10 +317,6 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		_onSaveCallback = callback;
 	}
 
-	// ============================================
-	// FUNCTIONAL UPDATES (Immutable State Updates)
-	// ============================================
-
 	/**
 	 * Update root slot with immutable function.
 	 * @param fn - Function that receives current slot and returns new slot
@@ -377,18 +358,18 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	function setUjlcDocument(doc: UJLCDocument): void {
 		_ujlcDocument = doc;
 		_selectedNodeId = null;
-		// Reassign to trigger Svelte reactivity for Set consumers.
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		_expandedNodeIds = new Set();
 
-		// Reset library state to force reload from new document's library/provider
-		_libraryItems.splice(0, _libraryItems.length);
-		_libraryCursor = undefined;
-		_libraryHasMore = true;
-		_libraryLoading = false;
-		_providerInitialized = false;
+		libraryState.libraryItems = [];
+		libraryState.libraryCursor = undefined;
+		libraryState.libraryHasMore = true;
+		libraryState.libraryLoading = false;
+		libraryState.providerInitialized = false;
 		_isLibraryViewActive = false;
 		_libraryContext = null;
+		clipboardState.showComponentPicker = false;
+		clipboardState.insertTargetNodeId = null;
 	}
 
 	/**
@@ -399,219 +380,54 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		_ujltDocument = doc;
 	}
 
-	// ============================================
-	// LIBRARY OPERATIONS (Provider Integration)
-	// ============================================
-
-	/**
-	 * Initialize the library provider (called automatically before first use)
-	 */
-	async function initLibraryProvider(): Promise<void> {
-		if (_providerInitialized || !libraryProvider.init) return;
-		await libraryProvider.init();
-		_providerInitialized = true;
-	}
-
-	/**
-	 * Load more library assets (Infinite Scroll)
-	 * @param limit - Number of items to load
-	 */
-	async function loadMoreLibraryItems(limit = 50): Promise<void> {
-		if (_libraryLoading || !_libraryHasMore) return;
-
-		await initLibraryProvider();
-		_libraryLoading = true;
-
-		try {
-			const result = await libraryProvider.list(libraryData, {
-				limit,
-				cursor: _libraryCursor,
-			});
-
-			_libraryItems = mergeLibraryItemsById(_libraryItems, result.items);
-			_libraryCursor = result.nextCursor;
-			_libraryHasMore = result.hasMore;
-		} finally {
-			_libraryLoading = false;
-		}
-	}
-
-	/**
-	 * Search library assets (resets pagination)
-	 * @param query - Search query
-	 * @param limit - Number of items to load
-	 */
-	async function searchLibraryItems(query: string, limit = 50): Promise<void> {
-		_libraryItems = [];
-		_libraryCursor = undefined;
-		_libraryHasMore = true;
-
-		await initLibraryProvider();
-		_libraryLoading = true;
-
-		try {
-			const result = await libraryProvider.list(libraryData, {
-				limit,
-				search: query,
-			});
-
-			_libraryItems = mergeLibraryItemsById([], result.items);
-			_libraryCursor = result.nextCursor;
-			_libraryHasMore = result.hasMore;
-		} finally {
-			_libraryLoading = false;
-		}
-	}
-
-	/**
-	 * Get a single library asset by ID
-	 * @param id - Asset ID
-	 * @returns The asset or null if not found
-	 */
-	async function getLibraryAsset(id: string): Promise<LibraryAsset | null> {
-		await initLibraryProvider();
-		return libraryProvider.get(libraryData, id);
-	}
-
-	/**
-	 * Upload a file to the library
-	 * @param file - File to upload
-	 * @returns The uploaded asset with ID
-	 */
-	async function uploadLibraryAsset(file: File): Promise<{ id: string } & LibraryAsset> {
-		if (!libraryProvider.upload) {
-			throw new LibraryError("Upload not supported", "NOT_SUPPORTED");
-		}
-
-		await initLibraryProvider();
-		const buffer = await file.arrayBuffer();
-		const asset = await libraryProvider.upload(buffer, {
-			filename: file.name,
-			type: file.type,
-		});
-
-		// Generate ID and update document library
-		const id = crypto.randomUUID();
-		updateLibrary((lib) => ({ ...lib, [id]: asset }));
-
-		// Add to local cache with ID (deduplicated)
-		const assetWithId = { id, ...asset };
-		_libraryItems = mergeLibraryItemsById([assetWithId], _libraryItems);
-
-		return assetWithId;
-	}
-
-	/**
-	 * Delete a library asset
-	 * @param id - Asset ID
-	 */
-	async function deleteLibraryAsset(id: string): Promise<void> {
-		await initLibraryProvider();
-
-		// Check if delete is supported by provider
-		if (!libraryProvider.delete) {
-			throw new LibraryError("Delete not supported by this provider", "NOT_SUPPORTED");
-		}
-
-		// Delete from external storage
-		await libraryProvider.delete(id);
-
-		// Remove from document library
-		updateLibrary((lib) => {
-			const { [id]: _, ...rest } = lib;
-			return rest;
-		});
-
-		// Update local cache
-		_libraryItems = _libraryItems.filter((item) => item.id !== id);
-	}
-
-	/**
-	 * Update asset metadata
-	 * @param id - Asset ID
-	 * @param metadata - Metadata to update
-	 */
-	async function updateLibraryMetadata(
-		id: string,
-		metadata: Record<string, unknown>,
-	): Promise<void> {
-		await initLibraryProvider();
-
-		if (!libraryProvider.updateMetadata) {
-			throw new LibraryError("Metadata update not supported", "NOT_SUPPORTED");
-		}
-
-		// Update via provider (returns new asset)
-		const updated = await libraryProvider.updateMetadata(libraryData, id, metadata);
-
-		// Update document library
-		updateLibrary((lib) => ({ ...lib, [id]: updated }));
-
-		// Update local list
-		const index = _libraryItems.findIndex((item) => item.id === id);
-		if (index !== -1) {
-			_libraryItems[index] = { id, ...updated };
-		}
-	}
-
-	/**
-	 * Select a library asset for use in a module.
-	 * Ensures the asset is persisted in the document library before returning its ID.
-	 * @param id - Asset ID from _libraryItems
-	 * @returns The asset ID (guaranteed to be in doc.ujlc.library after this call)
-	 */
-	async function selectLibraryAsset(id: string): Promise<string> {
-		// Check if asset is already in document library
-		if (libraryData[id]) {
-			return id;
-		}
-
-		// Find asset in local cache (loaded from provider)
-		const asset = _libraryItems.find((item) => item.id === id);
-		if (!asset) {
-			throw new LibraryError(`Asset ${id} not found in library items`, "NOT_FOUND");
-		}
-
-		// Persist to document library
-		const { id: _, ...assetData } = asset;
-		updateLibrary((lib) => ({ ...lib, [id]: assetData }));
-
-		return id;
-	}
-
-	/**
-	 * Capability checks
-	 */
-	function canUploadLibrary(): boolean {
-		return !!libraryProvider.upload;
-	}
-
-	function canDeleteLibrary(): boolean {
-		return !!libraryProvider.delete;
-	}
-
-	function canUpdateLibraryMetadata(): boolean {
-		return !!libraryProvider.updateMetadata;
-	}
-
-	// ============================================
-	// OPERATIONS (High-Level Document Manipulation)
-	// ============================================
-
 	const operations = createOperations(() => rootSlot, updateRootSlot, composer);
+	const clipboardFeature = createClipboardFeature({
+		operations,
+		state: clipboardState,
+		setSelectedNodeId,
+		parseSlotSelection,
+		isModuleObject,
+		readFromBrowserClipboard,
+		writeToBrowserClipboard,
+	});
+	const libraryFeature = createLibraryFeature({
+		libraryProvider,
+		state: libraryState,
+		getLibraryData: () => libraryData,
+		updateLibrary,
+		mergeLibraryItemsById,
+	});
 
-	// ============================================
-	// PUBLIC API (Immutable Interface)
-	// ============================================
+	const {
+		setClipboard,
+		copyNode,
+		cutNode,
+		deleteNode,
+		performPaste,
+		pasteNode,
+		requestInsert,
+		closeComponentPicker,
+		handleComponentSelect,
+	} = clipboardFeature;
+
+	const {
+		loadMoreLibraryItems,
+		searchLibraryItems,
+		getLibraryAsset,
+		selectLibraryAsset,
+		uploadLibraryAsset,
+		deleteLibraryAsset,
+		updateLibraryMetadata,
+		canUploadLibrary,
+		canDeleteLibrary,
+		canUpdateLibraryMetadata,
+	} = libraryFeature;
 
 	return {
-		// Instance Identity
 		instanceId,
 
-		// Configuration (readonly)
 		testMode,
 
-		// State (readonly via getters - encapsulation)
 		get ujlcDocument() {
 			return _ujlcDocument;
 		},
@@ -643,7 +459,6 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 			return _onSaveCallback;
 		},
 
-		// Computed (readonly via getters)
 		get rootSlot() {
 			return rootSlot;
 		},
@@ -663,22 +478,19 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 			return _shouldShowFullscreenButton;
 		},
 
-		// Library State (readonly via getters)
 		get libraryItems() {
-			return _libraryItems;
+			return libraryState.libraryItems;
 		},
 		get libraryLoading() {
-			return _libraryLoading;
+			return libraryState.libraryLoading;
 		},
 		get libraryHasMore() {
-			return _libraryHasMore;
+			return libraryState.libraryHasMore;
 		},
 
-		// Library Provider (direct access)
 		libraryProvider,
 		composer,
 
-		// Actions
 		setMode,
 		setSelectedNodeId,
 		setNodeExpanded,
@@ -690,14 +502,12 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		toggleFullscreen,
 		setOnSaveCallback,
 
-		// Functional Updates
 		updateRootSlot,
 		updateTokenSet,
 		updateLibrary,
 		setUjlcDocument,
 		setUjltDocument,
 
-		// Library Operations
 		loadMoreLibraryItems,
 		searchLibraryItems,
 		getLibraryAsset,
@@ -709,14 +519,33 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 		canDeleteLibrary,
 		canUpdateLibraryMetadata,
 
-		// Operations
 		operations,
+
+		deleteNode,
+		copyNode,
+		cutNode,
+		pasteNode,
+		requestInsert,
+		closeComponentPicker,
+		handleComponentSelect,
+		performPaste,
+
+		setClipboard,
+		get clipboard() {
+			return clipboardState.clipboard;
+		},
+		get hasClipboardContent() {
+			return _hasClipboardContent;
+		},
+
+		get showComponentPicker() {
+			return clipboardState.showComponentPicker;
+		},
+		get insertTargetNodeId() {
+			return clipboardState.insertTargetNodeId;
+		},
 	} as const;
 }
-
-// ============================================
-// TYPE EXPORT
-// ============================================
 
 /** Store type derived from factory return type */
 export type CrafterStore = ReturnType<typeof createCrafterStore>;
@@ -726,10 +555,6 @@ export type CrafterStore = ReturnType<typeof createCrafterStore>;
  * CrafterContext === CrafterStore (design decision: context IS store)
  */
 export type CrafterContext = CrafterStore;
-
-// ============================================
-// CONTEXT SYMBOLS
-// ============================================
 
 /**
  * Symbol for type-safe CrafterContext access.

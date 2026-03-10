@@ -82,5 +82,9 @@ jspm_packages/
 # Storybook
 storybook-static/
 
-# Personal Support Files
-_support/
+# User specific files
+.support/
+
+# Redundant Agent instructions to support multiple ai tools
+.cursor/
+.claude/

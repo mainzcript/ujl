@@ -5,10 +5,10 @@
 		UJLTDocument,
 		UJLAbstractNode,
 		UJLTTokenSet,
+		UJLCModuleObject,
 	} from "@ujl-framework/types";
 	import type { Composer } from "@ujl-framework/core";
 	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
-	// Note: Adapter styles are now bundled via Shadow DOM injection (see bundle.css)
 	import { getContext } from "svelte";
 	import {
 		COMPOSER_CONTEXT,
@@ -21,6 +21,9 @@
 	import { logger } from "$lib/utils/logger.js";
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
+	import Island from "../island.svelte";
+	import { ModuleOverlay, HoverOverlay } from "../overlay/index.js";
+	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -53,8 +56,6 @@
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
 	const shadowRootContext = getContext<ShadowRootContext | undefined>(SHADOW_ROOT_CONTEXT);
 
-	// Scoped DOM queries - ensures multi-instance isolation
-	// Uses Shadow Root when available for proper Shadow DOM support
 	const dom = createScopedSelector(crafter.instanceId, shadowRootContext?.value);
 
 	const selectedNodeId = $derived.by(() => {
@@ -66,7 +67,6 @@
 	let ast = $state<UJLAbstractNode | null>(null);
 
 	$effect(() => {
-		// Composer composes the document into an AST
 		composer.compose(ujlcDocument).then((composedAst) => {
 			ast = composedAst;
 		});
@@ -76,12 +76,6 @@
 
 	const editorCssVars = $derived(editorTokenSet ? generateThemeCSSVariables(editorTokenSet) : {});
 
-	/**
-	 * Find an editable node in the AST by its moduleId
-	 * @param node - The AST node to search in
-	 * @param targetModuleId - The moduleId to find
-	 * @returns The found editable node or null
-	 */
 	function findEditableNodeByModuleId(
 		node: UJLAbstractNode,
 		targetModuleId: string,
@@ -112,25 +106,18 @@
 		return null;
 	}
 
-	/**
-	 * Handle click events on the preview container.
-	 * Extracts moduleId from DOM and checks editability in AST.
-	 * Prevents default actions (like link navigation) in editor mode.
-	 */
 	function handlePreviewClick(event: MouseEvent) {
 		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
 
 		const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
 		if (!clickedElement) return;
 
-		// Prevent default actions (link navigation, form submission, etc.) in editor mode
 		event.preventDefault();
 		event.stopPropagation();
 
 		const moduleId = clickedElement.getAttribute("data-ujl-module-id");
 		if (!moduleId || !ast) return;
 
-		// Only editable nodes with isModuleRoot === true are selectable
 		const editableNode = findEditableNodeByModuleId(ast, moduleId);
 		if (!editableNode) return;
 
@@ -139,37 +126,42 @@
 		scrollToNodeInTree(editableNode.meta.moduleId);
 	}
 
-	function scrollToNodeInTree(nodeId: string) {
-		// Timeout allows tree expansion animation to complete before scrolling
-		setTimeout(() => {
-			const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
-			if (treeItem) {
-				treeItem.scrollIntoView({ behavior: "smooth", block: "center" });
-			} else {
-				logger.warn("Tree item not found after expansion:", nodeId);
-			}
-		}, 300);
+	function scrollToNodeInTree(nodeId: string, remainingFrames = 10) {
+		const treeItem = dom.querySelector(`[data-tree-node-id="${nodeId}"]`);
+		if (treeItem) {
+			treeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+			return;
+		}
+
+		if (remainingFrames <= 0) {
+			logger.warn("Tree item not found after expansion:", nodeId);
+			return;
+		}
+
+		requestAnimationFrame(() => {
+			scrollToNodeInTree(nodeId, remainingFrames - 1);
+		});
 	}
 
-	let scrollContainerRef: HTMLDivElement;
+	let scrollContainerRef: HTMLDivElement | undefined = $state(undefined);
 
 	function getScrollContainer(): HTMLDivElement | null {
 		return (
 			dom.querySelector<HTMLDivElement>('[data-ujl-scroll-container="canvas"]') ??
-			scrollContainerRef
+			scrollContainerRef ??
+			null
 		);
 	}
 
-	/**
-	 * Scroll to component in preview; retry if DOM or ref is not ready.
-	 */
 	function scrollToComponentInPreview(moduleId: string, retries = 3) {
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
 		const container = getScrollContainer();
 
 		if (!element || !container) {
 			if (retries > 0) {
-				setTimeout(() => scrollToComponentInPreview(moduleId, retries - 1), 100);
+				requestAnimationFrame(() => {
+					scrollToComponentInPreview(moduleId, retries - 1);
+				});
 			}
 			return;
 		}
@@ -177,11 +169,37 @@
 		const elementRect = element.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
 
-		const targetScroll =
-			container.scrollTop +
-			(elementRect.top - containerRect.top) -
-			containerRect.height / 2 +
-			elementRect.height / 2;
+		// Calculate visibility ratio
+		const visibleTop = Math.max(elementRect.top, containerRect.top);
+		const visibleBottom = Math.min(elementRect.bottom, containerRect.bottom);
+		const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+		const elementVisibilityRatio = visibleHeight / elementRect.height; // 0-1
+
+		// Calculate how much of the preview the element fills
+		const previewFillRatio = elementRect.height / containerRect.height;
+
+		// Determine if scrolling is needed
+		const needsScroll = elementVisibilityRatio < 0.9;
+
+		if (!needsScroll) {
+			return; // Element is sufficiently visible, don't scroll
+		}
+
+		// Determine scroll target based on element size
+		let targetScroll: number;
+
+		if (previewFillRatio > 0.5) {
+			// Large element: scroll to show top edge
+			targetScroll = container.scrollTop + (elementRect.top - containerRect.top) - 100;
+		} else {
+			// Normal element: scroll to center
+			targetScroll =
+				container.scrollTop +
+				(elementRect.top - containerRect.top) -
+				containerRect.height / 2 +
+				elementRect.height / 2 -
+				100;
+		}
 
 		container.scrollTo({
 			top: Math.max(0, targetScroll),
@@ -189,43 +207,209 @@
 		});
 	}
 
-	/**
-	 * Apply selection to a module element with retry mechanism.
-	 * This is needed because when a new module is created, the AST update
-	 * is asynchronous, so the element might not be in the DOM yet.
-	 */
-	function applySelection(moduleId: string, retries = 10) {
-		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`);
-		if (element) {
-			element.classList.add("ujl-selected");
-			scrollToComponentInPreview(moduleId);
-			return true;
-		}
-		if (retries > 0) {
-			setTimeout(() => applySelection(moduleId, retries - 1), 50);
-		} else {
-			logger.warn("Could not find element for selection after retries:", moduleId);
-		}
-		return false;
-	}
-
+	// Keep the selected module in view after selection changes.
 	$effect(() => {
-		// Remove selection only from elements within this Crafter instance
-		dom.querySelectorAll("[data-ujl-module-id].ujl-selected").forEach((el) => {
-			el.classList.remove("ujl-selected");
-		});
-
-		if (crafterMode === "editor" && selectedNodeId && ast) {
-			setTimeout(() => {
-				applySelection(selectedNodeId);
-			}, 0);
+		if (crafterMode === "editor" && selectedNodeId && ast && scrollContainer) {
+			requestAnimationFrame(() => {
+				scrollToComponentInPreview(selectedNodeId);
+			});
 		}
 	});
+
+	// ============================================
+	// ISLAND STATE (Selection-based)
+	// ============================================
+
+	interface IslandState {
+		moduleId: string;
+		canMoveUp: boolean;
+		canMoveDown: boolean;
+	}
+
+	let islandState = $state<IslandState | null>(null);
+
+	// Get the actual scroll container (the parent with overflow-auto, not the Preview root)
+	let scrollContainer = $derived(
+		scrollContainerRef
+			? ((dom.querySelector('[data-ujl-scroll-container="canvas"]') as HTMLElement | null) ??
+					scrollContainerRef)
+			: null,
+	);
+
+	/**
+	 * Update Island state when selection changes
+	 */
+	$effect(() => {
+		if (crafterMode !== "editor" || !selectedNodeId || !ast || !scrollContainerRef) {
+			islandState = null;
+			return;
+		}
+
+		const moduleId = getModuleIdFromNodeId(selectedNodeId);
+		if (!moduleId) {
+			islandState = null;
+			return;
+		}
+
+		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`) as HTMLElement | null;
+		if (!element) {
+			islandState = null;
+			return;
+		}
+
+		const editableNode = findEditableNodeByModuleId(ast, moduleId);
+		if (!editableNode) {
+			islandState = null;
+			return;
+		}
+
+		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
+
+		islandState = {
+			moduleId,
+			canMoveUp,
+			canMoveDown,
+		};
+	});
+
+	function getModuleIdFromNodeId(nodeId: string): string | null {
+		if (!nodeId.includes(".")) {
+			return nodeId;
+		}
+		const parts = nodeId.split(".");
+		return parts[0] || null;
+	}
+
+	function getModuleMoveCapabilities(moduleId: string): {
+		canMoveUp: boolean;
+		canMoveDown: boolean;
+	} {
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return { canMoveUp: false, canMoveDown: false };
+
+		const { slotName, index } = parentInfo;
+
+		let slotContent: UJLCModuleObject[];
+		if (parentInfo.parent && parentInfo.parent.slots && parentInfo.parent.slots[slotName]) {
+			slotContent = parentInfo.parent.slots[slotName];
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+		} else {
+			return { canMoveUp: false, canMoveDown: false };
+		}
+
+		return {
+			canMoveUp: index > 0,
+			canMoveDown: index < slotContent.length - 1,
+		};
+	}
+
+	function handleIslandSelect() {
+		const state = islandState;
+		if (!state) return;
+		crafter.expandToNode(state.moduleId);
+		crafter.setSelectedNodeId(state.moduleId);
+	}
+
+	function handleIslandMoveUp() {
+		const state = islandState;
+		if (!state) return;
+		const moduleId = state.moduleId;
+
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return;
+
+		const { parent, slotName, index } = parentInfo;
+		if (index <= 0) return;
+
+		let slotContent: UJLCModuleObject[];
+		let parentId: string;
+		if (parent && parent.slots && parent.slots[slotName]) {
+			slotContent = parent.slots[slotName];
+			parentId = parent.meta.id;
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+			parentId = "__root__";
+		} else {
+			return;
+		}
+
+		const targetId = slotContent[index - 1]?.meta.id;
+		if (targetId) {
+			crafter.operations.moveNode(
+				moduleId,
+				targetId,
+				parentId === "__root__" ? undefined : parentId,
+				"before",
+			);
+		}
+	}
+
+	function handleIslandMoveDown() {
+		const state = islandState;
+		if (!state) return;
+		const moduleId = state.moduleId;
+
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo) return;
+
+		const { parent, slotName, index } = parentInfo;
+
+		let slotContent: UJLCModuleObject[];
+		let parentId: string;
+		if (parent && parent.slots && parent.slots[slotName]) {
+			slotContent = parent.slots[slotName];
+			parentId = parent.meta.id;
+		} else if (slotName === "__root__") {
+			slotContent = crafter.ujlcDocument.ujlc.root;
+			parentId = "__root__";
+		} else {
+			return;
+		}
+
+		if (index === -1 || index >= slotContent.length - 1) return;
+
+		const targetId = slotContent[index + 1]?.meta.id;
+		if (targetId) {
+			crafter.operations.moveNode(
+				moduleId,
+				targetId,
+				parentId === "__root__" ? undefined : parentId,
+				"after",
+			);
+		}
+	}
+
+	async function handleIslandCopy() {
+		if (!islandState) return;
+		await crafter.copyNode(islandState.moduleId);
+	}
+
+	async function handleIslandCut() {
+		if (!islandState) return;
+		await crafter.cutNode(islandState.moduleId);
+	}
+
+	async function handleIslandPaste() {
+		if (!islandState) return;
+		await crafter.pasteNode(islandState.moduleId);
+	}
+
+	function handleIslandInsert() {
+		if (!islandState) return;
+		crafter.requestInsert(islandState.moduleId);
+	}
+
+	function handleIslandDelete() {
+		if (!islandState) return;
+		crafter.deleteNode(islandState.moduleId);
+		islandState = null;
+	}
 </script>
 
 <div
 	bind:this={scrollContainerRef}
-	class="h-full w-full"
+	class="relative h-full w-full"
 	class:ujl-editor-mode={crafterMode === "editor"}
 	role={crafterMode === "editor" ? "application" : undefined}
 	onclick={handlePreviewClick}
@@ -240,4 +424,44 @@
 			<div class="text-sm text-muted-foreground">Loading preview...</div>
 		</div>
 	{/if}
+
+	<!-- Selection Overlay with {#key} Pattern -->
+	{#key selectedNodeId}
+		{#if crafterMode === "editor" && selectedNodeId && scrollContainer}
+			<ModuleOverlay
+				variant="selection"
+				moduleId={selectedNodeId}
+				containerElement={scrollContainer}
+			/>
+		{/if}
+	{/key}
+
+	<!-- Hover Overlay (not keyed, tracks mouse events) -->
+	{#if crafterMode === "editor" && scrollContainer}
+		<HoverOverlay containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
+	{/if}
+
+	<!-- Module Island with {#key} Pattern -->
+	{#key selectedNodeId}
+		{#if islandState && crafterMode === "editor" && scrollContainer}
+			<Island
+				moduleId={islandState.moduleId}
+				containerElement={scrollContainer}
+				canMoveUp={islandState.canMoveUp}
+				canMoveDown={islandState.canMoveDown}
+				onSelect={handleIslandSelect}
+				onMoveUp={handleIslandMoveUp}
+				onMoveDown={handleIslandMoveDown}
+				onCopy={handleIslandCopy}
+				onCut={handleIslandCut}
+				onPaste={handleIslandPaste}
+				onDelete={handleIslandDelete}
+				onInsert={handleIslandInsert}
+				canCopy={true}
+				canCut={true}
+				canPaste={crafter.hasClipboardContent}
+				canInsert={true}
+			/>
+		{/if}
+	{/key}
 </div>

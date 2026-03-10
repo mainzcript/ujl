@@ -145,30 +145,18 @@ const UJLCModuleObjectSchema: z.ZodType<{
 const UJLCSlotObjectSchema = z.array(UJLCModuleObjectSchema);
 
 /**
- * Library provider configuration schema.
- *
- * Only routing information is stored in the document — credentials
- * are never persisted and are passed at runtime via LibraryOptions.
- *
- *   - inline:  no extra fields (assets stored in document)
- */
-const LibraryProviderConfigSchema = z.object({
-	provider: z.literal("inline"),
-});
-
-/**
  * Document metadata schema
  */
-const UJLCDocumentMetaSchema = z.object({
-	title: z.string(),
-	description: z.string(),
-	tags: z.array(z.string()),
-	updated_at: z.string(),
-	_version: z.string(),
-	_instance: z.string(),
-	_embedding_model_hash: z.string(),
-	_library: LibraryProviderConfigSchema.optional().default({ provider: "inline" }),
-});
+const UJLCDocumentMetaSchema = z
+	.object({
+		title: z.string(),
+		description: z.string(),
+		tags: z.array(z.string()),
+		updated_at: z.string(),
+		_version: z.string(),
+		_embedding_model_hash: z.string(),
+	})
+	.strict();
 
 /**
  * Root UJLC object schema
@@ -196,7 +184,6 @@ export type UJLCModuleObject = z.infer<typeof UJLCModuleObjectSchema>;
 export type UJLCSlotObject = z.infer<typeof UJLCSlotObjectSchema>;
 export type UJLCDocumentMeta = z.infer<typeof UJLCDocumentMetaSchema>;
 export type UJLCLibrary = Record<string, LibraryAssetImage>;
-export type LibraryProviderConfig = z.infer<typeof LibraryProviderConfigSchema>;
 export type UJLCObject = z.infer<typeof UJLCObjectSchema>;
 export type UJLCDocument = z.infer<typeof UJLCDocumentSchema>;
 

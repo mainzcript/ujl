@@ -1,0 +1,34 @@
+---
+description: Clean-code rule for comments and TODO quality in UJL.
+globs: "**/*.{ts,js,svelte,md}"
+alwaysApply: true
+---
+
+# UJL Clean Code: Comments and TODOs
+
+## Goal
+
+Comments should capture intent and constraints, not restate obvious code.
+
+## Must
+
+- English only in comments and TODOs.
+- Explain WHY, trade-offs, invariants, or non-obvious constraints.
+- Keep TODOs actionable with reason and, if possible, a reference (issue/PR/task).
+- Remove stale comments when code changes.
+
+## Should
+
+- Prefer clearer code over explanatory comments.
+- Keep comments short and close to the relevant line/block.
+
+## Avoid
+
+- Step-by-step narration of obvious operations.
+- Change-history notes in code comments.
+- Emojis in code comments and technical docs.
+
+## Allowed Exceptions
+
+- Short section comments in complex algorithms where structure is not obvious.
+- Temporary migration notes with clear removal intent.

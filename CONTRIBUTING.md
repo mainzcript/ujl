@@ -169,9 +169,13 @@ We follow conventional commits:
 4. Request review from maintainers
 5. Merge using **squash**
 
+<!-- release-process:start -->
 ## Release Process
 
 **Release workflow:**
+
+This section is the single source of truth for the release workflow.
+Agents may guide and validate state, but release/publish commands must be executed consciously by a human.
 
 1. Create a release branch from `main` using a Mainz landmark as the name:
 
@@ -233,12 +237,13 @@ The following packages are versioned together:
 - `@ujl-framework/adapter-web`
 - `@ujl-framework/examples`
 - `@ujl-framework/types`
+<!-- release-process:end -->
 
 ## Development Guidelines
 
-- [Testing Guidelines](./docs/testing.md), test infrastructure and best practices
-- [Code Review Process](./docs/code-review.md), code review standards and workflow
-- [Bundle Strategy](./docs/bundle-strategy.md), bundle architecture and performance decisions
+- [Testing Standards](./.agents/rules/testing-standards.mdc), test structure and quality expectations
+- [Branch Review Skill](./.agents/skills/ujl-branch-review/SKILL.md), code review checklist and severity model
+- [Architecture Decisions](./apps/docs/src/reference/decisions/), design and packaging rationale
 
 ## How We Work, Tooling Decisions
 

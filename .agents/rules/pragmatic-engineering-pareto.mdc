@@ -1,0 +1,53 @@
+---
+description: Global rule for pragmatic engineering, anti-overengineering, and Pareto-oriented planning in UJL.
+globs: "**/*"
+alwaysApply: true
+---
+
+# UJL Engineering: Pragmatic Pareto
+
+## Goal
+
+Build clean, extensible solutions with high quality standards while avoiding overengineering.
+
+## Principle
+
+Aim for excellent architecture and clean code, but prioritize changes by impact versus complexity (Pareto mindset).
+Perfection is a direction, not an excuse for unnecessary abstraction or inflated implementations.
+
+## Must
+
+- Keep implementations as small and clear as possible for the current problem.
+- Prefer the simplest design that remains extensible for likely near-term evolution.
+- Refactor proactively in early development when it clearly reduces long-term complexity.
+- Spend deliberate design time on core architecture boundaries and public contracts.
+- Make trade-offs explicit when choosing between ideal design and delivery pragmatism.
+
+## Should
+
+- Delay abstractions until at least one real second use-case exists.
+- Add parameters, options, and edge-case handling only when required by concrete requirements or known risks.
+- Prefer additive, reviewable refactors over large speculative rewrites.
+- Keep plans focused on high-impact steps first, then iterative refinement.
+
+## Avoid
+
+- Speculative generic frameworks "just in case".
+- Parameter bloat and deeply configurable APIs without immediate need.
+- Defensive complexity for hypothetical edge cases.
+- Large helper layers that hide straightforward logic.
+- Expanding scope with low-value polish before core behavior is correct.
+
+## Allowed Exceptions
+
+- Additional robustness in high-risk areas (public API boundaries, data integrity, security-sensitive logic).
+- Temporary duplication or adapter layers during migrations when they reduce rollout risk.
+
+## Decision Heuristic
+
+Before introducing complexity, ask:
+
+1. Does this solve a real current problem?
+2. Is there a simpler solution with similar outcome?
+3. Does this improve maintainability within the next few iterations?
+4. Would a future refactor be cheaper than adding complexity now?

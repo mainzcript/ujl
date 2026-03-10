@@ -1,0 +1,120 @@
+---
+description: Testing conventions and requirements for UJL Framework
+globs: "**/*.test.ts"
+alwaysApply: true
+---
+
+# UJL Testing
+
+## Test Structure
+
+Use the unified `*.test.ts` pattern. Location determines test type:
+
+```
+src/**/*.test.ts          # Unit tests (co-located with code)
+tests/e2e/**/*.test.ts    # E2E tests (Playwright)
+tests/integration/**/*.test.ts  # Integration tests
+```
+
+## Required Scripts
+
+All testable packages need these scripts:
+
+```json
+{
+	"test:unit": "vitest run",
+	"test:unit:watch": "vitest",
+	"test": "vitest run"
+}
+```
+
+For E2E packages add:
+
+```json
+{
+	"test:e2e": "playwright test",
+	"test": "vitest run && playwright test"
+}
+```
+
+## Test Code Structure
+
+Use AAA pattern with nested describes:
+
+```typescript
+describe("ComponentName", () => {
+	describe("methodName", () => {
+		describe("valid inputs", () => {
+			it("should handle valid input correctly", () => {
+				// Arrange
+				const input = createValidInput();
+
+				// Act
+				const result = component.methodName(input);
+
+				// Assert
+				expect(result).toBe(expected);
+			});
+		});
+
+		describe("invalid inputs", () => {
+			it("should reject invalid input", () => {
+				// ...
+			});
+		});
+
+		describe("edge cases", () => {
+			it("should handle edge case", () => {
+				// ...
+			});
+		});
+	});
+});
+```
+
+## Critical Requirements
+
+### Must
+
+- Tests must be isolated (cleanup after each test)
+- Test original data remains unchanged (immutability)
+- Edge cases must be covered (empty inputs, non-existent data, boundaries)
+- Mock data via consistent factory functions
+
+### Should
+
+- Co-locate unit tests with code in `src/` folder
+- Use `vitest.setup.ts` for Testing Library with Svelte UI components
+
+## Environment
+
+- **Node packages** (`types`, `core`): `environment: 'node'`
+- **UI packages** (`adapter-*`, `crafter`): `environment: 'jsdom'`
+
+## Coverage Excludes
+
+Always exclude:
+
+- `node_modules/`
+- `**/*.d.ts`
+- `**/*.config.*`
+- `**/*.test.ts` (test files themselves)
+- `**/mockData.ts`
+- `tests/`
+- `dist/`
+
+## Running Tests
+
+```bash
+# All tests
+pnpm test
+
+# Unit tests only
+pnpm test:unit
+
+# E2E tests only
+pnpm test:e2e
+
+# Full quality check (before committing!)
+pnpm rtc
+```

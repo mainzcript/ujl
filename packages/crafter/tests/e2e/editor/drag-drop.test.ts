@@ -63,8 +63,7 @@ test.describe("Drag and Drop", () => {
 				);
 				await page.mouse.up();
 
-				// Wait
-				await page.waitForTimeout(300);
+				await crafter.waitForAnimation();
 
 				// Parent should still exist
 				await expect(parent).toBeVisible();

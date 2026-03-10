@@ -62,9 +62,6 @@ test.describe("Keyboard Shortcuts", () => {
 		// Cut the node
 		await crafter.cutSelectedNode();
 
-		// Wait for DOM update
-		await page.waitForTimeout(500);
-
 		// The module should be removed
 		await expect(crafter.getPreviewModule(moduleToRemove)).not.toBeVisible({ timeout: 2000 });
 	});
@@ -86,13 +83,13 @@ test.describe("Keyboard Shortcuts", () => {
 		// Paste it
 		await crafter.pasteNode();
 
-		// Wait for DOM update
-		await page.waitForTimeout(500);
-
 		// After paste: at least one new ID should exist
-		const idsAfter = await crafter.getVisibleTreeNodeIds();
-		const newIds = idsAfter.filter((id) => !idsBefore.has(id));
-		expect(newIds.length).toBeGreaterThan(0);
+		await expect
+			.poll(async () => {
+				const idsAfter = await crafter.getVisibleTreeNodeIds();
+				return idsAfter.filter((id) => !idsBefore.has(id)).length;
+			})
+			.toBeGreaterThan(0);
 	});
 
 	test("should delete selected node with Delete key", async ({ page }) => {
@@ -110,12 +107,10 @@ test.describe("Keyboard Shortcuts", () => {
 		// Delete it
 		await crafter.deleteSelectedNode();
 
-		// Wait for DOM update
-		await page.waitForTimeout(500);
-
 		// Module count should decrease
-		const newModuleIds = await crafter.getPreviewModuleIds();
-		expect(newModuleIds.length).toBe(initialCount - 1);
+		await expect
+			.poll(async () => (await crafter.getPreviewModuleIds()).length)
+			.toBe(initialCount - 1);
 
 		// The specific module should be gone
 		await expect(crafter.getPreviewModule(moduleToDelete)).not.toBeVisible();
@@ -132,9 +127,6 @@ test.describe("Keyboard Shortcuts", () => {
 		// Select and delete with Backspace
 		await crafter.selectModuleInPreview(moduleToDelete);
 		await page.keyboard.press("Backspace");
-
-		// Wait for DOM update
-		await page.waitForTimeout(500);
 
 		// Module should be gone
 		await expect(crafter.getPreviewModule(moduleToDelete)).not.toBeVisible();
@@ -164,8 +156,7 @@ test.describe("Keyboard Shortcuts", () => {
 		const moduleIds = await crafter.getPreviewModuleIds();
 		await crafter.selectModuleInPreview(moduleIds[0]);
 
-		// Wait for panel to update
-		await page.waitForTimeout(300);
+		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible({ timeout: 2000 });
 
 		// Find an input in the properties panel
 		const input = crafter.panel.locator("input").first();
@@ -214,9 +205,6 @@ test.describe("Keyboard Shortcuts", () => {
 
 		// Try to paste without copying first
 		await crafter.pasteNode();
-
-		// Wait
-		await page.waitForTimeout(300);
 
 		// Count should not change
 		const newModuleIds = await crafter.getPreviewModuleIds();

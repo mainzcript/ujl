@@ -1,0 +1,33 @@
+---
+description: Clean-code DRY rule for UJL code and tests.
+globs: "**/*.{ts,js,svelte}"
+alwaysApply: true
+---
+
+# UJL Clean Code: DRY
+
+## Goal
+
+Avoid repeating the same business rule in multiple places.
+
+## Must
+
+- Centralize shared decision logic (for example insert/paste behavior, can-paste guards, overlay positioning).
+- Reuse helpers for repeated transformations and validations.
+- Keep one canonical implementation for package boundary rules and public type contracts.
+
+## Should
+
+- Prefer shared test helpers/fixtures over repeated setup blocks.
+- Consolidate repeated markup patterns into snippets/components when behavior is identical.
+
+## Avoid
+
+- Copy/paste branches that differ only by small condition changes.
+- Parallel implementations for the same state transition.
+- Duplicating constants/schema fragments across packages.
+
+## Allowed Exceptions
+
+- Duplicate code temporarily during safe refactors, but remove before merge.
+- Small local duplication when abstraction would reduce readability.

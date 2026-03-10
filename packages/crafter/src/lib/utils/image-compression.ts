@@ -135,8 +135,8 @@ export async function compressImage(file: File): Promise<File> {
 		}
 	}
 
-	// Step 4: Scale down stepwise to 800x800 (640K pixels)
-	const minDimension = 800;
+	// Step 4: Scale down stepwise to 800x800 (640K pixels), without upscaling small images
+	const minDimension = Math.min(800, maxWidth, maxHeight);
 	const steps = 5; // Number of reduction steps
 	const widthStep = (maxWidth - minDimension) / steps;
 	const heightStep = (maxHeight - minDimension) / steps;
@@ -169,8 +169,8 @@ export async function compressImage(file: File): Promise<File> {
 	let currentHeight = Math.max(minDimension, maxHeight - heightStep * steps);
 	let currentQuality = 0.6;
 
-	const minWidth = 400; // Lower threshold for Step 5
-	const minHeight = 400;
+	const minWidth = Math.min(400, currentWidth); // Never upscale smaller originals
+	const minHeight = Math.min(400, currentHeight);
 	const minQuality = 0.3; // Absolute minimum quality
 	const maxIterations = 50; // Prevent infinite loops
 	let iterations = 0;

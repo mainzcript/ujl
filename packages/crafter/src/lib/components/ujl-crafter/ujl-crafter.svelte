@@ -1,18 +1,3 @@
-<!--
-	UJL Crafter - Main Component
-	
-	This is the root component for the Crafter visual editor.
-	It creates the CrafterStore and provides it via Svelte context.
-	
-	Architecture:
-	- Single Source of Truth: All state managed by CrafterStore
-	- Dependency Injection: Store receives all dependencies via factory
-	- Unidirectional Data Flow: State flows down, actions flow up
-	- Context-based API: Child components access store via context
-	
-	Note: This component is rendered inside the ujl-crafter-element Custom Element,
-	which handles Shadow DOM creation and style injection.
--->
 <script lang="ts">
 	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from "../ui/app/index.js";
 	import { Badge, UJLTheme } from "@ujl-framework/ui";
@@ -21,7 +6,7 @@
 	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
 	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
 	import { Composer } from "@ujl-framework/core";
-	import { InlineLibraryProvider } from "$lib/providers/index.js";
+	import { InlineLibraryProvider } from "$lib/library-providers/index.js";
 
 	import {
 		createCrafterStore,
@@ -38,16 +23,26 @@
 	import PropertiesPanel from "./panel/properties-panel.svelte";
 	import DesignerPanel from "./panel/designer-panel.svelte";
 	import CrafterEffects from "./crafter-effects.svelte";
+	import ComponentPicker from "./sidebar/component-picker.svelte";
 
 	import showcaseDocument from "@ujl-framework/examples/documents/showcase" with { type: "json" };
 	import defaultTheme from "@ujl-framework/examples/themes/default" with { type: "json" };
 
 	import { downloadJsonFile, readJsonFile } from "$lib/utils/files.js";
 	import { logger } from "$lib/utils/logger.js";
-
-	// ============================================
-	// PROPS
-	// ============================================
+	import { canPasteIntoSelection } from "$lib/utils/editor-commands.js";
+	import {
+		writeToBrowserClipboard,
+		readFromBrowserClipboard,
+		writeToClipboardEvent,
+		readFromClipboardEvent,
+	} from "$lib/utils/clipboard.js";
+	import {
+		findNodeById,
+		ROOT_NODE_ID,
+		parseSlotSelection,
+		isRootNode,
+	} from "$lib/utils/ujlc-tree.js";
 
 	interface Props {
 		/** External store (from UJLCrafter class via Custom Element) */
@@ -73,10 +68,6 @@
 		shadowRoot,
 	}: Props = $props();
 
-	// ============================================
-	// STORE CREATION
-	// ============================================
-
 	const { store, composer } = (() => {
 		if (externalStore) {
 			return {
@@ -84,7 +75,6 @@
 				composer: externalComposer ?? new Composer(),
 			};
 		} else {
-			// Capture initial props in a closure - we intentionally don't react to prop changes
 			const { validatedContent, validatedTheme } = (() => {
 				const content = initialContent;
 				const theme = initialTheme;
@@ -98,8 +88,6 @@
 
 			const composer = new Composer();
 
-			// Build the library provider (defaults to InlineLibraryProvider)
-			// Stateless - no closures needed. Crafter/Store manages all document storage.
 			const libraryProvider = new InlineLibraryProvider();
 
 			const storeDeps: CrafterStoreDeps = {
@@ -117,29 +105,16 @@
 
 	setContext(CRAFTER_CONTEXT, store);
 	setContext(COMPOSER_CONTEXT, composer);
-	// Use getter to avoid Svelte warning about capturing initial value
 	setContext(SHADOW_ROOT_CONTEXT, {
 		get value() {
 			return shadowRoot;
 		},
 	});
 
-	// ============================================
-	// PORTAL CONTAINER
-	// ============================================
-
-	// Portal container for overlay components (dropdowns, dialogs, etc.)
-	// This ensures overlays render inside Shadow DOM and inherit styles
 	let portalContainerRef: HTMLDivElement | undefined = $state();
 
-	// ============================================
-	// FULLSCREEN TRACKING
-	// ============================================
-
-	// Reference to App container for size tracking
 	let appContainerRef: HTMLElement | null = $state(null);
 
-	// ResizeObserver for container size tracking
 	$effect(() => {
 		if (!appContainerRef) return;
 
@@ -154,7 +129,6 @@
 
 		observer.observe(appContainerRef);
 
-		// Measure initial size on mount
 		store.setContainerSize(appContainerRef.offsetWidth, appContainerRef.offsetHeight);
 
 		return () => {
@@ -162,7 +136,6 @@
 		};
 	});
 
-	// Window resize listener for screen size tracking
 	$effect(() => {
 		if (typeof window === "undefined") return;
 
@@ -178,7 +151,6 @@
 		};
 	});
 
-	// ESC key handler to exit fullscreen
 	$effect(() => {
 		if (typeof window === "undefined") return;
 
@@ -195,20 +167,12 @@
 		};
 	});
 
-	// ============================================
-	// EDITOR THEME
-	// ============================================
-
 	const editorTokenSet = $derived(
 		(editorTheme
 			? validateUJLTDocument(editorTheme)
 			: validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
 		).ujlt.tokens,
 	);
-
-	// ============================================
-	// IMPORT / EXPORT HANDLERS
-	// ============================================
 
 	function handleExportTheme() {
 		downloadJsonFile(store.ujltDocument, "theme.ujlt.json");
@@ -260,23 +224,264 @@
 		}
 	}
 
-	// ============================================
-	// MODE CHANGE HANDLER
-	// ============================================
-
 	function handleModeChange(newMode: string | undefined) {
 		if (newMode === "editor" || newMode === "designer") {
 			store.setMode(newMode);
 		}
 	}
 
-	// ============================================
-	// VIEWPORT CHANGE HANDLER
-	// ============================================
-
 	function handleViewportTypeChange(type: string | undefined) {
 		store.setViewportType(type);
 	}
+
+	let isHandlingKeyboardShortcut = $state(false);
+
+	const selectedNodeId = $derived.by(() => {
+		return store.mode === "editor" ? store.selectedNodeId : null;
+	});
+
+	const selectedSlotInfo = $derived(parseSlotSelection(selectedNodeId));
+
+	const selectedNode = $derived.by(() => {
+		if (!selectedNodeId) return null;
+
+		if (selectedSlotInfo) {
+			return findNodeById(store.rootSlot, selectedSlotInfo.parentId);
+		}
+
+		return findNodeById(store.rootSlot, selectedNodeId);
+	});
+
+	const canCut = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canCopy = $derived(selectedNodeId !== null && !selectedSlotInfo);
+	const canDelete = $derived(
+		selectedNodeId !== null && !selectedSlotInfo && !isRootNode(selectedNodeId),
+	);
+	const canPaste = $derived.by(() => {
+		return canPasteIntoSelection({
+			selectedNodeId,
+			selectedSlotInfo,
+			selectedNode,
+			rootSlot: store.rootSlot,
+			clipboard: store.clipboard,
+			findNodeById,
+		});
+	});
+
+	async function handleCopy(nodeId: string) {
+		await store.copyNode(nodeId);
+	}
+
+	async function handleCut(nodeId: string) {
+		await store.cutNode(nodeId);
+	}
+
+	async function handlePaste(nodeIdOrSlot: string) {
+		await store.pasteNode(nodeIdOrSlot);
+	}
+
+	function handleDelete(nodeId: string) {
+		store.deleteNode(nodeId);
+	}
+
+	function handleInsert(nodeIdOrSlot: string) {
+		store.requestInsert(nodeIdOrSlot);
+	}
+
+	function handleComponentSelect(componentType: string) {
+		store.handleComponentSelect(componentType);
+	}
+
+	function handleComponentPickerOpenChange(open: boolean) {
+		if (!open) {
+			store.closeComponentPicker();
+		}
+	}
+
+	/**
+	 * Checks if the keyboard event originated from an editable element.
+	 * Uses composedPath() for Shadow DOM compatibility - event.target is
+	 * retargeted to the shadow host when events bubble outside Shadow DOM.
+	 */
+	function isEditableElement(event: KeyboardEvent | ClipboardEvent): boolean {
+		const path = event.composedPath();
+		const actualTarget = path[0];
+
+		if (!actualTarget || !(actualTarget instanceof HTMLElement)) {
+			return false;
+		}
+
+		const tagName = actualTarget.tagName.toLowerCase();
+
+		if (tagName === "input" || tagName === "textarea") {
+			return true;
+		}
+
+		if (actualTarget.isContentEditable) {
+			return true;
+		}
+
+		if (tagName === "select") {
+			return true;
+		}
+
+		return false;
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (isEditableElement(event)) return;
+
+		if (event.key === "Escape") {
+			if (selectedNodeId) {
+				event.preventDefault();
+				store.setSelectedNodeId(null);
+			}
+			return;
+		}
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "i") {
+			event.preventDefault();
+			if (selectedSlotInfo && selectedNodeId) {
+				handleInsert(selectedNodeId);
+			} else if (selectedNodeId) {
+				handleInsert(selectedNodeId);
+			} else {
+				handleInsert(ROOT_NODE_ID);
+			}
+			return;
+		}
+
+		if (!selectedNodeId && !store.clipboard) return;
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "v") {
+			if (canPaste) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				const targetId = selectedNodeId || ROOT_NODE_ID;
+				runKeyboardShortcut(() => handlePaste(targetId));
+			}
+			return;
+		}
+
+		if (event.key === "Delete" || event.key === "Backspace") {
+			if (canDelete && selectedNodeId) {
+				event.preventDefault();
+				handleDelete(selectedNodeId);
+			}
+			return;
+		}
+
+		if (selectedSlotInfo || !selectedNodeId) return;
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "c") {
+			if (canCopy) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				runKeyboardShortcut(() => handleCopy(selectedNodeId));
+			}
+		}
+
+		if ((event.ctrlKey || event.metaKey) && event.key === "x") {
+			if (canCut) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				runKeyboardShortcut(() => handleCut(selectedNodeId));
+			}
+		}
+	}
+
+	function runKeyboardShortcut(task: () => Promise<void>) {
+		isHandlingKeyboardShortcut = true;
+		task().finally(() => {
+			queueMicrotask(() => {
+				isHandlingKeyboardShortcut = false;
+			});
+		});
+	}
+
+	function handleCopyEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCopy) return;
+
+		const copiedNode = store.operations.copyNode(selectedNodeId);
+		if (copiedNode) {
+			store.setClipboard(copiedNode);
+			writeToClipboardEvent(event, copiedNode);
+			writeToBrowserClipboard(copiedNode);
+		}
+	}
+
+	function handleCutEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!selectedNodeId || selectedSlotInfo) return;
+		if (!canCut) return;
+
+		const cutNode = store.operations.cutNode(selectedNodeId);
+		if (cutNode) {
+			store.setClipboard(cutNode);
+			writeToClipboardEvent(event, cutNode);
+			writeToBrowserClipboard(cutNode);
+		}
+	}
+
+	function handlePasteEvent(event: ClipboardEvent) {
+		if (isHandlingKeyboardShortcut) return;
+
+		if (isEditableElement(event)) return;
+
+		if (!canPaste) return;
+
+		const eventData = readFromClipboardEvent(event);
+		const pasteData = eventData || store.clipboard;
+		if (!pasteData) return;
+
+		if (eventData && eventData !== store.clipboard) {
+			store.setClipboard(eventData);
+		}
+
+		const targetId = selectedNodeId || ROOT_NODE_ID;
+		store.performPaste(pasteData, targetId);
+	}
+
+	$effect(() => {
+		if (typeof window === "undefined") return;
+
+		window.addEventListener("keydown", handleKeyDown);
+		window.addEventListener("copy", handleCopyEvent);
+		window.addEventListener("cut", handleCutEvent);
+		window.addEventListener("paste", handlePasteEvent);
+
+		readFromBrowserClipboard().then((data) => {
+			if (data) {
+				store.setClipboard(data);
+			}
+		});
+
+		const handleFocus = () => {
+			readFromBrowserClipboard().then((data) => {
+				if (data && data !== store.clipboard) {
+					store.setClipboard(data);
+				}
+			});
+		};
+
+		window.addEventListener("focus", handleFocus);
+
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+			window.removeEventListener("copy", handleCopyEvent);
+			window.removeEventListener("cut", handleCutEvent);
+			window.removeEventListener("paste", handlePasteEvent);
+			window.removeEventListener("focus", handleFocus);
+		};
+	});
 </script>
 
 <UJLTheme
@@ -286,7 +491,6 @@
 	portalContainer={portalContainerRef}
 >
 	<App bind:ref={appContainerRef}>
-		<!-- Panel-Auto-Open and Close Callback Logic -->
 		<CrafterEffects
 			mode={store.mode}
 			setSelectedNodeId={store.setSelectedNodeId}
@@ -340,7 +544,10 @@
 		</AppPanel>
 	</App>
 
-	<!-- Portal container for overlay components (dropdowns, dialogs, tooltips, etc.) -->
-	<!-- Must be inside UJLTheme to inherit theme styles and CSS variables -->
+	<ComponentPicker
+		open={store.showComponentPicker}
+		onSelect={handleComponentSelect}
+		onOpenChange={handleComponentPickerOpenChange}
+	/>
 	<div bind:this={portalContainerRef} data-ujl-portal-container class="contents"></div>
 </UJLTheme>

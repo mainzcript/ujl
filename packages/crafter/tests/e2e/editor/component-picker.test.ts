@@ -52,12 +52,10 @@ test.describe("Component Picker", () => {
 		// Search for a specific component
 		await crafter.componentPickerSearch.fill("Text");
 
-		// Wait for filter to apply
-		await page.waitForTimeout(200);
-
 		// Should show fewer components
-		const filteredCount = await crafter.componentPicker.getByRole("option").count();
-		expect(filteredCount).toBeLessThanOrEqual(initialCount);
+		await expect
+			.poll(async () => crafter.componentPicker.getByRole("option").count())
+			.toBeLessThanOrEqual(initialCount);
 
 		// Should show Text component
 		await expect(crafter.componentPicker.getByRole("option", { name: /text/i })).toBeVisible();
@@ -79,12 +77,10 @@ test.describe("Component Picker", () => {
 		const textOption = crafter.componentPicker.getByRole("option", { name: /text/i }).first();
 		await textOption.click();
 
-		// Wait for DOM update
-		await page.waitForTimeout(500);
-
 		// Should have one more module
-		const newModuleIds = await crafter.getPreviewModuleIds();
-		expect(newModuleIds.length).toBe(initialCount + 1);
+		await expect
+			.poll(async () => (await crafter.getPreviewModuleIds()).length)
+			.toBe(initialCount + 1);
 	});
 
 	test("should close after selecting component", async ({ page }) => {
@@ -112,9 +108,6 @@ test.describe("Component Picker", () => {
 		// Insert a component
 		await crafter.insertComponent("Text");
 
-		// Wait for insertion
-		await page.waitForTimeout(500);
-
 		// A module should be selected
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
@@ -135,12 +128,10 @@ test.describe("Component Picker", () => {
 		// Insert a new component
 		await crafter.insertComponent("Text");
 
-		// Wait for insertion
-		await page.waitForTimeout(500);
-
 		// The new component should be inserted after the selected one
-		const newModuleIds = await crafter.getPreviewModuleIds();
-		expect(newModuleIds.length).toBe(moduleIds.length + 1);
+		await expect
+			.poll(async () => (await crafter.getPreviewModuleIds()).length)
+			.toBe(moduleIds.length + 1);
 	});
 
 	test("should close with Escape key", async ({ page }) => {
@@ -166,7 +157,6 @@ test.describe("Component Picker", () => {
 
 		for (const type of commonTypes) {
 			await crafter.componentPickerSearch.fill(type);
-			await page.waitForTimeout(100);
 
 			// CommandItem renders as role="option"
 			const option = crafter.componentPicker.getByRole("option", { name: new RegExp(type, "i") });

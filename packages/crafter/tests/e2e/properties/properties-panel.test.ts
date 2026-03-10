@@ -28,9 +28,6 @@ test.describe("Properties Panel", () => {
 		expect(moduleId).not.toBeNull();
 		await crafter.selectModuleInPreview(moduleId!);
 
-		// Wait for panel to update
-		await page.waitForTimeout(300);
-
 		// Should no longer show "No module selected"
 		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible();
 	});
@@ -42,8 +39,7 @@ test.describe("Properties Panel", () => {
 		// Find and select a Text module (which has editable fields)
 		await crafter.insertComponent("Text");
 
-		// Wait for panel to update
-		await page.waitForTimeout(500);
+		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
 		// Text module uses RichText which has a contenteditable div (TipTap editor)
 		// Also check for regular inputs/textareas
@@ -63,7 +59,7 @@ test.describe("Properties Panel", () => {
 
 		// Insert a Text module
 		await crafter.insertComponent("Text");
-		await page.waitForTimeout(500);
+		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
 		// Find the text input in the panel
 		const textInput = crafter.panel.locator("input, textarea").first();
@@ -72,12 +68,10 @@ test.describe("Properties Panel", () => {
 			// Clear and type new content
 			await textInput.fill("Test Content 12345");
 
-			// Wait for preview update
-			await page.waitForTimeout(500);
-
 			// The preview should contain the new text
-			const previewText = await crafter.canvas.textContent();
-			expect(previewText).toContain("Test Content 12345");
+			await expect
+				.poll(async () => (await crafter.canvas.textContent()) ?? "")
+				.toContain("Test Content 12345");
 		}
 	});
 
@@ -89,8 +83,6 @@ test.describe("Properties Panel", () => {
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
 		await crafter.selectModuleInPreview(moduleId!);
-
-		await page.waitForTimeout(300);
 
 		// Check for label elements
 		const labels = crafter.panel.locator("label");
@@ -116,8 +108,6 @@ test.describe("Properties Panel", () => {
 		if (slotCount > 0) {
 			await slotElements.first().click();
 
-			await page.waitForTimeout(300);
-
 			// Should show slot selected message
 			await expect(crafter.panel.getByText("Slot selected")).toBeVisible();
 		}
@@ -133,14 +123,12 @@ test.describe("Properties Panel", () => {
 		for (const moduleId of selectableIds.slice(0, 5)) {
 			// Check first 5 selectable modules
 			await crafter.selectModuleInPreview(moduleId);
-			await page.waitForTimeout(300);
 
 			const numberInput = crafter.panel.locator('input[type="number"]');
 
 			if (await numberInput.first().isVisible()) {
 				// Found a number input
 				await numberInput.first().fill("42");
-				await page.waitForTimeout(300);
 
 				// Value should be set
 				await expect(numberInput.first()).toHaveValue("42");
@@ -158,21 +146,15 @@ test.describe("Properties Panel", () => {
 
 		for (const moduleId of selectableIds.slice(0, 5)) {
 			await crafter.selectModuleInPreview(moduleId);
-			await page.waitForTimeout(300);
 
 			const toggle = crafter.panel.locator('[role="switch"]');
 
 			if (await toggle.first().isVisible()) {
-				// Get initial state
 				const initialState = await toggle.first().getAttribute("data-state");
-
-				// Click to toggle
 				await toggle.first().click();
-				await page.waitForTimeout(300);
-
-				// State should change
-				const newState = await toggle.first().getAttribute("data-state");
-				expect(newState).not.toBe(initialState);
+				await expect
+					.poll(async () => await toggle.first().getAttribute("data-state"))
+					.not.toBe(initialState);
 				break;
 			}
 		}
@@ -191,12 +173,10 @@ test.describe("Properties Panel", () => {
 
 		// Select first module
 		await crafter.selectModuleInPreview(selectableIds[0]);
-		await page.waitForTimeout(300);
 		const firstPanelContent = await crafter.panel.textContent();
 
 		// Select second module
 		await crafter.selectModuleInPreview(selectableIds[1]);
-		await page.waitForTimeout(300);
 		const secondPanelContent = await crafter.panel.textContent();
 
 		// Panel content might change (different module type)
