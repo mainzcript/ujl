@@ -71,15 +71,8 @@ Quick reference for agents:
 - For authoring/editorial workflows: `packages/crafter/`.
 - For assets: `services/library/`.
 
-## Developer Guidelines
-
-For detailed development guidelines, see the [docs/](./docs/) directory:
-
-- [Testing Guidelines](./docs/testing.md)
-- [Code Review Playbook](./docs/code-review.md)
-
 ## Currency & Notes
 
 - This document is intentionally high‑level. For specifics, read the corresponding READMEs.
 - The package landscape may grow (new adapters, tools, services). Explore `packages/` and `services/`.
-- **Temporary files**: The `_support/` directory (ignored by git) can be used for temporary files like code reviews, analysis documents, or personal notes that should not be versioned.
+- **Temporary files**: The `.support/` directory (ignored by git) can be used for temporary files like code reviews, analysis documents, or personal notes that should not be versioned.
