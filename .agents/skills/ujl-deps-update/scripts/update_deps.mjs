@@ -274,7 +274,7 @@ function main() {
 			"Detect outdated dependencies",
 			`pnpm outdated -r --format json ${flags}`.trim(),
 			steps,
-			{ outdatedOk: true }, // pnpm outdated returns exit code 1 when packages are outdated
+			{ outdatedOk: true },
 		);
 		outdatedSummary = summarizeOutdated(outdated.stdout || "");
 
