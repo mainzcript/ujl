@@ -1,0 +1,33 @@
+---
+description: Clean-code rule for naming and domain intent in UJL.
+globs: "**/*.{ts,js,svelte}"
+alwaysApply: true
+---
+
+# UJL Clean Code: Naming and Intent
+
+## Goal
+
+Names should explain domain intent, not implementation details.
+
+## Must
+
+- Use names that reflect UJL domain concepts (`module`, `slot`, `field`, `library`, `overlay`, `composer`).
+- Prefer explicit verbs for actions (`insertModule`, `updateField`, `toggleFullscreen`) over vague verbs (`handle`, `process`, `do`).
+- Avoid ambiguous abbreviations in exported symbols.
+- Rename misleading variables when logic evolves.
+
+## Should
+
+- Keep naming consistent across `types`, `core`, `crafter`, and adapters.
+- Mirror existing package terminology from README/docs and public APIs.
+
+## Avoid
+
+- `data`, `item`, `value`, `tmp`, `obj` as long-lived identifiers.
+- Prefixes that expose implementation noise (`newData2`, `realStore`, `finalResult`).
+
+## Allowed Exceptions
+
+- Short loop/index identifiers in very small local scopes.
+- Widely established abbreviations (`id`, `url`, `html`, `ast`).

@@ -57,8 +57,6 @@ Quick reference for agents:
 | `crafter`        | Visual editor (SvelteKit)                    | [README](packages/crafter/README.md)        |
 | `examples`       | Example documents and themes                 | [README](packages/examples/README.md)       |
 
-**Services**: `library` (Payload CMS for asset management – images, fonts, documents)
-
 **Apps**: `docs` (VitePress), `demo` (minimal integration demo)
 
 ## Navigation Tips for Agents
@@ -69,10 +67,17 @@ Quick reference for agents:
   - `packages/adapter-web/` — for framework-agnostic Web Components (uses `adapter-svelte` internally)
 - For UI building blocks: `packages/ui/`.
 - For authoring/editorial workflows: `packages/crafter/`.
-- For assets: `services/library/`.
+- For assets and provider integrations: start in `packages/crafter/` and related package READMEs.
+
+## Instruction Layers
+
+- `AGENTS.md`: stable, high-level project context and navigation.
+- `.agents/rules/*`: normative, always-on implementation rules.
+- `.agents/skills/*`: reusable multi-step workflows and automations.
+- `.support/*`: temporary outputs (reviews, PR drafts, reports), not versioned.
 
 ## Currency & Notes
 
 - This document is intentionally high‑level. For specifics, read the corresponding READMEs.
-- The package landscape may grow (new adapters, tools, services). Explore `packages/` and `services/`.
+- The package landscape may grow (new adapters, tools, workflows). Explore `packages/`, `apps/`, and `.agents/`.
 - **Temporary files**: The `.support/` directory (ignored by git) can be used for temporary files like code reviews, analysis documents, or personal notes that should not be versioned.

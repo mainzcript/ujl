@@ -1,0 +1,35 @@
+---
+description: Clean-code rule for architecture boundaries in UJL packages.
+globs: "packages/**/*.{ts,js,svelte}"
+alwaysApply: true
+---
+
+# UJL Clean Code: Architecture Boundaries
+
+## Goal
+
+Keep package responsibilities and dependency direction explicit.
+
+## Must
+
+- Respect layer direction: `types` -> `core` -> `ui` -> `adapter-*` -> `crafter`.
+- Keep validation and schema ownership in `types`.
+- Keep composition/AST concerns in `core`.
+- Keep editor-specific behavior in `crafter`.
+- Call out public API changes and keep backward compatibility unless explicitly breaking.
+
+## Should
+
+- Prefer additive type changes over destructive interface changes.
+- Reuse shared primitives instead of cross-layer shortcuts.
+
+## Avoid
+
+- Importing higher-layer implementation into lower layers.
+- Hiding cross-package coupling behind utility modules.
+- Moving package-specific behavior into generic layers for convenience.
+
+## Allowed Exceptions
+
+- Build-time toolchain integration explicitly documented in architecture docs.
+- Transitional adapters during planned migrations with clear removal path.

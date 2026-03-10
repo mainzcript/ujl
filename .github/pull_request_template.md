@@ -18,12 +18,15 @@
 ### Breaking Change Details (if applicable)
 
 **Justification:**
+
 <!-- Explain why this breaking change is necessary and cannot be avoided. -->
 
 **Migration Path:**
+
 <!-- Describe how users should migrate from the old API/behavior to the new one. -->
 
 **Affected Packages/Components:**
+
 <!-- List all packages, components, or APIs that are affected. -->
 
 ## Definition of Done
@@ -60,6 +63,10 @@
 - [ ] All documentation (README, doc comments) is in English
 - [ ] Terminology is consistent with code and existing documentation
 - [ ] I have made corresponding changes to the documentation (if applicable)
+- [ ] I have checked developer docs (`README*`, `CONTRIBUTING.md`, `AGENTS.md`) for impacted behavior/API terminology
+- [ ] I have checked agentic instructions (`.agents/rules/*`, `.agents/skills/*`, subagent definitions if present) and updated them when workflows/standards changed
+- [ ] I have checked docs site content (`apps/docs`) for impacted concepts, APIs, and examples
+- [ ] I have verified changed documentation links/paths still resolve
 - [ ] Migration guide is provided (if breaking change)
 
 ### Performance & Usability (if applicable)

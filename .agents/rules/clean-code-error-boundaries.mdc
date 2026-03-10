@@ -1,0 +1,34 @@
+---
+description: Clean-code rule for error handling and boundaries in UJL.
+globs: "**/*.{ts,js,svelte}"
+alwaysApply: true
+---
+
+# UJL Clean Code: Error Handling and Boundaries
+
+## Goal
+
+Failures should be explicit, diagnosable, and contained at the right layer.
+
+## Must
+
+- Validate external input at boundaries (`types` schemas, adapter input, provider responses).
+- Fail fast on invalid states instead of silently ignoring errors.
+- Return/throw actionable errors with enough context.
+- Keep fallback behavior deterministic.
+
+## Should
+
+- Use guard clauses for invalid preconditions.
+- Keep UI error states user-readable and non-blocking where possible.
+
+## Avoid
+
+- Empty `catch` blocks.
+- Swallowing promise rejections.
+- Hidden retries/timeouts without limits or visibility.
+
+## Allowed Exceptions
+
+- Intentional best-effort cleanup in `finally`/destroy paths.
+- Explicitly documented no-op behavior for optional capabilities.

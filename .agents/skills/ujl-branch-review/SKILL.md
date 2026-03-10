@@ -94,6 +94,7 @@ Follow this flow, adapted to the information available:
 - Identify which packages/layers are touched
 - Check whether public APIs, schemas/AST, adapters, or user-facing docs could be affected
 - Does it require updates to user-facing docs (`apps/docs`) to keep terminology/APIs consistent?
+- Check documentation consistency across developer docs (`README*`, `CONTRIBUTING.md`, `AGENTS.md`), agentic instructions (`.agents/rules/*`, `.agents/skills/*`, subagents if present), and docs site (`apps/docs`)
 - Assign a **Risk Level**: Low / Medium / High (with a short reason)
 
 ### Step B — Reality Check
@@ -194,6 +195,15 @@ Comments must explain **WHY**, never **WHAT**.
   - Concepts are clearly defined and not ambiguous
   - No conflicting names for the same concept exist
 - Inconsistencies in terminology are a **Should** (or **Must** if they cause confusion or ambiguity)
+
+### 5.3 Documentation Surface Consistency
+
+- Reviewers must verify that relevant changes are reflected consistently across:
+  - Developer docs (`README*`, `CONTRIBUTING.md`, `AGENTS.md`)
+  - Agentic instructions (`.agents/rules/*`, `.agents/skills/*`, and subagent definitions if present)
+  - Documentation website content (`apps/docs`)
+- If behavior, workflows, or standards changed, missing updates in any relevant surface are at least a **Should**
+- Broken or stale links in touched documentation are a **Should** (or **Must** when they block key contributor workflows)
 
 ## UJL Architecture Checks
 
@@ -299,5 +309,6 @@ In your decision, treat a change as **merge-ready** when:
 - Architecture boundaries are respected
 - Comments and docs follow the English/minimalism rules and avoid emojis
 - Documentation terminology is consistent with code where relevant
+- Documentation surfaces stay consistent (developer docs, agentic instructions, docs site) for affected changes
 - No obvious AI artifacts or unnecessary overengineering remain
 - The overall review respects the **80/20 rule**

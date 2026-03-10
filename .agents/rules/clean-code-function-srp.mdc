@@ -1,0 +1,34 @@
+---
+description: Clean-code rule for SRP and function/module size in UJL.
+globs: "**/*.{ts,js,svelte}"
+alwaysApply: true
+---
+
+# UJL Clean Code: SRP and Function Size
+
+## Goal
+
+Each unit should have one clear responsibility.
+
+## Must
+
+- Split functions/components when they mix unrelated concerns (for example UI rendering + command logic + persistence).
+- Keep side effects localized and explicit.
+- Extract pure helpers for reusable decision logic.
+- Keep public store/component APIs stable when refactoring internals.
+
+## Should
+
+- Prefer smaller modules by feature (`selection`, `clipboard`, `library`, `viewport`) over one large file.
+- Separate event wiring from business rules.
+
+## Signals to Refactor
+
+- One function updates multiple independent domains.
+- Multiple nested condition levels are needed to understand basic flow.
+- Extensive comments are needed to explain "what happens next".
+
+## Allowed Exceptions
+
+- Tight integration code that must stay together for lifecycle correctness.
+- Small duplication when extraction would increase coupling or risk.

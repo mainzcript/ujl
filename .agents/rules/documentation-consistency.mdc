@@ -1,0 +1,38 @@
+---
+description: Keep developer docs, agentic instructions, and docs site consistent with code changes in UJL.
+globs: "**/*"
+alwaysApply: true
+---
+
+# UJL Documentation Consistency
+
+## Goal
+
+Ensure all relevant documentation surfaces stay current and consistent with implemented behavior.
+
+## Must
+
+- When behavior, API, architecture, workflow, or standards change, verify and update all relevant documentation surfaces:
+  - Developer docs (`README*`, `CONTRIBUTING.md`, `AGENTS.md`)
+  - Agentic instructions (`.agents/rules/*`, `.agents/skills/*`, subagent definitions if present)
+  - Documentation website (`apps/docs`)
+- Keep terminology aligned across code and all touched documentation.
+- Keep links and referenced paths valid in changed docs/instructions.
+- Avoid contradictory guidance between documentation surfaces.
+
+## Should
+
+- Add concise migration notes when contributor workflow or architecture expectations changed.
+- Reference canonical sources instead of duplicating long guidance in multiple places.
+- Prefer small, focused doc updates in the same branch as the code change.
+
+## Avoid
+
+- Updating only one documentation surface for cross-cutting changes.
+- Leaving stale package paths, scripts, or workflow references.
+- Introducing new guidance in skills/rules without reflecting it in contributor-facing docs when relevant.
+
+## Allowed Exceptions
+
+- Purely local refactors with no behavior/workflow/contract change can skip doc edits.
+- Experimental branches may defer broad doc updates if the PR clearly marks follow-up work.
