@@ -177,7 +177,7 @@ function gitSummary() {
 	};
 }
 
-function writeReport(options, steps, outdatedSummary, errorMessage = "") {
+function writeReport(options, steps, outdatedSummary, errorMessage = "", pnpmUpdateInfo = null) {
 	const reportDir = path.join(root, ".support", "deps");
 	fs.mkdirSync(reportDir, { recursive: true });
 	const reportPath = path.join(reportDir, `${timestamp()}-deps-update.md`);
@@ -192,6 +192,29 @@ function writeReport(options, steps, outdatedSummary, errorMessage = "") {
 	lines.push(`- Dry run: \`${options.dryRun}\``);
 	lines.push(`- Filters: \`${options.filters.join(",") || "(none)"}\``);
 	lines.push("");
+
+	// pnpm version section
+	lines.push("## pnpm Version");
+	lines.push("");
+	if (pnpmUpdateInfo) {
+		if (pnpmUpdateInfo.error) {
+			lines.push(`- Status: \`error\``);
+			lines.push(`- Error: ${pnpmUpdateInfo.error}`);
+		} else if (pnpmUpdateInfo.current) {
+			lines.push(`- Current: \`${pnpmUpdateInfo.current}\``);
+			lines.push(`- Latest: \`${pnpmUpdateInfo.latest}\``);
+			lines.push(`- Update available: \`${pnpmUpdateInfo.updateAvailable ? "yes" : "no"}\``);
+		if (pnpmUpdateInfo.updateAvailable) {
+			lines.push("");
+			lines.push("> To update pnpm, run: `npm install -g pnpm@latest`");
+			lines.push(`> Then update package.json: \"packageManager\": \"pnpm@${pnpmUpdateInfo.latest}\"`);
+		}
+		}
+	} else {
+		lines.push("- Status: `not checked`");
+	}
+	lines.push("");
+
 	lines.push("## Outdated Summary");
 	lines.push("");
 	lines.push(`- Parseable JSON: \`${outdatedSummary.parseable}\``);
@@ -249,6 +272,51 @@ function buildFlags(options) {
 	return flags.join(" ");
 }
 
+function getPnpmVersionFromPackageManager() {
+	const rootPackageJsonPath = path.join(root, "package.json");
+	try {
+		const content = fs.readFileSync(rootPackageJsonPath, "utf8");
+		const parsed = JSON.parse(content);
+		const packageManager = parsed.packageManager;
+		if (packageManager && packageManager.startsWith("pnpm@")) {
+			return packageManager.replace("pnpm@", "");
+		}
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+function checkPnpmUpdate() {
+	const current = getPnpmVersionFromPackageManager();
+	if (!current) {
+		return { current: null, latest: null, updateAvailable: false, error: "Could not read pnpm version from package.json" };
+	}
+
+	try {
+		const result = shell("npm view pnpm version");
+		if (result.status !== 0) {
+			return { current, latest: null, updateAvailable: false, error: "Failed to check latest pnpm version" };
+		}
+		const latest = result.stdout.trim();
+		const currentSemver = parseSemver(current);
+		const latestSemver = parseSemver(latest);
+
+		if (!currentSemver || !latestSemver) {
+			return { current, latest, updateAvailable: false, error: "Could not parse semver" };
+		}
+
+		const updateAvailable =
+			latestSemver.major > currentSemver.major ||
+			latestSemver.minor > currentSemver.minor ||
+			latestSemver.patch > currentSemver.patch;
+
+		return { current, latest, updateAvailable, error: null };
+	} catch (error) {
+		return { current, latest: null, updateAvailable: false, error: error.message };
+	}
+}
+
 function main() {
 	const options = parseArgs(process.argv.slice(2));
 	if (options.help) {
@@ -268,8 +336,20 @@ function main() {
 	const steps = [];
 	const flags = buildFlags(options);
 	let outdatedSummary = { total: 0, major: 0, minor: 0, patch: 0, unknown: 0, parseable: false };
+	let pnpmUpdateInfo = { current: null, latest: null, updateAvailable: false, error: null };
 
 	try {
+		// Check pnpm version first
+		console.log("\n== Check pnpm version ==");
+		pnpmUpdateInfo = checkPnpmUpdate();
+		if (pnpmUpdateInfo.error) {
+			console.log(`Note: ${pnpmUpdateInfo.error}`);
+		} else if (pnpmUpdateInfo.updateAvailable) {
+			console.log(`pnpm update available: ${pnpmUpdateInfo.current} → ${pnpmUpdateInfo.latest}`);
+		} else {
+			console.log(`pnpm is up to date: ${pnpmUpdateInfo.current}`);
+		}
+
 		const outdated = runStep(
 			"Detect outdated dependencies",
 			`pnpm outdated -r --format json ${flags}`.trim(),
@@ -279,7 +359,7 @@ function main() {
 		outdatedSummary = summarizeOutdated(outdated.stdout || "");
 
 		if (options.reportOnly || options.dryRun) {
-			const reportPath = writeReport(options, steps, outdatedSummary);
+			const reportPath = writeReport(options, steps, outdatedSummary, "", pnpmUpdateInfo);
 			console.log(`\nreport_path=${reportPath}`);
 			if (options.dryRun) console.log("note=Dry run enabled, update steps skipped.");
 			return;
@@ -295,11 +375,11 @@ function main() {
 			runStep("Run unit tests", "pnpm run test:unit", steps);
 		}
 
-		const reportPath = writeReport(options, steps, outdatedSummary);
+		const reportPath = writeReport(options, steps, outdatedSummary, "", pnpmUpdateInfo);
 		console.log(`\nreport_path=${reportPath}`);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		const reportPath = writeReport(options, steps, outdatedSummary, message);
+		const reportPath = writeReport(options, steps, outdatedSummary, message, pnpmUpdateInfo);
 		console.error(`\nreport_path=${reportPath}`);
 		process.exit(1);
 	}
