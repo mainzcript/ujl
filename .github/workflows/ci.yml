@@ -13,7 +13,6 @@ permissions:
 
 env:
   NODE_VERSION: "22"
-  PNPM_VERSION: "10.30.3"
   PNPM_STORE_PATH: ".pnpm-store"
 
 jobs:
@@ -32,8 +31,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Configure pnpm store
         run: pnpm config set store-dir ${{ env.PNPM_STORE_PATH }}
@@ -94,8 +91,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Configure pnpm store
         run: pnpm config set store-dir ${{ env.PNPM_STORE_PATH }}
@@ -140,8 +135,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Configure pnpm store
         run: pnpm config set store-dir ${{ env.PNPM_STORE_PATH }}

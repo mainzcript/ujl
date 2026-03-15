@@ -208,7 +208,13 @@ Agents may guide and validate state, but release/publish commands must be execut
    # if not: npm login
    ```
 
-6. From `main`, publish the packages:
+6. Optional but recommended: run the publish-path dry-run before releasing:
+
+   ```bash
+   pnpm run vc:preflight
+   ```
+
+7. From `main`, publish the packages:
 
    ```bash
    pnpm run vc:release
@@ -216,8 +222,9 @@ Agents may guide and validate state, but release/publish commands must be execut
 
    This script will:
    - Verify your npm login (`npm:check-auth`)
-   - Run the full quality gate: install, format, build, lint, check, test (`rtc`)
+   - Run the full quality gate and publish-path preflight (`vc:preflight`)
    - Publish all packages to npm (`changeset publish`)
+   - Verify that all expected packages are published (`vc:verify-published`)
    - Replace the per-package git tags with a single unified `vX.X.X` tag (`vc:retag`)
 
    Push the tag afterwards:
@@ -226,7 +233,12 @@ Agents may guide and validate state, but release/publish commands must be execut
    git push && git push --tags
    ```
 
-7. Create a GitHub Release from the tag.
+8. If `vc:verify-published` reports a partial publish:
+   - Manually publish the missing package(s): `cd packages/<name> && npm publish --access public`
+   - Rerun `pnpm run vc:verify-published`
+   - Run `pnpm run vc:retag`
+
+9. Create a GitHub Release from the tag.
 
 ### Package Versioning
 
