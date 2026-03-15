@@ -22,6 +22,7 @@
 	],
 	"scripts": {
 		"build": "pnpm run clean && tsc -b tsconfig.build.json",
+		"prepack": "pnpm run build",
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\"",
 		"check": "tsc --noEmit",
 		"format": "prettier --write .",
