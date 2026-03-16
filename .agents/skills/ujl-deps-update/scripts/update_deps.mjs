@@ -14,6 +14,7 @@ function parseArgs(argv) {
 		verify: "full",
 		filters: [],
 		help: false,
+		skipPnpmUpdate: false,
 	};
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -24,6 +25,7 @@ function parseArgs(argv) {
 		if (token === "--scope") options.scope = argv[index + 1] ?? options.scope;
 		if (token === "--verify") options.verify = argv[index + 1] ?? options.verify;
 		if (token === "--filter") options.filters.push(argv[index + 1] ?? "");
+		if (token === "--skip-pnpm-update") options.skipPnpmUpdate = true;
 	}
 
 	options.filters = options.filters.filter(Boolean);
@@ -39,6 +41,7 @@ function printHelp() {
 	console.log("  --scope <value>    all | prod | dev (default: all)");
 	console.log("  --verify <value>   full | quick | none (default: full)");
 	console.log("  --filter <value>   Pass --filter selector to recursive pnpm commands");
+	console.log("  --skip-pnpm-update Skip automatic pnpm self-update (default: false)");
 	console.log("  -h, --help         Show this help");
 }
 
@@ -204,11 +207,13 @@ function writeReport(options, steps, outdatedSummary, errorMessage = "", pnpmUpd
 			lines.push(`- Current: \`${pnpmUpdateInfo.current}\``);
 			lines.push(`- Latest: \`${pnpmUpdateInfo.latest}\``);
 			lines.push(`- Update available: \`${pnpmUpdateInfo.updateAvailable ? "yes" : "no"}\``);
-		if (pnpmUpdateInfo.updateAvailable) {
-			lines.push("");
-			lines.push("> To update pnpm, run: `npm install -g pnpm@latest`");
-			lines.push(`> Then update package.json: \"packageManager\": \"pnpm@${pnpmUpdateInfo.latest}\"`);
-		}
+			if (pnpmUpdateInfo.updateAvailable) {
+				lines.push("");
+				lines.push("> To update pnpm, run: `npm install -g pnpm@latest`");
+				lines.push(
+					`> Then update package.json: \"packageManager\": \"pnpm@${pnpmUpdateInfo.latest}\"`,
+				);
+			}
 		}
 	} else {
 		lines.push("- Status: `not checked`");
@@ -290,13 +295,23 @@ function getPnpmVersionFromPackageManager() {
 function checkPnpmUpdate() {
 	const current = getPnpmVersionFromPackageManager();
 	if (!current) {
-		return { current: null, latest: null, updateAvailable: false, error: "Could not read pnpm version from package.json" };
+		return {
+			current: null,
+			latest: null,
+			updateAvailable: false,
+			error: "Could not read pnpm version from package.json",
+		};
 	}
 
 	try {
 		const result = shell("npm view pnpm version");
 		if (result.status !== 0) {
-			return { current, latest: null, updateAvailable: false, error: "Failed to check latest pnpm version" };
+			return {
+				current,
+				latest: null,
+				updateAvailable: false,
+				error: "Failed to check latest pnpm version",
+			};
 		}
 		const latest = result.stdout.trim();
 		const currentSemver = parseSemver(current);
@@ -315,6 +330,14 @@ function checkPnpmUpdate() {
 	} catch (error) {
 		return { current, latest: null, updateAvailable: false, error: error.message };
 	}
+}
+
+function updatePnpm() {
+	console.log("\n== Update pnpm version ==");
+	const result = shell("pnpm self-update");
+	if (result.stdout) process.stdout.write(result.stdout);
+	if (result.stderr) process.stderr.write(result.stderr);
+	return result.status === 0;
 }
 
 function main() {
@@ -348,6 +371,15 @@ function main() {
 			console.log(`pnpm update available: ${pnpmUpdateInfo.current} → ${pnpmUpdateInfo.latest}`);
 		} else {
 			console.log(`pnpm is up to date: ${pnpmUpdateInfo.current}`);
+		}
+
+		// Auto-update pnpm if update is available and not skipped
+		if (pnpmUpdateInfo.updateAvailable && !options.skipPnpmUpdate) {
+			const updated = updatePnpm();
+			if (updated) {
+				console.log("pnpm updated successfully");
+				pnpmUpdateInfo = checkPnpmUpdate();
+			}
 		}
 
 		const outdated = runStep(

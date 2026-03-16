@@ -8,7 +8,7 @@
 		"apps/*",
 		"services/*"
 	],
-	"packageManager": "pnpm@10.30.3",
+	"packageManager": "pnpm@10.32.1",
 	"scripts": {
 		"postinstall": "pnpm run instructions:sync",
 		"instructions:sync": "rm -rf .cursor/rules && mkdir -p .cursor/rules && if [ -d .agents/rules ]; then cp -r .agents/rules/. .cursor/rules/; else echo 'No .agents/rules to sync'; fi",

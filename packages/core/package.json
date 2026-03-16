@@ -26,9 +26,9 @@
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\""
 	},
 	"dependencies": {
-		"@tiptap/starter-kit": "^3.20.1",
+		"@tiptap/starter-kit": "^3.20.2",
 		"@ujl-framework/types": "workspace:*",
-		"nanoid": "^5.1.6"
+		"nanoid": "^5.1.7"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.3",
