@@ -87,9 +87,9 @@ ujl/
 │   ├── core/           # Schemas, Validator, Renderer, Composer
 │   ├── types/          # TypeScript types and Zod schemas
 │   ├── ui/             # Shadcn-svelte UI Components
-│   ├── crafter/        # Visual UJL Editor (~600 KB gzip)
-│   ├── adapter-svelte/ # Svelte 5 Adapter (~120 KB gzip)
-│   ├── adapter-web/    # Web Components Adapter (~280 KB gzip)
+│   ├── crafter/        # Visual UJL Editor
+│   ├── adapter-svelte/ # Svelte 5 Adapter
+│   ├── adapter-web/    # Web Components Adapter
 │   └── examples/       # Example Content & Test Data
 └── apps/
     ├── demo/           # Minimal Crafter integration demo (Vite)
@@ -98,13 +98,13 @@ ujl/
 
 ## Packages
 
-| Package                         | Purpose                                 | Size (gzip) | npm                                                                                                                           |
-| ------------------------------- | --------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `@ujl-framework/crafter`        | Full visual editor, embed anywhere      | ~600 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/crafter)](https://npmjs.com/package/@ujl-framework/crafter)               |
-| `@ujl-framework/adapter-web`    | Web Components rendering, no editor     | ~280 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/adapter-web)](https://npmjs.com/package/@ujl-framework/adapter-web)       |
-| `@ujl-framework/adapter-svelte` | Svelte 5 native rendering for SvelteKit | ~120 KB     | [![npm](https://img.shields.io/npm/v/@ujl-framework/adapter-svelte)](https://npmjs.com/package/@ujl-framework/adapter-svelte) |
-| `@ujl-framework/core`           | Composition utilities                   | ~50 KB      | [![npm](https://img.shields.io/npm/v/@ujl-framework/core)](https://npmjs.com/package/@ujl-framework/core)                     |
-| `@ujl-framework/types`          | TypeScript definitions                  | ~10 KB      | [![npm](https://img.shields.io/npm/v/@ujl-framework/types)](https://npmjs.com/package/@ujl-framework/types)                   |
+| Package                                                                                  | Purpose                                 |
+| ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| [@ujl-framework/crafter](https://npmjs.com/package/@ujl-framework/crafter)               | Full visual editor, embed anywhere      |
+| [@ujl-framework/adapter-web](https://npmjs.com/package/@ujl-framework/adapter-web)       | Web Components rendering, no editor     |
+| [@ujl-framework/adapter-svelte](https://npmjs.com/package/@ujl-framework/adapter-svelte) | Svelte 5 native rendering for SvelteKit |
+| [@ujl-framework/core](https://npmjs.com/package/@ujl-framework/core)                     | Composition utilities                   |
+| [@ujl-framework/types](https://npmjs.com/package/@ujl-framework/types)                   | TypeScript definitions                  |
 
 ## Documentation
 
