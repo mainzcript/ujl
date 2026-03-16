@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { overlayPositioning } from "$lib/actions/overlay-position.js";
+	import OverlayBase from "./OverlayBase.svelte";
 
 	interface Props {
 		containerElement: HTMLElement;
@@ -19,6 +19,7 @@
 			const moduleId = hoveredModule.getAttribute("data-ujl-module-id");
 			if (moduleId && moduleId !== selectedModuleId && moduleId !== hoveredModuleId) {
 				hoveredModuleId = moduleId;
+				isVisible = true;
 			}
 		}
 	}
@@ -39,15 +40,6 @@
 		}
 	}
 
-	const actionParams = $derived({
-		containerElement,
-		getModuleId: () => hoveredModuleId,
-		padding: 15,
-		onVisibilityChange: (visible: boolean) => {
-			isVisible = visible;
-		},
-	});
-
 	$effect(() => {
 		if (!containerElement) return;
 
@@ -61,11 +53,18 @@
 	});
 </script>
 
-<div
-	class="pointer-events-none absolute top-0 left-0 z-30 rounded-md border-2 border-dashed border-[oklch(var(--editor-accent-light,var(--accent-light)))]"
-	class:opacity-0={!isVisible}
-	class:opacity-70={isVisible}
-	style="will-change: transform, width, height, opacity;"
-	data-crafter="hover-overlay"
-	use:overlayPositioning={actionParams}
-></div>
+{#if hoveredModuleId && isVisible}
+	<OverlayBase
+		moduleId={hoveredModuleId}
+		{containerElement}
+		padding={15}
+		sticky={false}
+		zIndex={30}
+		pointerEvents="none"
+	>
+		<div
+			class="pointer-events-none h-full w-full rounded-md border-2 border-dashed border-[oklch(var(--editor-accent-light,var(--accent-light)))] opacity-70"
+			data-crafter="hover-indicator"
+		></div>
+	</OverlayBase>
+{/if}

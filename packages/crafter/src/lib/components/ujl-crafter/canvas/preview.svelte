@@ -21,8 +21,7 @@
 	import { logger } from "$lib/utils/logger.js";
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
-	import Island from "../island.svelte";
-	import { ModuleOverlay, HoverOverlay } from "../overlay/index.js";
+	import { Island, HoverIndicator, SelectionIndicator } from "../overlays/index.js";
 	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
@@ -428,20 +427,16 @@
 	<!-- Selection Overlay with {#key} Pattern -->
 	{#key selectedNodeId}
 		{#if crafterMode === "editor" && selectedNodeId && scrollContainer}
-			<ModuleOverlay
-				variant="selection"
-				moduleId={selectedNodeId}
-				containerElement={scrollContainer}
-			/>
+			<SelectionIndicator moduleId={selectedNodeId} containerElement={scrollContainer} />
 		{/if}
 	{/key}
 
 	<!-- Hover Overlay (not keyed, tracks mouse events) -->
 	{#if crafterMode === "editor" && scrollContainer}
-		<HoverOverlay containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
+		<HoverIndicator containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
 	{/if}
 
-	<!-- Module Island with {#key} Pattern -->
+	<!-- Module Actions Overlay with {#key} Pattern -->
 	{#key selectedNodeId}
 		{#if islandState && crafterMode === "editor" && scrollContainer}
 			<Island
