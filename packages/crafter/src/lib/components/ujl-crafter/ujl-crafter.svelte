@@ -4,7 +4,11 @@
 	import { setContext } from "svelte";
 	import { toast } from "svelte-sonner";
 	import type { UJLCDocument, UJLTDocument } from "@ujl-framework/types";
-	import { validateUJLCDocument, validateUJLTDocument } from "@ujl-framework/types";
+	import {
+		resolveColorFromShades,
+		validateUJLCDocument,
+		validateUJLTDocument,
+	} from "@ujl-framework/types";
 	import { Composer } from "@ujl-framework/core";
 	import { InlineLibraryProvider } from "$lib/library-providers/index.js";
 
@@ -114,6 +118,7 @@
 	let portalContainerRef: HTMLDivElement | undefined = $state();
 
 	let appContainerRef: HTMLElement | null = $state(null);
+	let prefersDarkCanvas = $state(false);
 
 	$effect(() => {
 		if (!appContainerRef) return;
@@ -152,6 +157,22 @@
 	});
 
 	$effect(() => {
+		if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+
+		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		const handleChange = () => {
+			prefersDarkCanvas = mediaQuery.matches;
+		};
+
+		handleChange();
+		mediaQuery.addEventListener("change", handleChange);
+
+		return () => {
+			mediaQuery.removeEventListener("change", handleChange);
+		};
+	});
+
+	$effect(() => {
 		if (typeof window === "undefined") return;
 
 		const handleEscape = (event: KeyboardEvent) => {
@@ -173,6 +194,13 @@
 			: validateUJLTDocument(defaultTheme as unknown as UJLTDocument)
 		).ujlt.tokens,
 	);
+
+	const canvasBackground = $derived.by(() => {
+		const ambientColor = store.tokens.color.ambient;
+		const shadeRef = prefersDarkCanvas ? ambientColor.dark : ambientColor.light;
+		const shade = resolveColorFromShades(ambientColor.shades, shadeRef);
+		return `oklch(${shade.l} ${shade.c} ${shade.h})`;
+	});
 
 	function handleExportTheme() {
 		downloadJsonFile(store.ujltDocument, "theme.ujlt.json");
@@ -520,11 +548,10 @@
 		</AppSidebar>
 
 		<AppCanvas>
-			<UJLTheme
-				tokens={store.tokens}
+			<div
 				data-crafter="canvas-surface"
 				class="min-h-full w-full"
-				style="background-color: oklch(var(--ambient));"
+				style={`background-color: ${canvasBackground};`}
 			>
 				<div
 					class="mx-auto min-w-[375px] duration-300"
@@ -537,7 +564,7 @@
 						{editorTokenSet}
 					/>
 				</div>
-			</UJLTheme>
+			</div>
 		</AppCanvas>
 
 		<AppPanel>
