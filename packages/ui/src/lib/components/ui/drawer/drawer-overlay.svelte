@@ -26,7 +26,7 @@
 	data-slot="drawer-overlay"
 	data-state={isOpen ? "open" : "closed"}
 	class={cn(
-		"fixed inset-0 z-50 bg-black/50 transition-opacity duration-200 ease-out",
+		"fixed inset-0 z-50 bg-black/20 backdrop-blur-xs transition-opacity duration-[240ms] ease-out",
 		"data-[state=closed]:pointer-events-none data-[state=closed]:opacity-0",
 		"data-[state=open]:opacity-100",
 		className,

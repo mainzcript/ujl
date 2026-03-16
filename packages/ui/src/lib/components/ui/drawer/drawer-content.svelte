@@ -207,7 +207,7 @@
 		data-state={isOpen ? "open" : "closed"}
 		class={cn(
 			isDark && "dark",
-			"bg-ambient/95 text-ambient-foreground outline outline-foreground/10 backdrop-blur-sm",
+			"bg-ambient/95 text-ambient-foreground shadow-2xl outline outline-foreground/10 backdrop-blur-sm",
 			"group/drawer-content fixed z-50 flex h-auto flex-col will-change-transform",
 			"data-[state=closed]:pointer-events-none",
 			transitionClasses,
