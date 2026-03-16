@@ -105,18 +105,31 @@ test.describe("Designer Mode", () => {
 		await crafter.goto();
 		await crafter.setMode("designer");
 
-		// Find a color input
-		const colorInput = crafter.panel.locator('input[type="color"]').first();
-
-		if (await colorInput.isVisible()) {
-			// Change the color
-			await colorInput.fill("#ff0000");
-
-			await crafter.waitForAnimation();
-
-			// Preview should have updated styles
-			// (Difficult to assert without knowing exact CSS variable names)
+		const ambientLightInput = crafter.panel.locator("#ambient-color-light");
+		if (!(await ambientLightInput.isVisible())) {
+			await crafter.panel.getByRole("button", { name: /Ambient Color/i }).click();
+			await expect(ambientLightInput).toBeVisible();
 		}
+
+		const initialBackground = await crafter.canvasSurface.evaluate((element) => {
+			return window.getComputedStyle(element).backgroundColor;
+		});
+
+		await ambientLightInput.evaluate((element) => {
+			const input = element as HTMLInputElement;
+			input.value = "#ff0000";
+			input.dispatchEvent(new Event("input", { bubbles: true }));
+		});
+
+		await crafter.waitForAnimation();
+
+		await expect
+			.poll(async () => {
+				return crafter.canvasSurface.evaluate((element) => {
+					return window.getComputedStyle(element).backgroundColor;
+				});
+			})
+			.not.toBe(initialBackground);
 	});
 
 	test("should switch back to Editor mode", async ({ page }) => {

@@ -16,6 +16,8 @@ export class CrafterPage {
 	readonly crafterElement: Locator;
 	readonly sidebar: Locator;
 	readonly canvas: Locator;
+	readonly canvasSurface: Locator;
+	readonly previewViewport: Locator;
 	readonly panel: Locator;
 
 	readonly navTree: Locator;
@@ -38,6 +40,8 @@ export class CrafterPage {
 		this.crafterElement = shadowHost;
 		this.sidebar = shadowHost.locator('[data-slot="app-sidebar"]');
 		this.canvas = shadowHost.locator('[data-ujl-scroll-container="canvas"]');
+		this.canvasSurface = shadowHost.locator('[data-crafter="canvas-surface"]');
+		this.previewViewport = this.canvasSurface.locator(":scope > div").first();
 		this.panel = shadowHost.locator('[data-slot="app-panel"]');
 
 		this.navTree = shadowHost.locator('[data-crafter="nav-tree"]');
@@ -89,7 +93,7 @@ export class CrafterPage {
 	 * Get the currently selected module in the preview.
 	 */
 	getSelectedPreviewModule(): Locator {
-		return this.crafterElement.locator('[data-crafter="module-overlay"][data-variant="selection"]');
+		return this.crafterElement.locator('[data-crafter="selection-indicator"]');
 	}
 
 	/**

@@ -65,12 +65,46 @@ test.describe("Viewport Simulation", () => {
 		await expect(desktopToggle).toHaveAttribute("data-state", "on");
 
 		// Preview container should have constrained width
-		const previewContainer = crafter.canvas.locator("div").first();
-		const box = await previewContainer.boundingBox();
+		const box = await crafter.previewViewport.boundingBox();
 
 		// Width should be around 1024px (or less if container is smaller)
 		if (box) {
 			expect(box.width).toBeLessThanOrEqual(1024 + 50); // Some tolerance
+		}
+	});
+
+	test("should keep canvas surface filling the scrollable canvas in responsive and desktop modes", async ({
+		page,
+	}) => {
+		const crafter = new CrafterPage(page);
+		await crafter.goto();
+
+		await expect(crafter.canvasSurface).toBeVisible();
+
+		const responsiveCanvasBox = await crafter.canvas.boundingBox();
+		const responsiveSurfaceBox = await crafter.canvasSurface.boundingBox();
+
+		expect(responsiveCanvasBox).not.toBeNull();
+		expect(responsiveSurfaceBox).not.toBeNull();
+
+		if (responsiveCanvasBox && responsiveSurfaceBox) {
+			expect(Math.abs(responsiveSurfaceBox.width - responsiveCanvasBox.width)).toBeLessThanOrEqual(
+				2,
+			);
+			expect(responsiveSurfaceBox.height).toBeGreaterThanOrEqual(responsiveCanvasBox.height);
+		}
+
+		await crafter.setViewport("desktop");
+
+		const desktopCanvasBox = await crafter.canvas.boundingBox();
+		const desktopSurfaceBox = await crafter.canvasSurface.boundingBox();
+
+		expect(desktopCanvasBox).not.toBeNull();
+		expect(desktopSurfaceBox).not.toBeNull();
+
+		if (desktopCanvasBox && desktopSurfaceBox) {
+			expect(Math.abs(desktopSurfaceBox.width - desktopCanvasBox.width)).toBeLessThanOrEqual(2);
+			expect(desktopSurfaceBox.height).toBeGreaterThanOrEqual(desktopCanvasBox.height);
 		}
 	});
 

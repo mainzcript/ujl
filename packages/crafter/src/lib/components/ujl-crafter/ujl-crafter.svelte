@@ -520,7 +520,12 @@
 		</AppSidebar>
 
 		<AppCanvas>
-			<div class="h-full">
+			<UJLTheme
+				tokens={store.tokens}
+				data-crafter="canvas-surface"
+				class="min-h-full w-full"
+				style="background-color: oklch(var(--ambient));"
+			>
 				<div
 					class="mx-auto min-w-[375px] duration-300"
 					style={store.viewportSize ? `width: ${store.viewportSize}px;` : "width: 100%;"}
@@ -532,7 +537,7 @@
 						{editorTokenSet}
 					/>
 				</div>
-			</div>
+			</UJLTheme>
 		</AppCanvas>
 
 		<AppPanel>
