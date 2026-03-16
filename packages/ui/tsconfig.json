@@ -6,9 +6,7 @@
 		".svelte-kit/types/**/$types.d.ts",
 		"./src/**/*.js",
 		"./src/**/*.ts",
-		"./src/**/*.svelte",
-		"./.storybook/**/*.ts",
-		"./.storybook/**/*.svelte"
+		"./src/**/*.svelte"
 	],
 	"compilerOptions": {
 		"allowImportingTsExtensions": true,

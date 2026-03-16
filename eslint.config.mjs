@@ -307,13 +307,6 @@ export default defineConfig(
 			"no-console": "off",
 		},
 	},
-	// Storybook stories - console statements are common for demos
-	{
-		files: ["**/*.stories.svelte", "**/*.stories.ts", "**/*.stories.js"],
-		rules: {
-			"no-console": "off",
-		},
-	},
 	// Logger utilities - console is the whole point
 	{
 		files: ["**/utils/logger.{ts,js}", "**/lib/utils/logger.{ts,js}"],

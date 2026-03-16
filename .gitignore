@@ -79,9 +79,6 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Storybook
-storybook-static/
-
 # User specific files
 .support/
 
