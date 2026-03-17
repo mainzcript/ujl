@@ -1,5 +1,19 @@
 <script lang="ts">
-	import { App, AppLogo, AppHeader, AppSidebar, AppCanvas, AppPanel } from "../ui/app/index.js";
+	import {
+		App,
+		AppLogo,
+		AppHeader,
+		AppSidebar,
+		AppCanvas,
+		AppPanel,
+		AppMobileMenu,
+		useApp,
+	} from "../ui/app/index.js";
+	import { Button, ToggleGroup, ToggleGroupItem } from "@ujl-framework/ui";
+	import MonitorIcon from "@lucide/svelte/icons/monitor";
+	import TabletIcon from "@lucide/svelte/icons/tablet";
+	import SmartphoneIcon from "@lucide/svelte/icons/smartphone";
+	import Settings2Icon from "@lucide/svelte/icons/settings-2";
 	import { Badge, UJLTheme } from "@ujl-framework/ui";
 	import { setContext } from "svelte";
 	import { toast } from "svelte-sonner";
@@ -512,6 +526,35 @@
 	});
 </script>
 
+{#snippet mobileMenuContent(app: ReturnType<typeof useApp>)}
+	<div class="flex items-center justify-between py-2">
+		<ToggleGroup
+			type="single"
+			value={store.viewportType}
+			onValueChange={(value) => handleViewportTypeChange(value)}
+			data-crafter="viewport-toggles"
+		>
+			<ToggleGroupItem value="desktop" title="Desktop View (1024px)">
+				<MonitorIcon />
+			</ToggleGroupItem>
+			<ToggleGroupItem value="tablet" title="Tablet View (768px)">
+				<TabletIcon class="-rotate-90" />
+			</ToggleGroupItem>
+			<ToggleGroupItem value="mobile" title="Mobile View (375px)">
+				<SmartphoneIcon />
+			</ToggleGroupItem>
+		</ToggleGroup>
+
+		<Button
+			onclick={() => app.togglePanel()}
+			variant={app.isPanelVisible ? "muted" : "ghost"}
+			size="icon"
+		>
+			<Settings2Icon />
+		</Button>
+	</div>
+{/snippet}
+
 <UJLTheme
 	tokens={editorTokenSet}
 	class={store.isFullscreen ? "fixed inset-0 isolate z-9999 h-full w-full" : "h-full w-full"}
@@ -574,6 +617,10 @@
 				<DesignerPanel tokens={store.tokens} />
 			{/if}
 		</AppPanel>
+
+		<AppMobileMenu>
+			{@render mobileMenuContent(useApp())}
+		</AppMobileMenu>
 	</App>
 
 	<ComponentPicker

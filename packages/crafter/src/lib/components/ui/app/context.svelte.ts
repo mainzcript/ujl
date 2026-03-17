@@ -1,6 +1,10 @@
 import type { Snippet } from "svelte";
 import { getContext, setContext } from "svelte";
-import { BREAKPOINT_PANEL_DESKTOP, BREAKPOINT_SIDEBAR_DESKTOP } from "./constants.js";
+import {
+	BREAKPOINT_MOBILE_MENU,
+	BREAKPOINT_PANEL_DESKTOP,
+	BREAKPOINT_SIDEBAR_DESKTOP,
+} from "./constants.js";
 
 export type AppInitOptions = {
 	initialSidebarOpen?: boolean;
@@ -51,6 +55,11 @@ class AppState {
 
 	get isDesktopPanel(): boolean {
 		return this.#containerWidth >= BREAKPOINT_PANEL_DESKTOP;
+	}
+
+	// Mobile Menu visibility
+	get isMobileView(): boolean {
+		return this.#containerWidth < BREAKPOINT_MOBILE_MENU;
 	}
 
 	// Combined visibility (Desktop + Mobile)
@@ -153,7 +162,7 @@ class AppState {
 const SYMBOL_KEY = "crafter-app";
 const REGISTRY_KEY = "crafter-app-registry";
 
-export type AppSlot = "logo" | "header" | "sidebar" | "canvas" | "panel";
+export type AppSlot = "logo" | "header" | "sidebar" | "canvas" | "panel" | "mobile-menu";
 
 /**
  * Registry for App component slots.
@@ -167,6 +176,7 @@ class AppRegistry {
 		sidebar: null,
 		canvas: null,
 		panel: null,
+		"mobile-menu": null,
 	});
 
 	/**
@@ -202,6 +212,10 @@ class AppRegistry {
 
 	get panel(): Snippet | null {
 		return this.#slots.panel;
+	}
+
+	get mobileMenu(): Snippet | null {
+		return this.#slots["mobile-menu"];
 	}
 }
 

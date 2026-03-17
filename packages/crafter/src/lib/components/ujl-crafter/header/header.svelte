@@ -125,22 +125,24 @@
 			</SelectContent>
 		</Select>
 
-		<ToggleGroup
-			type="single"
-			value={viewportType}
-			onValueChange={(value) => onViewportTypeChange?.(value)}
-			data-crafter="viewport-toggles"
-		>
-			<ToggleGroupItem value="desktop" title="Desktop View (1024px)">
-				<MonitorIcon />
-			</ToggleGroupItem>
-			<ToggleGroupItem value="tablet" title="Tablet View (768px)">
-				<TabletIcon class="-rotate-90" />
-			</ToggleGroupItem>
-			<ToggleGroupItem value="mobile" title="Mobile View (375px)">
-				<SmartphoneIcon />
-			</ToggleGroupItem>
-		</ToggleGroup>
+		{#if !app.isMobileView}
+			<ToggleGroup
+				type="single"
+				value={viewportType}
+				onValueChange={(value) => onViewportTypeChange?.(value)}
+				data-crafter="viewport-toggles"
+			>
+				<ToggleGroupItem value="desktop" title="Desktop View (1024px)">
+					<MonitorIcon />
+				</ToggleGroupItem>
+				<ToggleGroupItem value="tablet" title="Tablet View (768px)">
+					<TabletIcon class="-rotate-90" />
+				</ToggleGroupItem>
+				<ToggleGroupItem value="mobile" title="Mobile View (375px)">
+					<SmartphoneIcon />
+				</ToggleGroupItem>
+			</ToggleGroup>
+		{/if}
 	</div>
 
 	<div class="flex items-center gap-2">
@@ -207,12 +209,14 @@
 				{/if}
 			</Button>
 		{/if}
-		<Button
-			onclick={() => app.togglePanel()}
-			variant={app.isPanelVisible ? "muted" : "ghost"}
-			size="icon"
-		>
-			<Settings2Icon />
-		</Button>
+		{#if !app.isMobileView}
+			<Button
+				onclick={() => app.togglePanel()}
+				variant={app.isPanelVisible ? "muted" : "ghost"}
+				size="icon"
+			>
+				<Settings2Icon />
+			</Button>
+		{/if}
 	</div>
 </div>
