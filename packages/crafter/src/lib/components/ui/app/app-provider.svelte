@@ -88,7 +88,7 @@
 	bind:this={containerRef}
 	data-slot="app-wrapper"
 	style="--ujl-app-sidebar-width: {APP_SIDEBAR_WIDTH}; --ujl-app-panel-width: {APP_PANEL_WIDTH}; {style}"
-	class={cn("h-full bg-background p-1", className)}
+	class={cn("h-full bg-background", app.isMobileView && "p-1", className)}
 	{...restProps}
 >
 	<!-- Render children first so they can register their content -->
