@@ -9,8 +9,7 @@ import { ModuleBase } from "./base.js";
 // ============================================
 
 /**
- * Minimal concrete ModuleBase implementation for testing parseField and
- * escapeHtml behaviour. Exposes both protected methods publicly.
+ * Minimal concrete ModuleBase implementation for testing ModuleBase helpers.
  */
 class TestModule extends ModuleBase {
 	public readonly name = "test";
@@ -31,6 +30,10 @@ class TestModule extends ModuleBase {
 		return { type: "text", id: "test-id", props: {} };
 	}
 
+	public getInstanceLabel(_moduleData: UJLCModuleObject): string | null {
+		return null;
+	}
+
 	// Expose protected methods for testing
 	public testParseField<T>(moduleData: UJLCModuleObject, key: string, fallback: T): T {
 		return this.parseField(moduleData, key, fallback);
@@ -38,6 +41,10 @@ class TestModule extends ModuleBase {
 
 	public testEscapeHtml(value: string): string {
 		return this.escapeHtml(value);
+	}
+
+	public testGetTextPreviewLabel(value: unknown, maxLength = 40): string | null {
+		return this.getTextPreviewLabel(value, maxLength);
 	}
 }
 
@@ -138,5 +145,40 @@ describe("ModuleBase.escapeHtml", () => {
 	it("returns an empty string unchanged", () => {
 		const mod = new TestModule();
 		expect(mod.testEscapeHtml("")).toBe("");
+	});
+});
+
+describe("ModuleBase.getTextPreviewLabel", () => {
+	it("returns trimmed plain text", () => {
+		const mod = new TestModule();
+		expect(mod.testGetTextPreviewLabel("  Hello world  ")).toBe("Hello world");
+	});
+
+	it("extracts text from rich-text documents", () => {
+		const mod = new TestModule();
+		const value = {
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{ type: "text", text: "Hello" },
+						{ type: "text", text: " world" },
+					],
+				},
+			],
+		};
+
+		expect(mod.testGetTextPreviewLabel(value)).toBe("Hello  world");
+	});
+
+	it("truncates long text previews", () => {
+		const mod = new TestModule();
+		expect(mod.testGetTextPreviewLabel("a".repeat(50), 10)).toBe("aaaaaaaaaa...");
+	});
+
+	it("returns null for empty content", () => {
+		const mod = new TestModule();
+		expect(mod.testGetTextPreviewLabel("   ")).toBeNull();
 	});
 });

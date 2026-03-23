@@ -18,6 +18,14 @@ export class Button extends ModuleBase {
 	public readonly tags = ["cta", "action", "link", "click"] as const;
 	public readonly icon = '<rect width="20" height="12" x="2" y="6" rx="2"/>';
 
+	/**
+	 * Use the visible button label as the instance name when available.
+	 */
+	public getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const label = this.parseField(moduleData, "label", "Click me").trim();
+		return label || null;
+	}
+
 	/** Field definitions available in this module */
 	public readonly fields = [
 		{

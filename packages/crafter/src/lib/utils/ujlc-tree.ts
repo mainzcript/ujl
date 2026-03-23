@@ -9,7 +9,6 @@
  * - Immutable tree mutations (insert, remove, update)
  * - Virtual root node handling
  * - Clipboard/paste validation
- * - Node display formatting
  */
 
 import { generateUid } from "@ujl-framework/core";
@@ -640,75 +639,6 @@ export function getAllSlotEntries(node: UJLCModuleObject): [string, UJLCModuleOb
  */
 export function canAcceptDrop(targetNode: UJLCModuleObject): boolean {
 	return targetNode.slots && Object.keys(targetNode.slots).length > 0;
-}
-
-// ============================================
-// Display & Formatting
-// ============================================
-
-/**
- * Extracts plain text from a ProseMirror Document
- * @internal - Used only by getDisplayName()
- */
-function extractTextFromProseMirror(doc: unknown): string {
-	if (
-		typeof doc === "object" &&
-		doc !== null &&
-		"type" in doc &&
-		doc.type === "doc" &&
-		"content" in doc &&
-		Array.isArray(doc.content)
-	) {
-		const textParts: string[] = [];
-		const extractText = (node: unknown): void => {
-			if (typeof node === "object" && node !== null) {
-				if ("text" in node && typeof node.text === "string") {
-					textParts.push(node.text);
-				}
-				if ("content" in node && Array.isArray(node.content)) {
-					for (const child of node.content) {
-						extractText(child);
-					}
-				}
-			}
-		};
-		for (const node of doc.content) {
-			extractText(node);
-		}
-		return textParts.join(" ");
-	}
-	return "";
-}
-
-/**
- * Returns a display name for a node.
- * Tries to use title, label, or headline fields first, then falls back to content
- * (shortened if too long), and finally just the formatted type name.
- *
- * @param node - The node to get a display name for
- * @returns A human-readable display name for the node
- */
-export function getDisplayName(node: UJLCModuleObject): string {
-	const typeName = formatTypeName(node.type);
-
-	if (node.fields.title) return `${typeName}: ${node.fields.title}`;
-	if (node.fields.label) return `${typeName}: ${node.fields.label}`;
-	if (node.fields.headline) return `${typeName}: ${node.fields.headline}`;
-
-	if (node.fields.content) {
-		const contentText =
-			typeof node.fields.content === "string"
-				? node.fields.content.trim()
-				: // Extract text from ProseMirror Document
-					extractTextFromProseMirror(node.fields.content).trim();
-		if (contentText) {
-			const shortContent =
-				contentText.length > 40 ? `${contentText.substring(0, 40)}...` : contentText;
-			return `${typeName}: ${shortContent}`;
-		}
-	}
-
-	return typeName;
 }
 
 /**

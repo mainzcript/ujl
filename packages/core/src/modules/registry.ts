@@ -54,6 +54,27 @@ export class ModuleRegistry {
 	}
 
 	/**
+	 * Resolve the human-readable display name for a module instance.
+	 *
+	 * Returns the module's instance label when available. Falls back to the
+	 * module's static type label when the instance has no individual label, and
+	 * only falls back to a generated type label when the module type is not
+	 * present in the registry.
+	 *
+	 * @param moduleData - Module instance to resolve for display
+	 * @returns Human-readable display name for the instance
+	 */
+	public getDisplayName(moduleData: UJLCModuleObject): string {
+		const module = this.getModule(moduleData.type);
+		if (!module) {
+			return ModuleRegistry.generateLabelFromName(moduleData.type);
+		}
+
+		const instanceLabel = module.getInstanceLabel(moduleData)?.trim() || null;
+		return instanceLabel ?? module.label;
+	}
+
+	/**
 	 * Get all registered modules
 	 * @returns Array of all registered modules (immutable copy)
 	 */

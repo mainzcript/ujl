@@ -15,8 +15,16 @@ export class TEMPLATE_Module extends ModuleBase {
 	/** Unique identifier for this module type */
 	public readonly name = "template"; // TODO: Change to your module type name
 
-	/** Human-readable display name */
+	/** Human-readable type label for this module */
 	public readonly label = "Template"; // TODO: Set appropriate label
+
+	/**
+	 * Optional human-readable label for a specific module instance.
+	 * Return `null` if the UI should show only the static module label.
+	 */
+	public getInstanceLabel(_moduleData: UJLCModuleObject): string | null {
+		return null;
+	}
 
 	/** Description for component picker */
 	public readonly description = "TODO: Add description for your module";

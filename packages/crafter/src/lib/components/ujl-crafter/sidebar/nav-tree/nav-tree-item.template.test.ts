@@ -16,4 +16,12 @@ describe("nav-tree-item template", () => {
 		expect(matches).toHaveLength(2);
 		expect(matches.map((match) => match[1])).toEqual(["canInsertRoot", "canInsertRoot"]);
 	});
+
+	it("renders the module icon from the registry for non-root nodes", () => {
+		const currentDir = dirname(fileURLToPath(import.meta.url));
+		const source = readFileSync(resolve(currentDir, "nav-tree-item.svelte"), "utf8");
+
+		expect(source).toContain("composer.getRegistry().getModule(node.type)?.getSvgIcon() ?? null");
+		expect(source).toContain('data-crafter="nav-tree-item-icon"');
+	});
 });

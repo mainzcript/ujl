@@ -29,6 +29,7 @@
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
 	import {
+		CanvasDragGhost,
 		ModuleActionBar,
 		HoverIndicator,
 		SelectionIndicator,
@@ -37,6 +38,7 @@
 	} from "../overlays/index.js";
 	import {
 		findParentOfNode,
+		findNodeById,
 		isValidMoveInsertRequest,
 		ROOT_NODE_ID,
 	} from "$lib/utils/ujlc-tree.js";
@@ -263,6 +265,8 @@
 
 	interface ModuleActionBarState {
 		moduleId: string;
+		dragDisplayName: string;
+		dragIconSvg: string | null;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 	}
@@ -528,9 +532,12 @@
 		}
 
 		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
+		const { dragDisplayName, dragIconSvg } = getModuleDragMetadata(moduleId);
 
 		moduleActionBarState = {
 			moduleId,
+			dragDisplayName,
+			dragIconSvg,
 			canMoveUp,
 			canMoveDown,
 		};
@@ -565,6 +572,24 @@
 		return {
 			canMoveUp: index > 0,
 			canMoveDown: index < slotContent.length - 1,
+		};
+	}
+
+	function getModuleDragMetadata(moduleId: string): {
+		dragDisplayName: string;
+		dragIconSvg: string | null;
+	} {
+		const moduleNode = findNodeById(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!moduleNode) {
+			return {
+				dragDisplayName: moduleId,
+				dragIconSvg: null,
+			};
+		}
+
+		return {
+			dragDisplayName: composer.getRegistry().getDisplayName(moduleNode),
+			dragIconSvg: composer.getRegistry().getModule(moduleNode.type)?.getSvgIcon() ?? null,
 		};
 	}
 
@@ -727,6 +752,10 @@
 		<HoverIndicator containerElement={scrollContainer} {selectedModuleId} />
 	{/if}
 
+	{#if crafterMode === "editor"}
+		<CanvasDragGhost containerElement={scrollContainerRef ?? null} />
+	{/if}
+
 	<!-- Module Quick Actions -->
 	{#if crafterMode === "editor" && scrollContainer}
 		<ModulePlacementTargets containerElement={scrollContainer} {selectedModuleId} />
@@ -738,6 +767,8 @@
 			<ModuleActionBar
 				moduleId={moduleActionBarState.moduleId}
 				containerElement={scrollContainer}
+				dragDisplayName={moduleActionBarState.dragDisplayName}
+				dragIconSvg={moduleActionBarState.dragIconSvg}
 				canMoveUp={moduleActionBarState.canMoveUp}
 				canMoveDown={moduleActionBarState.canMoveDown}
 				onSelect={handleModuleActionBarSelect}

@@ -33,6 +33,11 @@ class MockModule extends ModuleBase {
 	public compose(_moduleData: UJLCModuleObject, _composer: Composer): UJLAbstractNode {
 		return { type: "text", id: "test-id", props: {} };
 	}
+
+	public getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const title = this.parseField(moduleData, "title", "Hello").trim();
+		return title || null;
+	}
 }
 
 function createRegistry(): ModuleRegistry {
@@ -231,6 +236,56 @@ describe("ModuleRegistry", () => {
 			expect(() => registry.createModuleFromType("nonexistent", "id-x")).toThrowError(
 				'Module type "nonexistent" not found in registry',
 			);
+		});
+	});
+
+	describe("getDisplayName", () => {
+		it("returns the static module label when the module has no instance label", () => {
+			const registry = createRegistry();
+
+			class NamelessModule extends MockModule {
+				public override getInstanceLabel(): string | null {
+					return null;
+				}
+			}
+
+			registry.registerModule(new NamelessModule("alpha", "Alpha"));
+
+			expect(
+				registry.getDisplayName({
+					type: "alpha",
+					meta: { id: "alpha-1", updated_at: new Date().toISOString(), _embedding: [] },
+					fields: {},
+					slots: {},
+				}),
+			).toBe("Alpha");
+		});
+
+		it("returns only the instance label for named modules", () => {
+			const registry = createRegistry();
+			registry.registerModule(new MockModule("alpha", "Alpha"));
+
+			expect(
+				registry.getDisplayName({
+					type: "alpha",
+					meta: { id: "alpha-1", updated_at: new Date().toISOString(), _embedding: [] },
+					fields: { title: "Launch" },
+					slots: {},
+				}),
+			).toBe("Launch");
+		});
+
+		it("falls back to a generated label when the module type is missing", () => {
+			const registry = createRegistry();
+
+			expect(
+				registry.getDisplayName({
+					type: "call-to-action",
+					meta: { id: "cta-1", updated_at: new Date().toISOString(), _embedding: [] },
+					fields: {},
+					slots: {},
+				}),
+			).toBe("Call To Action");
 		});
 	});
 

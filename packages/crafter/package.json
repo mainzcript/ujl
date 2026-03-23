@@ -4,7 +4,7 @@
 	"description": "UJL Crafter - Visual Editor for UJL Content",
 	"license": "MIT",
 	"scripts": {
-		"dev": "concurrently -n tw,vite -c blue,green \"pnpm run build:tailwind:watch\" \"vite\"",
+		"dev": "concurrently -n tw,vite -c blue,green \"pnpm run build:tailwind:watch\" \"vite --host\"",
 		"build": "pnpm run build:tailwind && vite build",
 		"build:analyze": "pnpm run build:tailwind && vite build --mode analyze",
 		"build:tailwind": "tailwindcss -i src/lib/styles/bundle.css -o src/lib/styles/_bundled.css --minify",

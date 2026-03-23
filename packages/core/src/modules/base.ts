@@ -6,6 +6,50 @@ import { Slot } from "./slot.js";
 import type { ComponentCategory } from "./types.js";
 
 /**
+ * Extract plain text from structured rich-text content.
+ *
+ * Traverses ProseMirror-style documents recursively and concatenates all text
+ * nodes in document order. Returns an empty string when the input does not
+ * match the expected rich-text structure.
+ *
+ * @param value - Structured field value, typically a rich-text document
+ * @returns Concatenated plain-text content, or an empty string when unavailable
+ */
+function extractTextFromStructuredContent(value: unknown): string {
+	if (
+		typeof value === "object" &&
+		value !== null &&
+		"type" in value &&
+		value.type === "doc" &&
+		"content" in value &&
+		Array.isArray(value.content)
+	) {
+		const textParts: string[] = [];
+
+		const extractText = (node: unknown): void => {
+			if (typeof node === "object" && node !== null) {
+				if ("text" in node && typeof node.text === "string") {
+					textParts.push(node.text);
+				}
+				if ("content" in node && Array.isArray(node.content)) {
+					for (const child of node.content) {
+						extractText(child);
+					}
+				}
+			}
+		};
+
+		for (const node of value.content) {
+			extractText(node);
+		}
+
+		return textParts.join(" ");
+	}
+
+	return "";
+}
+
+/**
  * Represents a single field definition within a module
  *
  * Contains the field key and the actual field instance.
@@ -79,8 +123,21 @@ export abstract class ModuleBase {
 		doc: UJLCDocument,
 	): UJLAbstractNode | Promise<UJLAbstractNode>;
 
-	/** Human-readable display name */
+	/** Human-readable type label for the module itself */
 	public abstract readonly label: string;
+
+	/**
+	 * Human-readable label for a specific module instance.
+	 *
+	 * Returns only the instance-specific part of the name. UI consumers combine
+	 * this with the module's static {@link label} according to their own display
+	 * rules. Return `null` when the module has no meaningful individual name and
+	 * the static module label should be shown instead.
+	 *
+	 * @param moduleData - The concrete module instance from the UJLC document
+	 * @returns Instance-specific label, or null to fall back to {@link label}
+	 */
+	public abstract getInstanceLabel(moduleData: UJLCModuleObject): string | null;
 
 	/** Description for component picker */
 	public abstract readonly description: string;
@@ -149,6 +206,31 @@ export abstract class ModuleBase {
 		if (!entry) return fallback;
 		const parsed = entry.field.parse(moduleData.fields[key]);
 		return (parsed ?? fallback) as T;
+	}
+
+	/**
+	 * Extracts a short text preview from plain strings or structured rich-text values.
+	 *
+	 * Trims leading and trailing whitespace, falls back to extracting text from
+	 * structured rich-text input, and truncates long results with an ellipsis.
+	 *
+	 * @param value - Plain text or structured rich-text content
+	 * @param maxLength - Maximum length before truncation occurs
+	 * @returns Short preview text, or null when no meaningful text is available
+	 */
+	protected getTextPreviewLabel(value: unknown, maxLength = 40): string | null {
+		const rawText =
+			typeof value === "string" ? value.trim() : extractTextFromStructuredContent(value).trim();
+
+		if (!rawText) {
+			return null;
+		}
+
+		if (rawText.length <= maxLength) {
+			return rawText;
+		}
+
+		return `${rawText.substring(0, maxLength)}...`;
 	}
 
 	/**

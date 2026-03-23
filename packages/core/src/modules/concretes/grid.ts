@@ -19,6 +19,13 @@ export class GridModule extends ModuleBase {
 	public readonly icon =
 		'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>';
 
+	/**
+	 * Grids rely on the static module label for display.
+	 */
+	public getInstanceLabel(_moduleData: UJLCModuleObject): string | null {
+		return null;
+	}
+
 	/** Field definitions available in this module */
 	public readonly fields = [];
 

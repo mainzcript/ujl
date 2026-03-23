@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from "svelte";
 	import { Settings, ChevronUp, ChevronDown, EllipsisVertical, Move } from "@lucide/svelte";
 	import {
 		Button,
@@ -15,6 +16,8 @@
 	interface Props {
 		moduleId: string;
 		containerElement: HTMLElement;
+		dragDisplayName: string;
+		dragIconSvg?: string | null;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 		onSelect: () => void;
@@ -35,6 +38,8 @@
 	let {
 		moduleId,
 		containerElement,
+		dragDisplayName,
+		dragIconSvg = null,
 		canMoveUp,
 		canMoveDown,
 		onSelect,
@@ -114,10 +119,18 @@
 
 		activePointerId = event.pointerId;
 		dragHandleElement?.setPointerCapture(event.pointerId);
-		canvasDrag.startDrag(moduleId, event.pointerId, {
-			clientX: event.clientX,
-			clientY: event.clientY,
-		});
+		canvasDrag.startDrag(
+			moduleId,
+			event.pointerId,
+			{
+				clientX: event.clientX,
+				clientY: event.clientY,
+			},
+			{
+				dragDisplayName,
+				dragIconSvg,
+			},
+		);
 	}
 
 	function handleDragPointerMove(event: PointerEvent) {
@@ -135,6 +148,17 @@
 		if (dragHandleElement?.hasPointerCapture(pointerId)) {
 			dragHandleElement.releasePointerCapture(pointerId);
 		}
+	}
+
+	function cancelActiveDrag() {
+		const pointerId = activePointerId;
+		activePointerId = null;
+
+		if (pointerId !== null) {
+			releaseDragPointer(pointerId);
+		}
+
+		canvasDrag.cancelDrag();
 	}
 
 	function handleDragPointerUp(event: PointerEvent) {
@@ -159,24 +183,74 @@
 		event.preventDefault();
 		event.stopPropagation();
 
-		const pointerId = activePointerId;
-		activePointerId = null;
-		canvasDrag.cancelDrag();
-		releaseDragPointer(pointerId);
+		cancelActiveDrag();
 	}
 
 	function handleLostPointerCapture() {
 		if (activePointerId === null) return;
 
-		activePointerId = null;
-		canvasDrag.cancelDrag();
+		cancelActiveDrag();
 	}
+
+	$effect(() => {
+		if (typeof window === "undefined" || !isDragging) {
+			return;
+		}
+
+		const handleWindowKeyDown = (event: KeyboardEvent) => {
+			if (event.key !== "Escape" || !isDragging) {
+				return;
+			}
+
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			cancelActiveDrag();
+		};
+
+		window.addEventListener("keydown", handleWindowKeyDown, true);
+
+		return () => {
+			window.removeEventListener("keydown", handleWindowKeyDown, true);
+		};
+	});
+
+	$effect(() => {
+		const moduleElement = containerElement.querySelector(
+			`[data-ujl-module-id="${moduleId}"]`,
+		) as HTMLElement | null;
+
+		if (!moduleElement) {
+			return;
+		}
+
+		if (isDragging) {
+			moduleElement.setAttribute("data-crafter-dragging-source", "true");
+		} else {
+			moduleElement.removeAttribute("data-crafter-dragging-source");
+		}
+
+		return () => {
+			moduleElement.removeAttribute("data-crafter-dragging-source");
+		};
+	});
+
+	onDestroy(() => {
+		if (
+			activePointerId !== null ||
+			(canvasDrag.isDragging && canvasDrag.draggedModuleId === moduleId)
+		) {
+			cancelActiveDrag();
+		}
+	});
 </script>
 
 <OverlayBase {moduleId} {containerElement} sticky={true} zIndex={50}>
 	<div
-		class="flex items-center gap-1 rounded-2xl border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1 shadow-lg"
+		class="flex items-center gap-1 rounded-2xl border-2 border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar px-2 py-1 shadow-lg transition-all duration-150 {isDragging
+			? 'scale-[1.02] bg-sidebar/95 shadow-2xl ring-2 ring-[oklch(var(--editor-accent-light,var(--accent-light)))]/40'
+			: ''}"
 		data-crafter="module-action-bar"
+		data-dragging={isDragging ? "true" : "false"}
 	>
 		<Button
 			bind:ref={dragHandleElement}
@@ -255,3 +329,10 @@
 		</DropdownMenu>
 	</div>
 </OverlayBase>
+
+<style>
+	:global([data-crafter-dragging-source="true"]) {
+		opacity: 0.72;
+		transition: opacity 150ms ease-out;
+	}
+</style>

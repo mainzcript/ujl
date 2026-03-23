@@ -25,6 +25,14 @@ export class CardModule extends ModuleBase {
 	public readonly tags = ["feature", "info", "box", "panel"] as const;
 	public readonly icon = '<rect width="18" height="18" x="3" y="3" rx="2"/>';
 
+	/**
+	 * Use the card title as the instance name when available.
+	 */
+	public getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const title = this.parseField(moduleData, "title", "").trim();
+		return title || null;
+	}
+
 	/** Field definitions available in this module */
 	public readonly fields = [
 		{

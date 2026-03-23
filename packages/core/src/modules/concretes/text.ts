@@ -19,6 +19,14 @@ export class TextModule extends ModuleBase {
 	public readonly icon =
 		'<path d="M15 5h6"/><path d="M15 12h6"/><path d="M3 19h18"/><path d="m3 12 3.553-7.724a.5.5 0 0 1 .894 0L11 12"/><path d="M3.92 10h6.16"/>';
 
+	/**
+	 * Use a short excerpt of the text content as the instance name.
+	 */
+	public getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const content = this.parseField(moduleData, "content", this.EMPTY_DOCUMENT);
+		return this.getTextPreviewLabel(content);
+	}
+
 	/** Field definitions available in this module */
 	public readonly fields = [
 		{

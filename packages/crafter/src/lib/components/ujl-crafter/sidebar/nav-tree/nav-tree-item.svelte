@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { UJLCModuleObject } from "@ujl-framework/types";
+	import type { Composer } from "@ujl-framework/core";
 	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
 	import MoreVerticalIcon from "@lucide/svelte/icons/more-vertical";
 	import {
@@ -22,7 +23,6 @@
 	import NavTreeSlotGroup from "./nav-tree-slot-group.svelte";
 	import NavTreeItem from "./nav-tree-item.svelte";
 	import {
-		getDisplayName,
 		getChildren,
 		hasChildren,
 		hasMultipleSlots,
@@ -32,7 +32,7 @@
 	} from "$lib/utils/ujlc-tree.js";
 	import { getContext } from "svelte";
 	import { cn } from "@ujl-framework/ui/utils";
-	import { CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
+	import { COMPOSER_CONTEXT, CRAFTER_CONTEXT, type CrafterContext } from "$lib/stores/index.js";
 
 	let {
 		node,
@@ -117,6 +117,7 @@
 
 	// Get Crafter Context for expanded state
 	const crafter = getContext<CrafterContext>(CRAFTER_CONTEXT);
+	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 	const expandedNodeIds = $derived(crafter.expandedNodeIds);
 
 	// Root node is always expanded and not collapsible
@@ -130,7 +131,12 @@
 	}
 
 	// Root node display name
-	const displayName = $derived(isRootNode ? "Document" : getDisplayName(node));
+	const displayName = $derived(
+		isRootNode ? "Document" : composer.getRegistry().getDisplayName(node),
+	);
+	const moduleIconSvg = $derived(
+		isRootNode ? null : (composer.getRegistry().getModule(node.type)?.getSvgIcon() ?? null),
+	);
 
 	// Root node cannot be copied, cut, or deleted
 	const canCopyRoot = $derived(!isRootNode);
@@ -169,6 +175,22 @@
 		{canInsert}
 		{canDelete}
 	/>
+{/snippet}
+
+{#snippet nodeLabelContent()}
+	<span class="flex min-w-0 items-center gap-2 overflow-hidden">
+		{#if moduleIconSvg}
+			<span
+				class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[oklch(var(--editor-accent-light,var(--accent-light)))]/15 text-current [&_svg]:h-3 [&_svg]:w-3"
+				data-crafter="nav-tree-item-icon"
+			>
+				<!-- SVG strings come from trusted module definitions -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html moduleIconSvg}
+			</span>
+		{/if}
+		<span class="min-w-0 truncate">{displayName}</span>
+	</span>
 {/snippet}
 
 {#snippet slotChildrenContent()}
@@ -300,7 +322,7 @@
 										}}
 										class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 									>
-										<span>{displayName}</span>
+										{@render nodeLabelContent()}
 									</button>
 									<DropdownMenu bind:open={dropdownOpen}>
 										<DropdownMenuTrigger>
@@ -384,7 +406,9 @@
 						ondragend={onDragEnd}
 						data-crafter="nav-tree-item-button"
 					>
-						<span class="flex-1 overflow-hidden text-ellipsis">{displayName}</span>
+						<span class="flex-1 overflow-hidden text-ellipsis">
+							{@render nodeLabelContent()}
+						</span>
 						<DropdownMenu bind:open={dropdownOpen}>
 							<DropdownMenuTrigger>
 								{#snippet child({ props: triggerProps })}
@@ -464,7 +488,7 @@
 									}}
 									class="w-full overflow-hidden text-left text-nowrap text-ellipsis"
 								>
-									<span>{displayName}</span>
+									{@render nodeLabelContent()}
 								</button>
 								<DropdownMenu bind:open={dropdownOpen}>
 									<DropdownMenuTrigger>
@@ -552,7 +576,7 @@
 					}}
 					class="h-full flex-1 overflow-hidden text-left text-nowrap text-ellipsis"
 				>
-					<span>{getDisplayName(node)}</span>
+					{@render nodeLabelContent()}
 				</button>
 				<DropdownMenu bind:open={dropdownOpen}>
 					<DropdownMenuTrigger>

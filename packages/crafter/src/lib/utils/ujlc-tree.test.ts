@@ -12,7 +12,6 @@ import {
 	formatTypeName,
 	getAllSlotEntries,
 	getChildren,
-	getDisplayName,
 	getFirstSlotName,
 	getMoveInsertRequestValidationError,
 	hasChildren,
@@ -380,42 +379,6 @@ describe("ujlc-tree-utils", () => {
 		it("should return false for empty slots object", () => {
 			const node = createMockNode("test", "container", {}, {});
 			expect(hasSlots(node)).toBe(false);
-		});
-	});
-
-	describe("getDisplayName", () => {
-		it("should use title field if available", () => {
-			const node = createMockNode("test", "card", { title: "My Card" });
-			expect(getDisplayName(node)).toBe("Card: My Card");
-		});
-
-		it("should use label field if available", () => {
-			const node = createMockNode("test", "button", { label: "Click Me" });
-			expect(getDisplayName(node)).toBe("Button: Click Me");
-		});
-
-		it("should use headline field if available", () => {
-			const node = createMockNode("test", "call-to-action", { headline: "Join Now" });
-			expect(getDisplayName(node)).toBe("Call To Action: Join Now");
-		});
-
-		it("should use content field if available", () => {
-			const node = createMockNode("test", "text", { content: "This is a long text content..." });
-			expect(getDisplayName(node)).toContain("Text: This is a long text content");
-		});
-
-		it("should truncate long content", () => {
-			const longContent = "a".repeat(50);
-			const node = createMockNode("test", "text", { content: longContent });
-			const result = getDisplayName(node);
-
-			expect(result.length).toBeLessThan(50);
-			expect(result).toContain("...");
-		});
-
-		it("should return type only if no display fields", () => {
-			const node = createMockNode("test", "container", {});
-			expect(getDisplayName(node)).toBe("Container");
 		});
 	});
 
