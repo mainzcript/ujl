@@ -30,7 +30,7 @@ The foundation. Contains all TypeScript type definitions and Zod schemas for UJL
 
 ### `@ujl-framework/core`
 
-The engine. Contains the `Composer` (which transforms a UJLC document into an AST), the `ModuleRegistry` (which manages available modules), and the `FieldBase` and `ModuleBase` classes for building custom modules.
+The engine. Contains the `Composer` (which transforms a UJLC document into an AST), the `ModuleRegistry` (which manages available modules and resolves authoring display names), and the `FieldBase` and `ModuleBase` classes for building custom modules. `label` defines a module's static type name; `getInstanceLabel()` defines an optional instance-specific authoring name.
 
 → [README](https://github.com/mainzcript/ujl/tree/main/packages/core)
 
@@ -54,7 +54,7 @@ The shared shadcn-svelte component library used internally by the Crafter editor
 
 ### `@ujl-framework/crafter`
 
-The full visual editor, bundled with all dependencies including the Svelte runtime. Framework-agnostic: works in any HTML page or application. This is what most integrators install.
+The full visual editor, bundled with all dependencies including the Svelte runtime. Framework-agnostic: works in any HTML page or application. This is what most integrators install. Crafter consumes the Core naming API, so places like the navigation tree and drag ghost use `ModuleRegistry.getDisplayName(moduleData)` instead of guessing labels from field names.
 
 → [README](https://github.com/mainzcript/ujl/tree/main/packages/crafter)
 

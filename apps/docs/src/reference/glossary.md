@@ -29,7 +29,7 @@ Terms used consistently throughout UJL documentation and code.
 
 **Composer**, Orchestrates the composition process using the ModuleRegistry. Takes a single UJLC document and produces an AST. Stateless; no theme parameter. Theme/tokens are applied at adapter level.
 
-**ModuleRegistry**, Manages available modules. Custom modules are registered here, making them available for composition and the editor.
+**ModuleRegistry**, Manages available modules. Custom modules are registered here, making them available for composition and the editor. It also resolves authoring display names centrally through `getDisplayName(moduleData)`.
 
 **LibraryProvider**, Interface used by the Crafter for asset upload and storage during editing (e.g. `InlineLibraryProvider` from `@ujl-framework/crafter`). Not used by the Composer; at render time, image data is read from the document's `doc.ujlc.library`.
 
@@ -37,7 +37,11 @@ Terms used consistently throughout UJL documentation and code.
 
 **Module**, A reusable building block with Fields (data) and Slots (content areas). The atomic unit of UJL content.
 
-**ModuleBase**, The base class for all modules. Defines metadata (`name`, `label`, `category`), fields, slots, and the `compose()` method.
+**ModuleBase**, The base class for all modules. Defines metadata (`name`, `label`, `category`), fields, slots, the optional instance naming hook `getInstanceLabel(moduleData)`, and the `compose()` method.
+
+**Static type label**, The module's `label` property. Used for picker UIs and as the fallback authoring name when a concrete module instance has no meaningful individual name.
+
+**Instance label**, The optional value returned by `getInstanceLabel(moduleData)`. Used for concrete module instances in authoring UIs such as the navigation tree or drag ghost.
 
 **Fields**, Type-safe data containers with validation, parsing, and fitting logic. Examples: `TextField`, `NumberField`, `ImageField`.
 

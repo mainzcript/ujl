@@ -54,6 +54,7 @@ When adding new example files:
 
 When adding new modules to `@ujl-framework/core`:
 
-1. Implement `ModuleBase` with optional UI metadata (label, description, category, tags)
-2. Register the module in the default registry
-3. Modules are automatically available in the registry - no manual updates needed!
+1. Implement `ModuleBase` with the required module metadata (`label`, `description`, `category`, `tags`, `icon`)
+2. Implement `getInstanceLabel()` when a concrete module instance can have a meaningful authoring name; return `null` when the static `label` should be used instead
+3. Register the module in the default registry
+4. Modules are automatically available in the registry - no manual updates needed!

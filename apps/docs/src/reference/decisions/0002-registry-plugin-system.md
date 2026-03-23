@@ -20,8 +20,17 @@ UJL treats modules as plugins registered at runtime through a `ModuleRegistry`. 
 ```typescript
 class CustomModule extends ModuleBase {
 	readonly name = "custom-card";
+	readonly label = "Custom Card";
+	readonly description = "A custom card module";
+	readonly category = "content" as const;
+	readonly tags = ["custom", "card"] as const;
+	readonly icon = '<rect width="18" height="18" x="3" y="3" rx="2"/>';
 	readonly fields = [{ key: "title", field: new TextField({ label: "Title", default: "" }) }];
 	readonly slots = [{ key: "body", slot: new Slot({ label: "Body", max: 5 }) }];
+
+	getInstanceLabel(moduleData): string | null {
+		return this.parseField(moduleData, "title", "").trim() || null;
+	}
 
 	async compose(moduleData, composer, doc): Promise<UJLAbstractNode> {
 		return {
@@ -41,6 +50,8 @@ composer.registerModule(new CustomModule());
 ```
 
 Fields encapsulate validation and normalization, `parse()` applies type checking, constraint fitting, and default fallback in one call.
+
+Authoring UIs consume the same registry metadata. `label` defines the static type name, `getInstanceLabel()` optionally defines the name of a concrete instance, and `ModuleRegistry.getDisplayName(moduleData)` resolves the final name shown in interfaces like the navigation tree or drag ghost.
 
 **Integration via the Crafter:** When using the visual editor, `UJLCrafter` is the official entry point for module registration. Modules passed at initialization are available in the component picker before the first render:
 

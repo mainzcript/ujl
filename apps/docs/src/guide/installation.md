@@ -90,6 +90,10 @@ class HeroModule extends ModuleBase {
 	];
 	readonly slots = [];
 
+	getInstanceLabel(moduleData) {
+		return this.parseField(moduleData, "headline", "").trim() || null;
+	}
+
 	compose(moduleData, _composer, _doc) {
 		// escapeHtml() required: headline is interpolated into a raw HTML string
 		const headline = this.escapeHtml(this.parseField(moduleData, "headline", ""));
@@ -107,6 +111,8 @@ const crafter = new UJLCrafter({
 crafter.registerModule(new AnotherModule());
 crafter.unregisterModule("hero");
 ```
+
+`label` remains the static type name for the module. If you want Crafter authoring UIs such as the navigation tree or drag ghost to show a meaningful instance-specific name, implement `getInstanceLabel()`. Without it, Crafter falls back to `label`.
 
 For a complete module implementation guide, see [`@ujl-framework/core` – Creating Custom Modules](https://github.com/mainzcript/ujl/tree/main/packages/core#creating-custom-modules).
 

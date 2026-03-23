@@ -97,10 +97,22 @@ class EmailField extends FieldBase<string, EmailFieldConfig> {
 ```typescript
 class CustomModule extends ModuleBase {
 	readonly name = "custom-module";
+	readonly label = "Custom Module";
+	readonly description = "A custom module example";
+	readonly category = "content" as const;
+	readonly tags = ["custom"] as const;
+	readonly icon = '<rect width="18" height="18" x="3" y="3" rx="2"/>';
 
 	readonly fields = [{ key: "title", field: new TextField({ label: "Title", default: "" }) }];
 
 	readonly slots = [{ key: "content", slot: new Slot({ label: "Content", max: 5 }) }];
+
+	// Return an instance-specific name when the module should be shown
+	// differently from its static type label in authoring UIs.
+	getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const title = this.parseField(moduleData, "title", "").trim();
+		return title || null;
+	}
 
 	async compose(
 		moduleData: UJLCModuleObject,
@@ -118,6 +130,26 @@ class CustomModule extends ModuleBase {
 	}
 }
 ```
+
+### Naming in Authoring UIs
+
+Modules expose two different naming concepts:
+
+- `label` is the static type name of the module. It is used in places like the component picker and as the fallback display name when an instance has no meaningful individual name.
+- `getInstanceLabel(moduleData)` returns an optional, instance-specific name for a concrete module in a document.
+
+Authoring UIs should not guess instance names from arbitrary field keys. Instead, they should resolve names centrally through `ModuleRegistry.getDisplayName(moduleData)`:
+
+```typescript
+const moduleData = doc.ujlc.root[0];
+const displayName = composer.getRegistry().getDisplayName(moduleData);
+
+// Example outcomes:
+// "Spring Campaign"
+// "Image"
+```
+
+If `getInstanceLabel()` returns a non-empty string, `getDisplayName()` returns that instance name. Otherwise it falls back to the module's static `label`.
 
 ### Registry Management
 
@@ -147,6 +179,9 @@ if (module) {
 		console.log(field.key, field.field.config.label);
 	}
 }
+
+const moduleData = ujlcDocument.ujlc.root[0];
+console.log(composer.getRegistry().getDisplayName(moduleData));
 ```
 
 ## Built-in Modules & Fields
@@ -229,8 +264,14 @@ class Composer {
 
 abstract class ModuleBase {
 	abstract readonly name: string;
+	abstract readonly label: string;
+	abstract readonly description: string;
+	abstract readonly category: ComponentCategory;
+	abstract readonly tags: readonly string[];
+	abstract readonly icon: string;
 	abstract readonly fields: FieldSet;
 	abstract readonly slots: SlotSet;
+	abstract getInstanceLabel(moduleData: UJLCModuleObject): string | null;
 	abstract compose(
 		moduleData: UJLCModuleObject,
 		composer: Composer,

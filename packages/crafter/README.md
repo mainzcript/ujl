@@ -63,6 +63,10 @@ class HeroModule extends ModuleBase {
 	readonly fields = [];
 	readonly slots = [];
 
+	getInstanceLabel(_moduleData) {
+		return null;
+	}
+
 	compose(moduleData) {
 		return this.createNode("wrapper", {}, moduleData);
 	}
@@ -80,6 +84,13 @@ crafter.registerModule(new AnotherModule());
 // Unregister a module by name or instance
 crafter.unregisterModule("hero");
 ```
+
+Crafter resolves authoring names through the Core registry API. In places like the navigation tree and drag ghost it uses `ModuleRegistry.getDisplayName(moduleData)`:
+
+- if your module returns a non-empty `getInstanceLabel()`, that instance name is shown
+- otherwise Crafter falls back to the module's static `label`
+
+For custom modules, implement `getInstanceLabel()` whenever a concrete module instance can have a meaningful name. Return `null` for modules such as `Image`, `Container`, or similar types where the static type label is already the best display name.
 
 ### With a custom library provider
 

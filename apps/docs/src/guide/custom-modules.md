@@ -27,7 +27,7 @@ import type { Composer } from "@ujl-framework/core";
 export class TestimonialModule extends ModuleBase {
 	// --- Identity (required) ---
 	readonly name = "testimonial"; // unique key, used in .ujlc.json
-	readonly label = "Testimonial"; // shown in component picker
+	readonly label = "Testimonial"; // static type name, used as fallback in authoring UIs
 	readonly description = "A customer quote with author attribution";
 	readonly category = "content" as const;
 	readonly tags = ["quote", "review", "customer"] as const;
@@ -68,6 +68,11 @@ export class TestimonialModule extends ModuleBase {
 	// --- Slots (child module areas) ---
 	readonly slots = []; // no nested modules needed here
 
+	getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const author = this.parseField(moduleData, "author", "").trim();
+		return author || null;
+	}
+
 	// --- Composition ---
 	compose(moduleData: UJLCModuleObject, _composer: Composer, _doc: UJLCDocument): UJLAbstractNode {
 		// escapeHtml() is required here: values are interpolated directly into a raw HTML string.
@@ -107,13 +112,28 @@ readonly name = "hero-section"; // not "HeroSection" or "hero_section"
 
 ### `label`, `description`, `tags`
 
-Shown in the Crafter's component picker. `tags` are used for full-text search.
+`label` is the static type name of the module. It is used in the Crafter's component picker and as the fallback display name when a concrete instance has no meaningful individual name. `description` and `tags` are used in the picker and search UI.
 
 ```typescript
 readonly label = "Hero Section";
 readonly description = "Full-width intro with headline and CTA";
 readonly tags = ["hero", "banner", "header", "landing"] as const;
 ```
+
+### `getInstanceLabel()`
+
+Use `getInstanceLabel(moduleData)` when a concrete module instance should have its own display name in authoring UIs such as the navigation tree or the drag ghost.
+
+```typescript
+getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+	const headline = this.parseField(moduleData, "headline", "").trim();
+	return headline || null;
+}
+```
+
+Return `null` when the module does not have a useful individual name. In that case, UIs fall back to the module's static `label`.
+
+UJL resolves these names centrally through `ModuleRegistry.getDisplayName(moduleData)`. Custom modules should therefore define naming explicitly instead of relying on UI-side heuristics.
 
 ### `category`
 
@@ -380,6 +400,11 @@ export class PricingCardModule extends ModuleBase {
 			slot: new Slot({ label: "Features", description: "Add feature list items", max: 0 }),
 		},
 	];
+
+	getInstanceLabel(moduleData: UJLCModuleObject): string | null {
+		const planName = this.parseField(moduleData, "planName", "").trim();
+		return planName || null;
+	}
 
 	async compose(
 		moduleData: UJLCModuleObject,
