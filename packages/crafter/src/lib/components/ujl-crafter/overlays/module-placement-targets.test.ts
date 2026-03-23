@@ -13,6 +13,7 @@ import {
 	doRectsIntersect,
 	filterPlacementTargetsByActionBarCollision,
 	getInsertRequestKey,
+	getNearestPlacementTarget,
 	getPlacementTargetAtPoint,
 	getPlacementTargetButtonRect,
 	PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX,
@@ -283,6 +284,34 @@ describe("module-placement-targets helpers", () => {
 				{ x: 260, y: 200 },
 			),
 		).toBeNull();
+	});
+
+	it("picks the nearest placement target during drag mode", () => {
+		expect(
+			getNearestPlacementTarget(
+				[
+					{
+						key: "before-a",
+						sourceModuleId: "module-a",
+						insertRequest: { targetId: "module-a", position: "before" },
+						x: 100,
+						y: 120,
+					},
+					{
+						key: "after-a",
+						sourceModuleId: "module-a",
+						insertRequest: { targetId: "module-a", position: "after" },
+						x: 200,
+						y: 120,
+					},
+				],
+				{ x: 185, y: 126 },
+			)?.key,
+		).toBe("after-a");
+	});
+
+	it("returns null when no placement targets exist for drag mode", () => {
+		expect(getNearestPlacementTarget([], { x: 185, y: 126 })).toBeNull();
 	});
 
 	it("keeps the first origin when multiple sources produce the same insert target", () => {

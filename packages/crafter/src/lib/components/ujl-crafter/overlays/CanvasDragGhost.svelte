@@ -13,9 +13,39 @@
 	const EDGE_PADDING = 8;
 
 	let { containerElement }: Props = $props();
+	let ghostElement = $state<HTMLDivElement | null>(null);
+	let ghostSize = $state({ width: MAX_GHOST_WIDTH, height: MAX_GHOST_HEIGHT });
 
 	const canvasDrag = getCanvasDragContext();
 	const scrollContext = getScrollContext();
+
+	$effect(() => {
+		if (!ghostElement) {
+			ghostSize = { width: MAX_GHOST_WIDTH, height: MAX_GHOST_HEIGHT };
+			return;
+		}
+
+		const updateGhostSize = () => {
+			const rect = ghostElement?.getBoundingClientRect();
+			if (!rect) {
+				return;
+			}
+
+			ghostSize = {
+				width: rect.width || MAX_GHOST_WIDTH,
+				height: rect.height || MAX_GHOST_HEIGHT,
+			};
+		};
+
+		updateGhostSize();
+
+		const resizeObserver = new ResizeObserver(updateGhostSize);
+		resizeObserver.observe(ghostElement);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	});
 
 	const ghostPosition = $derived.by(() => {
 		const { x: scrollX, y: scrollY } = scrollContext.position;
@@ -30,8 +60,8 @@
 		const unconstrainedX = canvasDrag.pointer.clientX - containerRect.left + POINTER_OFFSET_X;
 		const unconstrainedY = canvasDrag.pointer.clientY - containerRect.top + POINTER_OFFSET_Y;
 
-		const maxX = Math.max(EDGE_PADDING, containerRect.width - MAX_GHOST_WIDTH - EDGE_PADDING);
-		const maxY = Math.max(EDGE_PADDING, containerRect.height - MAX_GHOST_HEIGHT - EDGE_PADDING);
+		const maxX = Math.max(EDGE_PADDING, containerRect.width - ghostSize.width - EDGE_PADDING);
+		const maxY = Math.max(EDGE_PADDING, containerRect.height - ghostSize.height - EDGE_PADDING);
 
 		return {
 			x: Math.min(Math.max(EDGE_PADDING, unconstrainedX), maxX),
@@ -42,6 +72,7 @@
 
 {#if canvasDrag.isDragging && ghostPosition}
 	<div
+		bind:this={ghostElement}
 		class="pointer-events-none absolute top-0 left-0 z-[70]"
 		style={`transform: translate(${ghostPosition.x}px, ${ghostPosition.y}px);`}
 		data-crafter="canvas-drag-ghost"

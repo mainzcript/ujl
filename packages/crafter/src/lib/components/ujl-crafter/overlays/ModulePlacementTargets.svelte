@@ -21,7 +21,7 @@
 	import {
 		filterPlacementTargetsByActionBarCollision,
 		getInsertRequestKey,
-		getPlacementTargetAtPoint,
+		getNearestPlacementTarget,
 	} from "../canvas/targeting/placement-target-hit-testing.js";
 	import {
 		PLACEMENT_TARGET_HOLD_MS,
@@ -320,7 +320,7 @@
 		);
 		const relativePoint = getPointerPositionRelativeToOverlay(canvasDrag.pointer);
 		const activeDefinition = relativePoint
-			? getPlacementTargetAtPoint(validDefinitions, relativePoint)
+			? getNearestPlacementTarget(validDefinitions, relativePoint)
 			: null;
 
 		return {

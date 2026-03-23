@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from "svelte/transition";
 	import { Button } from "@ujl-framework/ui";
+	import CrosshairIcon from "@lucide/svelte/icons/crosshair";
 	import PlusIcon from "@lucide/svelte/icons/plus";
 
 	interface Props {
@@ -13,6 +14,10 @@
 	}
 
 	let { x, y, onInsert = null, mode = "insert", isActive = false, zIndex = 45 }: Props = $props();
+	let isHovered = $state(false);
+
+	const isHighlighted = $derived(isActive || isHovered);
+	const useCrosshairIcon = $derived(mode === "drop");
 </script>
 
 <div
@@ -25,11 +30,15 @@
 	data-crafter="placement-target-button"
 	data-mode={mode}
 	data-active={isActive}
+	data-highlighted={isHighlighted ? "true" : "false"}
+	data-icon={useCrosshairIcon ? "crosshair" : "plus"}
 >
 	<div
-		class="flex -translate-x-1/2 -translate-y-1/2 items-center rounded-2xl border-2 border-dotted border-[oklch(var(--editor-accent-light,var(--accent-light)))] bg-sidebar shadow-lg transition-[transform,box-shadow,opacity] duration-75"
-		class:scale-110={isActive}
-		class:shadow-xl={isActive}
+		class={`flex -translate-x-1/2 -translate-y-1/2 items-center rounded-2xl border-[oklch(var(--editor-accent-light,var(--accent-light)))] transition-[transform,box-shadow,opacity,background-color,border-width] duration-100 ${
+			isHighlighted
+				? "scale-110 border-[3px] border-solid bg-sidebar/95 shadow-xl ring-2 ring-[oklch(var(--editor-accent-light,var(--accent-light)))]/35"
+				: "border-2 border-dotted bg-sidebar shadow-lg"
+		}`}
 	>
 		<Button
 			variant="ghost"
@@ -37,9 +46,19 @@
 			class="h-6 w-6"
 			disabled={mode === "drop"}
 			onclick={onInsert ?? undefined}
+			onmouseenter={() => {
+				isHovered = true;
+			}}
+			onmouseleave={() => {
+				isHovered = false;
+			}}
 			title={mode === "drop" ? "Drop module here" : "Insert module"}
 		>
-			<PlusIcon class="h-3.5 w-3.5" />
+			{#if useCrosshairIcon}
+				<CrosshairIcon class="h-3.5 w-3.5" />
+			{:else}
+				<PlusIcon class="h-3.5 w-3.5" />
+			{/if}
 		</Button>
 	</div>
 </div>

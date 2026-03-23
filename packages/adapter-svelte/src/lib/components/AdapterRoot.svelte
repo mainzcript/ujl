@@ -15,5 +15,7 @@
 </script>
 
 <UJLTheme tokens={tokenSet} {mode} class="bg-ambient h-content isolate p-10">
-	<ASTNode {node} {showMetadata} />
+	<div data-ujl-slot="root">
+		<ASTNode {node} {showMetadata} />
+	</div>
 </UJLTheme>
