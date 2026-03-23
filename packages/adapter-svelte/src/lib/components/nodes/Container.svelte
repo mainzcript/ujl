@@ -13,6 +13,7 @@
 
 <Container
 	data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
+	data-ujl-slot="body"
 	class="space-y-6"
 >
 	{#if node.props.children}

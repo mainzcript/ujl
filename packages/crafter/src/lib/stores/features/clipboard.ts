@@ -11,13 +11,19 @@ export type UJLClipboardData =
 
 export interface ClipboardFeatureState {
 	showComponentPicker: boolean;
-	insertTargetNodeId: string | null;
+	insertTargetNodeId: InsertRequest | string | null;
 	clipboard: UJLClipboardData | null;
 }
 
 interface SlotSelection {
 	parentId: string;
 	slotName: string;
+}
+
+export interface InsertRequest {
+	targetId: string;
+	slotName?: string;
+	position?: "before" | "after" | "into";
 }
 
 interface ClipboardFeatureDeps {
@@ -40,6 +46,30 @@ export function createClipboardFeature(deps: ClipboardFeatureDeps) {
 		readFromBrowserClipboard,
 		writeToBrowserClipboard,
 	} = deps;
+
+	function normalizeInsertRequest(target: InsertRequest | string): InsertRequest {
+		if (typeof target !== "string") {
+			return {
+				targetId: target.targetId,
+				slotName: target.slotName,
+				position: target.position ?? (target.slotName ? "into" : "after"),
+			};
+		}
+
+		const slotInfo = parseSlotSelection(target);
+		if (slotInfo) {
+			return {
+				targetId: slotInfo.parentId,
+				slotName: slotInfo.slotName,
+				position: "into",
+			};
+		}
+
+		return {
+			targetId: target,
+			position: "after",
+		};
+	}
 
 	function setClipboard(data: UJLClipboardData | null): void {
 		state.clipboard = data;
@@ -103,8 +133,8 @@ export function createClipboardFeature(deps: ClipboardFeatureDeps) {
 		performPaste(pasteData, targetId);
 	}
 
-	function requestInsert(targetId: string): void {
-		state.insertTargetNodeId = targetId;
+	function requestInsert(target: InsertRequest | string): void {
+		state.insertTargetNodeId = target;
 		state.showComponentPicker = true;
 	}
 
@@ -116,12 +146,13 @@ export function createClipboardFeature(deps: ClipboardFeatureDeps) {
 	function handleComponentSelect(componentType: string): void {
 		if (!state.insertTargetNodeId) return;
 
-		const targetId = state.insertTargetNodeId;
-		const slotInfo = parseSlotSelection(targetId);
-
-		const newNodeId = slotInfo
-			? operations.insertNode(componentType, slotInfo.parentId, slotInfo.slotName, "into")
-			: operations.insertNode(componentType, targetId, undefined, "after");
+		const insertRequest = normalizeInsertRequest(state.insertTargetNodeId);
+		const newNodeId = operations.insertNode(
+			componentType,
+			insertRequest.targetId,
+			insertRequest.slotName,
+			insertRequest.position,
+		);
 
 		if (newNodeId) {
 			setSelectedNodeId(newNodeId);

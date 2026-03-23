@@ -14,6 +14,10 @@
 		COMPOSER_CONTEXT,
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
+		createHoverTargetContext,
+		createScrollContext,
+		setHoverTargetContext,
+		setScrollContext,
 		type CrafterContext,
 		type ShadowRootContext,
 		type CrafterMode,
@@ -21,8 +25,24 @@
 	import { logger } from "$lib/utils/logger.js";
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
-	import { Island, HoverIndicator, SelectionIndicator } from "../overlays/index.js";
+	import {
+		Island,
+		HoverIndicator,
+		SelectionIndicator,
+		SelectionParentIndicators,
+		ModuleQuickActions,
+	} from "../overlays/index.js";
 	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
+	import {
+		getSelectionParentModuleIds,
+		getSelectedModuleId,
+	} from "../overlays/selection-parent-indicators.js";
+
+	// Create preview-local contexts for overlay positioning and hover state.
+	const scrollContext = createScrollContext();
+	setScrollContext(scrollContext);
+	const hoverTargetContext = createHoverTargetContext();
+	setHoverTargetContext(hoverTargetContext);
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -60,6 +80,12 @@
 	const selectedNodeId = $derived.by(() => {
 		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
 	});
+
+	const selectedModuleId = $derived(getSelectedModuleId(selectedNodeId));
+
+	const selectionParentModuleIds = $derived(
+		getSelectionParentModuleIds(crafter.ujlcDocument.ujlc.root, selectedNodeId),
+	);
 
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
 
@@ -168,30 +194,23 @@
 		const elementRect = element.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
 
-		// Calculate visibility ratio
 		const visibleTop = Math.max(elementRect.top, containerRect.top);
 		const visibleBottom = Math.min(elementRect.bottom, containerRect.bottom);
 		const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-		const elementVisibilityRatio = visibleHeight / elementRect.height; // 0-1
+		const elementVisibilityRatio = visibleHeight / elementRect.height;
 
-		// Calculate how much of the preview the element fills
 		const previewFillRatio = elementRect.height / containerRect.height;
-
-		// Determine if scrolling is needed
 		const needsScroll = elementVisibilityRatio < 0.9;
 
 		if (!needsScroll) {
-			return; // Element is sufficiently visible, don't scroll
+			return;
 		}
 
-		// Determine scroll target based on element size
 		let targetScroll: number;
 
 		if (previewFillRatio > 0.5) {
-			// Large element: scroll to show top edge
 			targetScroll = container.scrollTop + (elementRect.top - containerRect.top) - 100;
 		} else {
-			// Normal element: scroll to center
 			targetScroll =
 				container.scrollTop +
 				(elementRect.top - containerRect.top) -
@@ -215,10 +234,6 @@
 		}
 	});
 
-	// ============================================
-	// ISLAND STATE (Selection-based)
-	// ============================================
-
 	interface IslandState {
 		moduleId: string;
 		canMoveUp: boolean;
@@ -227,7 +242,7 @@
 
 	let islandState = $state<IslandState | null>(null);
 
-	// Get the actual scroll container (the parent with overflow-auto, not the Preview root)
+	// Use the real scrollable canvas element instead of the preview root.
 	let scrollContainer = $derived(
 		scrollContainerRef
 			? ((dom.querySelector('[data-ujl-scroll-container="canvas"]') as HTMLElement | null) ??
@@ -235,9 +250,22 @@
 			: null,
 	);
 
-	/**
-	 * Update Island state when selection changes
-	 */
+	$effect(() => {
+		if (!scrollContainer) return;
+
+		const handleScroll = () => {
+			scrollContext.updatePosition(scrollContainer.scrollLeft, scrollContainer.scrollTop);
+		};
+
+		handleScroll();
+		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+
+		return () => {
+			scrollContainer.removeEventListener("scroll", handleScroll);
+		};
+	});
+
+	// Recompute island actions whenever the selection changes.
 	$effect(() => {
 		if (crafterMode !== "editor" || !selectedNodeId || !ast || !scrollContainerRef) {
 			islandState = null;
@@ -426,14 +454,27 @@
 
 	<!-- Selection Overlay with {#key} Pattern -->
 	{#key selectedNodeId}
+		{#if crafterMode === "editor" && selectedModuleId && selectionParentModuleIds.length > 0 && scrollContainer}
+			<SelectionParentIndicators
+				moduleId={selectedModuleId}
+				parentModuleIds={selectionParentModuleIds}
+				containerElement={scrollContainer}
+			/>
+		{/if}
+
 		{#if crafterMode === "editor" && selectedNodeId && scrollContainer}
 			<SelectionIndicator moduleId={selectedNodeId} containerElement={scrollContainer} />
 		{/if}
 	{/key}
 
-	<!-- Hover Overlay (not keyed, tracks mouse events) -->
+	<!-- Hover Overlay (Modul-Hover) -->
 	{#if crafterMode === "editor" && scrollContainer}
 		<HoverIndicator containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
+	{/if}
+
+	<!-- Module Quick Actions -->
+	{#if crafterMode === "editor" && scrollContainer}
+		<ModuleQuickActions containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
 	{/if}
 
 	<!-- Module Actions Overlay with {#key} Pattern -->

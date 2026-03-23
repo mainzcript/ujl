@@ -15,6 +15,7 @@
 <Card
 	class="h-full"
 	data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
+	data-ujl-slot="content"
 >
 	<CardHeader>
 		<CardTitle>{node.props.title}</CardTitle>

@@ -11,7 +11,10 @@
 	let { node, showMetadata = false }: Props = $props();
 </script>
 
-<Grid data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}>
+<Grid
+	data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
+	data-ujl-slot="items"
+>
 	{#if node.props.children}
 		{#each node.props.children as childNode, i (i)}
 			<ASTNode node={childNode} {showMetadata} />
