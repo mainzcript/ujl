@@ -1,15 +1,10 @@
 import type { InsertRequest } from "$lib/stores/features/clipboard.js";
+import { isValidMoveInsertRequest } from "$lib/utils/ujlc-tree.js";
 import type { UJLCModuleObject } from "@ujl-framework/types";
 import type { FlowDirection, RelativeRect } from "./quick-action-position.js";
 import { getEdgeAnchor, getGapAnchor } from "./quick-action-position.js";
 
-export interface QuickActionSourceState {
-	selectedModuleId?: string | null;
-	hoveredModuleId?: string | null;
-	nearestModuleId?: string | null;
-}
-
-export interface QuickActionDefinition {
+export interface PlacementTargetDefinition {
 	key: string;
 	sourceModuleId: string;
 	insertRequest: InsertRequest;
@@ -17,7 +12,7 @@ export interface QuickActionDefinition {
 	y: number;
 }
 
-export interface SlotQuickActionContext {
+export interface SlotPlacementContext {
 	ownerModuleId: string | null;
 	slotName: string;
 	slotRect: RelativeRect | null;
@@ -32,104 +27,8 @@ export interface SlotMetrics {
 	childCount: number;
 }
 
-export interface QuickActionVisibilityResolution {
-	effectiveTrackedModuleIds: string[];
-	nextHeldTransientModuleIds: string[];
-	shouldScheduleHide: boolean;
-}
-
 const GAP_ESTIMATE_PX = 24;
 const FLOW_LINE_OVERLAP_THRESHOLD = 0.3;
-export const INSERT_BUTTON_VISUAL_SIZE_PX = 36;
-export const QUICK_ACTION_HOLD_MS = 160;
-
-export function getTrackedModuleIds(state: QuickActionSourceState): string[] {
-	const ordered = [state.selectedModuleId, state.hoveredModuleId, state.nearestModuleId];
-	const unique = new Set<string>();
-
-	for (const moduleId of ordered) {
-		if (moduleId) {
-			unique.add(moduleId);
-		}
-	}
-
-	return [...unique];
-}
-
-export function getTransientTrackedModuleIds(
-	state: Pick<QuickActionSourceState, "hoveredModuleId" | "nearestModuleId">,
-): string[] {
-	return getTrackedModuleIds({
-		hoveredModuleId: state.hoveredModuleId,
-		nearestModuleId: state.nearestModuleId,
-	});
-}
-
-export function getEffectiveTrackedModuleIds(
-	selectedModuleId: string | null | undefined,
-	transientModuleIds: string[],
-): string[] {
-	return getTrackedModuleIds({
-		selectedModuleId,
-		hoveredModuleId: transientModuleIds[0] ?? null,
-		nearestModuleId: transientModuleIds[1] ?? null,
-	});
-}
-
-export function resolveQuickActionVisibility(params: {
-	selectedModuleId?: string | null;
-	liveTransientModuleIds: string[];
-	heldTransientModuleIds: string[];
-	isQuickActionsHovered: boolean;
-}): QuickActionVisibilityResolution {
-	const {
-		selectedModuleId = null,
-		liveTransientModuleIds,
-		heldTransientModuleIds,
-		isQuickActionsHovered,
-	} = params;
-
-	if (liveTransientModuleIds.length > 0) {
-		return {
-			effectiveTrackedModuleIds: getEffectiveTrackedModuleIds(
-				selectedModuleId,
-				liveTransientModuleIds,
-			),
-			nextHeldTransientModuleIds: liveTransientModuleIds,
-			shouldScheduleHide: false,
-		};
-	}
-
-	if (selectedModuleId) {
-		return {
-			effectiveTrackedModuleIds: getEffectiveTrackedModuleIds(selectedModuleId, []),
-			nextHeldTransientModuleIds: [],
-			shouldScheduleHide: false,
-		};
-	}
-
-	if (heldTransientModuleIds.length === 0) {
-		return {
-			effectiveTrackedModuleIds: [],
-			nextHeldTransientModuleIds: [],
-			shouldScheduleHide: false,
-		};
-	}
-
-	return {
-		effectiveTrackedModuleIds: getEffectiveTrackedModuleIds(null, heldTransientModuleIds),
-		nextHeldTransientModuleIds: heldTransientModuleIds,
-		shouldScheduleHide: !isQuickActionsHovered,
-	};
-}
-
-export function getInsertRequestKey(insertRequest: InsertRequest): string {
-	if (insertRequest.position === "into") {
-		return `into:${insertRequest.targetId}:${insertRequest.slotName ?? ""}`;
-	}
-
-	return `${insertRequest.position ?? "after"}:${insertRequest.targetId}`;
-}
 
 function hasMeaningfulAxisOverlap(
 	fromRect: RelativeRect,
@@ -179,7 +78,7 @@ function collectChildRects(
 }
 
 export function getSlotMetrics(
-	context: SlotQuickActionContext,
+	context: SlotPlacementContext,
 	getRelativeRect: (moduleId: string) => RelativeRect | null,
 ): SlotMetrics {
 	return {
@@ -199,17 +98,25 @@ function getMirroredAnchor(
 ): { x: number; y: number } {
 	if (direction === "horizontal") {
 		const distanceFromCenter = Math.abs(referenceAnchor.x - rect.centerX);
+		const mirroredY =
+			referenceAnchor.y >= rect.top && referenceAnchor.y <= rect.bottom
+				? referenceAnchor.y
+				: rect.centerY;
 
 		return {
 			x: edge === "before" ? rect.centerX - distanceFromCenter : rect.centerX + distanceFromCenter,
-			y: referenceAnchor.y,
+			y: mirroredY,
 		};
 	}
 
 	const distanceFromCenter = Math.abs(referenceAnchor.y - rect.centerY);
+	const mirroredX =
+		referenceAnchor.x >= rect.left && referenceAnchor.x <= rect.right
+			? referenceAnchor.x
+			: rect.centerX;
 
 	return {
-		x: referenceAnchor.x,
+		x: mirroredX,
 		y: edge === "before" ? rect.centerY - distanceFromCenter : rect.centerY + distanceFromCenter,
 	};
 }
@@ -248,44 +155,25 @@ export function inferSlotFlowDirection(metrics: SlotMetrics): FlowDirection {
 	return "vertical";
 }
 
-export function getInsertButtonRect(x: number, y: number): RelativeRect {
-	const halfSize = INSERT_BUTTON_VISUAL_SIZE_PX / 2;
-
-	return {
-		left: x - halfSize,
-		right: x + halfSize,
-		top: y - halfSize,
-		bottom: y + halfSize,
-		width: INSERT_BUTTON_VISUAL_SIZE_PX,
-		height: INSERT_BUTTON_VISUAL_SIZE_PX,
-		centerX: x,
-		centerY: y,
-	};
-}
-
-export function doRectsIntersect(a: RelativeRect, b: RelativeRect): boolean {
-	return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
-}
-
-export function filterQuickActionDefinitionsByIslandCollision(
-	definitions: QuickActionDefinition[],
-	islandRect: RelativeRect | null,
-): QuickActionDefinition[] {
-	if (!islandRect) {
+export function filterPlacementTargetDefinitionsByMoveValidity(
+	definitions: PlacementTargetDefinition[],
+	rootNodes: UJLCModuleObject[],
+	draggedModuleId: string | null,
+): PlacementTargetDefinition[] {
+	if (!draggedModuleId) {
 		return definitions;
 	}
 
-	return definitions.filter((definition) => {
-		const buttonRect = getInsertButtonRect(definition.x, definition.y);
-		return !doRectsIntersect(buttonRect, islandRect);
-	});
+	return definitions.filter((definition) =>
+		isValidMoveInsertRequest(rootNodes, draggedModuleId, definition.insertRequest),
+	);
 }
 
-export function calculateQuickActionDefinitions(
+export function calculatePlacementTargetDefinitions(
 	moduleId: string,
-	context: SlotQuickActionContext,
+	context: SlotPlacementContext,
 	getRelativeRect: (moduleId: string) => RelativeRect | null,
-): QuickActionDefinition[] {
+): PlacementTargetDefinition[] {
 	const currentIndex = context.siblings.findIndex((m) => m.meta.id === moduleId);
 	if (currentIndex === -1) return [];
 
@@ -306,7 +194,7 @@ export function calculateQuickActionDefinitions(
 	const afterGapAnchor =
 		hasNextGap && nextRect ? getGapAnchor(currentRect, nextRect, direction) : null;
 
-	const definitions: QuickActionDefinition[] = [];
+	const definitions: PlacementTargetDefinition[] = [];
 
 	if (beforeGapAnchor) {
 		definitions.push({
@@ -359,10 +247,11 @@ export function calculateQuickActionDefinitions(
 	return definitions;
 }
 
-export function dedupeQuickActionDefinitions(
-	definitions: QuickActionDefinition[],
-): QuickActionDefinition[] {
-	const deduped = new Map<string, QuickActionDefinition>();
+export function dedupePlacementTargetDefinitions(
+	definitions: PlacementTargetDefinition[],
+	getInsertRequestKey: (insertRequest: InsertRequest) => string,
+): PlacementTargetDefinition[] {
+	const deduped = new Map<string, PlacementTargetDefinition>();
 
 	for (const definition of definitions) {
 		const dedupeKey = getInsertRequestKey(definition.insertRequest);

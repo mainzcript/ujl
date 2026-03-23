@@ -35,6 +35,12 @@ export const ROOT_SLOT_NAME = "root";
  */
 export const DEFAULT_NODE_ID_LENGTH = 10;
 
+export interface MoveInsertRequestLike {
+	targetId: string;
+	slotName?: string;
+	position?: "before" | "after" | "into";
+}
+
 // ============================================
 // Internal Helper Functions
 // ============================================
@@ -146,6 +152,69 @@ export function isDescendant(node: UJLCModuleObject, targetId: string): boolean 
 	}
 
 	return false;
+}
+
+export function getMoveInsertRequestValidationError(
+	nodes: UJLCModuleObject[],
+	nodeId: string,
+	request: MoveInsertRequestLike,
+): string | null {
+	const node = findNodeById(nodes, nodeId);
+	const targetNode = findNodeById(nodes, request.targetId);
+
+	if (!node || !targetNode) {
+		return "Node or target not found";
+	}
+
+	if (isRootNode(nodeId)) {
+		return "Cannot move root node";
+	}
+
+	if (request.position === "before" || request.position === "after") {
+		const targetParentInfo = findParentOfNode(nodes, request.targetId);
+
+		if (!targetParentInfo) {
+			return "Cannot find parent of target node";
+		}
+
+		if (isRootNode(request.targetId)) {
+			return "Cannot move relative to root node";
+		}
+
+		if (isDescendant(node, request.targetId)) {
+			return "Cannot move node into itself or its descendants";
+		}
+
+		return null;
+	}
+
+	if (!hasSlots(targetNode)) {
+		return "Target node has no slots - cannot accept children";
+	}
+
+	if (isDescendant(node, request.targetId)) {
+		return "Cannot move node into itself or its descendants";
+	}
+
+	const targetSlotName = request.slotName ?? getFirstSlotName(targetNode);
+
+	if (!targetSlotName) {
+		return "Target node has no valid slot";
+	}
+
+	if (!targetNode.slots?.[targetSlotName]) {
+		return "Specified slot does not exist on target node";
+	}
+
+	return null;
+}
+
+export function isValidMoveInsertRequest(
+	nodes: UJLCModuleObject[],
+	nodeId: string,
+	request: MoveInsertRequestLike,
+): boolean {
+	return getMoveInsertRequestValidationError(nodes, nodeId, request) === null;
 }
 
 /**

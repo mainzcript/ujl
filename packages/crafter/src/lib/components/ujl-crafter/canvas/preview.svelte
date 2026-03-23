@@ -11,38 +11,63 @@
 	import { AdapterRoot } from "@ujl-framework/adapter-svelte";
 	import { getContext } from "svelte";
 	import {
+		createCanvasDragContext,
+		createCanvasInteractionContext,
 		COMPOSER_CONTEXT,
 		CRAFTER_CONTEXT,
 		SHADOW_ROOT_CONTEXT,
-		createHoverTargetContext,
 		createScrollContext,
-		setHoverTargetContext,
+		setCanvasDragContext,
+		setCanvasInteractionContext,
 		setScrollContext,
 		type CrafterContext,
 		type ShadowRootContext,
 		type CrafterMode,
 	} from "$lib/stores/index.js";
+	import type { InsertRequest } from "$lib/stores/features/clipboard.js";
 	import { logger } from "$lib/utils/logger.js";
 	import { createScopedSelector } from "$lib/utils/scoped-dom.js";
 	import { generateThemeCSSVariables } from "@ujl-framework/ui/utils";
 	import {
-		Island,
+		ModuleActionBar,
 		HoverIndicator,
 		SelectionIndicator,
 		SelectionParentIndicators,
-		ModuleQuickActions,
+		ModulePlacementTargets,
 	} from "../overlays/index.js";
-	import { findParentOfNode } from "$lib/utils/ujlc-tree.js";
+	import {
+		findParentOfNode,
+		isValidMoveInsertRequest,
+		ROOT_NODE_ID,
+	} from "$lib/utils/ujlc-tree.js";
 	import {
 		getSelectionParentModuleIds,
 		getSelectedModuleId,
 	} from "../overlays/selection-parent-indicators.js";
+	import {
+		resolvePointerTargetsFromPoint,
+		resolvePointerTargetsFromTarget,
+		type ActiveSlotTarget,
+	} from "./targeting/pointer-targets.js";
+	import {
+		type AutoScrollEdgeState,
+		getAutoScrollDelta,
+		getAutoScrollEdgeZone,
+		resolveAutoScrollEdgeState,
+	} from "./targeting/auto-scroll.js";
+	import { findNearestModuleId, getDirectSlotChildIds } from "./targeting/quick-action-nearest.js";
 
-	// Create preview-local contexts for overlay positioning and hover state.
+	// Create preview-local contexts for overlay positioning and canvas interaction state.
 	const scrollContext = createScrollContext();
 	setScrollContext(scrollContext);
-	const hoverTargetContext = createHoverTargetContext();
-	setHoverTargetContext(hoverTargetContext);
+	const canvasInteractionContext = createCanvasInteractionContext();
+	setCanvasInteractionContext(canvasInteractionContext);
+	const canvasDragContext = createCanvasDragContext();
+	setCanvasDragContext(canvasDragContext);
+
+	const AUTO_SCROLL_EDGE_PX = 64;
+	const AUTO_SCROLL_MAX_STEP_PX = 18;
+	const AUTO_SCROLL_START_DELAY_MS = 500;
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -76,6 +101,7 @@
 	const shadowRootContext = getContext<ShadowRootContext | undefined>(SHADOW_ROOT_CONTEXT);
 
 	const dom = createScopedSelector(crafter.instanceId, shadowRootContext?.value);
+	const hitTestRoot = shadowRootContext?.value ?? document;
 
 	const selectedNodeId = $derived.by(() => {
 		return crafter.mode === "editor" ? crafter.selectedNodeId : null;
@@ -133,6 +159,7 @@
 
 	function handlePreviewClick(event: MouseEvent) {
 		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
+		if (canvasDragContext.isDragging) return;
 
 		const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
 		if (!clickedElement) return;
@@ -234,13 +261,13 @@
 		}
 	});
 
-	interface IslandState {
+	interface ModuleActionBarState {
 		moduleId: string;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 	}
 
-	let islandState = $state<IslandState | null>(null);
+	let moduleActionBarState = $state<ModuleActionBarState | null>(null);
 
 	// Use the real scrollable canvas element instead of the preview root.
 	let scrollContainer = $derived(
@@ -249,6 +276,84 @@
 					scrollContainerRef)
 			: null,
 	);
+	let wasDragging = $state(false);
+
+	function isCanvasOverlayElement(element: HTMLElement | null) {
+		return !!element?.closest(
+			'[data-crafter="module-action-bar"], [data-crafter="placement-target-button"], [data-crafter="overlay-base"], [data-crafter="module-placement-targets"]',
+		);
+	}
+
+	function getDragHomeSlot(moduleId: string): ActiveSlotTarget | null {
+		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
+		if (!parentInfo || !parentInfo.parent) {
+			return null;
+		}
+
+		return {
+			ownerModuleId: parentInfo.parent.meta.id === ROOT_NODE_ID ? null : parentInfo.parent.meta.id,
+			slotName: parentInfo.slotName,
+		};
+	}
+
+	function computeNearestModuleId(
+		slot: ActiveSlotTarget,
+		point: { clientX: number; clientY: number },
+	) {
+		const candidateIds = getDirectSlotChildIds(
+			crafter.ujlcDocument.ujlc.root,
+			slot.ownerModuleId,
+			slot.slotName,
+		);
+
+		return findNearestModuleId(candidateIds, { x: point.clientX, y: point.clientY }, (moduleId) => {
+			const moduleElement = dom.querySelector(
+				`[data-ujl-module-id="${moduleId}"]`,
+			) as HTMLElement | null;
+			return moduleElement?.getBoundingClientRect() ?? null;
+		});
+	}
+
+	function updateCanvasTargetsFromPointer(
+		point: { clientX: number; clientY: number },
+		targets: {
+			hoveredModuleId: string | null;
+			activeSlot: ActiveSlotTarget | null;
+		},
+	) {
+		const nearestSlot =
+			targets.activeSlot ??
+			canvasInteractionContext.lastValidSlot ??
+			(canvasDragContext.isDragging && canvasDragContext.draggedModuleId
+				? getDragHomeSlot(canvasDragContext.draggedModuleId)
+				: null);
+
+		canvasInteractionContext.updateState({
+			pointer: point,
+			hoveredModuleId: targets.hoveredModuleId,
+			activeSlot: targets.activeSlot,
+			nearestModuleId: nearestSlot ? computeNearestModuleId(nearestSlot, point) : null,
+		});
+	}
+
+	function handleCanvasPointerMove(event: MouseEvent) {
+		if (canvasDragContext.isDragging) {
+			return;
+		}
+
+		updateCanvasTargetsFromPointer(
+			{ clientX: event.clientX, clientY: event.clientY },
+			resolvePointerTargetsFromTarget(event.target, isCanvasOverlayElement),
+		);
+	}
+
+	function handleCanvasPointerLeave() {
+		if (canvasDragContext.isDragging) {
+			return;
+		}
+
+		canvasInteractionContext.clear();
+	}
 
 	$effect(() => {
 		if (!scrollContainer) return;
@@ -265,34 +370,166 @@
 		};
 	});
 
-	// Recompute island actions whenever the selection changes.
+	$effect(() => {
+		if (!scrollContainer) {
+			return;
+		}
+
+		scrollContainer.addEventListener("mousemove", handleCanvasPointerMove, { passive: true });
+		scrollContainer.addEventListener("mouseleave", handleCanvasPointerLeave, { passive: true });
+
+		return () => {
+			scrollContainer.removeEventListener("mousemove", handleCanvasPointerMove);
+			scrollContainer.removeEventListener("mouseleave", handleCanvasPointerLeave);
+		};
+	});
+
+	$effect(() => {
+		if (!canvasDragContext.isDragging || !canvasDragContext.pointer) {
+			return;
+		}
+
+		updateCanvasTargetsFromPointer(
+			canvasDragContext.pointer,
+			resolvePointerTargetsFromPoint(
+				canvasDragContext.pointer,
+				isCanvasOverlayElement,
+				hitTestRoot,
+			),
+		);
+	});
+
+	$effect(() => {
+		if (canvasDragContext.isDragging) {
+			wasDragging = true;
+			return;
+		}
+
+		if (wasDragging) {
+			wasDragging = false;
+			canvasInteractionContext.clear();
+		}
+	});
+
+	$effect(() => {
+		if (!scrollContainer) {
+			return;
+		}
+
+		const refreshTargets = () => {
+			if (!canvasInteractionContext.pointer) {
+				return;
+			}
+
+			updateCanvasTargetsFromPointer(
+				canvasInteractionContext.pointer,
+				resolvePointerTargetsFromPoint(
+					canvasInteractionContext.pointer,
+					isCanvasOverlayElement,
+					hitTestRoot,
+				),
+			);
+		};
+
+		const unregister = scrollContext.register(refreshTargets);
+		const interval = setInterval(refreshTargets, 200);
+		const resizeObserver = new ResizeObserver(refreshTargets);
+		resizeObserver.observe(scrollContainer);
+
+		return () => {
+			unregister();
+			clearInterval(interval);
+			resizeObserver.disconnect();
+		};
+	});
+
+	$effect(() => {
+		if (!scrollContainer || !canvasDragContext.isDragging) return;
+
+		let frameId: number | null = null;
+		let autoScrollEdgeState: AutoScrollEdgeState = {
+			activeZone: null,
+			zoneEnteredAt: null,
+		};
+
+		const tick = () => {
+			if (!scrollContainer || !canvasDragContext.isDragging || !canvasDragContext.pointer) {
+				return;
+			}
+
+			const containerRect = scrollContainer.getBoundingClientRect();
+			const activeZone = getAutoScrollEdgeZone(
+				canvasDragContext.pointer.clientY,
+				containerRect,
+				AUTO_SCROLL_EDGE_PX,
+			);
+			const resolved = resolveAutoScrollEdgeState(
+				activeZone,
+				autoScrollEdgeState,
+				performance.now(),
+				AUTO_SCROLL_START_DELAY_MS,
+			);
+			autoScrollEdgeState = resolved.nextState;
+			const delta = resolved.isScrollActive
+				? getAutoScrollDelta(
+						canvasDragContext.pointer.clientY,
+						containerRect,
+						AUTO_SCROLL_EDGE_PX,
+						AUTO_SCROLL_MAX_STEP_PX,
+					)
+				: 0;
+
+			if (delta !== 0) {
+				const nextScrollTop = Math.max(
+					0,
+					Math.min(
+						scrollContainer.scrollTop + delta,
+						scrollContainer.scrollHeight - scrollContainer.clientHeight,
+					),
+				);
+				scrollContainer.scrollTop = nextScrollTop;
+			}
+
+			frameId = requestAnimationFrame(tick);
+		};
+
+		frameId = requestAnimationFrame(tick);
+
+		return () => {
+			if (frameId !== null) {
+				cancelAnimationFrame(frameId);
+			}
+		};
+	});
+
+	// Recompute the selected module action bar whenever the selection changes.
 	$effect(() => {
 		if (crafterMode !== "editor" || !selectedNodeId || !ast || !scrollContainerRef) {
-			islandState = null;
+			moduleActionBarState = null;
 			return;
 		}
 
 		const moduleId = getModuleIdFromNodeId(selectedNodeId);
 		if (!moduleId) {
-			islandState = null;
+			moduleActionBarState = null;
 			return;
 		}
 
 		const element = dom.querySelector(`[data-ujl-module-id="${moduleId}"]`) as HTMLElement | null;
 		if (!element) {
-			islandState = null;
+			moduleActionBarState = null;
 			return;
 		}
 
 		const editableNode = findEditableNodeByModuleId(ast, moduleId);
 		if (!editableNode) {
-			islandState = null;
+			moduleActionBarState = null;
 			return;
 		}
 
 		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
 
-		islandState = {
+		moduleActionBarState = {
 			moduleId,
 			canMoveUp,
 			canMoveDown,
@@ -331,15 +568,15 @@
 		};
 	}
 
-	function handleIslandSelect() {
-		const state = islandState;
+	function handleModuleActionBarSelect() {
+		const state = moduleActionBarState;
 		if (!state) return;
 		crafter.expandToNode(state.moduleId);
 		crafter.setSelectedNodeId(state.moduleId);
 	}
 
-	function handleIslandMoveUp() {
-		const state = islandState;
+	function handleModuleActionBarMoveUp() {
+		const state = moduleActionBarState;
 		if (!state) return;
 		const moduleId = state.moduleId;
 
@@ -372,8 +609,8 @@
 		}
 	}
 
-	function handleIslandMoveDown() {
-		const state = islandState;
+	function handleModuleActionBarMoveDown() {
+		const state = moduleActionBarState;
 		if (!state) return;
 		const moduleId = state.moduleId;
 
@@ -407,30 +644,45 @@
 		}
 	}
 
-	async function handleIslandCopy() {
-		if (!islandState) return;
-		await crafter.copyNode(islandState.moduleId);
+	async function handleModuleActionBarCopy() {
+		if (!moduleActionBarState) return;
+		await crafter.copyNode(moduleActionBarState.moduleId);
 	}
 
-	async function handleIslandCut() {
-		if (!islandState) return;
-		await crafter.cutNode(islandState.moduleId);
+	async function handleModuleActionBarCut() {
+		if (!moduleActionBarState) return;
+		await crafter.cutNode(moduleActionBarState.moduleId);
 	}
 
-	async function handleIslandPaste() {
-		if (!islandState) return;
-		await crafter.pasteNode(islandState.moduleId);
+	async function handleModuleActionBarPaste() {
+		if (!moduleActionBarState) return;
+		await crafter.pasteNode(moduleActionBarState.moduleId);
 	}
 
-	function handleIslandInsert() {
-		if (!islandState) return;
-		crafter.requestInsert(islandState.moduleId);
+	function handleModuleActionBarInsert() {
+		if (!moduleActionBarState) return;
+		crafter.requestInsert(moduleActionBarState.moduleId);
 	}
 
-	function handleIslandDelete() {
-		if (!islandState) return;
-		crafter.deleteNode(islandState.moduleId);
-		islandState = null;
+	function handleModuleActionBarDragDrop(request: InsertRequest) {
+		const state = moduleActionBarState;
+		if (!state) return;
+		if (!isValidMoveInsertRequest(crafter.ujlcDocument.ujlc.root, state.moduleId, request)) {
+			return;
+		}
+
+		crafter.operations.moveNode(
+			state.moduleId,
+			request.targetId,
+			request.slotName,
+			request.position,
+		);
+	}
+
+	function handleModuleActionBarDelete() {
+		if (!moduleActionBarState) return;
+		crafter.deleteNode(moduleActionBarState.moduleId);
+		moduleActionBarState = null;
 	}
 </script>
 
@@ -463,36 +715,40 @@
 		{/if}
 
 		{#if crafterMode === "editor" && selectedNodeId && scrollContainer}
-			<SelectionIndicator moduleId={selectedNodeId} containerElement={scrollContainer} />
+			<SelectionIndicator
+				moduleId={selectedModuleId ?? selectedNodeId}
+				containerElement={scrollContainer}
+			/>
 		{/if}
 	{/key}
 
 	<!-- Hover Overlay (Modul-Hover) -->
-	{#if crafterMode === "editor" && scrollContainer}
-		<HoverIndicator containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
+	{#if crafterMode === "editor" && scrollContainer && !canvasDragContext.isDragging}
+		<HoverIndicator containerElement={scrollContainer} {selectedModuleId} />
 	{/if}
 
 	<!-- Module Quick Actions -->
 	{#if crafterMode === "editor" && scrollContainer}
-		<ModuleQuickActions containerElement={scrollContainer} selectedModuleId={selectedNodeId} />
+		<ModulePlacementTargets containerElement={scrollContainer} {selectedModuleId} />
 	{/if}
 
 	<!-- Module Actions Overlay with {#key} Pattern -->
 	{#key selectedNodeId}
-		{#if islandState && crafterMode === "editor" && scrollContainer}
-			<Island
-				moduleId={islandState.moduleId}
+		{#if moduleActionBarState && crafterMode === "editor" && scrollContainer}
+			<ModuleActionBar
+				moduleId={moduleActionBarState.moduleId}
 				containerElement={scrollContainer}
-				canMoveUp={islandState.canMoveUp}
-				canMoveDown={islandState.canMoveDown}
-				onSelect={handleIslandSelect}
-				onMoveUp={handleIslandMoveUp}
-				onMoveDown={handleIslandMoveDown}
-				onCopy={handleIslandCopy}
-				onCut={handleIslandCut}
-				onPaste={handleIslandPaste}
-				onDelete={handleIslandDelete}
-				onInsert={handleIslandInsert}
+				canMoveUp={moduleActionBarState.canMoveUp}
+				canMoveDown={moduleActionBarState.canMoveDown}
+				onSelect={handleModuleActionBarSelect}
+				onMoveUp={handleModuleActionBarMoveUp}
+				onMoveDown={handleModuleActionBarMoveDown}
+				onCopy={handleModuleActionBarCopy}
+				onCut={handleModuleActionBarCut}
+				onPaste={handleModuleActionBarPaste}
+				onDelete={handleModuleActionBarDelete}
+				onInsert={handleModuleActionBarInsert}
+				onDragDrop={handleModuleActionBarDragDrop}
 				canCopy={true}
 				canCut={true}
 				canPaste={crafter.hasClipboardContent}

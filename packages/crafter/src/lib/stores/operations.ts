@@ -18,10 +18,10 @@ import {
 	findNodeById,
 	findParentOfNode,
 	getFirstSlotName,
+	getMoveInsertRequestValidationError,
 	hasSlots,
 	insertNodeAtPosition,
 	insertNodeIntoSlot,
-	isDescendant,
 	isRootNode,
 	removeNodeFromTree,
 	updateNodeInTree,
@@ -309,16 +309,20 @@ export function createOperations(
 			position?: "before" | "after" | "into",
 		): boolean {
 			const slot = getSlot();
-			const node = findNodeById(slot, nodeId);
-			const targetNode = findNodeById(slot, targetId);
-
-			if (!node || !targetNode) {
-				logger.warn("Node or target not found");
+			const validationError = getMoveInsertRequestValidationError(slot, nodeId, {
+				targetId,
+				slotName,
+				position,
+			});
+			if (validationError) {
+				logger.warn(validationError, slotName);
 				return false;
 			}
 
-			if (isRootNode(nodeId)) {
-				logger.warn("Cannot move root node");
+			const node = findNodeById(slot, nodeId);
+			const targetNode = findNodeById(slot, targetId);
+			if (!node || !targetNode) {
+				logger.warn("Node or target not found");
 				return false;
 			}
 
@@ -330,19 +334,8 @@ export function createOperations(
 
 			if (position === "before" || position === "after") {
 				const targetParentInfo = findParentOfNode(slot, targetId);
-
 				if (!targetParentInfo) {
 					logger.warn("Cannot find parent of target node");
-					return false;
-				}
-
-				if (isRootNode(targetId)) {
-					logger.warn("Cannot move relative to root node");
-					return false;
-				}
-
-				if (isDescendant(node, targetId)) {
-					logger.warn("Cannot move node into itself or its descendants");
 					return false;
 				}
 
@@ -395,24 +388,8 @@ export function createOperations(
 				return true;
 			}
 
-			if (!hasSlots(targetNode)) {
-				logger.warn("Target node has no slots - cannot accept children");
-				return false;
-			}
-
-			if (isDescendant(node, targetId)) {
-				logger.warn("Cannot move node into itself or its descendants");
-				return false;
-			}
-
 			const targetSlotName = slotName ?? getFirstSlotName(targetNode);
-
-			if (!targetSlotName) {
-				logger.warn("Target node has no valid slot");
-				return false;
-			}
-
-			if (!targetNode.slots?.[targetSlotName]) {
+			if (!targetSlotName || !targetNode.slots?.[targetSlotName]) {
 				logger.warn("Specified slot does not exist on target node", targetSlotName);
 				return false;
 			}

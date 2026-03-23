@@ -26,7 +26,7 @@ test.describe("Properties Panel", () => {
 		// Select a selectable module
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.selectModuleForSetup(moduleId!);
 
 		// Should no longer show "No module selected"
 		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible();
@@ -82,7 +82,7 @@ test.describe("Properties Panel", () => {
 		// Select a selectable module
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.selectModuleForSetup(moduleId!);
 
 		// Check for label elements
 		const labels = crafter.panel.locator("label");
@@ -122,7 +122,7 @@ test.describe("Properties Panel", () => {
 
 		for (const moduleId of selectableIds.slice(0, 5)) {
 			// Check first 5 selectable modules
-			await crafter.selectModuleInPreview(moduleId);
+			await crafter.selectModuleForSetup(moduleId);
 
 			const numberInput = crafter.panel.locator('input[type="number"]');
 
@@ -145,7 +145,7 @@ test.describe("Properties Panel", () => {
 		const selectableIds = await crafter.getSelectableModuleIds();
 
 		for (const moduleId of selectableIds.slice(0, 5)) {
-			await crafter.selectModuleInPreview(moduleId);
+			await crafter.selectModuleForSetup(moduleId);
 
 			const toggle = crafter.panel.locator('[role="switch"]');
 
@@ -172,11 +172,11 @@ test.describe("Properties Panel", () => {
 		}
 
 		// Select first module
-		await crafter.selectModuleInPreview(selectableIds[0]);
+		await crafter.selectModuleForSetup(selectableIds[0]);
 		const firstPanelContent = await crafter.panel.textContent();
 
 		// Select second module
-		await crafter.selectModuleInPreview(selectableIds[1]);
+		await crafter.selectModuleForSetup(selectableIds[1]);
 		const secondPanelContent = await crafter.panel.textContent();
 
 		// Panel content might change (different module type)

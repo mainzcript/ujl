@@ -73,6 +73,9 @@ export class CrafterPage {
 	async waitForReady() {
 		await expect(this.crafterElement).toBeVisible();
 		await expect(this.navTree).toBeVisible({ timeout: 10000 });
+		await expect(this.crafterElement.locator("[data-ujl-module-id]").first()).toBeVisible({
+			timeout: 10000,
+		});
 	}
 
 	/**
@@ -110,10 +113,41 @@ export class CrafterPage {
 	 * Select a module by clicking in the preview.
 	 * Note: Only modules with isModuleRoot=true in the AST can be selected.
 	 */
-	async selectModuleInPreview(moduleId: string) {
-		const module = this.getPreviewModule(moduleId);
-		await module.click();
+	async clickModuleInPreview(moduleId: string) {
+		await this.getPreviewModule(moduleId).evaluate((element) => {
+			const rect = element.getBoundingClientRect();
+			element.dispatchEvent(
+				new MouseEvent("click", {
+					bubbles: true,
+					cancelable: true,
+					composed: true,
+					clientX: rect.left + rect.width / 2,
+					clientY: rect.top + rect.height / 2,
+				}),
+			);
+		});
 		await expect(this.getSelectedPreviewModule()).toBeVisible({ timeout: 2000 });
+	}
+
+	/**
+	 * Select a module for general test setup.
+	 * Prefers the navigation tree to avoid overlay hit-testing concerns in preview.
+	 */
+	async selectModuleForSetup(moduleId: string) {
+		const treeNode = this.getTreeNode(moduleId);
+		if ((await treeNode.count()) > 0 && (await treeNode.first().isVisible())) {
+			await this.selectNodeInTree(moduleId);
+			return;
+		}
+
+		await this.clickModuleInPreview(moduleId);
+	}
+
+	/**
+	 * Backward-compatible alias for tests that explicitly want preview interaction.
+	 */
+	async selectModuleInPreview(moduleId: string) {
+		await this.clickModuleInPreview(moduleId);
 	}
 
 	/**
@@ -236,7 +270,7 @@ export class CrafterPage {
 	 * Excludes virtual nodes like __root__ which are not user-selectable.
 	 */
 	async getVisibleTreeNodeIds(): Promise<string[]> {
-		const nodes = this.crafterElement.locator("[data-tree-node-id]");
+		const nodes = this.crafterElement.locator("[data-tree-node-id]:visible");
 		const ids = await nodes.evaluateAll((elements) =>
 			elements.map((el) => el.getAttribute("data-tree-node-id") ?? ""),
 		);

@@ -35,11 +35,22 @@ export {
 	type ScrollPosition,
 } from "./scroll-context.svelte.js";
 
-// Hover Target Context for preview-local hover state
+// Canvas interaction context for preview-local pointer, hover, slot and nearest state
 export {
-	HOVER_TARGET_CONTEXT,
-	createHoverTargetContext,
-	getHoverTargetContext,
-	setHoverTargetContext,
-	type HoverTargetContext,
-} from "./hover-target-context.svelte.ts";
+	CANVAS_INTERACTION_CONTEXT,
+	createCanvasInteractionContext,
+	getCanvasInteractionContext,
+	setCanvasInteractionContext,
+	type CanvasInteractionContext,
+} from "./canvas-interaction-context.svelte.ts";
+
+// Canvas drag context for preview-local module dragging
+export {
+	CANVAS_DRAG_CONTEXT,
+	createCanvasDragContext,
+	getCanvasDragContext,
+	setCanvasDragContext,
+	type CanvasDragContext,
+	type CanvasDragPointer,
+	type CanvasDragSnapshot,
+} from "./canvas-drag-context.svelte.js";

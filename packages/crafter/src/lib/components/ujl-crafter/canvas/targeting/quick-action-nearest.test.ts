@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMockTree } from "../../../../../tests/mockData.js";
+import { createMockTree } from "../../../../../../tests/mockData.js";
 import {
 	findNearestModuleId,
 	getDirectSlotChildIds,
@@ -52,6 +52,7 @@ describe("quick-action-nearest utilities", () => {
 	it("returns only the direct children of the requested slot", () => {
 		const tree = createMockTree();
 
+		expect(getDirectSlotChildIds(tree, null, "root")).toEqual(["root-1"]);
 		expect(getDirectSlotChildIds(tree, "root-1", "body")).toEqual(["nested-1", "nested-2"]);
 		expect(getDirectSlotChildIds(tree, "nested-1", "content")).toEqual(["leaf-1"]);
 		expect(getDirectSlotChildIds(tree, "root-1", "content")).toEqual([]);

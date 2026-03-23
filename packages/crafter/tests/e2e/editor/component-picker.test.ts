@@ -120,18 +120,19 @@ test.describe("Component Picker", () => {
 		await crafter.goto();
 
 		// Get modules
-		const moduleIds = await crafter.getPreviewModuleIds();
+		const moduleIds = await crafter.getSelectableModuleIds();
+		const initialCount = moduleIds.length;
 
 		// Select the first module
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		await crafter.selectModuleForSetup(moduleIds[0]);
 
 		// Insert a new component
 		await crafter.insertComponent("Text");
 
 		// The new component should be inserted after the selected one
 		await expect
-			.poll(async () => (await crafter.getPreviewModuleIds()).length)
-			.toBe(moduleIds.length + 1);
+			.poll(async () => (await crafter.getSelectableModuleIds()).length)
+			.toBe(initialCount + 1);
 	});
 
 	test("should close with Escape key", async ({ page }) => {

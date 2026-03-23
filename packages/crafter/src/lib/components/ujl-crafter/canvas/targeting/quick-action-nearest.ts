@@ -1,4 +1,4 @@
-import { findNodeById } from "$lib/utils/ujlc-tree.js";
+import { findNodeById, ROOT_SLOT_NAME } from "$lib/utils/ujlc-tree.js";
 import type { UJLCModuleObject } from "@ujl-framework/types";
 
 export interface PointerPosition {
@@ -15,9 +15,15 @@ export interface RectLike {
 
 export function getDirectSlotChildIds(
 	nodes: UJLCModuleObject[],
-	ownerModuleId: string,
+	ownerModuleId: string | null,
 	slotName: string,
 ): string[] {
+	if (ownerModuleId === null && slotName === ROOT_SLOT_NAME) {
+		return nodes.map((child) => child.meta.id);
+	}
+
+	if (ownerModuleId === null) return [];
+
 	const owner = findNodeById(nodes, ownerModuleId);
 	if (!owner?.slots?.[slotName]) return [];
 

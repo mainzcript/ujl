@@ -2,22 +2,28 @@ import type { UJLCModuleObject } from "@ujl-framework/types";
 import { describe, expect, it } from "vitest";
 import { createMockNode } from "../../../../../tests/mockData.js";
 import {
-	calculateQuickActionDefinitions,
-	dedupeQuickActionDefinitions,
-	doRectsIntersect,
-	filterQuickActionDefinitionsByIslandCollision,
-	getEffectiveTrackedModuleIds,
-	getInsertButtonRect,
-	getInsertRequestKey,
+	calculatePlacementTargetDefinitions,
+	dedupePlacementTargetDefinitions,
+	filterPlacementTargetDefinitionsByMoveValidity,
 	getSlotMetrics,
-	getTrackedModuleIds,
-	getTransientTrackedModuleIds,
 	inferSlotFlowDirection,
-	INSERT_BUTTON_VISUAL_SIZE_PX,
-	resolveQuickActionVisibility,
-	type SlotQuickActionContext,
-} from "./module-quick-actions.js";
-import type { RelativeRect } from "./quick-action-position.js";
+	type SlotPlacementContext,
+} from "../canvas/targeting/placement-target-definitions.js";
+import {
+	doRectsIntersect,
+	filterPlacementTargetsByActionBarCollision,
+	getInsertRequestKey,
+	getPlacementTargetAtPoint,
+	getPlacementTargetButtonRect,
+	PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX,
+} from "../canvas/targeting/placement-target-hit-testing.js";
+import {
+	resolveEffectiveTrackedModuleIds,
+	resolvePlacementTargetVisibility,
+	resolveTrackedModuleIds,
+	resolveTransientTrackedModuleIds,
+} from "../canvas/targeting/placement-target-tracking.js";
+import type { RelativeRect } from "../canvas/targeting/quick-action-position.js";
 
 function createSiblings(ids: string[]): UJLCModuleObject[] {
 	return ids.map((id) => createMockNode(id, "card", { title: id }));
@@ -40,7 +46,7 @@ function createRect(partial: Partial<RelativeRect>): RelativeRect {
 function createContext(
 	siblings: UJLCModuleObject[],
 	slotRect: RelativeRect | null,
-): SlotQuickActionContext {
+): SlotPlacementContext {
 	return {
 		ownerModuleId: "slot-owner",
 		slotName: "items",
@@ -52,7 +58,7 @@ function createContext(
 function createRootContext(
 	siblings: UJLCModuleObject[],
 	slotRect: RelativeRect | null,
-): SlotQuickActionContext {
+): SlotPlacementContext {
 	return {
 		ownerModuleId: null,
 		slotName: "root",
@@ -61,10 +67,10 @@ function createRootContext(
 	};
 }
 
-describe("module-quick-actions helpers", () => {
+describe("module-placement-targets helpers", () => {
 	it("keeps the source priority order selected > hovered > nearest", () => {
 		expect(
-			getTrackedModuleIds({
+			resolveTrackedModuleIds({
 				selectedModuleId: "selected",
 				hoveredModuleId: "hovered",
 				nearestModuleId: "nearest",
@@ -74,7 +80,7 @@ describe("module-quick-actions helpers", () => {
 
 	it("removes duplicate module ids across selected, hovered and nearest", () => {
 		expect(
-			getTrackedModuleIds({
+			resolveTrackedModuleIds({
 				selectedModuleId: "same",
 				hoveredModuleId: "same",
 				nearestModuleId: "same",
@@ -84,27 +90,84 @@ describe("module-quick-actions helpers", () => {
 
 	it("derives transient tracked ids only from hovered and nearest sources", () => {
 		expect(
-			getTransientTrackedModuleIds({
+			resolveTransientTrackedModuleIds({
 				hoveredModuleId: "hovered",
 				nearestModuleId: "nearest",
 			}),
 		).toEqual(["hovered", "nearest"]);
 	});
 
+	it("uses the same tracking priority in drag mode as in idle mode", () => {
+		expect(
+			resolveTrackedModuleIds({
+				selectedModuleId: "selected",
+				hoveredModuleId: "hovered",
+				nearestModuleId: "nearest",
+			}),
+		).toEqual(["selected", "hovered", "nearest"]);
+	});
+
+	it("dedupes drag tracking inputs even when selection and hover point to the dragged module", () => {
+		expect(
+			resolveTrackedModuleIds({
+				selectedModuleId: "dragged-module",
+				hoveredModuleId: "dragged-module",
+				nearestModuleId: "other-module",
+			}),
+		).toEqual(["dragged-module", "other-module"]);
+	});
+
+	it("filters self and descendant targets out of drag-mode definitions", () => {
+		const leaf = createMockNode("leaf", "text", { content: "Leaf" });
+		const child = createMockNode("child", "container", {}, { body: [leaf] });
+		const sibling = createMockNode("sibling", "card", { title: "Sibling" });
+		const root = [createMockNode("parent", "container", {}, { body: [child, sibling] })];
+
+		expect(
+			filterPlacementTargetDefinitionsByMoveValidity(
+				[
+					{
+						key: "self-before",
+						sourceModuleId: "child",
+						insertRequest: { targetId: "child", position: "before" },
+						x: 10,
+						y: 10,
+					},
+					{
+						key: "descendant-before",
+						sourceModuleId: "leaf",
+						insertRequest: { targetId: "leaf", position: "before" },
+						x: 20,
+						y: 20,
+					},
+					{
+						key: "sibling-after",
+						sourceModuleId: "sibling",
+						insertRequest: { targetId: "sibling", position: "after" },
+						x: 30,
+						y: 30,
+					},
+				],
+				root,
+				"child",
+			).map((definition) => definition.key),
+		).toEqual(["sibling-after"]);
+	});
+
 	it("combines selected and transient tracked ids without duplicates", () => {
-		expect(getEffectiveTrackedModuleIds("selected", ["selected", "nearest"])).toEqual([
+		expect(resolveEffectiveTrackedModuleIds("selected", ["selected", "nearest"])).toEqual([
 			"selected",
 			"nearest",
 		]);
 	});
 
-	it("resolves live quick-action targets immediately", () => {
+	it("resolves live placement targets immediately", () => {
 		expect(
-			resolveQuickActionVisibility({
+			resolvePlacementTargetVisibility({
 				selectedModuleId: "selected",
 				liveTransientModuleIds: ["hovered", "nearest"],
 				heldTransientModuleIds: [],
-				isQuickActionsHovered: false,
+				isPlacementTargetsHovered: false,
 			}),
 		).toEqual({
 			effectiveTrackedModuleIds: ["selected", "hovered", "nearest"],
@@ -115,11 +178,11 @@ describe("module-quick-actions helpers", () => {
 
 	it("keeps held transient targets during the hold when no selection exists", () => {
 		expect(
-			resolveQuickActionVisibility({
+			resolvePlacementTargetVisibility({
 				selectedModuleId: null,
 				liveTransientModuleIds: [],
 				heldTransientModuleIds: ["hovered", "nearest"],
-				isQuickActionsHovered: false,
+				isPlacementTargetsHovered: false,
 			}),
 		).toEqual({
 			effectiveTrackedModuleIds: ["hovered", "nearest"],
@@ -130,11 +193,11 @@ describe("module-quick-actions helpers", () => {
 
 	it("keeps held transient targets without scheduling hide while a button is hovered", () => {
 		expect(
-			resolveQuickActionVisibility({
+			resolvePlacementTargetVisibility({
 				selectedModuleId: null,
 				liveTransientModuleIds: [],
 				heldTransientModuleIds: ["hovered"],
-				isQuickActionsHovered: true,
+				isPlacementTargetsHovered: true,
 			}),
 		).toEqual({
 			effectiveTrackedModuleIds: ["hovered"],
@@ -145,11 +208,11 @@ describe("module-quick-actions helpers", () => {
 
 	it("falls back to selection-only buttons when hover and nearest disappear", () => {
 		expect(
-			resolveQuickActionVisibility({
+			resolvePlacementTargetVisibility({
 				selectedModuleId: "selected",
 				liveTransientModuleIds: [],
 				heldTransientModuleIds: ["hovered"],
-				isQuickActionsHovered: false,
+				isPlacementTargetsHovered: false,
 			}),
 		).toEqual({
 			effectiveTrackedModuleIds: ["selected"],
@@ -159,25 +222,67 @@ describe("module-quick-actions helpers", () => {
 	});
 
 	it("dedupes buttons by insert request instead of position", () => {
-		const deduped = dedupeQuickActionDefinitions([
-			{
-				key: "selected-before",
-				sourceModuleId: "selected",
-				insertRequest: { targetId: "module-a", position: "before" },
-				x: 10,
-				y: 10,
-			},
-			{
-				key: "hovered-before",
-				sourceModuleId: "hovered",
-				insertRequest: { targetId: "module-a", position: "before" },
-				x: 100,
-				y: 100,
-			},
-		]);
+		const deduped = dedupePlacementTargetDefinitions(
+			[
+				{
+					key: "selected-before",
+					sourceModuleId: "selected",
+					insertRequest: { targetId: "module-a", position: "before" },
+					x: 10,
+					y: 10,
+				},
+				{
+					key: "hovered-before",
+					sourceModuleId: "hovered",
+					insertRequest: { targetId: "module-a", position: "before" },
+					x: 100,
+					y: 100,
+				},
+			],
+			getInsertRequestKey,
+		);
 
 		expect(deduped).toHaveLength(1);
 		expect(deduped[0]?.sourceModuleId).toBe("selected");
+	});
+
+	it("finds the active drop target from the button geometry", () => {
+		expect(
+			getPlacementTargetAtPoint(
+				[
+					{
+						key: "before-a",
+						sourceModuleId: "module-a",
+						insertRequest: { targetId: "module-a", position: "before" },
+						x: 100,
+						y: 120,
+					},
+					{
+						key: "after-a",
+						sourceModuleId: "module-a",
+						insertRequest: { targetId: "module-a", position: "after" },
+						x: 200,
+						y: 120,
+					},
+				],
+				{ x: 102, y: 118 },
+			)?.key,
+		).toBe("before-a");
+
+		expect(
+			getPlacementTargetAtPoint(
+				[
+					{
+						key: "after-a",
+						sourceModuleId: "module-a",
+						insertRequest: { targetId: "module-a", position: "after" },
+						x: 200,
+						y: 120,
+					},
+				],
+				{ x: 260, y: 200 },
+			),
+		).toBeNull();
 	});
 
 	it("keeps the first origin when multiple sources produce the same insert target", () => {
@@ -189,7 +294,7 @@ describe("module-quick-actions helpers", () => {
 
 	it("returns exactly two buttons for a single tracked module", () => {
 		const siblings = createSiblings(["module-a", "module-b", "module-c"]);
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-b",
 			createContext(
 				siblings,
@@ -366,7 +471,7 @@ describe("module-quick-actions helpers", () => {
 
 	it("uses the single-child width heuristic for a root-level slot when a slot rect is present", () => {
 		const siblings = createSiblings(["module-a"]);
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-a",
 			createRootContext(
 				siblings,
@@ -472,7 +577,7 @@ describe("module-quick-actions helpers", () => {
 			inferSlotFlowDirection(getSlotMetrics(context, (moduleId) => rects[moduleId] ?? null)),
 		).toBe("horizontal");
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-b",
 			context,
 			(moduleId) => rects[moduleId] ?? null,
@@ -516,7 +621,7 @@ describe("module-quick-actions helpers", () => {
 			}),
 		};
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-b",
 			createContext(
 				siblings,
@@ -536,6 +641,55 @@ describe("module-quick-actions helpers", () => {
 
 		expect(definitions).toEqual([
 			expect.objectContaining({ key: "before-gap-module-b", x: 150, y: 50 }),
+			expect.objectContaining({ key: "after-edge-module-b", x: 330, y: 50 }),
+		]);
+	});
+
+	it("falls back to the module center when a mirrored horizontal before-gap would drift outside", () => {
+		const siblings = createSiblings(["module-a", "module-b"]);
+		const rects: Record<string, RelativeRect> = {
+			"module-a": createRect({
+				left: 0,
+				right: 120,
+				top: 0,
+				bottom: 220,
+				width: 120,
+				height: 220,
+				centerX: 60,
+				centerY: 110,
+			}),
+			"module-b": createRect({
+				left: 180,
+				right: 300,
+				top: 0,
+				bottom: 100,
+				width: 120,
+				height: 100,
+				centerX: 240,
+				centerY: 50,
+			}),
+		};
+
+		const definitions = calculatePlacementTargetDefinitions(
+			"module-b",
+			createContext(
+				siblings,
+				createRect({
+					left: 0,
+					right: 320,
+					top: 0,
+					bottom: 240,
+					width: 320,
+					height: 240,
+					centerX: 160,
+					centerY: 120,
+				}),
+			),
+			(moduleId) => rects[moduleId] ?? null,
+		);
+
+		expect(definitions).toEqual([
+			expect.objectContaining({ key: "before-gap-module-b", x: 150, y: 110 }),
 			expect.objectContaining({ key: "after-edge-module-b", x: 330, y: 50 }),
 		]);
 	});
@@ -563,7 +717,7 @@ describe("module-quick-actions helpers", () => {
 			}),
 		};
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-a",
 			createContext(
 				siblings,
@@ -583,6 +737,55 @@ describe("module-quick-actions helpers", () => {
 
 		expect(definitions).toEqual([
 			expect.objectContaining({ key: "after-gap-module-a", x: 150, y: 50 }),
+			expect.objectContaining({ key: "before-edge-module-a", x: -30, y: 50 }),
+		]);
+	});
+
+	it("falls back to the module center when a mirrored horizontal after-gap would drift outside", () => {
+		const siblings = createSiblings(["module-a", "module-b"]);
+		const rects: Record<string, RelativeRect> = {
+			"module-a": createRect({
+				left: 0,
+				right: 120,
+				top: 0,
+				bottom: 100,
+				width: 120,
+				height: 100,
+				centerX: 60,
+				centerY: 50,
+			}),
+			"module-b": createRect({
+				left: 180,
+				right: 300,
+				top: 0,
+				bottom: 220,
+				width: 120,
+				height: 220,
+				centerX: 240,
+				centerY: 110,
+			}),
+		};
+
+		const definitions = calculatePlacementTargetDefinitions(
+			"module-a",
+			createContext(
+				siblings,
+				createRect({
+					left: 0,
+					right: 320,
+					top: 0,
+					bottom: 240,
+					width: 320,
+					height: 240,
+					centerX: 160,
+					centerY: 120,
+				}),
+			),
+			(moduleId) => rects[moduleId] ?? null,
+		);
+
+		expect(definitions).toEqual([
+			expect.objectContaining({ key: "after-gap-module-a", x: 150, y: 110 }),
 			expect.objectContaining({ key: "before-edge-module-a", x: -30, y: 50 }),
 		]);
 	});
@@ -610,7 +813,7 @@ describe("module-quick-actions helpers", () => {
 			}),
 		};
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-a",
 			createContext(
 				siblings,
@@ -634,6 +837,55 @@ describe("module-quick-actions helpers", () => {
 		]);
 	});
 
+	it("falls back to the module center when a mirrored vertical anchor would drift outside", () => {
+		const siblings = createSiblings(["module-a", "module-b"]);
+		const rects: Record<string, RelativeRect> = {
+			"module-a": createRect({
+				left: 40,
+				right: 140,
+				top: 0,
+				bottom: 100,
+				width: 100,
+				height: 100,
+				centerX: 90,
+				centerY: 50,
+			}),
+			"module-b": createRect({
+				left: 100,
+				right: 320,
+				top: 160,
+				bottom: 260,
+				width: 220,
+				height: 100,
+				centerX: 210,
+				centerY: 210,
+			}),
+		};
+
+		const definitions = calculatePlacementTargetDefinitions(
+			"module-a",
+			createContext(
+				siblings,
+				createRect({
+					left: 0,
+					right: 240,
+					top: 0,
+					bottom: 280,
+					width: 240,
+					height: 280,
+					centerX: 120,
+					centerY: 140,
+				}),
+			),
+			(moduleId) => rects[moduleId] ?? null,
+		);
+
+		expect(definitions).toEqual([
+			expect.objectContaining({ key: "after-gap-module-a", x: 180, y: 130 }),
+			expect.objectContaining({ key: "before-edge-module-a", x: 90, y: -30 }),
+		]);
+	});
+
 	it("places single-child actions left and right in a horizontal slot", () => {
 		const siblings = createSiblings(["module-a"]);
 		const rects: Record<string, RelativeRect> = {
@@ -648,7 +900,7 @@ describe("module-quick-actions helpers", () => {
 			}),
 		};
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-a",
 			createContext(
 				siblings,
@@ -686,7 +938,7 @@ describe("module-quick-actions helpers", () => {
 			}),
 		};
 
-		const definitions = calculateQuickActionDefinitions(
+		const definitions = calculatePlacementTargetDefinitions(
 			"module-a",
 			createContext(
 				siblings,
@@ -710,13 +962,13 @@ describe("module-quick-actions helpers", () => {
 		]);
 	});
 
-	it("derives the visible insert-button rect from its anchor point", () => {
-		expect(getInsertButtonRect(100, 120)).toEqual(
+	it("derives the visible placement-target-button rect from its anchor point", () => {
+		expect(getPlacementTargetButtonRect(100, 120)).toEqual(
 			expect.objectContaining({
-				left: 100 - INSERT_BUTTON_VISUAL_SIZE_PX / 2,
-				right: 100 + INSERT_BUTTON_VISUAL_SIZE_PX / 2,
-				top: 120 - INSERT_BUTTON_VISUAL_SIZE_PX / 2,
-				bottom: 120 + INSERT_BUTTON_VISUAL_SIZE_PX / 2,
+				left: 100 - PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX / 2,
+				right: 100 + PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX / 2,
+				top: 120 - PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX / 2,
+				bottom: 120 + PLACEMENT_TARGET_BUTTON_VISUAL_SIZE_PX / 2,
 			}),
 		);
 	});
@@ -739,7 +991,7 @@ describe("module-quick-actions helpers", () => {
 		).toBe(true);
 	});
 
-	it("keeps all quick actions when no island rect is present", () => {
+	it("keeps all quick actions when no action-bar rect is present", () => {
 		const definitions = [
 			{
 				key: "before-edge-module-a",
@@ -757,10 +1009,10 @@ describe("module-quick-actions helpers", () => {
 			},
 		];
 
-		expect(filterQuickActionDefinitionsByIslandCollision(definitions, null)).toEqual(definitions);
+		expect(filterPlacementTargetsByActionBarCollision(definitions, null)).toEqual(definitions);
 	});
 
-	it("filters only the quick action that collides with the island", () => {
+	it("filters only the quick action that collides with the action bar", () => {
 		const definitions = [
 			{
 				key: "before-edge-module-a",
@@ -784,7 +1036,7 @@ describe("module-quick-actions helpers", () => {
 				y: 50,
 			},
 		];
-		const islandRect = createRect({
+		const actionBarRect = createRect({
 			left: 132,
 			right: 168,
 			top: 32,
@@ -795,7 +1047,7 @@ describe("module-quick-actions helpers", () => {
 			centerY: 50,
 		});
 
-		expect(filterQuickActionDefinitionsByIslandCollision(definitions, islandRect)).toEqual([
+		expect(filterPlacementTargetsByActionBarCollision(definitions, actionBarRect)).toEqual([
 			definitions[0],
 			definitions[2],
 		]);

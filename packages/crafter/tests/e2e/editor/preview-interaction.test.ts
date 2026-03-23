@@ -25,7 +25,7 @@ test.describe("Preview Interaction", () => {
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
 
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.clickModuleInPreview(moduleId!);
 
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 	});
@@ -37,7 +37,7 @@ test.describe("Preview Interaction", () => {
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
 
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.clickModuleInPreview(moduleId!);
 
 		const selectedModule = crafter.getSelectedPreviewModule();
 		await expect(selectedModule).toBeVisible();
@@ -51,7 +51,7 @@ test.describe("Preview Interaction", () => {
 
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.clickModuleInPreview(moduleId!);
 
 		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible({ timeout: 2000 });
 	});
@@ -95,7 +95,7 @@ test.describe("Preview Interaction", () => {
 		);
 		expect(childId).toBeDefined();
 
-		await crafter.selectModuleInPreview(childId!);
+		await crafter.clickModuleInPreview(childId!);
 
 		await crafter.waitForAnimation();
 
@@ -126,7 +126,7 @@ test.describe("Preview Interaction", () => {
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
 
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.clickModuleInPreview(moduleId!);
 
 		const selectedModule = crafter.getSelectedPreviewModule();
 		await expect(selectedModule).toBeVisible();
@@ -144,7 +144,7 @@ test.describe("Preview Interaction", () => {
 
 		const moduleId = await crafter.getFirstSelectableModuleId();
 		expect(moduleId).not.toBeNull();
-		await crafter.selectModuleInPreview(moduleId!);
+		await crafter.clickModuleInPreview(moduleId!);
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
 		await crafter.deselect();
@@ -175,7 +175,7 @@ test.describe("Preview Interaction", () => {
 
 		const moduleId = selectableIds[Math.floor(selectableIds.length / 2)];
 
-		await crafter.selectModuleInPreview(moduleId);
+		await crafter.clickModuleInPreview(moduleId);
 
 		await crafter.waitForAnimation();
 

@@ -14,11 +14,13 @@ import {
 	getChildren,
 	getDisplayName,
 	getFirstSlotName,
+	getMoveInsertRequestValidationError,
 	hasChildren,
 	hasMultipleSlots,
 	hasSlots,
 	insertNodeAtPosition,
 	insertNodeIntoSlot,
+	isValidMoveInsertRequest,
 	removeNodeFromTree,
 	updateNodeInTree,
 } from "./ujlc-tree.js";
@@ -91,6 +93,71 @@ describe("ujlc-tree-utils", () => {
 			const result = findParentOfNode(tree, "nested-2");
 
 			expect(result?.index).toBe(1);
+		});
+	});
+
+	describe("move insert request validation", () => {
+		it("rejects moving a node relative to itself", () => {
+			const tree = createMockTree();
+
+			expect(
+				getMoveInsertRequestValidationError(tree, "nested-1", {
+					targetId: "nested-1",
+					position: "before",
+				}),
+			).toBe("Cannot move node into itself or its descendants");
+		});
+
+		it("rejects moving a node relative to one of its descendants", () => {
+			const tree = createMockTree();
+
+			expect(
+				getMoveInsertRequestValidationError(tree, "root-1", {
+					targetId: "leaf-1",
+					position: "after",
+				}),
+			).toBe("Cannot move node into itself or its descendants");
+		});
+
+		it("rejects moving a node into one of its descendants", () => {
+			const tree = createMockTree();
+
+			expect(
+				getMoveInsertRequestValidationError(tree, "root-1", {
+					targetId: "nested-1",
+					position: "into",
+				}),
+			).toBe("Cannot move node into itself or its descendants");
+		});
+
+		it("accepts moving a node to a sibling target", () => {
+			const tree = createMockTree();
+
+			expect(
+				isValidMoveInsertRequest(tree, "nested-1", {
+					targetId: "nested-2",
+					position: "after",
+				}),
+			).toBe(true);
+		});
+
+		it("accepts moving a node into another slot-bearing sibling", () => {
+			const left = createMockNode(
+				"left",
+				"container",
+				{},
+				{ body: [createMockNode("leaf", "text")] },
+			);
+			const right = createMockNode("right", "container", {}, { body: [] });
+			const tree = [createMockNode("root", "layout", {}, { main: [left, right] })];
+
+			expect(
+				isValidMoveInsertRequest(tree, "left", {
+					targetId: "right",
+					position: "into",
+					slotName: "body",
+				}),
+			).toBe(true);
 		});
 	});
 

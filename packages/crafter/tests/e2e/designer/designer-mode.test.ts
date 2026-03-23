@@ -27,8 +27,9 @@ test.describe("Designer Mode", () => {
 		await crafter.goto();
 
 		// Select a module in Editor mode
-		const moduleIds = await crafter.getPreviewModuleIds();
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		const moduleId = await crafter.getFirstSelectableModuleId();
+		expect(moduleId).not.toBeNull();
+		await crafter.selectModuleForSetup(moduleId!);
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
 		// Switch to Designer mode
@@ -145,8 +146,9 @@ test.describe("Designer Mode", () => {
 		await expect(crafter.modeSelector).toContainText("Editor");
 
 		// Should be able to select modules again
-		const moduleIds = await crafter.getPreviewModuleIds();
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		const moduleId = await crafter.getFirstSelectableModuleId();
+		expect(moduleId).not.toBeNull();
+		await crafter.selectModuleForSetup(moduleId!);
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 	});
 

@@ -38,8 +38,8 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Select a node
-		const moduleIds = await crafter.getPreviewModuleIds();
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		const moduleIds = await crafter.getSelectableModuleIds();
+		await crafter.selectModuleForSetup(moduleIds[0]);
 
 		// Copy the node
 		await crafter.copySelectedNode();
@@ -53,11 +53,11 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Get initial module count
-		const initialModuleIds = await crafter.getPreviewModuleIds();
+		const initialModuleIds = await crafter.getSelectableModuleIds();
 		const moduleToRemove = initialModuleIds[initialModuleIds.length - 1]; // Last module
 
 		// Select the module
-		await crafter.selectModuleInPreview(moduleToRemove);
+		await crafter.selectModuleForSetup(moduleToRemove);
 
 		// Cut the node
 		await crafter.cutSelectedNode();
@@ -97,19 +97,19 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Get initial count
-		const initialModuleIds = await crafter.getPreviewModuleIds();
+		const initialModuleIds = await crafter.getSelectableModuleIds();
 		const initialCount = initialModuleIds.length;
 
 		// Select the last module (not root)
 		const moduleToDelete = initialModuleIds[initialModuleIds.length - 1];
-		await crafter.selectModuleInPreview(moduleToDelete);
+		await crafter.selectModuleForSetup(moduleToDelete);
 
 		// Delete it
 		await crafter.deleteSelectedNode();
 
 		// Module count should decrease
 		await expect
-			.poll(async () => (await crafter.getPreviewModuleIds()).length)
+			.poll(async () => (await crafter.getSelectableModuleIds()).length)
 			.toBe(initialCount - 1);
 
 		// The specific module should be gone
@@ -121,11 +121,11 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Get a deletable module
-		const moduleIds = await crafter.getPreviewModuleIds();
+		const moduleIds = await crafter.getSelectableModuleIds();
 		const moduleToDelete = moduleIds[moduleIds.length - 1];
 
 		// Select and delete with Backspace
-		await crafter.selectModuleInPreview(moduleToDelete);
+		await crafter.selectModuleForSetup(moduleToDelete);
 		await page.keyboard.press("Backspace");
 
 		// Module should be gone
@@ -137,8 +137,8 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Select a node
-		const moduleIds = await crafter.getPreviewModuleIds();
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		const moduleIds = await crafter.getSelectableModuleIds();
+		await crafter.selectModuleForSetup(moduleIds[0]);
 		await expect(crafter.getSelectedPreviewModule()).toBeVisible();
 
 		// Press Escape
@@ -153,8 +153,8 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Select a node to show properties panel
-		const moduleIds = await crafter.getPreviewModuleIds();
-		await crafter.selectModuleInPreview(moduleIds[0]);
+		const moduleIds = await crafter.getSelectableModuleIds();
+		await crafter.selectModuleForSetup(moduleIds[0]);
 
 		await expect(crafter.panel.getByText("No module selected")).not.toBeVisible({ timeout: 2000 });
 
@@ -197,17 +197,17 @@ test.describe("Keyboard Shortcuts", () => {
 		await crafter.goto();
 
 		// Get initial count
-		const initialModuleIds = await crafter.getPreviewModuleIds();
+		const initialModuleIds = await crafter.getSelectableModuleIds();
 		const initialCount = initialModuleIds.length;
 
 		// Select a node
-		await crafter.selectModuleInPreview(initialModuleIds[0]);
+		await crafter.selectModuleForSetup(initialModuleIds[0]);
 
 		// Try to paste without copying first
 		await crafter.pasteNode();
 
 		// Count should not change
-		const newModuleIds = await crafter.getPreviewModuleIds();
+		const newModuleIds = await crafter.getSelectableModuleIds();
 		expect(newModuleIds.length).toBe(initialCount);
 	});
 
