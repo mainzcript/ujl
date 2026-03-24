@@ -5,6 +5,7 @@ export * from "./aspect-ratio/index.js";
 export * from "./avatar/index.js";
 export * from "./badge/index.js";
 export * from "./breadcrumb/index.js";
+export * from "./button-group/index.js";
 export * from "./button/index.js";
 export * from "./card/index.js";
 export * from "./carousel/index.js";
@@ -34,7 +35,6 @@ export * from "./scroll-area/index.js";
 export * from "./select/index.js";
 export * from "./separator/index.js";
 export * from "./sheet/index.js";
-// Sidebar components removed - menu components moved to crafter package
 export * from "./skeleton/index.js";
 export * from "./slider/index.js";
 export * from "./sonner/index.js";
