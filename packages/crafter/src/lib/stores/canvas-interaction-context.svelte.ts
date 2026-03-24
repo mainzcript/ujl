@@ -8,12 +8,16 @@ export interface CanvasInteractionContext {
 	readonly pointer: CanvasDragPointer | null;
 	readonly hoveredModuleId: string | null;
 	readonly activeSlot: ActiveSlotTarget | null;
+	readonly activePlaceholderSlot: ActiveSlotTarget | null;
+	readonly isHoveringDraggedSource: boolean;
 	readonly lastValidSlot: ActiveSlotTarget | null;
 	readonly nearestModuleId: string | null;
 	updateState(next: {
 		pointer: CanvasDragPointer | null;
 		hoveredModuleId: string | null;
 		activeSlot: ActiveSlotTarget | null;
+		activePlaceholderSlot?: ActiveSlotTarget | null;
+		isHoveringDraggedSource?: boolean;
 		nearestModuleId: string | null;
 	}): void;
 	clear(): void;
@@ -23,6 +27,8 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 	let pointer = $state<CanvasDragPointer | null>(null);
 	let hoveredModuleId = $state<string | null>(null);
 	let activeSlot = $state<ActiveSlotTarget | null>(null);
+	let activePlaceholderSlot = $state<ActiveSlotTarget | null>(null);
+	let isHoveringDraggedSource = $state(false);
 	let lastValidSlot = $state<ActiveSlotTarget | null>(null);
 	let nearestModuleId = $state<string | null>(null);
 
@@ -36,6 +42,12 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 		get activeSlot() {
 			return activeSlot;
 		},
+		get activePlaceholderSlot() {
+			return activePlaceholderSlot;
+		},
+		get isHoveringDraggedSource() {
+			return isHoveringDraggedSource;
+		},
 		get lastValidSlot() {
 			return lastValidSlot;
 		},
@@ -46,6 +58,8 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 			pointer = next.pointer;
 			hoveredModuleId = next.hoveredModuleId;
 			activeSlot = next.activeSlot;
+			activePlaceholderSlot = next.activePlaceholderSlot ?? null;
+			isHoveringDraggedSource = next.isHoveringDraggedSource ?? false;
 			if (next.activeSlot) {
 				lastValidSlot = next.activeSlot;
 			}
@@ -55,6 +69,8 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 			pointer = null;
 			hoveredModuleId = null;
 			activeSlot = null;
+			activePlaceholderSlot = null;
+			isHoveringDraggedSource = false;
 			lastValidSlot = null;
 			nearestModuleId = null;
 		},

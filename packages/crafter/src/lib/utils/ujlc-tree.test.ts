@@ -158,6 +158,18 @@ describe("ujlc-tree-utils", () => {
 				}),
 			).toBe(true);
 		});
+
+		it("accepts moving a node into the root slot", () => {
+			const tree = createMockTree();
+
+			expect(
+				isValidMoveInsertRequest(tree, "nested-1", {
+					targetId: "__root__",
+					position: "into",
+					slotName: "root",
+				}),
+			).toBe(true);
+		});
 	});
 
 	describe("removeNodeFromTree", () => {

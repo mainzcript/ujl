@@ -10,7 +10,7 @@
 </script>
 
 {#if showMetadata}
-	<div data-ujl-module-id={node.meta?.moduleId ?? undefined}>
+	<div data-ujl-module-id={node.meta?.moduleId ?? undefined} class="h-full">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html node.props.content}
 	</div>

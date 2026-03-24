@@ -8,9 +8,16 @@
 		getCanvasInteractionContext,
 		getScrollContext,
 	} from "$lib/stores/index.js";
-	import { findParentOfNode, ROOT_NODE_ID, ROOT_SLOT_NAME } from "$lib/utils/ujlc-tree.js";
+	import {
+		findParentOfNode,
+		isValidMoveInsertRequest,
+		ROOT_NODE_ID,
+		ROOT_SLOT_NAME,
+	} from "$lib/utils/ujlc-tree.js";
+	import { getCanvasDragHomeTrackedModuleIds } from "$lib/utils/canvas-drag-home.js";
 	import type { RelativeRect } from "../canvas/targeting/quick-action-position.js";
 	import PlacementTargetButton from "./PlacementTargetButton.svelte";
+	import SlotPlaceholderButton from "./SlotPlaceholderButton.svelte";
 	import {
 		calculatePlacementTargetDefinitions,
 		dedupePlacementTargetDefinitions,
@@ -21,8 +28,14 @@
 	import {
 		filterPlacementTargetsByActionBarCollision,
 		getInsertRequestKey,
-		getNearestPlacementTarget,
 	} from "../canvas/targeting/placement-target-hit-testing.js";
+	import { resolveActiveDragTarget } from "../canvas/targeting/drag-target-resolver.js";
+	import {
+		getSlotPlaceholderInsertRequest,
+		getSlotPlaceholderKey,
+		mergeSemanticallyEquivalentInsertTargets,
+		SLOT_PLACEHOLDER_HOST_SELECTOR,
+	} from "../canvas/targeting/slot-placeholder-targets.js";
 	import {
 		PLACEMENT_TARGET_HOLD_MS,
 		resolvePlacementTargetVisibility,
@@ -41,9 +54,18 @@
 		insertRequest: InsertRequest;
 		x: number;
 		y: number;
+		width?: number;
+		height?: number;
 		onInsert: (() => void) | null;
 		mode: "insert" | "drop";
 		isActive: boolean;
+		kind: "placement" | "placeholder";
+	}
+
+	interface RenderTargetDefinition extends PlacementTargetDefinition {
+		kind: "placement" | "placeholder";
+		width?: number;
+		height?: number;
 	}
 
 	const FALLBACK_RECOMPUTE_INTERVAL_MS = 200;
@@ -77,8 +99,11 @@
 					value.sourceModuleId === other.sourceModuleId &&
 					value.x === other.x &&
 					value.y === other.y &&
+					value.width === other.width &&
+					value.height === other.height &&
 					value.mode === other.mode &&
 					value.isActive === other.isActive &&
+					value.kind === other.kind &&
 					getInsertRequestKey(value.insertRequest) === getInsertRequestKey(other.insertRequest)
 				);
 			})
@@ -111,7 +136,9 @@
 	}
 
 	function isPlacementTargetButtonElement(element: HTMLElement | null) {
-		return !!element?.closest('[data-crafter="placement-target-button"]');
+		return !!element?.closest(
+			'[data-crafter="placement-target-button"], [data-crafter="slot-placeholder-target"]',
+		);
 	}
 
 	function handlePlacementTargetMouseOver(event: MouseEvent) {
@@ -252,7 +279,7 @@
 	function getVisibleDefinitions(
 		trackedModuleIds: string[],
 		excludedModuleId: string | null = canvasDrag.draggedModuleId,
-	): PlacementTargetDefinition[] {
+	): RenderTargetDefinition[] {
 		const definitions = trackedModuleIds
 			.filter((moduleId) => moduleId !== excludedModuleId)
 			.flatMap((moduleId) =>
@@ -262,11 +289,11 @@
 		return filterPlacementTargetsByActionBarCollision(
 			dedupePlacementTargetDefinitions(definitions, getInsertRequestKey),
 			getActionBarRelativeRect(),
-		);
+		).map((definition) => ({ ...definition, kind: "placement" as const }));
 	}
 
 	function buildButtonPositions(
-		definitions: PlacementTargetDefinition[],
+		definitions: RenderTargetDefinition[],
 		mode: "insert" | "drop",
 		activeDropRequest: InsertRequest | null = null,
 	): ButtonPosition[] {
@@ -285,17 +312,75 @@
 		}));
 	}
 
+	function getPlaceholderDefinitions(): RenderTargetDefinition[] {
+		if (!overlayRoot) {
+			return [];
+		}
+
+		const hosts = Array.from(
+			containerElement.querySelectorAll(SLOT_PLACEHOLDER_HOST_SELECTOR),
+		).filter((element): element is HTMLElement => element instanceof HTMLElement);
+
+		return hosts.flatMap((host) => {
+			const rect = toRelativeRect(host);
+			if (!rect) {
+				return [];
+			}
+
+			const slotName = host.getAttribute("data-slot-name");
+			if (!slotName) {
+				return [];
+			}
+
+			const ownerModuleId = host.getAttribute("data-slot-owner-module-id") || null;
+
+			return [
+				{
+					key: `placeholder-${getSlotPlaceholderKey(ownerModuleId, slotName)}`,
+					sourceModuleId: ownerModuleId ?? ROOT_NODE_ID,
+					insertRequest: getSlotPlaceholderInsertRequest(ownerModuleId, slotName),
+					x: rect.left,
+					y: rect.top,
+					width: rect.width,
+					height: rect.height,
+					kind: "placeholder" as const,
+				},
+			];
+		});
+	}
+
+	function getValidPlaceholderDefinitions(): RenderTargetDefinition[] {
+		const definitions = getPlaceholderDefinitions();
+		if (!canvasDrag.draggedModuleId) {
+			return definitions;
+		}
+
+		return definitions.filter((definition) =>
+			isValidMoveInsertRequest(
+				crafter.ujlcDocument.ujlc.root,
+				canvasDrag.draggedModuleId as string,
+				definition.insertRequest,
+			),
+		);
+	}
+
+	function mergeRenderableDefinitions(
+		definitions: RenderTargetDefinition[],
+	): RenderTargetDefinition[] {
+		return mergeSemanticallyEquivalentInsertTargets(crafter.ujlcDocument.ujlc.root, definitions);
+	}
+
 	function updateButtonPositions() {
 		if (!overlayRoot) return;
 
-		if (effectiveTrackedModuleIds.length === 0) {
-			setButtonPositions([]);
-			return;
-		}
+		const mergedDefinitions = mergeRenderableDefinitions([
+			...(effectiveTrackedModuleIds.length > 0
+				? getVisibleDefinitions(effectiveTrackedModuleIds)
+				: []),
+			...getPlaceholderDefinitions(),
+		]);
 
-		setButtonPositions(
-			buildButtonPositions(getVisibleDefinitions(effectiveTrackedModuleIds), "insert"),
-		);
+		setButtonPositions(buildButtonPositions(mergedDefinitions, "insert"));
 	}
 
 	function computeDragRenderState() {
@@ -311,22 +396,41 @@
 			hoveredModuleId: canvasInteraction.hoveredModuleId,
 			nearestModuleId: canvasInteraction.nearestModuleId,
 		});
+		const homeTrackedModuleIds = canvasInteraction.isHoveringDraggedSource
+			? getCanvasDragHomeTrackedModuleIds(canvasDrag.homePosition)
+			: [];
+		const resolvedDragTrackedModuleIds = [
+			...new Set([...dragTrackedModuleIds, ...homeTrackedModuleIds]),
+		];
 
-		const visibleDefinitions = getVisibleDefinitions(dragTrackedModuleIds, null);
+		const visibleDefinitions = getVisibleDefinitions(resolvedDragTrackedModuleIds, null);
 		const validDefinitions = filterPlacementTargetDefinitionsByMoveValidity(
 			visibleDefinitions,
 			crafter.ujlcDocument.ujlc.root,
 			canvasDrag.draggedModuleId,
-		);
+		).map((definition) => ({
+			...definition,
+			kind: "placement" as const,
+		}));
+		const validPlaceholderDefinitions = getValidPlaceholderDefinitions();
 		const relativePoint = getPointerPositionRelativeToOverlay(canvasDrag.pointer);
-		const activeDefinition = relativePoint
-			? getNearestPlacementTarget(validDefinitions, relativePoint)
-			: null;
+		const mergedDefinitions = mergeRenderableDefinitions([
+			...validDefinitions,
+			...validPlaceholderDefinitions,
+		]);
+		const activeDefinition = resolveActiveDragTarget({
+			rootNodes: crafter.ujlcDocument.ujlc.root,
+			definitions: mergedDefinitions,
+			pointer: relativePoint,
+			activePlaceholderSlot: canvasInteraction.activePlaceholderSlot,
+			isHoveringDraggedSource: canvasInteraction.isHoveringDraggedSource,
+			homePosition: canvasDrag.homePosition,
+		});
 
 		return {
 			activeDropRequest: activeDefinition?.insertRequest ?? null,
 			buttonPositions: buildButtonPositions(
-				validDefinitions,
+				mergedDefinitions,
 				"drop",
 				activeDefinition?.insertRequest ?? null,
 			),
@@ -423,6 +527,7 @@
 		const _ = crafter.ujlcDocument;
 		const _hoveredModuleId = canvasInteraction.hoveredModuleId;
 		const _nearestModuleId = canvasInteraction.nearestModuleId;
+		const _isHoveringDraggedSource = canvasInteraction.isHoveringDraggedSource;
 		const _pointer = canvasDrag.pointer;
 
 		if (!overlayRoot) {
@@ -445,14 +550,27 @@
 >
 	{#if buttonPositions.length > 0}
 		{#each buttonPositions as pos (pos.key)}
-			<PlacementTargetButton
-				x={pos.x}
-				y={pos.y}
-				onInsert={pos.onInsert}
-				mode={pos.mode}
-				isActive={pos.isActive}
-				zIndex={45}
-			/>
+			{#if pos.kind === "placeholder"}
+				<SlotPlaceholderButton
+					x={pos.x}
+					y={pos.y}
+					width={pos.width ?? 0}
+					height={pos.height ?? 0}
+					onInsert={pos.onInsert}
+					mode={pos.mode}
+					isActive={pos.isActive}
+					zIndex={40}
+				/>
+			{:else}
+				<PlacementTargetButton
+					x={pos.x}
+					y={pos.y}
+					onInsert={pos.onInsert}
+					mode={pos.mode}
+					isActive={pos.isActive}
+					zIndex={45}
+				/>
+			{/if}
 		{/each}
 	{/if}
 </div>

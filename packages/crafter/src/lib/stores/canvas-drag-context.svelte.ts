@@ -1,3 +1,4 @@
+import type { CanvasDragHomePosition } from "$lib/utils/canvas-drag-home.js";
 import { getContext, setContext } from "svelte";
 import type { InsertRequest } from "./features/clipboard.js";
 
@@ -11,6 +12,7 @@ export interface CanvasDragPointer {
 export interface CanvasDragMetadata {
 	dragDisplayName: string;
 	dragIconSvg: string | null;
+	homePosition: CanvasDragHomePosition | null;
 }
 
 export interface CanvasDragSnapshot {
@@ -26,6 +28,7 @@ export interface CanvasDragContext {
 	readonly pointer: CanvasDragPointer | null;
 	readonly dragDisplayName: string | null;
 	readonly dragIconSvg: string | null;
+	readonly homePosition: CanvasDragHomePosition | null;
 	readonly activeDropRequest: InsertRequest | null;
 	readonly isDragging: boolean;
 	startDrag(
@@ -40,12 +43,25 @@ export interface CanvasDragContext {
 	cancelDrag(): void;
 }
 
+function areInsertRequestsEqual(a: InsertRequest | null, b: InsertRequest | null): boolean {
+	if (a === b) {
+		return true;
+	}
+
+	if (!a || !b) {
+		return false;
+	}
+
+	return a.targetId === b.targetId && a.slotName === b.slotName && a.position === b.position;
+}
+
 export function createCanvasDragContext(): CanvasDragContext {
 	let draggedModuleId = $state<string | null>(null);
 	let pointerId = $state<number | null>(null);
 	let pointer = $state<CanvasDragPointer | null>(null);
 	let dragDisplayName = $state<string | null>(null);
 	let dragIconSvg = $state<string | null>(null);
+	let homePosition = $state<CanvasDragHomePosition | null>(null);
 	let activeDropRequest = $state<InsertRequest | null>(null);
 
 	function reset() {
@@ -54,6 +70,7 @@ export function createCanvasDragContext(): CanvasDragContext {
 		pointer = null;
 		dragDisplayName = null;
 		dragIconSvg = null;
+		homePosition = null;
 		activeDropRequest = null;
 	}
 
@@ -73,6 +90,9 @@ export function createCanvasDragContext(): CanvasDragContext {
 		get dragIconSvg() {
 			return dragIconSvg;
 		},
+		get homePosition() {
+			return homePosition;
+		},
 		get activeDropRequest() {
 			return activeDropRequest;
 		},
@@ -90,12 +110,17 @@ export function createCanvasDragContext(): CanvasDragContext {
 			pointer = point;
 			dragDisplayName = metadata.dragDisplayName?.trim() || moduleId;
 			dragIconSvg = metadata.dragIconSvg?.trim() || null;
+			homePosition = metadata.homePosition ?? null;
 			activeDropRequest = null;
 		},
 		updatePointer(point: CanvasDragPointer) {
 			pointer = point;
 		},
 		setActiveDropRequest(request: InsertRequest | null) {
+			if (areInsertRequestsEqual(activeDropRequest, request)) {
+				return;
+			}
+
 			activeDropRequest = request;
 		},
 		endDrag() {

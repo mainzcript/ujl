@@ -15,7 +15,6 @@
 <Card
 	class="h-full"
 	data-ujl-module-id={showMetadata && node.meta?.moduleId ? node.meta.moduleId : undefined}
-	data-ujl-slot="content"
 >
 	<CardHeader>
 		<CardTitle>{node.props.title}</CardTitle>
@@ -23,7 +22,7 @@
 		<RichText document={node.props.description} size="sm" intensity="muted" />
 	</CardHeader>
 	{#if node.props.children && node.props.children.length > 0}
-		<CardContent>
+		<CardContent data-ujl-slot="content">
 			{#each node.props.children as childNode, i (i)}
 				<ASTNode node={childNode} {showMetadata} />
 			{/each}

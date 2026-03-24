@@ -10,6 +10,7 @@
 	import type { InsertRequest } from "$lib/stores/features/clipboard.js";
 	import { useApp } from "$lib/components/ui/app/context.svelte.js";
 	import { getCanvasDragContext } from "$lib/stores/index.js";
+	import type { CanvasDragHomePosition } from "$lib/utils/canvas-drag-home.js";
 	import { ModuleActions } from "$lib/components/ui/module-actions/index.js";
 	import OverlayBase from "./OverlayBase.svelte";
 
@@ -18,6 +19,7 @@
 		containerElement: HTMLElement;
 		dragDisplayName: string;
 		dragIconSvg?: string | null;
+		dragHomePosition?: CanvasDragHomePosition | null;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 		onSelect: () => void;
@@ -40,6 +42,7 @@
 		containerElement,
 		dragDisplayName,
 		dragIconSvg = null,
+		dragHomePosition = null,
 		canMoveUp,
 		canMoveDown,
 		onSelect,
@@ -129,6 +132,7 @@
 			{
 				dragDisplayName,
 				dragIconSvg,
+				homePosition: dragHomePosition,
 			},
 		);
 	}

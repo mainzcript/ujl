@@ -4,12 +4,22 @@ import { createCanvasDragContext } from "./canvas-drag-context.svelte.js";
 describe("canvas-drag-context", () => {
 	it("tracks pointer and drag metadata for the active drag", () => {
 		const context = createCanvasDragContext();
+		const homePosition = {
+			ownerModuleId: "container-a",
+			slotName: "body",
+			previousSiblingId: "module-prev",
+			nextSiblingId: "module-next",
+		};
 
 		context.startDrag(
 			"module-a",
 			7,
 			{ clientX: 100, clientY: 200 },
-			{ dragDisplayName: "Main banner", dragIconSvg: "<svg>hero</svg>" },
+			{
+				dragDisplayName: "Main banner",
+				dragIconSvg: "<svg>hero</svg>",
+				homePosition,
+			},
 		);
 
 		expect(context.draggedModuleId).toBe("module-a");
@@ -17,6 +27,7 @@ describe("canvas-drag-context", () => {
 		expect(context.pointer).toEqual({ clientX: 100, clientY: 200 });
 		expect(context.dragDisplayName).toBe("Main banner");
 		expect(context.dragIconSvg).toBe("<svg>hero</svg>");
+		expect(context.homePosition).toEqual(homePosition);
 		expect(context.isDragging).toBe(true);
 	});
 
@@ -53,6 +64,7 @@ describe("canvas-drag-context", () => {
 		expect(context.pointer).toBeNull();
 		expect(context.dragDisplayName).toBeNull();
 		expect(context.dragIconSvg).toBeNull();
+		expect(context.homePosition).toBeNull();
 		expect(context.activeDropRequest).toBeNull();
 	});
 
@@ -74,6 +86,20 @@ describe("canvas-drag-context", () => {
 		expect(context.pointer).toBeNull();
 		expect(context.dragDisplayName).toBeNull();
 		expect(context.dragIconSvg).toBeNull();
+		expect(context.homePosition).toBeNull();
 		expect(context.activeDropRequest).toBeNull();
+	});
+
+	it("does not churn activeDropRequest when the same request is set repeatedly", () => {
+		const context = createCanvasDragContext();
+
+		context.startDrag("module-a", 7, { clientX: 50, clientY: 60 });
+		context.setActiveDropRequest({ targetId: "module-c", position: "before" });
+		const firstRequest = context.activeDropRequest;
+
+		context.setActiveDropRequest({ targetId: "module-c", position: "before" });
+
+		expect(context.activeDropRequest).toBe(firstRequest);
+		expect(context.activeDropRequest).toEqual({ targetId: "module-c", position: "before" });
 	});
 });

@@ -1,6 +1,6 @@
 import type { UJLCModuleObject } from "@ujl-framework/types";
 import { describe, expect, it } from "vitest";
-import { createMockNode } from "../../../../../tests/mockData.js";
+import { createMockNode, createMockTree } from "../../../../../tests/mockData.js";
 import {
 	calculatePlacementTargetDefinitions,
 	dedupePlacementTargetDefinitions,
@@ -25,6 +25,11 @@ import {
 	resolveTransientTrackedModuleIds,
 } from "../canvas/targeting/placement-target-tracking.js";
 import type { RelativeRect } from "../canvas/targeting/quick-action-position.js";
+import {
+	findSemanticallyEquivalentInsertTarget,
+	getSemanticInsertTargetKey,
+	mergeSemanticallyEquivalentInsertTargets,
+} from "../canvas/targeting/slot-placeholder-targets.js";
 
 function createSiblings(ids: string[]): UJLCModuleObject[] {
 	return ids.map((id) => createMockNode(id, "card", { title: id }));
@@ -319,6 +324,95 @@ describe("module-placement-targets helpers", () => {
 			"before:module-a",
 		);
 		expect(getInsertRequestKey({ targetId: "module-a", position: "after" })).toBe("after:module-a");
+	});
+
+	it("treats after(last-child) and placeholder into(slot) as the same slot-end target", () => {
+		const tree = createMockTree();
+
+		expect(
+			getSemanticInsertTargetKey(tree, {
+				targetId: "nested-2",
+				position: "after",
+			}),
+		).toBe(
+			getSemanticInsertTargetKey(tree, {
+				targetId: "root-1",
+				slotName: "body",
+				position: "into",
+			}),
+		);
+	});
+
+	it("keeps non-terminal after targets distinct from slot-end placeholders", () => {
+		const tree = createMockTree();
+
+		expect(
+			getSemanticInsertTargetKey(tree, {
+				targetId: "nested-1",
+				position: "after",
+			}),
+		).not.toBe(
+			getSemanticInsertTargetKey(tree, {
+				targetId: "root-1",
+				slotName: "body",
+				position: "into",
+			}),
+		);
+	});
+
+	it("prefers placeholders over terminal after-edge targets when merging definitions", () => {
+		const tree = createMockTree();
+		const merged = mergeSemanticallyEquivalentInsertTargets(tree, [
+			{
+				key: "after-edge-nested-2",
+				sourceModuleId: "nested-2",
+				insertRequest: { targetId: "nested-2", position: "after" as const },
+				x: 120,
+				y: 220,
+				kind: "placement" as const,
+			},
+			{
+				key: "placeholder-root-1-body",
+				sourceModuleId: "root-1",
+				insertRequest: { targetId: "root-1", slotName: "body", position: "into" as const },
+				x: 0,
+				y: 0,
+				width: 320,
+				height: 96,
+				kind: "placeholder" as const,
+			},
+		]);
+
+		expect(merged).toHaveLength(1);
+		expect(merged[0]?.kind).toBe("placeholder");
+		expect(merged[0]?.insertRequest).toEqual({
+			targetId: "root-1",
+			slotName: "body",
+			position: "into",
+		});
+	});
+
+	it("finds a placeholder definition when the previous request is semantically equivalent", () => {
+		const tree = createMockTree();
+		const definitions = mergeSemanticallyEquivalentInsertTargets(tree, [
+			{
+				key: "placeholder-root-1-body",
+				sourceModuleId: "root-1",
+				insertRequest: { targetId: "root-1", slotName: "body", position: "into" as const },
+				x: 0,
+				y: 0,
+				width: 320,
+				height: 96,
+				kind: "placeholder" as const,
+			},
+		]);
+
+		expect(
+			findSemanticallyEquivalentInsertTarget(tree, definitions, {
+				targetId: "nested-2",
+				position: "after",
+			}),
+		).toEqual(definitions[0]);
 	});
 
 	it("returns exactly two buttons for a single tracked module", () => {

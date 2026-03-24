@@ -53,6 +53,12 @@
 			containerElement={container}
 			dragDisplayName="Hero: Module A"
 			dragIconSvg="<svg>hero</svg>"
+			dragHomePosition={{
+				ownerModuleId: null,
+				slotName: "root",
+				previousSiblingId: null,
+				nextSiblingId: null,
+			}}
 			canMoveUp={true}
 			canMoveDown={true}
 			onSelect={() => {}}

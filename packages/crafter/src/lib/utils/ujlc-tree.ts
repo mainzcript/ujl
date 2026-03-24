@@ -161,7 +161,7 @@ export function getMoveInsertRequestValidationError(
 	const node = findNodeById(nodes, nodeId);
 	const targetNode = findNodeById(nodes, request.targetId);
 
-	if (!node || !targetNode) {
+	if (!node) {
 		return "Node or target not found";
 	}
 
@@ -169,15 +169,31 @@ export function getMoveInsertRequestValidationError(
 		return "Cannot move root node";
 	}
 
+	if (isRootNode(request.targetId)) {
+		if (request.position === "before" || request.position === "after") {
+			return "Cannot move relative to root node";
+		}
+
+		if (request.position !== "into") {
+			return "Root node accepts only into moves";
+		}
+
+		if ((request.slotName ?? ROOT_SLOT_NAME) !== ROOT_SLOT_NAME) {
+			return "Specified slot does not exist on target node";
+		}
+
+		return null;
+	}
+
+	if (!targetNode) {
+		return "Node or target not found";
+	}
+
 	if (request.position === "before" || request.position === "after") {
 		const targetParentInfo = findParentOfNode(nodes, request.targetId);
 
 		if (!targetParentInfo) {
 			return "Cannot find parent of target node";
-		}
-
-		if (isRootNode(request.targetId)) {
-			return "Cannot move relative to root node";
 		}
 
 		if (isDescendant(node, request.targetId)) {

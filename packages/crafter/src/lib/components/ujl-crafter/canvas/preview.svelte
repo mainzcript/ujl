@@ -37,11 +37,14 @@
 		ModulePlacementTargets,
 	} from "../overlays/index.js";
 	import {
-		findParentOfNode,
 		findNodeById,
+		findParentOfNode,
 		isValidMoveInsertRequest,
-		ROOT_NODE_ID,
 	} from "$lib/utils/ujlc-tree.js";
+	import {
+		getCanvasDragHomePosition,
+		type CanvasDragHomePosition,
+	} from "$lib/utils/canvas-drag-home.js";
 	import {
 		getSelectionParentModuleIds,
 		getSelectedModuleId,
@@ -51,6 +54,7 @@
 		resolvePointerTargetsFromTarget,
 		type ActiveSlotTarget,
 	} from "./targeting/pointer-targets.js";
+	import { isCanvasOverlayElement } from "./targeting/canvas-overlay-elements.js";
 	import {
 		type AutoScrollEdgeState,
 		getAutoScrollDelta,
@@ -58,6 +62,10 @@
 		resolveAutoScrollEdgeState,
 	} from "./targeting/auto-scroll.js";
 	import { findNearestModuleId, getDirectSlotChildIds } from "./targeting/quick-action-nearest.js";
+	import {
+		augmentPreviewDocumentWithPlaceholders,
+		createPreviewComposer,
+	} from "./preview-placeholders.js";
 
 	// Create preview-local contexts for overlay positioning and canvas interaction state.
 	const scrollContext = createScrollContext();
@@ -116,12 +124,35 @@
 	);
 
 	const composer = getContext<Composer>(COMPOSER_CONTEXT);
+	let previewComposer = $state(createPreviewComposer(composer));
+	let composeRunId = 0;
 
 	let ast = $state<UJLAbstractNode | null>(null);
 
 	$effect(() => {
-		composer.compose(ujlcDocument).then((composedAst) => {
-			ast = composedAst;
+		previewComposer = createPreviewComposer(composer);
+
+		const unsubscribe = composer.getRegistry().onChanged(() => {
+			previewComposer = createPreviewComposer(composer);
+		});
+
+		return () => {
+			unsubscribe();
+		};
+	});
+
+	$effect(() => {
+		const activeComposer = crafterMode === "editor" ? previewComposer : composer;
+		const activeDocument =
+			crafterMode === "editor"
+				? augmentPreviewDocumentWithPlaceholders(ujlcDocument)
+				: ujlcDocument;
+		const currentRunId = ++composeRunId;
+
+		activeComposer.compose(activeDocument).then((composedAst) => {
+			if (currentRunId === composeRunId) {
+				ast = composedAst;
+			}
 		});
 	});
 
@@ -267,6 +298,7 @@
 		moduleId: string;
 		dragDisplayName: string;
 		dragIconSvg: string | null;
+		dragHomePosition: CanvasDragHomePosition | null;
 		canMoveUp: boolean;
 		canMoveDown: boolean;
 	}
@@ -282,21 +314,76 @@
 	);
 	let wasDragging = $state(false);
 
-	function isCanvasOverlayElement(element: HTMLElement | null) {
-		return !!element?.closest(
-			'[data-crafter="module-action-bar"], [data-crafter="placement-target-button"], [data-crafter="overlay-base"], [data-crafter="module-placement-targets"]',
-		);
+	function getElementsFromPointForCanvas(point: {
+		clientX: number;
+		clientY: number;
+	}): HTMLElement[] {
+		const maybeElementsFromPoint = (
+			hitTestRoot as typeof hitTestRoot & {
+				elementsFromPoint?: (x: number, y: number) => Element[];
+				elementFromPoint?: (x: number, y: number) => Element | null;
+			}
+		).elementsFromPoint;
+
+		if (typeof maybeElementsFromPoint === "function") {
+			return maybeElementsFromPoint
+				.call(hitTestRoot, point.clientX, point.clientY)
+				.filter((element): element is HTMLElement => element instanceof HTMLElement);
+		}
+
+		const maybeElementFromPoint = (
+			hitTestRoot as typeof hitTestRoot & {
+				elementFromPoint?: (x: number, y: number) => Element | null;
+			}
+		).elementFromPoint;
+
+		if (typeof maybeElementFromPoint === "function") {
+			const element = maybeElementFromPoint.call(hitTestRoot, point.clientX, point.clientY);
+			return element instanceof HTMLElement ? [element] : [];
+		}
+
+		return [];
 	}
 
-	function getDragHomeSlot(moduleId: string): ActiveSlotTarget | null {
-		const parentInfo = findParentOfNode(crafter.ujlcDocument.ujlc.root, moduleId);
-		if (!parentInfo || !parentInfo.parent) {
+	function isPointerOverDraggedSource(
+		point: { clientX: number; clientY: number },
+		draggedModuleId: string | null,
+	): boolean {
+		if (!draggedModuleId) {
+			return false;
+		}
+
+		return getElementsFromPointForCanvas(point).some((element) => {
+			if (element.closest(`[data-ujl-module-id="${draggedModuleId}"]`)) {
+				return true;
+			}
+
+			return (
+				element.closest('[data-crafter="overlay-base"]')?.getAttribute("data-module-id") ===
+				draggedModuleId
+			);
+		});
+	}
+
+	function resolvePointerTargetsForCanvasEvent(event: MouseEvent) {
+		const point = { clientX: event.clientX, clientY: event.clientY };
+		const target = event.target as HTMLElement | null;
+
+		return isCanvasOverlayElement(target)
+			? resolvePointerTargetsFromPoint(point, isCanvasOverlayElement, hitTestRoot)
+			: resolvePointerTargetsFromTarget(target, isCanvasOverlayElement);
+	}
+
+	function toActiveSlotTarget(
+		homePosition: CanvasDragHomePosition | null,
+	): ActiveSlotTarget | null {
+		if (!homePosition) {
 			return null;
 		}
 
 		return {
-			ownerModuleId: parentInfo.parent.meta.id === ROOT_NODE_ID ? null : parentInfo.parent.meta.id,
-			slotName: parentInfo.slotName,
+			ownerModuleId: homePosition.ownerModuleId,
+			slotName: homePosition.slotName,
 		};
 	}
 
@@ -323,19 +410,22 @@
 		targets: {
 			hoveredModuleId: string | null;
 			activeSlot: ActiveSlotTarget | null;
+			activePlaceholderSlot: ActiveSlotTarget | null;
+			isHoveringDraggedSource: boolean;
 		},
 	) {
 		const nearestSlot =
+			targets.activePlaceholderSlot ??
 			targets.activeSlot ??
 			canvasInteractionContext.lastValidSlot ??
-			(canvasDragContext.isDragging && canvasDragContext.draggedModuleId
-				? getDragHomeSlot(canvasDragContext.draggedModuleId)
-				: null);
+			toActiveSlotTarget(canvasDragContext.homePosition);
 
 		canvasInteractionContext.updateState({
 			pointer: point,
 			hoveredModuleId: targets.hoveredModuleId,
-			activeSlot: targets.activeSlot,
+			activeSlot: targets.activePlaceholderSlot ?? targets.activeSlot,
+			activePlaceholderSlot: targets.activePlaceholderSlot,
+			isHoveringDraggedSource: targets.isHoveringDraggedSource,
 			nearestModuleId: nearestSlot ? computeNearestModuleId(nearestSlot, point) : null,
 		});
 	}
@@ -345,10 +435,13 @@
 			return;
 		}
 
-		updateCanvasTargetsFromPointer(
-			{ clientX: event.clientX, clientY: event.clientY },
-			resolvePointerTargetsFromTarget(event.target, isCanvasOverlayElement),
-		);
+		const point = { clientX: event.clientX, clientY: event.clientY };
+		const targets = resolvePointerTargetsForCanvasEvent(event);
+
+		updateCanvasTargetsFromPointer(point, {
+			...targets,
+			isHoveringDraggedSource: isPointerOverDraggedSource(point, canvasDragContext.draggedModuleId),
+		});
 	}
 
 	function handleCanvasPointerLeave() {
@@ -393,14 +486,17 @@
 			return;
 		}
 
-		updateCanvasTargetsFromPointer(
-			canvasDragContext.pointer,
-			resolvePointerTargetsFromPoint(
+		updateCanvasTargetsFromPointer(canvasDragContext.pointer, {
+			...resolvePointerTargetsFromPoint(
 				canvasDragContext.pointer,
 				isCanvasOverlayElement,
 				hitTestRoot,
 			),
-		);
+			isHoveringDraggedSource: isPointerOverDraggedSource(
+				canvasDragContext.pointer,
+				canvasDragContext.draggedModuleId,
+			),
+		});
 	});
 
 	$effect(() => {
@@ -425,14 +521,17 @@
 				return;
 			}
 
-			updateCanvasTargetsFromPointer(
-				canvasInteractionContext.pointer,
-				resolvePointerTargetsFromPoint(
+			updateCanvasTargetsFromPointer(canvasInteractionContext.pointer, {
+				...resolvePointerTargetsFromPoint(
 					canvasInteractionContext.pointer,
 					isCanvasOverlayElement,
 					hitTestRoot,
 				),
-			);
+				isHoveringDraggedSource: isPointerOverDraggedSource(
+					canvasInteractionContext.pointer,
+					canvasDragContext.draggedModuleId,
+				),
+			});
 		};
 
 		const unregister = scrollContext.register(refreshTargets);
@@ -533,11 +632,13 @@
 
 		const { canMoveUp, canMoveDown } = getModuleMoveCapabilities(moduleId);
 		const { dragDisplayName, dragIconSvg } = getModuleDragMetadata(moduleId);
+		const dragHomePosition = getCanvasDragHomePosition(crafter.ujlcDocument.ujlc.root, moduleId);
 
 		moduleActionBarState = {
 			moduleId,
 			dragDisplayName,
 			dragIconSvg,
+			dragHomePosition,
 			canMoveUp,
 			canMoveDown,
 		};
@@ -718,7 +819,7 @@
 	role={crafterMode === "editor" ? "application" : undefined}
 	onclick={handlePreviewClick}
 	style={editorTokenSet && crafterMode === "editor"
-		? `--editor-accent-light: ${editorCssVars["--accent-light"] ?? "var(--accent-light)"}; --editor-accent-dark: ${editorCssVars["--accent-dark"] ?? "var(--accent-dark)"};`
+		? `--editor-accent-light: ${editorCssVars["--accent-light"] ?? "var(--accent-light)"}; --editor-accent-dark: ${editorCssVars["--accent-dark"] ?? "var(--accent-dark)"}; --editor-radius: ${editorCssVars["--radius"] ?? "var(--radius)"};`
 		: undefined}
 >
 	{#if ast}
@@ -769,6 +870,7 @@
 				containerElement={scrollContainer}
 				dragDisplayName={moduleActionBarState.dragDisplayName}
 				dragIconSvg={moduleActionBarState.dragIconSvg}
+				dragHomePosition={moduleActionBarState.dragHomePosition}
 				canMoveUp={moduleActionBarState.canMoveUp}
 				canMoveDown={moduleActionBarState.canMoveDown}
 				onSelect={handleModuleActionBarSelect}

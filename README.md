@@ -74,6 +74,7 @@ Clone this repository and run the included demo:
 git clone https://github.com/mainzcript/ujl.git
 cd ujl
 pnpm install
+pnpm build
 pnpm --filter @ujl-framework/demo dev
 ```
 

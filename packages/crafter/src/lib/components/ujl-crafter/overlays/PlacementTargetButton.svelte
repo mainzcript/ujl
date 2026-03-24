@@ -10,13 +10,24 @@
 		onInsert?: (() => void) | null;
 		mode?: "insert" | "drop";
 		isActive?: boolean;
+		isHovered?: boolean;
+		interactive?: boolean;
 		zIndex?: number;
 	}
 
-	let { x, y, onInsert = null, mode = "insert", isActive = false, zIndex = 45 }: Props = $props();
-	let isHovered = $state(false);
+	let {
+		x,
+		y,
+		onInsert = null,
+		mode = "insert",
+		isActive = false,
+		isHovered = false,
+		interactive = true,
+		zIndex = 45,
+	}: Props = $props();
+	let isButtonHovered = $state(false);
 
-	const isHighlighted = $derived(isActive || isHovered);
+	const isHighlighted = $derived(isActive || isHovered || isButtonHovered);
 	const useCrosshairIcon = $derived(mode === "drop");
 </script>
 
@@ -40,25 +51,35 @@
 				: "border-2 border-dotted bg-sidebar shadow-lg"
 		}`}
 	>
-		<Button
-			variant="ghost"
-			size="icon"
-			class="h-6 w-6"
-			disabled={mode === "drop"}
-			onclick={onInsert ?? undefined}
-			onmouseenter={() => {
-				isHovered = true;
-			}}
-			onmouseleave={() => {
-				isHovered = false;
-			}}
-			title={mode === "drop" ? "Drop module here" : "Insert module"}
-		>
-			{#if useCrosshairIcon}
-				<CrosshairIcon class="h-3.5 w-3.5" />
-			{:else}
-				<PlusIcon class="h-3.5 w-3.5" />
-			{/if}
-		</Button>
+		{#if interactive}
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-6 w-6"
+				disabled={mode === "drop"}
+				onclick={onInsert ?? undefined}
+				onmouseenter={() => {
+					isButtonHovered = true;
+				}}
+				onmouseleave={() => {
+					isButtonHovered = false;
+				}}
+				title={mode === "drop" ? "Drop module here" : "Insert module"}
+			>
+				{#if useCrosshairIcon}
+					<CrosshairIcon class="h-3.5 w-3.5" />
+				{:else}
+					<PlusIcon class="h-3.5 w-3.5" />
+				{/if}
+			</Button>
+		{:else}
+			<div class="flex h-6 w-6 items-center justify-center" aria-hidden="true">
+				{#if useCrosshairIcon}
+					<CrosshairIcon class="h-3.5 w-3.5" />
+				{:else}
+					<PlusIcon class="h-3.5 w-3.5" />
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>

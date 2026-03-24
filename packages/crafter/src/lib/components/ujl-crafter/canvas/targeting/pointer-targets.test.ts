@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCanvasOverlayElement } from "./canvas-overlay-elements.js";
 import {
 	resolveActiveSlotFromElement,
 	resolvePointerTargetsFromElements,
@@ -43,6 +44,34 @@ describe("pointer target resolver", () => {
 				ownerModuleId: "container-b",
 				slotName: "content",
 			},
+			activePlaceholderSlot: null,
+		});
+	});
+
+	it("resolves placeholder hosts as active placeholder slots", () => {
+		const targets = getPointerTargets(
+			`
+				<div
+					data-crafter="slot-placeholder-host"
+					data-slot-owner-module-id="card-1"
+					data-slot-name="content"
+				>
+					<span data-testid="target"></span>
+				</div>
+			`,
+			'[data-testid="target"]',
+		);
+
+		expect(targets).toEqual({
+			hoveredModuleId: null,
+			activeSlot: {
+				ownerModuleId: "card-1",
+				slotName: "content",
+			},
+			activePlaceholderSlot: {
+				ownerModuleId: "card-1",
+				slotName: "content",
+			},
 		});
 	});
 
@@ -80,6 +109,35 @@ describe("pointer target resolver", () => {
 				ownerModuleId: "container-b",
 				slotName: "content",
 			},
+			activePlaceholderSlot: null,
+		});
+	});
+
+	it("can resolve the underlying module from elementsFromPoint when an overlay sits on top", () => {
+		const overlay = document.createElement("div");
+		overlay.setAttribute("data-crafter", "slot-placeholder-target");
+
+		const module = document.createElement("div");
+		module.setAttribute("data-ujl-module-id", "module-b");
+		module.setAttribute("data-ujl-slot", "content");
+
+		const hitTestRoot = {
+			elementsFromPoint: () => [overlay, module],
+		} as unknown as Document;
+
+		expect(
+			resolvePointerTargetsFromPoint(
+				{ clientX: 10, clientY: 20 },
+				isCanvasOverlayElement,
+				hitTestRoot,
+			),
+		).toEqual({
+			hoveredModuleId: "module-b",
+			activeSlot: {
+				ownerModuleId: "module-b",
+				slotName: "content",
+			},
+			activePlaceholderSlot: null,
 		});
 	});
 });

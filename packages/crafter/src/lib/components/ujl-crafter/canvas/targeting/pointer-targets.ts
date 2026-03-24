@@ -1,4 +1,5 @@
 import { ROOT_SLOT_NAME } from "$lib/utils/ujlc-tree.js";
+import { readSlotPlaceholderTargetFromElement } from "./slot-placeholder-targets.js";
 
 export interface ActiveSlotTarget {
 	ownerModuleId: string | null;
@@ -8,6 +9,7 @@ export interface ActiveSlotTarget {
 export interface PointerTargets {
 	hoveredModuleId: string | null;
 	activeSlot: ActiveSlotTarget | null;
+	activePlaceholderSlot: ActiveSlotTarget | null;
 }
 
 type IgnorePredicate = (element: HTMLElement | null) => boolean;
@@ -50,6 +52,11 @@ export function resolveHoveredModuleIdFromElement(element: HTMLElement | null): 
 }
 
 export function resolveActiveSlotFromElement(element: HTMLElement | null): ActiveSlotTarget | null {
+	const placeholderTarget = readSlotPlaceholderTargetFromElement(element);
+	if (placeholderTarget) {
+		return placeholderTarget;
+	}
+
 	const slotElement = element?.closest("[data-ujl-slot]") as HTMLElement | null;
 	if (!slotElement) {
 		return null;
@@ -85,6 +92,7 @@ export function resolvePointerTargetsFromElements(
 ): PointerTargets {
 	let hoveredModuleId: string | null = null;
 	let activeSlot: ActiveSlotTarget | null = null;
+	let activePlaceholderSlot: ActiveSlotTarget | null = null;
 
 	for (const element of elements) {
 		if (shouldIgnore(element)) {
@@ -95,16 +103,20 @@ export function resolvePointerTargetsFromElements(
 			hoveredModuleId = resolveHoveredModuleIdFromElement(element);
 		}
 
+		if (!activePlaceholderSlot) {
+			activePlaceholderSlot = readSlotPlaceholderTargetFromElement(element);
+		}
+
 		if (!activeSlot) {
 			activeSlot = resolveActiveSlotFromElement(element);
 		}
 
-		if (hoveredModuleId && activeSlot) {
+		if (hoveredModuleId && activeSlot && activePlaceholderSlot) {
 			break;
 		}
 	}
 
-	return { hoveredModuleId, activeSlot };
+	return { hoveredModuleId, activeSlot, activePlaceholderSlot };
 }
 
 export function resolvePointerTargetsFromTarget(

@@ -51,6 +51,7 @@ export {
 	getCanvasDragContext,
 	setCanvasDragContext,
 	type CanvasDragContext,
+	type CanvasDragMetadata,
 	type CanvasDragPointer,
 	type CanvasDragSnapshot,
 } from "./canvas-drag-context.svelte.js";

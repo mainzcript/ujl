@@ -9,12 +9,14 @@ describe("canvas-interaction-context", () => {
 			pointer: { clientX: 10, clientY: 20 },
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: "parent-a", slotName: "content" },
+			isHoveringDraggedSource: true,
 			nearestModuleId: "module-b",
 		});
 
 		expect(context.pointer).toEqual({ clientX: 10, clientY: 20 });
 		expect(context.hoveredModuleId).toBe("module-a");
 		expect(context.activeSlot).toEqual({ ownerModuleId: "parent-a", slotName: "content" });
+		expect(context.isHoveringDraggedSource).toBe(true);
 		expect(context.lastValidSlot).toEqual({ ownerModuleId: "parent-a", slotName: "content" });
 		expect(context.nearestModuleId).toBe("module-b");
 	});
@@ -26,6 +28,7 @@ describe("canvas-interaction-context", () => {
 			pointer: { clientX: 10, clientY: 20 },
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: null, slotName: "root" },
+			isHoveringDraggedSource: true,
 			nearestModuleId: "module-a",
 		});
 
@@ -33,10 +36,12 @@ describe("canvas-interaction-context", () => {
 			pointer: { clientX: 30, clientY: 40 },
 			hoveredModuleId: null,
 			activeSlot: null,
+			isHoveringDraggedSource: false,
 			nearestModuleId: "module-b",
 		});
 
 		expect(context.activeSlot).toBeNull();
+		expect(context.isHoveringDraggedSource).toBe(false);
 		expect(context.lastValidSlot).toEqual({ ownerModuleId: null, slotName: "root" });
 		expect(context.nearestModuleId).toBe("module-b");
 	});
@@ -48,6 +53,7 @@ describe("canvas-interaction-context", () => {
 			pointer: { clientX: 10, clientY: 20 },
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: "parent-a", slotName: "content" },
+			isHoveringDraggedSource: true,
 			nearestModuleId: "module-b",
 		});
 		context.clear();
@@ -55,6 +61,7 @@ describe("canvas-interaction-context", () => {
 		expect(context.pointer).toBeNull();
 		expect(context.hoveredModuleId).toBeNull();
 		expect(context.activeSlot).toBeNull();
+		expect(context.isHoveringDraggedSource).toBe(false);
 		expect(context.lastValidSlot).toBeNull();
 		expect(context.nearestModuleId).toBeNull();
 	});
