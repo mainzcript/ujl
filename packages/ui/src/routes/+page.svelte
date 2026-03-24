@@ -12,12 +12,16 @@
 		Highlight,
 		AspectRatio,
 		Button,
+		ButtonGroup,
+		ButtonGroupSeparator,
+		ButtonGroupText,
 		Grid,
 		GridItem,
 		Badge,
 	} from "$lib/index.js";
 	import { flavors } from "@ujl-framework/types";
 	import { getContext } from "svelte";
+	import Star from "@lucide/svelte/icons/star";
 
 	// Get selectedFlavor from layout context
 	const flavorContext = getContext<{ value: string }>("selectedFlavor");
@@ -126,8 +130,8 @@
 					<CardHeader>
 						<CardTitle>Buttons</CardTitle>
 					</CardHeader>
-					<CardContent>
-						<div class="flex flex-nowrap gap-2 overflow-x-auto">
+					<CardContent class="flex flex-col gap-4 overflow-x-auto">
+						<div class="flex flex-nowrap gap-2">
 							<Button>Default</Button>
 							<Button variant="muted">Muted</Button>
 							<Button variant="outline">Outline</Button>
@@ -136,6 +140,66 @@
 								<Button variant={btn_flavor}>{btn_flavor}</Button>
 							{/each}
 						</div>
+						<div class="flex flex-nowrap items-center gap-2">
+							<Button size="xs">XS</Button>
+							<Button size="sm">Small</Button>
+							<Button size="default">Default</Button>
+							<Button size="lg">Large</Button>
+							<Button size="icon-xs"><Star /></Button>
+							<Button size="icon-sm"><Star /></Button>
+							<Button size="icon"><Star /></Button>
+							<Button size="icon-lg"><Star /></Button>
+						</div>
+					</CardContent>
+				</Card>
+			</GridItem>
+			<GridItem>
+				<Card>
+					<CardHeader>
+						<CardTitle>Button Group</CardTitle>
+					</CardHeader>
+					<CardContent class="flex flex-col gap-4 overflow-x-auto">
+						<ButtonGroup>
+							<Button>Default</Button>
+							<Button variant="muted" size="sm">Muted</Button>
+							<Button variant="outline">Outline</Button>
+							<Button variant="ghost">Ghost</Button>
+						</ButtonGroup>
+						<ButtonGroup>
+							{#each flavors as btn_flavor, i (btn_flavor)}
+								{#if i > 0}
+									<ButtonGroupSeparator />
+								{/if}
+								<Button variant={btn_flavor}>{btn_flavor}</Button>
+							{/each}
+						</ButtonGroup>
+						<ButtonGroup>
+							<ButtonGroup>
+								<Button variant="outline">-</Button>
+								<ButtonGroupText variant="outline">Text Element</ButtonGroupText>
+								<Button variant="outline">+</Button>
+							</ButtonGroup>
+							<ButtonGroup>
+								<Button variant="outline">Left</Button>
+								<Button variant="outline">Middle</Button>
+								<Button variant="outline">Right</Button>
+							</ButtonGroup>
+						</ButtonGroup>
+						<ButtonGroup>
+							<Button variant="outline" size="xs">XS</Button>
+							<Button variant="outline" size="sm">Small</Button>
+							<Button variant="outline" size="default">Default</Button>
+							<Button variant="outline" size="lg">Large</Button>
+							<Button variant="outline" size="icon-xs"><Star /></Button>
+							<Button variant="outline" size="icon-sm"><Star /></Button>
+							<Button variant="outline" size="icon"><Star /></Button>
+							<Button variant="outline" size="icon-lg"><Star /></Button>
+						</ButtonGroup>
+						<ButtonGroup orientation="vertical">
+							<Button variant="outline">Top</Button>
+							<Button variant="outline">Middle</Button>
+							<Button variant="outline">Bottom</Button>
+						</ButtonGroup>
 					</CardContent>
 				</Card>
 			</GridItem>
