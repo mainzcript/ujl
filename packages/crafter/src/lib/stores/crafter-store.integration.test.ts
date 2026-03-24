@@ -115,6 +115,7 @@ async function renderStore(deps: CrafterStoreDeps): Promise<CrafterContext> {
 describe("CrafterStore Library Operations - Integration", () => {
 	afterEach(() => {
 		cleanup();
+		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
 	});
 
@@ -355,6 +356,44 @@ describe("CrafterStore Library Operations - Integration", () => {
 
 			// Verify prepended to cache
 			expect(store.libraryItems[0]?.id).toBe(result.id);
+		});
+
+		it("should still upload when crypto.randomUUID is unavailable", async () => {
+			const uploadedAsset: LibraryAsset = {
+				kind: "image",
+				img: { src: "data:uploaded", width: 1200, height: 800 },
+				meta: { filename: "iphone-photo.jpg", fileSize: 2048 },
+			} as LibraryAsset;
+
+			const originalRandomUUID = globalThis.crypto.randomUUID;
+
+			try {
+				Object.defineProperty(globalThis.crypto, "randomUUID", {
+					value: undefined,
+					configurable: true,
+				});
+
+				const provider = createMockLibraryProvider({
+					upload: vi.fn().mockResolvedValue(uploadedAsset),
+				});
+
+				const store = await renderStore(createMockDeps({ libraryProvider: provider }));
+				const mockFile = new File([new Uint8Array(2048)], "iphone-photo.jpg", {
+					type: "image/jpeg",
+				});
+
+				const result = await store.uploadLibraryAsset(mockFile);
+
+				expect(result.id).toBeDefined();
+				expect(typeof result.id).toBe("string");
+				expect(store.libraryData[result.id]).toBeDefined();
+				expect(store.libraryItems[0]?.id).toBe(result.id);
+			} finally {
+				Object.defineProperty(globalThis.crypto, "randomUUID", {
+					value: originalRandomUUID,
+					configurable: true,
+				});
+			}
 		});
 	});
 

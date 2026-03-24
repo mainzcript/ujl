@@ -1,3 +1,4 @@
+import { generateUid } from "@ujl-framework/core";
 import type { LibraryAsset, LibraryProvider, UJLCLibrary } from "@ujl-framework/types";
 import { LibraryError } from "@ujl-framework/types";
 
@@ -88,7 +89,7 @@ export function createLibraryFeature(deps: LibraryFeatureDeps) {
 			type: file.type,
 		});
 
-		const id = crypto.randomUUID();
+		const id = generateUid();
 		updateLibrary((lib) => ({ ...lib, [id]: asset }));
 
 		const assetWithId = { id, ...asset };
