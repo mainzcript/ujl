@@ -1,4 +1,5 @@
-import type { UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLCModuleObject, UJLCSlotObject } from "@ujl-framework/types";
+import { ROOT_SLOT_NAME } from "../../utils/ujlc-tree.js";
 import type { CrafterOperations } from "../operations.js";
 
 export type UJLClipboardData =
@@ -29,7 +30,12 @@ export interface InsertRequest {
 interface ClipboardFeatureDeps {
 	operations: CrafterOperations;
 	state: ClipboardFeatureState;
+	getRootSlot: () => UJLCSlotObject;
 	setSelectedNodeId: (nodeId: string | null) => void;
+	findParentOfNode: (
+		nodes: UJLCModuleObject[],
+		targetId: string,
+	) => { parent: UJLCModuleObject | null; slotName: string; index: number } | null;
 	parseSlotSelection: (selection: string | null) => SlotSelection | null;
 	isModuleObject: (data: UJLClipboardData) => data is UJLCModuleObject;
 	readFromBrowserClipboard: () => Promise<UJLClipboardData | null>;
@@ -40,12 +46,32 @@ export function createClipboardFeature(deps: ClipboardFeatureDeps) {
 	const {
 		operations,
 		state,
+		getRootSlot,
 		setSelectedNodeId,
+		findParentOfNode,
 		parseSlotSelection,
 		isModuleObject,
 		readFromBrowserClipboard,
 		writeToBrowserClipboard,
 	} = deps;
+
+	function resolveDeleteSelectionFallback(nodeId: string): string | null {
+		const rootSlot = getRootSlot();
+		const parentInfo = findParentOfNode(rootSlot, nodeId);
+
+		if (!parentInfo) {
+			return null;
+		}
+
+		const siblings =
+			parentInfo.slotName === ROOT_SLOT_NAME
+				? rootSlot
+				: (parentInfo.parent?.slots?.[parentInfo.slotName] ?? []);
+
+		return (
+			siblings[parentInfo.index + 1]?.meta.id ?? siblings[parentInfo.index - 1]?.meta.id ?? null
+		);
+	}
 
 	function normalizeInsertRequest(target: InsertRequest | string): InsertRequest {
 		if (typeof target !== "string") {
@@ -89,9 +115,10 @@ export function createClipboardFeature(deps: ClipboardFeatureDeps) {
 	}
 
 	function deleteNode(nodeId: string): boolean {
+		const fallbackSelectionId = resolveDeleteSelectionFallback(nodeId);
 		const success = operations.deleteNode(nodeId);
 		if (success) {
-			setSelectedNodeId(null);
+			setSelectedNodeId(fallbackSelectionId);
 		}
 		return success;
 	}

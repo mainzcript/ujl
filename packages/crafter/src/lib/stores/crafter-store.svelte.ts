@@ -26,6 +26,7 @@ import type {
 import { readFromBrowserClipboard, writeToBrowserClipboard } from "../utils/clipboard.js";
 import { logger } from "../utils/logger.js";
 import {
+	findParentOfNode,
 	findPathToNode,
 	isModuleObject,
 	isRootNode,
@@ -384,7 +385,9 @@ export function createCrafterStore(deps: CrafterStoreDeps) {
 	const clipboardFeature = createClipboardFeature({
 		operations,
 		state: clipboardState,
+		getRootSlot: () => rootSlot,
 		setSelectedNodeId,
+		findParentOfNode,
 		parseSlotSelection,
 		isModuleObject,
 		readFromBrowserClipboard,

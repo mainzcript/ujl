@@ -1,10 +1,26 @@
-import type { UJLCModuleObject } from "@ujl-framework/types";
+import type { UJLCModuleObject, UJLCSlotObject } from "@ujl-framework/types";
 import { describe, expect, it, vi } from "vitest";
 import {
 	createClipboardFeature,
 	type ClipboardFeatureState,
 	type UJLClipboardData,
 } from "./clipboard.js";
+
+function createModule(
+	id: string,
+	slots: Record<string, UJLCModuleObject[]> = {},
+): UJLCModuleObject {
+	return {
+		type: "text",
+		meta: {
+			id,
+			updated_at: "2026-03-24T00:00:00.000Z",
+			_embedding: [],
+		},
+		fields: {},
+		slots,
+	};
+}
 
 function createState(): ClipboardFeatureState {
 	return {
@@ -36,7 +52,14 @@ function createDeps(state: ClipboardFeatureState) {
 			updateNodeFields: vi.fn(),
 		},
 		state,
+		getRootSlot: vi.fn<() => UJLCSlotObject>(() => []),
 		setSelectedNodeId: vi.fn(),
+		findParentOfNode: vi.fn<
+			(
+				nodes: UJLCModuleObject[],
+				targetId: string,
+			) => { parent: UJLCModuleObject | null; slotName: string; index: number } | null
+		>(() => null),
 		parseSlotSelection: vi.fn((selection: string | null) => {
 			if (selection === "parent-id:content") {
 				return { parentId: "parent-id", slotName: "content" };
@@ -91,5 +114,105 @@ describe("clipboard feature insert requests", () => {
 			undefined,
 			"before",
 		);
+	});
+});
+
+describe("clipboard feature delete selection fallback", () => {
+	it("selects the next sibling in the same root slot after delete", () => {
+		const state = createState();
+		const deps = createDeps(state);
+		const root = [createModule("module-a"), createModule("module-b"), createModule("module-c")];
+
+		deps.getRootSlot.mockReturnValue(root);
+		deps.findParentOfNode.mockReturnValue({
+			parent: null,
+			slotName: "root",
+			index: 0,
+		});
+		deps.operations.deleteNode.mockReturnValue(true);
+
+		const clipboard = createClipboardFeature(deps);
+		clipboard.deleteNode("module-a");
+
+		expect(deps.setSelectedNodeId).toHaveBeenCalledWith("module-b");
+	});
+
+	it("selects the previous sibling when deleting the last module in a slot", () => {
+		const state = createState();
+		const deps = createDeps(state);
+		const parent = createModule("parent", {
+			content: [createModule("module-a"), createModule("module-b")],
+		});
+
+		deps.getRootSlot.mockReturnValue([parent]);
+		deps.findParentOfNode.mockReturnValue({
+			parent,
+			slotName: "content",
+			index: 1,
+		});
+		deps.operations.deleteNode.mockReturnValue(true);
+
+		const clipboard = createClipboardFeature(deps);
+		clipboard.deleteNode("module-b");
+
+		expect(deps.setSelectedNodeId).toHaveBeenCalledWith("module-a");
+	});
+
+	it("clears selection when deleting the only module in a slot", () => {
+		const state = createState();
+		const deps = createDeps(state);
+		const root = [createModule("module-a")];
+
+		deps.getRootSlot.mockReturnValue(root);
+		deps.findParentOfNode.mockReturnValue({
+			parent: null,
+			slotName: "root",
+			index: 0,
+		});
+		deps.operations.deleteNode.mockReturnValue(true);
+
+		const clipboard = createClipboardFeature(deps);
+		clipboard.deleteNode("module-a");
+
+		expect(deps.setSelectedNodeId).toHaveBeenCalledWith(null);
+	});
+
+	it("reuses the same fallback behavior for cut", async () => {
+		const state = createState();
+		const deps = createDeps(state);
+		const root = [createModule("module-a"), createModule("module-b")];
+
+		deps.getRootSlot.mockReturnValue(root);
+		deps.findParentOfNode.mockReturnValue({
+			parent: null,
+			slotName: "root",
+			index: 0,
+		});
+		deps.operations.copyNode.mockReturnValue(root[0]);
+		deps.operations.deleteNode.mockReturnValue(true);
+
+		const clipboard = createClipboardFeature(deps);
+		await clipboard.cutNode("module-a");
+
+		expect(deps.setSelectedNodeId).toHaveBeenCalledWith("module-b");
+	});
+
+	it("does not change selection when delete fails", () => {
+		const state = createState();
+		const deps = createDeps(state);
+		const root = [createModule("module-a"), createModule("module-b")];
+
+		deps.getRootSlot.mockReturnValue(root);
+		deps.findParentOfNode.mockReturnValue({
+			parent: null,
+			slotName: "root",
+			index: 0,
+		});
+		deps.operations.deleteNode.mockReturnValue(false);
+
+		const clipboard = createClipboardFeature(deps);
+		clipboard.deleteNode("module-a");
+
+		expect(deps.setSelectedNodeId).not.toHaveBeenCalled();
 	});
 });

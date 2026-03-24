@@ -273,19 +273,6 @@
 			<Move class="h-3.5 w-3.5" />
 		</Button>
 
-		{#if showSettingsButton}
-			<Button
-				variant="ghost"
-				size="icon"
-				class="h-6 w-6 {isSettingsDisabled ? 'opacity-50' : ''}"
-				disabled={isSettingsDisabled}
-				onclick={handleSettings}
-				title={isSettingsDisabled ? "Panel already open" : "Show panel"}
-			>
-				<Settings class="h-3.5 w-3.5" />
-			</Button>
-		{/if}
-
 		<Button
 			variant="ghost"
 			size="icon"
@@ -307,6 +294,19 @@
 		>
 			<ChevronDown class="h-3.5 w-3.5" />
 		</Button>
+
+		{#if showSettingsButton}
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-6 w-6 {isSettingsDisabled ? 'opacity-50' : ''}"
+				disabled={isSettingsDisabled}
+				onclick={handleSettings}
+				title={isSettingsDisabled ? "Panel already open" : "Show panel"}
+			>
+				<Settings class="h-3.5 w-3.5" />
+			</Button>
+		{/if}
 
 		<DropdownMenu bind:open={dropdownOpen}>
 			<DropdownMenuTrigger>

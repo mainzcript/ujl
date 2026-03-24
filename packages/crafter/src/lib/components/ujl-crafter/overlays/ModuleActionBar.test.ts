@@ -101,4 +101,35 @@ describe("ModuleActionBar", () => {
 		expect(onDragDrop).not.toHaveBeenCalled();
 		expect(document.querySelector('[data-crafter="module-action-bar"]')).not.toBeNull();
 	});
+
+	it("renders settings between move controls and more actions", async () => {
+		let helpers: Helpers | undefined;
+
+		render(TestWrapper, {
+			onReady: (value: Helpers) => {
+				helpers = value;
+			},
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 10));
+
+		if (!helpers) {
+			throw new Error("Test helpers not received");
+		}
+
+		helpers.app.setContainerWidth(600);
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		const actionBar = document.querySelector('[data-crafter="module-action-bar"]');
+		if (!(actionBar instanceof HTMLElement)) {
+			throw new Error("Action bar not found");
+		}
+
+		const titles = Array.from(actionBar.querySelectorAll("button")).map((button) =>
+			button.getAttribute("title"),
+		);
+
+		expect(titles).toEqual(["Drag module", "Move up", "Move down", "Show panel", "More actions"]);
+	});
 });
