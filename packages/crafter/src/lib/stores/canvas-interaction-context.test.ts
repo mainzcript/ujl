@@ -7,6 +7,7 @@ describe("canvas-interaction-context", () => {
 
 		context.updateState({
 			pointer: { clientX: 10, clientY: 20 },
+			inputMode: "mouse",
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: "parent-a", slotName: "content" },
 			isHoveringDraggedSource: true,
@@ -14,6 +15,7 @@ describe("canvas-interaction-context", () => {
 		});
 
 		expect(context.pointer).toEqual({ clientX: 10, clientY: 20 });
+		expect(context.inputMode).toBe("mouse");
 		expect(context.hoveredModuleId).toBe("module-a");
 		expect(context.activeSlot).toEqual({ ownerModuleId: "parent-a", slotName: "content" });
 		expect(context.isHoveringDraggedSource).toBe(true);
@@ -26,6 +28,7 @@ describe("canvas-interaction-context", () => {
 
 		context.updateState({
 			pointer: { clientX: 10, clientY: 20 },
+			inputMode: "touch",
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: null, slotName: "root" },
 			isHoveringDraggedSource: true,
@@ -41,6 +44,7 @@ describe("canvas-interaction-context", () => {
 		});
 
 		expect(context.activeSlot).toBeNull();
+		expect(context.inputMode).toBe("touch");
 		expect(context.isHoveringDraggedSource).toBe(false);
 		expect(context.lastValidSlot).toEqual({ ownerModuleId: null, slotName: "root" });
 		expect(context.nearestModuleId).toBe("module-b");
@@ -51,6 +55,7 @@ describe("canvas-interaction-context", () => {
 
 		context.updateState({
 			pointer: { clientX: 10, clientY: 20 },
+			inputMode: "touch",
 			hoveredModuleId: "module-a",
 			activeSlot: { ownerModuleId: "parent-a", slotName: "content" },
 			isHoveringDraggedSource: true,
@@ -59,6 +64,7 @@ describe("canvas-interaction-context", () => {
 		context.clear();
 
 		expect(context.pointer).toBeNull();
+		expect(context.inputMode).toBeNull();
 		expect(context.hoveredModuleId).toBeNull();
 		expect(context.activeSlot).toBeNull();
 		expect(context.isHoveringDraggedSource).toBe(false);

@@ -56,6 +56,15 @@
 	} from "./targeting/pointer-targets.js";
 	import { isCanvasOverlayElement } from "./targeting/canvas-overlay-elements.js";
 	import {
+		createTouchTapSession,
+		isTapSelectionPointerType,
+		resolveModuleIdFromEventTarget,
+		resolveTouchTapSelectionTarget,
+		shouldCancelTouchTapSession,
+		shouldSuppressSyntheticMouseEvent,
+		type TouchTapSession,
+	} from "./targeting/touch-selection.js";
+	import {
 		type AutoScrollEdgeState,
 		getAutoScrollDelta,
 		getAutoScrollEdgeZone,
@@ -78,6 +87,8 @@
 	const AUTO_SCROLL_EDGE_PX = 64;
 	const AUTO_SCROLL_MAX_STEP_PX = 18;
 	const AUTO_SCROLL_START_DELAY_MS = 500;
+	const TOUCH_TAP_MOVE_THRESHOLD_PX = 10;
+	const TOUCH_MOUSE_SUPPRESSION_MS = 500;
 
 	function hasChildren(node: UJLAbstractNode): node is UJLAbstractNode & {
 		props: { children?: UJLAbstractNode[] };
@@ -193,22 +204,36 @@
 	function handlePreviewClick(event: MouseEvent) {
 		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
 		if (canvasDragContext.isDragging) return;
+		if (
+			shouldSuppressSyntheticMouseEvent(
+				canvasInteractionContext.inputMode,
+				lastTouchInputAt,
+				Date.now(),
+				TOUCH_MOUSE_SUPPRESSION_MS,
+			)
+		) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
 
-		const clickedElement = (event.target as HTMLElement).closest("[data-ujl-module-id]");
-		if (!clickedElement) return;
+		const moduleId = resolveModuleIdFromEventTarget(event.target);
+		if (!moduleId) return;
 
 		event.preventDefault();
 		event.stopPropagation();
+		selectModuleById(moduleId);
+	}
 
-		const moduleId = clickedElement.getAttribute("data-ujl-module-id");
-		if (!moduleId || !ast) return;
-
+	function selectModuleById(moduleId: string): boolean {
+		if (!ast) return false;
 		const editableNode = findEditableNodeByModuleId(ast, moduleId);
-		if (!editableNode) return;
+		if (!editableNode) return false;
 
 		crafter.expandToNode(editableNode.meta.moduleId);
 		crafter.setSelectedNodeId(editableNode.meta.moduleId);
 		scrollToNodeInTree(editableNode.meta.moduleId);
+		return true;
 	}
 
 	function scrollToNodeInTree(nodeId: string, remainingFrames = 10) {
@@ -313,6 +338,8 @@
 			: null,
 	);
 	let wasDragging = $state(false);
+	let activeTouchTapSession = $state<TouchTapSession | null>(null);
+	let lastTouchInputAt = $state<number | null>(null);
 
 	function getElementsFromPointForCanvas(point: {
 		clientX: number;
@@ -413,6 +440,7 @@
 			activePlaceholderSlot: ActiveSlotTarget | null;
 			isHoveringDraggedSource: boolean;
 		},
+		inputMode?: "mouse" | "touch" | "pen" | null,
 	) {
 		const nearestSlot =
 			targets.activePlaceholderSlot ??
@@ -422,6 +450,7 @@
 
 		canvasInteractionContext.updateState({
 			pointer: point,
+			inputMode,
 			hoveredModuleId: targets.hoveredModuleId,
 			activeSlot: targets.activePlaceholderSlot ?? targets.activeSlot,
 			activePlaceholderSlot: targets.activePlaceholderSlot,
@@ -434,14 +463,31 @@
 		if (canvasDragContext.isDragging) {
 			return;
 		}
+		if (
+			shouldSuppressSyntheticMouseEvent(
+				canvasInteractionContext.inputMode,
+				lastTouchInputAt,
+				Date.now(),
+				TOUCH_MOUSE_SUPPRESSION_MS,
+			)
+		) {
+			return;
+		}
 
 		const point = { clientX: event.clientX, clientY: event.clientY };
 		const targets = resolvePointerTargetsForCanvasEvent(event);
 
-		updateCanvasTargetsFromPointer(point, {
-			...targets,
-			isHoveringDraggedSource: isPointerOverDraggedSource(point, canvasDragContext.draggedModuleId),
-		});
+		updateCanvasTargetsFromPointer(
+			point,
+			{
+				...targets,
+				isHoveringDraggedSource: isPointerOverDraggedSource(
+					point,
+					canvasDragContext.draggedModuleId,
+				),
+			},
+			"mouse",
+		);
 	}
 
 	function handleCanvasPointerLeave() {
@@ -450,6 +496,78 @@
 		}
 
 		canvasInteractionContext.clear();
+	}
+
+	function handlePreviewTouchPointerDown(event: PointerEvent) {
+		if (crafterMode !== "editor" || crafter.mode !== "editor") return;
+		if (canvasDragContext.isDragging) return;
+		if (!isTapSelectionPointerType(event.pointerType) || event.isPrimary === false) return;
+
+		lastTouchInputAt = Date.now();
+		activeTouchTapSession = createTouchTapSession(
+			event.pointerId,
+			{ clientX: event.clientX, clientY: event.clientY },
+			resolveModuleIdFromEventTarget(event.target),
+		);
+		canvasInteractionContext.updateState({
+			pointer: null,
+			inputMode: event.pointerType === "pen" ? "pen" : "touch",
+			hoveredModuleId: null,
+			activeSlot: null,
+			activePlaceholderSlot: null,
+			isHoveringDraggedSource: false,
+			nearestModuleId: null,
+		});
+	}
+
+	function handlePreviewTouchPointerMove(event: PointerEvent) {
+		if (!activeTouchTapSession) return;
+		if (
+			!isTapSelectionPointerType(event.pointerType) ||
+			event.pointerId !== activeTouchTapSession.pointerId
+		)
+			return;
+
+		lastTouchInputAt = Date.now();
+		if (
+			shouldCancelTouchTapSession(
+				activeTouchTapSession,
+				{ clientX: event.clientX, clientY: event.clientY },
+				TOUCH_TAP_MOVE_THRESHOLD_PX,
+			)
+		) {
+			activeTouchTapSession = null;
+		}
+	}
+
+	function handlePreviewTouchPointerUp(event: PointerEvent) {
+		if (!activeTouchTapSession) return;
+		if (
+			!isTapSelectionPointerType(event.pointerType) ||
+			event.pointerId !== activeTouchTapSession.pointerId
+		)
+			return;
+
+		lastTouchInputAt = Date.now();
+		const moduleId = resolveTouchTapSelectionTarget(activeTouchTapSession, event.target);
+		activeTouchTapSession = null;
+		if (!moduleId) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+		selectModuleById(moduleId);
+	}
+
+	function handlePreviewTouchPointerCancel(event: PointerEvent) {
+		if (!activeTouchTapSession) return;
+		if (
+			!isTapSelectionPointerType(event.pointerType) ||
+			event.pointerId !== activeTouchTapSession.pointerId
+		)
+			return;
+
+		lastTouchInputAt = Date.now();
+		activeTouchTapSession = null;
 	}
 
 	$effect(() => {
@@ -517,7 +635,11 @@
 		}
 
 		const refreshTargets = () => {
-			if (!canvasInteractionContext.pointer) {
+			if (
+				!canvasInteractionContext.pointer ||
+				canvasInteractionContext.inputMode === "touch" ||
+				canvasInteractionContext.inputMode === "pen"
+			) {
 				return;
 			}
 
@@ -818,6 +940,10 @@
 	class:ujl-editor-mode={crafterMode === "editor"}
 	role={crafterMode === "editor" ? "application" : undefined}
 	onclick={handlePreviewClick}
+	onpointerdown={handlePreviewTouchPointerDown}
+	onpointermove={handlePreviewTouchPointerMove}
+	onpointerup={handlePreviewTouchPointerUp}
+	onpointercancel={handlePreviewTouchPointerCancel}
 	style={editorTokenSet && crafterMode === "editor"
 		? `--editor-accent-light: ${editorCssVars["--accent-light"] ?? "var(--accent-light)"}; --editor-accent-dark: ${editorCssVars["--accent-dark"] ?? "var(--accent-dark)"}; --editor-radius: ${editorCssVars["--radius"] ?? "var(--radius)"};`
 		: undefined}

@@ -41,6 +41,7 @@ export {
 	createCanvasInteractionContext,
 	getCanvasInteractionContext,
 	setCanvasInteractionContext,
+	type CanvasInputMode,
 	type CanvasInteractionContext,
 } from "./canvas-interaction-context.svelte.ts";
 

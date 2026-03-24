@@ -4,8 +4,11 @@ import type { CanvasDragPointer } from "./canvas-drag-context.svelte.js";
 
 export const CANVAS_INTERACTION_CONTEXT = Symbol("canvas-interaction-context");
 
+export type CanvasInputMode = "mouse" | "touch" | "pen";
+
 export interface CanvasInteractionContext {
 	readonly pointer: CanvasDragPointer | null;
+	readonly inputMode: CanvasInputMode | null;
 	readonly hoveredModuleId: string | null;
 	readonly activeSlot: ActiveSlotTarget | null;
 	readonly activePlaceholderSlot: ActiveSlotTarget | null;
@@ -14,6 +17,7 @@ export interface CanvasInteractionContext {
 	readonly nearestModuleId: string | null;
 	updateState(next: {
 		pointer: CanvasDragPointer | null;
+		inputMode?: CanvasInputMode | null;
 		hoveredModuleId: string | null;
 		activeSlot: ActiveSlotTarget | null;
 		activePlaceholderSlot?: ActiveSlotTarget | null;
@@ -25,6 +29,7 @@ export interface CanvasInteractionContext {
 
 export function createCanvasInteractionContext(): CanvasInteractionContext {
 	let pointer = $state<CanvasDragPointer | null>(null);
+	let inputMode = $state<CanvasInputMode | null>(null);
 	let hoveredModuleId = $state<string | null>(null);
 	let activeSlot = $state<ActiveSlotTarget | null>(null);
 	let activePlaceholderSlot = $state<ActiveSlotTarget | null>(null);
@@ -35,6 +40,9 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 	return {
 		get pointer() {
 			return pointer;
+		},
+		get inputMode() {
+			return inputMode;
 		},
 		get hoveredModuleId() {
 			return hoveredModuleId;
@@ -56,6 +64,9 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 		},
 		updateState(next) {
 			pointer = next.pointer;
+			if (next.inputMode !== undefined) {
+				inputMode = next.inputMode;
+			}
 			hoveredModuleId = next.hoveredModuleId;
 			activeSlot = next.activeSlot;
 			activePlaceholderSlot = next.activePlaceholderSlot ?? null;
@@ -67,6 +78,7 @@ export function createCanvasInteractionContext(): CanvasInteractionContext {
 		},
 		clear() {
 			pointer = null;
+			inputMode = null;
 			hoveredModuleId = null;
 			activeSlot = null;
 			activePlaceholderSlot = null;
