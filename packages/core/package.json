@@ -26,23 +26,23 @@
 		"clean": "node -e \"require('fs').rmSync('dist', {recursive:true, force:true}); require('fs').rmSync('tsconfig.build.tsbuildinfo', {force:true})\""
 	},
 	"dependencies": {
-		"@tiptap/starter-kit": "^3.20.1",
+		"@tiptap/starter-kit": "^3.20.5",
 		"@ujl-framework/types": "workspace:*",
-		"nanoid": "^5.1.6"
+		"nanoid": "^5.1.7"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.3",
 		"@eslint/js": "^10.0.1",
 		"@types/node": "^25.5.0",
 		"@ujl-framework/examples": "workspace:*",
-		"eslint": "^10.0.3",
+		"eslint": "^10.1.0",
 		"eslint-config-prettier": "^10.1.8",
 		"globals": "^17.4.0",
 		"prettier": "^3.8.1",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.57.0",
-		"vitest": "^4.1.0"
+		"typescript-eslint": "^8.57.2",
+		"vitest": "^4.1.1"
 	},
 	"author": "mainzcript GbR",
 	"homepage": "https://ujl-framework.org",
