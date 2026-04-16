@@ -30,19 +30,19 @@
 		"prepublishOnly": "pnpm run version:sync"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^2.0.3",
+		"@eslint/compat": "^2.0.5",
 		"@eslint/js": "^10.0.1",
-		"@types/node": "^25.5.0",
+		"@types/node": "^25.6.0",
 		"@ujl-framework/types": "workspace:*",
-		"eslint": "^10.0.3",
+		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
-		"globals": "^17.4.0",
-		"prettier": "^3.8.1",
+		"globals": "^17.5.0",
+		"prettier": "^3.8.3",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.57.0",
-		"vitest": "^4.1.0"
+		"typescript-eslint": "^8.58.2",
+		"vitest": "^4.1.4"
 	},
 	"author": "mainzcript GbR",
 	"homepage": "https://ujl-framework.org",
